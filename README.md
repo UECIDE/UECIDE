@@ -39,7 +39,7 @@ hard-coded executables.  Gone is the old single-core structure.  Say
 hello to a nice clean structure which separates the cores from the IDE,
 and the boards from the core.
 
-Also the IDE itsef has had a bit of a makeover.  Re-branding the IDE to
+Also the IDE itself has had a bit of a makeover.  Re-branding the IDE to
 match your corporate identity is now nice and simple - just a collection
 of PNG files (gone are the old ropey GIF files) and a couple of text files
 to create a completely unique branded IDE with no programming whatsoever.
