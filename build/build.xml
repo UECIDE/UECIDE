@@ -1,0 +1,815 @@
+<?xml version="1.0"?>
+<project name="mjide" default="build">
+  <!--echo message="os.name = ${os.name}" /-->
+  <!--echo message="os.arch = ${os.arch}" /-->
+  <!--echo message="os.version = ${os.version}" /-->
+  <!-- Sets properties for macosx/windows/linux depending on current system -->
+    <!--property name="theme" value="mpide"/-->
+    <property file="build.settings"/>
+    <property file="upload.properties"/>
+    <property name="aws.bucket" value="chipkit" />
+
+    <property file="themes/${theme}/ide/theme.txt"/>
+
+ <condition property="macosx"><os family="mac" /></condition>
+  <condition property="windows"><os family="windows" /></condition>
+  <condition property="linux"><os family="unix" /></condition>
+  <condition property="linux64"><os family="unix" arch="amd64" /></condition>
+
+<condition property="platform" value="macosx">
+	<os family="mac" />
+</condition>
+<condition property="platform" value="windows">
+	<os family="windows" />
+</condition>
+  <condition property="platform"  value="linux">
+	<os family="unix" arch="i386" />
+</condition>
+<condition property="platform" value="linux64">
+	<os family="unix" arch="amd64" />
+</condition>
+
+    <!-- set time propert -->  
+    <tstamp>
+        <format property="TODAY" pattern="yyyyMMdd" />
+    </tstamp>
+
+  <!-- Libraries required for running IDE -->
+  <fileset dir=".." id="runtime.jars">
+    <include name="core/core.jar" />
+    <include name="app/pde.jar" />
+    <include name="app/lib/ecj.jar" />
+    <include name="app/lib/jna.jar" />
+    <include name="app/lib/RXTXcomm.jar" />
+    <include name="app/lib/ant.jar" />
+    <include name="app/lib/ant-launcher.jar" />
+    <include name="app/lib/log4j-1.2.16.jar" />
+    <include name="app/lib/log4j.properties" />
+  </fileset>
+
+  <target name="build" description="Build IDE.">
+    <antcall target="${platform}-build" />
+  </target>
+
+  <target name="run" description="Run IDE.">
+    <antcall target="${platform}-run" />
+  </target>
+  
+  <target name="win-debug" description="Run IDE from Java." depends="build">
+      <java dir="./${platform}/work"
+          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/core.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar:${platform}/work/lib/log4j-1.2.16.jar:${platform}/work/lib/pde.jar"
+          fork="true"
+          jar="./${platform}/work/lib/pde.jar">
+    </java>
+  </target>
+
+   <target name="linux-debug" description="Run IDE from Java." depends="build">
+      <java dir="./${platform}/work"
+          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/core.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar:${platform}/work/lib/log4j-1.2.16.jar:${platform}/work/lib/pde.jar"
+          fork="true"
+          jar="./${platform}/work/lib/pde.jar">
+    </java>
+  </target>
+
+
+    <target name="version-number" depends="revision-check" description="Get the version number">
+        <input message="Enter version number:" 
+        addproperty="version"
+        defaultvalue="${revision}-${TODAY}-${platform}" />
+    </target>
+
+    <target name="dist" depends="version-number"
+          description="Build IDE for distribution.">
+        <antcall target="${platform}-dist" />
+    </target>
+
+    <target name="deb" description="Build IDE for distribution.">
+        <antcall target="${platform}-deb" />
+    </target>
+
+
+  <target name="dist-test" depends="revision-check"
+          description="Build IDE for distribution.">
+    <input message="Enter version number:"
+           addproperty="version"
+           defaultvalue="${revision}-${platform}-${TODAY}-test" />
+  <propertyfile file="upload.properties">
+      <entry  key="uploadversion" value="${version}"/>
+  </propertyfile>
+    <antcall target="${platform}-dist" />
+  </target>
+
+  <target name="deb-test" depends="revision-check"
+          description="Build IDE for distribution.">
+    <input message="Enter version number:"
+           addproperty="version"
+           defaultvalue="${revision}-${platform}-${TODAY}-test" />
+  <propertyfile file="upload.properties">
+      <entry  key="uploadversion" value="${version}"/>
+  </propertyfile>
+    <antcall target="${platform}-deb" />
+  </target>
+
+  <!-- "§$§$&, ant doesn't have a built-in help target :(  -->
+  <target name="help" description="Show project help">
+    <java classname="org.apache.tools.ant.Main">
+      <arg value="-p" />
+    </java>
+  </target>
+
+  <!-- - - - - - - - - - - - - - - - - - -->
+  <!-- Subprojects: Core, App, Libraries -->
+  <!-- - - - - - - - - - - - - - - - - - -->
+
+  <target name="subprojects-clean">
+    <subant buildpath="../core" target="clean"/>
+    <subant buildpath="../app" target="clean"/>
+  </target>
+
+  <target name="subprojects-build">
+    <subant buildpath="../core" target="build"/>
+    <subant buildpath="../app" target="build"/>
+  </target>
+
+
+  <!-- - - - - - - - - -->
+  <!-- Basic Assembly  -->
+  <!-- - - - - - - - - -->
+
+    <target name="install_core" if="core.${core.name}">
+        <get src="http://www.majenko.co.uk/uecide/cores/${core.name}-${target.platform}-current.zip"
+             dest="tmp/${core.name}-${target.platform}-current.zip" 
+             usetimestamp="true" />    
+        <unzip dest="${target.path}/hardware/cores" src="tmp/${core.name}-${target.platform}-current.zip" overwrite="false" />
+    </target>
+
+    <target name="install_boards" if="boards.${boards.name}">
+        <get src="http://www.majenko.co.uk/uecide/boards/boards-${boards.name}.zip"
+             dest="tmp/boards-${boards.name}.zip" 
+             usetimestamp="true" />    
+        <unzip dest="${target.path}/hardware/boards/${boards.name}" src="tmp/boards-${boards.name}.zip" overwrite="false" />
+    </target>
+        
+    <target name="assemble">
+        <fail unless="target.path" 
+            message="Do not call assemble from the command line." />
+
+        <!-- Install selected cores -->
+        <antcall target="install_core">
+            <param name="core.name" value="avr105" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_core">
+            <param name="core.name" value="pic32" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_core">
+            <param name="core.name" value="msp430" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <!-- Install selected boards -->
+        <antcall target="install_boards">
+            <param name="boards.name" value="Arduino" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="Cerebot" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="CUI32" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="Majenko" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="MicroElektronika" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="PONTECH" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="chipKIT" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="Fubarino" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="Microchip" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="Olimex" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_boards">
+            <param name="boards.name" value="UBW32" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <!-- copy shared examples folder -->
+        <copy todir="${target.path}/examples">
+            <fileset dir="shared/examples" />
+        </copy>
+    
+        <!-- Unzip documentation -->
+        <unzip dest="${target.path}" src="shared/reference.zip" overwrite="false"/>
+
+        <copy todir="${target.path}/lib/theme/">
+            <fileset dir="themes/${theme}/ide/" includes="**/*"/>
+        </copy>
+    
+        <!-- Write the revision file! -->
+        <echo file="${target.path}/lib/version.txt" message="${version}" />
+    </target>
+
+  
+  <!-- - - - - - - - - -->
+  <!-- Revision check  -->
+  <!-- - - - - - - - - -->
+  <target name="revision-check">
+    <!-- figure out the revision number -->
+    <loadfile srcfile="../todo.txt" property="revision">
+      <filterchain>
+	<headfilter lines="1"/>
+	<tokenfilter>
+	  <stringtokenizer suppressdelims="true"/>
+	  <!-- grab the thing from the first line that's 4 digits -->
+	  <containsregex pattern="(\d\d\d\d)" />
+	</tokenfilter>
+      </filterchain>
+    </loadfile>
+    <!-- <echo message="revision is ${revision}." /> -->
+    
+    <!-- figure out the revision number in base.java -->
+    <loadfile srcfile="../app/src/processing/app/Base.java" 
+	      property="revision.base">
+      <filterchain>
+	<tokenfilter>
+	  <linetokenizer />
+	  <containsregex pattern="String VERSION_NAME = "/>
+	  <replaceregex pattern="[^0-9]*" flags="g" replace=""/>
+	</tokenfilter>
+      </filterchain>
+    </loadfile>
+    <!-- <echo message="base revision is ${revision.base}." /> -->
+    
+    <condition property="revision.correct">
+      <!-- Using contains because I can't figure out how to get rid of the
+	   LF in revision.base. Please file a bug if you have a fix. -->
+      <contains string="${revision.base}" substring="${revision}"/>
+    </condition>
+    
+    <!-- the revision.base property won't be set
+	 if $revision wasn't found... -->
+    <fail unless="revision.correct" 
+	  message="Fix revision number in Base.java" />
+  </target>
+  
+  
+  <!-- - - - - - - - -->
+  <!-- Mac OS X      -->
+  <!-- - - - - - - - -->
+
+  <target name="macosx-clean" depends="subprojects-clean" description="Clean Mac OS X build">
+    <delete dir="macosx/work" />
+    <delete dir="macosx/working_dir" />
+    <delete dir="macosx/working.dmg" />
+    <delete file="macosx/${product}-*.dmg" />
+  </target>
+  
+  <target name="macosx-checkos" unless="macosx">
+    <echo>
+      =======================================================
+      ${product.cap} for Mac OS X can only be built on Mac OS X.
+      
+      Bye. 
+      =======================================================
+    </echo>
+    <fail message="wrong platform (${os.name})" />
+  </target>
+  
+  <target name="macosx-build" depends="revision-check, subprojects-build" description="Build Mac OS X version">
+    	<mkdir dir="macosx/work" />
+   	<property name="platform" value="macosx"/>  
+    
+    <!-- assemble the pde -->
+    <copy todir="macosx/work">
+      <fileset dir="macosx/" includes="template.app/**"/>
+    </copy>
+    
+<!--    <rename src="macosx/work/template.app" 
+	    dest="macosx/work/${product.cap}.app" />-->
+    <move file="macosx/work/template.app" 
+	  tofile="macosx/work/${product.cap}.app" />
+
+    <chmod file="macosx/work/${product.cap}.app/Contents/MacOS/JavaApplicationStub" perm="755" />
+    
+    <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java" flatten="true">
+      <fileset refid="runtime.jars"/>
+    </copy>
+    
+    <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java">
+      <fileset dir="shared" includes="lib/**" />
+      <fileset file="shared/revisions.txt" />
+    </copy>
+
+    <antcall target="assemble">
+      <param name="target.path" value="macosx/work/${product.cap}.app/Contents/Resources/Java" />
+      <param name="target.platform" value="macosx" />
+    </antcall>
+  </target>
+
+  <target name="macosx-run" depends="macosx-build" description="Run Mac OS X version">
+    <exec executable="macosx/work/${product.cap}.app/Contents/MacOS/JavaApplicationStub" spawn="true"/>
+  </target>
+
+  <target name="macosx-debug" depends="macosx-build" description="Run Mac OS X version">
+    <exec executable="macosx/work/${product.cap}.app/Contents/MacOS/JavaApplicationStub" spawn="false"/>
+  </target>
+
+
+  <target name="macosx-dist" if="macosx" depends="macosx-build" description="Create a .dmg of the Mac OS X version">
+   	<property name="extension" value="dmg"/>  
+	<propertyfile file="upload.properties">
+      		<entry  key="extension" value="${extension}"/>
+  	</propertyfile>
+
+    <!-- now build the dmg -->
+    <gunzip src="macosx/template.dmg.gz" dest="macosx/working.dmg" />
+    
+    <mkdir dir="macosx/working_dir" />
+    <exec executable="hdiutil">
+      <arg line="attach macosx/working.dmg -noautoopen -mountpoint macosx/working_dir" />
+      <!--<arg line="attach macosx/working.dmg -noautoopen -quiet -mountpoint macosx/working_dir" />-->
+    </exec>
+    
+    <copy todir="macosx/working_dir">
+      <fileset dir="macosx/work">
+        <exclude name="**/ArduinoTestSuite/**" />
+      </fileset>
+    </copy>
+
+    <!-- The ant copy command does not preserve permissions. -->
+    <chmod file="macosx/working_dir/${product.cap}.app/Contents/MacOS/JavaApplicationStub" perm="+x" />
+    <chmod perm="+x">
+        <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/compiler" includes="**/*" />
+    </chmod>
+    <chmod perm="+x">
+      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/bin" includes="**/*" />
+      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/avr/bin" includes="**/*" />
+      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/avr-3/bin" includes="**/*" />
+      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/avr-4/bin" includes="**/*" />
+      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/libexec/gcc/avr/3.4.6/" includes="**/cc1*" />
+      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/libexec/gcc/avr/4.3.2/" includes="**/cc1*" />
+    </chmod>
+
+    <!-- Pause briefly for the OS to catch up with the DMG changes. 
+	 This prevents "hdiutil: couldn't eject "disk3" - Resource busy"
+	 errors when ejecting the disk in the next step.
+         You may need to set this value higher for your system. -->
+    <sleep seconds="3" />
+
+    <exec executable="hdiutil">
+      <!--<arg line="detach macosx/working_dir -quiet -force" />-->
+      <arg line="detach macosx/working_dir" />
+    </exec>
+  
+    <delete file="macosx/${product.cap}-*.dmg" />
+    <exec executable="hdiutil">
+      <arg line="convert macosx/working.dmg -quiet -format UDZO -imagekey zlib-level=9 -o macosx/${product.cap}-${version}.dmg" />
+    </exec>
+
+    <!-- Clean up the interim files. -->
+    <delete file="macosx/working.dmg" />
+    <delete dir="macosx/working_dir" />
+    
+    <echo>
+      =======================================================
+      ${product.cap} for Mac OS X was built. Grab the image from   
+      
+      macosx/${product.cap}-${version}.dmg
+      =======================================================
+  </echo>
+  <propertyfile file="upload.properties">
+      <entry  key="uploadversion" value="${version}"/>
+  </propertyfile>
+
+  </target>
+
+  
+  <!-- - - - - - - - -->
+  <!-- Linux         -->
+  <!-- - - - - - - - -->
+  
+  <target name="linux-clean" depends="subprojects-clean" description="Clean linux version">
+    <delete dir="linux/work" />
+  </target>
+  
+  <target name="linux-checkos" unless="linux">
+    <echo>
+      =======================================================
+      ${product.cap} for Linux can only be built on on unix systems.
+      
+      Bye. 
+      =======================================================
+    </echo>
+    
+    <fail message="wrong platform (${os.name})" />
+  </target>
+  
+  <target name="linux-build" depends="revision-check, linux-checkos, subprojects-build" description="Build linux version">
+   	<property name="platform" value="linux"/>  
+    <mkdir dir="linux/work" />
+    
+    <copy todir="linux/work">
+      <fileset dir="shared" includes="lib/**" />
+      <fileset file="shared/revisions.txt" />
+    </copy>
+    
+    <copy todir="linux/work">
+      <fileset dir="linux/dist" includes="lib/**" />
+    </copy>
+
+    <copy todir="linux/work/lib" flatten="true">
+      <fileset refid="runtime.jars" />
+    </copy>
+    
+    <antcall target="assemble">
+      <param name="target.path" value="linux/work" />
+      <param name="target.platform" value="linux" />
+    </antcall>
+
+    <copy tofile="linux/work/${product}" file="linux/dist/linuxrunner" />
+    <chmod perm="755" file="linux/work/${product}" />
+  </target>
+
+    <target name="linux32-build" depends="linux-build" description="Build linux (32-bit) version">
+    </target>
+
+
+    <target name="linux64-build" depends="linux-build" description="Build linux (64-bit) version">
+        <property name="platform" value="linux64"/>  
+        <copy tofile="linux/work/lib/librxtxSerial.so" file="linux/dist/lib/librxtxSerial64.so" overwrite="true" />   
+    </target>
+  
+  <target name="linux-run" depends="linux-build" 
+	  description="Run Linux (32-bit) version">
+    <exec executable="./linux/work/${product}" spawn="false"/>
+  </target>
+  
+  <target name="linux64-run" depends="linux64-build" 
+	  description="Run Linux (64-bit) version">
+    <exec executable="./linux/work/${product}" spawn="false"/>
+  </target>
+
+  <target name="linux-dist" depends="build" 
+	  description="Build .tar.gz of linux version">
+    <property name="extension" value="tgz"/> 
+    <propertyfile file="upload.properties">
+           <entry  key="extension" value="${extension}"/>
+    </propertyfile>
+
+    <!--get src="http://dev.processing.org/build/jre-tools-6u18-linux-i586.tgz" 
+	 dest="linux/dist/jre.tgz" 
+	 usetimestamp="true" />    
+    <untar compression="gzip" 
+	   dest="linux/work" 
+	   src="linux/dist/jre.tgz" 
+	   overwrite="false"/-->
+
+<!--
+    <tar compression="gzip" basedir="linux/work" 
+	 destfile="linux/${product}-${version}.tgz" />
+-->
+    <tar compression="gzip"  longfile="gnu"  destfile="linux/${product}-${version}.tgz">
+      <tarfileset dir="linux/work" 
+		  prefix="${product}-${version}" />
+      <tarfileset dir="linux/work/hardware/cores/pic32/compiler/pic32-tools/" dirmode="755" prefix="${product}-${version}/hardware/cores/pic32/compiler/pic32-tools" />
+      <tarfileset file="linux/work/hardware/cores/pic32/compiler/pic32-tools/**" filemode="755" prefix="${product}-${version}/hardware/cores/pic32/compiler/pic32-tools" />
+
+      <tarfileset file="linux/work/${product}" filemode="755" prefix="${product}-${version}" />
+      <tarfileset file="linux/work/hardware/cores/pic32/tools/avrdude" filemode="755" prefix="${product}-${version}/hardware/cores/pic32/tools" />
+    </tar>
+
+    <echo>
+      =======================================================
+      ${product.cap} for Linux was built. Grab the archive from   
+      
+      build/linux/${product}-${version}.tgz
+      =======================================================
+    </echo>
+  </target>
+
+	<target name="linux-generate-debian" depends="version-number, build" description="Build debian tree ready for packaging">
+        <mkdir dir="linux/${product}-${version}-${arch}" />
+        <copy todir="linux/${product}-${version}-${arch}/usr">
+            <fileset dir="linux/dist/usr" />
+        </copy>
+        <copy todir="linux/${product}-${version}-${arch}/usr/share/${product}">
+            <fileset dir="linux/work" />
+        </copy>
+        <chmod perm="755">
+            <fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}" includes="${product}" />
+            <fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}/tools" includes="**/*" />
+            <fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}/hardware/cores/pic32/tools" includes="**/*" />
+            <fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}/hardware/cores/pic32/compiler" includes="**/*" />
+            <!--fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}/hardware/cores/pic32/tools" includes="**/*" /-->
+        </chmod>
+        <symlink link="linux/${product}-${version}-${arch}/usr/bin/${product}" resource="/usr/share/${product}/${product}" overwrite="true" />
+        <mkdir dir="linux/${product}-${version}-${arch}/DEBIAN" />
+        <echo file="linux/${product}-${version}-${arch}/DEBIAN/control">
+Package: ${product}
+Version: ${version}
+Maintainer: matt@majenko.co.uk
+Architecture: ${arch}
+Section: Programming
+Depends: avr-libc, avrdude, binutils-avr, extra-xdg-menus, gcc-avr, libftdi1, libjna-java, librxtx-java
+Description: chipKIT MPIDE Development environment
+
+</echo>
+        <exec executable="dpkg-deb" dir="linux">
+            <arg value="-b"/>
+            <arg value="${product}-${version}-${arch}"/>
+        </exec>
+        <delete dir="linux/${product}-${version}-${arch}" />
+        <echo>
+      =======================================================
+      ${product.cap} for Linux was built. Grab the package from   
+      
+      build/linux/${product}-${version}-${arch}.deb
+      =======================================================
+        </echo>
+    </target>
+
+
+	<target name="linux-deb" description="Build .deb of linux version">
+        <property name="extension" value="deb"/>
+        <property name="arch" value="i386"/>
+        <propertyfile file="upload.properties">
+            <entry  key="extension" value="${extension}"/>
+        </propertyfile>
+        <antcall target="linux-generate-debian"/>
+    </target>
+
+    <target name="linux64-deb" description="Build .deb of linux version">
+        <property name="arch" value="amd64"/>
+        <property name="extension" value="deb"/>
+        <propertyfile file="upload.properties">
+            <entry  key="extension" value="${extension}"/>
+        </propertyfile>
+        <antcall target="linux-generate-debian"/>
+    </target>
+
+
+  
+  <target name="linux64-dist" depends="linux-dist" 
+	  description="Build .tar.gz of linux version" />
+  
+  <!-- - - - - - - - -->
+  <!-- Windows       -->
+  <!-- - - - - - - - -->
+  
+  <target name="windows-clean" depends="subprojects-clean"
+	  description="Clean windows version">
+    <delete dir="windows/work" />
+  </target>
+  
+  <target name="windows-checkos" unless="windows">
+    <echo>
+      =======================================================
+      ${product.cap} for Windows can only be built on windows.
+      
+      Bye. 
+      =======================================================
+    </echo>
+    
+    <fail message="wrong platform (${os.name})" />
+  </target>
+  
+  <target name="windows-build" 
+	  depends="revision-check, subprojects-build" 
+	  description="Build windows version">
+   	<property name="platform" value="windows"/>  
+    <mkdir dir="windows/work" />
+    
+    <!-- assemble the pde -->
+    <mkdir dir="windows/work/lib" />
+    <copy todir="windows/work/lib" flatten="true">
+      <fileset refid="runtime.jars" />
+    </copy>
+    
+    <copy todir="windows/work">
+      <fileset dir="shared" includes="lib/**" />
+      <fileset file="shared/revisions.txt" />
+    </copy>
+    
+    <copy todir="windows/work">
+      <fileset dir="windows/dist" includes="*.dll" />
+    </copy>
+    
+    <copy todir="windows/work">
+      <fileset dir="windows/dist" includes="drivers/**" />
+    </copy>
+    
+    <antcall target="assemble">
+      <param name="target.path" value="windows/work" />
+      <param name="target.platform" value="windows" />
+  </antcall>
+
+    <property name="launch4j.dir" value="windows/launcher/launch4j/" />
+    <taskdef name="launch4j" 
+	     classname="net.sf.launch4j.ant.Launch4jTask" 
+	     classpath="${launch4j.dir}/launch4j.jar; ${launch4j.dir}/lib/xstream.jar; " />
+
+    <copy todir="windows/work">
+      <fileset dir="themes/${theme}/windows/" 
+	       includes="about.bmp, application.ico, config.xml"/>
+    </copy>
+    <launch4j configFile="windows/work/config.xml" />
+    <delete dir="windows/work" 
+	    includes="about.bmp, application.ico, config.xml" />
+
+    <!-- cygwin requires html, dll, and exe to have the +x flag -->
+    <chmod perm="755">
+      <fileset dir="windows/work" includes="**/*.html, **/*.dll, **/*.exe" />
+    </chmod>
+  </target>
+  
+  <target name="windows-run" depends="windows-build" 
+	  description="Run windows version">
+    <exec executable="windows/work/${product}.exe" 
+	  dir="windows/work" spawn="true"/>
+  </target>
+
+  <target name="windows-dist" depends="windows-build" 
+	  description="Create .zip files of windows version">
+    <property name="extension" value="zip"/>   
+    <propertyfile file="upload.properties">
+           <entry  key="extension" value="${extension}"/>
+    </propertyfile>
+
+    <!--get src="http://dev.processing.org/build/jre-tools-6u18-windows-i586.zip" 
+	 dest="windows/dist/jre.zip" 
+	 usetimestamp="true" /-->
+
+    <unzip dest="windows/work" src="windows/dist/jre.zip" overwrite="false"/>
+
+    <!--
+    <zip basedir="windows/work" 
+	 prefix="${product}-${version}"
+	 destfile="windows/${product}-${version}.zip" />
+    <zip basedir="windows/work" 
+	 prefix="${product}-${version}"
+	 destfile="windows/${product}-${version}-expert.zip" 
+	 excludes="java/**" />
+    -->
+
+    <zip destfile="windows/${product}-${version}.zip">
+      <zipfileset dir="windows/work" 
+		  prefix="${product}-${version}" />
+    </zip>
+
+    <zip destfile="windows/${product}-${version}-expert.zip">
+      <zipfileset dir="windows/work" 
+		  prefix="${product}-${version}" 
+		  excludes="java/**" />
+    </zip>
+    
+    <echo>
+      =======================================================
+      ${product.cap} for Windows was built. Grab the archive from   
+      
+      windows/${product}-${version}.zip
+      windows/${product}-${version}-expert.zip
+      =======================================================
+    </echo>
+  </target>
+  
+
+  <!-- - - - - - - - -->
+  <!-- Source        -->
+  <!-- - - - - - - - -->
+ 
+   <target name="source-dist" depends="revision-check"
+	  description="Build .tar.gz of source code">
+    <input message="Enter version number:" 
+	   addproperty="version"
+	   defaultvalue="${revision}" />
+
+    <tar compression="gzip" longfile="gnu" destfile="${product}-${version}-src.tar.gz">
+      <tarfileset dir="../" 
+		  prefix="${product}-${version}" 
+		  excludes="**/*.tgz,
+			     **/macosx/,
+			     **/windows/,
+			     **/work/,
+			     **/.git/,
+			     **/*.class"
+		  /> 
+    </tar>
+
+    <echo>
+      =======================================================
+      ${product.cap} source distribution was built. Grab the archive from   
+      
+      ${product}-${version}-src.tar.gz
+      =======================================================
+    </echo>
+  </target>
+  
+
+  <!-- - - - - - - - -->
+  <!-- Run It!       -->
+  <!-- - - - - - - - -->
+  
+  <target name="clean" description="Perform a spring cleaning" 
+	  depends="linux-clean, windows-clean, macosx-clean, subprojects-clean">
+  </target>
+
+
+  <target name="update-avrdude-macosx" description="Update the avrdude configuration to latest version." depends="">
+      <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/etc/">
+        <fileset file="macosx/dist/avrdude.conf" />
+    </copy>
+  </target>
+
+  <target name="update-avrdude-windows" description="Update the avrdude configuration to latest version." depends="">
+      <copy todir="windows/work/hardware/cores/pic32/tools/avr/etc/">
+        <fileset file="windows/dist/avrdude.conf" />
+    </copy>
+  </target>
+  <!-- not need linux does this already.
+    <target name="update-avrdude-linux" description="Update the avrdude configuration to latest version." depends="">
+      <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java/hardware/tools/avr/etc/">
+        <fileset file="linux/dist/tools/avrdude.conf" />
+    </copy>
+  </target>
+    -->
+   <!-- Task for setting up the aws-ant-tasks -->
+    <target name="awstasks.setup">
+        <path id="tasks.path">
+            <fileset dir="antlibs" includes="*.jar"/>
+        </path>
+
+        <taskdef name="s3put" classpath="antlibs" classname="it.corley.ant.S3PutTask"
+                 classpathref="tasks.path"/>
+        <typedef name="contenttype.mapping" classname="it.corley.ant.ContentTypeMapping" classpathref="tasks.path"/>
+        <typedef name="cachecontrol.mapping" classname="it.corley.ant.CacheControlMapping" classpathref="tasks.path"/>
+    	<typedef name="contentencoding.mapping" classname="it.corley.ant.ContentEncodingMapping" classpathref="tasks.path"/>
+    </target>
+    <!-- Upload the current build -->
+    <target name="upload" description="Use the Task" depends="awstasks.setup">
+        <property file="test.properties"/>
+        <s3put key="${aws.access_key}" secret="${aws.secret_key}" bucket="${aws.bucket}"
+               dest="builds" publicread="true" cacheControl="3600" contentType="application/x-readme">
+            <fileset dir="${platform}" includes="${product}-${uploadversion}.${extension}"/> 
+            <contenttypemapping extension="md" contenttype="text/plain"/>
+            <cachecontrolmapping extension="md" maxage="7200"/>
+   	    	<contentencodingmapping extension="md" encoding="UTF-8" />
+        </s3put>
+        <echo message="Upload task complete" /> 
+    </target>
+    <!-- Debugging echo target for s3, other values could be added as needed. -->
+    <target name="echo">
+        <echo message="${aws.access_key}"/>
+        <echo message="${aws.secret_key}"/>
+        <echo message="${aws.bucket}"/>
+        <echo message="${version}"/>
+    </target>
+
+
+</project>
