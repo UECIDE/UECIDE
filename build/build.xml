@@ -330,7 +330,6 @@
   
   <target name="macosx-build" depends="revision-check, subprojects-build" description="Build Mac OS X version">
     	<mkdir dir="macosx/work" />
-   	<property name="platform" value="macosx"/>  
     
     <!-- assemble the pde -->
     <copy todir="macosx/work">
@@ -369,67 +368,40 @@
     <exec executable="macosx/work/${product.cap}.app/Contents/MacOS/JavaApplicationStub" spawn="false"/>
   </target>
 
+    <target name="macosx-mkdmg-linux64">
+        <antcall target="macosx-mkdmg-linux" />
+    </target>
 
-  <target name="macosx-dist" if="macosx" depends="macosx-build" description="Create a .dmg of the Mac OS X version">
+    <target name="macosx-mkdmg-linux">
+        <exec executable="sudo">
+            <arg value="macosx/mkdmg.linux" />
+            <arg value="macosx/work" /> 
+            <arg value="macosx/${product}-${version}-macosx.dmg" />
+            <arg value="${product.cap}" />
+        </exec>
+    </target>
+
+    <target name="macosx-mkdmg-macosx">
+        <exec executable="macosx/mkdmg">
+            <arg value="macosx/work"/>
+        </exec>
+        <rename file="work.dmg" tofile="macosx/${product}-${version}-macosx.dmg"/>
+    </target>
+
+  <target name="macosx-dist" depends="macosx-build" description="Create a .dmg of the Mac OS X version">
    	<property name="extension" value="dmg"/>  
 	<propertyfile file="upload.properties">
       		<entry  key="extension" value="${extension}"/>
   	</propertyfile>
 
     <!-- now build the dmg -->
-    <gunzip src="macosx/template.dmg.gz" dest="macosx/working.dmg" />
-    
-    <mkdir dir="macosx/working_dir" />
-    <exec executable="hdiutil">
-      <arg line="attach macosx/working.dmg -noautoopen -mountpoint macosx/working_dir" />
-      <!--<arg line="attach macosx/working.dmg -noautoopen -quiet -mountpoint macosx/working_dir" />-->
-    </exec>
-    
-    <copy todir="macosx/working_dir">
-      <fileset dir="macosx/work">
-        <exclude name="**/ArduinoTestSuite/**" />
-      </fileset>
-    </copy>
+    <antcall target="macosx-mkdmg-${platform}" />
 
-    <!-- The ant copy command does not preserve permissions. -->
-    <chmod file="macosx/working_dir/${product.cap}.app/Contents/MacOS/JavaApplicationStub" perm="+x" />
-    <chmod perm="+x">
-        <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/compiler" includes="**/*" />
-    </chmod>
-    <chmod perm="+x">
-      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/bin" includes="**/*" />
-      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/avr/bin" includes="**/*" />
-      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/avr-3/bin" includes="**/*" />
-      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/avr-4/bin" includes="**/*" />
-      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/libexec/gcc/avr/3.4.6/" includes="**/cc1*" />
-      <fileset dir="macosx/working_dir/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/libexec/gcc/avr/4.3.2/" includes="**/cc1*" />
-    </chmod>
-
-    <!-- Pause briefly for the OS to catch up with the DMG changes. 
-	 This prevents "hdiutil: couldn't eject "disk3" - Resource busy"
-	 errors when ejecting the disk in the next step.
-         You may need to set this value higher for your system. -->
-    <sleep seconds="3" />
-
-    <exec executable="hdiutil">
-      <!--<arg line="detach macosx/working_dir -quiet -force" />-->
-      <arg line="detach macosx/working_dir" />
-    </exec>
-  
-    <delete file="macosx/${product.cap}-*.dmg" />
-    <exec executable="hdiutil">
-      <arg line="convert macosx/working.dmg -quiet -format UDZO -imagekey zlib-level=9 -o macosx/${product.cap}-${version}.dmg" />
-    </exec>
-
-    <!-- Clean up the interim files. -->
-    <delete file="macosx/working.dmg" />
-    <delete dir="macosx/working_dir" />
-    
     <echo>
       =======================================================
       ${product.cap} for Mac OS X was built. Grab the image from   
       
-      macosx/${product.cap}-${version}.dmg
+      macosx/${product}-${version}.dmg
       =======================================================
   </echo>
   <propertyfile file="upload.properties">
@@ -460,7 +432,6 @@
   </target>
   
   <target name="linux-build" depends="revision-check, linux-checkos, subprojects-build" description="Build linux version">
-   	<property name="platform" value="linux"/>  
     <mkdir dir="linux/work" />
     
     <copy todir="linux/work">
@@ -490,7 +461,6 @@
 
 
     <target name="linux64-build" depends="linux-build" description="Build linux (64-bit) version">
-        <property name="platform" value="linux64"/>  
         <copy tofile="linux/work/lib/librxtxSerial.so" file="linux/dist/lib/librxtxSerial64.so" overwrite="true" />   
     </target>
   
@@ -615,7 +585,6 @@ Description: chipKIT MPIDE Development environment
     <target name="windows-build" 
         depends="revision-check, subprojects-build" 
         description="Build windows version">
-        <property name="platform" value="windows"/>  
         <mkdir dir="windows/work" />
     
         <!-- assemble the pde -->
