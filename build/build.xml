@@ -373,11 +373,16 @@
     </target>
 
     <target name="macosx-mkdmg-linux">
-        <exec executable="sudo">
-            <arg value="macosx/mkdmg.linux" />
-            <arg value="macosx/work" /> 
-            <arg value="macosx/${product}-${version}-macosx.dmg" />
+        <exec executable="genisoimage">
+            <arg value="-D" />
+            <arg value="-V" />
             <arg value="${product.cap}" />
+            <arg value="-no-pad" />
+            <arg value="-r" />
+            <arg value="-apple" />
+            <arg value="-o" />
+            <arg value="macosx/${product}-${version}-macosx.dmg" />
+            <arg value="macosx/work" /> 
         </exec>
     </target>
 
@@ -385,7 +390,7 @@
         <exec executable="macosx/mkdmg">
             <arg value="macosx/work"/>
         </exec>
-        <rename file="work.dmg" tofile="macosx/${product}-${version}-macosx.dmg"/>
+        <rename src="work.dmg" dest="macosx/${product}-${version}-macosx.dmg" repace="true" />
     </target>
 
   <target name="macosx-dist" depends="macosx-build" description="Create a .dmg of the Mac OS X version">
