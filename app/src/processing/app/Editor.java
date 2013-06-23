@@ -231,7 +231,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       toolbarMenu = new JMenu();
       base.rebuildToolbarMenu(toolbarMenu);
     }
-//    toolbar = new EditorToolbar(this, toolbarMenu);
     toolbar = new JToolBar();
     toolbar.setBackground(Theme.getColor("buttons.bgcolor"));
     toolbar.setFloatable(false);
@@ -331,10 +330,12 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     });
     toolbar.add(consoleButton);
 
+
     Dimension dmax = toolbar.getMaximumSize();
     dmax.height = 32;
+    dmax.width = 9999;
     toolbar.setMaximumSize(dmax);
-
+/*
     Dimension dmin = toolbar.getMinimumSize();
     dmin.height = 32;
     toolbar.setMinimumSize(dmin);
@@ -342,7 +343,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     Dimension dpref = toolbar.getPreferredSize();
     dpref.height = 32;
     toolbar.setPreferredSize(dpref);
-
+*/
     upper.add(toolbar);
 
     header = new EditorHeader(this);
