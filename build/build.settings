@@ -1,0 +1,17 @@
+version=0.0.1pre
+theme=uecide
+#core.pic32=yes
+core.avr105=yes
+#core.msp430=yes
+boards.Arduino=yes
+#boards.Cerebot=yes
+#boards.CUI32=yes
+#boards.Majenko=yes
+#boards.MicroElektronika=yes
+#boards.PONTECH=yes
+#boards.chipKIT=yes
+#boards.Fubarino=yes
+#boards.Microchip=yes
+#boards.Olimex=yes
+#boards.UBW32=yes
+
