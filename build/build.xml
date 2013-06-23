@@ -342,6 +342,8 @@
     <move file="macosx/work/template.app" 
 	  tofile="macosx/work/${product.cap}.app" />
 
+    <copy file="themes/${theme}/ide/icon.icns" tofile="macosx/work/${product.cap}.app/Contents/Resources/processing.icns" overwrite="true" />
+
     <chmod file="macosx/work/${product.cap}.app/Contents/MacOS/JavaApplicationStub" perm="755" />
     
     <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java" flatten="true">
