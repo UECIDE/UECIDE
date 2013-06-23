@@ -496,43 +496,27 @@
     <exec executable="./linux/work/${product}" spawn="false"/>
   </target>
 
-  <target name="linux-dist" depends="build" 
-	  description="Build .tar.gz of linux version">
-    <property name="extension" value="tgz"/> 
-    <propertyfile file="upload.properties">
-           <entry  key="extension" value="${extension}"/>
-    </propertyfile>
+    <target name="linux-dist" depends="linux-build" 
+        description="Build .tar.gz of linux version">
+        <property name="extension" value="tgz"/> 
 
-    <!--get src="http://dev.processing.org/build/jre-tools-6u18-linux-i586.tgz" 
-	 dest="linux/dist/jre.tgz" 
-	 usetimestamp="true" />    
-    <untar compression="gzip" 
-	   dest="linux/work" 
-	   src="linux/dist/jre.tgz" 
-	   overwrite="false"/-->
 
-<!--
-    <tar compression="gzip" basedir="linux/work" 
-	 destfile="linux/${product}-${version}.tgz" />
--->
-    <tar compression="gzip"  longfile="gnu"  destfile="linux/${product}-${version}.tgz">
-      <tarfileset dir="linux/work" 
-		  prefix="${product}-${version}" />
-      <tarfileset dir="linux/work/hardware/cores/pic32/compiler/pic32-tools/" dirmode="755" prefix="${product}-${version}/hardware/cores/pic32/compiler/pic32-tools" />
-      <tarfileset file="linux/work/hardware/cores/pic32/compiler/pic32-tools/**" filemode="755" prefix="${product}-${version}/hardware/cores/pic32/compiler/pic32-tools" />
+        <propertyfile file="upload.properties">
+            <entry  key="extension" value="${extension}"/>
+        </propertyfile>
 
-      <tarfileset file="linux/work/${product}" filemode="755" prefix="${product}-${version}" />
-      <tarfileset file="linux/work/hardware/cores/pic32/tools/avrdude" filemode="755" prefix="${product}-${version}/hardware/cores/pic32/tools" />
-    </tar>
+        <zip destfile="linux/${product}-${version}-linux.zip">
+            <zipfileset dir="linux/work" prefix="${product}-${version}" filemode="755"/>
+        </zip>
 
-    <echo>
+        <echo>
       =======================================================
       ${product.cap} for Linux was built. Grab the archive from   
       
-      build/linux/${product}-${version}.tgz
+      build/linux/${product}-${version}-linux.zip
       =======================================================
-    </echo>
-  </target>
+        </echo>
+    </target>
 
 	<target name="linux-generate-debian" depends="version-number, build" description="Build debian tree ready for packaging">
         <mkdir dir="linux/${product}-${version}-${arch}" />
@@ -620,104 +604,82 @@ Description: chipKIT MPIDE Development environment
     <fail message="wrong platform (${os.name})" />
   </target>
   
-  <target name="windows-build" 
-	  depends="revision-check, subprojects-build" 
-	  description="Build windows version">
-   	<property name="platform" value="windows"/>  
-    <mkdir dir="windows/work" />
+    <target name="windows-build" 
+        depends="revision-check, subprojects-build" 
+        description="Build windows version">
+        <property name="platform" value="windows"/>  
+        <mkdir dir="windows/work" />
     
-    <!-- assemble the pde -->
-    <mkdir dir="windows/work/lib" />
-    <copy todir="windows/work/lib" flatten="true">
-      <fileset refid="runtime.jars" />
-    </copy>
+        <!-- assemble the pde -->
+        <mkdir dir="windows/work/lib" />
+        <copy todir="windows/work/lib" flatten="true">
+            <fileset refid="runtime.jars" />
+        </copy>
     
-    <copy todir="windows/work">
-      <fileset dir="shared" includes="lib/**" />
-      <fileset file="shared/revisions.txt" />
-    </copy>
+        <copy todir="windows/work">
+            <fileset dir="shared" includes="lib/**" />
+            <fileset file="shared/revisions.txt" />
+        </copy>
     
-    <copy todir="windows/work">
-      <fileset dir="windows/dist" includes="*.dll" />
-    </copy>
+        <copy todir="windows/work">
+            <fileset dir="windows/dist" includes="*.dll" />
+        </copy>
+
+        <copy todir="windows/work">
+            <fileset dir="windows/dist" includes="drivers/**" />
+        </copy>
+
+        <antcall target="assemble">
+            <param name="target.path" value="windows/work" />
+            <param name="target.platform" value="windows" />
+        </antcall>
+
+        <property name="launch4j.dir" value="windows/launcher/launch4j/" />
+        <taskdef name="launch4j" 
+            classname="net.sf.launch4j.ant.Launch4jTask" 
+            classpath="${launch4j.dir}/launch4j.jar; ${launch4j.dir}/lib/xstream.jar; " />
+
+        <copy todir="windows/work">
+            <fileset dir="themes/${theme}/windows/" 
+                includes="about.bmp, application.ico, config.xml"/>
+        </copy>
+        <launch4j configFile="windows/work/config.xml" />
+        <delete dir="windows/work" 
+            includes="about.bmp, application.ico, config.xml" />
+
+        <!-- cygwin requires html, dll, and exe to have the +x flag -->
+        <chmod perm="755">
+            <fileset dir="windows/work" includes="**/*.html, **/*.dll, **/*.exe" />
+        </chmod>
+    </target>
+
+    <target name="windows-run" depends="windows-build" 
+        description="Run windows version">
+        <exec executable="windows/work/${product}.exe" 
+            dir="windows/work" spawn="true"/>
+    </target>
+
+    <target name="windows-dist" depends="windows-build" 
+        description="Create .zip files of windows version">
+        <property name="extension" value="zip"/>   
+        <propertyfile file="upload.properties">
+            <entry  key="extension" value="${extension}"/>
+        </propertyfile>
+
+        <unzip dest="windows/work" src="windows/dist/jre.zip" overwrite="false"/>
+
+        <zip destfile="windows/${product}-${version}-windows.zip">
+            <zipfileset dir="windows/work" prefix="${product}-${version}" filemode="755" />
+        </zip>
     
-    <copy todir="windows/work">
-      <fileset dir="windows/dist" includes="drivers/**" />
-    </copy>
-    
-    <antcall target="assemble">
-      <param name="target.path" value="windows/work" />
-      <param name="target.platform" value="windows" />
-  </antcall>
-
-    <property name="launch4j.dir" value="windows/launcher/launch4j/" />
-    <taskdef name="launch4j" 
-	     classname="net.sf.launch4j.ant.Launch4jTask" 
-	     classpath="${launch4j.dir}/launch4j.jar; ${launch4j.dir}/lib/xstream.jar; " />
-
-    <copy todir="windows/work">
-      <fileset dir="themes/${theme}/windows/" 
-	       includes="about.bmp, application.ico, config.xml"/>
-    </copy>
-    <launch4j configFile="windows/work/config.xml" />
-    <delete dir="windows/work" 
-	    includes="about.bmp, application.ico, config.xml" />
-
-    <!-- cygwin requires html, dll, and exe to have the +x flag -->
-    <chmod perm="755">
-      <fileset dir="windows/work" includes="**/*.html, **/*.dll, **/*.exe" />
-    </chmod>
-  </target>
-  
-  <target name="windows-run" depends="windows-build" 
-	  description="Run windows version">
-    <exec executable="windows/work/${product}.exe" 
-	  dir="windows/work" spawn="true"/>
-  </target>
-
-  <target name="windows-dist" depends="windows-build" 
-	  description="Create .zip files of windows version">
-    <property name="extension" value="zip"/>   
-    <propertyfile file="upload.properties">
-           <entry  key="extension" value="${extension}"/>
-    </propertyfile>
-
-    <!--get src="http://dev.processing.org/build/jre-tools-6u18-windows-i586.zip" 
-	 dest="windows/dist/jre.zip" 
-	 usetimestamp="true" /-->
-
-    <unzip dest="windows/work" src="windows/dist/jre.zip" overwrite="false"/>
-
-    <!--
-    <zip basedir="windows/work" 
-	 prefix="${product}-${version}"
-	 destfile="windows/${product}-${version}.zip" />
-    <zip basedir="windows/work" 
-	 prefix="${product}-${version}"
-	 destfile="windows/${product}-${version}-expert.zip" 
-	 excludes="java/**" />
-    -->
-
-    <zip destfile="windows/${product}-${version}.zip">
-      <zipfileset dir="windows/work" 
-		  prefix="${product}-${version}" />
-    </zip>
-
-    <zip destfile="windows/${product}-${version}-expert.zip">
-      <zipfileset dir="windows/work" 
-		  prefix="${product}-${version}" 
-		  excludes="java/**" />
-    </zip>
-    
-    <echo>
+        <echo>
       =======================================================
       ${product.cap} for Windows was built. Grab the archive from   
       
-      windows/${product}-${version}.zip
-      windows/${product}-${version}-expert.zip
+      windows/${product}-${version}-windows.zip
       =======================================================
-    </echo>
-  </target>
+        </echo>
+    </target>
   
 
   <!-- - - - - - - - -->
