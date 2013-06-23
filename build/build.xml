@@ -390,7 +390,7 @@
         <exec executable="macosx/mkdmg">
             <arg value="macosx/work"/>
         </exec>
-        <rename src="work.dmg" dest="macosx/${product}-${version}-macosx.dmg" repace="true" />
+        <move file="work.dmg" tofile="macosx/${product}-${version}-macosx.dmg" overwrite="true" />
     </target>
 
   <target name="macosx-dist" depends="macosx-build" description="Create a .dmg of the Mac OS X version">
