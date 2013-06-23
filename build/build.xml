@@ -141,6 +141,9 @@
              dest="tmp/${core.name}-${target.platform}-current.zip" 
              usetimestamp="true" />    
         <unzip dest="${target.path}/hardware/cores" src="tmp/${core.name}-${target.platform}-current.zip" overwrite="false" />
+        <chmod perm="+x">
+            <fileset dir="${target.path}/hardware/cores/${core.name}" includes="**/*" />
+        </chmod>
     </target>
 
     <target name="install_boards" if="boards.${boards.name}">
@@ -148,6 +151,9 @@
              dest="tmp/boards-${boards.name}.zip" 
              usetimestamp="true" />    
         <unzip dest="${target.path}/hardware/boards/${boards.name}" src="tmp/boards-${boards.name}.zip" overwrite="false" />
+        <chmod perm="+x">
+            <fileset dir="${target.path}/hardware/boards/${boards.name}" includes="**/*" />
+        </chmod>
     </target>
         
     <target name="assemble">
