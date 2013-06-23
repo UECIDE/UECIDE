@@ -114,11 +114,11 @@ about.version.y = 215
 about.version.color = #656565
 about.version.font = SansSerif,normal,14
 
-product=uceide
-product.cap=UCEIDE
+product=uecide
+product.cap=UECIDE
 
-links.homepage.name=Visit uceide.org
-links.homepage.url=http://uceide.org
+links.homepage.name=Visit uecide.org
+links.homepage.url=http://uecide.org
 links.forums.name=Visit forums
-links.forums.url=http://uceide.org/forum
+links.forums.url=http://uecide.org/forum
 
