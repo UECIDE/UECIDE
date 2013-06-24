@@ -246,12 +246,18 @@ public class Board implements MessageConsumer {
             rts = true;
         }
 
-        if (dtr || rts) {
-            assertDTRRTS(dtr, rts);
+        if (get("upload.using", core.get("upload.using", "serial")).equals("serial"))
+        {
+            if (dtr || rts) {
+                assertDTRRTS(dtr, rts);
+            }
         }
         boolean res = execAsynchronously(commandString);
-        if (dtr || rts) {
-            assertDTRRTS(false, false);
+        if (get("upload.using", core.get("upload.using", "serial")).equals("serial"))
+        {
+            if (dtr || rts) {
+                assertDTRRTS(false, false);
+            }
         }
         return res;
     }
