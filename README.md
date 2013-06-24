@@ -4,7 +4,7 @@ UECIDE
 Universal Embedded Computing IDE
 
 First came the Arduino.  Arduino forked the Processing IDE and used it for
-their own ends.  Arduino took off big time, and prople all over the globe
+their own ends.  Arduino took off big time, and people all over the globe
 started using it.
 
 Then along came new players to the market - chipKIT, Launchpad, etc.
