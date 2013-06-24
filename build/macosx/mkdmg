@@ -2,9 +2,11 @@
 
 #
 FOLDER="$1"
-if [ -z "$FOLDER" ]; then
+NAME="$2"
+FILE="$3"
+if [ -z "$FOLDER" -o -z "$NAME" -o -z "$FILE" ]; then
 echo
-echo "usage: $0 <folder>"
+echo "usage: $0 <folder> <name> <file>"
 echo
 exit 1
 fi
@@ -17,8 +19,6 @@ fi
 SIZE=`du -s "$FOLDER" | awk '{ print $1 }'`
 # allow space for partition map and directory structure
 SIZE=`echo 1024 + $SIZE \* 1.1 / 1 | bc`
-NAME=`basename "$FOLDER"`
-FILE=$NAME.dmg
 TMP=${TMP:-/tmp}
 
 if [ $SIZE -lt 9216 ]; then
@@ -26,8 +26,7 @@ SIZE=9216
 fi
 
 if [ -e "$FILE" ] ; then
-echo $FILE already exists!
-exit 3
+rm "$FILE"
 fi
 
 TMPFILE=$TMP/$$.dmg
@@ -44,10 +43,10 @@ DEVICES=`hdid -nomount $TMPFILE`
 DEVMASTER=`echo $DEVICES| awk '{ print $1 }'`
 
 # Different results on 10.4 vs 10.5. Yay! [fry] 
-#echo "devices as follows"
-#echo $DEVICES
+echo "devices as follows"
+echo $DEVICES
 DARWINVERSION=`uname -r`
-if [ $DARWINVERSION = "9.5.0" ] ; then 
+if [ $DARWINVERSION = "9.5.0" -o $DARWINVERSION = "9.2.0" ] ; then 
   DEVHFS=`echo $DEVICES| awk '{ print $3 }'`
 else 
   if [ $DARWINVERSION = "8.11.1" ] ; then 
