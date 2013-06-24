@@ -388,9 +388,10 @@
 
     <target name="macosx-mkdmg-macosx">
         <exec executable="macosx/mkdmg">
-            <arg value="macosx/work"/>
+            <arg value="macosx/work" />
+            <arg value="${product.cap}" />
+			<arg value="macosx/${product}-${version}-macosx.dmg" />
         </exec>
-        <move file="work.dmg" tofile="macosx/${product}-${version}-macosx.dmg" overwrite="true" />
     </target>
 
   <target name="macosx-dist" depends="macosx-build" description="Create a .dmg of the Mac OS X version">
