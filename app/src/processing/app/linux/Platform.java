@@ -27,6 +27,7 @@ import java.io.File;
 import javax.swing.UIManager;
 
 import processing.app.Preferences;
+import processing.app.Theme;
 
 
 /**
@@ -41,14 +42,19 @@ public class Platform extends processing.app.Platform {
     // Linux is by default even uglier than metal (Motif?).
     // Actually, i'm using native menus, so they're even uglier
     // and Motif-looking (Lesstif?). Ick. Need to fix this.
-    //String lfname = UIManager.getCrossPlatformLookAndFeelClassName();
-    //UIManager.setLookAndFeel(lfname);
+//    String lfname = UIManager.getCrossPlatformLookAndFeelClassName();
+//    UIManager.setLookAndFeel(lfname);
 
     // For 0120, trying out the gtk+ look and feel as the default.
     // This is available in Java 1.4.2 and later, and it can't possibly
     // be any worse than Metal. (Ocean might also work, but that's for
     // Java 1.5, and we aren't going there yet)
-    //UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+//    UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+
+    String laf = Theme.get("window.laf");
+    if ((laf != null) && (laf != "default")) {
+       UIManager.setLookAndFeel(laf);
+    }
   }
 
 

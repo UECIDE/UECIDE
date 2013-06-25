@@ -181,7 +181,7 @@ public class PdeTextAreaDefaults extends TextAreaDefaults {
 
     // moved from TextAreaPainter
 
-    font = Preferences.getFont("editor.font");
+    font = Theme.getFont("editor.font");
 
     fgcolor = Theme.getColor("editor.fgcolor");
     bgcolor = Theme.getColor("editor.bgcolor");

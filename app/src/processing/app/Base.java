@@ -2189,24 +2189,31 @@ return outgoing;
 }
 
 
-static protected void listFiles(String basePath,
-String path, Vector<String> vector) {
-File folder = new File(path);
-String list[] = folder.list();
-if (list == null) return;
+    static protected void listFiles(String basePath, String path, Vector<String> vector) {
+        File folder = new File(path);
+        String list[] = folder.list();
+        if (list == null) return;
 
-for (int i = 0; i < list.length; i++) {
-if (list[i].charAt(0) == '.') continue;
+        for (int i = 0; i < list.length; i++) {
+            if (list[i].charAt(0) == '.') continue;
 
-File file = new File(path, list[i]);
-String newPath = file.getAbsolutePath();
-if (newPath.startsWith(basePath)) {
-newPath = newPath.substring(basePath.length());
-}
-vector.add(newPath);
-if (file.isDirectory()) {
-listFiles(basePath, newPath, vector);
-}
-}
-}
+            File file = new File(path, list[i]);
+            String newPath = file.getAbsolutePath();
+            if (newPath.startsWith(basePath)) {
+                newPath = newPath.substring(basePath.length());
+            }
+            vector.add(newPath);
+            if (file.isDirectory()) {
+                listFiles(basePath, newPath, vector);
+            }
+        }
+    }
+
+    public static void handleSystemInfo() {
+        System.out.println("Installed java LookAndFeels:");
+        UIManager.LookAndFeelInfo[] looks = UIManager.getInstalledLookAndFeels();
+        for (int i = 0; i < looks.length; i++) {
+            System.out.println("  "+looks[i].getClassName());
+        }
+    }
 }

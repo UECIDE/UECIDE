@@ -89,6 +89,14 @@ public class Theme {
   }
 
 
+  static public String get(String attribute, String def) {
+    String v = get(attribute);
+    if (v == null) {
+        return def;
+    }
+    return v;
+  }
+
   static public String get(String attribute) {
     return (String) table.get(attribute);
   }
@@ -143,12 +151,10 @@ public class Theme {
     set(attr, "#" + PApplet.hex(what.getRGB() & 0xffffff, 6));
   }
 
-
   static public Font getFont(String attr) {
     boolean replace = false;
     String value = get(attr);
     if (value == null) {
-      //System.out.println("reset 1");
       value = getDefault(attr);
       replace = true;
     }

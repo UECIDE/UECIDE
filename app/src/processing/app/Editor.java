@@ -335,15 +335,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     dmax.height = 32;
     dmax.width = 9999;
     toolbar.setMaximumSize(dmax);
-/*
-    Dimension dmin = toolbar.getMinimumSize();
-    dmin.height = 32;
-    toolbar.setMinimumSize(dmin);
 
-    Dimension dpref = toolbar.getPreferredSize();
-    dpref.height = 32;
-    toolbar.setPreferredSize(dpref);
-*/
     upper.add(toolbar);
 
     header = new EditorHeader(this);
@@ -583,8 +575,14 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
 
   protected void buildMenuBar() {
+
+    Font f = new Font("courier", Font.BOLD, 20);
+
     JMenuBar menubar = new JMenuBar();
     menubar = new JMenuBar();
+
+    menubar.setFont(f);
+    
     menubar.add(buildFileMenu());
     menubar.add(buildEditMenu());
     menubar.add(buildSketchMenu());
@@ -1208,6 +1206,14 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         });
       menu.add(item);
     }
+
+    item = new JMenuItem("System Information");
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            base.handleSystemInfo();
+        }
+    });
+    menu.add(item);
 
     return menu;
   }
