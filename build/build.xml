@@ -148,7 +148,7 @@
 
     <target name="install_boards" if="boards.${boards.name}">
         <get src="http://www.uecide.org/boards/boards-${boards.name}-current.zip"
-             dest="tmp/boards-${boards.name}.zip" 
+             dest="tmp/boards-${boards.name}-current.zip" 
              usetimestamp="true" />    
         <unzip dest="${target.path}/hardware/boards/${boards.name}" src="tmp/boards-${boards.name}-current.zip" overwrite="false" />
         <chmod perm="+x">
