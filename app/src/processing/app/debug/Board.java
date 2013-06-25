@@ -147,6 +147,9 @@ public class Board implements MessageConsumer {
             uploadCommand = get("upload.command");
         }
         if (uploadCommand == null) {
+            uploadCommand = core.get("upload.command." + Base.osNameFull());
+        }
+        if (uploadCommand == null) {
             uploadCommand = core.get("upload.command." + Base.osName());
         }
         if (uploadCommand == null) {
