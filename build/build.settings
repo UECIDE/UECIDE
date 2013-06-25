@@ -1,5 +1,6 @@
-version=0.2.0b
+version=0.2.0e
 theme=uecide
+download.enable=yes
 #core.pic32=yes
 core.avr105=yes
 #core.msp430=yes
@@ -14,4 +15,4 @@ boards.Arduino=yes
 #boards.Microchip=yes
 #boards.Olimex=yes
 #boards.UBW32=yes
-
+#boards.Launchpad=yes

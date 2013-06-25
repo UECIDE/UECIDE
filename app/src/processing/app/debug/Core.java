@@ -66,7 +66,7 @@ public class Core implements MessageConsumer {
                 corePreferences = new LinkedHashMap();
                 Preferences.load(new FileInputStream(coreFile), corePreferences);
                 this.name = folder.getName();
-                this.api = new File(folder, "api");
+                this.api = new File(folder, get("library.core.path","api"));
             }
             valid = true;
         } catch (Exception e) {
