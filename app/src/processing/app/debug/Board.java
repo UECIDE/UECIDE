@@ -47,10 +47,10 @@ public class Board implements MessageConsumer {
     private String longname;
     private Core core;
     private String group;
-    private Map boardPreferences;
     private File folder;
     private boolean valid;
     private boolean runInVerboseMode;
+    private Map boardPreferences;
 
     static Logger logger = Logger.getLogger(Base.class.getName());
   
@@ -74,6 +74,10 @@ public class Board implements MessageConsumer {
         } catch (Exception e) {
             System.err.print("Bad board file format: " + folder);
         }
+    }
+
+    public void setVerbose(boolean v) {
+        runInVerboseMode = v;
     }
 
     public String getGroup() {
@@ -105,6 +109,10 @@ public class Board implements MessageConsumer {
 
     }
 
+    public void set(String k, String d) {
+        boardPreferences.put(k, d);
+    }
+
     public String get(String k, String d) {
         if ((String) boardPreferences.get(k) == null) {
             return d;
@@ -123,9 +131,13 @@ public class Board implements MessageConsumer {
         }
     }
 
-    public boolean upload(String filename, boolean verbose) {
+    public boolean upload(String filename) {
         String uploadCommand;
-        runInVerboseMode = verbose;
+
+        set("filename", filename);
+        set("filename.elf", filename + ".elf");
+        set("filename.hex", filename + ".hex");
+        set("filename.eep", filename + ".eep");
 
         uploadCommand = get("upload.command." + Base.osNameFull());
         if (uploadCommand == null) {
@@ -146,60 +158,10 @@ public class Board implements MessageConsumer {
             return false;
         }
 
-        int iStart;
-        int iEnd;
-        String start;
-        String end;
-        String mid;
+        String[] spl;
+        spl = parseString(uploadCommand).split("::");
 
-        iStart = uploadCommand.indexOf("${");
-
-        while (iStart != -1) {
-            iEnd = uploadCommand.indexOf("}", iStart);
-
-            start = uploadCommand.substring(0, iStart);
-            end = uploadCommand.substring(iEnd+1);
-            mid = uploadCommand.substring(iStart+2, iEnd);
-
-            if (mid.equals("filename")) {
-                mid = filename;
-            } else if (mid.equals("filename.hex")) {
-                mid = filename + ".hex";
-            } else if (mid.equals("filename.elf")) {
-                mid = filename + ".elf";
-            } else if (mid.equals("filename.eep")) {
-                mid = filename + ".eep";
-            } else if (mid.equals("core.root")) {
-                mid = core.getFolder().getAbsolutePath();
-            } else if (mid.equals("board.root")) {
-                mid = folder.getAbsolutePath();
-            } else if (mid.equals("verbose")) {
-                if (verbose)
-                    mid = get("upload.verbose", core.get("upload.verbose", ""));
-                else 
-                    mid = get("upload.quiet", core.get("upload.quiet", ""));
-            } else if (mid.equals("port")) {
-                if (Base.isWindows()) 
-                    mid = "\\\\.\\" + Preferences.get("serial.port");
-                else 
-                    mid = Preferences.get("serial.port");
-            } else {
-                mid = get(mid, core.get(mid, ""));
-            }
-
-            uploadCommand = start + mid + end;
-            iStart = uploadCommand.indexOf("${");
-        }
-
-        // Attempt to locate the executable in standard locations
-
-        ArrayList <String> spl = new ArrayList();
-        Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(uploadCommand);
-        while (m.find())
-            spl.add(m.group(1));
-
-        String executable = spl.get(0);
-        executable = executable.replace("\"", "");
+        String executable = spl[0];
         if (Base.isWindows()) {
             executable = executable + ".exe";
         }
@@ -224,13 +186,14 @@ public class Board implements MessageConsumer {
             executable = exeFile.getAbsolutePath();
         }
 
+        spl[0] = executable;
+
         // Parse each word, doing string replacement as needed, trimming it, and
         // generally getting it ready for executing.
 
         String commandString = executable;
-        for (int i = 1; i < spl.size(); i++) {
-            String tmp = spl.get(i);
-            tmp = tmp.replace("\"", "");
+        for (int i = 1; i < spl.length; i++) {
+            String tmp = spl[i];
             tmp = tmp.trim();
             if (tmp.length() > 0) {
                 commandString += "::" + tmp;
@@ -305,7 +268,7 @@ public class Board implements MessageConsumer {
         return null;
     }
 
-    private boolean execAsynchronously(String command) {
+    public boolean execAsynchronously(String command) {
         String[] commandArray = command.split("::");
         List<String> stringList = new ArrayList<String>();
         Process process;
@@ -352,4 +315,86 @@ public class Board implements MessageConsumer {
         return false;
     }
 
+    public String parseString(String in)
+    {
+        int iStart;
+        int iEnd;
+        int iTest;
+        String out;
+        String start;
+        String end;
+        String mid;
+
+        out = in;
+
+        if (out == null) {
+            return null;
+        }
+
+        iStart = out.indexOf("${");
+        if (iStart == -1) {
+            return out;
+        }
+
+        iEnd = out.indexOf("}", iStart);
+        iTest = out.indexOf("${", iStart+1);
+        while ((iTest > -1) && (iTest < iEnd)) {
+            iStart = iTest;
+            iTest = out.indexOf("${", iStart+1);
+        }
+
+        while (iStart != -1) {
+            start = out.substring(0, iStart);
+            end = out.substring(iEnd+1);
+            mid = out.substring(iStart+2, iEnd);
+
+            if (mid.equals("core.root")) {
+                mid = core.getFolder().getAbsolutePath();
+            } else if ((mid.length() > 5) && (mid.substring(0,5).equals("find:"))) {
+                String f = mid.substring(5);
+
+                File found;
+                found = new File(folder, f);
+                if (!found.exists()) {
+                    found = new File(parseString(core.get("library.core.path","notfound")), f);
+                }
+                if (!found.exists()) {
+                    mid = "NOTFOUND";
+                } else {
+                    mid = found.getAbsolutePath();
+                }
+            } else if (mid.equals("board.root")) {
+                mid = folder.getAbsolutePath();
+            } else if (mid.equals("verbose")) {
+                if (runInVerboseMode)
+                    mid = get("upload.verbose", core.get("upload.verbose", ""));
+                else 
+                    mid = get("upload.quiet", core.get("upload.quiet", ""));
+            } else if (mid.equals("port")) {
+                if (Base.isWindows()) 
+                    mid = "\\\\.\\" + Preferences.get("serial.port");
+                else 
+                    mid = Preferences.get("serial.port");
+            } else {
+                mid = get(mid, core.get(mid, ""));
+            }
+
+            out = start + mid + end;
+            iStart = out.indexOf("${");
+            iEnd = out.indexOf("}", iStart);
+            iTest = out.indexOf("${", iStart+1);
+            while ((iTest > -1) && (iTest < iEnd)) {
+                iStart = iTest;
+                iTest = out.indexOf("${", iStart+1);
+            }
+        }
+
+        // This shouldn't be needed as the methodology should always find any tokens put in
+        // by other token replaceements.  But just in case, eh?
+        if (out != in) {
+            out = parseString(out);
+        }
+
+        return out;
+    }
 }

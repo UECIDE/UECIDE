@@ -45,19 +45,9 @@ public class Sizer implements MessageConsumer {
     }
   
     public long computeSize() throws RunnerException {
-        String basePath = Base.selectedBoard.getCore().get("compiler.path", "");
-        File root = Base.getContentFile(null);
-        Object[] Args = {root.getAbsolutePath(), Base.selectedBoard.getCore().getFolder().getAbsolutePath()};
-        MessageFormat compileFormat = new MessageFormat(basePath);
-        basePath = compileFormat.format(Args);
 
-        String command = Base.selectedBoard.getCore().get("compiler.size", "size");
-        String commandSize[] = new String[] {
-            basePath + command,
-            " "
-        };
-    
-        commandSize[1] = buildPath + File.separator + sketchName + ".elf";
+        Base.selectedBoard.set("filename", sketchName);
+        String commandSize[] = Base.selectedBoard.parseString(Base.selectedBoard.getCore().get("compiler.size")).split("::");
 
         int r = 0;
         try {

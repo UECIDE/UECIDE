@@ -265,11 +265,11 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     burnButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e)
         {
+            Base.selectedBoard.setVerbose(false);
             if ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
-                handleExport(true);
-            } else {
-                handleExport(false);
+                Base.selectedBoard.setVerbose(true);
             }
+            handleExport();
         }
     });
     toolbar.add(burnButton);
@@ -653,7 +653,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     item = newJMenuItem("Upload to I/O Board", 'U');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          handleExport(false);
+            Base.selectedBoard.setVerbose(false);
+          handleExport();
         }
       });
     fileMenu.add(item);
@@ -1475,10 +1476,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
   public void resetHandlers() {
     runHandler = new DefaultRunHandler();
-    presentHandler = new DefaultPresentHandler();
 //-    stopHandler = new DefaultStopHandler();
     exportHandler = new DefaultExportHandler();
-    exportAppHandler = new DefaultExportAppHandler();
   }
 
 
@@ -1908,6 +1907,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   public void handleRun(final boolean verbose) {
     internalCloseRunner();
     running = true;
+    Base.selectedBoard.setVerbose(verbose);
     status.progress("Compiling sketch...");
 
     // clear the console on each run, unless the user doesn't want to
@@ -1917,7 +1917,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     // Cannot use invokeLater() here, otherwise it gets
     // placed on the event thread and causes a hang--bad idea all around.
-    new Thread(verbose ? presentHandler : runHandler).start();
+    new Thread(runHandler).start();
   }
 
   // DAM: in Arduino, this is compile
@@ -1925,26 +1925,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     public void run() {
       try {
         sketch.prepare();
-        if(sketch.build(false) != null) {
-            statusNotice("Done compiling.");
-        } else {
-            statusNotice("Compilation failed.");
-        }
-      } catch (Exception e) {
-        status.unprogress();
-        statusError(e);
-      }
-
-      status.unprogress();
-    }
-  }
-
-  // DAM: in Arduino, this is compile (with verbose output)
-  class DefaultPresentHandler implements Runnable {
-    public void run() {
-      try {
-        sketch.prepare();
-        if(sketch.build(true) != null) {
+        if(sketch.build() != null) {
             statusNotice("Done compiling.");
         } else {
             statusNotice("Compilation failed.");
@@ -2379,13 +2360,13 @@ static Logger logger = Logger.getLogger(Base.class.getName());
    * Made synchronized to (hopefully) avoid problems of people
    * hitting export twice, quickly, and horking things up.
    */
-  synchronized public void handleExport(final boolean usingProgrammer) {
+  synchronized public void handleExport() {
     //if (!handleExportCheckModified()) return;
     //toolbar.activate(EditorToolbar.EXPORT);
     console.clear();
     status.progress("Uploading to I/O Board...");
 
-    new Thread(usingProgrammer ? exportAppHandler : exportHandler).start();
+    new Thread(exportHandler).start();
   }
 
   // DAM: in Arduino, this is upload
@@ -2399,42 +2380,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         uploading = true;
           
         boolean success = sketch.exportApplet(false);
-        if (success) {
-          statusNotice("Done uploading.");
-        } else {
-          // error message will already be visible
-        }
-      } catch (SerialNotFoundException e) {
-        populateSerialMenu();
-        if (serialMenu.getItemCount() == 0) statusError(e);
-        else if (serialPrompt()) run();
-        else statusNotice("Upload canceled.");
-      } catch (RunnerException e) {
-        //statusError("Error during upload.");
-        //e.printStackTrace();
-        status.unprogress();
-        statusError(e);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      status.unprogress();
-      uploading = false;
-      //toolbar.clear();
-      //toolbar.deactivate(EditorToolbar.EXPORT);
-    }
-  }
-
-  // DAM: in Arduino, this is upload (with verbose output)
-  class DefaultExportAppHandler implements Runnable {
-    public void run() {
-
-      try {
-        serialMonitor.closeSerialPort();
-        serialMonitor.setVisible(false);
-            
-        uploading = true;
-          
-        boolean success = sketch.exportApplet(true);
         if (success) {
           statusNotice("Done uploading.");
         } else {

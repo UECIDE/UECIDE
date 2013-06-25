@@ -116,51 +116,51 @@ public class Core implements MessageConsumer {
         return get(k);
     }
 
-    public boolean compile(Sketch sketch, String buildPath,String primaryClassName, boolean verbose) {
+    public boolean compile(Sketch sketch, String buildPath,String primaryClassName) {
         ArrayList<String> includePaths;
         List<File> objectFiles = new ArrayList<File>();
         List<File> tobjs;
 
-        runInVerboseMode = verbose;
-
-        String basePath = get("compiler.path", "");
         File root = Base.getContentFile(null);
         Object[] Args = {root.getAbsolutePath(), folder.getAbsolutePath()};
-        MessageFormat compileFormat = new MessageFormat(basePath);
-        basePath = compileFormat.format(Args);
  
         includePaths = getIncludes(sketch);
 
-        tobjs = compileSketch(basePath, buildPath, includePaths);
+        Base.selectedBoard.set("filename", primaryClassName);
+        Base.selectedBoard.set("includes", preparePaths(includePaths));
+
+        tobjs = compileSketch(buildPath);
         if (tobjs == null) {
             return false;
         }
         objectFiles.addAll(tobjs);
         sketch.setCompilingProgress(30);
 
-        tobjs = compileLibraries(sketch, basePath, buildPath, includePaths);
+        tobjs = compileLibraries(sketch, buildPath);
         if (tobjs == null) {
             return false;
         }
+
         objectFiles.addAll(tobjs);
         sketch.setCompilingProgress(40);
 
-        if (!compileCore(basePath, buildPath)) {
+        if (!compileCore(buildPath)) {
             return false;
         }
         sketch.setCompilingProgress(50);
 
-        if (!compileLink(basePath, buildPath, objectFiles, primaryClassName)) {
+        Base.selectedBoard.set("filename", primaryClassName);
+        if (!compileLink(buildPath, objectFiles)) {
             return false;
         }
         sketch.setCompilingProgress(60);
 
-        if (!compileEEP(basePath, buildPath, primaryClassName)) {
+        if (!compileEEP(buildPath)) {
             return false;
         }
         sketch.setCompilingProgress(70);
 
-        if (!compileHEX(basePath, buildPath, primaryClassName)) {
+        if (!compileHEX(buildPath)) {
             return false;
         }
         sketch.setCompilingProgress(80);
@@ -208,22 +208,26 @@ public class Core implements MessageConsumer {
         return paths;
     }
 
-    private List<File> compileFiles(String basePath,
+    private List<File> compileFiles(
             String buildPath,
-            ArrayList<String> includePaths,
             List<File> sSources, List<File>
             cSources,
             List<File> cppSources) {
 
         List<File> objectPaths = new ArrayList<File>();
 
+        Base.selectedBoard.set("build.path", buildPath);
+
         for (File file : sSources) {
             String objectPath = buildPath + File.separator + file.getName()
                     + ".o";
             File objectFile = new File(objectPath);
             objectPaths.add(objectFile);
-            if(!execAsynchronously(getCommandCompilerS(basePath, includePaths,
-                    file.getAbsolutePath(), objectPath)))
+
+            Base.selectedBoard.set("source.name", file.getAbsolutePath());
+            Base.selectedBoard.set("object.name", objectPath);
+
+            if(!Base.selectedBoard.execAsynchronously(Base.selectedBoard.parseString(get("recipe.S.o.pattern"))))
                 return null;
             if (!objectFile.exists()) 
                 return null;
@@ -234,8 +238,11 @@ public class Core implements MessageConsumer {
                     + ".o";
             File objectFile = new File(objectPath);
             objectPaths.add(objectFile);
-            if(!execAsynchronously(getCommandCompilerC(basePath, includePaths,
-                    file.getAbsolutePath(), objectPath)))
+
+            Base.selectedBoard.set("source.name", file.getAbsolutePath());
+            Base.selectedBoard.set("object.name", objectPath);
+
+            if(!Base.selectedBoard.execAsynchronously(Base.selectedBoard.parseString(get("recipe.c.o.pattern"))))
                 return null;
             if (!objectFile.exists()) 
                 return null;
@@ -246,93 +253,17 @@ public class Core implements MessageConsumer {
                     + ".o";
             File objectFile = new File(objectPath);
             objectPaths.add(objectFile);
-            if(!execAsynchronously(getCommandCompilerCPP(basePath, includePaths,
-                    file.getAbsolutePath(), objectPath)))
+
+            Base.selectedBoard.set("source.name", file.getAbsolutePath());
+            Base.selectedBoard.set("object.name", objectPath);
+
+            if(!Base.selectedBoard.execAsynchronously(Base.selectedBoard.parseString(get("recipe.cpp.o.pattern"))))
                 return null;
             if (!objectFile.exists()) 
                 return null;
         }
 
         return objectPaths;
-    }
-
-    private String getCommandCompilerS(String basePath,
-            ArrayList<String> includePaths, String sourceName, String objectName)
-    {
-        String baseCommandString = get("recipe.cpp.o.pattern");
-        MessageFormat compileFormat = new MessageFormat(baseCommandString);
-        //getIncludes to String
-
-        String includes = preparePaths(includePaths);
-
-        Object[] Args = {
-                basePath, //0
-                get("compiler.cpp.cmd"), //1
-                get("compiler.S.flags"), //2
-                get("compiler.cpudef"), //3
-                Base.selectedBoard.get("build.mcu"), //4
-                Base.selectedBoard.get("build.f_cpu"), //5
-                "ARDUINO=" + get("core.version", Integer.toString(Base.REVISION)),
-                Base.selectedBoard.get("board") , //7,
-                get("compiler.define") + " " + Base.selectedBoard.get("board.define")  , //8
-                includes, //9
-                sourceName, //10
-                objectName //11
-        };
-
-        return compileFormat.format(  Args );
-    }
-
-    private String getCommandCompilerC(String basePath,
-            ArrayList<String> includePaths, String sourceName, String objectName)
-    {
-        String baseCommandString = get("recipe.c.o.pattern");
-        MessageFormat compileFormat = new MessageFormat(baseCommandString);
-        //getIncludes to String
-        String includes = preparePaths(includePaths);
-
-        Object[] Args = {
-                basePath,
-                get("compiler.c.cmd"),
-                get("compiler.c.flags"),
-                get("compiler.cpudef"),
-                Base.selectedBoard.get("build.mcu"),
-                Base.selectedBoard.get("build.f_cpu"),
-                "ARDUINO=" + get("core.version", Integer.toString(Base.REVISION)),
-                Base.selectedBoard.getName(),
-                get("compiler.define") + " " + Base.selectedBoard.get("board.define"),
-                includes,
-                sourceName,
-                objectName
-        };
-
-        return compileFormat.format(  Args );
-    }
-
-    private String getCommandCompilerCPP(String basePath,
-            ArrayList<String> includePaths, String sourceName, String objectName)
-    {
-        String baseCommandString = get("recipe.cpp.o.pattern");
-        MessageFormat compileFormat = new MessageFormat(baseCommandString);
-        //getIncludes to String
-        String includes = preparePaths(includePaths);
-
-        Object[] Args = {
-                basePath,
-                get("compiler.cpp.cmd"),
-                get("compiler.cpp.flags"),
-                get("compiler.cpudef"),
-                Base.selectedBoard.get("build.mcu"),
-                Base.selectedBoard.get("build.f_cpu"),
-                "ARDUINO=" + get("core.version", Integer.toString(Base.REVISION)),
-                Base.selectedBoard.get("board"),
-                get("compiler.define") + " " + Base.selectedBoard.get("board.define"),
-                includes,
-                sourceName,
-                objectName
-        };
-
-        return compileFormat.format(  Args );
     }
 
     private String preparePaths(ArrayList<String> includePaths) {
@@ -357,7 +288,10 @@ public class Core implements MessageConsumer {
         }
 
         if (runInVerboseMode) {
-            System.out.println(command.replace("::"," "));
+            for (int i = 0; i < commandArray.length; i++) {
+                System.out.print(commandArray[i] + " ");
+            }
+            System.out.println("");
         }
         commandArray = stringList.toArray(new String[stringList.size()]);
 
@@ -391,8 +325,8 @@ public class Core implements MessageConsumer {
         return false;
     }
 
-    private List<File> compileSketch(String basePath, String buildPath, ArrayList<String> includePaths) {
-       return compileFiles(basePath, buildPath, includePaths,
+    private List<File> compileSketch(String buildPath) {
+        return compileFiles(buildPath,
                 findFilesInPath(buildPath, "S", false),
                 findFilesInPath(buildPath, "c", false),
                 findFilesInPath(buildPath, "cpp", false));
@@ -406,9 +340,11 @@ public class Core implements MessageConsumer {
         return true;
     }
 
-    private List<File> compileLibraries (Sketch sketch, String basePath, String buildPath, ArrayList<String> includePaths) {
+    private List<File> compileLibraries (Sketch sketch, String buildPath) {
         List<File> objectFiles = new ArrayList<File>();
         List<File> tobjs;
+
+        String origIncs = Base.selectedBoard.get("includes");
         
         for (File libraryFolder : sketch.getImportedLibraries())
         {
@@ -417,9 +353,9 @@ public class Core implements MessageConsumer {
             if (!createFolder(outputFolder))
                 return null;
             // this library can use includes in its utility/ folder
-            includePaths.add(utilityFolder.getAbsolutePath());
-            tobjs = compileFiles(basePath,
-                    outputFolder.getAbsolutePath(), includePaths,
+            Base.selectedBoard.set("includes", origIncs + "::-I" + utilityFolder.getAbsolutePath());
+            tobjs = compileFiles(
+                    outputFolder.getAbsolutePath(),
                     findFilesInFolder(libraryFolder, "S", false),
                     findFilesInFolder(libraryFolder, "c", false),
                     findFilesInFolder(libraryFolder, "cpp", false));
@@ -432,8 +368,8 @@ public class Core implements MessageConsumer {
             outputFolder = new File(outputFolder, "utility");
             if (!createFolder(outputFolder))
                 return null;
-            tobjs = compileFiles(basePath,
-                    outputFolder.getAbsolutePath(), includePaths,
+            tobjs = compileFiles(
+                    outputFolder.getAbsolutePath(),
                     findFilesInFolder(utilityFolder, "S", false),
                     findFilesInFolder(utilityFolder, "c", false),
                     findFilesInFolder(utilityFolder, "cpp", false));
@@ -442,12 +378,12 @@ public class Core implements MessageConsumer {
                 return null;
             }
             objectFiles.addAll(tobjs);
-            includePaths.remove(includePaths.size() - 1);
+            Base.selectedBoard.set("includes", origIncs);
         }
         return objectFiles;
     }
 
-    private boolean compileCore (String basePath, String buildPath) {
+    private boolean compileCore (String buildPath) {
 
         List<File> objectFiles = new ArrayList<File>();
         ArrayList<String> includePaths =  new ArrayList();
@@ -457,14 +393,8 @@ public class Core implements MessageConsumer {
         includePaths.add(corePath);
         includePaths.add(Base.selectedBoard.getFolder().getAbsolutePath());
 
-        String baseCommandString = get("recipe.ar.pattern", "");
-        String commandString = "";
-        MessageFormat compileFormat = new MessageFormat(baseCommandString);
-
         List<File> coreObjectFiles   = compileFiles(
-                basePath,
                 buildPath,
-                includePaths,
                 findFilesInPath(corePath, "S", true),
                 findFilesInPath(corePath, "c", true),
                 findFilesInPath(corePath, "cpp", true));
@@ -474,31 +404,18 @@ public class Core implements MessageConsumer {
         }
 
         for (File file : coreObjectFiles) {
-            //List commandAR = new ArrayList(baseCommandAR);
-            //commandAR = commandAR +  file.getAbsolutePath();
+            Base.selectedBoard.set("object.name", file.getAbsolutePath());
 
-            Object[] Args = {
-                    basePath,
-                    get("compiler.ar.cmd", ""),
-                    get("compiler.ar.flags", ""),
-                    //corePath,
-                    buildPath + File.separator,
-                    "core.a",
-                    //objectName
-                    file.getAbsolutePath()
-            };
-            commandString = compileFormat.format(  Args );
-            if (!execAsynchronously(commandString)) {
+            if (!Base.selectedBoard.execAsynchronously(Base.selectedBoard.parseString(get("recipe.ar.pattern")))) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean compileLink(String basePath, String buildPath, List<File> objectFiles, String primaryClassName) {
+    private boolean compileLink(String buildPath, List<File> objectFiles) {
         String baseCommandString = get("recipe.c.combine.pattern", "");
         String commandString = "";
-        MessageFormat compileFormat = new MessageFormat(baseCommandString);
         String objectFileList = "";
 
         for (File file : objectFiles) {
@@ -516,58 +433,21 @@ public class Core implements MessageConsumer {
             ldScriptFile = ldscript.getName();
             ldScriptPath = ldscript.getParentFile().getAbsolutePath();
         }
-        Object[] Args = {
-                basePath,
-                get("compiler.c.elf.cmd"),
-                get("compiler.c.elf.flags"),
-                get("compiler.cpudef"),
-                Base.selectedBoard.get("build.mcu"),
-                buildPath + File.separator,
-                primaryClassName,
-                objectFileList,
-                buildPath + File.separator + "core.a",
-                buildPath,
-                ldScriptPath,
-                ldScriptFile,
-                api.getAbsolutePath(),
-                get("ldcommon","")
-        };
-        commandString = compileFormat.format(  Args );
-        return execAsynchronously(commandString);
+        Base.selectedBoard.set("build.path", buildPath);
+        Base.selectedBoard.set("object.filelist", objectFileList);
+
+        commandString = Base.selectedBoard.parseString(baseCommandString);
+        return Base.selectedBoard.execAsynchronously(commandString);
     }
 
-    private boolean compileEEP(String basePath, String buildPath, String primaryClassName) {
-        String baseCommandString = get("recipe.objcopy.eep.pattern");
-        String commandString = "";
-        MessageFormat compileFormat = new MessageFormat(baseCommandString);
-        String objectFileList = "";
-
-        Object[] Args = {
-                basePath,
-                get("compiler.objcopy.cmd"),
-                get("compiler.objcopy.eep.flags"),
-                buildPath + File.separator + primaryClassName,
-                buildPath + File.separator + primaryClassName
-        };
-        commandString = compileFormat.format(  Args );
-        return execAsynchronously(commandString);
+    private boolean compileEEP(String buildPath) {
+        Base.selectedBoard.set("build.path", buildPath);
+        return Base.selectedBoard.execAsynchronously(Base.selectedBoard.parseString(get("recipe.objcopy.eep.pattern")));
     }
 
-    private boolean compileHEX(String basePath, String buildPath, String primaryClassName) {
-        String baseCommandString = get("recipe.objcopy.hex.pattern");
-        String commandString = "";
-        MessageFormat compileFormat = new MessageFormat(baseCommandString);
-        String objectFileList = "";
-
-        Object[] Args = {
-                basePath,
-                get("compiler.elf2hex.cmd"),
-                get("compiler.elf2hex.flags"),
-                buildPath + File.separator + primaryClassName,
-                buildPath + File.separator + primaryClassName
-        };
-        commandString = compileFormat.format(  Args );
-        return execAsynchronously(commandString);
+    private boolean compileHEX(String buildPath) {
+        Base.selectedBoard.set("build.path", buildPath);
+        return Base.selectedBoard.execAsynchronously(Base.selectedBoard.parseString(get("recipe.objcopy.hex.pattern")));
     }
 
     static public String[] headerListFromIncludePath(String path) {
