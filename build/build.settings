@@ -1,4 +1,4 @@
-version=0.0.1pre
+version=0.1-prfm
 theme=uecide
 #core.pic32=yes
 core.avr105=yes
