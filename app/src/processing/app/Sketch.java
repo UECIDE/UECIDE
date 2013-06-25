@@ -1524,8 +1524,8 @@ public class Sketch {
    * @return null if compilation failed, main class name if not
    * @throws RunnerException
    */
-  public String build(boolean verbose) throws RunnerException {
-    return build(tempBuildFolder.getAbsolutePath(), verbose);
+  public String build() throws RunnerException {
+    return build(tempBuildFolder.getAbsolutePath());
   }
 
 
@@ -1538,7 +1538,7 @@ public class Sketch {
    *
    * @return null if compilation failed, main class name if not
    */
-  public String build(String buildPath, boolean verbose) {
+  public String build(String buildPath) {
     
     // run the preprocessor
     String primaryClassName = "";
@@ -1551,7 +1551,7 @@ public class Sketch {
 
     // compile the program. errors will happen as a RunnerException
     // that will bubble up to whomever called build().
-    if (Base.selectedBoard.getCore().compile(this, buildPath, primaryClassName, verbose)) {
+    if (Base.selectedBoard.getCore().compile(this, buildPath, primaryClassName)) {
         try {
             size(buildPath, primaryClassName);
         } catch (Exception e) {
@@ -1596,13 +1596,13 @@ public class Sketch {
     appletFolder.mkdirs();
 
     // build the sketch
-    String foundName = build(appletFolder.getPath(), false);
+    String foundName = build(appletFolder.getPath());
     if (foundName == null) {
         return false;
     }
 
     editor.status.progressNotice("Uploading...");
-    Base.selectedBoard.upload(appletFolder.getPath() + "/" + foundName, verbose);
+    Base.selectedBoard.upload(appletFolder.getPath() + "/" + foundName);
     editor.status.progressUpdate(100);    
     return true;
   }

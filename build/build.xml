@@ -137,7 +137,7 @@
   <!-- - - - - - - - - -->
 
     <target name="install_core" if="core.${core.name}">
-        <get src="http://www.majenko.co.uk/uecide/cores/${core.name}-${target.platform}-current.zip"
+        <get src="http://www.uecide.org/cores/${core.name}-${target.platform}-current.zip"
              dest="tmp/${core.name}-${target.platform}-current.zip" 
              usetimestamp="true" />    
         <unzip dest="${target.path}/hardware/cores" src="tmp/${core.name}-${target.platform}-current.zip" overwrite="false" />
@@ -147,10 +147,10 @@
     </target>
 
     <target name="install_boards" if="boards.${boards.name}">
-        <get src="http://www.majenko.co.uk/uecide/boards/boards-${boards.name}.zip"
-             dest="tmp/boards-${boards.name}.zip" 
+        <get src="http://www.uecide.org/uecide/boards/boards-${boards.name}-current.zip"
+             dest="tmp/boards-${boards.name}-current.zip" 
              usetimestamp="true" />    
-        <unzip dest="${target.path}/hardware/boards/${boards.name}" src="tmp/boards-${boards.name}.zip" overwrite="false" />
+        <unzip dest="${target.path}/hardware/boards/${boards.name}" src="tmp/boards-${boards.name}-current.zip" overwrite="false" />
         <chmod perm="+x">
             <fileset dir="${target.path}/hardware/boards/${boards.name}" includes="**/*" />
         </chmod>
@@ -465,8 +465,29 @@
     <target name="linux32-build" depends="linux-build" description="Build linux (32-bit) version">
     </target>
 
+    <target name="linux64-build" depends="revision-check, linux-checkos, subprojects-build" description="Build linux (64-bit) version">
+        <mkdir dir="linux/work" />
+    
+        <copy todir="linux/work">
+          <fileset dir="shared" includes="lib/**" />
+          <fileset file="shared/revisions.txt" />
+        </copy>
+        
+        <copy todir="linux/work">
+          <fileset dir="linux/dist" includes="lib/**" />
+        </copy>
 
-    <target name="linux64-build" depends="linux-build" description="Build linux (64-bit) version">
+        <copy todir="linux/work/lib" flatten="true">
+          <fileset refid="runtime.jars" />
+        </copy>
+        
+        <antcall target="assemble">
+          <param name="target.path" value="linux/work" />
+          <param name="target.platform" value="linux64" />
+        </antcall>
+
+        <copy tofile="linux/work/${product}" file="linux/dist/linuxrunner" />
+        <chmod perm="755" file="linux/work/${product}" />
         <copy tofile="linux/work/lib/librxtxSerial.so" file="linux/dist/lib/librxtxSerial64.so" overwrite="true" />   
     </target>
   
