@@ -64,8 +64,6 @@ public class EditorHeader extends JComponent {
   static final int RIGHT = 2;
   static final int MENU = 3;
 
-  static final int PIECE_WIDTH = 12;
-
   static Image[][] pieces;
 
   //
@@ -73,6 +71,7 @@ public class EditorHeader extends JComponent {
   Image offscreen;
   int sizeW, sizeH;
   int imageW, imageH;
+  int tabHeight;
 
 
   public EditorHeader(Editor eddie) {
@@ -96,6 +95,9 @@ public class EditorHeader extends JComponent {
       textColor[UNSELECTED] =
         Theme.getColor("header.text.unselected.color");
     }
+
+    String th = Theme.get("header.height",Integer.toString(pieces[SELECTED][MIDDLE].getHeight(this)));
+    tabHeight = Integer.parseInt(th);
 
     addMouseListener(new MouseAdapter() {
         public void mousePressed(MouseEvent e) {
@@ -151,11 +153,12 @@ public class EditorHeader extends JComponent {
     Graphics g = offscreen.getGraphics();
     if (selectedfont == null) {
       selectedfont = Theme.getFont("header.text.selectedfont");
+        g.setFont(selectedfont);  // need to set this each time through
     }
     if (unselectedfont == null) {
       unselectedfont = Theme.getFont("header.text.unselectedfont");
+        g.setFont(unselectedfont);  // need to set this each time through
     }
-    g.setFont(selectedfont);  // need to set this each time through
     metrics = g.getFontMetrics();
     fontAscent = metrics.getAscent();
     //}
@@ -183,10 +186,27 @@ public class EditorHeader extends JComponent {
         code.getPrettyName() : code.getFileName();
 
       // if modified, add the li'l glyph next to the name
-      String text = "  " + codeName + (code.isModified() ? " \u00A7" : "  ");
+      String text = codeName;
       Graphics2D g2 = (Graphics2D) g;
 
+    g2.setRenderingHint(
+        RenderingHints.KEY_ANTIALIASING,
+        RenderingHints.VALUE_ANTIALIAS_ON);
+    g2.setRenderingHint(
+        RenderingHints.KEY_TEXT_ANTIALIASING,
+        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+      String testText = text + "*";
+      int textWidthSel = (int) selectedfont.getStringBounds(testText, g2.getFontRenderContext()).getWidth();
+      int textWidthUnsel = (int) unselectedfont.getStringBounds(testText, g2.getFontRenderContext()).getWidth();
+
+      int textMaxWidth = textWidthSel > textWidthUnsel ? textWidthSel : textWidthUnsel;
+
       int textWidth;
+
+      if (code.isModified()) {
+        text += "*";
+      }
       if (state == SELECTED) {
         g.setFont(selectedfont);
         textWidth = (int) selectedfont.getStringBounds(text, g2.getFontRenderContext()).getWidth();
@@ -194,31 +214,39 @@ public class EditorHeader extends JComponent {
         g.setFont(unselectedfont);
         textWidth = (int) unselectedfont.getStringBounds(text, g2.getFontRenderContext()).getWidth();
       }
+
       metrics = g.getFontMetrics();
       fontAscent = metrics.getAscent();
 
-      int pieceCount = 2 + (textWidth / PIECE_WIDTH);
-      int pieceWidth = pieceCount * PIECE_WIDTH;
+      String gutter = Theme.get("header.text.gutter", "4");
+
+      int midCount = (
+                ((textMaxWidth + (Integer.parseInt(gutter) * 2)) - pieces[state][LEFT].getWidth(this) - pieces[state][RIGHT].getWidth(this)) /
+                pieces[state][MIDDLE].getWidth(this)
+      ) + 1;
 
       g.drawImage(pieces[state][LEFT], x, 0, null);
-      x += PIECE_WIDTH;
-
-      int contentLeft = x;
       tabLeft[i] = x;
-      for (int j = 0; j < pieceCount; j++) {
+      x += pieces[state][LEFT].getWidth(this);
+
+      for (int j = 0; j < midCount; j++) {
         g.drawImage(pieces[state][MIDDLE], x, 0, null);
-        x += PIECE_WIDTH;
+        x += pieces[state][MIDDLE].getWidth(this);
       }
+
+      g.drawImage(pieces[state][RIGHT], x, 0, null);
+      x += pieces[state][RIGHT].getWidth(this) - 1;
       tabRight[i] = x;
-      int textLeft = contentLeft + (pieceWidth - textWidth) / 2;
+
+      int tabWidth = tabRight[i] - tabLeft[i];
+      int tabCenter = tabLeft[i] + (tabWidth / 2);
+      int textLeft = tabCenter - (textWidth / 2);
 
       g.setColor(textColor[state]);
-      int baseline = (sizeH + fontAscent) / 2;
+      int baseline = Integer.parseInt(Theme.get("header.text.baseline", "16")); 
       //g.drawString(sketch.code[i].name, textLeft, baseline);
       g.drawString(text, textLeft, baseline);
 
-      g.drawImage(pieces[state][RIGHT], x, 0, null);
-      x += PIECE_WIDTH - 1;  // overlap by 1 pixel
     }
 
     menuLeft = sizeW - (16 + pieces[0][MENU].getWidth(this));
@@ -392,17 +420,11 @@ public class EditorHeader extends JComponent {
 
 
   public Dimension getMinimumSize() {
-    if (Base.isMacOS()) {
-      return new Dimension(300, Preferences.GRID_SIZE);
-    }
-    return new Dimension(300, Preferences.GRID_SIZE - 1);
+      return new Dimension(300, tabHeight);
   }
 
 
   public Dimension getMaximumSize() {
-    if (Base.isMacOS()) {
-      return new Dimension(3000, Preferences.GRID_SIZE);
-    }
-    return new Dimension(3000, Preferences.GRID_SIZE - 1);
+      return new Dimension(3000, tabHeight);
   }
 }

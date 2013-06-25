@@ -30,8 +30,11 @@ import com.sun.jna.Native;
 
 import processing.app.Base;
 import processing.app.Preferences;
+import processing.app.Theme;
 import processing.app.windows.Registry.REGISTRY_ROOT_KEY;
 import processing.core.PApplet;
+
+import javax.swing.UIManager;
 
 
 // http://developer.apple.com/documentation/QuickTime/Conceptual/QT7Win_Update_Guide/Chapter03/chapter_3_section_1.html
@@ -46,6 +49,14 @@ public class Platform extends processing.app.Platform {
     System.getProperty("user.dir").replace('/', '\\') +
     "\\processing.exe \"%1\"";
   static final String DOC = "Processing.Document";
+
+  public void setLookAndFeel() throws Exception {
+    // Use the Quaqua L & F on OS X to make JFileChooser less awful
+    String laf = Theme.get("window.laf.windows");
+    if ((laf != null) && (laf != "default")) {
+       UIManager.setLookAndFeel(laf);
+    } 
+  }
 
   public void init(Base base) {
     super.init(base);

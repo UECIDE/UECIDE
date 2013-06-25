@@ -12,6 +12,9 @@ status.edit.fgcolor = #000000
 status.edit.bgcolor = #660000
 status.font = SansSerif,plain,12
 
+editor.antialias = yes
+editor.font = SansSerif,plain,24
+
 # GUI - TABS
 # settings for the tabs at the top
 # (tab images are stored in the lib/theme folder)
@@ -19,8 +22,8 @@ header.bgcolor = #666666
 header.text.selected.color = #000000
 header.text.unselected.color = #ffffff
 header.text.font = SansSerif,plain,12
-header.text.selectedfont = SansSerif,bold,12
-header.text.unselectedfont = SansSerif,plain,12
+header.text.selectedfont = SansSerif,bold,10
+header.text.unselectedfont = SansSerif,plain,10
 
 
 # GUI - CONSOLE

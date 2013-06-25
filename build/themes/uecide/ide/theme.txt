@@ -2,6 +2,12 @@
 # GUI with chipKIT related colours
 #
 
+window.laf = default
+window.laf.linux = com.sun.java.swing.plaf.gtk.GTKLookAndFeel
+
+editor.antialias = yes
+editor.font = SansSerif,plain,24
+
 
 # GUI - STATUS
 status.notice.fgcolor = #000000
@@ -16,10 +22,13 @@ status.font = SansSerif,plain,12
 # settings for the tabs at the top
 # (tab images are stored in the lib/theme folder)
 header.bgcolor = #666666
+header.height = 22
 header.text.selected.color = #000000
 header.text.unselected.color = #FFFFFF
-header.text.selectedfont = SansSerif,bold,12
-header.text.unselectedfont = SansSerif,plain,12
+header.text.selectedfont = SansSerif,bold,10
+header.text.unselectedfont = SansSerif,plain,10
+header.text.gutter = 2
+header.text.baseline = 16
 
 # GUI - CONSOLE
 console.font = Monospaced,plain,10
@@ -72,13 +81,13 @@ editor.brackethighlight.color = #006699
 # TEXT - KEYWORDS
 
 # e.g abstract, final, private
-editor.keyword1.style = #ff0000,plain
+editor.keyword1.style = #0000ff,bold
 
 # e.g. beginShape, point, line
-editor.keyword2.style = #ff8000,plain
+editor.keyword2.style = #c00000,plain
 
 # e.g. byte, char, short, color
-editor.keyword3.style = #8b308b,bold
+editor.keyword3.style = #30308b,bold
 
 
 # TEXT - LITERALS
@@ -101,8 +110,8 @@ editor.label.style = #7e7e7e,bold
 
 
 # TEXT - COMMENTS
-editor.comment1.style = #007f00,plain
-editor.comment2.style = #007f00,plain
+editor.comment1.style = #007f00,italic
+editor.comment2.style = #007f00,italic
 
 
 # LINE STATUS - editor line number status bar at the bottom of the screen
