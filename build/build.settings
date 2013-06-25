@@ -1,4 +1,4 @@
-version=0.2.0b
+version=0.2.0d
 theme=uecide
 #core.pic32=yes
 core.avr105=yes
