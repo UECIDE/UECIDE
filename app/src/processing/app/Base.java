@@ -907,18 +907,17 @@ public class Base {
         File coreLibs = new File(selectedBoard.getCore().getFolder(), selectedBoard.getCore().get("library.path","libraries"));
         File sbLibs = new File(getSketchbookFolder(),"libraries");
 
-        JMenuItem coreItem = new JMenuItem(selectedBoard.getCore().getName());
-        coreItem.setEnabled(false);
+        JMenu coreItem = new JMenu(selectedBoard.getCore().get(
+            "name",
+            selectedBoard.getCore().getName())
+        );
         importMenu.add(coreItem);
-        importMenu.addSeparator();
-        addLibraries(importMenu, coreLibs);
+        addLibraries(coreItem, coreLibs);
 
         if (sbLibs.isDirectory()) {
-            JMenuItem contrib = new JMenuItem("Contributed");
-            contrib.setEnabled(false);
+            JMenu contrib = new JMenu("Contributed");
             importMenu.add(contrib);
-            importMenu.addSeparator();
-            addLibraries(importMenu, sbLibs);
+            addLibraries(contrib, sbLibs);
         }
     }
 
@@ -932,20 +931,25 @@ public class Base {
         menu.removeAll();
         addSketches(menu, examplesFolder, false);
 
+        Core c = selectedBoard.getCore();
+
+        menu.addSeparator();
+        JMenu coreItem = new JMenu(c.get("name", c.getName()));
+        menu.add(coreItem);
         if (coreExamples.isDirectory()) {
-            JMenuItem coreItem = new JMenuItem(selectedBoard.getCore().getName());
-            coreItem.setEnabled(false);
-            menu.add(coreItem);
             menu.addSeparator();
             addSketches(menu, coreExamples, false);
         }
  
         if (coreLibs.isDirectory()) {
-            addSketches(menu, coreLibs, false);
+            addSketches(coreItem, coreLibs, false);
         }
 
+        JMenu contributedItem = new JMenu("Contributed");
+        menu.add(contributedItem);
+        
         if (sbLibs.isDirectory()) {
-            addSketches(menu, sbLibs, false);
+            addSketches(contributedItem, sbLibs, false);
         }
     }
 
@@ -1048,6 +1052,10 @@ public class Base {
 
         boolean ifound = false;
 
+        JMenu nextMenu = new JMenu("More");
+        menu.add(nextMenu);
+        int nfound = 0;
+
         for (int i = 0; i < list.length; i++) {
             if ((list[i].charAt(0) == '.') || list[i].equals("CVS")) 
                 continue;
@@ -1084,6 +1092,13 @@ public class Base {
                 item.setActionCommand(entry.getAbsolutePath());
                 menu.add(item);
                 ifound = true;
+                nfound++;
+                if (nfound == 20) {
+                    menu = nextMenu;
+                    nextMenu = new JMenu("More");
+                    menu.add(nextMenu);
+                    nfound = 0;
+                }
 
             } else {
                 // don't create an extra menu level for a folder named "examples"
@@ -1103,8 +1118,16 @@ public class Base {
                         ifound = true;
                     }
                 }
+                nfound++;
+                if (nfound == 20) {
+                    menu = nextMenu;
+                    nextMenu = new JMenu("More");
+                    menu.add(nextMenu);
+                    nfound = 0;
+                }
             }
         }
+        menu.remove(nextMenu);
         return ifound;  // actually ignored, but..
     }
 
@@ -2450,7 +2473,8 @@ removeDir(dead);
         String[] entries = (String[]) cores.keySet().toArray(new String[0]);
 
         for (int i = 0; i < entries.length; i++) {
-            item = new JMenuItem("  " + entries[i]);
+            Core c = cores.get(entries[i]);
+            item = new JMenuItem("  " + c.get("name", entries[i]));
             menu.add(item);
         }
     }
@@ -2469,6 +2493,9 @@ removeDir(dead);
         }
 
         File bf = new File(getSketchbookFolder(), "cores");
+        if (!bf.exists()) {
+            bf.mkdirs();
+        }
         extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
         loadCores();
         loadBoards();
@@ -2476,5 +2503,26 @@ removeDir(dead);
         rebuildBoardsMenu(Editor.boardsMenu);
         rebuildImportMenu(activeEditor.importMenu);
         rebuildExamplesMenu(activeEditor.examplesMenu);
+        activeEditor.rebuildToolsMenu(activeEditor.toolsMenu);
+    }
+
+    public void handleInstallPlugin()
+    {
+        File inputFile = openFileDialog("Install plugin...", "zip");
+
+        if (inputFile == null) {
+            return;
+        }
+
+        if (!inputFile.exists()) {
+            System.err.println(inputFile.getName() + ": not found");
+            return;
+        }
+        File bf = new File(getSketchbookFolder(), "plugins");
+        if (!bf.exists()) {
+            bf.mkdirs();
+        }
+        extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
+        activeEditor.rebuildToolsMenu(activeEditor.toolsMenu);
     }
 }

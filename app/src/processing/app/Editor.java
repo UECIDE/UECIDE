@@ -87,9 +87,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   // file, sketch, and tools menus for re-inserting items
   JMenu fileMenu;
   JMenu sketchMenu;
+  JMenu hardwareMenu;
   JMenu toolsMenu;
-
-  int numTools = 0;
 
   JToolBar toolbar;
   //EditorToolbar toolbar;
@@ -193,8 +192,9 @@ static Logger logger = Logger.getLogger(Base.class.getName());
           fileMenu.insert(sketchbookMenu, 2);
           fileMenu.insert(examplesMenu, 3);
           sketchMenu.insert(importMenu, 4);
-          toolsMenu.insert(boardsMenu, numTools);
-          toolsMenu.insert(serialMenu, numTools + 1);
+          hardwareMenu.insert(boardsMenu, 0);
+          hardwareMenu.insert(coresMenu, 1);
+          hardwareMenu.insert(serialMenu, 2);
         }
 
         // added for 1.0.5
@@ -204,8 +204,9 @@ static Logger logger = Logger.getLogger(Base.class.getName());
           fileMenu.remove(sketchbookMenu);
           fileMenu.remove(examplesMenu);
           sketchMenu.remove(importMenu);
-          toolsMenu.remove(boardsMenu);
-          toolsMenu.remove(serialMenu);
+          hardwareMenu.remove(boardsMenu);
+          hardwareMenu.remove(coresMenu);
+          hardwareMenu.remove(serialMenu);
         }
       });
 
@@ -587,6 +588,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     menubar.add(buildFileMenu());
     menubar.add(buildEditMenu());
     menubar.add(buildSketchMenu());
+    menubar.add(buildHardwareMenu());
     menubar.add(buildToolsMenu());
     menubar.add(buildHelpMenu());
     setJMenuBar(menubar);
@@ -767,32 +769,11 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   }
 
 
-  protected JMenu buildToolsMenu() {
-    toolsMenu = new JMenu("Tools");
-    JMenu menu = toolsMenu;
+  protected JMenu buildHardwareMenu() {
+    hardwareMenu = new JMenu("Hardware");
+    JMenu menu = hardwareMenu;
     JMenuItem item;
 
-    addInternalTools(menu);
-    
-    item = newJMenuItemShift("Serial Monitor", 'M');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          handleSerial();
-        }
-      });
-    menu.add(item);
-    
-    addTools(menu, Base.getToolsFolder());
-    File sketchbookTools = new File(Base.getSketchbookFolder(), "tools");
-    addTools(menu, sketchbookTools);
-
-    menu.addSeparator();
-    
-    numTools = menu.getItemCount();
-    
-    // XXX: DAM: these should probably be implemented using the Tools plugin
-    // API, if possible (i.e. if it supports custom actions, etc.)
-    
     if (boardsMenu == null) {
       boardsMenu = new JMenu("Board");
       base.rebuildBoardsMenu(boardsMenu);
@@ -817,11 +798,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     populateSerialMenu();
     menu.add(serialMenu);
     
-    menu.addSeparator();
-
-    JMenu programmerMenu = new JMenu("Programmer");
-    menu.add(programmerMenu);
-
     menu.addMenuListener(new MenuListener() {
       public void menuCanceled(MenuEvent e) {}
       public void menuDeselected(MenuEvent e) {}
@@ -829,10 +805,55 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         populateSerialMenu();
       }
     });
-
     return menu;
   }
 
+ 
+    protected JMenu buildToolsMenu() {
+        toolsMenu = new JMenu("Tools");
+        JMenu menu = toolsMenu;
+
+        rebuildToolsMenu(menu);
+        return menu;
+    }
+
+    public void rebuildToolsMenu(JMenu menu)
+    {
+        menu.removeAll();
+        JMenuItem item;
+
+        addInternalTools(menu);
+    
+        item = newJMenuItemShift("Serial Monitor", 'M');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleSerial();
+            }
+        });
+        menu.add(item);
+
+        menu.addSeparator();
+        item = new JMenuItem("Install Plugin...");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                base.handleInstallPlugin();
+            }
+        });
+        menu.add(item);
+
+        Core c = Base.selectedBoard.getCore();
+    
+        File plugins;
+
+        plugins = Base.getContentFile("plugins");
+        if (plugins != null) addTools(menu, plugins);
+
+        plugins = new File(c.getFolder(), c.get("library.plugins", "plugins"));
+        if (plugins != null) addTools(menu, plugins);
+
+        plugins = new File(Base.getSketchbookFolder(), "plugins");
+        if (plugins != null) addTools(menu, plugins);
+    }
 
   protected void addTools(JMenu menu, File sourceFolder) {
     HashMap<String, JMenuItem> toolItems = new HashMap<String, JMenuItem>();
@@ -927,7 +948,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     ArrayList<String> toolList = new ArrayList<String>(toolItems.keySet());
     if (toolList.size() == 0) return;
 
-    menu.addSeparator();
     Collections.sort(toolList);
     for (String title : toolList) {
       menu.add((JMenuItem) toolItems.get(title));
@@ -999,6 +1019,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     //menu.add(createToolMenuItem("processing.app.tools.ColorSelector"));
     menu.add(createToolMenuItem("processing.app.tools.Archiver"));
     menu.add(createToolMenuItem("processing.app.tools.FixEncoding"));
+//    menu.add(createToolMenuItem("processing.app.tools.ExportToMPLABX"));
 
 //    // These are temporary entries while Android mode is being worked out.
 //    // The mode will not be in the tools menu, and won't involve a cmd-key

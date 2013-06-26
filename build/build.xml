@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="mjide" default="build">
+<project name="uecide" default="build">
   <!--echo message="os.name = ${os.name}" /-->
   <!--echo message="os.arch = ${os.arch}" /-->
   <!--echo message="os.version = ${os.version}" /-->
@@ -830,6 +830,19 @@ Description: chipKIT MPIDE Development environment
         <antcall target="windows-dist" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}-windows.zip" overwrite="true" />
 
+    </target>
+
+    <target name="bundle-tool">
+        <delete dir="bundle-tools" />
+        <mkdir dir="bundle-tools/work/processing/app/tools" />
+        <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${tool}.class" />
+        <jar destfile="tools/${tool}/tool/${tool}.jar" basedir="bundle-tools" />
+        <delete dir="bundle-tools" />
+        <zip destfile="tools/${tool}.zip" basedir="tools" includes="${tool}/**" />
+    </target>
+
+    <target name="bundle-tools" depends="subprojects-build">
+        <antcall target="bundle-tool"><param name="tool" value="ExportToMPLABX"/></antcall>
     </target>
 
 </project>
