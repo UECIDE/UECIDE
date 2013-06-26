@@ -213,9 +213,13 @@ public class EditorListener {
     switch ((int) c) {
 
     case 9:  // TAB
+        if ((event.getModifiers() & KeyEvent.SHIFT_MASK) != 0) {
+            editor.handleIndentOutdent(false);
+            event.consume();
+            return true;
+        } 
       if (textarea.isSelectionActive()) {
-        boolean outdent = (event.getModifiers() & KeyEvent.SHIFT_MASK) != 0;
-        editor.handleIndentOutdent(!outdent);
+        editor.handleIndentOutdent(true);
 
       } else if (tabsExpand) {  // expand tabs
         textarea.setSelectedText(tabString);

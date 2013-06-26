@@ -1620,8 +1620,8 @@ public class JEditTextArea extends JComponent
     // events weren't making it up to the frame.
     super.processKeyEvent(evt);
 
-    //System.out.println("jedittextarea: " + evt);
-    //System.out.println();
+//    System.out.println("jedittextarea: " + evt);
+//    System.out.println();
     if (inputHandler == null) return;
 
     switch(evt.getID()) {

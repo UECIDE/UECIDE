@@ -73,8 +73,6 @@ public abstract class InputHandler extends KeyAdapter
         public static final ActionListener CLIPBOARD_CUT = new clipboard_cut();  // [fry]
         public static final ActionListener CLIPBOARD_COPY = new clipboard_copy();
         public static final ActionListener CLIPBOARD_PASTE = new clipboard_paste();
-        public static final ActionListener TAB = new tab();
-        public static final ActionListener STAB = new stab();
 
         // Default action
         public static final ActionListener INSERT_CHAR = new insert_char();
@@ -121,8 +119,6 @@ public abstract class InputHandler extends KeyAdapter
                 actions.put("clipboard-cut",CLIPBOARD_CUT);
                 actions.put("clipboard-copy",CLIPBOARD_COPY);
                 actions.put("clipboard-paste",CLIPBOARD_PASTE);
-                actions.put("tab",TAB);
-                actions.put("stab",STAB);
         }
 
         /**
@@ -1138,17 +1134,4 @@ public abstract class InputHandler extends KeyAdapter
                 }
         }
 
-        public static class tab implements ActionListener, InputHandler.NonRepeatable
-        {
-                public void actionPerformed(ActionEvent evt)
-                {
-                }
-        }
-
-        public static class stab implements ActionListener, InputHandler.NonRepeatable
-        {
-                public void actionPerformed(ActionEvent evt)
-                {
-                }
-        }
 }
