@@ -40,6 +40,9 @@ import processing.app.debug.Board;
 import processing.app.debug.Core;
 import processing.core.*;
 
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 
 /**
  * The base class for the main processing application.
@@ -316,6 +319,7 @@ public class Base {
     }
 
     private void loadCores() {
+        cores.clear();
         loadCoresFromFolder(new File(getHardwareFolder(),"cores"));
         loadCoresFromFolder(new File(getSketchbookFolder(),"cores"));
     }
@@ -339,6 +343,7 @@ public class Base {
     }
 
     private void loadBoards() {
+        boards.clear();
         loadBoardsFromFolder(new File(getHardwareFolder(), "boards"));
         loadBoardsFromFolder(new File(getSketchbookFolder(), "boards"));
     }
@@ -883,13 +888,23 @@ public class Base {
     public void rebuildImportMenu(JMenu importMenu) {
         importMenu.removeAll();
 
+        JMenuItem item = new JMenuItem("Add Library...");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleAddLibrary();
+            }
+        });
+        importMenu.add(item);
+        importMenu.addSeparator();
+    
+
         // reset the set of libraries
         libraries = new HashSet<File>();
 
         // reset the table mapping imports to libraries
         importToLibraryTable = new HashMap<String, File>();
 
-        File coreLibs = new File(selectedBoard.getCore().getFolder(), "libraries");
+        File coreLibs = new File(selectedBoard.getCore().getFolder(), selectedBoard.getCore().get("library.path","libraries"));
         File sbLibs = new File(getSketchbookFolder(),"libraries");
 
         JMenuItem coreItem = new JMenuItem(selectedBoard.getCore().getName());
@@ -947,6 +962,16 @@ public class Base {
         ButtonGroup group = new ButtonGroup();
         HashMap<String, JMenu> groupings;
         groupings = new HashMap<String, JMenu>();
+
+        JMenuItem addboard = new JMenuItem("Add Boards...");
+        addboard.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleAddBoards();
+            }
+        });
+
+        menu.add(addboard);
+        menu.addSeparator();
 
         for (Board board : boards.values()) {
             AbstractAction action = new AbstractAction(board.getLongName()) {
@@ -2142,52 +2167,48 @@ removeDir(dead);
 }
 }
 
+    /**
+     * Calculate the size of the contents of a folder.
+     * Used to determine whether sketches are empty or not.
+     * Note that the function calls itself recursively.
+     */
+    static public int calcFolderSize(File folder) {
+        int size = 0;
 
-/**
-* Calculate the size of the contents of a folder.
-* Used to determine whether sketches are empty or not.
-* Note that the function calls itself recursively.
-*/
-static public int calcFolderSize(File folder) {
-int size = 0;
+        String files[] = folder.list();
+        // null if folder doesn't exist, happens when deleting sketch
+        if (files == null) return -1;
 
-String files[] = folder.list();
-// null if folder doesn't exist, happens when deleting sketch
-if (files == null) return -1;
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].equals(".") || (files[i].equals("..")) ||
+                files[i].equals(".DS_Store")) continue;
+                File fella = new File(folder, files[i]);
+            if (fella.isDirectory()) {
+                size += calcFolderSize(fella);
+            } else {
+                size += (int) fella.length();
+            }
+        }
+        return size;
+    }
 
-for (int i = 0; i < files.length; i++) {
-if (files[i].equals(".") || (files[i].equals("..")) ||
-files[i].equals(".DS_Store")) continue;
-File fella = new File(folder, files[i]);
-if (fella.isDirectory()) {
-size += calcFolderSize(fella);
-} else {
-size += (int) fella.length();
-}
-}
-return size;
-}
+    /**
+     * Recursively creates a list of all files within the specified folder,
+     * and returns a list of their relative paths.
+     * Ignores any files/folders prefixed with a dot.
+     */
+    static public String[] listFiles(String path, boolean relative) {
+        return listFiles(new File(path), relative);
+    }
 
-
-/**
-* Recursively creates a list of all files within the specified folder,
-* and returns a list of their relative paths.
-* Ignores any files/folders prefixed with a dot.
-*/
-static public String[] listFiles(String path, boolean relative) {
-return listFiles(new File(path), relative);
-}
-
-
-static public String[] listFiles(File folder, boolean relative) {
-String path = folder.getAbsolutePath();
-Vector<String> vector = new Vector<String>();
-listFiles(relative ? (path + File.separator) : "", path, vector);
-String outgoing[] = new String[vector.size()];
-vector.copyInto(outgoing);
-return outgoing;
-}
-
+    static public String[] listFiles(File folder, boolean relative) {
+        String path = folder.getAbsolutePath();
+        Vector<String> vector = new Vector<String>();
+        listFiles(relative ? (path + File.separator) : "", path, vector);
+        String outgoing[] = new String[vector.size()];
+        vector.copyInto(outgoing);
+        return outgoing;
+    }
 
     static protected void listFiles(String basePath, String path, Vector<String> vector) {
         File folder = new File(path);
@@ -2215,5 +2236,244 @@ return outgoing;
         for (int i = 0; i < looks.length; i++) {
             System.out.println("  "+looks[i].getClassName());
         }
+    }
+
+    public File openFileDialog(String title, final String type)
+    {
+        // get the frontmost window frame for placing file dialog
+        FileDialog fd = new FileDialog(activeEditor,
+            title,
+            FileDialog.LOAD);
+
+        fd.setFilenameFilter(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith("." + type);
+            }
+        });
+
+        fd.setVisible(true);
+
+        String directory = fd.getDirectory();
+        String filename = fd.getFile();
+
+        // User canceled selection
+        if (filename == null) return null;
+
+        File inputFile = new File(directory, filename);
+        return inputFile;
+    }
+
+    public void handleAddLibrary()
+    {
+        File inputFile = openFileDialog("Add a Library...", "zip");
+
+        if (inputFile == null) {
+            return;
+        }
+
+        if (!inputFile.exists()) {
+            System.err.println(inputFile.getName() + ": not found");
+            return;
+        }
+
+        if (!testLibraryZipFormat(inputFile.getAbsolutePath())) {
+            System.err.println("Error: " + inputFile.getName() + " is not correctly packaged.");
+            return;
+        }
+
+        extractZip(inputFile.getAbsolutePath(), getSketchbookLibrariesFolder().getAbsolutePath());
+        rebuildImportMenu(activeEditor.importMenu);
+        rebuildExamplesMenu(activeEditor.examplesMenu);
+    }
+
+    public boolean testLibraryZipFormat(String inputFile)
+    {
+        ArrayList<String> fileList = new ArrayList<String>();
+        try {
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
+            ZipEntry ze = zis.getNextEntry();
+            while (ze != null) {
+                String fileName = ze.getName();
+                fileList.add(fileName);
+                ze = zis.getNextEntry();
+            }
+            zis.closeEntry();
+            zis.close();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+
+        // Now look through fileList for an entry of X/X.cpp and X/X.h where X==X
+        boolean foundCPP = false;
+        boolean foundHeader = false;
+
+        for (int i=0; i<fileList.size(); i++) {
+            String entry = fileList.get(i);
+            if (entry.endsWith(".h")) {
+                String[] bits = entry.split("/");
+                if (bits[1].equals(bits[0] + ".h")) {
+                    foundHeader = true;
+                }
+            }
+            if (entry.endsWith(".cpp")) {
+                String[] bits = entry.split("/");
+                if (bits[1].equals(bits[0] + ".cpp")) {
+                    foundCPP = true;
+                }
+            }
+        }
+        return (foundHeader && foundCPP);
+    }
+
+    public int countZipEntries(String inputFile)
+    {
+        int count = 0;
+        try {
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
+            ZipEntry ze = zis.getNextEntry();
+            while (ze != null) {
+                count++;
+                ze = zis.getNextEntry();
+            }
+            zis.closeEntry();
+            zis.close();
+        } catch (Exception e) {
+            return -1;
+        }
+        return count;
+    }
+
+    public void extractZip(final String inputFile, final String destination)
+    {
+        DefaultZipHandler zip = new DefaultZipHandler();
+        zip.inputFile = inputFile;
+        zip.destination = destination;
+        new Thread(zip).start();
+    }
+
+    class DefaultZipHandler implements Runnable {
+        public String inputFile;
+        public String destination;
+        public void run() {
+
+            activeEditor.status.progress("Extracting...");
+        
+            byte[] buffer = new byte[1024];
+            ArrayList<String> fileList = new ArrayList<String>();
+            File slf = new File(destination);
+            int files = countZipEntries(inputFile);
+            if (files == -1) {
+                return;
+            }
+            int done = 0;
+            try {
+                ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
+                ZipEntry ze = zis.getNextEntry();
+                while (ze != null) {
+                    String fileName = ze.getName();
+                    File newFile = new File(slf, fileName);
+
+                    new File(newFile.getParent()).mkdirs();
+
+                    if (ze.isDirectory()) {
+                        newFile.mkdirs();
+                    } else {
+
+                        FileOutputStream fos = new FileOutputStream(newFile);
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                        fos.close();
+                    }
+                    done++;
+                    activeEditor.status.progressUpdate((done * 100) / files);
+                    ze = zis.getNextEntry();
+                }
+                zis.closeEntry();
+                zis.close();
+            } catch (Exception e) {
+                activeEditor.status.progressNotice("Install failed");
+                System.err.println(e.getMessage());
+                return;
+            }
+            activeEditor.status.progressNotice("Installed.");
+            activeEditor.status.unprogress();
+        }
+    }
+
+    public void updateProgress(final int perc)
+    {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                activeEditor.status.progressUpdate(perc);
+            }
+        });
+    }
+
+    public void handleAddBoards() 
+    {
+        File inputFile = openFileDialog("Add a boards package...", "zip");
+
+        if (inputFile == null) {
+            return;
+        }
+
+        if (!inputFile.exists()) {
+            System.err.println(inputFile.getName() + ": not found");
+            return;
+        }
+
+        File bf = new File(getSketchbookFolder(), "boards");
+        extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
+        loadBoards();
+        rebuildBoardsMenu(Editor.boardsMenu);
+        rebuildImportMenu(activeEditor.importMenu);
+        rebuildExamplesMenu(activeEditor.examplesMenu);
+    }
+
+    public void rebuildCoresMenu(JMenu menu)
+    {
+        JMenuItem item = new JMenuItem("Add Core...");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleAddCore();
+            }
+        });
+        menu.add(item);
+        menu.addSeparator();
+        item = new JMenuItem("Installed Cores:");
+        menu.add(item);
+
+        String[] entries = (String[]) cores.keySet().toArray(new String[0]);
+
+        for (int i = 0; i < entries.length; i++) {
+            item = new JMenuItem("  " + entries[i]);
+            menu.add(item);
+        }
+    }
+    
+    public void handleAddCore()
+    {
+        File inputFile = openFileDialog("Add a core package...", "zip");
+
+        if (inputFile == null) {
+            return;
+        }
+
+        if (!inputFile.exists()) {
+            System.err.println(inputFile.getName() + ": not found");
+            return;
+        }
+
+        File bf = new File(getSketchbookFolder(), "cores");
+        extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
+        loadCores();
+        loadBoards();
+        rebuildCoresMenu(Editor.coresMenu);
+        rebuildBoardsMenu(Editor.boardsMenu);
+        rebuildImportMenu(activeEditor.importMenu);
+        rebuildExamplesMenu(activeEditor.examplesMenu);
     }
 }
