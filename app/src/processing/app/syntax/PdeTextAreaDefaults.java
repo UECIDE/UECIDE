@@ -133,6 +133,8 @@ public class PdeTextAreaDefaults extends TextAreaDefaults {
     inputHandler.addKeyBinding("CS+DOWN", InputHandler.SELECT_DOC_END);
 
     inputHandler.addKeyBinding(mod + "+ENTER", InputHandler.REPEAT);
+    inputHandler.addKeyBinding("TAB", InputHandler.TAB);
+    inputHandler.addKeyBinding("S+TAB", InputHandler.STAB);
 
     document = new SyntaxDocument();
     editable = true;
