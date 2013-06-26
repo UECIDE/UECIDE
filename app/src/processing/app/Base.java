@@ -661,7 +661,7 @@ public class Base {
     public void handleOpenPrompt() {
         // get the frontmost window frame for placing file dialog
         FileDialog fd = new FileDialog(activeEditor,
-            "Open an Arduino sketch...",
+            "Open " + Theme.get("product.cap") + " sketch...",
             FileDialog.LOAD);
 
         // Only show .pde files as eligible bachelors
