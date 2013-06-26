@@ -104,6 +104,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   // are the same for all windows (since the board and serial port that are
   // actually used are determined by the preferences, which are shared)
   static JMenu boardsMenu;
+  static JMenu coresMenu;
   static JMenu serialMenu;
 
   static SerialMenuListener serialMenuListener;
@@ -800,6 +801,14 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       base.rebuildImportMenu(importMenu);
     }
     menu.add(boardsMenu);
+
+    if (coresMenu == null) {
+        coresMenu = new JMenu("Cores");
+        base.rebuildCoresMenu(coresMenu);
+        importMenu.removeAll();
+        base.rebuildImportMenu(importMenu);
+    }
+    menu.add(coresMenu);
     
     if (serialMenuListener == null)
       serialMenuListener  = new SerialMenuListener();
