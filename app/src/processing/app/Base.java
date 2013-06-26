@@ -2386,6 +2386,7 @@ removeDir(dead);
                             fos.write(buffer, 0, len);
                         }
                         fos.close();
+                        newFile.setExecutable(true, false);
                     }
                     done++;
                     activeEditor.status.progressUpdate((done * 100) / files);

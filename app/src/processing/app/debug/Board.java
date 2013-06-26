@@ -358,10 +358,8 @@ public class Board implements MessageConsumer {
 
                 File found;
                 found = new File(folder, f);
-                System.err.println("Looking for " + found.getAbsolutePath());
                 if (!found.exists()) {
                     found = new File(core.getAPIFolder(), f);
-                    System.err.println("Looking for " + found.getAbsolutePath());
                 }
                 if (!found.exists()) {
                     mid = "NOTFOUND";
