@@ -98,6 +98,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   static JMenu sketchbookMenu;
   static JMenu examplesMenu;
   static JMenu importMenu;
+  static JMenu pluginsMenu;
 
   // these menus are shared so that the board and serial port selections
   // are the same for all windows (since the board and serial port that are
@@ -578,13 +579,9 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
   protected void buildMenuBar() {
 
-    Font f = new Font("courier", Font.BOLD, 20);
-
     JMenuBar menubar = new JMenuBar();
     menubar = new JMenuBar();
 
-    menubar.setFont(f);
-    
     menubar.add(buildFileMenu());
     menubar.add(buildEditMenu());
     menubar.add(buildSketchMenu());
@@ -809,17 +806,10 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   }
 
  
-    protected JMenu buildToolsMenu() {
+    public JMenu buildToolsMenu()
+    {
         toolsMenu = new JMenu("Tools");
         JMenu menu = toolsMenu;
-
-        rebuildToolsMenu(menu);
-        return menu;
-    }
-
-    public void rebuildToolsMenu(JMenu menu)
-    {
-        menu.removeAll();
         JMenuItem item;
 
         addInternalTools(menu);
@@ -832,157 +822,12 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         });
         menu.add(item);
 
-        menu.addSeparator();
-        item = new JMenuItem("Install Plugin...");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                base.handleInstallPlugin();
-            }
-        });
-        menu.add(item);
+        pluginsMenu = new JMenu("Plugins");
+        menu.add(pluginsMenu);
 
-        Core c = Base.selectedBoard.getCore();
-    
-        File plugins;
-
-        plugins = Base.getContentFile("plugins");
-        if (plugins != null) addTools(menu, plugins);
-
-        plugins = new File(c.getFolder(), c.get("library.plugins", "plugins"));
-        if (plugins != null) addTools(menu, plugins);
-
-        plugins = new File(Base.getSketchbookFolder(), "plugins");
-        if (plugins != null) addTools(menu, plugins);
+        base.rebuildPluginsMenu(pluginsMenu);
+        return menu;
     }
-
-  protected void addTools(JMenu menu, File sourceFolder) {
-    HashMap<String, JMenuItem> toolItems = new HashMap<String, JMenuItem>();
-
-    File[] folders = sourceFolder.listFiles(new FileFilter() {
-      public boolean accept(File folder) {
-        if (folder.isDirectory()) {
-          File subfolder = new File(folder, "tool");
-          return subfolder.exists();
-        }
-        return false;
-      }
-    });
-
-    if (folders == null || folders.length == 0) {
-      return;
-    }
-
-    for (int i = 0; i < folders.length; i++) {
-      File toolDirectory = new File(folders[i], "tool");
-
-      try {
-        // add dir to classpath for .classes
-        //urlList.add(toolDirectory.toURL());
-
-        // add .jar files to classpath
-        File[] archives = toolDirectory.listFiles(new FilenameFilter() {
-          public boolean accept(File dir, String name) {
-            return (name.toLowerCase().endsWith(".jar") ||
-                    name.toLowerCase().endsWith(".zip"));
-          }
-        });
-
-        URL[] urlList = new URL[archives.length];
-        for (int j = 0; j < urlList.length; j++) {
-          urlList[j] = archives[j].toURI().toURL();
-        }
-        URLClassLoader loader = new URLClassLoader(urlList);
-
-        String className = null;
-        for (int j = 0; j < archives.length; j++) {
-          className = findClassInZipFile(folders[i].getName(), archives[j]);
-          if (className != null) break;
-        }
-
-        /*
-        // Alternatively, could use manifest files with special attributes:
-        // http://java.sun.com/j2se/1.3/docs/guide/jar/jar.html
-        // Example code for loading from a manifest file:
-        // http://forums.sun.com/thread.jspa?messageID=3791501
-        File infoFile = new File(toolDirectory, "tool.txt");
-        if (!infoFile.exists()) continue;
-
-        String[] info = PApplet.loadStrings(infoFile);
-        //Main-Class: org.poo.shoe.AwesomerTool
-        //String className = folders[i].getName();
-        String className = null;
-        for (int k = 0; k < info.length; k++) {
-          if (info[k].startsWith(";")) continue;
-
-          String[] pieces = PApplet.splitTokens(info[k], ": ");
-          if (pieces.length == 2) {
-            if (pieces[0].equals("Main-Class")) {
-              className = pieces[1];
-            }
-          }
-        }
-        */
-        // If no class name found, just move on.
-        if (className == null) continue;
-
-        Class<?> toolClass = Class.forName(className, true, loader);
-        final Tool tool = (Tool) toolClass.newInstance();
-
-        tool.init(Editor.this);
-
-        String title = tool.getMenuTitle();
-        JMenuItem item = new JMenuItem(title);
-        item.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            SwingUtilities.invokeLater(tool);
-            //new Thread(tool).start();
-          }
-        });
-        //menu.add(item);
-        toolItems.put(title, item);
-
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    ArrayList<String> toolList = new ArrayList<String>(toolItems.keySet());
-    if (toolList.size() == 0) return;
-
-    Collections.sort(toolList);
-    for (String title : toolList) {
-      menu.add((JMenuItem) toolItems.get(title));
-    }
-  }
-
-
-  protected String findClassInZipFile(String base, File file) {
-    // Class file to search for
-    String classFileName = "/" + base + ".class";
-
-    try {
-      ZipFile zipFile = new ZipFile(file);
-      Enumeration<?> entries = zipFile.entries();
-      while (entries.hasMoreElements()) {
-        ZipEntry entry = (ZipEntry) entries.nextElement();
-
-        if (!entry.isDirectory()) {
-          String name = entry.getName();
-
-          if (name.endsWith(classFileName)) {
-            //int slash = name.lastIndexOf('/');
-            //String packageName = (slash == -1) ? "" : name.substring(0, slash);
-            // Remove .class and convert slashes to periods.
-            return name.substring(0, name.length() - 6).replace('/', '.');
-          }
-        }
-      }
-    } catch (IOException e) {
-      //System.err.println("Ignoring " + filename + " (" + e.getMessage() + ")");
-      e.printStackTrace();
-    }
-    return null;
-  }
-
 
   protected JMenuItem createToolMenuItem(String className) {
     try {
@@ -991,7 +836,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
       JMenuItem item = new JMenuItem(tool.getMenuTitle());
 
-      tool.init(Editor.this);
+      tool.init(this);
 
       item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -1015,20 +860,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     item.setAccelerator(KeyStroke.getKeyStroke('T', modifiers));
     menu.add(item);
 
-    //menu.add(createToolMenuItem("processing.app.tools.CreateFont"));
-    //menu.add(createToolMenuItem("processing.app.tools.ColorSelector"));
     menu.add(createToolMenuItem("processing.app.tools.Archiver"));
     menu.add(createToolMenuItem("processing.app.tools.FixEncoding"));
-//    menu.add(createToolMenuItem("processing.app.tools.ExportToMPLABX"));
-
-//    // These are temporary entries while Android mode is being worked out.
-//    // The mode will not be in the tools menu, and won't involve a cmd-key
-//    if (!Base.RELEASE) {
-//      item = createToolMenuItem("processing.app.tools.android.AndroidTool");
-//    item.setAccelerator(KeyStroke.getKeyStroke('D', modifiers));
-//    menu.add(item);
-//      menu.add(createToolMenuItem("processing.app.tools.android.Reset"));
-//    }
 
     return menu;
   }

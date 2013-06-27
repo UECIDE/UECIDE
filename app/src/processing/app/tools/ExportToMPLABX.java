@@ -19,6 +19,8 @@ public class ExportToMPLABX implements Tool {
     }
 
     public void run() {
-        System.err.println("Not Implemented");
+        System.err.println(
+            editor.getSketch().getName()
+        );
     }
 }
