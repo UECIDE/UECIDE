@@ -141,6 +141,8 @@ public class Base {
             e.printStackTrace();
         }
 
+        // setup the theme coloring fun
+        Theme.init();
         initPlatform();
 
         // Use native popups so they don't look so crappy on osx
@@ -152,8 +154,6 @@ public class Base {
         // run static initialization that grabs all the prefs
         Preferences.init(null);
 
-        // setup the theme coloring fun
-        Theme.init();
 
         // Set the look and feel before opening the window
         try {
@@ -1368,32 +1368,32 @@ return System.getProperty("os.name").indexOf("Linux") != -1;
 // .................................................................
 
 
-static public File getSettingsFolder() {
-File settingsFolder = null;
+    static public File getSettingsFolder() {
+        File settingsFolder = null;
 
-String preferencesPath = Preferences.get("settings.path");
-if (preferencesPath != null) {
-settingsFolder = new File(preferencesPath);
+        String preferencesPath = Preferences.get("settings.path");
+        if (preferencesPath != null) {
+            settingsFolder = new File(preferencesPath);
 
-} else {
-try {
-settingsFolder = platform.getSettingsFolder();
-} catch (Exception e) {
-showError("Problem getting data folder",
-"Error getting the " + Theme.get("product.cap") + " data folder.", e);
-}
-}
+        } else {
+            try {
+                settingsFolder = platform.getSettingsFolder();
+            } catch (Exception e) {
+                showError("Problem getting data folder",
+                "Error getting the " + Theme.get("product.cap") + " data folder.", e);
+            }
+        }
 
-// create the folder if it doesn't exist already
-if (!settingsFolder.exists()) {
-if (!settingsFolder.mkdirs()) {
-showError("Settings issues",
-Theme.get("product.cap") + " cannot run because it could not\n" +
-"create a folder to store your settings.", null);
-}
-}
-return settingsFolder;
-}
+        // create the folder if it doesn't exist already
+        if (!settingsFolder.exists()) {
+            if (!settingsFolder.mkdirs()) {
+                showError("Settings issues",
+                        Theme.get("product.cap") + " cannot run because it could not\n" +
+                        "create a folder to store your settings.", null);
+            }
+        }
+        return settingsFolder;
+    }
 
 
 /**
