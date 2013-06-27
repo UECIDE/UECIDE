@@ -1084,31 +1084,14 @@ public class Sketch {
   public void importLibrary(String jarPath) {
     // make sure the user didn't hide the sketch folder
     ensureExistence();
-/*
 
-    String list[] = Compiler.headerListFromIncludePath(jarPath);
+    File f = new File(jarPath);
 
-    // import statements into the main sketch file (code[0])
-    // if the current code is a .java file, insert into current
-    //if (current.flavor == PDE) {
-    if (hasDefaultExtension(current)) {
-      setCurrentCode(0);
-    }
-    // could also scan the text in the file to see if each import
-    // statement is already in there, but if the user has the import
-    // commented out, then this will be a problem.
-    StringBuffer buffer = new StringBuffer();
-    for (int i = 0; i < list.length; i++) {
-      buffer.append("#include <");
-      buffer.append(list[i]);
-      buffer.append(">\n");
-    }
-    buffer.append('\n');
-    buffer.append(editor.getText());
-    editor.setText(buffer.toString());
+    String buffer = "#include <" + f.getName() + ">\n";
     editor.setSelection(0, 0);  // scroll to start
+    editor.insertText(buffer);
     setModified(true);
-*/
+
   }
 
 
