@@ -484,7 +484,7 @@ public class Base {
 
         // set the current window to be the console that's getting output
         EditorConsole.setEditor(activeEditor);
-        setPluginEditors();
+//        setPluginEditors();
     }
 
     protected int[] nextEditorLocation() {
