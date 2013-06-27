@@ -845,9 +845,25 @@ Description: chipKIT MPIDE Development environment
         <zip destfile="tools/${tool}.zip" basedir="tools" includes="${tool}/**" />
     </target>
 
+    <target name="bundle-tool-2">
+        <delete dir="bundle-tools" />
+        <mkdir dir="bundle-tools/work/processing/app/tools" />
+        <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${tool}.class" />
+        <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${extra1}.class" />
+        <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${extra2}.class" />
+        <jar destfile="tools/${tool}/plugin/${tool}.jar" basedir="bundle-tools" />
+        <delete dir="bundle-tools" />
+        <zip destfile="tools/${tool}.zip" basedir="tools" includes="${tool}/**" />
+    </target>
+
     <target name="bundle-tools" depends="subprojects-build">
         <antcall target="bundle-tool"><param name="tool" value="ExportToMPLABX"/></antcall>
         <antcall target="bundle-tool"><param name="tool" value="ColorSelector"/></antcall>
+        <antcall target="bundle-tool-2">
+            <param name="tool" value="ConvertWaveFile"/>
+            <param name="extra1" value="WavFile"/>
+            <param name="extra2" value="WavFileException"/>
+        </antcall>
     </target>
 
 </project>

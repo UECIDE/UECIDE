@@ -268,7 +268,7 @@ public class Sketch {
   }
 
 
-  boolean renamingCode;
+  public boolean renamingCode;
 
   /**
    * Handler for the New Code menu option.
@@ -334,7 +334,7 @@ public class Sketch {
    * cases, so they're kept merged except for right in the middle
    * where they diverge.
    */
-  protected void nameCode(String newName) {
+  public void nameCode(String newName) {
     // make sure the user didn't hide the sketch folder
     ensureExistence();
 
