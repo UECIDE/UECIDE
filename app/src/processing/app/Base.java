@@ -26,6 +26,10 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import java.net.*;
+import java.util.zip.*;
+
+
 
 import javax.swing.*;
 
@@ -39,6 +43,7 @@ import org.apache.log4j.Level;
 import processing.app.debug.Board;
 import processing.app.debug.Core;
 import processing.core.*;
+import processing.app.tools.*;
 
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -107,6 +112,7 @@ public class Base {
   
     static public HashMap<String, Board> boards;
     static public HashMap<String, Core> cores;
+    static public HashMap<String, Tool> plugins;
     static public Board selectedBoard;
 
     // Location for untitled items
@@ -249,6 +255,7 @@ public class Base {
     
         cores = new HashMap<String, Core>();
         boards = new HashMap<String, Board>();
+        plugins = new HashMap<String, Tool>();
 
         loadCores();
         if (cores.size() == 0) {
@@ -263,6 +270,8 @@ public class Base {
             return;
         }
         selectedBoard = getDefaultBoard();
+
+        loadPlugins();
 
         // Check if there were previously opened sketches to be restored
         boolean opened = restoreSketches();
@@ -475,8 +484,8 @@ public class Base {
 
         // set the current window to be the console that's getting output
         EditorConsole.setEditor(activeEditor);
+        setPluginEditors();
     }
-
 
     protected int[] nextEditorLocation() {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -954,6 +963,8 @@ public class Base {
     }
 
     public void onBoardOrPortChange() {
+        rebuildImportMenu(activeEditor.importMenu);
+        rebuildExamplesMenu(activeEditor.examplesMenu);
         for (Editor editor : editors) {
             editor.onBoardOrPortChange();
         }
@@ -1462,6 +1473,11 @@ static public File getHardwareFolder() {
 // the boards.txt and programmers.txt preferences files (which happens
 // before the other folders / paths get cached).
 return getContentFile("hardware");
+}
+
+public Editor getActiveEditor()
+{
+    return activeEditor;
 }
 
 //Get the core libraries
@@ -2372,7 +2388,13 @@ removeDir(dead);
         DefaultZipHandler zip = new DefaultZipHandler();
         zip.inputFile = inputFile;
         zip.destination = destination;
-        new Thread(zip).start();
+        Thread thr = new Thread(zip);
+        thr.start();
+        try {
+            thr.join();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     class DefaultZipHandler implements Runnable {
@@ -2503,7 +2525,7 @@ removeDir(dead);
         rebuildBoardsMenu(Editor.boardsMenu);
         rebuildImportMenu(activeEditor.importMenu);
         rebuildExamplesMenu(activeEditor.examplesMenu);
-        activeEditor.rebuildToolsMenu(activeEditor.toolsMenu);
+        rebuildPluginsMenu(Editor.pluginsMenu);
     }
 
     public void handleInstallPlugin()
@@ -2523,6 +2545,153 @@ removeDir(dead);
             bf.mkdirs();
         }
         extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
-        activeEditor.rebuildToolsMenu(activeEditor.toolsMenu);
+        loadPlugins();
+        rebuildPluginsMenu(Editor.pluginsMenu);
+    }
+
+    public void loadPlugins()
+    {
+        plugins.clear();
+
+        File pf;
+
+        pf = getContentFile("plugins");
+        if (pf != null) loadPluginsFromFolder(pf);
+
+        String[] entries = (String[]) cores.keySet().toArray(new String[0]);
+
+        for (int i = 0; i < entries.length; i++) {
+            Core c = cores.get(entries[i]);
+            pf = new File(c.getFolder(), c.get("library.plugins", "plugins"));
+            if (pf != null) loadPluginsFromFolder(pf);
+        }
+
+        pf = new File(getSketchbookFolder(), "plugins");
+        if (pf != null) loadPluginsFromFolder(pf);
+    }
+
+    public void loadPluginsFromFolder(File f)
+    {
+        File[] folders = f.listFiles(new FileFilter() {
+            public boolean accept(File folder) {
+                if (folder.isDirectory()) {
+                    File subfolder = new File(folder, "plugin");
+                    return (subfolder.exists() && subfolder.isDirectory());
+                }
+                return false;
+            }
+        });
+        if (folders == null || folders.length == 0) {
+            return;
+        }
+
+        for (int i = 0; i < folders.length; i++) {
+            loadPlugin(folders[i]);
+        }
+    }
+
+    public void loadPlugin(File tld)
+    {
+        try {
+            File pld = new File(tld, "plugin");
+            File[] jars = pld.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return (name.toLowerCase().endsWith(".jar"));
+                }
+            });
+
+            URL[] urlList = new URL[jars.length];
+            for (int i = 0; i < urlList.length; i++) {
+              urlList[i] = jars[i].toURI().toURL();
+            }
+            URLClassLoader loader = new URLClassLoader(urlList);
+
+
+            String className = null;
+            for (int i=0; i<jars.length; i++) {
+                className = findClassInZipFile(jars[i]);
+                if (className != null) break;
+            }
+
+            if (className == null) {
+                return;
+            }
+
+            Class<?> toolClass = Class.forName(className, true, loader);
+            Tool tool = (Tool) toolClass.newInstance();
+            plugins.put(className, tool);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public String findClassInZipFile(File file) {
+        String base = file.getName();
+        if (!base.endsWith(".jar")) {
+            return null;
+        }
+
+        base = base.substring(0, base.length()-4);
+
+        String classFileName = "/" + base + ".class";
+
+
+        try {
+            ZipFile zipFile = new ZipFile(file);
+            Enumeration<?> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = (ZipEntry) entries.nextElement();
+
+                if (!entry.isDirectory()) {
+                    String name = entry.getName();
+
+                    if (name.endsWith(classFileName)) {
+                        // Remove .class and convert slashes to periods.
+                        return name.substring(0, name.length() - 6).replace('/', '.');
+                    }
+                }
+            }
+        } catch (IOException e) {
+            //System.err.println("Ignoring " + filename + " (" + e.getMessage() + ")");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void setPluginEditors()
+    {
+        String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
+
+        for (int i=0; i<entries.length; i++) {
+            final Tool t = plugins.get(entries[i]);
+            t.init(activeEditor);
+        }
+    }
+    public void rebuildPluginsMenu(JMenu menu)
+    {
+        menu.removeAll();
+        JMenuItem item;
+
+        item = new JMenuItem("Install Plugin...");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleInstallPlugin();
+            }
+        });
+        menu.add(item);
+
+        String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
+
+        for (int i=0; i<entries.length; i++) {
+            final Tool t = plugins.get(entries[i]);
+            item = new JMenuItem(t.getMenuTitle());
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    t.init(activeEditor);
+                    SwingUtilities.invokeLater(t);
+                }
+            });
+            menu.add(item);
+        }
     }
 }

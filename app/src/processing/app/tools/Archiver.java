@@ -33,7 +33,7 @@ import java.util.zip.*;
 
 
 public class Archiver implements Tool {
-  Editor editor;
+  public Editor editor;
 
   // someday these will be settable
   boolean useDate;
