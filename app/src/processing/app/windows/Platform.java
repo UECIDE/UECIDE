@@ -198,7 +198,7 @@ public class Platform extends processing.app.Platform {
     String appDataPath =
       Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "AppData");
 
-    File dataFolder = new File(appDataPath, "mpide");
+    File dataFolder = new File(appDataPath, Theme.get("product"));
     return dataFolder;
   }
 
@@ -227,7 +227,7 @@ public class Platform extends processing.app.Platform {
     String personalPath =
       Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "Personal");
 
-    return new File(personalPath, "mpide");
+    return new File(personalPath, Theme.get("product"));
   }
 
 

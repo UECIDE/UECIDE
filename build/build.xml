@@ -347,11 +347,15 @@
     <copy todir="macosx/work">
       <fileset dir="macosx/" includes="template.app/**"/>
     </copy>
+
     
 <!--    <rename src="macosx/work/template.app" 
 	    dest="macosx/work/${product.cap}.app" />-->
     <move file="macosx/work/template.app" 
 	  tofile="macosx/work/${product.cap}.app" />
+
+    <replace file="macosx/work/${product.cap}.app/Contents/Info.plist" token="{product.cap}" value="${product.cap}" />
+    <replace file="macosx/work/${product.cap}.app/Contents/Info.plist" token="{version}" value="${version}" />
 
     <copy file="themes/${theme}/ide/icon.icns" tofile="macosx/work/${product.cap}.app/Contents/Resources/processing.icns" overwrite="true" />
 

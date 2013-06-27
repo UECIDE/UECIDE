@@ -91,12 +91,12 @@ public class Platform extends processing.app.Platform {
 
 
   public File getSettingsFolder() throws Exception {
-    return new File(getLibraryFolder(), "mpide");
+    return new File(getLibraryFolder(), Theme.get("product"));
   }
 
 
   public File getDefaultSketchbookFolder() throws Exception {
-    return new File(getDocumentsFolder(), "mpide");
+    return new File(getDocumentsFolder(), Theme.get("product"));
     /*
     // looking for /Users/blah/Documents/Processing
     try {
