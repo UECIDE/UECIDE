@@ -111,7 +111,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   static SerialMonitor serialMonitor;
   
   EditorHeader header;
-  EditorStatus status;
+  public EditorStatus status;
   EditorConsole console;
 
   JSplitPane splitPane;
