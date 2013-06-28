@@ -11,6 +11,9 @@
   <target name="clean" description="Clean the build directories">
     <delete dir="bin" />
     <delete file="uecide.jar" />
+    <delete file="CoorSelector.jar" />
+    <delete file="ConvertWaveFile.jar" />
+    <delete file="ExportToMPLABX.jar" />
   </target>
 
   <target name="compile" description="Compile sources">
@@ -56,27 +59,83 @@
 	   classpath="../core/core.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/RXTXcomm.jar; lib/log4j-1.2.16.jar; lib/log4j.properties" />
   </target>
   -->
-  <javac target="1.6"
-	   source="1.6" 
-	   srcdir="src" 
-	   destdir="bin" 
-	   excludes="**/tools/format/**" 
-	   encoding="UTF-8"
-	   includeAntRuntime="false"
-	   debug="true"
-	   classpath="../core/core.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/RXTXcomm.jar; lib/log4j-1.2.16.jar; lib/log4j.properties" />
-   </target>
+    <javac target="1.6"
+           source="1.6" 
+	       srcdir="src" 
+	       destdir="bin" 
+	       excludes="**/tools/format/**" 
+	       encoding="UTF-8"
+	       includeAntRuntime="false"
+	       debug="true"
+	       classpath="../core/core.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/RXTXcomm.jar; lib/log4j-1.2.16.jar; lib/log4j.properties" />
+    </target>
 
-<target name="build" depends="compile" description="Build PDE">
-	  <jar basedir="bin" destfile="uecide.jar" >
-		  <manifest>
+    <target name="build" depends="compile, plugins" description="Build PDE">
+        <jar basedir="bin" destfile="uecide.jar" includes="uecide/app/** uecide/plugin/Archiver.class uecide/plugin/AutoFormat.class uecide/plugin/BasePlugin.class uecide/plugin/DiscouseFormat*.class uecide/plugin/FixEncoding.class uecide/plugin/Plugin.class">
+
+            <manifest>
                 <attribute name="Built-By" value="Rick Anderson"/>  
                 <attribute name="Main-Class" value="uecide.app.Base"/>  
                 <attribute name="Class-Path" value="RXTXcomm.jar core.jar ecj.jar jna.jar log4j-1.2.16.jar uecide.jar"/>  
-		<attribute name="Version" value="${version}"/>
-		<attribute name="Compiled" value="${TODAY}"/>
-		  </manifest>
-	  </jar>
-  </target>
+                <attribute name="Version" value="${version}"/>
+                <attribute name="Compiled" value="${TODAY}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="plugins" depends="compile" description="Build the plugin jars">
+        <jar basedir="bin" destfile="ExportToMPLABX.jar" 
+            includes="uecide/plugin/ExportToMPLABX.class">
+            <manifest>
+                <attribute name="Version" value="${version}" />
+                <attribute name="Compiled" value="${TODAY}" />
+                <attribute name="Author" value="Matt Jenkins" />
+                <attribute name="Main-Class" value="uecide.plugin.ExportToMPLABX"/>
+            </manifest>
+        </jar>
+        <jar basedir="src" destfile="ExportToMPLABX.jar" includes="uecide/plugin/test.txt" update="true"/>
+
+        <jar basedir="bin" destfile="ConvertWaveFile.jar" includes="uecide/plugin/ConvertWaveFile*.class uecide/plugin/WaveFile*.class">
+            <manifest>
+                <attribute name="Version" value="${version}" />
+                <attribute name="Compiled" value="${TODAY}" />
+                <attribute name="Author" value="Matt Jenkins" />
+                <attribute name="Main-Class" value="uecide.plugin.ConvertWaveFile"/>
+            </manifest>
+        </jar>
+
+        <jar basedir="bin" destfile="ColorSelector.jar" includes="uecide/plugin/ColorSelector*.class">
+            <manifest>
+                <attribute name="Version" value="${version}" />
+                <attribute name="Compiled" value="${TODAY}" />
+                <attribute name="Author" value="Processing" />
+                <attribute name="Main-Class" value="uecide.plugin.ColorSelector"/>
+            </manifest>
+        </jar>
+                
+    </target>
+
+<!--
+
+CharacterSelector$1.class           
+CharacterSelector$2.class           CreateFont$1.class
+CharacterSelector$3.class           CreateFont$2.class
+CharacterSelector.class             CreateFont$3.class
+CheckBoxList$1.class                CreateFont$4.class
+CheckBoxList$CellRenderer.class     CreateFont$5.class
+CheckBoxList.class                  CreateFont$6.class
+
+ColorSelector$1.class               CreateFont$7.class
+ColorSelector$2.class               CreateFont.class
+ColorSelector$3.class               DiscourseFormat$1.class
+ColorSelector$4.class               DiscourseFormat.class
+ColorSelector.class                 ExportToMPLABX.class
+ColorSelector$ColorRange.class      FixEncoding.class
+ColorSelector$ColorSlider.class     Plugin.class
+ColorSelector$NumberDocument.class  SampleComponent$1.class
+ColorSelector$NumberField.class     SampleComponent.class
+
+
+-->
 
 </project>

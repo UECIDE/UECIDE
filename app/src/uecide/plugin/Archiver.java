@@ -21,19 +21,19 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package uecide.app.tools;
+package uecide.plugin;
 
 import uecide.app.*;
 
 import java.awt.FileDialog;
 import java.io.*;
+import java.net.*;
 import java.text.*;
 import java.util.*;
 import java.util.zip.*;
 
 
-public class Archiver implements Tool {
-  public Editor editor;
+public class Archiver extends BasePlugin {
 
   // someday these will be settable
   boolean useDate;
@@ -41,10 +41,6 @@ public class Archiver implements Tool {
 
   NumberFormat numberFormat;
   SimpleDateFormat dateFormat;
-    Map pluginInfo;
-    public void setInfo(Map info) { pluginInfo = info; }
-
-
 
   public String getMenuTitle() {
     return "Archive Sketch";
@@ -172,19 +168,4 @@ public class Archiver implements Tool {
       }
     }
   }
-
-  public String getVersion() { return (String) pluginInfo.get("version"); }
-  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
 }
-
-
-    /*
-    int index = 0;
-    SimpleDateFormat formatter = new SimpleDateFormat("yyMMdd");
-    String purty = formatter.format(new Date());
-    do {
-      newbieName = "sketch_" + purty + ((char) ('a' + index));
-      newbieDir = new File(newbieParentDir, newbieName);
-      index++;
-    } while (newbieDir.exists());
-    */

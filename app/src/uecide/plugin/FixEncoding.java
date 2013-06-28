@@ -20,9 +20,10 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package uecide.app.tools;
+package uecide.plugin;
 
 import java.io.BufferedReader;
+import java.net.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -34,23 +35,12 @@ import javax.swing.JOptionPane;
 import uecide.app.*;
 
 
-public class FixEncoding implements Tool {
-  Editor editor;
-
-    Map pluginInfo;
-    public void setInfo(Map info) { pluginInfo = info; }
-
+public class FixEncoding extends BasePlugin {
 
   public String getMenuTitle() {
     return "Fix Encoding & Reload";
   }
   
-  
-  public void init(Editor editor) {
-    this.editor = editor;
-  }
-  
-
   public void run() {
     Sketch sketch = editor.getSketch();
     //SketchCode code = sketch.current;
@@ -101,7 +91,4 @@ public class FixEncoding implements Tool {
     reader.close();
     return buffer.toString();
   }
-  public String getVersion() { return (String) pluginInfo.get("version"); }
-  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
-
 }

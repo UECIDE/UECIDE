@@ -1,5 +1,5 @@
 
-package uecide.app.tools;
+package uecide.plugin;
 
 import uecide.app.*;
 import processing.core.PApplet;
@@ -8,19 +8,18 @@ import processing.core.PApplet;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.*;
 import javax.swing.*;
 import java.util.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 
-import uecide.app.tools.WavFile;
-import uecide.app.tools.WavFileException;
+//import uecide.app.tools.WavFile;
+//import uecide.app.tools.WavFileException;
 
 
-public class ConvertWaveFile implements Tool {
-
-    Editor editor;
+public class ConvertWaveFile extends BasePlugin {
 
     JFrame win;
 
@@ -44,9 +43,6 @@ public class ConvertWaveFile implements Tool {
     JButton convertButton;
 
     int resampleTo;
-
-    Map pluginInfo;
-    public void setInfo(Map info) { pluginInfo = info; }
 
     public void init(Editor editor) {
         this.editor = editor;
@@ -141,9 +137,6 @@ public class ConvertWaveFile implements Tool {
         line.add(convertButton);
 
         box.add(line);
-        
-
-
 
         win.getContentPane().add(box);
 
@@ -292,7 +285,4 @@ public class ConvertWaveFile implements Tool {
             }
         }
     }
-  public String getVersion() { return (String) pluginInfo.get("version"); }
-  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
-
 }

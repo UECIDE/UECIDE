@@ -43,7 +43,7 @@ import org.apache.log4j.Level;
 import uecide.app.debug.Board;
 import uecide.app.debug.Core;
 import processing.core.*;
-import uecide.app.tools.*;
+import uecide.plugin.*;
 
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -112,7 +112,7 @@ public class Base {
   
     static public HashMap<String, Board> boards;
     static public HashMap<String, Core> cores;
-    static public HashMap<String, Tool> plugins;
+    static public HashMap<String, Plugin> plugins;
     static public Board selectedBoard;
 
     // Location for untitled items
@@ -261,7 +261,7 @@ public class Base {
     
         cores = new HashMap<String, Core>();
         boards = new HashMap<String, Board>();
-        plugins = new HashMap<String, Tool>();
+        plugins = new HashMap<String, Plugin>();
 
         loadCores();
         if (cores.size() == 0) {
@@ -2284,7 +2284,7 @@ removeDir(dead);
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
         for (int i = 0; i < entries.length; i++) {
-            Tool t = plugins.get(entries[i]);
+            Plugin t = plugins.get(entries[i]);
 
             String ver = "unknown";
             String com = "unknown";
@@ -2626,24 +2626,6 @@ removeDir(dead);
                 loadPlugin(contents[i]);
             }
         }
-/*
-        File[] folders = f.listFiles(new FileFilter() {
-            public boolean accept(File folder) {
-                if (folder.isDirectory()) {
-                    File subfolder = new File(folder, "plugin");
-                    return (subfolder.exists() && subfolder.isDirectory());
-                }
-                return false;
-            }
-        });
-        if (folders == null || folders.length == 0) {
-            return;
-        }
-
-        for (int i = 0; i < folders.length; i++) {
-            loadPlugin(folders[i]);
-        }
-*/
     }
     
 
@@ -2655,37 +2637,24 @@ removeDir(dead);
             URL[] urlList = new URL[1];
             urlList[0]  = jar.toURI().toURL();
 
-/*
-            File mainJar = null;
-            File pld = new File(tld, "plugin");
-            File[] jars = pld.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return (name.toLowerCase().endsWith(".jar"));
-                }
-            });
-
-            URL[] urlList = new URL[jars.length];
-            for (int i = 0; i < urlList.length; i++) {
-              urlList[i] = jars[i].toURI().toURL();
-            }
-*/
             URLClassLoader loader = new URLClassLoader(urlList);
 
+            System.err.println(loader);
 
             String className = null;
-//            for (int i=0; i<jars.length; i++) {
-                className = findClassInZipFile(jar);
-//                mainJar = jars[i];
-//                if (className != null) break;
-//            }
-
-            if (className == null) {
-                return;
-            }
 
             JarFile jf = new JarFile(jar);
             Manifest manifest = jf.getManifest();
             Attributes manifestContents = manifest.getMainAttributes();
+
+            className = manifestContents.getValue("Main-Class");
+            if (className == null) {
+                className = findClassInZipFile(jar);
+
+                if (className == null) {
+                    return;
+                }
+            }
 
             Map pluginInfo = new LinkedHashMap();
             pluginInfo.put("version", manifestContents.getValue("Version"));
@@ -2697,21 +2666,26 @@ removeDir(dead);
                 return;
             }
 
-            Class<?> toolClass;
+            Class<?> pluginClass;
             try {
-                toolClass = Class.forName(className, true, loader);
+                pluginClass = Class.forName(className, true, loader);
             } catch (Exception ex) {
-                System.err.println("Plugin " + jar.getName() + " is not compatible with this version.\nPlease upgrade the plugin.");
+                ex.printStackTrace();
                 return;
             }
-            Tool tool = (Tool) toolClass.newInstance();
+            Plugin plugin = (Plugin) pluginClass.newInstance();
 
             // If the setInfo method doesn't exist we don't care.
             try {
-                tool.setInfo(pluginInfo);
+                plugin.setInfo(pluginInfo);
             } catch (Exception blah) {
             }
-            plugins.put(className, tool);
+
+            try {
+                plugin.setLoader(loader);
+            } catch (Exception blah) {
+            }
+            plugins.put(className, plugin);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -2755,7 +2729,7 @@ removeDir(dead);
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
         for (int i=0; i<entries.length; i++) {
-            final Tool t = plugins.get(entries[i]);
+            final Plugin t = plugins.get(entries[i]);
             t.init(activeEditor);
         }
     }
@@ -2775,7 +2749,7 @@ removeDir(dead);
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
         for (int i=0; i<entries.length; i++) {
-            final Tool t = plugins.get(entries[i]);
+            final Plugin t = plugins.get(entries[i]);
             item = new JMenuItem(t.getMenuTitle());
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
