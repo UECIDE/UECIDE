@@ -1,4 +1,4 @@
-package uecide.app.tools;
+package uecide.plugin;
 
 public class WavFileException extends Exception
 {

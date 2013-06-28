@@ -832,4 +832,17 @@ Description: chipKIT MPIDE Development environment
         </antcall>
     </target>
 
+    <target name="tool-export">
+        <delete dir="bundle-tools" />
+        <copy todir="bundle-tools/uecide/plugin" file="../app/bin/uecide/plugin/ExportToMPLABX.class" />
+        <copy todir="bundle-tools/uecide/plugin" file="test.txt" />
+        <jar destfile="tools/ExportToMPLABX.jar" basedir="bundle-tools">
+            <manifest>
+                <attribute name="Version" value="${version}"/>
+                <attribute name="Compiled" value="${TODAY}"/>
+            </manifest>
+        </jar>
+        <!--delete dir="bundle-tools" /-->
+   </target> 
+
 </project>

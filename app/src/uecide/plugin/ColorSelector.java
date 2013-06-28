@@ -20,7 +20,7 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package uecide.app.tools;
+package uecide.plugin;
 
 import uecide.app.*;
 import processing.core.*;
@@ -32,6 +32,7 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import java.util.*;
+import java.net.*;
 
 
 /**
@@ -42,9 +43,8 @@ import java.util.*;
  * auto-insert of colorMode() or fill() or stroke() code cuz we couldn't
  * decide on a good way to do this.. your contributions welcome).
  */
-public class ColorSelector implements Tool, DocumentListener {
+public class ColorSelector extends BasePlugin implements DocumentListener {
 
-  Editor editor;
   JFrame frame;
 
   int hue, saturation, brightness;  // range 360, 100, 100
@@ -60,14 +60,9 @@ public class ColorSelector implements Tool, DocumentListener {
 
   JPanel colorPanel;
 
-    Map pluginInfo;
-    public void setInfo(Map info) { pluginInfo = info; }
-
-
   public String getMenuTitle() {
     return "Color Selector";
   }
-  
   
   public void init(Editor editor) {
     this.editor = editor;
@@ -147,7 +142,6 @@ public class ColorSelector implements Tool, DocumentListener {
     frame.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
   }
 
-
   public void changedUpdate(DocumentEvent e) {
     //System.out.println("changed");
   }
@@ -155,7 +149,6 @@ public class ColorSelector implements Tool, DocumentListener {
   public void removeUpdate(DocumentEvent e) {
     //System.out.println("remove");
   }
-
 
   boolean updating;
 
@@ -610,7 +603,4 @@ public class ColorSelector implements Tool, DocumentListener {
       // seems to have something to do with how Document objects are set up
     }
   }
-  public String getVersion() { return (String) pluginInfo.get("version"); }
-  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
-
 }

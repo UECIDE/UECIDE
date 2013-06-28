@@ -21,9 +21,9 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package uecide.app.tools;
+package uecide.plugin;
 
-import uecide.app.Editor;
+import uecide.app.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -31,26 +31,53 @@ import java.util.*;
 import java.net.*;
 import java.util.zip.*;
 
+public class BasePlugin implements Plugin {
 
+    public Editor editor;
+    public Map pluginInfo;
+    public URLClassLoader loader;
 
-/**
- * Interface for items to be shown in the Tools menu.
- */
-public interface Tool extends Runnable {
+    public void init(Editor editor)
+    {
+        this.editor = editor;
+    }
 
-  public void init(Editor editor);
-  
-  public void run();
+    public void run()
+    {
+    }
 
-  // Not doing shortcuts for now, no way to resolve between tools.
-  // Also would need additional modifiers for shift and alt.
-  //public char getShortcutKey();
+    public String getMenuTitle()
+    {
+        return "My Unnamed Plugin";
+    }
 
-  public String getMenuTitle();
+    public void setInfo(Map pluginInfo)
+    {
+        this.pluginInfo = pluginInfo;
+    }
 
-  public void setInfo(Map pluginInfo);
-  public String getVersion();
-  public String getCompiled();
+    public String getVersion()
+    {
+        return (String) pluginInfo.get("version");
+    }
 
+    public String getCompiled()
+    {
+        return (String) pluginInfo.get("compiler");
+    }
+
+    public void setLoader(URLClassLoader loader)
+    {
+        this.loader = loader;
+    }
+
+    public InputStream getResourceAsStream(String file) {
+        try {
+            return loader.getResourceAsStream(file);
+        } catch (Exception e) {
+            System.err.println("Resource not found: " + file);
+        }
+        return null;
+    }
 }
 

@@ -24,7 +24,7 @@ package uecide.app;
 
 import uecide.app.debug.*;
 import uecide.app.syntax.*;
-import uecide.app.tools.*;
+import uecide.plugin.*;
 import processing.core.*;
 
 import java.awt.*;
@@ -832,7 +832,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   protected JMenuItem createToolMenuItem(String className) {
     try {
       Class<?> toolClass = Class.forName(className);
-      final Tool tool = (Tool) toolClass.newInstance();
+      final Plugin tool = (Plugin) toolClass.newInstance();
 	Map ti = new LinkedHashMap();
 	tool.setInfo(ti);
 
@@ -857,13 +857,13 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   protected JMenu addInternalTools(JMenu menu) {
     JMenuItem item;
 
-    item = createToolMenuItem("uecide.app.tools.AutoFormat");
+    item = createToolMenuItem("uecide.plugin.AutoFormat");
     int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     item.setAccelerator(KeyStroke.getKeyStroke('T', modifiers));
     menu.add(item);
 
-    menu.add(createToolMenuItem("uecide.app.tools.Archiver"));
-    menu.add(createToolMenuItem("uecide.app.tools.FixEncoding"));
+    menu.add(createToolMenuItem("uecide.plugin.Archiver"));
+    menu.add(createToolMenuItem("uecide.plugin.FixEncoding"));
 
     return menu;
   }

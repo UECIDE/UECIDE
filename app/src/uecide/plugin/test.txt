@@ -1,0 +1,85 @@
+How To Build
+============
+
+A number of changes have been made to how the system builds.  There is now
+a couple of configuration files which you need to be aware of - the main one
+being build.settings.
+
+This file contains a number of key=value pairs for setting different options
+while building.  An example:
+
+version=0.0.1pre
+theme=uecide
+#core.pic32=yes
+core.avr105=yes
+#core.msp430=yes
+boards.Arduino=yes
+#boards.Cerebot=yes
+#boards.CUI32=yes
+#boards.Majenko=yes
+#boards.MicroElektronika=yes
+#boards.PONTECH=yes
+#boards.chipKIT=yes
+#boards.Fubarino=yes
+#boards.Microchip=yes
+#boards.Olimex=yes
+#boards.UBW32=yes
+
+Lines starting with a # are ignored.  The settings are:
+
+version
+  The current version of the IDE - update this as you see fit.
+
+theme
+  The selected theme - themes reside in the themes directory - see the section
+  on themes further down
+
+core.*
+  Cores to include in the build.  Cores are downloaded at build time, so only
+  the cores that you have selected will be downloaded and unpacked into the 
+  build tree.  It doesn't matter what you set these to, if they exist (not
+  commented out) the will be included.
+
+boards.*
+  Board packs to download and include.  Be sure to also include the right core
+  to support the boards you choose.  Again, it doesn't matter what you set
+  them to.
+
+
+Themes
+======
+
+The build system now selects graphics and other theme information (including
+even the name of the finished IDE) from the themes directory.  Much of the files
+in the theme directory are as per the original Arduino IDE except they have been
+upgraded to PNG format.  However, the "buttons.gif" file has now been replaced
+by a selection of PNG icons (22x22 is a good size) for the toolbar icons.
+
+The theme directory is split into two areas - the IDE, and Windows areas.  The
+IDE area is used for themeing the main IDE, while the Windows area is used
+for the launch4j stub program for Windows.
+
+A few new entries have been added to the standard theme.txt file:
+
+  about.version.x = 365
+  about.version.y = 215
+  about.version.color = #656565
+  about.version.font = SansSerif,normal,14
+
+These set the position, colour and font of the version number which is added to
+the "about.png" graphic (which is shown when you select "Help -> About ...").
+
+  product=uecide
+  product.cap=UECIDE
+
+You set the name of the IDE with these.  This affects all references to the name
+of the IDE within the IDE itself, and also during the build process for naming
+files.
+
+  links.homepage.name=Visit uecide.org
+  links.homepage.url=http://uecide.org
+  links.forums.name=Visit forums
+  links.forums.url=http://uecide.org/forum
+
+In the help menu there are two links - one to your home page, and one to your
+support forums.  Set the menu text and URLs here.

@@ -21,12 +21,13 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package uecide.app.tools;
+package uecide.plugin;
 
 import java.awt.*;
 import java.awt.datatransfer.*;
 import javax.swing.text.Segment;
 import java.util.*;
+import java.net.*;
 
 
 import uecide.app.*;
@@ -53,6 +54,11 @@ import processing.core.PApplet;
  * It works under my windows XP + PentiumIV + Processing 0091.
  */
 public class DiscourseFormat {
+    URLClassLoader loader;
+
+    public void setLoader(URLClassLoader loader) {
+        this.loader = loader;
+    }
 
   Editor editor;
   // JTextArea of the actual Editor

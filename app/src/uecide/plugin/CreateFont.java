@@ -21,7 +21,7 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package uecide.app.tools;
+package uecide.plugin;
 
 import uecide.app.*;
 import processing.core.*;
@@ -29,6 +29,7 @@ import processing.core.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
 import javax.swing.*;
@@ -39,11 +40,16 @@ import javax.swing.event.*;
 /**
  * GUI tool for font creation heaven/hell.
  */
-public class CreateFont extends JFrame implements Tool {
+public class CreateFont extends JFrame implements Plugin {
 	Editor editor;
 	//Sketch sketch;
 
 	Dimension windowSize;
+    URLClassLoader loader;
+
+    public void setLoader(URLClassLoader loader) {
+        this.loader = loader;
+    }
 
 	JList fontSelector;
 	JTextField sizeSelector;

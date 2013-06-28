@@ -22,12 +22,13 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package uecide.app.tools;
+package uecide.plugin;
 
 import uecide.app.*;
 import processing.core.PApplet;
 
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
 /**
@@ -41,8 +42,7 @@ import java.util.*;
  * http://www.geocities.com/~starkville/vancbj_idx.html
  * [Ben Fry, August 2009]
  */
-public class AutoFormat implements Tool {
-  Editor editor;
+public class AutoFormat extends BasePlugin {
 
   static final int BLOCK_MAXLEN = 1024;
 
@@ -79,15 +79,6 @@ public class AutoFormat implements Tool {
   char c;
 
   String line_feed;
-    Map pluginInfo;
-    public void setInfo(Map info) { pluginInfo = info; }
-
-
-  
-  public void init(Editor editor) {
-    this.editor = editor;
-  }
-
   
   public String getMenuTitle() {
     return "Auto Format";
@@ -939,7 +930,4 @@ public class AutoFormat implements Tool {
       editor.statusError(e);
     }
   }
-  public String getVersion() { return (String) pluginInfo.get("version"); }
-  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
-
 }

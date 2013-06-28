@@ -9,7 +9,7 @@
 // Version 1.0
 
 
-package uecide.app.tools;
+package uecide.plugin;
 
 import java.io.*;
 
