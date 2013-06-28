@@ -11,7 +11,7 @@ rebuild the beast from source.
 The interface (at least for now) is extremely simple:
 
 
-package processing.app.tools.Tool;
+package uecide.app.tools.Tool;
 
 public interface Tool extends Runnable {
 
@@ -93,11 +93,11 @@ The only API methods that are officially scrubbed and sanctioned by the
 Commissioner on Fair API and Proper Manners for use by the Tools classes 
 are found in:
 
-processing.app.Base
-processing.app.Editor
-processing.app.Preferences
-processing.app.Sketch
-processing.app.SketchCode
+uecide.app.Base
+uecide.app.Editor
+uecide.app.Preferences
+uecide.app.Sketch
+uecide.app.SketchCode
 
 In fact, most of the API you should be talking to is inside Editor. 
 Full API documentation can be found on dev.processing.org:
