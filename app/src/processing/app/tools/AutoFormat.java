@@ -28,7 +28,7 @@ import processing.app.*;
 import processing.core.PApplet;
 
 import java.io.*;
-
+import java.util.*;
 
 /**
  * Handler for dealing with auto format.
@@ -79,6 +79,9 @@ public class AutoFormat implements Tool {
   char c;
 
   String line_feed;
+    Map pluginInfo;
+    public void setInfo(Map info) { pluginInfo = info; }
+
 
   
   public void init(Editor editor) {
@@ -936,4 +939,7 @@ public class AutoFormat implements Tool {
       editor.statusError(e);
     }
   }
+  public String getVersion() { return (String) pluginInfo.get("version"); }
+  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
+
 }

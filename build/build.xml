@@ -840,7 +840,12 @@ Description: chipKIT MPIDE Development environment
         <delete dir="bundle-tools" />
         <mkdir dir="bundle-tools/work/processing/app/tools" />
         <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${tool}.class" />
-        <jar destfile="tools/${tool}/plugin/${tool}.jar" basedir="bundle-tools" />
+        <jar destfile="tools/${tool}/plugin/${tool}.jar" basedir="bundle-tools">
+		<manifest>
+			<attribute name="Version" value="${version}"/>
+			<attribute name="Compiled" value="${TODAY}"/>
+		</manifest>
+	</jar>
         <delete dir="bundle-tools" />
         <zip destfile="tools/${tool}.zip" basedir="tools" includes="${tool}/**" />
     </target>
@@ -851,7 +856,13 @@ Description: chipKIT MPIDE Development environment
         <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${tool}.class" />
         <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${extra1}.class" />
         <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${extra2}.class" />
-        <jar destfile="tools/${tool}/plugin/${tool}.jar" basedir="bundle-tools" />
+        <jar destfile="tools/${tool}/plugin/${tool}.jar" basedir="bundle-tools">
+		<manifest>
+			<attribute name="Version" value="${version}"/>
+			<attribute name="Compiled" value="${TODAY}"/>
+		</manifest>
+	</jar>
+			
         <delete dir="bundle-tools" />
         <zip destfile="tools/${tool}.zip" basedir="tools" includes="${tool}/**" />
     </target>

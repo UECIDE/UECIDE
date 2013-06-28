@@ -833,6 +833,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     try {
       Class<?> toolClass = Class.forName(className);
       final Tool tool = (Tool) toolClass.newInstance();
+	Map ti = new LinkedHashMap();
+	tool.setInfo(ti);
 
       JMenuItem item = new JMenuItem(tool.getMenuTitle());
 

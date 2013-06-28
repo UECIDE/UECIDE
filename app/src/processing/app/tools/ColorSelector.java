@@ -31,6 +31,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import java.util.*;
 
 
 /**
@@ -58,6 +59,9 @@ public class ColorSelector implements Tool, DocumentListener {
   JTextField hexField;
 
   JPanel colorPanel;
+
+    Map pluginInfo;
+    public void setInfo(Map info) { pluginInfo = info; }
 
 
   public String getMenuTitle() {
@@ -606,4 +610,7 @@ public class ColorSelector implements Tool, DocumentListener {
       // seems to have something to do with how Document objects are set up
     }
   }
+  public String getVersion() { return (String) pluginInfo.get("version"); }
+  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
+
 }

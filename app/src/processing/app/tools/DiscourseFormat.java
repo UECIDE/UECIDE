@@ -26,6 +26,8 @@ package processing.app.tools;
 import java.awt.*;
 import java.awt.datatransfer.*;
 import javax.swing.text.Segment;
+import java.util.*;
+
 
 import processing.app.*;
 import processing.app.syntax.*;
@@ -56,6 +58,9 @@ public class DiscourseFormat {
   // JTextArea of the actual Editor
   JEditTextArea textarea;
   boolean html;
+    Map pluginInfo;
+    public void setInfo(Map info) { pluginInfo = info; }
+
 
 
   /**
@@ -245,4 +250,7 @@ public class DiscourseFormat {
       }
     }
   }
+  public String getVersion() { return (String) pluginInfo.get("version"); }
+  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
+
 }
