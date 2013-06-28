@@ -10,7 +10,7 @@
   
   <target name="clean" description="Clean the build directories">
     <delete dir="bin" />
-    <delete file="pde.jar" />
+    <delete file="uecide.jar" />
   </target>
 
   <target name="compile" description="Compile sources">
@@ -68,11 +68,11 @@
    </target>
 
 <target name="build" depends="compile" description="Build PDE">
-	  <jar basedir="bin" destfile="pde.jar" >
+	  <jar basedir="bin" destfile="uecide.jar" >
 		  <manifest>
                 <attribute name="Built-By" value="Rick Anderson"/>  
-                <attribute name="Main-Class" value="processing.app.Base"/>  
-                <attribute name="Class-Path" value="RXTXcomm.jar core.jar ecj.jar jna.jar log4j-1.2.16.jar pde.jar"/>  
+                <attribute name="Main-Class" value="uecide.app.Base"/>  
+                <attribute name="Class-Path" value="RXTXcomm.jar core.jar ecj.jar jna.jar log4j-1.2.16.jar uecide.jar"/>  
 		<attribute name="Version" value="${version}"/>
 		<attribute name="Compiled" value="${TODAY}"/>
 		  </manifest>

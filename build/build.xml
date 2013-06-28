@@ -37,7 +37,7 @@
   <!-- Libraries required for running IDE -->
   <fileset dir=".." id="runtime.jars">
     <include name="core/core.jar" />
-    <include name="app/pde.jar" />
+    <include name="app/uecide.jar" />
     <include name="app/lib/ecj.jar" />
     <include name="app/lib/jna.jar" />
     <include name="app/lib/RXTXcomm.jar" />
@@ -57,22 +57,22 @@
   
   <target name="win-debug" description="Run IDE from Java." depends="build">
       <java dir="./${platform}/work"
-          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/core.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar:${platform}/work/lib/log4j-1.2.16.jar:${platform}/work/lib/pde.jar"
+          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/core.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar:${platform}/work/lib/log4j-1.2.16.jar:${platform}/work/lib/uecide.jar"
           fork="true"
-          jar="./${platform}/work/lib/pde.jar">
+          jar="./${platform}/work/lib/uecide.jar">
     </java>
   </target>
 
    <target name="linux-debug" description="Run IDE from Java." depends="build">
       <java dir="./${platform}/work"
-          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/core.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar:${platform}/work/lib/log4j-1.2.16.jar:${platform}/work/lib/pde.jar"
+          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/core.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar:${platform}/work/lib/log4j-1.2.16.jar:${platform}/work/lib/uecide.jar"
           fork="true"
-          jar="./${platform}/work/lib/pde.jar">
+          jar="./${platform}/work/lib/uecide.jar">
     </java>
   </target>
 
 
-    <target name="version-number" depends="revision-check" description="Get the version number">
+    <target name="version-number" description="Get the version number">
         <input message="Enter version number:" 
         addproperty="version"
         defaultvalue="${revision}-${TODAY}-${platform}" />
@@ -88,7 +88,7 @@
     </target>
 
 
-  <target name="dist-test" depends="revision-check"
+  <target name="dist-test" 
           description="Build IDE for distribution.">
     <input message="Enter version number:"
            addproperty="version"
@@ -99,7 +99,7 @@
     <antcall target="${platform}-dist" />
   </target>
 
-  <target name="deb-test" depends="revision-check"
+  <target name="deb-test" 
           description="Build IDE for distribution.">
     <input message="Enter version number:"
            addproperty="version"
@@ -275,49 +275,6 @@
     </target>
 
   
-  <!-- - - - - - - - - -->
-  <!-- Revision check  -->
-  <!-- - - - - - - - - -->
-  <target name="revision-check">
-    <!-- figure out the revision number -->
-    <loadfile srcfile="../todo.txt" property="revision">
-      <filterchain>
-	<headfilter lines="1"/>
-	<tokenfilter>
-	  <stringtokenizer suppressdelims="true"/>
-	  <!-- grab the thing from the first line that's 4 digits -->
-	  <containsregex pattern="(\d\d\d\d)" />
-	</tokenfilter>
-      </filterchain>
-    </loadfile>
-    <!-- <echo message="revision is ${revision}." /> -->
-    
-    <!-- figure out the revision number in base.java -->
-    <loadfile srcfile="../app/src/processing/app/Base.java" 
-	      property="revision.base">
-      <filterchain>
-	<tokenfilter>
-	  <linetokenizer />
-	  <containsregex pattern="String VERSION_NAME = "/>
-	  <replaceregex pattern="[^0-9]*" flags="g" replace=""/>
-	</tokenfilter>
-      </filterchain>
-    </loadfile>
-    <!-- <echo message="base revision is ${revision.base}." /> -->
-    
-    <condition property="revision.correct">
-      <!-- Using contains because I can't figure out how to get rid of the
-	   LF in revision.base. Please file a bug if you have a fix. -->
-      <contains string="${revision.base}" substring="${revision}"/>
-    </condition>
-    
-    <!-- the revision.base property won't be set
-	 if $revision wasn't found... -->
-    <fail unless="revision.correct" 
-	  message="Fix revision number in Base.java" />
-  </target>
-  
-  
   <!-- - - - - - - - -->
   <!-- Mac OS X      -->
   <!-- - - - - - - - -->
@@ -340,10 +297,10 @@
     <fail message="wrong platform (${os.name})" />
   </target>
   
-  <target name="macosx-build" depends="revision-check, subprojects-build" description="Build Mac OS X version">
+  <target name="macosx-build" depends="subprojects-build" description="Build Mac OS X version">
     	<mkdir dir="macosx/work" />
     
-    <!-- assemble the pde -->
+    <!-- assemble the uecide -->
     <copy todir="macosx/work">
       <fileset dir="macosx/" includes="template.app/**"/>
     </copy>
@@ -457,7 +414,7 @@
     <fail message="wrong platform (${os.name})" />
   </target>
   
-  <target name="linux-build" depends="revision-check, linux-checkos, subprojects-build" description="Build linux version">
+  <target name="linux-build" depends="linux-checkos, subprojects-build" description="Build linux version">
     <mkdir dir="linux/work" />
     
     <copy todir="linux/work">
@@ -485,7 +442,7 @@
     <target name="linux32-build" depends="linux-build" description="Build linux (32-bit) version">
     </target>
 
-    <target name="linux64-build" depends="revision-check, linux-checkos, subprojects-build" description="Build linux (64-bit) version">
+    <target name="linux64-build" depends="linux-checkos, subprojects-build" description="Build linux (64-bit) version">
         <mkdir dir="linux/work" />
     
         <copy todir="linux/work">
@@ -649,11 +606,11 @@ Description: chipKIT MPIDE Development environment
   </target>
   
     <target name="windows-build" 
-        depends="revision-check, subprojects-build" 
+        depends="subprojects-build" 
         description="Build windows version">
         <mkdir dir="windows/work" />
     
-        <!-- assemble the pde -->
+        <!-- assemble the uecide -->
         <mkdir dir="windows/work/lib" />
         <copy todir="windows/work/lib" flatten="true">
             <fileset refid="runtime.jars" />
@@ -729,7 +686,7 @@ Description: chipKIT MPIDE Development environment
   <!-- Source        -->
   <!-- - - - - - - - -->
  
-   <target name="source-dist" depends="revision-check"
+   <target name="source-dist" 
 	  description="Build .tar.gz of source code">
     <input message="Enter version number:" 
 	   addproperty="version"
@@ -838,8 +795,8 @@ Description: chipKIT MPIDE Development environment
 
     <target name="bundle-tool">
         <delete dir="bundle-tools" />
-        <mkdir dir="bundle-tools/work/processing/app/tools" />
-        <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${tool}.class" />
+        <mkdir dir="bundle-tools/work/uecide/app/tools" />
+        <copy todir="bundle-tools/uecide/app/tools" file="../app/bin/uecide/app/tools/${tool}.class" />
         <jar destfile="tools/${tool}.jar" basedir="bundle-tools">
 		<manifest>
 			<attribute name="Version" value="${version}"/>
@@ -851,10 +808,10 @@ Description: chipKIT MPIDE Development environment
 
     <target name="bundle-tool-2">
         <delete dir="bundle-tools" />
-        <mkdir dir="bundle-tools/work/processing/app/tools" />
-        <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${tool}.class" />
-        <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${extra1}.class" />
-        <copy todir="bundle-tools/processing/app/tools" file="../app/bin/processing/app/tools/${extra2}.class" />
+        <mkdir dir="bundle-tools/work/uecide/app/tools" />
+        <copy todir="bundle-tools/uecide/app/tools" file="../app/bin/uecide/app/tools/${tool}.class" />
+        <copy todir="bundle-tools/uecide/app/tools" file="../app/bin/uecide/app/tools/${extra1}.class" />
+        <copy todir="bundle-tools/uecide/app/tools" file="../app/bin/uecide/app/tools/${extra2}.class" />
         <jar destfile="tools/${tool}.jar" basedir="bundle-tools">
 		<manifest>
 			<attribute name="Version" value="${version}"/>

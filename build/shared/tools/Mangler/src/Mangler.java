@@ -28,8 +28,8 @@ import java.util.Date;
 
 import javax.swing.JOptionPane;
 
-import processing.app.Editor;
-import processing.app.tools.Tool;
+import uecide.app.Editor;
+import uecide.app.tools.Tool;
 
 
 /**

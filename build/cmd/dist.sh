@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# only needed for core.jar and pde.jar, hmm
+# only needed for core.jar and uecide.jar, hmm
 ARCH=`uname`
 if [ $ARCH == "Darwin" ]
 then
@@ -39,8 +39,8 @@ cp -r ../../xml processing/libraries/
 cp -r ../../candy processing/libraries/
 cp -r ../../video processing/libraries/
 
-# grab pde.jar and export from the working dir
-cp $BUILD/work/lib/pde.jar processing/lib/
+# grab uecide.jar and export from the working dir
+cp $BUILD/work/lib/uecide.jar processing/lib/
 cp $BUILD/work/lib/core.jar processing/lib/
 
 # get platform-specific goodies from the dist dir
