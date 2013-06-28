@@ -24,6 +24,13 @@
 package processing.app.tools;
 
 import processing.app.Editor;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.util.*;
+import java.net.*;
+import java.util.zip.*;
+
 
 
 /**
@@ -40,5 +47,10 @@ public interface Tool extends Runnable {
   //public char getShortcutKey();
 
   public String getMenuTitle();
+
+  public void setInfo(Map pluginInfo);
+  public String getVersion();
+  public String getCompiled();
+
 }
 

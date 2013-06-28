@@ -19,6 +19,7 @@ import processing.app.tools.WavFileException;
 
 
 public class ConvertWaveFile implements Tool {
+
     Editor editor;
 
     JFrame win;
@@ -43,6 +44,9 @@ public class ConvertWaveFile implements Tool {
     JButton convertButton;
 
     int resampleTo;
+
+    Map pluginInfo;
+    public void setInfo(Map info) { pluginInfo = info; }
 
     public void init(Editor editor) {
         this.editor = editor;
@@ -288,4 +292,7 @@ public class ConvertWaveFile implements Tool {
             }
         }
     }
+  public String getVersion() { return (String) pluginInfo.get("version"); }
+  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
+
 }

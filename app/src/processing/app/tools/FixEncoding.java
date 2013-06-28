@@ -26,6 +26,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.*;
+
 
 import javax.swing.JOptionPane;
 
@@ -34,6 +36,9 @@ import processing.app.*;
 
 public class FixEncoding implements Tool {
   Editor editor;
+
+    Map pluginInfo;
+    public void setInfo(Map info) { pluginInfo = info; }
 
 
   public String getMenuTitle() {
@@ -96,4 +101,7 @@ public class FixEncoding implements Tool {
     reader.close();
     return buffer.toString();
   }
+  public String getVersion() { return (String) pluginInfo.get("version"); }
+  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
+
 }

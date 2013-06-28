@@ -41,6 +41,9 @@ public class Archiver implements Tool {
 
   NumberFormat numberFormat;
   SimpleDateFormat dateFormat;
+    Map pluginInfo;
+    public void setInfo(Map info) { pluginInfo = info; }
+
 
 
   public String getMenuTitle() {
@@ -169,6 +172,9 @@ public class Archiver implements Tool {
       }
     }
   }
+
+  public String getVersion() { return (String) pluginInfo.get("version"); }
+  public String getCompiled() { return (String) pluginInfo.get("compiled"); }
 }
 
 

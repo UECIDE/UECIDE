@@ -1,5 +1,12 @@
 <?xml version="1.0"?>
 <project name="Arduino PDE" default="build">
+
+	
+  <property file="../build/build.settings"/>
+    <tstamp>
+        <format property="TODAY" pattern="yyyyMMdd" />
+    </tstamp>
+
   
   <target name="clean" description="Clean the build directories">
     <delete dir="bin" />
@@ -39,6 +46,7 @@
 -->
 <!--
     <javac target="1.5" 
+           source="1.5"
 	   srcdir="src" 
 	   destdir="bin" 
 	   excludes="**/tools/format/**" 
@@ -65,6 +73,8 @@
                 <attribute name="Built-By" value="Rick Anderson"/>  
                 <attribute name="Main-Class" value="processing.app.Base"/>  
                 <attribute name="Class-Path" value="RXTXcomm.jar core.jar ecj.jar jna.jar log4j-1.2.16.jar pde.jar"/>  
+		<attribute name="Version" value="${version}"/>
+		<attribute name="Compiled" value="${TODAY}"/>
 		  </manifest>
 	  </jar>
   </target>

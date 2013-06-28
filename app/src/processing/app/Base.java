@@ -28,7 +28,7 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 import java.util.zip.*;
-
+import java.util.jar.*;
 
 
 import javax.swing.*;
@@ -61,9 +61,9 @@ public class Base {
     static Logger logger = Logger.getLogger(Base.class.getName());
 
 	
-    public static final int REVISION = 23;
+    public static int REVISION = 23;
     /** This might be replaced by main() if there's a lib/version.txt file. */
-    static String VERSION_NAME = "0023";
+    public static String VERSION_NAME = "0023";
     /** Set true if this a proper release rather than a numbered revision. */
     static public boolean RELEASE = false;
   
@@ -128,15 +128,21 @@ public class Base {
             BasicConfigurator.configure();
             Logger.getRootLogger().setLevel(Level.DEBUG);
 
+		JarFile myself = new JarFile("lib/pde.jar");
+		Manifest manifest = myself.getManifest();
+		Attributes manifestContents = manifest.getMainAttributes();
 
-            File versionFile = getContentFile("lib/version.txt");
-            if (versionFile.exists()) {
-                String version = PApplet.loadStrings(versionFile)[0];
-                if (!version.equals(VERSION_NAME)) {
-                    VERSION_NAME = version;
+		VERSION_NAME = manifestContents.getValue("Version");
+		REVISION = Integer.parseInt(manifestContents.getValue("Compiled"));
+
+//            File versionFile = getContentFile("lib/version.txt");
+//            if (versionFile.exists()) {
+//                String version = PApplet.loadStrings(versionFile)[0];
+//                if (!version.equals(VERSION_NAME)) {
+//                    VERSION_NAME = version;
                     RELEASE = true;
-                }
-            }
+//                }
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2275,6 +2281,13 @@ removeDir(dead);
         for (int i = 0; i < looks.length; i++) {
             System.out.println("  "+looks[i].getClassName());
         }
+	System.out.println("Installed plugins:");
+        String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
+
+        for (int i = 0; i < entries.length; i++) {
+            Tool t = plugins.get(entries[i]);
+		System.out.println("  " + entries[i] + " - " + t.getVersion());
+	}
     }
 
     public File openFileDialog(String title, final String type)
@@ -2593,6 +2606,9 @@ removeDir(dead);
     public void loadPlugin(File tld)
     {
         try {
+            Map pluginInfo = new LinkedHashMap();
+
+	    File mainJar = null;
             File pld = new File(tld, "plugin");
             File[] jars = pld.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String name) {
@@ -2610,6 +2626,7 @@ removeDir(dead);
             String className = null;
             for (int i=0; i<jars.length; i++) {
                 className = findClassInZipFile(jars[i]);
+		mainJar = jars[i];
                 if (className != null) break;
             }
 
@@ -2617,8 +2634,17 @@ removeDir(dead);
                 return;
             }
 
+		JarFile jf = new JarFile(mainJar);
+		Manifest manifest = jf.getManifest();
+		Attributes manifestContents = manifest.getMainAttributes();
+
+		pluginInfo.put("version", manifestContents.getValue("Version"));
+		pluginInfo.put("compiled", manifestContents.getValue("Compiled"));
+		pluginInfo.put("jarfile", mainJar.getAbsolutePath());
+
             Class<?> toolClass = Class.forName(className, true, loader);
             Tool tool = (Tool) toolClass.newInstance();
+            tool.setInfo(pluginInfo);
             plugins.put(className, tool);
         } catch (Exception e) {
             System.err.println(e.getMessage());
