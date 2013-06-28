@@ -210,9 +210,6 @@ public class ConvertWaveFile extends BasePlugin {
     }
 
     public void run() {
-        System.err.println(
-            editor.getSketch().getName()
-        );
         win.setVisible(true);
     }
 

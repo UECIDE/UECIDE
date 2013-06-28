@@ -2639,8 +2639,6 @@ removeDir(dead);
 
             URLClassLoader loader = new URLClassLoader(urlList);
 
-            System.err.println(loader);
-
             String className = null;
 
             JarFile jf = new JarFile(jar);
@@ -2718,7 +2716,6 @@ removeDir(dead);
                 }
             }
         } catch (IOException e) {
-            //System.err.println("Ignoring " + filename + " (" + e.getMessage() + ")");
             e.printStackTrace();
         }
         return null;
