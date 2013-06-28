@@ -2094,25 +2094,24 @@ return outgoing;
 }
 
 
-static public void copyFile(File sourceFile,
-File targetFile) throws IOException {
-InputStream from =
-new BufferedInputStream(new FileInputStream(sourceFile));
-OutputStream to =
-new BufferedOutputStream(new FileOutputStream(targetFile));
-byte[] buffer = new byte[16 * 1024];
-int bytesRead;
-while ((bytesRead = from.read(buffer)) != -1) {
-to.write(buffer, 0, bytesRead);
-}
-to.flush();
-from.close(); // ??
-from = null;
-to.close(); // ??
-to = null;
+    static public void copyFile(File sourceFile, File targetFile) throws IOException {
+        InputStream from =
+            new BufferedInputStream(new FileInputStream(sourceFile));
+        OutputStream to =
+            new BufferedOutputStream(new FileOutputStream(targetFile));
+        byte[] buffer = new byte[16 * 1024];
+        int bytesRead;
+        while ((bytesRead = from.read(buffer)) != -1) {
+            to.write(buffer, 0, bytesRead);
+        }
+        to.flush();
+        from.close(); // ??
+        from = null;
+        to.close(); // ??
+        to = null;
 
-targetFile.setLastModified(sourceFile.lastModified());
-}
+        targetFile.setLastModified(sourceFile.lastModified());
+    }
 
 
 /**
@@ -2309,9 +2308,16 @@ removeDir(dead);
             title,
             FileDialog.LOAD);
 
+        final String types[] = type.split(",");
+
         fd.setFilenameFilter(new FilenameFilter() {
             public boolean accept(File dir, String name) {
-                return name.toLowerCase().endsWith("." + type);
+                for (int i = 0; i < types.length; i++) {
+                    if (name.toLowerCase().endsWith("." + types[i])) {
+                        return true;
+                    }
+                }
+                return false;
             }
         });
 
@@ -2555,7 +2561,7 @@ removeDir(dead);
 
     public void handleInstallPlugin()
     {
-        File inputFile = openFileDialog("Install plugin...", "zip");
+        File inputFile = openFileDialog("Install plugin...", "zip,jar");
 
         if (inputFile == null) {
             return;
@@ -2569,7 +2575,20 @@ removeDir(dead);
         if (!bf.exists()) {
             bf.mkdirs();
         }
-        extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
+        if (bf.getName().toLowerCase().endsWith(".zip")) {
+            extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
+        } else {
+            File d = new File(getSketchbookFolder(), "plugins");
+            if (!d.exists()) {
+                d.mkdirs();
+            }
+            File dst = new File(d, inputFile.getName());
+            try {
+                copyFile(inputFile, dst);
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        }
         loadPlugins();
         rebuildPluginsMenu(Editor.pluginsMenu);
     }
@@ -2597,6 +2616,17 @@ removeDir(dead);
 
     public void loadPluginsFromFolder(File f)
     {
+        File[] contents = f.listFiles();
+        if (contents == null) return;
+
+        for (int i = 0; i < contents.length; i++) {
+            if (contents[i].isDirectory()) {
+                loadPluginsFromFolder(contents[i]);
+            } else if (contents[i].getName().toLowerCase().endsWith(".jar")) {
+                loadPlugin(contents[i]);
+            }
+        }
+/*
         File[] folders = f.listFiles(new FileFilter() {
             public boolean accept(File folder) {
                 if (folder.isDirectory()) {
@@ -2613,12 +2643,19 @@ removeDir(dead);
         for (int i = 0; i < folders.length; i++) {
             loadPlugin(folders[i]);
         }
+*/
     }
+    
 
-    public void loadPlugin(File tld)
+    public void loadPlugin(File jar)
     {
         try {
 
+
+            URL[] urlList = new URL[1];
+            urlList[0]  = jar.toURI().toURL();
+
+/*
             File mainJar = null;
             File pld = new File(tld, "plugin");
             File[] jars = pld.listFiles(new FilenameFilter() {
@@ -2631,28 +2668,29 @@ removeDir(dead);
             for (int i = 0; i < urlList.length; i++) {
               urlList[i] = jars[i].toURI().toURL();
             }
+*/
             URLClassLoader loader = new URLClassLoader(urlList);
 
 
             String className = null;
-            for (int i=0; i<jars.length; i++) {
-                className = findClassInZipFile(jars[i]);
-                mainJar = jars[i];
-                if (className != null) break;
-            }
+//            for (int i=0; i<jars.length; i++) {
+                className = findClassInZipFile(jar);
+//                mainJar = jars[i];
+//                if (className != null) break;
+//            }
 
             if (className == null) {
                 return;
             }
 
-            JarFile jf = new JarFile(mainJar);
+            JarFile jf = new JarFile(jar);
             Manifest manifest = jf.getManifest();
             Attributes manifestContents = manifest.getMainAttributes();
 
             Map pluginInfo = new LinkedHashMap();
             pluginInfo.put("version", manifestContents.getValue("Version"));
             pluginInfo.put("compiled", manifestContents.getValue("Compiled"));
-            pluginInfo.put("jarfile", mainJar.getAbsolutePath());
+            pluginInfo.put("jarfile", jar.getAbsolutePath());
 
             Class<?> toolClass = Class.forName(className, true, loader);
             Tool tool = (Tool) toolClass.newInstance();
