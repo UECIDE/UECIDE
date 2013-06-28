@@ -73,7 +73,6 @@ public class Platform {
   
   public File getSettingsFolder() throws Exception {
     // otherwise make a .processing directory int the user's home dir
-    System.err.println(Theme.get("product"));
     File home = new File(System.getProperty("user.home"));
     File dataFolder = new File(home, "." + Theme.get("product"));
     if (!dataFolder.exists()) {

@@ -149,6 +149,7 @@ public class Base {
 
         // setup the theme coloring fun
         Theme.init();
+
         initPlatform();
 
         // Use native popups so they don't look so crappy on osx
@@ -159,7 +160,6 @@ public class Base {
 
         // run static initialization that grabs all the prefs
         Preferences.init(null);
-
 
         // Set the look and feel before opening the window
         try {
@@ -308,9 +308,9 @@ public class Base {
         }
 
         // check for updates
-        if (Preferences.getBoolean("update.check")) {
-            new UpdateCheck(this);
-        }
+//        if (Preferences.getBoolean("update.check")) {
+//            new UpdateCheck(this);
+//        }
 
     }
 
@@ -2281,13 +2281,25 @@ removeDir(dead);
         for (int i = 0; i < looks.length; i++) {
             System.out.println("  "+looks[i].getClassName());
         }
-	System.out.println("Installed plugins:");
+        System.out.println("\nInstalled plugins:");
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
         for (int i = 0; i < entries.length; i++) {
             Tool t = plugins.get(entries[i]);
-		System.out.println("  " + entries[i] + " - " + t.getVersion());
-	}
+
+            String ver = "unknown";
+            String com = "unknown";
+
+
+            // Older plugins may not have these methods - ignore them if they don't
+            try {
+                ver = t.getVersion();
+                com = t.getCompiled();
+            } catch (Exception e) {
+            }
+
+            System.out.println("  " + entries[i] + " - " + ver + " compiled " + com);
+        }
     }
 
     public File openFileDialog(String title, final String type)
@@ -2606,9 +2618,8 @@ removeDir(dead);
     public void loadPlugin(File tld)
     {
         try {
-            Map pluginInfo = new LinkedHashMap();
 
-	    File mainJar = null;
+            File mainJar = null;
             File pld = new File(tld, "plugin");
             File[] jars = pld.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String name) {
@@ -2626,7 +2637,7 @@ removeDir(dead);
             String className = null;
             for (int i=0; i<jars.length; i++) {
                 className = findClassInZipFile(jars[i]);
-		mainJar = jars[i];
+                mainJar = jars[i];
                 if (className != null) break;
             }
 
@@ -2634,17 +2645,23 @@ removeDir(dead);
                 return;
             }
 
-		JarFile jf = new JarFile(mainJar);
-		Manifest manifest = jf.getManifest();
-		Attributes manifestContents = manifest.getMainAttributes();
+            JarFile jf = new JarFile(mainJar);
+            Manifest manifest = jf.getManifest();
+            Attributes manifestContents = manifest.getMainAttributes();
 
-		pluginInfo.put("version", manifestContents.getValue("Version"));
-		pluginInfo.put("compiled", manifestContents.getValue("Compiled"));
-		pluginInfo.put("jarfile", mainJar.getAbsolutePath());
+            Map pluginInfo = new LinkedHashMap();
+            pluginInfo.put("version", manifestContents.getValue("Version"));
+            pluginInfo.put("compiled", manifestContents.getValue("Compiled"));
+            pluginInfo.put("jarfile", mainJar.getAbsolutePath());
 
             Class<?> toolClass = Class.forName(className, true, loader);
             Tool tool = (Tool) toolClass.newInstance();
-            tool.setInfo(pluginInfo);
+
+            // If the setInfo method doesn't exist we don't care.
+            try {
+                tool.setInfo(pluginInfo);
+            } catch (Exception blah) {
+            }
             plugins.put(className, tool);
         } catch (Exception e) {
             System.err.println(e.getMessage());
