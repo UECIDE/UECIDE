@@ -94,18 +94,18 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   //EditorToolbar toolbar;
   // these menus are shared so that they needn't be rebuilt for all windows
   // each time a sketch is created, renamed, or moved.
-  static JMenu toolbarMenu;
-  static JMenu sketchbookMenu;
-  static JMenu examplesMenu;
-  static JMenu importMenu;
-  static JMenu pluginsMenu;
+  /*static*/ JMenu toolbarMenu;
+  /*static*/ JMenu sketchbookMenu;
+  /*static*/ JMenu examplesMenu;
+  /*static*/ JMenu importMenu;
+  /*static*/ JMenu pluginsMenu;
 
   // these menus are shared so that the board and serial port selections
   // are the same for all windows (since the board and serial port that are
   // actually used are determined by the preferences, which are shared)
-  static JMenu boardsMenu;
-  static JMenu coresMenu;
-  static JMenu serialMenu;
+  /*static*/ JMenu boardsMenu;
+  /*static*/ JMenu coresMenu;
+  /*static*/ JMenu serialMenu;
 
   static SerialMenuListener serialMenuListener;
   static SerialMonitor serialMonitor;
@@ -190,24 +190,24 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 //          System.err.println("activate");  // not coming through
           base.handleActivated(Editor.this);
           // re-add the sub-menus that are shared by all windows
-          fileMenu.insert(sketchbookMenu, 2);
-          fileMenu.insert(examplesMenu, 3);
-          sketchMenu.insert(importMenu, 4);
-          hardwareMenu.insert(boardsMenu, 0);
-          hardwareMenu.insert(coresMenu, 1);
-          hardwareMenu.insert(serialMenu, 2);
+//          fileMenu.insert(sketchbookMenu, 2);
+//          fileMenu.insert(examplesMenu, 3);
+//          sketchMenu.insert(importMenu, 4);
+//          hardwareMenu.insert(boardsMenu, 0);
+//          hardwareMenu.insert(coresMenu, 1);
+//          hardwareMenu.insert(serialMenu, 2);
         }
 
         // added for 1.0.5
         // http://dev.processing.org/bugs/show_bug.cgi?id=1260
         public void windowDeactivated(WindowEvent e) {
 //          System.err.println("deactivate");  // not coming through
-          fileMenu.remove(sketchbookMenu);
-          fileMenu.remove(examplesMenu);
-          sketchMenu.remove(importMenu);
-          hardwareMenu.remove(boardsMenu);
-          hardwareMenu.remove(coresMenu);
-          hardwareMenu.remove(serialMenu);
+//          fileMenu.remove(sketchbookMenu);
+//          fileMenu.remove(examplesMenu);
+//          sketchMenu.remove(importMenu);
+//          hardwareMenu.remove(boardsMenu);
+//          hardwareMenu.remove(coresMenu);
+//          hardwareMenu.remove(serialMenu);
         }
       });
 
@@ -576,10 +576,11 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
+  JMenuBar menubar;
 
   protected void buildMenuBar() {
 
-    JMenuBar menubar = new JMenuBar();
+    menubar = new JMenuBar();
     menubar = new JMenuBar();
 
     menubar.add(buildFileMenu());

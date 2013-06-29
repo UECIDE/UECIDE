@@ -859,8 +859,10 @@ public class Base {
     protected void rebuildSketchbookMenus() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                rebuildSketchbookMenu(Editor.sketchbookMenu);
-                rebuildToolbarMenu(Editor.toolbarMenu);
+		for (int i = 0; i < editors.size(); i++) {
+			rebuildSketchbookMenu(editors.get(i).sketchbookMenu);
+			rebuildToolbarMenu(editors.get(i).toolbarMenu);
+		}
             }
         });
     }
@@ -1000,8 +1002,10 @@ public class Base {
                     Preferences.set("board", (String) getValue("board"));
                     selectedBoard = boards.get((String) getValue("board"));
                     onBoardOrPortChange();
-                    rebuildImportMenu(activeEditor.importMenu);
-                    rebuildExamplesMenu(activeEditor.examplesMenu);
+			for (int i = 0; i < editors.size(); i++) {
+				rebuildImportMenu(editors.get(i).importMenu);
+				rebuildExamplesMenu(editors.get(i).examplesMenu);
+			}
                 }
             };
             action.putValue("board", board.getName());
@@ -2352,8 +2356,10 @@ removeDir(dead);
         }
 
         extractZip(inputFile.getAbsolutePath(), getSketchbookLibrariesFolder().getAbsolutePath());
-        rebuildImportMenu(activeEditor.importMenu);
-        rebuildExamplesMenu(activeEditor.examplesMenu);
+	for (int i = 0; i < editors.size(); i++) {
+		rebuildImportMenu(editors.get(i).importMenu);
+		rebuildExamplesMenu(editors.get(i).examplesMenu);
+	}
     }
 
     public boolean testLibraryZipFormat(String inputFile)
@@ -2505,13 +2511,16 @@ removeDir(dead);
         File bf = new File(getSketchbookFolder(), "boards");
         extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
         loadBoards();
-        rebuildBoardsMenu(Editor.boardsMenu);
-        rebuildImportMenu(activeEditor.importMenu);
-        rebuildExamplesMenu(activeEditor.examplesMenu);
+	for (int i = 0; i < editors.size(); i++) {
+		rebuildBoardsMenu(editors.get(i).boardsMenu);
+		rebuildImportMenu(editors.get(i).importMenu);
+		rebuildExamplesMenu(editors.get(i).examplesMenu);
+	}
     }
 
     public void rebuildCoresMenu(JMenu menu)
     {
+	menu.removeAll();
         JMenuItem item = new JMenuItem("Add Core...");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -2552,11 +2561,13 @@ removeDir(dead);
         extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
         loadCores();
         loadBoards();
-        rebuildCoresMenu(Editor.coresMenu);
-        rebuildBoardsMenu(Editor.boardsMenu);
-        rebuildImportMenu(activeEditor.importMenu);
-        rebuildExamplesMenu(activeEditor.examplesMenu);
-        rebuildPluginsMenu(Editor.pluginsMenu);
+	for (int i = 0; i < editors.size(); i++) {
+		rebuildCoresMenu(editors.get(i).coresMenu);
+		rebuildBoardsMenu(editors.get(i).boardsMenu);
+		rebuildImportMenu(editors.get(i).importMenu);
+		rebuildExamplesMenu(editors.get(i).examplesMenu);
+		rebuildPluginsMenu(editors.get(i).pluginsMenu);
+	}
     }
 
     public void handleInstallPlugin()
@@ -2590,7 +2601,9 @@ removeDir(dead);
             }
         }
         loadPlugins();
-        rebuildPluginsMenu(Editor.pluginsMenu);
+	for (int i = 0; i < editors.size(); i++) {
+		rebuildPluginsMenu(editors.get(i).pluginsMenu);
+	}
     }
 
     public void loadPlugins()
