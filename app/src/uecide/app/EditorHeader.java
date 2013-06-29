@@ -364,29 +364,45 @@ public class EditorHeader extends JComponent {
 
     item = new JMenuItem("Previous Tab");
     KeyStroke ctrlAltLeft =
-      KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, Editor.SHORTCUT_ALT_KEY_MASK);
+      KeyStroke.getKeyStroke(KeyEvent.VK_UP, Editor.SHORTCUT_ALT_KEY_MASK);
     item.setAccelerator(ctrlAltLeft);
     // this didn't want to work consistently
-    /*
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          editor.sketch.prevCode();
-        }
-      });
-    */
-    menu.add(item);
+   
+	item.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			SketchCode c = editor.sketch.getCurrentCode();
+			int curr = editor.sketch.getCodeIndex(c);
+			int ncodes = editor.sketch.getCodeCount();
+			curr--;
+			if (curr == -1) {
+				curr = ncodes - 1;
+			}
+			editor.sketch.setCurrentCode(curr);
+			repaint();
+		}
+	});
+   
+	menu.add(item);
 
     item = new JMenuItem("Next Tab");
     KeyStroke ctrlAltRight =
-      KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, Editor.SHORTCUT_ALT_KEY_MASK);
+      KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, Editor.SHORTCUT_ALT_KEY_MASK);
     item.setAccelerator(ctrlAltRight);
-    /*
+    
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          editor.sketch.nextCode();
+			SketchCode c = editor.sketch.getCurrentCode();
+			int curr = editor.sketch.getCodeIndex(c);
+			int ncodes = editor.sketch.getCodeCount();
+			curr++;
+			if (curr == ncodes) {
+				curr = 0;
+			}
+			editor.sketch.setCurrentCode(curr);
+			repaint();
         }
       });
-    */
+    
     menu.add(item);
 
     Sketch sketch = editor.getSketch();
