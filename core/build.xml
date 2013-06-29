@@ -14,6 +14,7 @@
 
     <mkdir dir="bin" />
     <javac target="1.5" 
+           source="1.5"
 	   encoding="UTF-8"
 	   includeAntRuntime="false"
 	   srcdir="src" destdir="bin"/>
