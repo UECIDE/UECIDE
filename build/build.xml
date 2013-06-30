@@ -778,18 +778,28 @@ Description: chipKIT MPIDE Development environment
         <antcall target="clean" />
         <antcall target="linux-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-linux.zip" overwrite="true" />
+        <delete file="linux/${product}-${version}-linux.zip" />
 
         <antcall target="clean" />
         <antcall target="linux64-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-linux64.zip" overwrite="true" />
+        <delete file="linux/${product}-${version}-linux64.zip" />
 
         <antcall target="clean" />
         <antcall target="macosx-dist" />
         <copy todir="/var/www/uecide/downloads" file="macosx/${product}-${version}-macosx.zip" overwrite="true" />
+        <delete file="macosx/${product}-${version}-macosx.zip" />
+        <delete file="macosx/${product}-${version}-macosx.dmg" />
 
         <antcall target="clean" />
         <antcall target="windows-dist" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}-windows.zip" overwrite="true" />
+        <delete file="windows/${product}-${version}-windows.zip" />
+
+        <copy todir="/var/www/uecide/plugins" file="../app/ConvertWaveFile.jar" overwrite="true" />
+        <copy todir="/var/www/uecide/plugins" file="../app/ColorSelector.jar" overwrite="true" />
+
+        <antcall target="clean" />
 
     </target>
 
