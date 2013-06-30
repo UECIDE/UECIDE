@@ -97,14 +97,11 @@ public class PdePreprocessor {
         InputStream in;
 
         for (String animport : imports) {
-            System.err.println("Looking for " + animport);
             File iloc = Base.importToLibraryTable.get(animport);
-            System.err.println("Found " + iloc);
             if(iloc != null) {
                 File incFile = new File(iloc, animport);
                 if (incFile.exists()) {
                     try {
-                        System.err.println("Loading header file");
                         in = new BufferedInputStream(new FileInputStream(incFile));
                         int nr;
                         StringBuilder program = new StringBuilder();
@@ -123,10 +120,7 @@ public class PdePreprocessor {
                                 File xloc = Base.importToLibraryTable.get(thisImport);
                                 if (xloc != null) {
                                     if (imports.indexOf(thisImport)==-1) {
-                                        System.err.println("Adding import " + thisImport);
                                         newImports.add(thisImport);
-                                    } else {
-                                        System.err.println("Skipping duplicate import " + thisImport);
                                     }
                                 }
                             }
@@ -184,11 +178,9 @@ public class PdePreprocessor {
     int numImports = programImports.size();
     programImports.addAll(getSubImports(programImports));
 
-    System.err.println("Imports: " + numImports);
     while (numImports != programImports.size()) {
         numImports = programImports.size();
         programImports.addAll(getSubImports(programImports));
-        System.err.println("Imports: " + numImports);
     }
     
 
