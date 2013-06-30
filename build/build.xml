@@ -745,10 +745,6 @@ Description: chipKIT MPIDE Development environment
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}-windows.zip" overwrite="true" />
         <delete file="windows/${product}-${version}-windows.zip" />
 
-        <copy todir="/var/www/uecide/plugins" file="../app/ConvertWaveFile.jar" overwrite="true" />
-        <copy todir="/var/www/uecide/plugins" file="../app/ColorSelector.jar" overwrite="true" />
-        <copy todir="/var/www/uecide/plugins" file="../app/ExportToMPLABX.jar" overwrite="true" />
-
         <antcall target="clean" />
 
     </target>
