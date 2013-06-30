@@ -727,71 +727,30 @@ Description: chipKIT MPIDE Development environment
         <antcall target="clean" />
         <antcall target="linux-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-linux.zip" overwrite="true" />
+        <delete file="linux/${product}-${version}-linux.zip" />
 
         <antcall target="clean" />
         <antcall target="linux64-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-linux64.zip" overwrite="true" />
+        <delete file="linux/${product}-${version}-linux64.zip" />
 
         <antcall target="clean" />
         <antcall target="macosx-dist" />
         <copy todir="/var/www/uecide/downloads" file="macosx/${product}-${version}-macosx.zip" overwrite="true" />
+        <delete file="macosx/${product}-${version}-macosx.zip" />
+        <delete file="macosx/${product}-${version}-macosx.dmg" />
 
         <antcall target="clean" />
         <antcall target="windows-dist" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}-windows.zip" overwrite="true" />
+        <delete file="windows/${product}-${version}-windows.zip" />
+
+        <copy todir="/var/www/uecide/plugins" file="../app/ConvertWaveFile.jar" overwrite="true" />
+        <copy todir="/var/www/uecide/plugins" file="../app/ColorSelector.jar" overwrite="true" />
+        <copy todir="/var/www/uecide/plugins" file="../app/ExportToMPLABX.jar" overwrite="true" />
+
+        <antcall target="clean" />
 
     </target>
-
-    <target name="bundle-tool">
-        <delete dir="bundle-tools" />
-        <mkdir dir="bundle-tools/work/uecide/app/tools" />
-        <copy todir="bundle-tools/uecide/app/tools" file="../app/bin/uecide/app/tools/${tool}.class" />
-        <jar destfile="tools/${tool}.jar" basedir="bundle-tools">
-		<manifest>
-			<attribute name="Version" value="${version}"/>
-			<attribute name="Compiled" value="${TODAY}"/>
-		</manifest>
-	</jar>
-        <delete dir="bundle-tools" />
-    </target>
-
-    <target name="bundle-tool-2">
-        <delete dir="bundle-tools" />
-        <mkdir dir="bundle-tools/work/uecide/app/tools" />
-        <copy todir="bundle-tools/uecide/app/tools" file="../app/bin/uecide/app/tools/${tool}.class" />
-        <copy todir="bundle-tools/uecide/app/tools" file="../app/bin/uecide/app/tools/${extra1}.class" />
-        <copy todir="bundle-tools/uecide/app/tools" file="../app/bin/uecide/app/tools/${extra2}.class" />
-        <jar destfile="tools/${tool}.jar" basedir="bundle-tools">
-		<manifest>
-			<attribute name="Version" value="${version}"/>
-			<attribute name="Compiled" value="${TODAY}"/>
-		</manifest>
-	</jar>
-			
-        <delete dir="bundle-tools" />
-    </target>
-
-    <target name="bundle-tools" depends="subprojects-build">
-        <antcall target="bundle-tool"><param name="tool" value="ExportToMPLABX"/></antcall>
-        <antcall target="bundle-tool"><param name="tool" value="ColorSelector"/></antcall>
-        <antcall target="bundle-tool-2">
-            <param name="tool" value="ConvertWaveFile"/>
-            <param name="extra1" value="WavFile"/>
-            <param name="extra2" value="WavFileException"/>
-        </antcall>
-    </target>
-
-    <target name="tool-export">
-        <delete dir="bundle-tools" />
-        <copy todir="bundle-tools/uecide/plugin" file="../app/bin/uecide/plugin/ExportToMPLABX.class" />
-        <copy todir="bundle-tools/uecide/plugin" file="test.txt" />
-        <jar destfile="tools/ExportToMPLABX.jar" basedir="bundle-tools">
-            <manifest>
-                <attribute name="Version" value="${version}"/>
-                <attribute name="Compiled" value="${TODAY}"/>
-            </manifest>
-        </jar>
-        <!--delete dir="bundle-tools" /-->
-   </target> 
 
 </project>
