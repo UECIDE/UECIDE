@@ -46,7 +46,6 @@ public class Archiver extends BasePlugin {
     return "Archive Sketch";
   }
   
-  
   public void init(Editor editor) {
     this.editor = editor;
 
@@ -56,7 +55,6 @@ public class Archiver extends BasePlugin {
 
     dateFormat = new SimpleDateFormat("yyMMdd");
   }
-
 
   public void run() {
     Sketch sketch = editor.getSketch();
