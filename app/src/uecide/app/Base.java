@@ -38,8 +38,6 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 
-
-
 import uecide.app.debug.Board;
 import uecide.app.debug.Core;
 import processing.core.*;
@@ -103,7 +101,7 @@ public class Base {
     static HashSet<File> libraries;
   
     // maps imported packages to their library folder
-    static HashMap<String, File> importToLibraryTable;
+    static public HashMap<String, File> importToLibraryTable;
 
     // classpath for all known libraries for p5
     // (both those in the p5/libs folder and those with lib subfolders
@@ -278,6 +276,7 @@ public class Base {
         selectedBoard = getDefaultBoard();
 
         loadPlugins();
+        gatherLibraries();
 
         // Check if there were previously opened sketches to be restored
         boolean opened = restoreSketches();
@@ -914,28 +913,62 @@ public class Base {
         importMenu.add(item);
         importMenu.addSeparator();
     
+        HashMap<String, File> globalLibraries = libraryCollections.get("global");
+        HashMap<String, File> coreLibraries = libraryCollections.get(selectedBoard.getCore().getName());
+        HashMap<String, File> contributedLibraries = libraryCollections.get("sketchbook");
 
-        // reset the set of libraries
+        ActionListener listener = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                activeEditor.getSketch().importLibrary(e.getActionCommand());
+            }
+        };
+
         libraries = new HashSet<File>();
+
+        if (globalLibraries.size() > 0) {
+            JMenu globalMenu = new JMenu("Standard");
+            String[] entries = (String[]) globalLibraries.keySet().toArray(new String[0]);
+            for (String entry : entries) {
+                item = new JMenuItem(entry);
+                item.addActionListener(listener);
+                item.setActionCommand(globalLibraries.get(entry).getAbsolutePath());
+                globalMenu.add(item);
+                libraries.add(globalLibraries.get(entry));
+            }
+            importMenu.add(globalMenu);
+        }
+
+        if (coreLibraries.size() > 0) {
+            JMenu coreMenu = new JMenu(selectedBoard.getCore().getName());
+            String[] entries = (String[]) coreLibraries.keySet().toArray(new String[0]);
+            for (String entry : entries) {
+                item = new JMenuItem(entry);
+                item.addActionListener(listener);
+                item.setActionCommand(coreLibraries.get(entry).getAbsolutePath());
+                coreMenu.add(item);
+                libraries.add(coreLibraries.get(entry));
+            }
+            importMenu.add(coreMenu);
+        }
+
+        if (contributedLibraries.size() > 0) {
+            JMenu contributedMenu = new JMenu("Contributed");
+            String[] entries = (String[]) contributedLibraries.keySet().toArray(new String[0]);
+            for (String entry : entries) {
+                item = new JMenuItem(entry);
+                item.addActionListener(listener);
+                item.setActionCommand(contributedLibraries.get(entry).getAbsolutePath());
+                contributedMenu.add(item);
+                libraries.add(contributedLibraries.get(entry));
+            }
+            importMenu.add(contributedMenu);
+        }
 
         // reset the table mapping imports to libraries
         importToLibraryTable = new HashMap<String, File>();
-
-        File coreLibs = new File(selectedBoard.getCore().getFolder(), selectedBoard.getCore().get("library.path","libraries"));
-        File sbLibs = new File(getSketchbookFolder(),"libraries");
-
-        JMenu coreItem = new JMenu(selectedBoard.getCore().get(
-            "name",
-            selectedBoard.getCore().getName())
-        );
-        importMenu.add(coreItem);
-        addLibraries(coreItem, coreLibs);
-
-        if (sbLibs.isDirectory()) {
-            JMenu contrib = new JMenu("Contributed");
-            importMenu.add(contrib);
-            addLibraries(contrib, sbLibs);
-        }
+        importToLibraryTable.putAll(globalLibraries);
+        importToLibraryTable.putAll(coreLibraries);
+        importToLibraryTable.putAll(contributedLibraries);
     }
 
 
@@ -1028,6 +1061,36 @@ public class Base {
         }
     }
 
+    public HashMap<String, HashMap<String, File>> libraryCollections;
+
+    public void gatherLibraries() {
+        libraryCollections = new HashMap<String, HashMap<String, File>>();
+        libraryCollections.put("global", loadLibrariesFromFolder(getContentFile("libraries"))); // Global libraries
+        String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
+
+        for (String core : corelist) {
+            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibraryFolder())); // Core libraries
+        }
+
+        libraryCollections.put("sketchbook", loadLibrariesFromFolder(new File(getSketchbookFolder(), "libraries"))); // Contributed libraries
+    }
+
+    public HashMap<String, File> loadLibrariesFromFolder(File folder) {
+        HashMap out = new HashMap<String, File>();
+        if (!folder.exists()) {
+            return out;
+        }
+        File[] list = folder.listFiles();
+        for (File f : list) {
+            if (f.isDirectory()) {
+                File header = new File(f, f.getName() + ".h");
+                if (header.exists()) {
+                    out.put(header.getName(), f);
+                }
+            }
+        }
+        return out;
+    }
 
     /**
     * Scan a folder recursively, and add any sketches found to the menu
@@ -1151,71 +1214,6 @@ public class Base {
         menu.remove(nextMenu);
         return ifound;  // actually ignored, but..
     }
-
-
-    protected boolean addLibraries(JMenu menu, File folder) {
-        if (!folder.isDirectory()) return false;
-
-        String list[] = folder.list(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                // skip .DS_Store files, .svn folders, etc
-                if (name.charAt(0) == '.') return false;
-                if (name.equals("CVS")) return false;
-                return (new File(dir, name).isDirectory());
-            }
-        });
-        // if a bad folder or something like that, this might come back null
-        if (list == null) return false;
-
-        // alphabetize list, since it's not always alpha order
-        // replaced hella slow bubble sort with this feller for 0093
-        Arrays.sort(list, String.CASE_INSENSITIVE_ORDER);
-
-        ActionListener listener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                activeEditor.getSketch().importLibrary(e.getActionCommand());
-            }
-        };
-
-        boolean ifound = false;
-
-        for (String potentialName : list) {
-            File subfolder = new File(folder, potentialName);
-            //      File libraryFolder = new File(subfolder, "library");
-            //      File libraryJar = new File(libraryFolder, potentialName + ".jar");
-            //      // If a .jar file of the same prefix as the folder exists
-            //      // inside the 'library' subfolder of the sketch
-            //      if (libraryJar.exists()) {
-            String sanityCheck = Sketch.sanitizeName(potentialName);
-            if (!sanityCheck.equals(potentialName)) {
-                String mess =
-                    "The library \"" + potentialName + "\" cannot be used.\n" +
-                    "Library names must contain only basic letters and numbers.\n" +
-                    "(ASCII only and no spaces, and it cannot start with a number)";
-                Base.showMessage("Ignoring bad library name", mess);
-                continue;
-            }
-
-            String libraryName = potentialName;
-
-            libraries.add(subfolder);
-
-            String packages[] =
-                Core.headerListFromIncludePath(subfolder.getAbsolutePath());
-            for (String pkg : packages) {
-                importToLibraryTable.put(pkg, subfolder);
-            }
-
-            JMenuItem item = new JMenuItem(libraryName);
-            item.addActionListener(listener);
-            item.setActionCommand(subfolder.getAbsolutePath());
-            menu.add(item);
-            ifound = true;
-
-        }
-        return ifound;
-    }
-
 
 // .................................................................
 
@@ -2357,6 +2355,7 @@ removeDir(dead);
 
         extractZip(inputFile.getAbsolutePath(), getSketchbookLibrariesFolder().getAbsolutePath());
 	for (int i = 0; i < editors.size(); i++) {
+        gatherLibraries();
 		rebuildImportMenu(editors.get(i).importMenu);
 		rebuildExamplesMenu(editors.get(i).examplesMenu);
 	}
@@ -2564,6 +2563,8 @@ removeDir(dead);
 	for (int i = 0; i < editors.size(); i++) {
 		rebuildCoresMenu(editors.get(i).coresMenu);
 		rebuildBoardsMenu(editors.get(i).boardsMenu);
+    
+        gatherLibraries();
 		rebuildImportMenu(editors.get(i).importMenu);
 		rebuildExamplesMenu(editors.get(i).examplesMenu);
 		rebuildPluginsMenu(editors.get(i).pluginsMenu);
