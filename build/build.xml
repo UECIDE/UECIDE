@@ -6,7 +6,6 @@
   <!-- Sets properties for macosx/windows/linux depending on current system -->
     <!--property name="theme" value="mpide"/-->
     <property file="build.settings"/>
-    <property file="upload.properties"/>
     <property name="aws.bucket" value="chipkit" />
 
     <property file="themes/${theme}/ide/theme.txt"/>
@@ -93,9 +92,6 @@
     <input message="Enter version number:"
            addproperty="version"
            defaultvalue="${revision}-${platform}-${TODAY}-test" />
-  <propertyfile file="upload.properties">
-      <entry  key="uploadversion" value="${version}"/>
-  </propertyfile>
     <antcall target="${platform}-dist" />
   </target>
 
@@ -104,9 +100,6 @@
     <input message="Enter version number:"
            addproperty="version"
            defaultvalue="${revision}-${platform}-${TODAY}-test" />
-  <propertyfile file="upload.properties">
-      <entry  key="uploadversion" value="${version}"/>
-  </propertyfile>
     <antcall target="${platform}-deb" />
   </target>
 
@@ -368,10 +361,6 @@
     </target>
 
   <target name="macosx-dist" depends="macosx-build" description="Create a .dmg of the Mac OS X version">
-   	<property name="extension" value="dmg"/>  
-	<propertyfile file="upload.properties">
-      		<entry  key="extension" value="${extension}"/>
-  	</propertyfile>
 
     <!-- now build the dmg -->
     <antcall target="macosx-mkdmg-${platform}" />
@@ -387,9 +376,6 @@
       macosx/${product}-${version}.zip
       =======================================================
   </echo>
-  <propertyfile file="upload.properties">
-      <entry  key="uploadversion" value="${version}"/>
-  </propertyfile>
 
   </target>
 
@@ -483,10 +469,6 @@
         <property name="extension" value="tgz"/> 
 
 
-        <propertyfile file="upload.properties">
-            <entry  key="extension" value="${extension}"/>
-        </propertyfile>
-
         <zip destfile="linux/${product}-${version}-linux.zip">
             <zipfileset dir="linux/work" prefix="${product}-${version}" filemode="755"/>
         </zip>
@@ -504,10 +486,6 @@
         description="Build .tar.gz of linux64 version">
         <property name="extension" value="tgz"/> 
 
-
-        <propertyfile file="upload.properties">
-            <entry  key="extension" value="${extension}"/>
-        </propertyfile>
 
         <zip destfile="linux/${product}-${version}-linux64.zip">
             <zipfileset dir="linux/work" prefix="${product}-${version}" filemode="755"/>
@@ -567,18 +545,12 @@ Description: chipKIT MPIDE Development environment
 	<target name="linux-deb" description="Build .deb of linux version">
         <property name="extension" value="deb"/>
         <property name="arch" value="i386"/>
-        <propertyfile file="upload.properties">
-            <entry  key="extension" value="${extension}"/>
-        </propertyfile>
         <antcall target="linux-generate-debian"/>
     </target>
 
     <target name="linux64-deb" description="Build .deb of linux version">
         <property name="arch" value="amd64"/>
         <property name="extension" value="deb"/>
-        <propertyfile file="upload.properties">
-            <entry  key="extension" value="${extension}"/>
-        </propertyfile>
         <antcall target="linux-generate-debian"/>
     </target>
 
@@ -662,9 +634,6 @@ Description: chipKIT MPIDE Development environment
     <target name="windows-dist" depends="windows-build" 
         description="Create .zip files of windows version">
         <property name="extension" value="zip"/>   
-        <propertyfile file="upload.properties">
-            <entry  key="extension" value="${extension}"/>
-        </propertyfile>
 
         <unzip dest="windows/work" src="windows/dist/jre.zip" overwrite="false"/>
 
@@ -753,26 +722,6 @@ Description: chipKIT MPIDE Development environment
         <typedef name="cachecontrol.mapping" classname="it.corley.ant.CacheControlMapping" classpathref="tasks.path"/>
     	<typedef name="contentencoding.mapping" classname="it.corley.ant.ContentEncodingMapping" classpathref="tasks.path"/>
     </target>
-    <!-- Upload the current build -->
-    <target name="upload" description="Use the Task" depends="awstasks.setup">
-        <property file="test.properties"/>
-        <s3put key="${aws.access_key}" secret="${aws.secret_key}" bucket="${aws.bucket}"
-               dest="builds" publicread="true" cacheControl="3600" contentType="application/x-readme">
-            <fileset dir="${platform}" includes="${product}-${uploadversion}.${extension}"/> 
-            <contenttypemapping extension="md" contenttype="text/plain"/>
-            <cachecontrolmapping extension="md" maxage="7200"/>
-   	    	<contentencodingmapping extension="md" encoding="UTF-8" />
-        </s3put>
-        <echo message="Upload task complete" /> 
-    </target>
-    <!-- Debugging echo target for s3, other values could be added as needed. -->
-    <target name="echo">
-        <echo message="${aws.access_key}"/>
-        <echo message="${aws.secret_key}"/>
-        <echo message="${aws.bucket}"/>
-        <echo message="${version}"/>
-    </target>
-
 
     <target name="auto">
         <antcall target="clean" />
