@@ -121,9 +121,6 @@ public class Core implements MessageConsumer {
         List<File> objectFiles = new ArrayList<File>();
         List<File> tobjs;
 
-        File root = Base.getContentFile(null);
-        Object[] Args = {root.getAbsolutePath(), folder.getAbsolutePath()};
- 
         includePaths = getIncludes(sketch);
 
         Base.selectedBoard.set("filename", primaryClassName);
@@ -196,7 +193,7 @@ public class Core implements MessageConsumer {
     }
 
 
-    private ArrayList<String> getIncludes(Sketch s) {
+    public ArrayList<String> getIncludes(Sketch s) {
         ArrayList<String> paths = new ArrayList();
         paths.add(s.getFolder().toString());
         paths.add(api.getAbsolutePath());

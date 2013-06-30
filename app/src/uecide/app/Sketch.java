@@ -2031,4 +2031,9 @@ public class Sketch {
     }
     return buffer.toString();
   }
+
+    public File getBuildFolder()
+    {
+        return tempBuildFolder;
+    }
 }
