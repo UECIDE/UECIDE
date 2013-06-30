@@ -75,6 +75,12 @@ public class Core implements MessageConsumer {
 
     }
 
+    public File getLibraryFolder()
+    {
+        File lf = new File(folder, get("library.path", "libraries"));
+        return lf;
+    }
+
     public String getName() { 
         return name; 
     }

@@ -89,6 +89,56 @@ public class PdePreprocessor {
     indent = new String(indentChars);
   }
 
+    public List<String> getSubImports(List<String> imports)
+    {
+        List<String> newImports = new ArrayList<String>();
+
+        String importRegexp = "^\\s*#include\\s+[<\"](\\S+)[\">]";
+        InputStream in;
+
+        for (String animport : imports) {
+            System.err.println("Looking for " + animport);
+            File iloc = Base.importToLibraryTable.get(animport);
+            System.err.println("Found " + iloc);
+            if(iloc != null) {
+                File incFile = new File(iloc, animport);
+                if (incFile.exists()) {
+                    try {
+                        System.err.println("Loading header file");
+                        in = new BufferedInputStream(new FileInputStream(incFile));
+                        int nr;
+                        StringBuilder program = new StringBuilder();
+                        byte[] buffer = new byte[1024];
+
+                        while ((nr = in.read(buffer)) > 0) {
+                            String chunk = new String(buffer, 0, nr);
+                            program.append(chunk);
+                        }
+                        in.close();
+                        String[][] pieces = PApplet.matchAll(program.toString(), importRegexp);
+
+                        if (pieces != null){
+                        for (int i = 0; i < pieces.length; i++) {
+                            String thisImport = pieces[i][1];
+                                File xloc = Base.importToLibraryTable.get(thisImport);
+                                if (xloc != null) {
+                                    if (imports.indexOf(thisImport)==-1) {
+                                        System.err.println("Adding import " + thisImport);
+                                        newImports.add(thisImport);
+                                    } else {
+                                        System.err.println("Skipping duplicate import " + thisImport);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }
+        return newImports;
+    }
+
   /**
    * Writes out the head of the c++ code generated for a sketch. 
    * Called from uecide.app.Sketch.
@@ -118,7 +168,6 @@ public class PdePreprocessor {
       program = substituteUnicode(program);
     }
 
-    //String importRegexp = "(?:^|\\s|;)(import\\s+)(\\S+)(\\s*;)";
     String importRegexp = "^\\s*#include\\s+[<\"](\\S+)[\">]";
     programImports = new ArrayList<String>();
 
@@ -128,12 +177,22 @@ public class PdePreprocessor {
       for (int i = 0; i < pieces.length; i++)
         programImports.add(pieces[i][1]);  // the package name
 
+    // Work through the list of imports looking for ones that are in the library
+    // list.  Get their imports too - and the imports that they use as well
+    // ... ad infinitum.
+
+    int numImports = programImports.size();
+    programImports.addAll(getSubImports(programImports));
+
+    System.err.println("Imports: " + numImports);
+    while (numImports != programImports.size()) {
+        numImports = programImports.size();
+        programImports.addAll(getSubImports(programImports));
+        System.err.println("Imports: " + numImports);
+    }
+    
+
     codeFolderImports = new ArrayList<String>();
-//    if (codeFolderPackages != null) {
-//      for (String item : codeFolderPackages) {
-//        codeFolderImports.add(item + ".*");
-//      }
-//    }
 
     prototypes = prototypes(program);
     
