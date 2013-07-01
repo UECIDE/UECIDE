@@ -561,7 +561,8 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <chmod perm="755">
             <fileset dir="${proot}/DEBIAN" includes="postinst" />
         </chmod>
-        <exec executable="dpkg-deb" dir="linux">
+        <exec executable="fakeroot" dir="linux">
+            <arg value="dpkg-deb"/>
             <arg value="-b"/>
             <arg value="${product}-${version}-${arch}"/>
         </exec>
