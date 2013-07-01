@@ -501,24 +501,50 @@
     </target>
 
 	<target name="linux-generate-debian" depends="version-number, build" description="Build debian tree ready for packaging">
-        <mkdir dir="linux/${product}-${version}-${arch}" />
-        <copy todir="linux/${product}-${version}-${arch}/usr">
-            <fileset dir="linux/dist/usr" />
-        </copy>
-        <copy todir="linux/${product}-${version}-${arch}/usr/share/${product}">
+        <property name="proot" value="linux/${product}-${version}-${arch}" />
+        <mkdir dir="${proot}" />
+        <mkdir dir="${proot}/usr" />
+        <mkdir dir="${proot}/usr/bin" />
+        <mkdir dir="${proot}/usr/share" />
+        <mkdir dir="${proot}/usr/share/applications" />
+        <mkdir dir="${proot}/usr/share/icons" />
+
+        <copy tofile="${proot}/usr/share/icons/${product}.png" file="themes/${theme}/ide/icon.png" />
+        <copy tofile="${proot}/usr/share/icons/${product}_sketch.png" file="themes/${theme}/ide/doc_icon.png" />
+
+        <copy todir="${proot}/usr/share/${product}">
             <fileset dir="linux/work" />
         </copy>
         <chmod perm="755">
-            <fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}" includes="${product}" />
-            <fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}/tools" includes="**/*" />
-            <fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}/hardware/cores/pic32/tools" includes="**/*" />
-            <fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}/hardware/cores/pic32/compiler" includes="**/*" />
-            <!--fileset dir="linux/${product}-${version}-${arch}/usr/share/${product}/hardware/cores/pic32/tools" includes="**/*" /-->
+            <fileset dir="${proot}/usr/share/${product}" includes="${product}" />
+            <fileset dir="${proot}/usr/share/${product}/hardware" includes="**/*" />
         </chmod>
-        <symlink link="linux/${product}-${version}-${arch}/usr/bin/${product}" resource="/usr/share/${product}/${product}" overwrite="true" />
-        <mkdir dir="linux/${product}-${version}-${arch}/DEBIAN" />
-        <echo file="linux/${product}-${version}-${arch}/DEBIAN/control">
-Package: ${product}
+        <symlink link="${proot}/usr/bin/${product}" resource="/usr/share/${product}/${product}" overwrite="true" />
+
+        <echo file="${proot}/usr/share/applications/${product}.desktop">[Desktop Entry]
+Name=${product.cap}
+Comment=IDE for ${product.cap}
+Exec=/usr/bin/${product}
+Icon=${product}.png
+Terminal=false
+Type=Application
+Categories=Application;Development;Programming;
+StartupNotify=false
+MimeType=application/x-${product}
+</echo>
+
+        <echo file="${proot}/usr/share/${product}/${product}-mime.xml">&lt;?xml version="1.0"?&gt;
+&lt;mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'&gt;
+    &lt;mime-type type="application/x-${product}"&gt;
+        &lt;comment&gt;${product.cap} Sketch&lt;/comment&gt;
+        &lt;glob pattern="*.pde"/&gt;
+        &lt;glob pattern="*.ino"/&gt;
+    &lt;/mime-type&gt;
+&lt;/mime-info&gt;
+</echo>
+
+        <mkdir dir="${proot}/DEBIAN" />
+        <echo file="${proot}/DEBIAN/control">Package: ${product}
 Version: ${version}
 Maintainer: matt@majenko.co.uk
 Architecture: ${arch}
@@ -527,11 +553,19 @@ Depends: avr-libc, avrdude, binutils-avr, extra-xdg-menus, gcc-avr, libftdi1, li
 Description: chipKIT MPIDE Development environment
 
 </echo>
+        <echo file="${proot}/DEBIAN/postinst">#!/bin/bash
+xdg-mime install --novendor /usr/share/${product}/${product}-mime.xml
+xdg-icon-resource install --context mimetypes --novendor --size 128 /usr/share/icons/${product}_sketch.png application-x-${product}
+xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
+</echo>
+        <chmod perm="755">
+            <fileset dir="${proot}/DEBIAN" includes="postinst" />
+        </chmod>
         <exec executable="dpkg-deb" dir="linux">
             <arg value="-b"/>
             <arg value="${product}-${version}-${arch}"/>
         </exec>
-        <delete dir="linux/${product}-${version}-${arch}" />
+        <delete dir="${proot}" />
         <echo>
       =======================================================
       ${product.cap} for Linux was built. Grab the package from   

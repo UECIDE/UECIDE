@@ -127,21 +127,14 @@ public class Base {
             BasicConfigurator.configure();
             Logger.getRootLogger().setLevel(Level.DEBUG);
 
-		JarFile myself = new JarFile("lib/uecide.jar");
-		Manifest manifest = myself.getManifest();
-		Attributes manifestContents = manifest.getMainAttributes();
+            JarFile myself = new JarFile("lib/uecide.jar");
+            Manifest manifest = myself.getManifest();
+            Attributes manifestContents = manifest.getMainAttributes();
 
-		VERSION_NAME = manifestContents.getValue("Version");
-		REVISION = Integer.parseInt(manifestContents.getValue("Compiled"));
+            VERSION_NAME = manifestContents.getValue("Version");
+            REVISION = Integer.parseInt(manifestContents.getValue("Compiled"));
 
-//            File versionFile = getContentFile("lib/version.txt");
-//            if (versionFile.exists()) {
-//                String version = PApplet.loadStrings(versionFile)[0];
-//                if (!version.equals(VERSION_NAME)) {
-//                    VERSION_NAME = version;
-                    RELEASE = true;
-//                }
-//            }
+            RELEASE = true;
         } catch (Exception e) {
             e.printStackTrace();
         }
