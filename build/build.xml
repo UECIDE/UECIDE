@@ -762,11 +762,17 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="linux-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-linux.zip" overwrite="true" />
         <delete file="linux/${product}-${version}-linux.zip" />
+        <antcall target="linux-deb" />
+        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-i386.deb" overwrite="true" />
+        <delete file="linux/${product}-${version}-i386.deb" />
 
         <antcall target="clean" />
         <antcall target="linux64-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-linux64.zip" overwrite="true" />
         <delete file="linux/${product}-${version}-linux64.zip" />
+        <antcall target="linux64-deb" />
+        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-amd64.deb" overwrite="true" />
+        <delete file="linux/${product}-${version}-amd64.deb" />
 
         <antcall target="clean" />
         <antcall target="macosx-dist" />
