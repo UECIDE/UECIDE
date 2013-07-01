@@ -97,6 +97,7 @@ public class Base {
     static private File librariesFolder;
     static private File toolsFolder;
     static private File hardwareFolder;
+    static public ArrayList<File> MRUList;
 
     static HashSet<File> libraries;
   
@@ -277,6 +278,7 @@ public class Base {
 
         loadPlugins();
         gatherLibraries();
+        initMRU();
 
         // Check if there were previously opened sketches to be restored
         boolean opened = restoreSketches();
@@ -311,6 +313,69 @@ public class Base {
 //            new UpdateCheck(this);
 //        }
 
+    }
+
+    public void initMRU()
+    {
+        MRUList = new ArrayList<File>();
+        for (int i = 0; i < 10; i++) {
+            if (Preferences.get("sketch.mru." + i) != null) {
+                File f = new File(Preferences.get("sketch.mru." + i));
+                if (f.exists()) {
+                    if (MRUList.indexOf(f) == -1) {
+                        MRUList.add(f);
+                    }
+                }
+            }
+        }
+    }
+
+    public void updateMRU(File f)
+    {
+        if (f.getAbsolutePath().startsWith(untitledFolder.getAbsolutePath())) {
+            return;
+        }
+        MRUList.remove(f);
+        MRUList.add(f);
+        while (MRUList.size() > 10) {
+            MRUList.remove(0);
+        }
+        for (int i = 0; i < 10; i++) {
+            if (i < MRUList.size()) {
+                Preferences.set("sketch.mru." + i, MRUList.get(i).getAbsolutePath());
+            } else {
+                Preferences.unset("sketch.mru." + i);
+            }
+        }
+        Preferences.save();
+        rebuildSketchbookMenus();
+    }
+
+    public void rebuildMRUMenu(JMenu menu) {
+        menu.removeAll();
+
+        ActionListener listener = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String path = e.getActionCommand();
+                if (new File(path).exists()) {
+                    handleOpen(path);
+                } else {
+                    showWarning("Sketch Does Not Exist",
+                                "The selected sketch no longer exists.\n" +
+                                "You may need to restart " + Theme.get("product.cap") + " to update\n" +
+                                "the sketchbook menu.", null);
+                }
+            }
+        };
+
+        JMenuItem item;
+
+        for (int i = MRUList.size() - 1; i >= 0; i--) {
+            item = new JMenuItem(MRUList.get(i).getName());
+            item.addActionListener(listener);
+            item.setActionCommand(MRUList.get(i).getAbsolutePath());
+            menu.add(item);
+        }
     }
 
     private Board getDefaultBoard() {
@@ -678,6 +743,8 @@ public class Base {
             "Open " + Theme.get("product.cap") + " sketch...",
             FileDialog.LOAD);
 
+        fd.setDirectory(Base.getSketchbookFolder().getAbsolutePath());
+
         // Only show .pde files as eligible bachelors
         fd.setFilenameFilter(new FilenameFilter() {
             public boolean accept(File dir, String name) {
@@ -734,6 +801,7 @@ public class Base {
         editors.add(editor);
         editor.setVisible(true);
 
+        updateMRU(new File(path));
         return editor;
     }
 
@@ -855,11 +923,12 @@ public class Base {
     * Asynchronous version of menu rebuild to be used on save and rename
     * to prevent the interface from locking up until the menus are done.
     */
+
     protected void rebuildSketchbookMenus() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
 		for (int i = 0; i < editors.size(); i++) {
-			rebuildSketchbookMenu(editors.get(i).sketchbookMenu);
+            rebuildMRUMenu(editors.get(i).sketchbookMenu);
 			rebuildToolbarMenu(editors.get(i).toolbarMenu);
 		}
             }
@@ -894,12 +963,13 @@ public class Base {
         addSketches(menu, librariesFolder, true);
     }
 
+/*
     protected void rebuildSketchbookMenu(JMenu menu) {
         //System.out.println("rebuilding sketchbook menu");
         menu.removeAll();
         addSketches(menu, getSketchbookFolder(), false);
     }
-
+*/
 
     public void rebuildImportMenu(JMenu importMenu) {
         importMenu.removeAll();
