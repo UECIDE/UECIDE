@@ -79,7 +79,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   /**
    * true if this file has not yet been given a name by the user
    */
-  boolean untitled;
+  public boolean untitled;
 
   PageFormat pageFormat;
   PrinterJob printerJob;
@@ -614,8 +614,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     fileMenu.add(item);
 
     if (sketchbookMenu == null) {
-      sketchbookMenu = new JMenu("Sketchbook");
-      base.rebuildSketchbookMenu(sketchbookMenu);
+      sketchbookMenu = new JMenu("Recent Sketches");
+      base.rebuildMRUMenu(sketchbookMenu);
     }
     fileMenu.add(sketchbookMenu);
 
