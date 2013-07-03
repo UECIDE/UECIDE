@@ -411,9 +411,9 @@ public class Sketch {
     // In Arduino, don't allow a .cpp file with the same name as the sketch,
     // because the sketch is concatenated into a file with that name as part
     // of the build process.  
-    if (newName.equals(getName() + ".cpp")) {
+    if (newName.equals(getName() + "." + Base.selectedBoard.getCore().get("build.extension","cpp"))) {
       Base.showMessage("Nope",
-                       "You can't have a .cpp file with the same name as the sketch.");
+                       "You can't have a ." + Base.selectedBoard.getCore().get("build.extension","cpp") + " file with the same name as the sketch.");
       return;
     }
     
@@ -1321,7 +1321,7 @@ public class Sketch {
       }
 
       // store this for the compiler and the runtime
-      primaryClassName = className + ".cpp";
+      primaryClassName = className + "." + Base.selectedBoard.getCore().get("build.extension","cpp");
 
     } catch (FileNotFoundException fnfe) {
       fnfe.printStackTrace();
@@ -1470,7 +1470,7 @@ public class Sketch {
     }
 
     // If not the preprocessed file at this point, then need to get out
-    if (!dotJavaFilename.equals(name + ".cpp")) {
+    if (!dotJavaFilename.equals(name + "." + Base.selectedBoard.getCore().get("build.extension","cpp"))) {
       return null;
     }
 
