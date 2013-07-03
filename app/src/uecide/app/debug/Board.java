@@ -272,6 +272,7 @@ public class Board implements MessageConsumer {
     }
 
     public boolean execAsynchronously(String command) {
+        if (command == null) return true;
         String[] commandArray = command.split("::");
         List<String> stringList = new ArrayList<String>();
         Process process;

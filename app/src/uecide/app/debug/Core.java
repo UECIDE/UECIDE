@@ -393,14 +393,35 @@ public class Core implements MessageConsumer {
 
         String corePath = api.getAbsolutePath();
 
-        includePaths.add(corePath);
-        includePaths.add(Base.selectedBoard.getFolder().getAbsolutePath());
+        Board board = Base.selectedBoard;
 
-        List<File> coreObjectFiles   = compileFiles(
-                buildPath,
-                findFilesInPath(corePath, "S", true),
-                findFilesInPath(corePath, "c", true),
-                findFilesInPath(corePath, "cpp", true));
+        includePaths.add(corePath);
+        includePaths.add(board.getFolder().getAbsolutePath());
+
+        ArrayList<File> sFiles = findFilesInPath(corePath, "S", true);
+        ArrayList<File> cFiles = findFilesInPath(corePath, "c", true);
+        ArrayList<File> cppFiles = findFilesInPath(corePath, "cpp", true);
+
+        String boardFiles = board.get("build.files", board.getCore().get("build.files"));
+        if (boardFiles != null) {
+            String[] bfl = boardFiles.split("::");
+            for (String bf : bfl) {
+                File f = new File(board.getFolder(), bf);
+                if (f.exists()) {
+                    if (bf.endsWith(".S")) {
+                        sFiles.add(f);
+                    }
+                    if (bf.endsWith(".c")) {
+                        cFiles.add(f);
+                    }
+                    if (bf.endsWith(".cpp")) {
+                        cppFiles.add(f);
+                    }
+                }
+            }
+        }
+
+        List<File> coreObjectFiles   = compileFiles(buildPath, sFiles, cFiles, cppFiles);
 
         if (coreObjectFiles == null) {
             return false;

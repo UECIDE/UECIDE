@@ -195,7 +195,9 @@ public class PdePreprocessor {
     this.program = program;
     
     // output the code
-    File streamFile = new File(buildPath, name + ".cpp");
+
+    String newFilename = name + "." + Base.selectedBoard.getCore().get("build.extension","cpp");
+    File streamFile = new File(buildPath, newFilename);
     stream = new PrintStream(new FileOutputStream(streamFile));
     
     return headerCount + prototypeCount;
