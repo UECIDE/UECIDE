@@ -72,6 +72,11 @@ public class CreateFont extends JFrame implements Plugin {
 	Map pluginInfo;
 	public void setInfo(Map info) { pluginInfo = info; }
 
+    public int flags()
+    {
+        return BasePlugin.MENU;
+    }
+
 
 	public CreateFont() 
 	{
