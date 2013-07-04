@@ -34,9 +34,16 @@ import java.util.regex.*;
 
 public class BasePlugin implements Plugin {
 
+    public static final int MENU = 1;
+    public static final int LOADER = 2;
+
     public Editor editor;
     public Map pluginInfo;
     public URLClassLoader loader;
+
+    public int flags() {
+        return MENU;
+    }
 
     public void init(Editor editor)
     {
@@ -72,7 +79,8 @@ public class BasePlugin implements Plugin {
         this.loader = loader;
     }
 
-    public InputStream getResourceAsStream(String file) {
+    public InputStream getResourceAsStream(String file) 
+    {
         try {
             return loader.getResourceAsStream(file);
         } catch (Exception e) {
