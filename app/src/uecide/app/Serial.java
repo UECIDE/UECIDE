@@ -223,11 +223,14 @@ public class Serial implements SerialPortEventListener {
               System.arraycopy(buffer, 0, temp, 0, bufferLast);
               buffer = temp;
             }
-            //buffer[bufferLast++] = (byte) input.read();
+            int val = input.read();
             if(monitor == true)
-              System.out.print((char) input.read());
-            if (this.consumer != null)
-              this.consumer.message("" + (char) input.read());
+              System.out.print((char) val);
+            if (this.consumer != null) {
+              this.consumer.message("" + (char) val);
+            } else {
+                buffer[bufferLast++] = (byte) val;
+            }
             
             /*
             System.err.println(input.available() + " " + 

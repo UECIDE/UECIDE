@@ -547,7 +547,7 @@ public class Base {
 
         // set the current window to be the console that's getting output
         EditorConsole.setEditor(activeEditor);
-//        setPluginEditors();
+        setPluginEditors();
     }
 
     protected int[] nextEditorLocation() {
@@ -2824,14 +2824,22 @@ removeDir(dead);
 
         for (int i=0; i<entries.length; i++) {
             final Plugin t = plugins.get(entries[i]);
-            item = new JMenuItem(t.getMenuTitle());
-            item.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    t.init(activeEditor);
-                    SwingUtilities.invokeLater(t);
-                }
-            });
-            menu.add(item);
+            int flags = 0;
+            try {
+                flags = t.flags();
+            } catch (Exception e) {
+                flags = BasePlugin.MENU;
+            }
+            if ((flags & BasePlugin.MENU) != 0) {
+                item = new JMenuItem(t.getMenuTitle());
+                item.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        t.init(activeEditor);
+                        SwingUtilities.invokeLater(t);
+                    }
+                });
+                menu.add(item);
+            }
         }
     }
 }

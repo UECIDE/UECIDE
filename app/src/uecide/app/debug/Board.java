@@ -31,6 +31,8 @@ import java.util.*;
 
 import uecide.app.Preferences;
 import uecide.app.Base;
+import uecide.plugin.Plugin;
+import uecide.plugin.BasePlugin;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -139,7 +141,15 @@ public class Board implements MessageConsumer {
         set("filename.hex", filename + ".hex");
         set("filename.eep", filename + ".eep");
 
-        uploadCommand = get("upload.command." + Base.osNameFull());
+        boolean isJava = true;
+        uploadCommand = get("upload.command.java");
+        if (uploadCommand == null) {
+            uploadCommand = core.get("upload.command.java");
+        }
+        if (uploadCommand == null) {
+            isJava = false;
+            uploadCommand = get("upload.command." + Base.osNameFull());
+        }
         if (uploadCommand == null) {
             uploadCommand = get("upload.command." + Base.osName());
         }
@@ -159,6 +169,26 @@ public class Board implements MessageConsumer {
         if (uploadCommand == null) {
             System.err.println("No upload command defined for board");
             return false;
+        }
+
+        if (isJava) {
+            Plugin uploader;
+            uploader = Base.plugins.get(uploadCommand);
+            if (uploader == null) {
+                System.err.println("Upload class " + uploadCommand + " not found.");
+                return false;
+            }
+            try {
+                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
+                    System.err.println(uploadCommand + "is not a valid loader plugin.");
+                    return false;
+                }
+                uploader.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
         }
 
         String[] spl;
