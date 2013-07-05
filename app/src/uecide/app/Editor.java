@@ -1789,7 +1789,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     // Cannot use invokeLater() here, otherwise it gets
     // placed on the event thread and causes a hang--bad idea all around.
-    new Thread(runHandler).start();
+    new Thread(runHandler, "Compiler").start();
   }
 
   // DAM: in Arduino, this is compile
@@ -2238,7 +2238,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     console.clear();
     status.progress("Uploading to I/O Board...");
 
-    new Thread(exportHandler).start();
+    new Thread(exportHandler, "Uploader").start();
   }
 
   // DAM: in Arduino, this is upload
