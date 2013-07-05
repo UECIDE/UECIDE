@@ -40,7 +40,7 @@ public class MessageSiphon implements Runnable {
     this.streamReader = new BufferedReader(new InputStreamReader(stream));
     this.consumer = consumer;
 
-    thread = new Thread(this);
+    thread = new Thread(this, "Message Siphon");
     // don't set priority too low, otherwise exceptions won't
     // bubble up in time (i.e. compile errors have a weird delay)
     //thread.setPriority(Thread.MIN_PRIORITY);

@@ -64,6 +64,8 @@ public class Base {
     public static String VERSION_NAME = "0023";
     /** Set true if this a proper release rather than a numbered revision. */
     static public boolean RELEASE = false;
+
+    public static ArrayList<Process> processes = new ArrayList<Process>();
   
   
     static HashMap<Integer, String> platformNames = new HashMap<Integer, String>();
@@ -119,7 +121,7 @@ public class Base {
 
     java.util.List<Editor> editors =
         Collections.synchronizedList(new ArrayList<Editor>());
-    Editor activeEditor;
+    public Editor activeEditor;
 
 
     static public void main(String args[]) {
@@ -2364,7 +2366,20 @@ removeDir(dead);
 
             System.out.println("  " + entries[i] + " - " + ver + " compiled " + com);
         }
+
+        System.out.println("\nProcesses:");
+        for (Process p : processes) {
+            System.out.println("  " + p);
+        }
+
+        System.out.println("\nThreads:");
+        Thread[] threads = new Thread[Thread.activeCount()];
+        Thread.enumerate(threads);
+        for (Thread t : threads) {
+            System.out.println("  " + t.getName());
+        }
     }
+
 
     public File openFileDialog(String title, final String type)
     {
@@ -2487,7 +2502,7 @@ removeDir(dead);
         DefaultZipHandler zip = new DefaultZipHandler();
         zip.inputFile = inputFile;
         zip.destination = destination;
-        Thread thr = new Thread(zip);
+        Thread thr = new Thread(zip, "Unzip " + inputFile);
         thr.start();
         try {
             thr.join();
