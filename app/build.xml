@@ -71,7 +71,7 @@
     </target>
 
     <target name="build" depends="compile" description="Build PDE">
-        <jar basedir="bin" destfile="uecide.jar" includes="uecide/app/** uecide/plugin/Archiver.class uecide/plugin/AutoFormat.class uecide/plugin/BasePlugin.class uecide/plugin/DiscouseFormat*.class uecide/plugin/FixEncoding.class uecide/plugin/Plugin.class">
+        <jar basedir="bin" destfile="uecide.jar" includes="uecide/app/** uecide/plugin/AutoFormat.class uecide/plugin/BasePlugin.class uecide/plugin/DiscouseFormat*.class uecide/plugin/FixEncoding.class uecide/plugin/Plugin.class">
 
             <manifest>
                 <attribute name="Built-By" value="Rick Anderson"/>  

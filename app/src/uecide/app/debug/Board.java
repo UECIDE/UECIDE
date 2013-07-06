@@ -29,10 +29,8 @@ package uecide.app.debug;
 import java.io.*;
 import java.util.*;
 
-import uecide.app.Preferences;
-import uecide.app.Base;
-import uecide.plugin.Plugin;
-import uecide.plugin.BasePlugin;
+import uecide.app.*;
+import uecide.plugin.*;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -221,7 +219,7 @@ public class Board implements MessageConsumer {
 
         spl[0] = executable;
 
-        // Parse each word, doing string replacement as needed, trimming it, and
+        // Parse each word, doing String replacement as needed, trimming it, and
         // generally getting it ready for executing.
 
         String commandString = executable;
@@ -301,12 +299,22 @@ public class Board implements MessageConsumer {
         return null;
     }
 
+    public String getAny(String key) {
+        return getAny(key, "");
+    }
+    public String getAny(String key, String def) {
+        return get(key, core.get(key, def));
+    }
+
     public boolean execAsynchronously(String command) {
-        if (command == null) return true;
+        File buildFolder = new File(getAny("build.path"));
+
+        if (command == null) {
+            return true;
+        }
+
         String[] commandArray = command.split("::");
         List<String> stringList = new ArrayList<String>();
-        Process process;
-
         for(String string : commandArray) {
             string = string.trim();
             if(string != null && string.length() > 0) {
@@ -314,35 +322,55 @@ public class Board implements MessageConsumer {
             }
         }
 
-        if (runInVerboseMode) {
-            System.out.println(command.replace("::"," "));
-        }
-        commandArray = stringList.toArray(new String[stringList.size()]);
 
-        int result = -1;
+        ProcessBuilder process = new ProcessBuilder(stringList);
+        if (buildFolder != null) {
+            process.directory(buildFolder);
+        }
+        Map<String, String> environment = process.environment();
+        
+        String[] env = getAny("environment","").split("::");
+        for (String ev : env) {
+            String[] bits = ev.split("=");
+            if (bits.length == 2) {
+                environment.put(bits[0], bits[1]);
+            }
+        }
+
+        if (runInVerboseMode) {
+            for (String component : stringList) {
+                System.out.print(component + " ");
+            }
+            System.out.println("");
+        }
+
+        Process proc;
         try {
-            process = Runtime.getRuntime().exec(commandArray);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
+            proc = process.start();
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
 
-        MessageSiphon in = new MessageSiphon(process.getInputStream(), this);
-        MessageSiphon err = new MessageSiphon(process.getErrorStream(), this);
+        Base.processes.add(proc);
+
+        MessageSiphon in = new MessageSiphon(proc.getInputStream(), this);
+        MessageSiphon err = new MessageSiphon(proc.getErrorStream(), this);
         in.setChannel(1);
         err.setChannel(2);
         boolean running = true;
+        int result = -1;
         while (running) {
             try {
                 if (in.thread != null)
                     in.thread.join();
                 if (err.thread != null)
                     err.thread.join();
-                result = process.waitFor();
+                result = proc.waitFor();
                 running = false;
             } catch (InterruptedException ignored) { }
         }
-
+        Base.processes.remove(proc);
         if (result == 0) {
             return true;
         }

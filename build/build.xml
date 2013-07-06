@@ -117,11 +117,13 @@
   <target name="subprojects-clean">
     <subant buildpath="../core" target="clean"/>
     <subant buildpath="../app" target="clean"/>
+    <subant buildpath="../plugins" target="clean"/>
   </target>
 
   <target name="subprojects-build">
     <subant buildpath="../core" target="build"/>
     <subant buildpath="../app" target="build"/>
+    <subant buildpath="../plugins" target="build"/>
   </target>
 
 
@@ -142,6 +144,10 @@
         <chmod perm="+x">
             <fileset dir="${target.path}/hardware/cores/${core.name}" includes="**/*" />
         </chmod>
+    </target>
+
+    <target name="install_plugin" if="plugin.${plugin}">
+        <copy file="../plugins/${plugin}/${plugin}.jar" todir="${target.path}/plugins/"/>
     </target>
 
     <target name="install_boards" if="boards.${boards.name}">
@@ -247,6 +253,54 @@
 
         <antcall target="install_boards">
             <param name="boards.name" value="Launchpad" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_plugin">
+            <param name="plugin" value="Archiver" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_plugin">
+            <param name="plugin" value="AutoFormat" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_plugin">
+            <param name="plugin" value="ColorSelector" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_plugin">
+            <param name="plugin" value="ConvertWaveFile" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_plugin">
+            <param name="plugin" value="CreateFont" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_plugin">
+            <param name="plugin" value="ExportToMPLABX" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_plugin">
+            <param name="plugin" value="FixEncoding" />
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </antcall>
+
+        <antcall target="install_plugin">
+            <param name="plugin" value="SerialTerminal" />
             <param name="target.path" value="${target.path}"/>
             <param name="target.platform" value="${target.platform}"/>
         </antcall>
@@ -788,6 +842,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 
         <antcall target="clean" />
 
+    </target>
+
+    <target name="plugins">
+        <subant buildpath="../plugins" target="build"/>
     </target>
 
 </project>
