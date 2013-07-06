@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<project name="Plugins" default="build">
+    <target name="build">
+        <subant buildpath="Archiver" target="build"/>
+        <subant buildpath="AutoFormat" target="build"/>
+        <subant buildpath="ColorSelector" target="build"/>
+        <subant buildpath="ConvertWaveFile" target="build"/>
+        <subant buildpath="CreateFont" target="build"/>
+        <subant buildpath="ExportToMPLABX" target="build"/>
+        <subant buildpath="FixEncoding" target="build"/>
+        <subant buildpath="SerialTerminal" target="build"/>
+    </target>
+    <target name="clean">
+        <subant buildpath="Archiver" target="clean"/>
+        <subant buildpath="AutoFormat" target="clean"/>
+        <subant buildpath="ColorSelector" target="clean"/>
+        <subant buildpath="ConvertWaveFile" target="clean"/>
+        <subant buildpath="CreateFont" target="clean"/>
+        <subant buildpath="ExportToMPLABX" target="clean"/>
+        <subant buildpath="FixEncoding" target="clean"/>
+        <subant buildpath="SerialTerminal" target="clean"/>
+    </target>
+</project>

@@ -30,8 +30,7 @@ import java.io.*;
 import java.util.*;
 
 import uecide.app.*;
-import uecide.plugin.Plugin;
-import uecide.plugin.BasePlugin;
+import uecide.plugin.*;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
