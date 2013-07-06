@@ -33,6 +33,7 @@ import javax.swing.*;
 import uecide.app.syntax.*;
 import processing.core.*;
 
+import say.swing.*;
 
 
 
@@ -119,6 +120,7 @@ public class Preferences {
   JTextField memoryField;
   JCheckBox checkUpdatesBox;
   JTextField fontSizeField;
+  JTextField sfontSizeField;
   JCheckBox autoAssociateBox;
 
 
@@ -132,6 +134,26 @@ public class Preferences {
   static Hashtable defaults;
   static Hashtable table = new Hashtable();;
   static File preferencesFile;
+
+    static public String fontToString(Font f)
+    {
+        String font = f.getName();
+        String style = "";
+        font += ",";
+        if ((f.getStyle() & Font.BOLD) != 0) {
+            style += "bold";
+        }
+        if ((f.getStyle() & Font.ITALIC) != 0) {
+            style += "italic";
+        }
+        if (style.equals("")) {
+            style = "plain";
+        }
+        font += style;
+        font += ",";
+        font += Integer.toString(f.getSize());
+        return font;
+    }
 
 
   static protected void init(String commandLinePrefs) {
@@ -277,6 +299,36 @@ public class Preferences {
     Font editorFont = Preferences.getFont("editor.font");
     fontSizeField.setText(String.valueOf(editorFont.getSize()));
     top += d.height + GUI_BETWEEN;
+
+    // Serial font
+    box = Box.createHorizontalBox();
+    label = new JLabel("Serial font: ");
+    box.add(label);
+    sfontSizeField = new JTextField(20);
+    box.add(sfontSizeField);
+    JButton selectSerialFont = new JButton(Translate.t("Select Font..."));
+    box.add(selectSerialFont);
+    pain.add(box);
+    d = box.getPreferredSize();
+    box.setBounds(left, top, d.width, d.height);
+    Font serialFont = Preferences.getFont("serial.font");
+    sfontSizeField.setText(Preferences.fontToString(serialFont));
+
+    final Container parent = box;
+    selectSerialFont.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            JFontChooser fc = new JFontChooser(true);
+            int res = fc.showDialog(parent);
+            if (res == JFontChooser.OK_OPTION) {
+                Font f = fc.getSelectedFont();
+                sfontSizeField.setText(Preferences.fontToString(f));
+            }
+        }
+    });
+    
+    top += d.height + GUI_BETWEEN;
+
+    
 
 
     // [ ] Delete previous applet or application folder on export
@@ -502,6 +554,8 @@ public class Preferences {
     } catch (Exception e) {
       System.err.println("ignoring invalid font size " + newSizeText);
     }
+
+    set("serial.font", sfontSizeField.getText());
 
     if (autoAssociateBox != null) {
       setBoolean("platform.auto_file_type_associations",

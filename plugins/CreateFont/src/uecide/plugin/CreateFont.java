@@ -72,9 +72,19 @@ public class CreateFont extends JFrame implements Plugin {
 	Map pluginInfo;
 	public void setInfo(Map info) { pluginInfo = info; }
 
+    public ImageIcon toolbarIcon() { return null; }
+
     public int flags()
     {
         return BasePlugin.MENU;
+    }
+
+    public char getShortcut()
+    {
+        if (pluginInfo.get("shortcut") != null) {
+            return ((String) pluginInfo.get("shortcut")).charAt(0);
+        }
+        return 0;
     }
 
 

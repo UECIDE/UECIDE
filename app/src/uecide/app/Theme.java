@@ -39,9 +39,9 @@ import processing.core.*;
 public class Theme {
 
   /** Copy of the defaults in case the user mangles a preference. */
-  static HashMap<String,String> defaults;
+  static public HashMap<String,String> defaults;
   /** Table of attributes/values for the theme. */
-  static HashMap<String,String> table = new HashMap<String,String>();;
+  static public HashMap<String,String> table = new HashMap<String,String>();;
 
 
   static protected void init() {
@@ -157,6 +157,10 @@ public class Theme {
     if (value == null) {
       value = getDefault(attr);
       replace = true;
+    }
+
+    if (value == null) {
+        return null;
     }
 
     String[] pieces = PApplet.split(value, ',');

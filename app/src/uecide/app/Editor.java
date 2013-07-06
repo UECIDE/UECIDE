@@ -22,9 +22,9 @@
 
 package uecide.app;
 
+import uecide.plugin.*;
 import uecide.app.debug.*;
 import uecide.app.syntax.*;
-import uecide.plugin.*;
 import processing.core.*;
 
 import java.awt.*;
@@ -98,7 +98,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   /*static*/ JMenu sketchbookMenu;
   /*static*/ JMenu examplesMenu;
   /*static*/ JMenu importMenu;
-  /*static*/ JMenu pluginsMenu;
 
   // these menus are shared so that the board and serial port selections
   // are the same for all windows (since the board and serial port that are
@@ -108,7 +107,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   /*static*/ JMenu serialMenu;
 
   static SerialMenuListener serialMenuListener;
-  static SerialMonitor serialMonitor;
   
   EditorHeader header;
   public EditorStatus status;
@@ -214,10 +212,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     //PdeKeywords keywords = new PdeKeywords();
     //sketchbook = new Sketchbook(this);
 
-    if (serialMonitor == null)
-      serialMonitor = new SerialMonitor(Preferences.get("serial.port"));
-
-    
     buildMenuBar();
 
     // For rev 0120, placing things inside a JPanel
@@ -248,7 +242,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     ImageIcon runButtonIcon = new ImageIcon(runIconFile.getAbsolutePath());
 
     runButton = new JButton(runButtonIcon);
-    runButton.setToolTipText("Verify");
+    runButton.setToolTipText(Translate.t("Verify"));
     runButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e)
         {
@@ -264,7 +258,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     File burnIconFile = new File(themeFolder, "burn.png");
     ImageIcon burnButtonIcon = new ImageIcon(burnIconFile.getAbsolutePath());
     burnButton = new JButton(burnButtonIcon);
-    burnButton.setToolTipText("Program");
+    burnButton.setToolTipText(Translate.t("Program"));
     burnButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e)
         {
@@ -282,7 +276,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     File newIconFile = new File(themeFolder, "new.png");
     ImageIcon newButtonIcon = new ImageIcon(newIconFile.getAbsolutePath());
     newButton = new JButton(newButtonIcon);
-    newButton.setToolTipText("New");
+    newButton.setToolTipText(Translate.t("New"));
     newButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e)
         {
@@ -298,7 +292,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     File openIconFile = new File(themeFolder, "open.png");
     ImageIcon openButtonIcon = new ImageIcon(openIconFile.getAbsolutePath());
     openButton = new JButton(openButtonIcon);
-    openButton.setToolTipText("Open Sketch");
+    openButton.setToolTipText(Translate.t("Open Sketch"));
     openButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e)
         {
@@ -310,7 +304,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     File saveIconFile = new File(themeFolder, "save.png");
     ImageIcon saveButtonIcon = new ImageIcon(saveIconFile.getAbsolutePath());
     saveButton = new JButton(saveButtonIcon);
-    saveButton.setToolTipText("Save Sketch");
+    saveButton.setToolTipText(Translate.t("Save Sketch"));
     saveButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e)
         {
@@ -321,18 +315,25 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     toolbar.addSeparator();
 
-    File consoleIconFile = new File(themeFolder, "console.png");
-    ImageIcon consoleButtonIcon = new ImageIcon(consoleIconFile.getAbsolutePath());
-    consoleButton = new JButton(consoleButtonIcon);
-    consoleButton.setToolTipText("Open Serial Console");
-    consoleButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e)
-        {
-            handleSerial();
-        }
-    });
-    toolbar.add(consoleButton);
+    String[] entries = (String[]) Base.plugins.keySet().toArray(new String[0]);
 
+    for (String plugin : entries) {
+        try {
+            final Plugin t = Base.plugins.get(plugin);
+            ImageIcon bi = t.toolbarIcon();
+            if (bi != null) {
+                JButton button = new JButton(bi);
+                button.setToolTipText(t.getMenuTitle());
+                button.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        SwingUtilities.invokeLater(t);
+                    }
+                });
+                toolbar.add(button);
+            }
+        } catch(Exception e) {
+        }
+    }
 
     Dimension dmax = toolbar.getMaximumSize();
     dmax.height = 32;
@@ -486,13 +487,13 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       }
 
       if (successful == 0) {
-        statusError("No files were added to the sketch.");
+        statusError(Translate.t("No files were added to the sketch."));
 
       } else if (successful == 1) {
-        statusNotice("One file added to the sketch.");
+        statusNotice(Translate.t("One file added to the sketch."));
 
       } else {
-        statusNotice(successful + " files added to the sketch.");
+        statusNotice(Translate.t("%1 files added to the sketch.", Integer.toString(successful)));
       }
       return true;
     }
@@ -595,9 +596,9 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
   protected JMenu buildFileMenu() {
     JMenuItem item;
-    fileMenu = new JMenu("File");
+    fileMenu = new JMenu(Translate.t("File"));
 
-    item = newJMenuItem("New", 'N');
+    item = newJMenuItem(Translate.t("New"), 'N');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           base.handleNew();
@@ -605,7 +606,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     fileMenu.add(item);
 
-    item = Editor.newJMenuItem("Open...", 'O');
+    item = Editor.newJMenuItem(Translate.t("Open..."), 'O');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           base.handleOpenPrompt();
@@ -614,18 +615,18 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     fileMenu.add(item);
 
     if (sketchbookMenu == null) {
-      sketchbookMenu = new JMenu("Recent Sketches");
+      sketchbookMenu = new JMenu(Translate.t("Recent Sketches"));
       base.rebuildMRUMenu(sketchbookMenu);
     }
     fileMenu.add(sketchbookMenu);
 
     if (examplesMenu == null) {
-      examplesMenu = new JMenu("Examples");
+      examplesMenu = new JMenu(Translate.t("Examples"));
       base.rebuildExamplesMenu(examplesMenu);
     }
     fileMenu.add(examplesMenu);
 
-    item = Editor.newJMenuItem("Close", 'W');
+    item = Editor.newJMenuItem(Translate.t("Close"), 'W');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           base.handleClose(Editor.this);
@@ -633,7 +634,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     fileMenu.add(item);
 
-    saveMenuItem = newJMenuItem("Save", 'S');
+    saveMenuItem = newJMenuItem(Translate.t("Save"), 'S');
     saveMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handleSave(false);
@@ -641,7 +642,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     fileMenu.add(saveMenuItem);
 
-    saveAsMenuItem = newJMenuItemShift("Save As...", 'S');
+    saveAsMenuItem = newJMenuItemShift(Translate.t("Save As..."), 'S');
     saveAsMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handleSaveAs();
@@ -649,7 +650,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     fileMenu.add(saveAsMenuItem);
 
-    item = newJMenuItem("Upload to I/O Board", 'U');
+    item = newJMenuItem(Translate.t("Upload to I/O Board"), 'U');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             Base.selectedBoard.setVerbose(false);
@@ -668,7 +669,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     fileMenu.addSeparator();
 
-    item = newJMenuItemShift("Page Setup", 'P');
+    item = newJMenuItemShift(Translate.t("Page Setup"), 'P');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handlePageSetup();
@@ -676,7 +677,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     fileMenu.add(item);
 
-    item = newJMenuItem("Print", 'P');
+    item = newJMenuItem(Translate.t("Print"), 'P');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handlePrint();
@@ -688,7 +689,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     if (!Base.isMacOS()) {
       fileMenu.addSeparator();
 
-      item = newJMenuItem("Preferences", ',');
+      item = newJMenuItem(Translate.t("Preferences"), ',');
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             base.handlePrefs();
@@ -698,7 +699,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
       fileMenu.addSeparator();
 
-      item = newJMenuItem("Quit", 'Q');
+      item = newJMenuItem(Translate.t("Quit"), 'Q');
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             base.handleQuit();
@@ -712,9 +713,9 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
   protected JMenu buildSketchMenu() {
     JMenuItem item;
-    sketchMenu = new JMenu("Sketch");
+    sketchMenu = new JMenu(Translate.t("Sketch"));
 
-    item = newJMenuItem("Verify / Compile", 'R');
+    item = newJMenuItem(Translate.t("Verify / Compile"), 'R');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handleRun(false);
@@ -741,12 +742,12 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     sketchMenu.addSeparator();
 
     if (importMenu == null) {
-      importMenu = new JMenu("Import Library...");
+      importMenu = new JMenu(Translate.t("Import Library..."));
       base.rebuildImportMenu(importMenu);
     }
     sketchMenu.add(importMenu);
 
-    item = newJMenuItem("Show Sketch Folder", 'K');
+    item = newJMenuItem(Translate.t("Show Sketch Folder"), 'K');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Base.openFolder(sketch.getFolder());
@@ -755,7 +756,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     sketchMenu.add(item);
     item.setEnabled(Base.openFolderAvailable());
 
-    item = new JMenuItem("Add File...");
+    item = new JMenuItem(Translate.t("Add File..."));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           sketch.handleAddFile();
@@ -768,12 +769,12 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
 
   protected JMenu buildHardwareMenu() {
-    hardwareMenu = new JMenu("Hardware");
+    hardwareMenu = new JMenu(Translate.t("Hardware"));
     JMenu menu = hardwareMenu;
     JMenuItem item;
 
     if (boardsMenu == null) {
-      boardsMenu = new JMenu("Board");
+      boardsMenu = new JMenu(Translate.t("Board"));
       base.rebuildBoardsMenu(boardsMenu);
       //Debug: rebuild imports
       importMenu.removeAll();
@@ -782,7 +783,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     menu.add(boardsMenu);
 
     if (coresMenu == null) {
-        coresMenu = new JMenu("Cores");
+        coresMenu = new JMenu(Translate.t("Cores"));
         base.rebuildCoresMenu(coresMenu);
         importMenu.removeAll();
         base.rebuildImportMenu(importMenu);
@@ -792,7 +793,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     if (serialMenuListener == null)
       serialMenuListener  = new SerialMenuListener();
     if (serialMenu == null)
-      serialMenu = new JMenu("Serial Port");
+      serialMenu = new JMenu(Translate.t("Serial Port"));
     populateSerialMenu();
     menu.add(serialMenu);
     
@@ -809,24 +810,10 @@ static Logger logger = Logger.getLogger(Base.class.getName());
  
     public JMenu buildToolsMenu()
     {
-        toolsMenu = new JMenu("Tools");
+        toolsMenu = new JMenu(Translate.t("Tools"));
         JMenu menu = toolsMenu;
         JMenuItem item;
-
-        addInternalTools(menu);
-    
-        item = newJMenuItemShift("Serial Monitor", 'M');
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleSerial();
-            }
-        });
-        menu.add(item);
-
-        pluginsMenu = new JMenu("Plugins");
-        menu.add(pluginsMenu);
-
-        base.rebuildPluginsMenu(pluginsMenu);
+        base.rebuildPluginsMenu(toolsMenu);
         return menu;
     }
 
@@ -853,22 +840,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       return null;
     }
   }
-
-
-  protected JMenu addInternalTools(JMenu menu) {
-    JMenuItem item;
-
-    item = createToolMenuItem("uecide.plugin.AutoFormat");
-    int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-    item.setAccelerator(KeyStroke.getKeyStroke('T', modifiers));
-    menu.add(item);
-
-    menu.add(createToolMenuItem("uecide.plugin.Archiver"));
-    menu.add(createToolMenuItem("uecide.plugin.FixEncoding"));
-
-    return menu;
-  }
-
 
   class SerialMenuListener implements ActionListener {
     //public SerialMenuListener() { }
@@ -897,9 +868,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     }
     if (selection != null) selection.setState(true);
     Preferences.set("serial.port", name);
-    serialMonitor.closeSerialPort();
-    serialMonitor.setVisible(false);
-    serialMonitor = new SerialMonitor(Preferences.get("serial.port"));
   }
 
 
@@ -934,7 +902,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     catch (Exception exception)
     {
-      System.out.println("error retrieving port list");
+      System.out.println(Translate.t("Error retrieving port list"));
       exception.printStackTrace();
     }
 	
@@ -950,46 +918,10 @@ static Logger logger = Logger.getLogger(Base.class.getName());
   protected JMenu buildHelpMenu() {
     // To deal with a Mac OS X 10.5 bug, add an extra space after the name
     // so that the OS doesn't try to insert its slow help menu.
-    JMenu menu = new JMenu("Help ");
+    JMenu menu = new JMenu(Translate.t("Help"));
     JMenuItem item;
 
-    /*
-    // testing internal web server to serve up docs from a zip file
-    item = new JMenuItem("Web Server Test");
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          //WebServer ws = new WebServer();
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              try {
-                int port = WebServer.launch("/Users/fry/coconut/processing/build/shared/reference.zip");
-                Base.openURL("http://127.0.0.1:" + port + "/reference/setup_.html");
-
-              } catch (IOException e1) {
-                e1.printStackTrace();
-              }
-            }
-          });
-        }
-      });
-    menu.add(item);
-    */
-
-    /*
-    item = new JMenuItem("Browser Test");
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          //Base.openURL("http://processing.org/learning/gettingstarted/");
-          //JFrame browserFrame = new JFrame("Browser");
-          BrowserStartup bs = new BrowserStartup("jar:file:/Users/fry/coconut/processing/build/shared/reference.zip!/reference/setup_.html");
-          bs.initUI();
-          bs.launch();
-        }
-      });
-    menu.add(item);
-    */
-
-    item = new JMenuItem("Getting Started");
+    item = new JMenuItem(Translate.t("Getting Started"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Base.showGettingStarted();
@@ -997,7 +929,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
-    item = new JMenuItem("Environment");
+    item = new JMenuItem(Translate.t("Environment"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Base.showEnvironment();
@@ -1005,7 +937,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
-    item = new JMenuItem("Troubleshooting");
+    item = new JMenuItem(Translate.t("Troubleshooting"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Base.showTroubleshooting();
@@ -1013,7 +945,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
-    item = new JMenuItem("Reference");
+    item = new JMenuItem(Translate.t("Reference"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Base.showReference();
@@ -1021,7 +953,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
-    item = newJMenuItemShift("Find in Reference", 'F');
+    item = newJMenuItemShift(Translate.t("Find in Reference"), 'F');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if (textarea.isSelectionActive()) {
@@ -1031,7 +963,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
-    item = new JMenuItem("Frequently Asked Questions");
+    item = new JMenuItem(Translate.t("Frequently Asked Questions"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Base.showFAQ();
@@ -1064,7 +996,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     // macosx already has its own about menu
     if (!Base.isMacOS()) {
       menu.addSeparator();
-      item = new JMenuItem("About " + Theme.get("product.cap"));
+      item = new JMenuItem(Translate.t("About %1", Theme.get("product.cap")));
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             base.handleAbout();
@@ -1073,7 +1005,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       menu.add(item);
     }
 
-    item = new JMenuItem("System Information");
+    item = new JMenuItem(Translate.t("System Information"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             base.handleSystemInfo();
@@ -1086,14 +1018,14 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
 
   protected JMenu buildEditMenu() {
-    JMenu menu = new JMenu("Edit");
+    JMenu menu = new JMenu(Translate.t("Edit"));
     JMenuItem item;
 
-    undoItem = newJMenuItem("Undo", 'Z');
+    undoItem = newJMenuItem(Translate.t("Undo"), 'Z');
     undoItem.addActionListener(undoAction = new UndoAction());
     menu.add(undoItem);
 
-    redoItem = newJMenuItem("Redo", 'Y');
+    redoItem = newJMenuItem(Translate.t("Redo"), 'Y');
     redoItem.addActionListener(redoAction = new RedoAction());
     menu.add(redoItem);
 
@@ -1101,7 +1033,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     // TODO "cut" and "copy" should really only be enabled
     // if some text is currently selected
-    item = newJMenuItem("Cut", 'X');
+    item = newJMenuItem(Translate.t("Cut"), 'X');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handleCut();
@@ -1109,20 +1041,20 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
-    item = newJMenuItem("Copy", 'C');
+    item = newJMenuItem(Translate.t("Copy"), 'C');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           textarea.copy();
         }
       });
     menu.add(item);
-
+/*
     item = newJMenuItemShift("Copy for Forum", 'C');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
 //          SwingUtilities.invokeLater(new Runnable() {
 //              public void run() {
-          new DiscourseFormat(Editor.this, false).show();
+//          new DiscourseFormat(Editor.this, false).show();
 //              }
 //            });
         }
@@ -1134,14 +1066,14 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         public void actionPerformed(ActionEvent e) {
 //          SwingUtilities.invokeLater(new Runnable() {
 //              public void run() {
-          new DiscourseFormat(Editor.this, true).show();
+//          new DiscourseFormat(Editor.this, true).show();
 //              }
 //            });
         }
       });
     menu.add(item);
-
-    item = newJMenuItem("Paste", 'V');
+*/
+    item = newJMenuItem(Translate.t("Paste"), 'V');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           textarea.paste();
@@ -1150,7 +1082,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
-    item = newJMenuItem("Select All", 'A');
+    item = newJMenuItem(Translate.t("Select All"), 'A');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           textarea.selectAll();
@@ -1160,7 +1092,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     menu.addSeparator();
 
-    item = newJMenuItem("Comment/Uncomment", '/');
+    item = newJMenuItem(Translate.t("Comment/Uncomment"), '/');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handleCommentUncomment();
@@ -1168,7 +1100,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     });
     menu.add(item);
 
-    item = newJMenuItem("Increase Indent", ']');
+    item = newJMenuItem(Translate.t("Increase Indent"), ']');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handleIndentOutdent(true);
@@ -1176,7 +1108,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     });
     menu.add(item);
 
-    item = newJMenuItem("Decrease Indent", '[');
+    item = newJMenuItem(Translate.t("Decrease Indent"), '[');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handleIndentOutdent(false);
@@ -1186,7 +1118,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     menu.addSeparator();
 
-    item = newJMenuItem("Find...", 'F');
+    item = newJMenuItem(Translate.t("Find..."), 'F');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if (find == null) {
@@ -1201,7 +1133,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     // TODO find next should only be enabled after a
     // search has actually taken place
-    item = newJMenuItem("Find Next", 'G');
+    item = newJMenuItem(Translate.t("Find Next"), 'G');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if (find != null) {
@@ -1286,8 +1218,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       } else {
         this.setEnabled(false);
         undoItem.setEnabled(false);
-        undoItem.setText("Undo");
-        putValue(Action.NAME, "Undo");
+        undoItem.setText(Translate.t("Undo"));
+        putValue(Action.NAME, Translate.t("Undo"));
         if (sketch != null) {
           sketch.setModified(false);  // 0107
         }
@@ -1319,8 +1251,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       } else {
         this.setEnabled(false);
         redoItem.setEnabled(false);
-        redoItem.setText("Redo");
-        putValue(Action.NAME, "Redo");
+        redoItem.setText(Translate.t("Redo"));
+        putValue(Action.NAME, Translate.t("Redo"));
       }
     }
   }
@@ -1628,12 +1560,12 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
 
   protected void handleDiscourseCopy() {
-    new DiscourseFormat(Editor.this, false).show();
+//    new DiscourseFormat(Editor.this, false).show();
   }
 
 
   protected void handleHTMLCopy() {
-    new DiscourseFormat(Editor.this, true).show();
+//    new DiscourseFormat(Editor.this, true).show();
   }
 
 
@@ -1756,12 +1688,12 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     String text = textarea.getSelectedText().trim();
 
     if (text.length() == 0) {
-      statusNotice("First select a word to find in the reference.");
+      statusNotice(Translate.t("First select a word to find in the reference."));
 
     } else {
       String referenceFile = PdeKeywords.getReference(text);
       if (referenceFile == null) {
-        statusNotice("No reference available for \"" + text + "\"");
+        statusNotice(Translate.t("No reference available for \"%1\"", text));
       } else {
         Base.showReference(referenceFile + ".html");
       }
@@ -1780,7 +1712,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     internalCloseRunner();
     running = true;
     Base.selectedBoard.setVerbose(verbose);
-    status.progress("Compiling sketch...");
+    status.progress(Translate.t("Compiling sketch..."));
 
     // clear the console on each run, unless the user doesn't want to
     if (Preferences.getBoolean("console.auto_clear")) {
@@ -1798,9 +1730,9 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       try {
         sketch.prepare();
         if(sketch.build() != null) {
-            statusNotice("Done compiling.");
+            statusNotice(Translate.t("Done compiling."));
         } else {
-            statusNotice("Compilation failed.");
+            statusNotice(Translate.t("Compilation failed."));
         }
       } catch (Exception e) {
         status.unprogress();
@@ -1891,11 +1823,11 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     // As of Processing 1.0.10, this always happens immediately.
     // http://dev.processing.org/bugs/show_bug.cgi?id=1456
 
-    String prompt = "Save changes to " + sketch.getName() + "?  ";
+    String prompt = Translate.t("Save changes to %1?", sketch.getName());
 
     if (!Base.isMacOS()) {
       int result =
-        JOptionPane.showConfirmDialog(this, prompt, "Close",
+        JOptionPane.showConfirmDialog(this, prompt, Translate.t("Close"),
                                       JOptionPane.YES_NO_CANCEL_OPTION,
                                       JOptionPane.QUESTION_MESSAGE);
 
@@ -1909,7 +1841,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         return false;
 
       } else {
-        throw new IllegalStateException();
+        return false;
       }
 
     } else {
@@ -1929,13 +1861,12 @@ static Logger logger = Logger.getLogger(Base.class.getName());
                         "b { font: 13pt \"Lucida Grande\" }"+
                         "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
                         "</style> </head>" +
-                        "<b>Do you want to save changes to this sketch<BR>" +
-                        " before closing?</b>" +
-                        "<p>If you don't save, your changes will be lost.",
+                        "<b>" + Translate.t("Do you want to save changes to this sketch before closing?") + "</b>" +
+                        "<p>" + Translate.t("If you don't save, your changes will be lost."),
                         JOptionPane.QUESTION_MESSAGE);
 
       String[] options = new String[] {
-        "Save", "Cancel", "Don't Save"
+        Translate.t("Save"), Translate.t("Cancel"), Translate.t("Don't Save")
       };
       pane.setOptions(options);
 
@@ -2007,21 +1938,19 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     } else if (altInoFile.exists()) {
       path = altInoFile.getAbsolutePath();
     } else if (!path.endsWith(".ino") && !path.endsWith(".pde")) {
-      Base.showWarning("Bad file selected",
-                       "Processing can only open its own sketches\n" +
-                         "and other files ending in .ino or .pde", null);
+      Base.showWarning(Translate.t("Bad file selected"),
+                       Translate.t("%1 can only open its own sketches and other files ending in .ino or .pde", Theme.get("product.cap")), null);
       return false;
 
     } else {
       String properParent =
         fileName.substring(0, fileName.length() - 4);
 
-      Object[] options = { "OK", "Cancel" };
-      String prompt = "The file \"{0}\" needs to be inside\n" +
-	  "a sketch folder named \"{1}\".\n" +
-	  "Create this folder, move the file, and continue?" +
-	fileName +
-	properParent;
+      Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
+      String prompt = 
+        Translate.w("The file \"%1\" needs to be inside a sketch folder named \"%2\".",
+            30, "\n", fileName, properParent) + "\n" +
+	    Translate.t("Create this folder, move the file, and continue?");
 
       int result = JOptionPane.showOptionDialog(this,
                                                 prompt,
@@ -2036,15 +1965,15 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         // create properly named folder
         File properFolder = new File(file.getParent(), properParent);
         if (properFolder.exists()) {
-          Base.showWarning("Error",
-                           "A folder named \"" + properParent + "\" " +
-                           "already exists. Can't open sketch.", null);
+          Base.showWarning(Translate.t("Error"),
+                           Translate.w("A folder named \"%1\" already exists. Can't open sketch.", 30, "\n", properParent), null);
+
           return false;
         }
         if (!properFolder.mkdirs()) {
           //throw new IOException("Couldn't create sketch folder");
-          Base.showWarning("Error",
-                           "Could not create the sketch folder.", null);
+          Base.showWarning(Translate.t("Error"),
+                           Translate.t("Could not create the sketch folder."), null);
           return false;
         }
         // copy the sketch inside
@@ -2053,7 +1982,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         try {
           Base.copyFile(origPdeFile, properPdeFile);
         } catch (IOException e) {
-          Base.showWarning("Error", "Could not copy to a proper location.", e);
+          Base.showWarning(Translate.t("Error"), Translate.t("Could not copy to a proper location."), e);
           return false;
         }
 
@@ -2071,7 +2000,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     try {
       sketch = new Sketch(this, path);
     } catch (IOException e) {
-      Base.showWarning("Error", "Could not create the sketch.", e);
+      Base.showWarning(Translate.t("Error"), Translate.t("Could not create the sketch."), e);
       return false;
     }
     header.rebuild();
@@ -2087,12 +2016,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     // opening was successful
     return true;
-
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//      statusError(e);
-//      return false;
-//    }
   }
 
 
@@ -2129,12 +2052,12 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
 
   protected boolean handleSave2() {
-    statusNotice("Saving...");
+    statusNotice(Translate.t("Saving..."));
     boolean saved = false;
     try {
       saved = sketch.save();
       if (saved)
-        statusNotice("Done Saving.");
+        statusNotice(Translate.t("Done Saving."));
       else
         statusEmpty();
       // rebuild sketch menu in case a save-as was forced
@@ -2167,16 +2090,16 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     //SwingUtilities.invokeLater(new Runnable() {
     //public void run() {
-    statusNotice("Saving...");
+    statusNotice(Translate.t("Saving..."));
     try {
       if (sketch.saveAs()) {
-        statusNotice("Done Saving.");
+        statusNotice(Translate.t("Done Saving."));
         // Disabling this for 0125, instead rebuild the menu inside
         // the Save As method of the Sketch object, since that's the
         // only one who knows whether something was renamed.
         //sketchbook.rebuildMenusAsync();
       } else {
-        statusNotice("Save Canceled.");
+        statusNotice(Translate.t("Save Canceled."));
         return false;
       }
     } catch (Exception e) {
@@ -2201,11 +2124,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     String result = (String)
       JOptionPane.showInputDialog(this,
-                                  "Serial port " +
-                                  Preferences.get("serial.port") +
-                                  " not found.\n" +
-                                  "Retry the upload with another serial port?",
-                                  "Serial port not found",
+                                  Translate.w("Serial port %1 not found. Retry the upload with another serial port?", 30, "\n", Preferences.get("serial.port")),
+                                  Translate.t("Serial port not found"),
                                   JOptionPane.PLAIN_MESSAGE,
                                   null,
                                   names,
@@ -2233,10 +2153,9 @@ static Logger logger = Logger.getLogger(Base.class.getName());
    * hitting export twice, quickly, and horking things up.
    */
   synchronized public void handleExport() {
-    //if (!handleExportCheckModified()) return;
     //toolbar.activate(EditorToolbar.EXPORT);
     console.clear();
-    status.progress("Uploading to I/O Board...");
+    status.progress(Translate.t("Uploading to I/O Board..."));
 
     new Thread(exportHandler, "Uploader").start();
   }
@@ -2246,14 +2165,11 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     public void run() {
 
       try {
-        serialMonitor.closeSerialPort();
-        serialMonitor.setVisible(false);
-            
         uploading = true;
           
         boolean success = sketch.exportApplet(false);
         if (success) {
-          statusNotice("Done uploading.");
+          statusNotice(Translate.t("Done uploading."));
         } else {
           // error message will already be visible
         }
@@ -2261,7 +2177,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         populateSerialMenu();
         if (serialMenu.getItemCount() == 0) statusError(e);
         else if (serialPrompt()) run();
-        else statusNotice("Upload canceled.");
+        else statusNotice(Translate.t("Upload canceled."));
       } catch (RunnerException e) {
         //statusError("Error during upload.");
         //e.printStackTrace();
@@ -2276,53 +2192,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       //toolbar.deactivate(EditorToolbar.EXPORT);
     }
   }
-
-  /**
-   * Checks to see if the sketch has been modified, and if so,
-   * asks the user to save the sketch or cancel the export.
-   * This prevents issues where an incomplete version of the sketch
-   * would be exported, and is a fix for
-   * <A HREF="http://dev.processing.org/bugs/show_bug.cgi?id=157">Bug 157</A>
-   */
-  protected boolean handleExportCheckModified() {
-    if (!sketch.isModified()) return true;
-
-    Object[] options = { "OK", "Cancel" };
-    int result = JOptionPane.showOptionDialog(this,
-                                              "Save changes before export?",
-                                              "Save",
-                                              JOptionPane.OK_CANCEL_OPTION,
-                                              JOptionPane.QUESTION_MESSAGE,
-                                              null,
-                                              options,
-                                              options[0]);
-
-    if (result == JOptionPane.OK_OPTION) {
-      handleSave(true);
-
-    } else {
-      // why it's not CANCEL_OPTION is beyond me (at least on the mac)
-      // but f-- it.. let's get this shite done..
-      //} else if (result == JOptionPane.CANCEL_OPTION) {
-      statusNotice("Export canceled, changes must first be saved.");
-      //toolbar.clear();
-      return false;
-    }
-    return true;
-  }
-
-
-  public void handleSerial() {
-    if (uploading) return;
-    
-    try {
-      serialMonitor.openSerialPort();
-      serialMonitor.setVisible(true);
-    } catch (SerialException e) {
-      statusError(e);
-    }
-  }
-
 
   /**
    * Handler for File &rarr; Page Setup.
@@ -2343,7 +2212,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
    * Handler for File &rarr; Print.
    */
   public void handlePrint() {
-    statusNotice("Printing...");
+    statusNotice(Translate.t("Printing..."));
     //printerJob = null;
     if (printerJob == null) {
       printerJob = PrinterJob.getPrinterJob();
@@ -2359,14 +2228,14 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     if (printerJob.printDialog()) {
       try {
         printerJob.print();
-        statusNotice("Done printing.");
+        statusNotice(Translate.t("Done printing."));
 
       } catch (PrinterException pe) {
-        statusError("Error while printing.");
+        statusError(Translate.t("Error while printing."));
         pe.printStackTrace();
       }
     } else {
-      statusNotice("Printing canceled.");
+      statusNotice(Translate.t("Printing canceled."));
     }
     //printerJob = null;  // clear this out?
   }
@@ -2486,7 +2355,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     private String clickedURL;
 
     public TextAreaPopup() {
-      openURLItem = new JMenuItem("Open URL");
+      openURLItem = new JMenuItem(Translate.t("Open URL"));
       openURLItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Base.openURL(clickedURL);
@@ -2497,7 +2366,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       openURLItemSeparator = new JSeparator();
       add(openURLItemSeparator);
 
-      cutItem = new JMenuItem("Cut");
+      cutItem = new JMenuItem(Translate.t("Cut"));
       cutItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             handleCut();
@@ -2505,14 +2374,14 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
       add(cutItem);
 
-      copyItem = new JMenuItem("Copy");
+      copyItem = new JMenuItem(Translate.t("Copy"));
       copyItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             handleCopy();
           }
         });
       add(copyItem);
-
+/*
       discourseItem = new JMenuItem("Copy for Forum");
       discourseItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
@@ -2528,8 +2397,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
           }
         });
       add(discourseItem);
-
-      JMenuItem item = new JMenuItem("Paste");
+*/
+      JMenuItem item = new JMenuItem(Translate.t("Paste"));
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             handlePaste();
@@ -2537,7 +2406,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         });
       add(item);
 
-      item = new JMenuItem("Select All");
+      item = new JMenuItem(Translate.t("Select All"));
       item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           handleSelectAll();
@@ -2547,7 +2416,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
       addSeparator();
 
-      item = new JMenuItem("Comment/Uncomment");
+      item = new JMenuItem(Translate.t("Comment/Uncomment"));
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             handleCommentUncomment();
@@ -2555,7 +2424,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
       add(item);
 
-      item = new JMenuItem("Increase Indent");
+      item = new JMenuItem(Translate.t("Increase Indent"));
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             handleIndentOutdent(true);
@@ -2563,7 +2432,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
       add(item);
 
-      item = new JMenuItem("Decrease Indent");
+      item = new JMenuItem(Translate.t("Decrease Indent"));
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             handleIndentOutdent(false);
@@ -2573,7 +2442,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
       addSeparator();
 
-      referenceItem = new JMenuItem("Find in Reference");
+      referenceItem = new JMenuItem(Translate.t("Find in Reference"));
       referenceItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             handleFindReference();

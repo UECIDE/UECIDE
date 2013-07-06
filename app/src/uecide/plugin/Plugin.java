@@ -30,6 +30,10 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 import java.util.zip.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
+import javax.swing.text.*;
 
 
 
@@ -43,7 +47,9 @@ public interface Plugin extends Runnable {
   public void setInfo(Map pluginInfo);
   public String getVersion();
   public String getCompiled();
+  public char getShortcut();
   public void setLoader(URLClassLoader loader);
   public int flags();
+  public ImageIcon toolbarIcon();
 }
 

@@ -29,6 +29,7 @@ import java.util.*;
 import java.net.*;
 import java.util.zip.*;
 import java.util.jar.*;
+import uecide.plugin.*;
 
 
 import javax.swing.*;
@@ -41,7 +42,6 @@ import org.apache.log4j.Level;
 import uecide.app.debug.Board;
 import uecide.app.debug.Core;
 import processing.core.*;
-import uecide.plugin.*;
 
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -228,6 +228,8 @@ public class Base {
 
         // Get the sketchbook path, and make sure it's set properly
         String sketchbookPath = Preferences.get("sketchbook.path");
+
+//        Translate.load("swedish");
 
         // If a value is at least set, first check to see if the folder exists.
         // If it doesn't, warn the user that the sketchbook folder is being reset.
@@ -735,7 +737,7 @@ public class Base {
     public void handleOpenPrompt() {
         // get the frontmost window frame for placing file dialog
         FileDialog fd = new FileDialog(activeEditor,
-            "Open " + Theme.get("product.cap") + " sketch...",
+            Translate.t("Open %1 sketch...", Theme.get("product.cap")),
             FileDialog.LOAD);
 
         fd.setDirectory(Base.getSketchbookFolder().getAbsolutePath());
@@ -815,19 +817,19 @@ public class Base {
 
         if (editors.size() == 1) {
             if (Base.isMacOS()) {
-                Object[] options = { "OK", "Cancel" };
+                Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
                 String prompt =
                     "<html> " +
                     "<head> <style type=\"text/css\">"+
                     "b { font: 13pt \"Lucida Grande\" }"+
                     "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
                     "</style> </head>" +
-                    "<b>Are you sure you want to Quit?</b>" +
-                    "<p>Closing the last open sketch will quit " + Theme.get("product.cap") + ".";
+                    "<b>" + Translate.t("Are you sure you want to Quit?") + "</b>" +
+                    "<p>" + Translate.t("Closing the last open sketch will quit %1.", Theme.get("product.cap"));
 
                 int result = JOptionPane.showOptionDialog(editor,
                     prompt,
-                    "Quit",
+                    Translate.t("Quit"),
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
                     null,
@@ -842,7 +844,6 @@ public class Base {
 
             // This will store the sketch count as zero
             editors.remove(editor);
-            Editor.serialMonitor.closeSerialPort();
             storeSketches();
 
             // Save out the current prefs state
@@ -870,7 +871,6 @@ public class Base {
         // If quit is canceled, this will be replaced anyway
         // by a later handleQuit() that is not canceled.
         storeSketches();
-        Editor.serialMonitor.closeSerialPort();
 
         if (handleQuitEach()) {
             // make sure running sketches close before quitting
@@ -934,7 +934,7 @@ public class Base {
         JMenuItem item;
         menu.removeAll();
 
-        item = Editor.newJMenuItem("Open...", 'O');
+        item = Editor.newJMenuItem(Translate.t("Open..."), 'O');
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleOpenPrompt();
@@ -969,7 +969,7 @@ public class Base {
     public void rebuildImportMenu(JMenu importMenu) {
         importMenu.removeAll();
 
-        JMenuItem item = new JMenuItem("Add Library...");
+        JMenuItem item = new JMenuItem(Translate.t("Add Library..."));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleAddLibrary();
@@ -991,7 +991,7 @@ public class Base {
         libraries = new HashSet<File>();
 
         if (globalLibraries.size() > 0) {
-            JMenu globalMenu = new JMenu("Standard");
+            JMenu globalMenu = new JMenu(Translate.t("Standard"));
             String[] entries = (String[]) globalLibraries.keySet().toArray(new String[0]);
             for (String entry : entries) {
                 item = new JMenuItem(entry);
@@ -1017,7 +1017,7 @@ public class Base {
         }
 
         if (contributedLibraries.size() > 0) {
-            JMenu contributedMenu = new JMenu("Contributed");
+            JMenu contributedMenu = new JMenu(Translate.t("Contributed"));
             String[] entries = (String[]) contributedLibraries.keySet().toArray(new String[0]);
             for (String entry : entries) {
                 item = new JMenuItem(entry);
@@ -1060,7 +1060,7 @@ public class Base {
             addSketches(coreItem, coreLibs, false);
         }
 
-        JMenu contributedItem = new JMenu("Contributed");
+        JMenu contributedItem = new JMenu(Translate.t("Contributed"));
         menu.add(contributedItem);
         
         if (sbLibs.isDirectory()) {
@@ -1084,7 +1084,7 @@ public class Base {
         HashMap<String, JMenu> groupings;
         groupings = new HashMap<String, JMenu>();
 
-        JMenuItem addboard = new JMenuItem("Add Boards...");
+        JMenuItem addboard = new JMenuItem(Translate.t("Add Boards..."));
         addboard.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleAddBoards();
@@ -1191,17 +1191,16 @@ public class Base {
                         handleOpen(path);
                     }
                 } else {
-                    showWarning("Sketch Does Not Exist",
-                                "The selected sketch no longer exists.\n" +
-                                "You may need to restart " + Theme.get("product.cap") + " to update\n" +
-                                "the sketchbook menu.", null);
+                    showWarning(Translate.t("Sketch Does Not Exist"),
+                                Translate.t("The selected sketch no longer exists.") + "\n" +
+                                Translate.t("You may need to restart to update the sketchbook menu."), null);
                 }
             }
         };
 
         boolean ifound = false;
 
-        JMenu nextMenu = new JMenu("More");
+        JMenu nextMenu = new JMenu(Translate.t("More"));
         menu.add(nextMenu);
         int nfound = 0;
 
@@ -1225,13 +1224,12 @@ public class Base {
                 if (!Sketch.isSanitaryName(list[i])) {
                     if (!builtOnce) {
                         String complaining =
-                            "The sketch \"" + list[i] + "\" cannot be used.\n" +
-                            "Sketch names must contain only basic letters and numbers\n" +
-                            "(ASCII-only with no spaces, " +
-                            "and it cannot start with a number).\n" +
-                            "To get rid of this message, remove the sketch from\n" +
+                            Translate.t("The sketch %1 cannot be used.") + "\n" +
+                            Translate.t("Sketch names must contain only basic letters and numbers") + "\n" +
+                            Translate.t("(ASCII-only with no spaces, and it cannot start with a number).") + "\n" +
+                            Translate.t("To get rid of this message, remove the sketch from") + "\n" +
                             entry.getAbsolutePath();
-                        Base.showMessage("Ignoring sketch with bad name", complaining);
+                        Base.showMessage(Translate.t("Ignoring sketch with bad name"), complaining);
                     }
                     continue;
                 }
@@ -1270,7 +1268,7 @@ public class Base {
                 nfound++;
                 if (nfound == 20) {
                     menu = nextMenu;
-                    nextMenu = new JMenu("More");
+                    nextMenu = new JMenu(Translate.t("More"));
                     menu.add(nextMenu);
                     nfound = 0;
                 }
@@ -1400,45 +1398,45 @@ return platform;
     }
 
 
-static public int getPlatformIndex(String what) {
-Integer entry = platformIndices.get(what);
-return (entry == null) ? -1 : entry.intValue();
-}
+    static public int getPlatformIndex(String what) {
+        Integer entry = platformIndices.get(what);
+        return (entry == null) ? -1 : entry.intValue();
+    }
 
 
-// These were changed to no longer rely on PApplet and PConstants because
-// of conflicts that could happen with older versions of core.jar, where
-// the MACOSX constant would instead read as the LINUX constant.
+    // These were changed to no longer rely on PApplet and PConstants because
+    // of conflicts that could happen with older versions of core.jar, where
+    // the MACOSX constant would instead read as the LINUX constant.
 
 
-/**
-* returns true if Processing is running on a Mac OS X machine.
-*/
-static public boolean isMacOS() {
-//return PApplet.platform == PConstants.MACOSX;
-return System.getProperty("os.name").indexOf("Mac") != -1;
-}
+    /**
+    * returns true if Processing is running on a Mac OS X machine.
+    */
+    static public boolean isMacOS() {
+        //return PApplet.platform == PConstants.MACOSX;
+        return System.getProperty("os.name").indexOf("Mac") != -1;
+    }
 
 
-/**
-* returns true if running on windows.
-*/
-static public boolean isWindows() {
-//return PApplet.platform == PConstants.WINDOWS;
-return System.getProperty("os.name").indexOf("Windows") != -1;
-}
+    /**
+    * returns true if running on windows.
+    */
+    static public boolean isWindows() {
+        //return PApplet.platform == PConstants.WINDOWS;
+        return System.getProperty("os.name").indexOf("Windows") != -1;
+    }
 
 
-/**
-* true if running on linux.
-*/
-static public boolean isLinux() {
-//return PApplet.platform == PConstants.LINUX;
-return System.getProperty("os.name").indexOf("Linux") != -1;
-}
+    /**
+    * true if running on linux.
+    */
+    static public boolean isLinux() {
+        //return PApplet.platform == PConstants.LINUX;
+        return System.getProperty("os.name").indexOf("Linux") != -1;
+    }
 
 
-// .................................................................
+    // .................................................................
 
 
     static public File getSettingsFolder() {
@@ -1452,595 +1450,505 @@ return System.getProperty("os.name").indexOf("Linux") != -1;
             try {
                 settingsFolder = platform.getSettingsFolder();
             } catch (Exception e) {
-                showError("Problem getting data folder",
-                "Error getting the " + Theme.get("product.cap") + " data folder.", e);
+                showError(Translate.t("Problem getting data folder"),
+                Translate.t("Error getting the %1 data folder.", Theme.get("product.cap")), e);
             }
         }
 
         // create the folder if it doesn't exist already
         if (!settingsFolder.exists()) {
             if (!settingsFolder.mkdirs()) {
-                showError("Settings issues",
-                        Theme.get("product.cap") + " cannot run because it could not\n" +
-                        "create a folder to store your settings.", null);
+                showError(Translate.t("Settings issues"),
+                        Translate.t("%1 cannot run because it could not create a folder to store your settings.", Theme.get("product.cap")), null);
             }
         }
         return settingsFolder;
     }
 
 
-/**
-* Convenience method to get a File object for the specified filename inside
-* the settings folder.
-* For now, only used by Preferences to get the preferences.txt file.
-* @param filename A file inside the settings folder.
-* @return filename wrapped as a File object inside the settings folder
-*/
-static public File getSettingsFile(String filename) {
-return new File(getSettingsFolder(), filename);
-}
-
-
-static public File getBuildFolder() {
-if (buildFolder == null) {
-String buildPath = Preferences.get("build.path");
-if (buildPath != null) {
-buildFolder = new File(buildPath);
-
-} else {
-//File folder = new File(getTempFolder(), "build");
-//if (!folder.exists()) folder.mkdirs();
-buildFolder = createTempFolder("build");
-buildFolder.deleteOnExit();
-}
-}
-return buildFolder;
-}
-
-
-/**
-* Get the path to the platform's temporary folder, by creating
-* a temporary temporary file and getting its parent folder.
-* <br/>
-* Modified for revision 0094 to actually make the folder randomized
-* to avoid conflicts in multi-user environments. (Bug 177)
-*/
-static public File createTempFolder(String name) {
-try {
-File folder = File.createTempFile(name, null);
-//String tempPath = ignored.getParent();
-//return new File(tempPath);
-folder.delete();
-folder.mkdirs();
-return folder;
-
-} catch (Exception e) {
-e.printStackTrace();
-}
-return null;
-}
-
-
-static public Set<File> getLibraries() {
-return libraries;
-}
-
-
-static public String getExamplesPath() {
-return examplesFolder.getAbsolutePath();
-}
-
-
-static public File getToolsFolder() {
-return toolsFolder;
-}
-
-
-static public String getToolsPath() {
-return toolsFolder.getAbsolutePath();
-}
-
-
-static public File getHardwareFolder() {
-// calculate on the fly because it's needed by Preferences.init() to find
-// the boards.txt and programmers.txt preferences files (which happens
-// before the other folders / paths get cached).
-return getContentFile("hardware");
-}
-
-public Editor getActiveEditor()
-{
-    return activeEditor;
-}
-
-//Get the core libraries
-static public File getCoreLibraries(String path) {
-return getContentFile(path);	
-}
-
-static public String getHardwarePath() {
-return getHardwareFolder().getAbsolutePath();
-}
-
-
-static public String getAvrBasePath() {
-if(Base.isLinux()) {
-return ""; // avr tools are installed system-wide and in the path
-} else {
-return getHardwarePath() + File.separator + "tools" +
-File.separator + "avr" + File.separator + "bin" + File.separator;
-}  
-}
+    /**
+    * Convenience method to get a File object for the specified filename inside
+    * the settings folder.
+    * For now, only used by Preferences to get the preferences.txt file.
+    * @param filename A file inside the settings folder.
+    * @return filename wrapped as a File object inside the settings folder
+    */
+    static public File getSettingsFile(String filename) {
+        return new File(getSettingsFolder(), filename);
+    }
+
+
+    static public File getBuildFolder() {
+        if (buildFolder == null) {
+            String buildPath = Preferences.get("build.path");
+            if (buildPath != null) {
+                buildFolder = new File(buildPath);
+
+            } else {
+                //File folder = new File(getTempFolder(), "build");
+                //if (!folder.exists()) folder.mkdirs();
+                buildFolder = createTempFolder("build");
+                buildFolder.deleteOnExit();
+            }
+        }
+        return buildFolder;
+    }
+
+
+    /**
+    * Get the path to the platform's temporary folder, by creating
+    * a temporary temporary file and getting its parent folder.
+    * <br/>
+    * Modified for revision 0094 to actually make the folder randomized
+    * to avoid conflicts in multi-user environments. (Bug 177)
+    */
+    static public File createTempFolder(String name) {
+        try {
+            File folder = File.createTempFile(name, null);
+            //String tempPath = ignored.getParent();
+            //return new File(tempPath);
+            folder.delete();
+            folder.mkdirs();
+            return folder;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    static public Set<File> getLibraries() {
+        return libraries;
+    }
+
+
+    static public String getExamplesPath() {
+        return examplesFolder.getAbsolutePath();
+    }
+
+
+    static public File getToolsFolder() {
+        return toolsFolder;
+    }
+
+
+    static public String getToolsPath() {
+        return toolsFolder.getAbsolutePath();
+    }
+
+
+    static public File getHardwareFolder() {
+        // calculate on the fly because it's needed by Preferences.init() to find
+        // the boards.txt and programmers.txt preferences files (which happens
+        // before the other folders / paths get cached).
+        return getContentFile("hardware");
+    }
+
+    public Editor getActiveEditor()
+    {
+        return activeEditor;
+    }
+
+    //Get the core libraries
+        static public File getCoreLibraries(String path) {
+        return getContentFile(path);	
+    }
+
+    static public String getHardwarePath() {
+        return getHardwareFolder().getAbsolutePath();
+    }
+
+
+    static public String getAvrBasePath() {
+        if(Base.isLinux()) {
+            return ""; // avr tools are installed system-wide and in the path
+        } else {
+            return getHardwarePath() + File.separator + "tools" +
+                File.separator + "avr" + File.separator + "bin" + File.separator;
+        }  
+    }
 
-static public File getSketchbookFolder() {
-return new File(Preferences.get("sketchbook.path"));
-}
-
-
-static public File getSketchbookLibrariesFolder() {
-return new File(getSketchbookFolder(), "libraries");
-}
-
-
-static public String getSketchbookLibrariesPath() {
-return getSketchbookLibrariesFolder().getAbsolutePath();
-}
+    static public File getSketchbookFolder() {
+        return new File(Preferences.get("sketchbook.path"));
+    }
+
 
+    static public File getSketchbookLibrariesFolder() {
+        return new File(getSketchbookFolder(), "libraries");
+    }
+
+
+    static public String getSketchbookLibrariesPath() {
+        return getSketchbookLibrariesFolder().getAbsolutePath();
+    }
 
-static public File getSketchbookHardwareFolder() {
-return new File(getSketchbookFolder(), "hardware");
-}
 
+    static public File getSketchbookHardwareFolder() {
+        return new File(getSketchbookFolder(), "hardware");
+    }
 
-protected File getDefaultSketchbookFolder() {
-File sketchbookFolder = null;
-try {
-sketchbookFolder = platform.getDefaultSketchbookFolder();
-} catch (Exception e) { }
-
-if (sketchbookFolder == null) {
-sketchbookFolder = promptSketchbookLocation();
-}
-
-// create the folder if it doesn't exist already
-boolean result = true;
-if (!sketchbookFolder.exists()) {
-result = sketchbookFolder.mkdirs();
-}
-
-if (!result) {
-showError("You forgot your sketchbook",
-Theme.get("product.cap") + " cannot run because it could not\n" +
-"create a folder to store your sketchbook.", null);
-}
-
-return sketchbookFolder;
-}
-
-
-/**
-* Check for a new sketchbook location.
-*/
-static protected File promptSketchbookLocation() {
-File folder = null;
-
-folder = new File(System.getProperty("user.home"), "sketchbook");
-if (!folder.exists()) {
-folder.mkdirs();
-return folder;
-}
-
-String prompt = "Select (or create new) folder for sketches...";
-folder = Base.selectFolder(prompt, null, null);
-if (folder == null) {
-System.exit(0);
-}
-return folder;
-}
-
-
-// .................................................................
-
-
-/**
-* Implements the cross-platform headache of opening URLs
-* TODO This code should be replaced by PApplet.link(),
-* however that's not a static method (because it requires
-* an AppletContext when used as an applet), so it's mildly
-* trickier than just removing this method.
-*/
-static public void openURL(String url) {
-try {
-platform.openURL(url);
-
-} catch (Exception e) {
-showWarning("Problem Opening URL",
-"Could not open the URL\n" + url, e);
-}
-}
-
-
-/**
-* Used to determine whether to disable the "Show Sketch Folder" option.
-* @return true If a means of opening a folder is known to be available.
-*/
-static protected boolean openFolderAvailable() {
-return platform.openFolderAvailable();
-}
-
-
-/**
-* Implements the other cross-platform headache of opening
-* a folder in the machine's native file browser.
-*/
-static public void openFolder(File file) {
-try {
-platform.openFolder(file);
-
-} catch (Exception e) {
-showWarning("Problem Opening Folder",
-"Could not open the folder\n" + file.getAbsolutePath(), e);
-}
-}
-
-
-// .................................................................
-
-
-/**
-* Prompt for a fodler and return it as a File object (or null).
-* Implementation for choosing directories that handles both the
-* Mac OS X hack to allow the native AWT file dialog, or uses
-* the JFileChooser on other platforms. Mac AWT trick obtained from
-* <A HREF="http://lists.apple.com/archives/java-dev/2003/Jul/msg00243.html">this post</A>
-* on the OS X Java dev archive which explains the cryptic note in
-* Apple's Java 1.4 release docs about the special System property.
-*/
-static public File selectFolder(String prompt, File folder, Frame frame) {
-if (Base.isMacOS()) {
-if (frame == null) frame = new Frame(); //.pack();
-FileDialog fd = new FileDialog(frame, prompt, FileDialog.LOAD);
-if (folder != null) {
-fd.setDirectory(folder.getParent());
-//fd.setFile(folder.getName());
-}
-System.setProperty("apple.awt.fileDialogForDirectories", "true");
-fd.setVisible(true);
-System.setProperty("apple.awt.fileDialogForDirectories", "false");
-if (fd.getFile() == null) {
-return null;
-}
-return new File(fd.getDirectory(), fd.getFile());
-
-} else {
-JFileChooser fc = new JFileChooser();
-fc.setDialogTitle(prompt);
-if (folder != null) {
-fc.setSelectedFile(folder);
-}
-fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-int returned = fc.showOpenDialog(new JDialog());
-if (returned == JFileChooser.APPROVE_OPTION) {
-return fc.getSelectedFile();
-}
-}
-return null;
-}
-
-
-// .................................................................
-
-
-/**
-* Give this Frame a Processing icon.
-*/
-static public void setIcon(Frame frame) {
-File imageLocation = new File(getContentFile("lib/theme"), "icon.png");
-Image image = Toolkit.getDefaultToolkit().createImage(imageLocation.getAbsolutePath());
-frame.setIconImage(image);
-}
-
-
-// someone needs to be slapped
-//static KeyStroke closeWindowKeyStroke;
-
-/**
-* Return true if the key event was a Ctrl-W or an ESC,
-* both indicators to close the window.
-* Use as part of a keyPressed() event handler for frames.
-*/
-/*
-static public boolean isCloseWindowEvent(KeyEvent e) {
-if (closeWindowKeyStroke == null) {
-int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-closeWindowKeyStroke = KeyStroke.getKeyStroke('W', modifiers);
-}
-return ((e.getKeyCode() == KeyEvent.VK_ESCAPE) ||
-KeyStroke.getKeyStrokeForEvent(e).equals(closeWindowKeyStroke));
-}
-*/
-
-/**
-* Registers key events for a Ctrl-W and ESC with an ActionListener
-* that will take care of disposing the window.
-*/
-static public void registerWindowCloseKeys(JRootPane root,
-ActionListener disposer) {
-KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-root.registerKeyboardAction(disposer, stroke,
-JComponent.WHEN_IN_FOCUSED_WINDOW);
-
-int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-stroke = KeyStroke.getKeyStroke('W', modifiers);
-root.registerKeyboardAction(disposer, stroke,
-JComponent.WHEN_IN_FOCUSED_WINDOW);
-}
-
-
-// .................................................................
-
-
-static public void showReference(String filename) {
-File referenceFolder = Base.getContentFile("reference");
-File referenceFile = new File(referenceFolder, filename);
-openURL(referenceFile.getAbsolutePath());
-}
-
-static public void showGettingStarted() {
-if (Base.isMacOS()) {
-Base.showReference("Guide_MacOSX.html");
-} else if (Base.isWindows()) {
-Base.showReference("Guide_Windows.html");
-} else {
-Base.openURL("http://www.arduino.cc/playground/Learning/Linux");
-}
-}
-
-static public void showReference() {
-showReference("index.html");
-}
-
-
-static public void showEnvironment() {
-showReference("Guide_Environment.html");
-}
-
-
-static public void showPlatforms() {
-showReference("environment" + File.separator + "platforms.html");
-}
-
-
-static public void showTroubleshooting() {
-showReference("Guide_Troubleshooting.html");
-}
-
-
-static public void showFAQ() {
-showReference("FAQ.html");
-}
-
-
-// .................................................................
-
-
-/**
-* "No cookie for you" type messages. Nothing fatal or all that
-* much of a bummer, but something to notify the user about.
-*/
-static public void showMessage(String title, String message) {
-if (title == null) title = "Message";
-
-if (commandLine) {
-System.out.println(title + ": " + message);
-
-} else {
-JOptionPane.showMessageDialog(new Frame(), message, title,
-JOptionPane.INFORMATION_MESSAGE);
-}
-}
-
-
-/**
-* Non-fatal error message with optional stack trace side dish.
-*/
-static public void showWarning(String title, String message, Exception e) {
-if (title == null) title = "Warning";
-
-if (commandLine) {
-System.out.println(title + ": " + message);
-
-} else {
-JOptionPane.showMessageDialog(new Frame(), message, title,
-JOptionPane.WARNING_MESSAGE);
-}
-if (e != null) e.printStackTrace();
-}
-
-
-/**
-* Show an error message that's actually fatal to the program.
-* This is an error that can't be recovered. Use showWarning()
-* for errors that allow P5 to continue running.
-*/
-static public void showError(String title, String message, Throwable e) {
-if (title == null) title = "Error";
-
-if (commandLine) {
-System.err.println(title + ": " + message);
-
-} else {
-JOptionPane.showMessageDialog(new Frame(), message, title,
-JOptionPane.ERROR_MESSAGE);
-}
-if (e != null) e.printStackTrace();
-System.exit(1);
-}
-
-
-// ...................................................................
-
-
-
-// incomplete
-static public int showYesNoCancelQuestion(Editor editor, String title,
-String primary, String secondary) {
-if (!Base.isMacOS()) {
-int result =
-JOptionPane.showConfirmDialog(null, primary + "\n" + secondary, title,
-JOptionPane.YES_NO_CANCEL_OPTION,
-JOptionPane.QUESTION_MESSAGE);
-return result;
-//    if (result == JOptionPane.YES_OPTION) {
-//
-//    } else if (result == JOptionPane.NO_OPTION) {
-//      return true;  // ok to continue
-//
-//    } else if (result == JOptionPane.CANCEL_OPTION) {
-//      return false;
-//
-//    } else {
-//      throw new IllegalStateException();
-//    }
-
-} else {
-// Pane formatting adapted from the Quaqua guide
-// http://www.randelshofer.ch/quaqua/guide/joptionpane.html
-JOptionPane pane =
-new JOptionPane("<html> " +
-"<head> <style type=\"text/css\">"+
-"b { font: 13pt \"Lucida Grande\" }"+
-"p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
-"</style> </head>" +
-"<b>Do you want to save changes to this sketch<BR>" +
-" before closing?</b>" +
-"<p>If you don't save, your changes will be lost.",
-JOptionPane.QUESTION_MESSAGE);
-
-String[] options = new String[] {
-"Save", "Cancel", "Don't Save"
-};
-pane.setOptions(options);
-
-// highlight the safest option ala apple hig
-pane.setInitialValue(options[0]);
-
-// on macosx, setting the destructive property places this option
-// away from the others at the lefthand side
-pane.putClientProperty("Quaqua.OptionPane.destructiveOption",
-new Integer(2));
-
-JDialog dialog = pane.createDialog(editor, null);
-dialog.setVisible(true);
-
-Object result = pane.getValue();
-if (result == options[0]) {
-return JOptionPane.YES_OPTION;
-} else if (result == options[1]) {
-return JOptionPane.CANCEL_OPTION;
-} else if (result == options[2]) {
-return JOptionPane.NO_OPTION;
-} else {
-return JOptionPane.CLOSED_OPTION;
-}
-}
-}
-
-
-//if (result == JOptionPane.YES_OPTION) {
-//
-//      } else if (result == JOptionPane.NO_OPTION) {
-//        return true;  // ok to continue
-//
-//      } else if (result == JOptionPane.CANCEL_OPTION) {
-//        return false;
-//
-//      } else {
-//        throw new IllegalStateException();
-//      }
-
-static public int showYesNoQuestion(Frame editor, String title,
-String primary, String secondary) {
-if (!Base.isMacOS()) {
-return JOptionPane.showConfirmDialog(editor,
-"<html><body>" +
-"<b>" + primary + "</b>" +
-"<br>" + secondary, title,
-JOptionPane.YES_NO_OPTION,
-JOptionPane.QUESTION_MESSAGE);
-} else {
-// Pane formatting adapted from the Quaqua guide
-// http://www.randelshofer.ch/quaqua/guide/joptionpane.html
-JOptionPane pane =
-new JOptionPane("<html> " +
-"<head> <style type=\"text/css\">"+
-"b { font: 13pt \"Lucida Grande\" }"+
-"p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
-"</style> </head>" +
-"<b>" + primary + "</b>" +
-"<p>" + secondary + "</p>",
-JOptionPane.QUESTION_MESSAGE);
-
-String[] options = new String[] {
-"Yes", "No"
-};
-pane.setOptions(options);
-
-// highlight the safest option ala apple hig
-pane.setInitialValue(options[0]);
-
-JDialog dialog = pane.createDialog(editor, null);
-dialog.setVisible(true);
-
-Object result = pane.getValue();
-if (result == options[0]) {
-return JOptionPane.YES_OPTION;
-} else if (result == options[1]) {
-return JOptionPane.NO_OPTION;
-} else {
-return JOptionPane.CLOSED_OPTION;
-}
-}
-}
-
-
-/**
-* Retrieve a path to something in the Processing folder. Eventually this
-* may refer to the Contents subfolder of Processing.app, if we bundle things
-* up as a single .app file with no additional folders.
-*/
-//  static public String getContentsPath(String filename) {
-//    String basePath = System.getProperty("user.dir");
-//    /*
-//      // do this later, when moving to .app package
-//    if (PApplet.platform == PConstants.MACOSX) {
-//      basePath = System.getProperty("processing.contents");
-//    }
-//    */
-//    return basePath + File.separator + filename;
-//  }
-
-
-/**
-* Get a path for something in the Processing lib folder.
-*/
-/*
-static public String getLibContentsPath(String filename) {
-String libPath = getContentsPath("lib/" + filename);
-File libDir = new File(libPath);
-if (libDir.exists()) {
-return libPath;
-}
-//    was looking into making this run from Eclipse, but still too much mess
-//    libPath = getContents("build/shared/lib/" + what);
-//    libDir = new File(libPath);
-//    if (libDir.exists()) {
-//      return libPath;
-//    }
-return null;
-}
-*/
+
+    protected File getDefaultSketchbookFolder() {
+        File sketchbookFolder = null;
+        try {
+            sketchbookFolder = platform.getDefaultSketchbookFolder();
+        } catch (Exception e) { }
+
+        if (sketchbookFolder == null) {
+            sketchbookFolder = promptSketchbookLocation();
+        }
+
+        // create the folder if it doesn't exist already
+        boolean result = true;
+        if (!sketchbookFolder.exists()) {
+            result = sketchbookFolder.mkdirs();
+        }
+
+        if (!result) {
+            showError(Translate.t("You forgot your sketchbook"),
+            Translate.t("%1 cannot run because it could not create a folder to store your sketchbook.", Theme.get("product.cap")), null);
+        }
+
+        return sketchbookFolder;
+    }
+
+
+    /**
+    * Check for a new sketchbook location.
+    */
+    static protected File promptSketchbookLocation() {
+        File folder = null;
+
+        folder = new File(System.getProperty("user.home"), "sketchbook");
+        if (!folder.exists()) {
+            folder.mkdirs();
+            return folder;
+        }
+
+        String prompt = Translate.t("Select (or create new) folder for sketches...");
+        folder = Base.selectFolder(prompt, null, null);
+        if (folder == null) {
+            System.exit(0);
+        }
+        return folder;
+    }
+
+
+    // .................................................................
+
+
+    /**
+    * Implements the cross-platform headache of opening URLs
+    * TODO This code should be replaced by PApplet.link(),
+    * however that's not a static method (because it requires
+    * an AppletContext when used as an applet), so it's mildly
+    * trickier than just removing this method.
+    */
+    static public void openURL(String url) {
+        try {
+            platform.openURL(url);
+
+        } catch (Exception e) {
+            showWarning(Translate.t("Problem Opening URL"),
+            Translate.t("Could not open the URL") + "\n" + url, e);
+        }
+    }
+
+
+    /**
+    * Used to determine whether to disable the "Show Sketch Folder" option.
+    * @return true If a means of opening a folder is known to be available.
+    */
+    static protected boolean openFolderAvailable() {
+        return platform.openFolderAvailable();
+    }
+
+
+    /**
+    * Implements the other cross-platform headache of opening
+    * a folder in the machine's native file browser.
+    */
+    static public void openFolder(File file) {
+        try {
+            platform.openFolder(file);
+
+        } catch (Exception e) {
+            showWarning(Translate.t("Problem Opening Folder"),
+            Translate.t("Could not open the folder") + "\n" + file.getAbsolutePath(), e);
+        }
+    }
+
+
+    // .................................................................
+
+
+    /**
+    * Prompt for a fodler and return it as a File object (or null).
+    * Implementation for choosing directories that handles both the
+    * Mac OS X hack to allow the native AWT file dialog, or uses
+    * the JFileChooser on other platforms. Mac AWT trick obtained from
+    * <A HREF="http://lists.apple.com/archives/java-dev/2003/Jul/msg00243.html">this post</A>
+    * on the OS X Java dev archive which explains the cryptic note in
+    * Apple's Java 1.4 release docs about the special System property.
+    */
+    static public File selectFolder(String prompt, File folder, Frame frame) {
+        if (Base.isMacOS()) {
+            if (frame == null) frame = new Frame(); //.pack();
+            FileDialog fd = new FileDialog(frame, prompt, FileDialog.LOAD);
+            if (folder != null) {
+                fd.setDirectory(folder.getParent());
+                //fd.setFile(folder.getName());
+            }
+            System.setProperty("apple.awt.fileDialogForDirectories", "true");
+            fd.setVisible(true);
+            System.setProperty("apple.awt.fileDialogForDirectories", "false");
+            if (fd.getFile() == null) {
+                return null;
+            }
+            return new File(fd.getDirectory(), fd.getFile());
+
+        } else {
+            JFileChooser fc = new JFileChooser();
+            fc.setDialogTitle(prompt);
+            if (folder != null) {
+                fc.setSelectedFile(folder);
+            }
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+            int returned = fc.showOpenDialog(new JDialog());
+            if (returned == JFileChooser.APPROVE_OPTION) {
+                return fc.getSelectedFile();
+            }
+        }
+        return null;
+    }
+
+
+    // .................................................................
+
+
+    /**
+    * Give this Frame a Processing icon.
+    */
+    static public void setIcon(Frame frame) {
+        File imageLocation = new File(getContentFile("lib/theme"), "icon.png");
+        Image image = Toolkit.getDefaultToolkit().createImage(imageLocation.getAbsolutePath());
+        frame.setIconImage(image);
+    }
+
+
+    /**
+    * Registers key events for a Ctrl-W and ESC with an ActionListener
+    * that will take care of disposing the window.
+    */
+    static public void registerWindowCloseKeys(JRootPane root, ActionListener disposer) {
+        KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        root.registerKeyboardAction(disposer, stroke,
+        JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        stroke = KeyStroke.getKeyStroke('W', modifiers);
+        root.registerKeyboardAction(disposer, stroke,
+        JComponent.WHEN_IN_FOCUSED_WINDOW);
+    }
+
+
+    // .................................................................
+
+
+    static public void showReference(String filename) {
+        File referenceFolder = Base.getContentFile("reference");
+        File referenceFile = new File(referenceFolder, filename);
+        openURL(referenceFile.getAbsolutePath());
+    }
+
+    static public void showGettingStarted() {
+        if (Base.isMacOS()) {
+            Base.showReference("Guide_MacOSX.html");
+        } else if (Base.isWindows()) {
+            Base.showReference("Guide_Windows.html");
+        } else {
+            Base.openURL("http://www.arduino.cc/playground/Learning/Linux");
+        }
+    }
+
+    static public void showReference() {
+        showReference("index.html");
+    }
+
+
+    static public void showEnvironment() {
+        showReference("Guide_Environment.html");
+    }
+
+
+    static public void showPlatforms() {
+        showReference("environment" + File.separator + "platforms.html");
+    }
+
+
+    static public void showTroubleshooting() {
+        showReference("Guide_Troubleshooting.html");
+    }
+
+
+    static public void showFAQ() {
+        showReference("FAQ.html");
+    }
+
+
+    // .................................................................
+
+
+    /**
+    * "No cookie for you" type messages. Nothing fatal or all that
+    * much of a bummer, but something to notify the user about.
+    */
+    static public void showMessage(String title, String message) {
+        if (title == null) title = Translate.t("Message");
+
+        if (commandLine) {
+            System.out.println(title + ": " + message);
+
+        } else {
+            JOptionPane.showMessageDialog(new Frame(), message, title,
+            JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+
+    /**
+    * Non-fatal error message with optional stack trace side dish.
+    */
+    static public void showWarning(String title, String message, Exception e) {
+        if (title == null) title = Translate.t("Warning");
+
+        if (commandLine) {
+            System.out.println(title + ": " + message);
+
+        } else {
+            JOptionPane.showMessageDialog(new Frame(), message, title,
+            JOptionPane.WARNING_MESSAGE);
+        }
+        if (e != null) e.printStackTrace();
+    }
+
+
+    /**
+    * Show an error message that's actually fatal to the program.
+    * This is an error that can't be recovered. Use showWarning()
+    * for errors that allow P5 to continue running.
+    */
+    static public void showError(String title, String message, Throwable e) {
+        if (title == null) title = Translate.t("Error");
+
+        if (commandLine) {
+            System.err.println(title + ": " + message);
+
+        } else {
+            JOptionPane.showMessageDialog(new Frame(), message, title,
+            JOptionPane.ERROR_MESSAGE);
+        }
+        if (e != null) e.printStackTrace();
+        System.exit(1);
+    }
+
+
+    // ...................................................................
+
+    // incomplete
+    static public int showYesNoCancelQuestion(Editor editor, String title, String primary, String secondary) {
+        if (!Base.isMacOS()) {
+            int result =
+                JOptionPane.showConfirmDialog(null, primary + "\n" + secondary, title,
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+            return result;
+        } else {
+            // Pane formatting adapted from the Quaqua guide
+            // http://www.randelshofer.ch/quaqua/guide/joptionpane.html
+            JOptionPane pane =
+                new JOptionPane("<html> " +
+                    "<head> <style type=\"text/css\">"+
+                    "b { font: 13pt \"Lucida Grande\" }"+
+                    "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
+                    "</style> </head>" +
+                    "<b>" + Translate.t("Do you want to save changes to this sketch before closing?") + "</b>" +
+                    "<p>" + Translate.t("If you don't save, your changes will be lost."),
+                    JOptionPane.QUESTION_MESSAGE);
+
+            String[] options = new String[] {
+                Translate.t("Save"), Translate.t("Cancel"), Translate.t("Don't Save")
+            };
+            pane.setOptions(options);
+
+            // highlight the safest option ala apple hig
+            pane.setInitialValue(options[0]);
+
+            // on macosx, setting the destructive property places this option
+            // away from the others at the lefthand side
+            pane.putClientProperty("Quaqua.OptionPane.destructiveOption", new Integer(2));
+
+            JDialog dialog = pane.createDialog(editor, null);
+            dialog.setVisible(true);
+
+            Object result = pane.getValue();
+            if (result == options[0]) {
+                return JOptionPane.YES_OPTION;
+            } else if (result == options[1]) {
+                return JOptionPane.CANCEL_OPTION;
+            } else if (result == options[2]) {
+                return JOptionPane.NO_OPTION;
+            } else {
+                return JOptionPane.CLOSED_OPTION;
+            }
+        }
+    }
+
+    static public int showYesNoQuestion(Frame editor, String title, String primary, String secondary) {
+        if (!Base.isMacOS()) {
+            return JOptionPane.showConfirmDialog(editor,
+                "<html><body>" +
+                "<b>" + primary + "</b>" +
+                "<br>" + secondary, title,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+        } else {
+            // Pane formatting adapted from the Quaqua guide
+            // http://www.randelshofer.ch/quaqua/guide/joptionpane.html
+            JOptionPane pane =
+                new JOptionPane("<html> " +
+                    "<head> <style type=\"text/css\">"+
+                    "b { font: 13pt \"Lucida Grande\" }"+
+                    "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
+                    "</style> </head>" +
+                    "<b>" + primary + "</b>" +
+                    "<p>" + secondary + "</p>",
+                    JOptionPane.QUESTION_MESSAGE);
+
+            String[] options = new String[] {
+                Translate.t("Yes"), Translate.t("No")
+            };
+            pane.setOptions(options);
+
+            // highlight the safest option ala apple hig
+            pane.setInitialValue(options[0]);
+
+            JDialog dialog = pane.createDialog(editor, null);
+            dialog.setVisible(true);
+
+            Object result = pane.getValue();
+            if (result == options[0]) {
+                return JOptionPane.YES_OPTION;
+            } else if (result == options[1]) {
+                return JOptionPane.NO_OPTION;
+            } else {
+                return JOptionPane.CLOSED_OPTION;
+            }
+        }
+    }
+
 
     static public File getContentFile(String name) {
         String path = System.getProperty("user.dir");
@@ -2062,103 +1970,103 @@ return null;
     }
 
 
-/**
-* Get an image associated with the current color theme.
-*/
-static public Image getThemeImage(String name, Component who) {
-return getLibImage("theme/" + name, who);
-}
+    /**
+    * Get an image associated with the current color theme.
+    */
+    static public Image getThemeImage(String name, Component who) {
+        return getLibImage("theme/" + name, who);
+    }
 
 
-/**
-* Return an Image object from inside the Processing lib folder.
-*/
-static public Image getLibImage(String name, Component who) {
-Image image = null;
-Toolkit tk = Toolkit.getDefaultToolkit();
+    /**
+    * Return an Image object from inside the Processing lib folder.
+    */
+    static public Image getLibImage(String name, Component who) {
+        Image image = null;
+        Toolkit tk = Toolkit.getDefaultToolkit();
 
-File imageLocation = new File(getContentFile("lib"), name);
-image = tk.getImage(imageLocation.getAbsolutePath());
-MediaTracker tracker = new MediaTracker(who);
-tracker.addImage(image, 0);
-try {
-tracker.waitForAll();
-} catch (InterruptedException e) { }
-return image;
-}
-
-
-/**
-* Return an InputStream for a file inside the Processing lib folder.
-*/
-static public InputStream getLibStream(String filename) throws IOException {
-return new FileInputStream(new File(getContentFile("lib"), filename));
-}
+        File imageLocation = new File(getContentFile("lib"), name);
+        image = tk.getImage(imageLocation.getAbsolutePath());
+        MediaTracker tracker = new MediaTracker(who);
+        tracker.addImage(image, 0);
+        try {
+            tracker.waitForAll();
+        } catch (InterruptedException e) { }
+        return image;
+    }
 
 
-// ...................................................................
+    /**
+    * Return an InputStream for a file inside the Processing lib folder.
+    */
+    static public InputStream getLibStream(String filename) throws IOException {
+        return new FileInputStream(new File(getContentFile("lib"), filename));
+    }
 
 
-/**
-* Get the number of lines in a file by counting the number of newline
-* characters inside a String (and adding 1).
-*/
-static public int countLines(String what) {
-int count = 1;
-for (char c : what.toCharArray()) {
-if (c == '\n') count++;
-}
-return count;
-}
+    // ...................................................................
 
 
-/**
-* Same as PApplet.loadBytes(), however never does gzip decoding.
-*/
-static public byte[] loadBytesRaw(File file) throws IOException {
-int size = (int) file.length();
-FileInputStream input = new FileInputStream(file);
-byte buffer[] = new byte[size];
-int offset = 0;
-int bytesRead;
-while ((bytesRead = input.read(buffer, offset, size-offset)) != -1) {
-offset += bytesRead;
-if (bytesRead == 0) break;
-}
-input.close();  // weren't properly being closed
-input = null;
-return buffer;
-}
+    /**
+    * Get the number of lines in a file by counting the number of newline
+    * characters inside a String (and adding 1).
+    */
+    static public int countLines(String what) {
+        int count = 1;
+        for (char c : what.toCharArray()) {
+            if (c == '\n') count++;
+        }
+        return count;
+    }
+
+
+    /**
+    * Same as PApplet.loadBytes(), however never does gzip decoding.
+    */
+    static public byte[] loadBytesRaw(File file) throws IOException {
+        int size = (int) file.length();
+        FileInputStream input = new FileInputStream(file);
+        byte buffer[] = new byte[size];
+        int offset = 0;
+        int bytesRead;
+        while ((bytesRead = input.read(buffer, offset, size-offset)) != -1) {
+            offset += bytesRead;
+            if (bytesRead == 0) break;
+        }
+        input.close();  // weren't properly being closed
+        input = null;
+        return buffer;
+    }
 
 
 
-/**
-* Read from a file with a bunch of attribute/value pairs
-* that are separated by = and ignore comments with #.
-*/
-static public HashMap<String,String> readSettings(File inputFile) {
-HashMap<String,String> outgoing = new HashMap<String,String>();
-if (!inputFile.exists()) return outgoing;  // return empty hash
+    /**
+    * Read from a file with a bunch of attribute/value pairs
+    * that are separated by = and ignore comments with #.
+    */
+    static public HashMap<String,String> readSettings(File inputFile) {
+        HashMap<String,String> outgoing = new HashMap<String,String>();
+        if (!inputFile.exists()) return outgoing;  // return empty hash
 
-String lines[] = PApplet.loadStrings(inputFile);
-for (int i = 0; i < lines.length; i++) {
-int hash = lines[i].indexOf('#');
-String line = (hash == -1) ?
-lines[i].trim() : lines[i].substring(0, hash).trim();
-if (line.length() == 0) continue;
+        String lines[] = PApplet.loadStrings(inputFile);
+        for (int i = 0; i < lines.length; i++) {
+            int hash = lines[i].indexOf('#');
+            String line = (hash == -1) ?
+            lines[i].trim() : lines[i].substring(0, hash).trim();
+            if (line.length() == 0) continue;
 
-int equals = line.indexOf('=');
-if (equals == -1) {
-System.err.println("ignoring illegal line in " + inputFile);
-System.err.println("  " + line);
-continue;
-}
-String attr = line.substring(0, equals).trim();
-String valu = line.substring(equals + 1).trim();
-outgoing.put(attr, valu);
-}
-return outgoing;
-}
+            int equals = line.indexOf('=');
+            if (equals == -1) {
+                System.err.println("ignoring illegal line in " + inputFile);
+                System.err.println("  " + line);
+                continue;
+            }
+            String attr = line.substring(0, equals).trim();
+            String valu = line.substring(equals + 1).trim();
+            outgoing.put(attr, valu);
+        }
+        return outgoing;
+    }
 
 
     static public void copyFile(File sourceFile, File targetFile) throws IOException {
@@ -2181,102 +2089,101 @@ return outgoing;
     }
 
 
-/**
-* Grab the contents of a file as a string.
-*/
-static public String loadFile(File file) throws IOException {
-String[] contents = PApplet.loadStrings(file);
-if (contents == null) return null;
-return PApplet.join(contents, "\n");
-}
+    /**
+    * Grab the contents of a file as a string.
+    */
+    static public String loadFile(File file) throws IOException {
+        String[] contents = PApplet.loadStrings(file);
+        if (contents == null) return null;
+        return PApplet.join(contents, "\n");
+    }
 
 
-/**
-* Spew the contents of a String object out to a file.
-*/
-static public void saveFile(String str, File file) throws IOException {
-File temp = File.createTempFile(file.getName(), null, file.getParentFile());
-PApplet.saveStrings(temp, new String[] { str });
-if (file.exists()) {
-boolean result = file.delete();
-if (!result) {
-throw new IOException("Could not remove old version of " +
-file.getAbsolutePath());
-}
-}
-boolean result = temp.renameTo(file);
-if (!result) {
-throw new IOException("Could not replace " +
-file.getAbsolutePath());
-}
-}
+    /**
+    * Spew the contents of a String object out to a file.
+    */
+    static public void saveFile(String str, File file) throws IOException {
+        File temp = File.createTempFile(file.getName(), null, file.getParentFile());
+        PApplet.saveStrings(temp, new String[] { str });
+        if (file.exists()) {
+            boolean result = file.delete();
+            if (!result) {
+                throw new IOException(
+                    Translate.t("Could not remove old version of %1", file.getAbsolutePath()));
+            }
+        }
+        boolean result = temp.renameTo(file);
+        if (!result) {
+            throw new IOException(
+                    Translate.t("Could not replace %1", file.getAbsolutePath()));
+        }
+    }
 
 
-/**
-* Copy a folder from one place to another. This ignores all dot files and
-* folders found in the source directory, to avoid copying silly .DS_Store
-* files and potentially troublesome .svn folders.
-*/
-static public void copyDir(File sourceDir,
-File targetDir) throws IOException {
-targetDir.mkdirs();
-String files[] = sourceDir.list();
-for (int i = 0; i < files.length; i++) {
-// Ignore dot files (.DS_Store), dot folders (.svn) while copying
-if (files[i].charAt(0) == '.') continue;
-//if (files[i].equals(".") || files[i].equals("..")) continue;
-File source = new File(sourceDir, files[i]);
-File target = new File(targetDir, files[i]);
-if (source.isDirectory()) {
-//target.mkdirs();
-copyDir(source, target);
-target.setLastModified(source.lastModified());
-} else {
-copyFile(source, target);
-}
-}
-}
+    /**
+    * Copy a folder from one place to another. This ignores all dot files and
+    * folders found in the source directory, to avoid copying silly .DS_Store
+    * files and potentially troublesome .svn folders.
+    */
+    static public void copyDir(File sourceDir, File targetDir) throws IOException {
+        targetDir.mkdirs();
+        String files[] = sourceDir.list();
+        for (int i = 0; i < files.length; i++) {
+            // Ignore dot files (.DS_Store), dot folders (.svn) while copying
+            if (files[i].charAt(0) == '.') continue;
+            //if (files[i].equals(".") || files[i].equals("..")) continue;
+            File source = new File(sourceDir, files[i]);
+            File target = new File(targetDir, files[i]);
+            if (source.isDirectory()) {
+                //target.mkdirs();
+                copyDir(source, target);
+                target.setLastModified(source.lastModified());
+            } else {
+                copyFile(source, target);
+            }
+        }
+    }
 
 
-/**
-* Remove all files in a directory and the directory itself.
-*/
-static public void removeDir(File dir) {
-if (dir.exists()) {
-removeDescendants(dir);
-if (!dir.delete()) {
-System.err.println("Could not delete " + dir);
-}
-}
-}
+    /**
+    * Remove all files in a directory and the directory itself.
+    */
+    static public void removeDir(File dir) {
+        if (dir.exists()) {
+            removeDescendants(dir);
+            if (!dir.delete()) {
+                System.err.println(Translate.t("Could not delete %1", dir.getName()));
+            }
+        }
+    }
 
 
-/**
-* Recursively remove all files within a directory,
-* used with removeDir(), or when the contents of a dir
-* should be removed, but not the directory itself.
-* (i.e. when cleaning temp files from lib/build)
-*/
-static public void removeDescendants(File dir) {
-if (!dir.exists()) return;
+    /**
+    * Recursively remove all files within a directory,
+    * used with removeDir(), or when the contents of a dir
+    * should be removed, but not the directory itself.
+    * (i.e. when cleaning temp files from lib/build)
+    */
+    static public void removeDescendants(File dir) {
+        if (!dir.exists()) return;
 
-String files[] = dir.list();
-for (int i = 0; i < files.length; i++) {
-if (files[i].equals(".") || files[i].equals("..")) continue;
-File dead = new File(dir, files[i]);
-if (!dead.isDirectory()) {
-if (!Preferences.getBoolean("compiler.save_build_files")) {
-if (!dead.delete()) {
-// temporarily disabled
-System.err.println("Could not delete " + dead);
-}
-}
-} else {
-removeDir(dead);
-//dead.delete();
-}
-}
-}
+        String files[] = dir.list();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].equals(".") || files[i].equals("..")) continue;
+            File dead = new File(dir, files[i]);
+            if (!dead.isDirectory()) {
+                if (!Preferences.getBoolean("compiler.save_build_files")) {
+                    if (!dead.delete()) {
+                        // temporarily disabled
+                        System.err.println(Translate.t("Could not delete %1", dead.getName()));
+                    }
+                }
+            } else {
+                removeDir(dead);
+                //dead.delete();
+            }
+        }
+    }
 
     /**
      * Calculate the size of the contents of a folder.
@@ -2342,19 +2249,14 @@ removeDir(dead);
     }
 
     public static void handleSystemInfo() {
-        System.out.println("Installed java LookAndFeels:");
-        UIManager.LookAndFeelInfo[] looks = UIManager.getInstalledLookAndFeels();
-        for (int i = 0; i < looks.length; i++) {
-            System.out.println("  "+looks[i].getClassName());
-        }
-        System.out.println("\nInstalled plugins:");
+        System.out.println(Translate.t("Installed plugins") + ":");
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
         for (int i = 0; i < entries.length; i++) {
             Plugin t = plugins.get(entries[i]);
 
-            String ver = "unknown";
-            String com = "unknown";
+            String ver = Translate.t("unknown");
+            String com = Translate.t("unknown");
 
 
             // Older plugins may not have these methods - ignore them if they don't
@@ -2362,17 +2264,19 @@ removeDir(dead);
                 ver = t.getVersion();
                 com = t.getCompiled();
             } catch (Exception e) {
+                ver = Translate.t("unknown");
+                com = Translate.t("unknown");
             }
 
-            System.out.println("  " + entries[i] + " - " + ver + " compiled " + com);
+            System.out.println("  " + entries[i] + " - " + ver + " " + Translate.t("compiled") + " " + com);
         }
 
-        System.out.println("\nProcesses:");
+        System.out.println("\n" + Translate.t("Processes") + ":");
         for (Process p : processes) {
             System.out.println("  " + p);
         }
 
-        System.out.println("\nThreads:");
+        System.out.println("\n" + Translate.t("Threads") + ":");
         Thread[] threads = new Thread[Thread.activeCount()];
         Thread.enumerate(threads);
         for (Thread t : threads) {
@@ -2415,19 +2319,19 @@ removeDir(dead);
 
     public void handleAddLibrary()
     {
-        File inputFile = openFileDialog("Add a Library...", "zip");
+        File inputFile = openFileDialog(Translate.t("Add Library..."), "zip");
 
         if (inputFile == null) {
             return;
         }
 
         if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": not found");
+            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
             return;
         }
 
         if (!testLibraryZipFormat(inputFile.getAbsolutePath())) {
-            System.err.println("Error: " + inputFile.getName() + " is not correctly packaged.");
+            System.err.println(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()));
             return;
         }
 
@@ -2516,7 +2420,7 @@ removeDir(dead);
         public String destination;
         public void run() {
 
-            activeEditor.status.progress("Extracting...");
+            activeEditor.status.progress(Translate.t("Extracting..."));
         
             byte[] buffer = new byte[1024];
             ArrayList<String> fileList = new ArrayList<String>();
@@ -2554,11 +2458,11 @@ removeDir(dead);
                 zis.closeEntry();
                 zis.close();
             } catch (Exception e) {
-                activeEditor.status.progressNotice("Install failed");
+                activeEditor.status.progressNotice(Translate.t("Install failed"));
                 System.err.println(e.getMessage());
                 return;
             }
-            activeEditor.status.progressNotice("Installed.");
+            activeEditor.status.progressNotice(Translate.t("Installed."));
             activeEditor.status.unprogress();
         }
     }
@@ -2574,14 +2478,14 @@ removeDir(dead);
 
     public void handleAddBoards() 
     {
-        File inputFile = openFileDialog("Add a boards package...", "zip");
+        File inputFile = openFileDialog(Translate.t("Add Boards..."), "zip");
 
         if (inputFile == null) {
             return;
         }
 
         if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": not found");
+            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
             return;
         }
 
@@ -2598,7 +2502,7 @@ removeDir(dead);
     public void rebuildCoresMenu(JMenu menu)
     {
 	menu.removeAll();
-        JMenuItem item = new JMenuItem("Add Core...");
+        JMenuItem item = new JMenuItem(Translate.t("Add Core..."));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleAddCore();
@@ -2606,7 +2510,7 @@ removeDir(dead);
         });
         menu.add(item);
         menu.addSeparator();
-        item = new JMenuItem("Installed Cores:");
+        item = new JMenuItem(Translate.t("Installed Cores") + ":");
         menu.add(item);
 
         String[] entries = (String[]) cores.keySet().toArray(new String[0]);
@@ -2620,14 +2524,14 @@ removeDir(dead);
     
     public void handleAddCore()
     {
-        File inputFile = openFileDialog("Add a core package...", "zip");
+        File inputFile = openFileDialog(Translate.t("Add Core..."), "zip");
 
         if (inputFile == null) {
             return;
         }
 
         if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": not found");
+            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
             return;
         }
 
@@ -2645,20 +2549,20 @@ removeDir(dead);
         gatherLibraries();
 		rebuildImportMenu(editors.get(i).importMenu);
 		rebuildExamplesMenu(editors.get(i).examplesMenu);
-		rebuildPluginsMenu(editors.get(i).pluginsMenu);
+		rebuildPluginsMenu(editors.get(i).toolsMenu);
 	}
     }
 
     public void handleInstallPlugin()
     {
-        File inputFile = openFileDialog("Install plugin...", "zip,jar");
+        File inputFile = openFileDialog(Translate.t("Add Plugin..."), "zip,jar");
 
         if (inputFile == null) {
             return;
         }
 
         if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": not found");
+            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
             return;
         }
         File bf = new File(getSketchbookFolder(), "plugins");
@@ -2681,7 +2585,7 @@ removeDir(dead);
         }
         loadPlugins();
 	for (int i = 0; i < editors.size(); i++) {
-		rebuildPluginsMenu(editors.get(i).pluginsMenu);
+		rebuildPluginsMenu(editors.get(i).toolsMenu);
 	}
     }
 
@@ -2750,9 +2654,10 @@ removeDir(dead);
             pluginInfo.put("version", manifestContents.getValue("Version"));
             pluginInfo.put("compiled", manifestContents.getValue("Compiled"));
             pluginInfo.put("jarfile", jar.getAbsolutePath());
+            pluginInfo.put("shortcut", manifestContents.getValue("Shortcut"));
 
             if (className.startsWith("processing.")) {
-                System.err.println("Plugin " + jar.getName() + " is not compatible with this version.\nPlease upgrade the plugin.");
+                System.err.println(Translate.t("Plugin %1 is not compatible with this version. Please upgrade the plugin.", jar.getName()));
                 return;
             }
 
@@ -2827,15 +2732,18 @@ removeDir(dead);
         menu.removeAll();
         JMenuItem item;
 
-        item = new JMenuItem("Install Plugin...");
+        item = new JMenuItem(Translate.t("Add Plugin..."));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleInstallPlugin();
             }
         });
         menu.add(item);
+        menu.addSeparator();
 
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
+
+        HashMap<String, JMenuItem> menus = new HashMap<String, JMenuItem>();
 
         for (int i=0; i<entries.length; i++) {
             final Plugin t = plugins.get(entries[i]);
@@ -2853,8 +2761,21 @@ removeDir(dead);
                         SwingUtilities.invokeLater(t);
                     }
                 });
-                menu.add(item);
+                try {
+                    if (t.getShortcut() != 0) {
+                        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+                        item.setAccelerator(KeyStroke.getKeyStroke(t.getShortcut(), modifiers));
+                    }
+                } catch (Exception ignored) {};
+
+                menus.put(t.getMenuTitle(), item);
             }
+        }
+        
+        entries = (String[]) menus.keySet().toArray(new String[0]);
+        Arrays.sort(entries);
+        for (String entry : entries) {
+            menu.add(menus.get(entry));
         }
     }
 }

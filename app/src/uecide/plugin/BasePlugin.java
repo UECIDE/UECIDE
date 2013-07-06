@@ -31,6 +31,11 @@ import java.util.*;
 import java.net.*;
 import java.util.zip.*;
 import java.util.regex.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
+import javax.swing.text.*;
+
 
 public class BasePlugin implements Plugin {
 
@@ -86,6 +91,29 @@ public class BasePlugin implements Plugin {
         } catch (Exception e) {
             System.err.println("Resource not found: " + file);
         }
+        return null;
+    }
+
+    public URL getResourceURL(String file)
+    {
+        try {
+            return loader.getResource(file);
+        } catch (Exception e) {
+            System.err.println("Resource not found: " + file);
+        }
+        return null;
+    }
+
+    public char getShortcut()
+    {
+        if (pluginInfo.get("shortcut") != null) {
+            return ((String) pluginInfo.get("shortcut")).charAt(0);
+        } 
+        return 0;
+    }
+
+    public ImageIcon toolbarIcon()
+    {
         return null;
     }
 }

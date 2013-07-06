@@ -1,4 +1,4 @@
-version=0.3.3c
+version=0.4.0a
 theme=uecide
 download.enable=yes
 #core.pic32=yes
@@ -16,3 +16,11 @@ boards.Arduino=yes
 #boards.Olimex=yes
 #boards.UBW32=yes
 #boards.Launchpad=yes
+plugin.Archiver=yes
+plugin.AutoFormat=yes
+#plugin.ColorSelector=yes
+#plugin.ConvertWaveFile=yes
+#plugin.CreateFont=yes
+#plugin.ExportToMPLABX
+plugin.FixEncoding=yes
+plugin.SerialTerminal=yes
