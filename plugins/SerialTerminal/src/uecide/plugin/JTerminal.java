@@ -15,9 +15,10 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import java.awt.datatransfer.*;
 
 
-public class JTerminal extends JComponent implements MessageConsumer,KeyListener,MouseListener,FocusListener
+public class JTerminal extends JComponent implements MessageConsumer,KeyListener,MouseListener,FocusListener,MouseMotionListener
 {
     BufferedImage offscreen = null;
     
@@ -28,6 +29,8 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
     int fontDescent;
     Font font = null;
     Graphics2D graphic;
+    Point selectStart = null;
+    Point selectEnd = null;
 
     boolean hasFocus = false;
 
@@ -57,6 +60,15 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
     int cursorColor;
 
     MessageConsumer keyPressConsumer = null;
+
+    int scrollbackSize = 2000;
+    int[][] scrollback = new int[2000][80];
+
+    int topOfScreen = 2000 - 24;
+    int scrollbackPosition = 0;
+
+    final int IS_BRIGHT = 0x4000;
+    final int IS_DIM    = 0x8000;
 
     public JTerminal()
     {
@@ -98,6 +110,74 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         setFocusable(true);
         addMouseListener(this);
         addFocusListener(this);
+        addMouseMotionListener(this);
+    }
+
+    public void setScrollbackSize(int s)
+    {
+        scrollbackSize = s;
+        scrollback = new int[scrollbackSize][textSize.width];
+        topOfScreen = scrollbackSize - textSize.height;
+    }
+
+    public Point scrollbackAt(Point position)
+    {
+        if (position == null) {
+            return null;
+        }
+        return new Point(
+            position.x,
+            position.y + topOfScreen - scrollbackPosition
+        );
+    }
+
+    public char characterIn(Point position) {
+        return (char) (scrollback[position.y][position.x] & 0xFF);
+    }
+
+    public char characterAt(Point position)
+    {
+        return (char) (scrollback[position.y + topOfScreen - scrollbackPosition][position.x] & 0xFF);
+    }
+
+    public Color selectedForegroundAt(Point position)
+    {
+        int character = scrollback[position.y + topOfScreen - scrollbackPosition][position.x];
+        int colorIndex = (character >> 8) & 0x07;
+        if ((character & IS_BRIGHT) != 0) {
+            return brightColors[7-colorIndex];
+        }
+        if ((character & IS_DIM) != 0) {
+            return dimColors[7-colorIndex];
+        }
+        return normalColors[7-colorIndex];
+    }
+
+    public Color foregroundAt(Point position)
+    {
+        int character = scrollback[position.y + topOfScreen - scrollbackPosition][position.x];
+        int colorIndex = (character >> 8) & 0x07;
+        if ((character & IS_BRIGHT) != 0) {
+            return brightColors[colorIndex];
+        }
+        if ((character & IS_DIM) != 0) {
+            return dimColors[colorIndex];
+        }
+        return normalColors[colorIndex];
+    }
+
+    public Color selectedBackgroundAt(Point position)
+    {
+        int character = scrollback[position.y + topOfScreen - scrollbackPosition][position.x];
+        int colorIndex = (character >> 11) & 0x07;
+        return normalColors[7-colorIndex];
+    }
+
+    public Color backgroundAt(Point position)
+    {
+        int character = scrollback[position.y + topOfScreen - scrollbackPosition][position.x];
+        int colorIndex = (character >> 11) & 0x07;
+        return normalColors[colorIndex];
     }
 
     public void setKeypressConsumer(MessageConsumer m)
@@ -139,7 +219,8 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
             characterSize.width * textSize.width,
             characterSize.height * textSize.height
         );
-        clearScreen();
+        offscreen = new BufferedImage(screenSize.width, screenSize.height, BufferedImage.TYPE_INT_RGB);
+        graphic = offscreen.createGraphics();
     }
 
     public Color getFGColor()
@@ -160,13 +241,16 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
 
     public void clearScreen()
     {
-        offscreen = new BufferedImage(screenSize.width, screenSize.height, BufferedImage.TYPE_INT_RGB);
-        graphic = offscreen.createGraphics();
+        for (int y = 0; y < textSize.height; y++) {
+            scrollUp();
+        }
+    }
 
-        cursorPosition = new Point(0, 0);
-        graphic.setColor(getBGColor());
-        graphic.fillRect(0, 0, screenSize.width, screenSize.height);
-        graphic.setFont(font);
+    public Point graphicToChar(Point p) {
+        return new Point(
+            p.x / characterSize.width,
+            p.y / characterSize.height
+        );
     }
 
     public Point charToGraphic(Point p) {
@@ -183,8 +267,67 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         );
     }
 
+    public void setScrollbackPosition(int pos) {
+        scrollbackPosition = pos;
+        repaint();
+    }
+
+    public int pointToAbsolute(Point p) {
+        if (p == null) {
+            return -1;
+        }
+        return (p.y * textSize.width + p.x);
+    }
+
+    public Point absoluteToPoint(int a) {
+        if (a == -1) {
+            return null;
+        }
+        return new Point(
+            a % textSize.width,
+            a / textSize.width
+        );
+    }
+
     public void paintComponent(Graphics screen) 
     {
+        int sbSi = pointToAbsolute(selectStart);
+        int sbEi = pointToAbsolute(selectEnd);
+
+        if (sbSi > sbEi) {
+            int t = sbSi;
+            sbSi = sbEi;
+            sbEi = t;
+        }
+
+        graphic.setFont(font);
+        graphic.setRenderingHint(
+            RenderingHints.KEY_TEXT_ANTIALIASING,
+            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        boolean inSelect = false;
+
+        for (int y = 0; y < textSize.height; y++) {
+            for (int x = 0; x < textSize.width; x++) {
+                Point myPos = new Point(x, y);
+                Point sbP = scrollbackAt(myPos);
+                int sbPi = pointToAbsolute(sbP);
+
+                if ((sbPi >= sbSi) && (sbPi <= sbEi)) {
+                    inSelect = true;
+                } else {
+                    inSelect = false;
+                }
+                char c = characterAt(myPos);
+                Point cPos = charToGraphic(myPos);
+                graphic.setColor(inSelect ? selectedBackgroundAt(myPos) : backgroundAt(myPos));
+                graphic.fillRect(cPos.x, cPos.y, characterSize.width, characterSize.height);
+                graphic.setColor(inSelect ? selectedForegroundAt(myPos) : foregroundAt(myPos));
+                String text = Character.toString(c);
+                cPos = charToGraphicBaseline(myPos);
+                graphic.drawString(text, cPos.x, cPos.y);
+            }
+        }
         screen.drawImage(offscreen, 0, 0, null);
         if (cursorShow) {
             screen.setColor(brightColors[cursorColor]);
@@ -211,26 +354,37 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
 
     public void scrollUp()
     {
-        graphic.drawImage(offscreen, 0, 0 - characterSize.height, null);
+        for (int y = 0; y < scrollbackSize - 1; y++) {
+            for (int x = 0; x < textSize.width; x++) {
+                scrollback[y][x] = scrollback[y+1][x];
+            }
+        }
+        int bCol = 32;
+        bCol |= color << 8;
+        bCol |= background << 11;
+        if (brightness < 0) {
+            bCol |= IS_DIM;
+        }
+        if (brightness > 0) {
+            bCol |= IS_BRIGHT;
+        }
+        for (int x = 0; x < textSize.width; x++) {
+            scrollback[scrollbackSize - 1][x] = bCol;
+        }
     }
 
     public void drawCharacter(char c)
     {
-        graphic.setFont(font);
-        graphic.setColor(getBGColor());
-        graphic.setRenderingHint(
-            RenderingHints.KEY_TEXT_ANTIALIASING,
-            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        Point cPos = charToGraphic(cursorPosition);
-
-        graphic.fillRect(cPos.x, cPos.y, characterSize.width, characterSize.height);
-        graphic.setColor(getFGColor());
-
-        String text = Character.toString(c);
-
-        cPos = charToGraphicBaseline(cursorPosition);
-
-        graphic.drawString(text, cPos.x, cPos.y);
+        int bCol = (int)c;
+        bCol |= color << 8;
+        bCol |= background << 11;
+        if (brightness < 0) {
+            bCol |= IS_DIM;
+        }
+        if (brightness > 0) {
+            bCol |= IS_BRIGHT;
+        }
+        scrollback[cursorPosition.y + topOfScreen][cursorPosition.x] = bCol;
         cursorPosition.x++;
         if (cursorPosition.x == textSize.width) {
             cursorPosition.x = 0;
@@ -544,8 +698,9 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
     }
 
     public void mouseClicked(MouseEvent e) {
-        //Since the user clicked on us, let us get focus!
         requestFocusInWindow();
+        selectStart = null;
+        selectEnd = null;
     }
 
     public void mouseEntered(MouseEvent e) {
@@ -555,9 +710,21 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
     }
 
     public void mouseReleased(MouseEvent e) {
+        copyContent();
+        selectStart = null;
+        selectEnd = null;
     }
 
     public void mousePressed(MouseEvent e) {
+        selectStart = scrollbackAt(graphicToChar(e.getPoint()));
+        selectEnd = scrollbackAt(graphicToChar(e.getPoint()));
+    }
+
+    public void mouseMoved(MouseEvent e) {
+    }
+
+    public void mouseDragged(MouseEvent e) {
+        selectEnd = scrollbackAt(graphicToChar(e.getPoint()));
     }
 
     public void focusGained(FocusEvent e) {
@@ -570,4 +737,19 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         repaint();
     }
 
+    public void copyContent() {
+        Clipboard clipboard = getToolkit().getSystemClipboard();
+
+        int start = pointToAbsolute(selectStart);
+        int end = pointToAbsolute(selectEnd);
+
+        StringBuilder selection = new StringBuilder();
+        for (int i = start; i <= end; i++) {
+            Point p = absoluteToPoint(i);
+            System.err.println("Copy " + p.x + "," + p.y);
+            selection.append(Character.toString(characterIn(p)));
+        }
+
+        clipboard.setContents(new StringSelection(selection.toString()),null);
+    }
 }
