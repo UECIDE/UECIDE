@@ -746,7 +746,6 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         StringBuilder selection = new StringBuilder();
         for (int i = start; i <= end; i++) {
             Point p = absoluteToPoint(i);
-            System.err.println("Copy " + p.x + "," + p.y);
             selection.append(Character.toString(characterIn(p)));
         }
 
