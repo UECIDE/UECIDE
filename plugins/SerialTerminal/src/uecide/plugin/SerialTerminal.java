@@ -22,6 +22,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     Serial port;
     JComboBox baudRates;
     JCheckBox showCursor;
+    JScrollBar scrollbackBar;
 
     int baudRate;
 
@@ -46,6 +47,8 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
         Box box = Box.createVerticalBox();
 
+        Box line = Box.createHorizontalBox();
+
         term = new JTerminal();
         Font f = Preferences.getFont("serial.font");
         if (f == null) {
@@ -56,9 +59,22 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         term.setKeypressConsumer(this);
         term.boxCursor(true);
 
-        box.add(term);
+        line.add(term);
+        scrollbackBar = new JScrollBar(JScrollBar.VERTICAL);
+        scrollbackBar.setMinimum(24);
+        scrollbackBar.setMaximum(2010);
+        scrollbackBar.setValue(2000);
+        scrollbackBar.setVisibleAmount(24);
+        scrollbackBar.addAdjustmentListener(new AdjustmentListener() {
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                System.err.println(scrollbackBar.getValue() + " = " + (2000 - scrollbackBar.getValue()));
+                term.setScrollbackPosition(2000 - scrollbackBar.getValue());
+            }
+        });
+        line.add(scrollbackBar);
+        box.add(line);
         
-        Box line = Box.createHorizontalBox();
+        line = Box.createHorizontalBox();
 
         line.add(Box.createHorizontalGlue());
 
