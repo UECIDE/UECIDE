@@ -20,7 +20,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     JFrame win;
     JTerminal term;
     Serial port;
-    JComboBox baudRates;
+    JComboBox<String> baudRates;
     JCheckBox showCursor;
     JScrollBar scrollbackBar;
 
@@ -80,7 +80,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
         JLabel label = new JLabel(Translate.t("Baud Rate") + ": ");
         line.add(label);
-        baudRates = new JComboBox(new String[] { "300", "1200", "2400", "4800", "9600", "14400", "28800", "38400", "57600", "115200", "230400", "460800", "500000", "576000", "1000000", "1152000"});
+        baudRates = new JComboBox<String>(new String[] { "300", "1200", "2400", "4800", "9600", "14400", "28800", "38400", "57600", "115200", "230400", "460800", "500000", "576000", "1000000", "1152000"});
         baudRates.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 if (ready) {

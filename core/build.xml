@@ -17,7 +17,9 @@
            source="1.5"
 	   encoding="UTF-8"
 	   includeAntRuntime="false"
-	   srcdir="src" destdir="bin"/>
+	   srcdir="src" destdir="bin">
+            <compilerarg value="-Xlint:unchecked"/>
+     </javac>
   </target>		
 
   <target name="build" depends="compile" description="Build core library">

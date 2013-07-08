@@ -38,7 +38,9 @@
     <javac srcdir="src" 
 	       destdir="bin" 
 	       includeAntRuntime="false"
-	       classpath="${uecide.path}/core/core.jar; ${uecide.path}/app/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/RXTXcomm.jar; lib/log4j-1.2.16.jar; lib/log4j.properties" />
+	       classpath="${uecide.path}/core/core.jar; ${uecide.path}/app/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/RXTXcomm.jar; lib/log4j-1.2.16.jar; lib/log4j.properties" >
+           <compilerarg value="-Xlint:unchecked" />
+    </javac>
     </target>
 
     <target name="build" depends="compile" description="Build the plugin jars">
@@ -49,6 +51,7 @@
                 <attribute name="Author" value="Matt Jenkins" />
                 <attribute name="Main-Class" value="uecide.plugin.${plugin.name}"/>
                 <attribute name="Shortcut" value="G" />
+                <attribute name="Modifier" value="Shift" />
             </manifest>
         </jar>
         <jar basedir="src" destfile="${plugin.name}.jar" includes="uecide/plugin/${plugin.name}/**" update="true"/>
