@@ -2655,6 +2655,7 @@ return platform;
             pluginInfo.put("compiled", manifestContents.getValue("Compiled"));
             pluginInfo.put("jarfile", jar.getAbsolutePath());
             pluginInfo.put("shortcut", manifestContents.getValue("Shortcut"));
+            pluginInfo.put("modifier", manifestContents.getValue("Modifier"));
 
             if (className.startsWith("processing.")) {
                 System.err.println(Translate.t("Plugin %1 is not compatible with this version. Please upgrade the plugin.", jar.getName()));
@@ -2764,6 +2765,7 @@ return platform;
                 try {
                     if (t.getShortcut() != 0) {
                         int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+                        modifiers |= t.getModifier();
                         item.setAccelerator(KeyStroke.getKeyStroke(t.getShortcut(), modifiers));
                     }
                 } catch (Exception ignored) {};

@@ -760,6 +760,9 @@ public class Preferences {
       value = getDefault(attr);
       replace = true;
     }
+    if (value == null) {
+        value="Monospaced,plain,12";
+    }
 
     String[] pieces = PApplet.split(value, ',');
     if (pieces.length != 3) {
@@ -786,6 +789,9 @@ public class Preferences {
       set(attr, value);
     }
 
+    if (font == null) {
+        font = new Font("Monospaced", Font.PLAIN, 12);
+    }
     return font;
   }
 
