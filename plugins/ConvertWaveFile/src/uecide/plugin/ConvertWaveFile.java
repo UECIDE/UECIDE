@@ -35,7 +35,7 @@ public class ConvertWaveFile extends BasePlugin {
 
     JLabel info;
 
-    JComboBox rates;
+    JComboBox<String> rates;
     JLabel newFilenameLabel;
     JTextArea newFilename;
     JLabel newFilenameSuffix;
@@ -96,7 +96,7 @@ public class ConvertWaveFile extends BasePlugin {
         line.add(merge);
         resample = new JCheckBox("Resample to");
         line.add(resample);
-        rates = new JComboBox(new String[] {
+        rates = new JComboBox<String>(new String[] {
             "8000", "11025", "16000", "22050", "32000", "44100"
         });
 

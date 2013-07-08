@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.imageio.*;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -20,8 +21,13 @@ public class Grapher extends BasePlugin implements MessageConsumer
     JFrame win;
     JGrapher graph;
     Serial port;
-    JComboBox baudRates;
+    JComboBox<String> baudRates;
     JScrollBar scrollbackBar;
+
+    JButton playPauseButton;
+    ImageIcon playIcon;
+    ImageIcon pauseIcon;
+    boolean playPauseState = false;
 
     int baudRate;
 
@@ -39,12 +45,40 @@ public class Grapher extends BasePlugin implements MessageConsumer
         if (Grapher.isOpen) {
             return;
         }
-        Grapher.isOpen = true;
         win = new JFrame(Translate.t("Grapher"));
         win.getContentPane().setLayout(new BorderLayout());
         win.setResizable(false);
 
         Box box = Box.createVerticalBox();
+
+        JToolBar toolbar = new JToolBar();
+        toolbar.setFloatable(false);
+
+        File themeFolder = Base.getContentFile("lib/theme");
+        File iconFile = new File(themeFolder, "save.png");
+        ImageIcon saveIcon = new ImageIcon(iconFile.getAbsolutePath());
+        JButton saveButton = new JButton(saveIcon);
+        saveButton.setToolTipText(Translate.t("Save Image"));
+
+        saveButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveImage();
+            }
+        });
+        toolbar.add(saveButton);
+
+        playIcon = new ImageIcon(getResourceURL("uecide/plugin/Grapher/play.png"));
+        pauseIcon = new ImageIcon(getResourceURL("uecide/plugin/Grapher/pause.png"));
+        playPauseButton = new JButton(pauseIcon);
+        playPauseButton.setToolTipText(Translate.t("Pause Graph"));
+        playPauseButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                playPause();
+            }
+        });
+        playPauseState = false;
+        toolbar.add(playPauseButton);
+        box.add(toolbar);
 
         Box line = Box.createHorizontalBox();
 
@@ -65,7 +99,8 @@ public class Grapher extends BasePlugin implements MessageConsumer
 
         JLabel label = new JLabel(Translate.t("Baud Rate") + ": ");
         line.add(label);
-        baudRates = new JComboBox(new String[] { "300", "1200", "2400", "4800", "9600", "14400", "28800", "38400", "57600", "115200", "230400", "460800", "500000", "576000", "1000000", "1152000"});
+        String[] baudRateList = new String[] { "300", "1200", "2400", "4800", "9600", "14400", "28800", "38400", "57600", "115200", "230400", "460800", "500000", "576000", "1000000", "1152000"};
+        baudRates = new JComboBox<String>(baudRateList);
         final MessageConsumer mc = this;
         baudRates.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -109,11 +144,6 @@ public class Grapher extends BasePlugin implements MessageConsumer
                 close();
             }
         });
-//        Base.registerWindowCloseKeys(win.getRootPane(), new ActionListener() {
-//            public void actionPerformed(ActionEvent actionEvent) {
-//                close();
-//            }
-//        });
         Base.setIcon(win);
 
         try {
@@ -122,11 +152,13 @@ public class Grapher extends BasePlugin implements MessageConsumer
             port = new Serial(baudRate);
         } catch(Exception e) {
             System.err.println("Unable to open serial port");
+            win.dispose();
             return;
         }
         port.addListener(this);
         win.setVisible(true);
         ready = true;
+        Grapher.isOpen = true;
     }
 
     public void close()
@@ -151,6 +183,7 @@ public class Grapher extends BasePlugin implements MessageConsumer
                 switch(c) {
                     case 'A':
                     case 'V':
+                    case 'R':
                     case 'S':
                     case 'M':
                     case 'B':
@@ -184,11 +217,13 @@ public class Grapher extends BasePlugin implements MessageConsumer
                 }
                 break;
             case 'V':
-                float vals[] = new float[params.length];
-                for (int i = 0; i < params.length; i++) {
-                    vals[i] = Float.parseFloat(params[i]);
+                if (playPauseState == false) {
+                    float vals[] = new float[params.length];
+                    for (int i = 0; i < params.length; i++) {
+                        vals[i] = Float.parseFloat(params[i]);
+                    }
+                    graph.addDataPoint(vals);
                 }
-                graph.addDataPoint(vals);
                 break;
             case 'S':
                 if (params.length == 2) {
@@ -242,6 +277,9 @@ public class Grapher extends BasePlugin implements MessageConsumer
                     graph.setYStep(Integer.parseInt(params[2]));
                 }
                 break;
+            case 'R':
+                graph.reset();
+                break;
         }
     }
     
@@ -258,6 +296,39 @@ public class Grapher extends BasePlugin implements MessageConsumer
         win.pack();
         win.revalidate();
         win.repaint();
+    }
+
+    public void saveImage() {
+        FileDialog fd = new FileDialog(win,
+                                   Translate.t("Save Image"),
+                                   FileDialog.SAVE);
+        fd.setVisible(true);
+        String newParentDir = fd.getDirectory();
+        String newName = fd.getFile();
+        if (newName == null || newParentDir == null) {
+            return;
+        }
+
+        File df = new File(newParentDir, newName);
+        if (!(df.getName().toLowerCase().endsWith(".png"))) {
+            return;
+        }
+        try {
+            ImageIO.write(graph.renderGraph(), "PNG", df);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void playPause()
+    {
+        if (playPauseState == false) {
+            playPauseState = true;
+            playPauseButton.setIcon(playIcon);
+        } else {
+            playPauseState = false;
+            playPauseButton.setIcon(pauseIcon);
+        }
     }
 }
 

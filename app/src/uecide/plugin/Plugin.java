@@ -48,6 +48,7 @@ public interface Plugin extends Runnable {
   public String getVersion();
   public String getCompiled();
   public char getShortcut();
+  public int getModifier();
   public void setLoader(URLClassLoader loader);
   public int flags();
   public ImageIcon toolbarIcon();

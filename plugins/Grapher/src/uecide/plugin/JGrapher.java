@@ -96,6 +96,12 @@ public class JGrapher extends JComponent
 
     public void paintComponent(Graphics screen) 
     {
+        BufferedImage pic = renderGraph();
+        screen.drawImage(pic, 0, 0, null);
+    }
+
+    public BufferedImage renderGraph()
+    {
         BufferedImage offscreen = new BufferedImage(screenSize.width, screenSize.height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = offscreen.createGraphics();
         g.setRenderingHint(
@@ -157,8 +163,7 @@ public class JGrapher extends JComponent
             }
         }
 
-
-        screen.drawImage(offscreen, 0, 0, null);
+        return offscreen;
     }
 
     public Dimension getPreferredSize() { return screenSize; }
@@ -291,5 +296,9 @@ public class JGrapher extends JComponent
     public void setYStep(int value) {
         axisY1Step = value;
     }
-
+    
+    public void reset() {
+        series = new ArrayList<DataSeries>();
+        recreateDataStore();
+    }
 }

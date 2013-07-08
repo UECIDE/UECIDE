@@ -116,5 +116,17 @@ public class BasePlugin implements Plugin {
     {
         return null;
     }
+
+    public int getModifier()
+    {
+        String mod = (String)pluginInfo.get("modifier");
+        if (mod == null) {
+            return 0;
+        }
+        if (mod.toLowerCase().equals("shift")) {
+            return ActionEvent.SHIFT_MASK;
+        }
+        return 0;
+    }
 }
 
