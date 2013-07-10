@@ -692,11 +692,12 @@ int prepare(const char *lpCmdLine) {
 			appendAppClasspath(args, jar, exp);
 		}
 
+/*
 	// add tools.jar for JDK  [fry]
 	char tools[_MAX_PATH] = { 0 };
 	sprintf(tools, "%s\\lib\\tools.jar", jdk_path);
 	appendAppClasspath(args, tools, exp);
-
+*/
 		// Deal with wildcards or >> strcat(args, exp); <<
 		char* cp = strtok(exp, ";");
 		while(cp != NULL) {
