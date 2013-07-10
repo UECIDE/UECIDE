@@ -61,7 +61,7 @@
 #define LAUNCH4J_TMP_DIR "\\launch4j-tmp\\"
 #define MANIFEST ".manifest"
 
-#define KEY_WOW64_64KEY 0x0100
+//#define KEY_WOW64_64KEY 0x0100
 
 #define HKEY_STR "HKEY"
 #define HKEY_CLASSES_ROOT_STR "HKEY_CLASSES_ROOT"
