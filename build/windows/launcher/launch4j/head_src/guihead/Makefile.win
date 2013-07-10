@@ -9,8 +9,8 @@ OBJ  = ../../head/guihead.o ../../head/head.o $(RES)
 LINKOBJ  = ../../head/guihead.o ../../head/head.o $(RES)
 
 # removed dev-cpp flags, replacing for cygwin/mingw [fry]
-CXXFLAGS = -mwindows -mno-cygwin -O2 -Wall
-CFLAGS = -mwindows -mno-cygwin -O2 -Wall
+CXXFLAGS = -mwindows -O2 -Wall
+CFLAGS = -mwindows -O2 -Wall
 #CFLAGS = -I/cygdrive/c/cygwin/usr/include/mingw
 #LIBS =  -L"C:/Dev-Cpp/lib" -mwindows -n  -s 
 #INCS =  -I"C:/Dev-Cpp/include" 
