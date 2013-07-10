@@ -88,7 +88,7 @@ public class Builder {
 			outfile = ConfigPersister.getInstance().getOutputFile();
 
 			Cmd resCmd = new Cmd(_basedir);
-			resCmd.addExe("windres")
+			resCmd.addExe("/usr/bin/i586-mingw32msvc-windres")
 					.add(Util.WINDOWS_OS ? "--preprocessor=type" : "--preprocessor=cat")
 					.add("-J rc -O coff -F pe-i386")
 					.addAbsFile(rc)
@@ -97,15 +97,16 @@ public class Builder {
 			resCmd.exec(_log);
 
 			Cmd ldCmd = new Cmd(_basedir);
-			ldCmd.addExe("ld")
+
+			ldCmd.addExe("/usr/bin/i586-mingw32msvc-gcc")
 					.add("-mi386pe")
-					.add("--oformat pei-i386")
+					.add("-Wl,--oformat,pei-i386")
 					.add((c.getHeaderType().equals(Config.GUI_HEADER))
-							? "--subsystem windows" : "--subsystem console")
+							? "-Wl,--subsystem windows" : "-Wl,--subsystem console")
 					.add("-s")		// strip symbols
 					.addFiles(c.getHeaderObjects())
 					.addAbsFile(ro)
-					.addFiles(c.getLibs())
+					.addAll(c.getLibs())
 					.add("-o")
 					.addAbsFile(outfile);
 			_log.append(Messages.getString("Builder.linking"));
@@ -174,6 +175,12 @@ class Cmd {
 		}
 		return this;
 	}
+	public Cmd addAll(List s) {
+		for (Iterator iter = s.iterator(); iter.hasNext();) {
+			add((String) iter.next());
+		}
+		return this;
+	}
 
 	public Cmd addAbsFile(File file) {
 		_cmd.add(file.getPath());
@@ -189,7 +196,7 @@ class Cmd {
 		if (Util.WINDOWS_OS) {
 			pathname += ".exe";
 		}
-		_cmd.add(new File(_bindir, pathname).getPath());
+		_cmd.add(pathname);
 		return this;
 	}
 
