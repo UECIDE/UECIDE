@@ -724,7 +724,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         description="Create .zip files of windows version">
         <property name="extension" value="zip"/>   
 
-        <unzip dest="windows/work" src="windows/dist/jre.zip" overwrite="false"/>
+        <unzip dest="windows/work" src="windows/dist/jre7.zip" overwrite="false"/>
 
         <zip destfile="windows/${product}-${version}-windows.zip">
             <zipfileset dir="windows/work" prefix="${product}-${version}" filemode="755" />
