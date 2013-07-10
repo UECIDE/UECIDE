@@ -23,13 +23,15 @@
 
 package uecide.app;
 
+import uecide.plugin.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import java.lang.reflect.Method;
 
 import javax.swing.*;
-
+import javax.swing.border.*;
 import uecide.app.syntax.*;
 import processing.core.*;
 
@@ -119,9 +121,10 @@ public class Preferences {
   JCheckBox memoryOverrideBox;
   JTextField memoryField;
   JCheckBox checkUpdatesBox;
-  JTextField fontSizeField;
-  JTextField sfontSizeField;
+  JTextField editorFontField;
   JCheckBox autoAssociateBox;
+
+  JTabbedPane tabs;
 
 
   // the calling editor, so updates can be applied
@@ -231,226 +234,124 @@ public class Preferences {
     dialog = new JFrame("Preferences");
     dialog.setResizable(false);
 
-    Container pain = dialog.getContentPane();
-    pain.setLayout(null);
+    Container pane = dialog.getContentPane();
+    pane.setLayout(new BorderLayout());
 
-    int top = GUI_BIG;
-    int left = GUI_BIG;
-    int right = 0;
+    Box outerBox = Box.createVerticalBox();
+    pane.add(outerBox);
+
+    tabs = new JTabbedPane();
+    outerBox.add(tabs);
+    Box buttonLine = Box.createHorizontalBox();
+    outerBox.add(buttonLine);
+    buttonLine.add(Box.createHorizontalGlue());
+
+    JButton cancelButton = new JButton(Translate.t("Cancel"));
+    cancelButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            disposeFrame();
+        }
+    });
+    JButton okButton = new JButton(Translate.t("OK"));
+    okButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            applyFrame();
+            disposeFrame();
+        }
+    });
+
+    buttonLine.add(cancelButton);
+    buttonLine.add(okButton);
+
+    JPanel mainSettings = new JPanel(new GridBagLayout());
+    GridBagConstraints c = new GridBagConstraints();
+    mainSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+
+    c.fill = GridBagConstraints.HORIZONTAL;
+    c.gridwidth = 2;
+    c.gridheight = 1;
+    c.gridx = 0;
+    c.gridy = 0;
 
     JLabel label;
-    JButton button; //, button2;
-    //JComboBox combo;
-    Dimension d, d2; //, d3;
-    int h, vmax;
-
-
-    // Sketchbook location:
-    // [...............................]  [ Browse ]
-
+    JButton button;
     label = new JLabel("Sketchbook location:");
-    pain.add(label);
-    d = label.getPreferredSize();
-    label.setBounds(left, top, d.width, d.height);
-    top += d.height; // + GUI_SMALL;
+    mainSettings.add(label);
 
+    c.gridwidth = 1;
+    c.gridy++;
     sketchbookLocationField = new JTextField(40);
-    pain.add(sketchbookLocationField);
-    d = sketchbookLocationField.getPreferredSize();
+    mainSettings.add(sketchbookLocationField, c);
 
+    sketchbookLocationField.setEditable(false);
     button = new JButton(PROMPT_BROWSE);
     button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          File dflt = new File(sketchbookLocationField.getText());
-          File file =
-            Base.selectFolder("Select new sketchbook location", dflt, dialog);
-          if (file != null) {
-            sketchbookLocationField.setText(file.getAbsolutePath());
-          }
+            File dflt = new File(sketchbookLocationField.getText());
+            File file = Base.selectFolder("Select new sketchbook location", dflt, dialog);
+            if (file != null) {
+                sketchbookLocationField.setText(file.getAbsolutePath());
+            }
         }
-      });
-    pain.add(button);
-    d2 = button.getPreferredSize();
+    });
+    c.gridx = 1;
+    mainSettings.add(button, c);
 
-    // take max height of all components to vertically align em
-    vmax = Math.max(d.height, d2.height);
-    sketchbookLocationField.setBounds(left, top + (vmax-d.height)/2,
-                                      d.width, d.height);
-    h = left + d.width + GUI_SMALL;
-    button.setBounds(h, top + (vmax-d2.height)/2,
-                     d2.width, d2.height);
+    c.gridx = 0;
+    c.gridy++;
 
-    right = Math.max(right, h + d2.width + GUI_BIG);
-    top += vmax + GUI_BETWEEN;
+    label = new JLabel("Editor font: ");
+    mainSettings.add(label, c);
 
+    c.gridy++;
+    editorFontField = new JTextField(40);
+    editorFontField.setEditable(false);
+    mainSettings.add(editorFontField, c);
 
-    // Editor font size [    ]
+    editorFontField.setText(get("editor.font"));
 
-    Container box = Box.createHorizontalBox();
-    label = new JLabel("Editor font size: ");
-    box.add(label);
-    fontSizeField = new JTextField(4);
-    box.add(fontSizeField);
-    label = new JLabel("  (requires restart of " + Theme.get("product.cap") + ")");
-    box.add(label);
-    pain.add(box);
-    d = box.getPreferredSize();
-    box.setBounds(left, top, d.width, d.height);
-    Font editorFont = Preferences.getFont("editor.font");
-    fontSizeField.setText(String.valueOf(editorFont.getSize()));
-    top += d.height + GUI_BETWEEN;
+    JButton selectEditorFont = new JButton(Translate.t("Select Font..."));
+    c.gridx = 1;
+    mainSettings.add(selectEditorFont, c);
 
-    // Serial font
-    box = Box.createHorizontalBox();
-    label = new JLabel("Serial font: ");
-    box.add(label);
-    sfontSizeField = new JTextField(20);
-    box.add(sfontSizeField);
-    JButton selectSerialFont = new JButton(Translate.t("Select Font..."));
-    box.add(selectSerialFont);
-    pain.add(box);
-    d = box.getPreferredSize();
-    box.setBounds(left, top, d.width, d.height);
-    Font serialFont = Preferences.getFont("serial.font");
-    sfontSizeField.setText(Preferences.fontToString(serialFont));
-
-    final Container parent = box;
-    selectSerialFont.addActionListener(new ActionListener() {
+    final Container parent = mainSettings;
+    selectEditorFont.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             JFontChooser fc = new JFontChooser(true);
             int res = fc.showDialog(parent);
             if (res == JFontChooser.OK_OPTION) {
                 Font f = fc.getSelectedFont();
-                sfontSizeField.setText(Preferences.fontToString(f));
+                editorFontField.setText(Preferences.fontToString(f));
             }
         }
     });
-    
-    top += d.height + GUI_BETWEEN;
 
-    
-
-
-    // [ ] Delete previous applet or application folder on export
+    c.gridx = 0;
+    c.gridy++;
+    c.gridwidth = 2;
 
     deletePreviousBox =
-      new JCheckBox("Delete previous applet or application folder on export");
-    pain.add(deletePreviousBox);
-    d = deletePreviousBox.getPreferredSize();
-    deletePreviousBox.setBounds(left, top, d.width + 10, d.height);
-    right = Math.max(right, left + d.width);
-    top += d.height + GUI_BETWEEN;
+      new JCheckBox(Translate.t("Remove old build folder before each build"));
+    mainSettings.add(deletePreviousBox, c);
+
+    c.gridy++;
+    externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
+    mainSettings.add(externalEditorBox, c);
 
 
-    // [ ] Use external editor
-
-    externalEditorBox = new JCheckBox("Use external editor");
-    pain.add(externalEditorBox);
-    d = externalEditorBox.getPreferredSize();
-    externalEditorBox.setBounds(left, top, d.width + 10, d.height);
-    right = Math.max(right, left + d.width);
-    top += d.height + GUI_BETWEEN;
-
-
-    // [ ] Check for updates on startup
-
-    checkUpdatesBox = new JCheckBox("Check for updates on startup");
-    pain.add(checkUpdatesBox);
-    d = checkUpdatesBox.getPreferredSize();
-    checkUpdatesBox.setBounds(left, top, d.width + 10, d.height);
-    right = Math.max(right, left + d.width);
-    top += d.height + GUI_BETWEEN;
-
-
-    // [ ] Automatically associate .pde files with Processing
+    c.gridy++;
+    checkUpdatesBox = new JCheckBox(Translate.t("Check for updates on startup"));
+    mainSettings.add(checkUpdatesBox, c);
 
     if (Base.isWindows()) {
+      c.gridy++;
       autoAssociateBox =
         new JCheckBox("Automatically associate .pde files with " + Theme.get("product.cap"));
-      pain.add(autoAssociateBox);
-      d = autoAssociateBox.getPreferredSize();
-      autoAssociateBox.setBounds(left, top, d.width + 10, d.height);
-      right = Math.max(right, left + d.width);
-      top += d.height + GUI_BETWEEN;
+      mainSettings.add(autoAssociateBox, c);
     }
 
-
-    // More preferences are in the ...
-
-    label = new JLabel("More preferences can be edited directly in the file");
-    pain.add(label);
-    d = label.getPreferredSize();
-    label.setForeground(Color.gray);
-    label.setBounds(left, top, d.width, d.height);
-    right = Math.max(right, left + d.width);
-    top += d.height; // + GUI_SMALL;
-
-    label = new JLabel(preferencesFile.getAbsolutePath());
-    final JLabel clickable = label;
-    label.addMouseListener(new MouseAdapter() {
-        public void mousePressed(MouseEvent e) {
-          Base.openFolder(Base.getSettingsFolder());
-        }
-        
-        public void mouseEntered(MouseEvent e) {
-          clickable.setForeground(new Color(0, 0, 140));
-        }
-
-        public void mouseExited(MouseEvent e) {
-          clickable.setForeground(Color.BLACK);
-        }
-      });
-    pain.add(label);
-    d = label.getPreferredSize();
-    label.setBounds(left, top, d.width, d.height);
-    right = Math.max(right, left + d.width);
-    top += d.height;
-
-    label = new JLabel("(edit only when " + Theme.get("product.cap") + " is not running)");
-    pain.add(label);
-    d = label.getPreferredSize();
-    label.setForeground(Color.gray);
-    label.setBounds(left, top, d.width, d.height);
-    right = Math.max(right, left + d.width);
-    top += d.height; // + GUI_SMALL;
-
-
-    // [  OK  ] [ Cancel ]  maybe these should be next to the message?
-
-    button = new JButton(PROMPT_OK);
-    button.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          applyFrame();
-          disposeFrame();
-        }
-      });
-    pain.add(button);
-    d2 = button.getPreferredSize();
-    BUTTON_HEIGHT = d2.height;
-
-    h = right - (BUTTON_WIDTH + GUI_SMALL + BUTTON_WIDTH);
-    button.setBounds(h, top, BUTTON_WIDTH, BUTTON_HEIGHT);
-    h += BUTTON_WIDTH + GUI_SMALL;
-
-    button = new JButton(PROMPT_CANCEL);
-    button.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          disposeFrame();
-        }
-      });
-    pain.add(button);
-    button.setBounds(h, top, BUTTON_WIDTH, BUTTON_HEIGHT);
-
-    top += BUTTON_HEIGHT + GUI_BETWEEN;
-
-
-    // finish up
-
-    wide = right + GUI_BIG;
-    high = top + GUI_SMALL;
-
-
-    // closing the window is same as hitting cancel button
+    tabs.add(Translate.t("Main Settings"), mainSettings);
 
     dialog.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
@@ -466,21 +367,11 @@ public class Preferences {
     Base.registerWindowCloseKeys(dialog.getRootPane(), disposer);
     Base.setIcon(dialog);
 
-    Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-    dialog.setLocation((screen.width - wide) / 2,
-                      (screen.height - high) / 2);
-
-    dialog.pack(); // get insets
-    Insets insets = dialog.getInsets();
-    dialog.setSize(wide + insets.left + insets.right,
-                  high + insets.top + insets.bottom);
-
 
     // handle window closing commands for ctrl/cmd-W or hitting ESC.
 
-    pain.addKeyListener(new KeyAdapter() {
+    pane.addKeyListener(new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
-          //System.out.println(e);
           KeyStroke wc = Editor.WINDOW_CLOSE_KEYSTROKE;
           if ((e.getKeyCode() == KeyEvent.VK_ESCAPE) ||
               (KeyStroke.getKeyStrokeForEvent(e).equals(wc))) {
@@ -488,7 +379,32 @@ public class Preferences {
           }
         }
       });
-  }
+
+        String[] entries = Base.plugins.keySet().toArray(new String[0]);
+        for (String entry : entries) {
+            Plugin p = Base.plugins.get(entry);
+            Method m = null;
+            try {
+                Class[] cArg = new Class[1];
+                cArg[0] = new JPanel().getClass();
+                m = p.getClass().getMethod("populatePreferences", cArg);
+                if (m != null) {
+                    JPanel pluginSettings = new JPanel(new GridBagLayout());
+                    pluginSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
+                    m.invoke(p, pluginSettings);
+                    tabs.add(p.getMenuTitle(), pluginSettings);
+                }
+            } catch (Exception e) {
+            }
+        }
+        dialog.pack();
+
+        Dimension size = dialog.getSize();
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        dialog.setLocation((screen.width - size.width) / 2,
+                          (screen.height - size.height) / 2);
+            
+    }
 
 
   public Dimension getPreferredSize() {
@@ -544,18 +460,7 @@ public class Preferences {
     }
     */
 
-    String newSizeText = fontSizeField.getText();
-    try {
-      int newSize = Integer.parseInt(newSizeText.trim());
-      String pieces[] = PApplet.split(get("editor.font"), ',');
-      pieces[2] = String.valueOf(newSize);
-      set("editor.font", PApplet.join(pieces, ','));
-
-    } catch (Exception e) {
-      System.err.println("ignoring invalid font size " + newSizeText);
-    }
-
-    set("serial.font", sfontSizeField.getText());
+    set("editor.font", editorFontField.getText());
 
     if (autoAssociateBox != null) {
       setBoolean("platform.auto_file_type_associations",
@@ -563,6 +468,18 @@ public class Preferences {
     }
 
     editor.applyPreferences();
+        String[] entries = Base.plugins.keySet().toArray(new String[0]);
+        for (String entry : entries) {
+            Plugin p = Base.plugins.get(entry);
+            Method m = null;
+            try {
+                m = p.getClass().getMethod("savePreferences");
+                if (m != null) {
+                    m.invoke(p);
+                }
+            } catch (Exception e) {
+            }
+        }
   }
 
 
@@ -633,12 +550,20 @@ public class Preferences {
     // Fix for 0163 to properly use Unicode when writing preferences.txt
     PrintWriter writer = PApplet.createWriter(preferencesFile);
 
+    String[] keys = (String[]) table.keySet().toArray(new String[0]);
+    Arrays.sort(keys);
+
+    for (String key : keys) {
+        writer.println(key + "=" + ((String) table.get(key)));
+    }
+/*
+
     Enumeration e = table.keys(); //properties.propertyNames();
     while (e.hasMoreElements()) {
       String key = (String) e.nextElement();
       writer.println(key + "=" + ((String) table.get(key)));
     }
-
+*/
     writer.flush();
     writer.close();
 

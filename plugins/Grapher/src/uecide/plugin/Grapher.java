@@ -14,6 +14,7 @@ import javax.swing.text.*;
 import javax.imageio.*;
 import java.awt.*;
 import java.awt.event.*;
+import say.swing.*;
 
 
 public class Grapher extends BasePlugin implements MessageConsumer
@@ -28,6 +29,8 @@ public class Grapher extends BasePlugin implements MessageConsumer
     ImageIcon playIcon;
     ImageIcon pauseIcon;
     boolean playPauseState = false;
+
+    JTextField fontSizeField;
 
     int baudRate;
 
@@ -83,10 +86,10 @@ public class Grapher extends BasePlugin implements MessageConsumer
         Box line = Box.createHorizontalBox();
 
         graph = new JGrapher();
-        Font f = Preferences.getFont("serial.font");
+        Font f = Preferences.getFont("grapher.font");
         if (f == null) {
             f = new Font("Monospaced", Font.PLAIN, 12);
-            Preferences.set("serial.font", "Monospaced,plain,12");
+            Preferences.set("grapher.font", "Monospaced,plain,12");
         }
         graph.setFont(f);
 
@@ -330,5 +333,51 @@ public class Grapher extends BasePlugin implements MessageConsumer
             playPauseButton.setIcon(pauseIcon);
         }
     }
+
+    public void populatePreferences(JPanel p) {
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+
+        JLabel label = new JLabel("Grapher font: ");
+        c.gridx = 0;
+        c.gridy = 0;
+        p.add(label, c);
+
+        fontSizeField = new JTextField(40);
+        c.gridx = 0;
+        c.gridy = 1;
+        p.add(fontSizeField, c);
+        fontSizeField.setEditable(false);
+
+        JButton selectSerialFont = new JButton(Translate.t("Select Font..."));
+        c.gridx = 1;
+        c.gridy = 1;
+        p.add(selectSerialFont, c);
+
+        Font grapherFont = Preferences.getFont("grapher.font");
+        fontSizeField.setText(Preferences.fontToString(grapherFont));
+
+        final Container parent = p;
+        selectSerialFont.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFontChooser fc = new JFontChooser(false);
+                int res = fc.showDialog(parent);
+                if (res == JFontChooser.OK_OPTION) {
+                    Font f = fc.getSelectedFont();
+                    fontSizeField.setText(Preferences.fontToString(f));
+                }
+            }
+        });
+
+        fontSizeField.setText(Preferences.get("grapher.font"));
+    }
+
+    public void savePreferences() {
+        Preferences.set("grapher.font", fontSizeField.getText());
+    }
+
 }
 

@@ -751,4 +751,10 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
 
         clipboard.setContents(new StringSelection(selection.toString()),null);
     }
+
+    public void setSize(Dimension d) {
+        textSize = d;
+        topOfScreen = 2000 - d.height;
+        setDimension();
+    }
 }

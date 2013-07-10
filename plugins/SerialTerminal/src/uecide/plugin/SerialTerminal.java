@@ -14,6 +14,8 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import say.swing.*;
+
 
 public class SerialTerminal extends BasePlugin implements MessageConsumer
 {
@@ -23,6 +25,10 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     JComboBox<String> baudRates;
     JCheckBox showCursor;
     JScrollBar scrollbackBar;
+
+    JTextField fontSizeField;
+    JTextField widthField;
+    JTextField heightField;
 
     int baudRate;
 
@@ -59,15 +65,31 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         term.setKeypressConsumer(this);
         term.boxCursor(true);
 
+        int width = 80;
+        int height = 24;
+
+        try {
+            height = Integer.parseInt(Preferences.get("serial.height"));
+        } catch (Exception e) {
+            height = 24;
+        }
+
+        try {
+            width = Integer.parseInt(Preferences.get("serial.width"));
+        } catch (Exception e) {
+            width = 80;
+        }
+
+        term.setSize(new Dimension(width, height));
+
         line.add(term);
         scrollbackBar = new JScrollBar(JScrollBar.VERTICAL);
-        scrollbackBar.setMinimum(24);
-        scrollbackBar.setMaximum(2010);
+        scrollbackBar.setMinimum(height);
+        scrollbackBar.setMaximum(2000 + height);
         scrollbackBar.setValue(2000);
-        scrollbackBar.setVisibleAmount(24);
+        scrollbackBar.setVisibleAmount(height);
         scrollbackBar.addAdjustmentListener(new AdjustmentListener() {
             public void adjustmentValueChanged(AdjustmentEvent e) {
-                System.err.println(scrollbackBar.getValue() + " = " + (2000 - scrollbackBar.getValue()));
                 term.setScrollbackPosition(2000 - scrollbackBar.getValue());
             }
         });
@@ -187,5 +209,103 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         return icon;
     }
 
+    public void populatePreferences(JPanel p) {
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+
+        JLabel label = new JLabel("Serial font: ");
+        c.gridx = 0;
+        c.gridy = 0;
+        p.add(label, c);
+
+        fontSizeField = new JTextField(40);
+        c.gridx = 0;
+        c.gridy = 1;
+        p.add(fontSizeField, c);
+        fontSizeField.setEditable(false);
+
+        JButton selectSerialFont = new JButton(Translate.t("Select Font..."));
+        c.gridx = 1;
+        c.gridy = 1;
+        p.add(selectSerialFont, c);
+
+        Font serialFont = Preferences.getFont("serial.font");
+        fontSizeField.setText(Preferences.fontToString(serialFont));
+
+        final Container parent = p;
+        selectSerialFont.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFontChooser fc = new JFontChooser(true);
+                int res = fc.showDialog(parent);
+                if (res == JFontChooser.OK_OPTION) {
+                    Font f = fc.getSelectedFont();
+                    fontSizeField.setText(Preferences.fontToString(f));
+                }
+            }
+        });
+
+        fontSizeField.setText(Preferences.get("serial.font"));
+
+        label = new JLabel("Display size: ");
+        c.gridx = 0;
+        c.gridy++;
+        p.add(label, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        Box b = Box.createHorizontalBox();
+        widthField = new JTextField(4);
+        heightField = new JTextField(4);
+        int w = 80;
+        int h = 24;
+        try {
+            w = Integer.parseInt(Preferences.get("serial.width"));
+        } catch (Exception e) {
+            w = 80;
+        }
+        try {
+            h = Integer.parseInt(Preferences.get("serial.height"));
+        } catch (Exception e) {
+            h = 24;
+        }
+        widthField.setText(Integer.toString(w));
+        heightField.setText(Integer.toString(h));
+        b.add(widthField);
+        label = new JLabel(" x ");
+        b.add(label);
+        b.add(heightField);
+        b.add(Box.createHorizontalGlue());
+        p.add(b, c);
+
+        Dimension s = widthField.getMaximumSize();
+        s.width = 40;
+        widthField.setMaximumSize(s);
+        s = heightField.getMaximumSize();
+        s.width = 40;
+        heightField.setMaximumSize(s);
+    }
+
+    public void savePreferences() {
+        Preferences.set("serial.font", fontSizeField.getText());
+        int w = 80;
+        int h = 24;
+        try {
+            w = Integer.parseInt(widthField.getText().trim());
+        } catch (Exception e) {
+            w = 80;
+        }
+        try {
+            h = Integer.parseInt(heightField.getText().trim());
+        } catch (Exception e) {
+            h = 80;
+        }
+
+        Preferences.set("serial.width", Integer.toString(w));
+        Preferences.set("serial.height", Integer.toString(h));
+            
+    }
 }
 
