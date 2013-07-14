@@ -67,6 +67,9 @@ class SketchEditor extends JPanel {
         Gutter g = scrollPane.getGutter();
         g.setBackground(Theme.getColor("status.gutter.bgcolor"));
         g.setForeground(Theme.getColor("status.gutter.fgcolor"));
+        setBackground(Theme.getColor("editor.bgcolor"));
+        setFont(Preferences.getFont("editor.font"));
+
         this.add(scrollPane, BorderLayout.CENTER);
         if (file != null) {
             loadFile(file);

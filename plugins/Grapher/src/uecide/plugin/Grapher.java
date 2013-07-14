@@ -117,13 +117,13 @@ public class Grapher extends BasePlugin implements MessageConsumer
                             port = null;
                         }
                     } catch (Exception e) {
-                        System.err.println("Unable to release port");
+                        editor.message("Unable to release port: " + e.getMessage() + "\n", 2);
                     }
                     try {
                         port = new Serial(baudRate);
                         port.addListener(mc);
                     } catch (Exception e) {
-                        System.err.println("Unable to reopen port");
+                        editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
                     }
                 }
             }
@@ -154,7 +154,7 @@ public class Grapher extends BasePlugin implements MessageConsumer
             baudRates.setSelectedItem(Preferences.get("serial.debug_rate"));
             port = new Serial(baudRate);
         } catch(Exception e) {
-            System.err.println("Unable to open serial port");
+            editor.message("Unable to open serial port: " + e.getMessage() + "\n", 2);
             win.dispose();
             return;
         }
@@ -357,13 +357,14 @@ public class Grapher extends BasePlugin implements MessageConsumer
         c.gridy = 1;
         p.add(selectSerialFont, c);
 
-        Font grapherFont = Preferences.getFont("grapher.font");
+        final Font grapherFont = Preferences.getFont("grapher.font");
         fontSizeField.setText(Preferences.fontToString(grapherFont));
 
         final Container parent = p;
         selectSerialFont.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFontChooser fc = new JFontChooser(false);
+                fc.setSelectedFont(grapherFont);
                 int res = fc.showDialog(parent);
                 if (res == JFontChooser.OK_OPTION) {
                     Font f = fc.getSelectedFont();

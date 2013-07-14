@@ -158,6 +158,9 @@ public class Base {
             }
         }
 
+        UIManager.getDefaults().put("TabbedPane.contentBorderInsets", new Insets(0,0,0,0));
+        UIManager.getDefaults().put("TabbedPane.tabsOverlapBorder", true);
+
         // Create a location for untitled sketches
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
@@ -532,8 +535,6 @@ public class Base {
     * @return true if succeeded in closing, false if canceled.
     */
     public static boolean handleClose(Editor editor) {
-        editor.internalCloseRunner();
-
         if (editors.size() == 1) {
             if (Base.isMacOS()) {
                 Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
@@ -590,10 +591,6 @@ public class Base {
         // by a later handleQuit() that is not canceled.
 
         if (handleQuitEach()) {
-            // make sure running sketches close before quitting
-            for (Editor editor : editors) {
-                editor.internalCloseRunner();
-            }
             // Save out the current prefs state
             Preferences.save();
 

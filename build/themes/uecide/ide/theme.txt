@@ -50,7 +50,7 @@ linestatus.bgcolor = #666666
 
 # foreground and background colors
 editor.fgcolor = #000000
-editor.bgcolor = #e7e6e4
+editor.bgcolor = #f7f6f4
 
 # highlight for the current line
 editor.linehighlight.color=#e2e2e2

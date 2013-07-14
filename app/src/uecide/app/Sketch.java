@@ -92,6 +92,7 @@ public class Sketch implements MessageConsumer {
         folder = path;
         name = folder.getName();
         loadSketchFromFolder();
+        editor.setTitle(Theme.get("product.cap") + " | " + name);
     }
 
     public void createBlankFile(String fileName) {
@@ -531,6 +532,8 @@ public class Sketch implements MessageConsumer {
 
         fd.setFile(name);
 
+        fd.setVisible(true);
+
         String newParentDir = fd.getDirectory();
         String newFileName = fd.getFile();
 
@@ -563,7 +566,10 @@ public class Sketch implements MessageConsumer {
             String n = f.file.getName();
             f.file = new File(newFolder, n);
         }
+        folder = newFolder;
+        name = folder.getName();
         save();
+        editor.setTitle(Theme.get("product.cap") + " | " + name);
         return true;
     }
 
