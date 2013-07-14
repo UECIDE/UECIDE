@@ -13,17 +13,17 @@
     <methods dir="${basedir}/src/processing/core" />
 
     <mkdir dir="bin" />
-    <javac target="1.5" 
-           source="1.5"
+    <javac target="1.6" 
+           source="1.6"
 	   encoding="UTF-8"
 	   includeAntRuntime="false"
 	   srcdir="src" destdir="bin">
-            <compilerarg value="-Xlint:unchecked"/>
      </javac>
   </target>		
 
   <target name="build" depends="compile" description="Build core library">
     <jar basedir="bin" destfile="core.jar" />
+    <jar basedir="i18n" destfile="core.jar" update="true" />
   </target>
   
 </project>
