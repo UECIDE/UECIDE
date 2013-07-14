@@ -204,8 +204,8 @@ public class ExportToMPLABX extends BasePlugin {
             File nbproject = new File(dstDir, "nbproject");
             nbproject.mkdirs();
 
-            Board board = Base.selectedBoard;
-            Core core = board.getCore();
+            Board board = editor.board;
+            Core core = editor.core;
 
             if (core == null) {
                 System.err.println("No core");
@@ -221,13 +221,13 @@ public class ExportToMPLABX extends BasePlugin {
 
             File buildPath = sketch.getBuildFolder();
 
-            sketch.preprocess(buildPath.getAbsolutePath());
+            sketch.prepare();
 
             ArrayList<File> sketchCPP = gatherFiles(sketch.getFolder(), ".cpp");
             ArrayList<File> sketchC = gatherFiles(sketch.getFolder(), ".c");
             ArrayList<File> sketchH = gatherFiles(sketch.getFolder(), ".h");
             ArrayList<File> sketchS = gatherFiles(sketch.getFolder(), ".S");
-            ArrayList<File> libs = sketch.getImportedLibraries();
+            File[] libs = sketch.getImportedLibraries();
 
             ArrayList<File> coreCPP = gatherFiles(core.getAPIFolder(), ".cpp");
             ArrayList<File> coreC = gatherFiles(core.getAPIFolder(), ".c");

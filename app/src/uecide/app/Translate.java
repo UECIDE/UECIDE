@@ -159,10 +159,12 @@ public class Translate {
         for (String q : b) {
             if (len + q.length() > w) {
                 o += d;
-                len = 0;
+                o += q + " ";
+                len = q.length() + 1;
+            } else {
+                o += q + " ";
+                len += q.length() + 1;
             }
-            o += q;
-            len += q.length();
         }
         return o;
     }

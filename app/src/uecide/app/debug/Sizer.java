@@ -25,7 +25,7 @@
 
 package uecide.app.debug;
 
-import uecide.app.Base;
+import uecide.app.*;
 
 import java.io.*;
 import java.util.*;
@@ -38,16 +38,16 @@ public class Sizer implements MessageConsumer {
     private long sizeRam;
     private RunnerException exception;
 
+    private Editor editor;
 
-    public Sizer(String buildPath, String sketchName) {
-        this.buildPath = buildPath;
-        this.sketchName = sketchName;
+    public Sizer(Editor editor) {
+        this.editor = editor;
     }
   
     public long computeSize() throws RunnerException {
 
-        Base.selectedBoard.set("filename", sketchName);
-        String commandSize[] = Base.selectedBoard.parseString(Base.selectedBoard.getCore().get("compiler.size")).split("::");
+        editor.sketch.settings.put("filename", editor.sketch.name);
+        String commandSize[] = editor.sketch.parseString(editor.core.get("compiler.size")).split("::");
 
         int r = 0;
         try {

@@ -31,7 +31,7 @@ import java.io.*;
  */
 public class MessageSiphon implements Runnable {
   BufferedReader streamReader;
-  Thread thread;
+  public Thread thread;
   MessageConsumer consumer;
   int channel;
 
