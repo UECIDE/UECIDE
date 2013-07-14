@@ -58,14 +58,9 @@ public class FixEncoding extends BasePlugin {
       }
     }
     try {
-      for (int i = 0; i < sketch.getCodeCount(); i++) {
-        SketchCode code = sketch.getCode(i);
-        code.setProgram(loadWithLocalEncoding(code.getFile()));
-        code.setModified(true);  // yes, because we want them to save this
-      }
-      // Update the currently visible program with its code
-      editor.setText(sketch.getCurrentCode().getProgram());
-      
+        for (SketchFile code : editor.getSketch().sketchFiles) {
+            code.setText(loadWithLocalEncoding(code.file));
+        }
     } catch (IOException e) {
       String msg = 
         "An error occurred while trying to fix the file encoding.\n" +

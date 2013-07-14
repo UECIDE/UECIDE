@@ -133,77 +133,6 @@ public class PdePreprocessor {
         return newImports;
     }
 
-  /**
-   * Writes out the head of the c++ code generated for a sketch. 
-   * Called from uecide.app.Sketch.
-   * @param program the concatenated code from all tabs containing pde-files
-   * @param buildPath the path into which the processed pde-code is to be written
-   * @param name the name of the sketch 
-   * @param codeFolderPackages unused param (leftover from processing)
-   */
-  public int writePrefix(String program, String buildPath,
-                         String sketchName, String codeFolderPackages[]) throws FileNotFoundException {
-    this.buildPath = buildPath;
-    this.name = sketchName;
-
-    // if the program ends with no CR or LF an OutOfMemoryError will happen.
-    // not gonna track down the bug now, so here's a hack for it:
-    // http://dev.processing.org/bugs/show_bug.cgi?id=5
-    program += "\n";
-
-    // if the program ends with an unterminated multi-line comment,
-    // an OutOfMemoryError or NullPointerException will happen.
-    // again, not gonna bother tracking this down, but here's a hack.
-    // http://dev.processing.org/bugs/show_bug.cgi?id=16
-    Sketch.scrubComments(program);
-    // If there are errors, an exception is thrown and this fxn exits.
-
-    if (Preferences.getBoolean("preproc.substitute_unicode")) {
-      program = substituteUnicode(program);
-    }
-
-    String importRegexp = "^\\s*#include\\s+[<\"](\\S+)[\">]";
-    programImports = new ArrayList<String>();
-
-    String[][] pieces = PApplet.matchAll(program, importRegexp);
-
-    if (pieces != null)
-      for (int i = 0; i < pieces.length; i++)
-        programImports.add(pieces[i][1]);  // the package name
-
-    // Work through the list of imports looking for ones that are in the library
-    // list.  Get their imports too - and the imports that they use as well
-    // ... ad infinitum.
-
-    int numImports = programImports.size();
-    programImports.addAll(getSubImports(programImports));
-
-    while (numImports != programImports.size()) {
-        numImports = programImports.size();
-        programImports.addAll(getSubImports(programImports));
-    }
-    
-
-    codeFolderImports = new ArrayList<String>();
-
-    prototypes = prototypes(program);
-    
-    // store # of prototypes so that line number reporting can be adjusted
-    prototypeCount = prototypes.size();
-  
-    // do this after the program gets re-combobulated
-    this.program = program;
-    
-    // output the code
-
-    String newFilename = name + "." + Base.selectedBoard.getCore().get("build.extension","cpp");
-    File streamFile = new File(buildPath, newFilename);
-    stream = new PrintStream(new FileOutputStream(streamFile));
-    
-    return headerCount + prototypeCount;
-  }
-
-
   static String substituteUnicode(String program) {
     // check for non-ascii chars (these will be/must be in unicode format)
     char p[] = program.toCharArray();
@@ -243,38 +172,6 @@ public class PdePreprocessor {
   }
 
   /**
-   * preprocesses a pde file and writes out a java file
-   * @return the classname of the exported Java
-   */
-  //public String write(String program, String buildPath, String name,
-  //                  String extraImports[]) throws java.lang.Exception {
-  public String write() throws java.lang.Exception {
-    writeProgram(stream, program, prototypes);
-    writeFooter(stream);
-    stream.close();
-    return name;
-  }
-
-  // Write the pde program to the cpp file
-  protected void writeProgram(PrintStream out, String program, List<String> prototypes) {
-    int prototypeInsertionPoint = firstStatement(program);
-    String platform;
-    Map<String, String> platformPreferences;
-    Map<String, String> boardPreferences;
-
-    out.print(program.substring(0, prototypeInsertionPoint));
-    out.print("#include \"" + Base.selectedBoard.getCore().get("core.header") + "\"\n");    
-    
-    // print user defined prototypes
-    for (int i = 0; i < prototypes.size(); i++) {
-      out.print(prototypes.get(i) + "\n");
-    }
-    
-    out.print(program.substring(prototypeInsertionPoint));
-  }
-
-
-  /**
    * Write any necessary closing text.
    *
    * @param out         PrintStream to write it to.
@@ -285,10 +182,6 @@ public class PdePreprocessor {
   public List<String> getExtraImports() {
     return programImports;
   }
-
-
-
-
 
   /**
    * Returns the index of the first character that's not whitespace, a comment

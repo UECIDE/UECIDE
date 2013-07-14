@@ -96,7 +96,7 @@ public class ThinkDifferent implements ApplicationListener {
   public void handleOpenFile(ApplicationEvent ae) {
 //    System.out.println("got open file event " + ae.getFilename());
     String filename = ae.getFilename();
-    base.handleOpen(filename);
+    Base.createNewEditor(filename);
     ae.setHandled(true);
   }
 

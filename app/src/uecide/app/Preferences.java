@@ -32,7 +32,6 @@ import java.lang.reflect.Method;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import uecide.app.syntax.*;
 import processing.core.*;
 
 import say.swing.*;
@@ -316,9 +315,11 @@ public class Preferences {
     mainSettings.add(selectEditorFont, c);
 
     final Container parent = mainSettings;
+    final Font xFont = getFont("editor.font");
     selectEditorFont.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            JFontChooser fc = new JFontChooser(true);
+            JFontChooser fc = new JFontChooser(false);
+            fc.setSelectedFont(xFont);
             int res = fc.showDialog(parent);
             if (res == JFontChooser.OK_OPTION) {
                 Font f = fc.getSelectedFont();
@@ -436,14 +437,6 @@ public class Preferences {
 //               closingLastQuitsBox.isSelected());
     //setBoolean("sketchbook.prompt", sketchPromptBox.isSelected());
     //setBoolean("sketchbook.auto_clean", sketchCleanBox.isSelected());
-
-    // if the sketchbook path has changed, rebuild the menus
-    String oldPath = get("sketchbook.path");
-    String newPath = sketchbookLocationField.getText();
-    if (!newPath.equals(oldPath)) {
-      editor.base.rebuildSketchbookMenus();
-      set("sketchbook.path", newPath);
-    }
 
     setBoolean("editor.external", externalEditorBox.isSelected());
     setBoolean("update.check", checkUpdatesBox.isSelected());
@@ -721,29 +714,6 @@ public class Preferences {
   }
 
   
-// ROA: current getStyle: from Arduino 1.0
-  static public SyntaxStyle getStyle(String what /*, String dflt*/) {
-    String str = get("editor." + what + ".style"); //, dflt);
-
-    StringTokenizer st = new StringTokenizer(str, ",");
-
-    String s = st.nextToken();
-    if (s.indexOf("#") == 0) s = s.substring(1);
-    Color color = Color.DARK_GRAY;
-    try {
-      color = new Color(Integer.parseInt(s, 16));
-    } catch (Exception e) { }
-
-    s = st.nextToken();
-    boolean bold = (s.indexOf("bold") != -1);
-    boolean italic = (s.indexOf("italic") != -1);
-    boolean underlined = (s.indexOf("underlined") != -1);
-    //System.out.println(what + " = " + str + " " + bold + " " + italic);
-
-    return new SyntaxStyle(color, italic, bold, underlined);
-  }
-
-
   //get a Map of the Preferences
   static public Map<String, String> getMap() 
   {

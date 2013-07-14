@@ -142,6 +142,9 @@ public class EditorConsole extends JScrollPane {
           errFile = new File(tempFolder, errFileName);
           stderrFile = new FileOutputStream(errFile);
         }
+
+        outFile.deleteOnExit();
+        errFile.deleteOnExit();
       } catch (IOException e) {
         Base.showWarning("Console Error",
                          "A problem occurred while trying to open the\n" +
@@ -168,7 +171,7 @@ public class EditorConsole extends JScrollPane {
 
     // periodically post buffered messages to the console
     // should the interval come from the preferences file?
-    new javax.swing.Timer(250, new ActionListener() {
+    new javax.swing.Timer(100, new ActionListener() {
       public void actionPerformed(ActionEvent evt) {
         // only if new text has been added
         if (consoleDoc.hasAppendage) {
