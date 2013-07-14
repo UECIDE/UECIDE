@@ -115,13 +115,13 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
                             port = null;
                         }
                     } catch (Exception e) {
-                        System.err.println("Unable to release port");
+                        editor.message("Unable to release port\n", 2);
                     }
                     try {
                         port = new Serial(baudRate);
                         port.addListener(term);
                     } catch (Exception e) {
-                        System.err.println("Unable to reopen port");
+                        editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
                     }
                 }
             }
@@ -169,7 +169,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
             baudRates.setSelectedItem(Preferences.get("serial.debug_rate"));
             port = new Serial(baudRate);
         } catch(Exception e) {
-            System.err.println("Unable to open serial port");
+            editor.message("Unable to open serial port: " + e.getMessage() + "\n", 2);
             return;
         }
         showCursor.setSelected(Preferences.getBoolean("serial.debug_cursor"));

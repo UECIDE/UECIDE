@@ -1399,7 +1399,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
    * @param verbose Set true to run with verbose output.
    */
   public void handleRun(final boolean verbose) {
-    internalCloseRunner();
     running = true;
     board.setVerbose(verbose);
     sketch.runInVerboseMode = verbose;
@@ -1442,48 +1441,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         statusError(e);
       }
     }
-  }
-
-
-  /**
-   * Implements Sketch &rarr; Stop, or pressing Stop on the toolbar.
-   */
-  public void handleStop() {  // called by menu or buttons
-//-    toolbar.activate(EditorToolbar.STOP);
-
-    internalCloseRunner();
-
-//-    toolbar.deactivate(EditorToolbar.STOP);
-
-    // focus the PDE again after quitting presentation mode [toxi 030903]
-    toFront();
-  }
-
-
-  /**
-   * Deactivate the Run button. This is called by Runner to notify that the
-   * sketch has stopped running, usually in response to an error (or maybe
-   * the sketch completing and exiting?) Tools should not call this function.
-   * To initiate a "stop" action, call handleStop() instead.
-   */
-  public void internalRunnerClosed() {
-    running = false;
-    
-  }
-
-
-  /**
-   * Handle internal shutdown of the runner.
-   */
-  public void internalCloseRunner() {
-    running = false;
-
-    if (stopHandler != null)
-    try {
-      stopHandler.run();
-    } catch (Exception e) { }
-
-    sketch.cleanup();
   }
 
 
@@ -1620,21 +1577,11 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
 
   public boolean handleSaveAs() {
-    //stopRunner();  // formerly from 0135
-    handleStop();
-
-    //toolbar.activate(EditorToolbar.SAVE);
-
-    //SwingUtilities.invokeLater(new Runnable() {
-    //public void run() {
+        System.out.println("Saving AS");
     statusNotice(Translate.t("Saving..."));
     try {
       if (sketch.saveAs()) {
         statusNotice(Translate.t("Done Saving."));
-        // Disabling this for 0125, instead rebuild the menu inside
-        // the Save As method of the Sketch object, since that's the
-        // only one who knows whether something was renamed.
-        //sketchbook.rebuildMenusAsync();
       } else {
         statusNotice(Translate.t("Save Canceled."));
         return false;
@@ -2204,12 +2151,23 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     public void handleClose() {
 
-        boolean allowQuit = true;
         if (sketch.isModified()) {
-        }
-       
-        if (allowQuit == false) {
-            return;
+
+            Object[] options = { Translate.t("Yes"), Translate.t("No"), Translate.t("Cancel") };
+            String prompt = "Save changes to " + sketch.getName() + "?";
+            int result = JOptionPane.showOptionDialog(this, prompt, "Save Changes",
+                                                JOptionPane.YES_NO_CANCEL_OPTION,
+                                                JOptionPane.QUESTION_MESSAGE,
+                                                null, options, options[0]);
+            if (result == JOptionPane.CANCEL_OPTION) {
+                return;
+            }
+
+            if (result == JOptionPane.YES_OPTION) {
+                if (!handleSave()) {
+                    return;
+                }
+            }
         }
 
         System.gc();
