@@ -135,10 +135,15 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     static final int ADD_NEW_FILE = 1;
     static final int RENAME_FILE = 2;
 
+    public void setConsoleFont(Font f) {
+        console.setFont(f);
+    }
+
     public Editor(String path) {
         super(Theme.get("product"));
 
         Base.setIcon(this);
+ 
 
         // Install default actions for Run, Present, etc.
         resetHandlers();
@@ -246,7 +251,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
             }
         });
         toolbar.add(openButton);
-
+       
         File saveIconFile = new File(themeFolder, "save.png");
         ImageIcon saveButtonIcon = new ImageIcon(saveIconFile.getAbsolutePath());
         saveButton = new JButton(saveButtonIcon);
@@ -344,7 +349,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
 
         // Bring back the general options for the editor
-        applyPreferences();
 
 
         if (path == null) {
@@ -359,6 +363,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         if (board == null) {
             selectBoard(Base.getDefaultBoard());
         }
+
         // All set, now show the window
         setSize(new Dimension(350, 550));
         setPreferredSize(new Dimension(350, 550));
@@ -373,8 +378,22 @@ static Logger logger = Logger.getLogger(Base.class.getName());
             Point oPos = Base.activeEditor.getLocation();
             setLocation(oPos.x + 20, oPos.y + 20);
         }
-        //setVisible(true);
+        applyPreferences();
+        setVisible(true);
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                pullToFront();
+            }
+        });
     }
+
+    public void pullToFront() {
+        toFront();
+        repaint();
+    }
+
 
 
   /**
@@ -492,6 +511,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         );
 
         ed.setFont(Preferences.getFont("editor.font"));
+        console.setFont(Preferences.getFont("console.font"));
     }
   }
 
@@ -776,7 +796,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     catch (Exception exception)
     {
-      System.out.println(Translate.t("Error retrieving port list"));
+      message(Translate.t("Error retrieving port list") + "\n", 2);
       exception.printStackTrace();
     }
 	
@@ -1762,10 +1782,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
    */
   public void statusError(Exception e) {
     e.printStackTrace();
-//    if (e == null) {
-//      System.err.println("Editor.statusError() was passed a null exception.");
-//      return;
-//    }
 
     SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
 
@@ -1791,7 +1807,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         logger.debug("Editor: ed.getLineCount()" + ed.getLineCount());
         if (line < 0 || line >= ed.getLineCount()) {
 
-          System.err.println("Bad error line: " + line);
+          message("Bad error line: " + line + "\n", 2);
         } else {
           ed.select(ed.getLineStartOffset(line),
                           ed.getLineEndOffset(line) - 1);
@@ -1967,10 +1983,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
         boolean ifound = false;
 
-        JMenu nextMenu = new JMenu(Translate.t("More"));
-        menu.add(nextMenu);
-        int nfound = 0;
-
         for (int i = 0; i < list.length; i++) {
             if ((list[i].charAt(0) == '.') || list[i].equals("CVS"))
                 continue;
@@ -2001,13 +2013,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
                 item.setActionCommand(entry.getAbsolutePath());
                 menu.add(item);
                 ifound = true;
-                nfound++;
-                if (nfound == 20) {
-                    menu = nextMenu;
-                    nextMenu = new JMenu("More");
-                    menu.add(nextMenu);
-                    nfound = 0;
-                }
 
             } else {
                 // don't create an extra menu level for a folder named "examples"
@@ -2027,16 +2032,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
                         ifound = true;
                     }
                 }
-                nfound++;
-                if (nfound == 20) {
-                    menu = nextMenu;
-                    nextMenu = new JMenu(Translate.t("More"));
-                    menu.add(nextMenu);
-                    nfound = 0;
-                }
             }
         }
-        menu.remove(nextMenu);
         return ifound;  // actually ignored, but..
     }
 
@@ -2242,6 +2239,14 @@ static Logger logger = Logger.getLogger(Base.class.getName());
                 addTab(f);
                 break;
         }
+    }
+
+    public void message(String m) {
+        sketch.message(m);
+    }
+
+    public void message(String m, int c) {
+        sketch.message(m, c);
     }
 }
 

@@ -242,7 +242,6 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
     //if (screen == null) return;
     if (okButton == null) setup();
 
-    //System.out.println("status.paintComponent");
 
     Dimension size = getSize();
     if ((size.width != sizeW) || (size.height != sizeH)) {
@@ -365,7 +364,6 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
           // enter or backspace or whatever, so the keychar should
           // be used instead. grr.
           public void keyTyped(KeyEvent event) {
-            //System.out.println("got event " + event);
             int c = event.getKeyChar();
 
             if (c == KeyEvent.VK_ENTER) {  // accept the input
@@ -385,14 +383,6 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
                        (c == KeyEvent.VK_END) ||
                        (c == KeyEvent.VK_SHIFT)) {
               // these events are ignored
-
-              /*
-            } else if (c == KeyEvent.VK_ESCAPE) {
-              unedit();
-              editor.toolbar.clear();
-              event.consume();
-              */
-
             } else if (c == KeyEvent.VK_SPACE) {
               String t = editField.getText();
               int start = editField.getSelectionStart();
@@ -416,14 +406,11 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
               if ((editField.getCaretPosition() == 0) ||
                   (editField.getSelectionStart() == 0)) {
                 // number not allowed as first digit
-                //System.out.println("bad number bad");
                 event.consume();
               }
             } else {
               event.consume();
-              //System.out.println("code is " + code + "  char = " + c);
             }
-            //System.out.println("code is " + code + "  char = " + c);
           }
         });
       add(editField);

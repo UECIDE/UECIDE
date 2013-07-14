@@ -62,7 +62,6 @@ public class UpdateCheck implements Runnable {
 
 
   public void run() {
-    //System.out.println("checking for updates...");
 
     // generate a random id in case none exists yet
     Random r = new Random();
@@ -119,8 +118,6 @@ public class UpdateCheck implements Runnable {
         }
       }
     } catch (Exception e) {
-      //e.printStackTrace();
-      //System.err.println("Error while trying to check for an update.");
     }
   }
 

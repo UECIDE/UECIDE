@@ -413,7 +413,6 @@ public class Base {
         activeEditor = whichEditor;
 
         // set the current window to be the console that's getting output
-        EditorConsole.setEditor(activeEditor);
     }
 
     protected static int[] nextEditorLocation() {
@@ -1604,7 +1603,7 @@ public class Base {
     }
 
     public static void handleSystemInfo() {
-        System.out.println(Translate.t("Installed plugins") + ":");
+        activeEditor.message(Translate.t("Installed plugins") + ":\n");
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
         for (int i = 0; i < entries.length; i++) {
@@ -1623,19 +1622,19 @@ public class Base {
                 com = Translate.t("unknown");
             }
 
-            System.out.println("  " + entries[i] + " - " + ver + " " + Translate.t("compiled") + " " + com);
+            activeEditor.message("  " + entries[i] + " - " + ver + " " + Translate.t("compiled") + " " + com + "\n");
         }
 
-        System.out.println("\n" + Translate.t("Processes") + ":");
+        activeEditor.message("\n" + Translate.t("Processes") + ":\n");
         for (Process p : processes) {
-            System.out.println("  " + p);
+            activeEditor.message("  " + p + "\n");
         }
 
-        System.out.println("\n" + Translate.t("Threads") + ":");
+        activeEditor.message("\n" + Translate.t("Threads") + ":\n");
         Thread[] threads = new Thread[Thread.activeCount()];
         Thread.enumerate(threads);
         for (Thread t : threads) {
-            System.out.println("  " + t.getName());
+            activeEditor.message("  " + t.getName() + "\n");
         }
     }
 
@@ -1681,12 +1680,12 @@ public class Base {
         }
 
         if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
+            activeEditor.message(inputFile.getName() + ": " + Translate.t("not found") + "\n", 2);
             return;
         }
 
         if (!testLibraryZipFormat(inputFile.getAbsolutePath())) {
-            System.err.println(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()));
+            activeEditor.message(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()) + "\n", 2);
             return;
         }
 
@@ -2035,6 +2034,12 @@ public class Base {
 
     public static File getTmpDir() {
         return new File(System.getProperty("java.io.tmpdir"));
+    }
+
+    public static void applyPreferences() {
+        for (Editor ed : editors) {
+            ed.applyPreferences();
+        }
     }
 
 }

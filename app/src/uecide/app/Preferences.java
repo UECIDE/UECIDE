@@ -121,6 +121,7 @@ public class Preferences {
   JTextField memoryField;
   JCheckBox checkUpdatesBox;
   JTextField editorFontField;
+  JTextField consoleFontField;
   JCheckBox autoAssociateBox;
 
   JTabbedPane tabs;
@@ -330,6 +331,36 @@ public class Preferences {
 
     c.gridx = 0;
     c.gridy++;
+
+    label = new JLabel("Console font: ");
+    mainSettings.add(label, c);
+    c.gridy++;
+
+    consoleFontField = new JTextField(40);
+    consoleFontField.setEditable(false);
+    mainSettings.add(consoleFontField, c);
+
+    consoleFontField.setText(get("console.font"));
+
+    JButton selectConsoleFont = new JButton(Translate.t("Select Font..."));
+    c.gridx = 1;
+    mainSettings.add(selectConsoleFont, c);
+
+    final Font yFont = getFont("console.font");
+    selectConsoleFont.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            JFontChooser fc = new JFontChooser(false);
+            fc.setSelectedFont(yFont);
+            int res = fc.showDialog(parent);
+            if (res == JFontChooser.OK_OPTION) {
+                Font f = fc.getSelectedFont();
+                consoleFontField.setText(Preferences.fontToString(f));
+            }
+        }
+    });
+
+    c.gridx = 0;
+    c.gridy++;
     c.gridwidth = 2;
 
     deletePreviousBox =
@@ -454,13 +485,13 @@ public class Preferences {
     */
 
     set("editor.font", editorFontField.getText());
+    set("console.font", consoleFontField.getText());
 
     if (autoAssociateBox != null) {
       setBoolean("platform.auto_file_type_associations",
                  autoAssociateBox.isSelected());
     }
 
-    editor.applyPreferences();
         String[] entries = Base.plugins.keySet().toArray(new String[0]);
         for (String entry : entries) {
             Plugin p = Base.plugins.get(entry);
@@ -473,6 +504,7 @@ public class Preferences {
             } catch (Exception e) {
             }
         }
+    Base.applyPreferences();
   }
 
 
@@ -674,7 +706,6 @@ public class Preferences {
     boolean replace = false;
     String value = get(attr);
     if (value == null) {
-      //System.out.println("reset 1");
       value = getDefault(attr);
       replace = true;
     }
@@ -685,9 +716,7 @@ public class Preferences {
     String[] pieces = PApplet.split(value, ',');
     if (pieces.length != 3) {
       value = getDefault(attr);
-      //System.out.println("reset 2 for " + attr);
       pieces = PApplet.split(value, ',');
-      //PApplet.println(pieces);
       replace = true;
     }
 
@@ -723,7 +752,6 @@ public class Preferences {
     while (e.hasMoreElements()) 
     {
 		String key = (String) e.nextElement();
-		//System.out.println("Key: " + key + "Val: " + table.get(key));
 		String value = (String) table.get(key);
         globalpreferences.put(key, value );              
     }
