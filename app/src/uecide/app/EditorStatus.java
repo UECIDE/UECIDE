@@ -72,6 +72,8 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
   //Thread promptThread;
   int response;
 
+    int function = 0;
+
 
   public EditorStatus(Editor editor) {
     this.editor = editor;
@@ -149,7 +151,8 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
   */
 
 
-  public void edit(String message, String dflt) {
+  public void edit(String message, String dflt, int f) {
+    function = f;
     mode = EDIT;
     this.message = message;
 
@@ -307,7 +310,7 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
           // answering to rename/new code question
           if (mode == EDIT) {  // this if() isn't (shouldn't be?) necessary
             String answer = editField.getText();
-            editor.getSketch().nameCode(answer);
+            editor.handleStatusOk(function, answer);
             unedit();
           }
         }
@@ -367,7 +370,7 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
 
             if (c == KeyEvent.VK_ENTER) {  // accept the input
               String answer = editField.getText();
-              editor.getSketch().nameCode(answer);
+              editor.handleStatusOk(function, answer);
               unedit();
               event.consume();
 
@@ -495,7 +498,7 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
       // answering to rename/new code question
       if (mode == EDIT) {  // this if() isn't (shouldn't be?) necessary
         String answer = editField.getText();
-        editor.getSketch().nameCode(answer);
+        editor.handleStatusOk(function, answer);
         unedit();
       }
     }

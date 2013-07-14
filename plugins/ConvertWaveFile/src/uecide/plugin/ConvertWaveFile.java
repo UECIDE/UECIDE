@@ -235,9 +235,6 @@ public class ConvertWaveFile extends BasePlugin {
         public String destination;
         public void run() {
             try {
-                Sketch sketch = editor.getSketch();
-                sketch.renamingCode = false;
-                sketch.nameCode(newFilename.getText() + ".h");
                 wav = WavFile.openWavFile(inFile);
 
                 int chans = wav.getNumChannels();
@@ -273,7 +270,11 @@ public class ConvertWaveFile extends BasePlugin {
                 newText.append("};\n");
                 newText.append("const unsigned long " + newFilename.getText() + "_len = " + numSamples + ";\n\n");
 
-                editor.setText(newText.toString());
+                File newFile = new File(editor.getSketch().getFolder(), newFilename + ".h");
+                PrintWriter pw = new PrintWriter(newFile);
+                pw.print(newText.toString());
+                pw.close();
+                editor.addTab(newFile);
                 editor.status.progressNotice("Converted");
                 editor.status.unprogress();
                 win.setVisible(false);

@@ -50,7 +50,7 @@ public class Board implements MessageConsumer {
     private File folder;
     private boolean valid;
     private boolean runInVerboseMode;
-    private Map boardPreferences;
+    public Map boardPreferences;
 
     static Logger logger = Logger.getLogger(Base.class.getName());
   

@@ -921,7 +921,6 @@ public class AutoFormat extends BasePlugin {
         // selectionEnd hopefully at least in the neighborhood
         editor.setText(formattedText);
         editor.setSelection(selectionEnd, selectionEnd);
-        editor.getSketch().setModified(true);
         // mark as finished
         editor.statusNotice("Auto Format finished.");
       }
