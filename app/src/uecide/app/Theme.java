@@ -165,9 +165,7 @@ public class Theme {
     String[] pieces = PApplet.split(value, ',');
     if (pieces.length != 3) {
       value = getDefault(attr);
-      //System.out.println("reset 2 for " + attr);
       pieces = PApplet.split(value, ',');
-      //PApplet.println(pieces);
       replace = true;
     }
 
@@ -184,8 +182,6 @@ public class Theme {
 
     // replace bad font with the default
     if (replace) {
-      //System.out.println(attr + " > " + value);
-      //setString(attr, font.getName() + ",plain," + font.getSize());
       set(attr, value);
     }
 

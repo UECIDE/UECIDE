@@ -25,6 +25,7 @@ package uecide.app;
 
 import uecide.app.debug.*;
 import uecide.app.preproc.*;
+import uecide.plugin.*;
 import processing.core.*;
 
 import java.util.regex.*;
@@ -324,10 +325,140 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean upload() {
+        String uploadCommand;
         if (!build()) {
             return false;
         }
-        return editor.board.upload(new File(buildFolder, name).getAbsolutePath());
+
+        settings.put("filename", name);
+        settings.put("filename.elf", name + ".elf");
+        settings.put("filename.hex", name + ".hex");
+        settings.put("filename.eep", name + ".eep");
+
+        boolean isJava = true;
+        uploadCommand = editor.board.get("upload.command.java");
+        if (uploadCommand == null) {
+            uploadCommand = editor.core.get("upload.command.java");
+        }
+        if (uploadCommand == null) {
+            isJava = false;
+            uploadCommand = editor.board.get("upload.command." + Base.osNameFull());
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.board.get("upload.command." + Base.osName());
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.board.get("upload.command");
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.core.get("upload.command." + Base.osNameFull());
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.core.get("upload.command." + Base.osName());
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.core.get("upload.command");
+        }
+
+        if (uploadCommand == null) {
+            message("No upload command defined for board\n", 2);
+            return false;
+        }
+ 
+   
+        if (isJava) {
+            Plugin uploader;
+            uploader = Base.plugins.get(uploadCommand);
+            if (uploader == null) {
+                message("Upload class " + uploadCommand + " not found.\n", 2);
+                return false;
+            }
+            try {
+                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
+                    message(uploadCommand + "is not a valid loader plugin.\n", 2);
+                    return false;
+                }
+                uploader.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+
+        String[] spl;
+        spl = parseString(uploadCommand).split("::");
+
+        String executable = spl[0];
+        if (Base.isWindows()) {
+            executable = executable + ".exe";
+        }
+
+        File exeFile = new File(folder, executable);
+        File tools;
+        if (!exeFile.exists()) {
+            tools = new File(folder, "tools");
+            exeFile = new File(tools, executable);
+        }
+        if (!exeFile.exists()) {
+            exeFile = new File(editor.core.getFolder(), executable);
+        }
+        if (!exeFile.exists()) {
+            tools = new File(editor.core.getFolder(), "tools");
+            exeFile = new File(tools, executable);
+        }
+        if (!exeFile.exists()) {
+            exeFile = new File(executable);
+        }
+        if (exeFile.exists()) {
+            executable = exeFile.getAbsolutePath();
+        }
+
+        spl[0] = executable;
+
+        // Parse each word, doing String replacement as needed, trimming it, and
+        // generally getting it ready for executing.
+
+        String commandString = executable;
+        for (int i = 1; i < spl.length; i++) {
+            String tmp = spl[i];
+            tmp = tmp.trim();
+            if (tmp.length() > 0) {
+                commandString += "::" + tmp;
+            }
+        }
+
+        boolean dtr = false;
+        boolean rts = false;
+        if (editor.board.getAny("upload.dtr", "").equals("yes")) {
+            dtr = true;
+        }
+        if (editor.board.getAny("upload.rts", "").equals("yes")) {
+            rts = true;
+        }
+
+        if (editor.board.getAny("upload.using", "serial").equals("serial"))
+        {
+            if (dtr || rts) {
+                assertDTRRTS(dtr, rts);
+            }
+        }
+        boolean res = execAsynchronously(commandString);
+        if (dtr || rts) {
+            assertDTRRTS(false, false);
+        }
+        return res;
+    }
+
+    public void assertDTRRTS(boolean dtr, boolean rts) {
+        try {
+            Serial serialPort = new Serial();
+            serialPort.setDTR(dtr);
+            serialPort.setRTS(rts);
+            serialPort.dispose();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public boolean build() {
@@ -595,9 +726,9 @@ public class Sketch implements MessageConsumer {
     public void message(String m, int chan) {
         if (m.trim() != "") {
             if (chan == 2) {
-                System.err.print(m);
+                editor.console.message(m, true, false);
             } else {
-                System.out.print(m);
+                editor.console.message(m, false, false);
             }
         }
     }
@@ -651,9 +782,9 @@ public class Sketch implements MessageConsumer {
         try {
             Sizer sizer = new Sizer(editor);
             sizer.computeSize();
-            System.out.println("Program Size:");
-            System.out.println("  Flash: " + sizer.progSize() + " bytes");
-            System.out.println("  RAM:   " + sizer.ramSize() + " bytes");
+            message("Program Size:\n", 1);
+            message("  Flash: " + sizer.progSize() + " bytes\n", 1);
+            message("  RAM:   " + sizer.ramSize() + " bytes\n", 1);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -992,6 +1123,8 @@ public class Sketch implements MessageConsumer {
 
 
         ProcessBuilder process = new ProcessBuilder(stringList);
+        process.redirectOutput(ProcessBuilder.Redirect.PIPE);
+        process.redirectError(ProcessBuilder.Redirect.PIPE);
         if (buildFolder != null) {
             process.directory(buildFolder);
         }
@@ -1007,9 +1140,9 @@ public class Sketch implements MessageConsumer {
 
         if (runInVerboseMode) {
             for (String component : stringList) {
-                System.out.print("[" + component + "] ");
+                message("[" + component + "] ", 1);
             }
-            System.out.println("");
+            message("\n", 1);
         }
 
         Process proc;
@@ -1036,7 +1169,7 @@ public class Sketch implements MessageConsumer {
                     err.thread.join();
                 result = proc.waitFor();
                 running = false;
-            } catch (InterruptedException ignored) { }
+            } catch (Exception ignored) { }
         }
         Base.processes.remove(proc);
         if (result == 0) {
