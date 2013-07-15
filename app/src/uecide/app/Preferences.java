@@ -123,6 +123,7 @@ public class Preferences {
   JTextField editorFontField;
   JTextField consoleFontField;
   JCheckBox autoAssociateBox;
+  JCheckBox saveHex;
 
   JTabbedPane tabs;
 
@@ -367,6 +368,14 @@ public class Preferences {
       new JCheckBox(Translate.t("Remove old build folder before each build"));
     mainSettings.add(deletePreviousBox, c);
 
+    c.gridx = 0;
+    c.gridy++;
+    c.gridwidth = 2;
+
+    saveHex =
+      new JCheckBox(Translate.t("Save HEX file to sketch folder"));
+    mainSettings.add(saveHex, c);
+
     c.gridy++;
     externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
     mainSettings.add(externalEditorBox, c);
@@ -464,6 +473,8 @@ public class Preferences {
     setBoolean("export.delete_target_folder",
                deletePreviousBox.isSelected());
 
+    setBoolean("export.save_hex", saveHex.isSelected());
+
 //    setBoolean("sketchbook.closing_last_window_quits",
 //               closingLastQuitsBox.isSelected());
     //setBoolean("sketchbook.prompt", sketchPromptBox.isSelected());
@@ -514,6 +525,7 @@ public class Preferences {
     // set all settings entry boxes to their actual status
     deletePreviousBox.
       setSelected(getBoolean("export.delete_target_folder"));
+    saveHex.setSelected(getBoolean("export.save_hex"));
 
     //closingLastQuitsBox.
     //  setSelected(getBoolean("sketchbook.closing_last_window_quits"));
