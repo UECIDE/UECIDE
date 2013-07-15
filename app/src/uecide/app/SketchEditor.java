@@ -97,6 +97,7 @@ class SketchEditor extends JPanel {
         }
         setCaretPosition(0);
         scrollTo(0);
+        setModified(false);
         return true;
     }
 
