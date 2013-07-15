@@ -284,6 +284,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
                     toolbar.add(button);
                 }
             } catch(Exception e) {
+                e.printStackTrace();
             }
         }
 

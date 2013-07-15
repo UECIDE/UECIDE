@@ -24,6 +24,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     Serial port;
     JComboBox<String> baudRates;
     JCheckBox showCursor;
+    JCheckBox localEcho;
     JScrollBar scrollbackBar;
 
     JTextField fontSizeField;
@@ -129,6 +130,8 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
         line.add(baudRates);
 
+        localEcho = new JCheckBox(Translate.t("Local Echo"));
+        
         showCursor = new JCheckBox(Translate.t("Show Cursor"));
         showCursor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -139,6 +142,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
             }
         });
         
+        line.add(localEcho);
         line.add(showCursor);
         box.add(line);
 
@@ -196,6 +200,9 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         if (port == null) {
             win.setVisible(false);
             return;
+        }
+        if (localEcho.isSelected()) {
+            term.message(m);
         }
         port.write(m);
     }
