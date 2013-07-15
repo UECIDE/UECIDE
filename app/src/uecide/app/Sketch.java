@@ -795,6 +795,14 @@ public class Sketch implements MessageConsumer {
             e.printStackTrace();
         }
 
+        if (Preferences.getBoolean("export.save_hex")) {
+            try {
+                Base.copyFile(new File(buildFolder, name + ".hex"), new File(folder, name + ".hex"));
+            } catch (Exception e) {
+                message("Error copying HEX file: " + e.getMessage() + "\n", 2);
+            }
+        }
+
         return true;
     }
 

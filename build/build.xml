@@ -1,32 +1,52 @@
 <?xml version="1.0"?>
 <project name="uecide" default="build">
+
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="antlibs/ant-contrib.jar"/>
+        </classpath>
+    </taskdef>
+
+    <condition property="brand" value="default">
+        <not>
+            <isset property="brand" />
+        </not>
+    </condition>
+
   <!--echo message="os.name = ${os.name}" /-->
   <!--echo message="os.arch = ${os.arch}" /-->
   <!--echo message="os.version = ${os.version}" /-->
   <!-- Sets properties for macosx/windows/linux depending on current system -->
     <!--property name="theme" value="mpide"/-->
-    <property file="build.settings"/>
-    <property name="aws.bucket" value="chipkit" />
+    <sequential>
+        <property file="build.settings"/>
+        <property name="aws.bucket" value="chipkit" />
 
-    <property file="themes/${theme}/ide/theme.txt"/>
+        <propertycopy property="suffix" from="${brand}.suffix" />
+        <propertycopy property="theme" from="${brand}.theme" />
+        <propertycopy property="cores" from="${brand}.cores" />
+        <propertycopy property="boards" from="${brand}.boards" />
+        <propertycopy property="plugins" from="${brand}.plugins" />
+        <property file="themes/${theme}/ide/theme.txt"/>
+    </sequential>
 
- <condition property="macosx"><os family="mac" /></condition>
-  <condition property="windows"><os family="windows" /></condition>
-  <condition property="linux"><os family="unix" /></condition>
-  <condition property="linux64"><os family="unix" arch="amd64" /></condition>
+    <condition property="macosx"><os family="mac" /></condition>
+    <condition property="windows"><os family="windows" /></condition>
+    <condition property="linux"><os family="unix" /></condition>
+    <condition property="linux64"><os family="unix" arch="amd64" /></condition>
 
-<condition property="platform" value="macosx">
-	<os family="mac" />
-</condition>
-<condition property="platform" value="windows">
-	<os family="windows" />
-</condition>
-  <condition property="platform"  value="linux">
-	<os family="unix" arch="i386" />
-</condition>
-<condition property="platform" value="linux64">
-	<os family="unix" arch="amd64" />
-</condition>
+    <condition property="platform" value="macosx">
+        <os family="mac" />
+    </condition>
+    <condition property="platform" value="windows">
+            <os family="windows" />
+    </condition>
+    <condition property="platform"  value="linux">
+        <os family="unix" arch="i386" />
+    </condition>
+    <condition property="platform" value="linux64">
+        <os family="unix" arch="amd64" />
+    </condition>
 
     <!-- set time propert -->  
     <tstamp>
@@ -47,6 +67,9 @@
   </fileset>
 
   <target name="build" description="Build IDE.">
+    <echo>
+Building for ${brand} version ${version}${suffix}
+    </echo>
     <antcall target="${platform}-build" />
   </target>
 
@@ -135,7 +158,7 @@
         <get src="${src}" dest="${dest}" usetimestamp="true" />    
     </target>
 
-    <target name="install_core" if="core.${core.name}">
+    <target name="install_core">
         <antcall target="download-file">
             <param name="src" value="http://www.uecide.org/cores/${core.name}-${target.platform}-current.zip" />
             <param name="dest" value="tmp/${core.name}-${target.platform}-current.zip" />
@@ -146,11 +169,11 @@
         </chmod>
     </target>
 
-    <target name="install_plugin" if="plugin.${plugin}">
+    <target name="install_plugin">
         <copy file="../plugins/${plugin}/${plugin}.jar" todir="${target.path}/plugins/"/>
     </target>
 
-    <target name="install_boards" if="boards.${boards.name}">
+    <target name="install_boards">
         <antcall target="download-file">
             <param name="src" value="http://www.uecide.org/boards/boards-${boards.name}-current.zip" />
             <param name="dest" value="tmp/boards-${boards.name}-current.zip" />
@@ -165,145 +188,20 @@
         <fail unless="target.path" 
             message="Do not call assemble from the command line." />
 
-        <!-- Install selected cores -->
-        <antcall target="install_core">
-            <param name="core.name" value="avr105" />
+        <foreach list="${cores}" param="core.name" target="install_core">
             <param name="target.path" value="${target.path}"/>
             <param name="target.platform" value="${target.platform}"/>
-        </antcall>
+        </foreach>
 
-        <antcall target="install_core">
-            <param name="core.name" value="pic32" />
+        <foreach list="${boards}" param="boards.name" target="install_boards">
             <param name="target.path" value="${target.path}"/>
             <param name="target.platform" value="${target.platform}"/>
-        </antcall>
+        </foreach>
 
-        <antcall target="install_core">
-            <param name="core.name" value="msp430" />
+        <foreach list="${plugins}" param="plugin" target="install_plugin">
             <param name="target.path" value="${target.path}"/>
             <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <!-- Install selected boards -->
-        <antcall target="install_boards">
-            <param name="boards.name" value="Arduino" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="Cerebot" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="CUI32" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="Majenko" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="MicroElektronika" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="PONTECH" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="chipKIT" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="Fubarino" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="Microchip" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="Olimex" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="UBW32" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_boards">
-            <param name="boards.name" value="Launchpad" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_plugin">
-            <param name="plugin" value="Archiver" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_plugin">
-            <param name="plugin" value="AutoFormat" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_plugin">
-            <param name="plugin" value="ColorSelector" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_plugin">
-            <param name="plugin" value="ConvertWaveFile" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_plugin">
-            <param name="plugin" value="CreateFont" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_plugin">
-            <param name="plugin" value="ExportToMPLABX" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_plugin">
-            <param name="plugin" value="FixEncoding" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
-
-        <antcall target="install_plugin">
-            <param name="plugin" value="SerialTerminal" />
-            <param name="target.path" value="${target.path}"/>
-            <param name="target.platform" value="${target.platform}"/>
-        </antcall>
+        </foreach>
 
         <!-- copy shared examples folder -->
         <copy todir="${target.path}/examples">
@@ -359,7 +257,7 @@
 	  tofile="macosx/work/${product.cap}.app" />
 
     <replace file="macosx/work/${product.cap}.app/Contents/Info.plist" token="{product.cap}" value="${product.cap}" />
-    <replace file="macosx/work/${product.cap}.app/Contents/Info.plist" token="{version}" value="${version}" />
+    <replace file="macosx/work/${product.cap}.app/Contents/Info.plist" token="{version}" value="${version}${suffix}" />
 
     <copy file="themes/${theme}/ide/icon.icns" tofile="macosx/work/${product.cap}.app/Contents/Resources/processing.icns" overwrite="true" />
 
@@ -401,7 +299,7 @@
             <arg value="-r" />
             <arg value="-apple" />
             <arg value="-o" />
-            <arg value="macosx/${product}-${version}-macosx.dmg" />
+            <arg value="macosx/${product}-${version}${suffix}-macosx.dmg" />
             <arg value="macosx/work" /> 
         </exec>
     </target>
@@ -410,7 +308,7 @@
         <exec executable="macosx/mkdmg">
             <arg value="macosx/work" />
             <arg value="${product.cap}" />
-			<arg value="macosx/${product}-${version}-macosx.dmg" />
+			<arg value="macosx/${product}-${version}${suffix}-macosx.dmg" />
         </exec>
     </target>
 
@@ -419,15 +317,15 @@
     <!-- now build the dmg -->
     <antcall target="macosx-mkdmg-${platform}" />
 
-    <zip destfile="macosx/${product}-${version}-macosx.zip"
+    <zip destfile="macosx/${product}-${version}${suffix}-macosx.zip"
          basedir="macosx"
-         includes="${product}-${version}-macosx.dmg" />
+         includes="${product}-${version}${suffix}-macosx.dmg" />
 
     <echo>
       =======================================================
       ${product.cap} for Mac OS X was built. Grab the image from   
       
-      macosx/${product}-${version}.zip
+      macosx/${product}-${version}${suffix}.zip
       =======================================================
   </echo>
 
@@ -524,15 +422,15 @@
         <property name="extension" value="tgz"/> 
 
 
-        <zip destfile="linux/${product}-${version}-linux.zip">
-            <zipfileset dir="linux/work" prefix="${product}-${version}" filemode="755"/>
+        <zip destfile="linux/${product}-${version}${suffix}-linux.zip">
+            <zipfileset dir="linux/work" prefix="${product}-${version}${suffix}" filemode="755"/>
         </zip>
 
         <echo>
       =======================================================
       ${product.cap} for Linux was built. Grab the archive from   
       
-      build/linux/${product}-${version}-linux.zip
+      build/linux/${product}-${version}${suffix}-linux.zip
       =======================================================
         </echo>
     </target>
@@ -542,21 +440,21 @@
         <property name="extension" value="tgz"/> 
 
 
-        <zip destfile="linux/${product}-${version}-linux64.zip">
-            <zipfileset dir="linux/work" prefix="${product}-${version}" filemode="755"/>
+        <zip destfile="linux/${product}-${version}${suffix}-linux64.zip">
+            <zipfileset dir="linux/work" prefix="${product}-${version}${suffix}" filemode="755"/>
         </zip>
 
         <echo>
       =======================================================
       ${product.cap} for Linux was built. Grab the archive from   
       
-      build/linux/${product}-${version}-linux64.zip
+      build/linux/${product}-${version}${suffix}-linux64.zip
       =======================================================
         </echo>
     </target>
 
 	<target name="linux-generate-debian" depends="version-number, build" description="Build debian tree ready for packaging">
-        <property name="proot" value="linux/${product}-${version}-${arch}" />
+        <property name="proot" value="linux/${product}-${version}${suffix}-${arch}" />
         <mkdir dir="${proot}" />
         <mkdir dir="${proot}/usr" />
         <mkdir dir="${proot}/usr/bin" />
@@ -600,12 +498,12 @@ MimeType=application/x-${product}
 
         <mkdir dir="${proot}/DEBIAN" />
         <echo file="${proot}/DEBIAN/control">Package: ${product}
-Version: ${version}
+Version: ${version}${suffix}
 Maintainer: matt@majenko.co.uk
 Architecture: ${arch}
 Section: Programming
 Depends: avr-libc, avrdude, binutils-avr, extra-xdg-menus, gcc-avr, libftdi1, libjna-java, librxtx-java
-Description: chipKIT MPIDE Development environment
+Description: ${product.cap} Development environment
 
 </echo>
         <echo file="${proot}/DEBIAN/postinst">#!/bin/bash
@@ -619,14 +517,14 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <exec executable="fakeroot" dir="linux">
             <arg value="dpkg-deb"/>
             <arg value="-b"/>
-            <arg value="${product}-${version}-${arch}"/>
+            <arg value="${product}-${version}${suffix}-${arch}"/>
         </exec>
         <delete dir="${proot}" />
         <echo>
       =======================================================
       ${product.cap} for Linux was built. Grab the package from   
       
-      build/linux/${product}-${version}-${arch}.deb
+      build/linux/${product}-${version}${suffix}-${arch}.deb
       =======================================================
         </echo>
     </target>
@@ -727,15 +625,15 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 
         <unzip dest="windows/work" src="windows/dist/jre7.zip" overwrite="false"/>
 
-        <zip destfile="windows/${product}-${version}-windows.zip">
-            <zipfileset dir="windows/work" prefix="${product}-${version}" filemode="755" />
+        <zip destfile="windows/${product}-${version}${suffix}-windows.zip">
+            <zipfileset dir="windows/work" prefix="${product}-${version}${suffix}" filemode="755" />
         </zip>
     
         <echo>
       =======================================================
       ${product.cap} for Windows was built. Grab the archive from   
       
-      windows/${product}-${version}-windows.zip
+      windows/${product}-${version}${suffix}-windows.zip
       =======================================================
         </echo>
     </target>
@@ -751,9 +649,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 	   addproperty="version"
 	   defaultvalue="${revision}" />
 
-    <tar compression="gzip" longfile="gnu" destfile="${product}-${version}-src.tar.gz">
+    <tar compression="gzip" longfile="gnu" destfile="${product}-${version}${suffix}-src.tar.gz">
       <tarfileset dir="../" 
-		  prefix="${product}-${version}" 
+		  prefix="${product}-${version}${suffix}" 
 		  excludes="**/*.tgz,
 			     **/macosx/,
 			     **/windows/,
@@ -767,7 +665,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
       =======================================================
       ${product.cap} source distribution was built. Grab the archive from   
       
-      ${product}-${version}-src.tar.gz
+      ${product}-${version}${suffix}-src.tar.gz
       =======================================================
     </echo>
   </target>
@@ -816,30 +714,30 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     <target name="auto">
         <antcall target="clean" />
         <antcall target="linux-dist" />
-        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-linux.zip" overwrite="true" />
-        <delete file="linux/${product}-${version}-linux.zip" />
+        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-linux.zip" overwrite="true" />
+        <delete file="linux/${product}-${version}${suffix}-linux.zip" />
         <antcall target="linux-deb" />
-        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-i386.deb" overwrite="true" />
-        <delete file="linux/${product}-${version}-i386.deb" />
+        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-i386.deb" overwrite="true" />
+        <delete file="linux/${product}-${version}${suffix}-i386.deb" />
 
         <antcall target="clean" />
         <antcall target="linux64-dist" />
-        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-linux64.zip" overwrite="true" />
-        <delete file="linux/${product}-${version}-linux64.zip" />
+        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-linux64.zip" overwrite="true" />
+        <delete file="linux/${product}-${version}${suffix}-linux64.zip" />
         <antcall target="linux64-deb" />
-        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}-amd64.deb" overwrite="true" />
-        <delete file="linux/${product}-${version}-amd64.deb" />
+        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-amd64.deb" overwrite="true" />
+        <delete file="linux/${product}-${version}${suffix}-amd64.deb" />
 
         <antcall target="clean" />
         <antcall target="macosx-dist" />
-        <copy todir="/var/www/uecide/downloads" file="macosx/${product}-${version}-macosx.zip" overwrite="true" />
-        <delete file="macosx/${product}-${version}-macosx.zip" />
-        <delete file="macosx/${product}-${version}-macosx.dmg" />
+        <copy todir="/var/www/uecide/downloads" file="macosx/${product}-${version}${suffix}-macosx.zip" overwrite="true" />
+        <delete file="macosx/${product}-${version}${suffix}-macosx.zip" />
+        <delete file="macosx/${product}-${version}${suffix}-macosx.dmg" />
 
         <antcall target="clean" />
         <antcall target="windows-dist" />
-        <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}-windows.zip" overwrite="true" />
-        <delete file="windows/${product}-${version}-windows.zip" />
+        <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows.zip" overwrite="true" />
+        <delete file="windows/${product}-${version}${suffix}-windows.zip" />
 
         <antcall target="clean" />
 
