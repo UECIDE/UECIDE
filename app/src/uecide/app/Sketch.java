@@ -444,6 +444,8 @@ public class Sketch implements MessageConsumer {
                 assertDTRRTS(dtr, rts);
             }
         }
+
+        System.err.println(commandString);
         boolean res = execAsynchronously(commandString);
         if (dtr || rts) {
             assertDTRRTS(false, false);
@@ -852,13 +854,17 @@ public class Sketch implements MessageConsumer {
 
                 File found;
                 found = new File(editor.board.getFolder(), f);
+                System.err.println("Checking 1: " + found.getAbsolutePath());
                 if (!found.exists()) {
                     found = new File(editor.core.getAPIFolder(), f);
+                    System.err.println("Checking 2: " + found.getAbsolutePath());
                 }
                 if (!found.exists()) {
                     mid = "NOTFOUND";
+                    System.err.println("Not Found");
                 } else {
                     mid = found.getAbsolutePath();
+                    System.err.println("Found");
                 }
             } else if (mid.equals("verbose")) {
                 if (runInVerboseMode)
