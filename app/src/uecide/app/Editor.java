@@ -763,6 +763,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     }
     if (selection != null) selection.setState(true);
     Preferences.set("serial.port", name);
+    lineStatus.setText(board.getLongName() + " on " + Preferences.get("serial.port"));
   }
 
 
@@ -1887,7 +1888,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         examplesMenu.removeAll();
         addSketches(examplesMenu, Base.getExamplesFolder());
 
-        sketchbookMenu.addSeparator();
         JMenu coreItem = new JMenu(core.get("name", core.getName()));
         examplesMenu.add(coreItem);
         if (coreExamples.isDirectory()) {
@@ -2039,6 +2039,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         sketch.settings.put("board.root", board.getFolder().getAbsolutePath());
         lineStatus.setText(b.getLongName() + " on " + Preferences.get("serial.port"));
         rebuildBoardsMenu();
+        Preferences.set("board", b.getName());
     }
 
     public void rebuildCoresMenu()

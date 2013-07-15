@@ -1686,11 +1686,8 @@ public class Base {
             return;
         }
 
-        extractZip(inputFile.getAbsolutePath(), getSketchbookLibrariesFolder().getAbsolutePath());
-        gatherLibraries();
-        for (Editor e : editors) {
-            e.populateMenus();
-        }
+
+        new ZipExtractor(inputFile, getSketchbookLibrariesFolder()).execute();
     }
 
     public static boolean testLibraryZipFormat(String inputFile)
@@ -1733,7 +1730,7 @@ public class Base {
         return (foundHeader && foundCPP);
     }
 
-    public static int countZipEntries(String inputFile)
+    public static int countZipEntries(File inputFile)
     {
         int count = 0;
         try {
@@ -1751,16 +1748,30 @@ public class Base {
         return count;
     }
 
-    public static void extractZip(final String inputFile, final String destination)
+    public static class ZipExtractor extends SwingWorker<Void, Integer>
     {
-            activeEditor.status.progress(Translate.t("Extracting..."));
-        
+        File inputFile;
+        File destination;
+
+        public ZipExtractor(File in, File out) {
+            this.inputFile = in;
+            this.destination = out;
+        }
+
+        public ZipExtractor(String in, String out) {
+            this.inputFile = new File(in);
+            this.destination = new File(out);
+        }
+
+        @Override
+        protected Void doInBackground() {
             byte[] buffer = new byte[1024];
             ArrayList<String> fileList = new ArrayList<String>();
-            File slf = new File(destination);
+            publish(-1);
             int files = countZipEntries(inputFile);
             if (files == -1) {
-                return;
+                System.err.println("Zip file empty");
+                return null;
             }
             int done = 0;
             try {
@@ -1768,7 +1779,7 @@ public class Base {
                 ZipEntry ze = zis.getNextEntry();
                 while (ze != null) {
                     String fileName = ze.getName();
-                    File newFile = new File(slf, fileName);
+                    File newFile = new File(destination, fileName);
 
                     new File(newFile.getParent()).mkdirs();
 
@@ -1785,20 +1796,48 @@ public class Base {
                         newFile.setExecutable(true, false);
                     }
                     done++;
-                    activeEditor.status.progressUpdate((done * 100) / files);
+                    publish((done * 100) / files);
                     ze = zis.getNextEntry();
+                    Thread.yield();
                 }
                 zis.closeEntry();
                 zis.close();
             } catch (Exception e) {
                 activeEditor.status.progressNotice(Translate.t("Install failed"));
-                System.err.println(e.getMessage());
-                return;
+                e.printStackTrace();
+                return null;
             }
+            return null;
+        }
+
+        @Override
+        protected void done() {
             activeEditor.status.progressNotice(Translate.t("Installed."));
             activeEditor.status.unprogress();
-        
-    }
+            loadCores();
+            loadBoards();
+            gatherLibraries();
+            for (Editor e : editors) {
+                e.rebuildCoresMenu();
+                e.rebuildBoardsMenu();
+                e.rebuildImportMenu();
+                e.rebuildExamplesMenu();
+                e.rebuildPluginsMenu();
+            }
+        }
+
+        @Override
+        protected void process(java.util.List<Integer> pct) {
+            int p = pct.get(pct.size() - 1);
+            if (p == -1) {
+                activeEditor.status.progress(Translate.t("Examining..."));
+                activeEditor.status.progressIndeterminate(Translate.t("Examining..."));
+            } else {
+                activeEditor.status.progress(Translate.t("Installing..."));
+                activeEditor.status.progressUpdate(p);
+            }
+        }
+    };
 
     public void updateProgress(final int perc)
     {
@@ -1822,14 +1861,8 @@ public class Base {
             return;
         }
 
-        File bf = new File(getSketchbookFolder(), "boards");
-        extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
-        loadBoards();
-        for (Editor e : editors) {
-            e.rebuildBoardsMenu();
-            e.rebuildImportMenu();
-            e.rebuildExamplesMenu();
-        }
+        final File bf = new File(getSketchbookFolder(), "boards");
+        new ZipExtractor(inputFile, bf).execute();
     }
 
     public static void handleAddCore()
@@ -1845,22 +1878,11 @@ public class Base {
             return;
         }
 
-        File bf = new File(getSketchbookFolder(), "cores");
+        final File bf = new File(getSketchbookFolder(), "cores");
         if (!bf.exists()) {
             bf.mkdirs();
         }
-        extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
-        loadCores();
-        loadBoards();
-        gatherLibraries();
-        for (Editor e : editors) {
-            e.rebuildCoresMenu();
-            e.rebuildBoardsMenu();
-        
-            e.rebuildImportMenu();
-            e.rebuildExamplesMenu();
-            e.rebuildPluginsMenu();
-        }
+        new ZipExtractor(inputFile, bf).execute();
     }
 
     public static void handleInstallPlugin()
@@ -1880,7 +1902,7 @@ public class Base {
             bf.mkdirs();
         }
         if (bf.getName().toLowerCase().endsWith(".zip")) {
-            extractZip(inputFile.getAbsolutePath(), bf.getAbsolutePath());
+            new ZipExtractor(inputFile, bf).execute();
         } else {
             File d = new File(getSketchbookFolder(), "plugins");
             if (!d.exists()) {
