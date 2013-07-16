@@ -267,6 +267,7 @@ public class Sketch implements MessageConsumer {
                     e.printStackTrace();
                 }
             }
+            f.textArea.setNumberOffset(f.headerLines+1);
         }
     }
 

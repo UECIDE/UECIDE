@@ -306,4 +306,8 @@ class SketchEditor extends JPanel {
     public File getFile() {
         return file;
     }
+
+    public void setNumberOffset(int off) {
+        scrollPane.getGutter().setLineNumberingStartIndex(off);
+    }
 }
