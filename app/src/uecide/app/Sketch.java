@@ -818,6 +818,7 @@ public class Sketch implements MessageConsumer {
         if (!compileEEP()) {
             return false;
         }
+        setCompilingProgress(70);
 
         if (editor.core.get("recipe.objcopy.lss.pattern") != null) {
             if (Preferences.getBoolean("compiler.generate_lss")) {
@@ -834,6 +835,7 @@ public class Sketch implements MessageConsumer {
                 } catch (Exception e) {
                     result = false;
                 }
+                unredirectChannel(1);
                 
                 if (!result) {
                     return false;
@@ -848,12 +850,12 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        setCompilingProgress(70);
+        setCompilingProgress(80);
 
         if (!compileHEX()) {
             return false;
         }
-        setCompilingProgress(80);
+        setCompilingProgress(90);
 
         try {
             Sizer sizer = new Sizer(editor);
