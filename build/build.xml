@@ -349,6 +349,22 @@ Building for ${brand} version ${version}${suffix}
     <fail message="wrong platform (${os.name})" />
   </target>
   
+  <target name="upgrade-build" depends="subprojects-build" description="Build upgrade version">
+    <mkdir dir="upgrade/work" />
+    
+    <copy todir="upgrade/work">
+      <fileset dir="shared" includes="lib/**" />
+      <fileset file="shared/revisions.txt" />
+    </copy>
+    
+    <copy todir="upgrade/work/lib" flatten="true">
+      <fileset refid="runtime.jars" />
+    </copy>
+    <copy todir="upgrade/work/lib/theme/">
+        <fileset dir="themes/${theme}/ide/" includes="**/*"/>
+    </copy>
+  </target>
+
   <target name="linux-build" depends="linux-checkos, subprojects-build" description="Build linux version">
     <mkdir dir="linux/work" />
     
@@ -414,10 +430,15 @@ Building for ${brand} version ${version}${suffix}
     <exec executable="./linux/work/${product}" spawn="false"/>
   </target>
 
+    <target name="upgrade-dist" depends="upgrade-build"
+        description="Build distribution version">
+        <zip destfile="upgrade/${product}-${version}${suffix}-upgrade.zip">
+            <zipfileset dir="upgrade/work" prefix="${product}-${version}${suffix}" filemode="755"/>
+        </zip>
+    </target>
+
     <target name="linux-dist" depends="linux-build" 
         description="Build .tar.gz of linux version">
-        <property name="extension" value="tgz"/> 
-
 
         <zip destfile="linux/${product}-${version}${suffix}-linux.zip">
             <zipfileset dir="linux/work" prefix="${product}-${version}${suffix}" filemode="755"/>
@@ -434,7 +455,6 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="linux64-dist" depends="linux64-build" 
         description="Build .tar.gz of linux64 version">
-        <property name="extension" value="tgz"/> 
 
 
         <zip destfile="linux/${product}-${version}${suffix}-linux64.zip">
@@ -528,14 +548,12 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 
 
 	<target name="linux-deb" description="Build .deb of linux version">
-        <property name="extension" value="deb"/>
         <property name="arch" value="i386"/>
         <antcall target="linux-generate-debian"/>
     </target>
 
     <target name="linux64-deb" description="Build .deb of linux version">
         <property name="arch" value="amd64"/>
-        <property name="extension" value="deb"/>
         <antcall target="linux-generate-debian"/>
     </target>
 
@@ -616,9 +634,24 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
             dir="windows/work" spawn="true"/>
     </target>
 
+    <target name="windows-dist-lite" depends="windows-build" 
+        description="Create .zip files of windows version">
+
+        <zip destfile="windows/${product}-${version}${suffix}-windows-lite.zip">
+            <zipfileset dir="windows/work" prefix="${product}-${version}${suffix}" filemode="755" />
+        </zip>
+    
+        <echo>
+      =======================================================
+      ${product.cap} for Windows was built. Grab the archive from   
+      
+      windows/${product}-${version}${suffix}-windows.zip
+      =======================================================
+        </echo>
+    </target>
+  
     <target name="windows-dist" depends="windows-build" 
         description="Create .zip files of windows version">
-        <property name="extension" value="zip"/>   
 
         <unzip dest="windows/work" src="windows/dist/jre7.zip" overwrite="false"/>
 
@@ -735,6 +768,16 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="windows-dist" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows.zip" overwrite="true" />
         <delete file="windows/${product}-${version}${suffix}-windows.zip" />
+
+        <antcall target="clean" />
+        <antcall target="windows-dist-lite" />
+        <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows-lite.zip" overwrite="true" />
+        <delete file="windows/${product}-${version}${suffix}-windows-lite.zip" />
+
+        <antcall target="clean" />
+        <antcall target="upgrade-dist" />
+        <copy todir="/var/www/uecide/downloads" file="upgrade/${product}-${version}${suffix}-upgrade.zip" overwrite="true" />
+        <delete file="upgrade/${product}-${version}${suffix}-upgrade.zip" />
 
         <antcall target="clean" />
 
