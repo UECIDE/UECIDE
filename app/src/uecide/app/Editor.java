@@ -817,45 +817,56 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     JMenu menu = new JMenu(Translate.t("Help"));
     JMenuItem item;
 
-    item = new JMenuItem(Translate.t("Getting Started"));
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          Base.showGettingStarted();
-        }
-      });
-    menu.add(item);
+    if (Theme.get("links.gettingstarted.url") != null) {
+        item = new JMenuItem(Translate.t("Getting Started"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              Base.openURL(Theme.get("links.gettingstarted.url"));
+            }
+          });
+        menu.add(item);
+    }
 
-    item = new JMenuItem(Translate.t("Environment"));
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          Base.showEnvironment();
-        }
-      });
-    menu.add(item);
+    if (Theme.get("links.environment.url") != null) {
+        item = new JMenuItem(Translate.t("Environment"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              Base.openURL(Theme.get("links.environment.url"));
+            }
+          });
+        menu.add(item);
+    }
 
-    item = new JMenuItem(Translate.t("Troubleshooting"));
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          Base.showTroubleshooting();
-        }
-      });
-    menu.add(item);
+    if (Theme.get("links.troubleshooting.url") != null) {
+        item = new JMenuItem(Translate.t("Troubleshooting"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              Base.openURL(Theme.get("links.troubleshooting.url"));
+            }
+          });
+        menu.add(item);
+    }
 
-    item = new JMenuItem(Translate.t("Reference"));
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          Base.showReference();
-        }
-      });
-    menu.add(item);
 
-    item = new JMenuItem(Translate.t("Frequently Asked Questions"));
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          Base.showFAQ();
-        }
-      });
-    menu.add(item);
+    if (Theme.get("links.reference.url") != null) {
+        item = new JMenuItem(Translate.t("Reference"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              Base.openURL(Theme.get("links.reference.url"));
+            }
+          });
+        menu.add(item);
+    }
+
+    if (Theme.get("links.faq.url") != null) {
+        item = new JMenuItem(Translate.t("Frequently Asked Questions"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              Base.openURL(Theme.get("links.faq.url"));
+            }
+          });
+        menu.add(item);
+    }
 
     String linkName = Theme.get("links.homepage.name");
     if (linkName != null) {

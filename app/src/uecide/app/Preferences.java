@@ -124,6 +124,7 @@ public class Preferences {
   JTextField consoleFontField;
   JCheckBox autoAssociateBox;
   JCheckBox saveHex;
+  JCheckBox disablePrototypes;
 
   JTabbedPane tabs;
 
@@ -265,9 +266,10 @@ public class Preferences {
     buttonLine.add(okButton);
 
     JPanel mainSettings = new JPanel(new GridBagLayout());
+    JPanel advancedSettings = new JPanel(new GridBagLayout());
+
     GridBagConstraints c = new GridBagConstraints();
     mainSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-
 
     c.fill = GridBagConstraints.HORIZONTAL;
     c.gridwidth = 2;
@@ -361,38 +363,43 @@ public class Preferences {
     });
 
     c.gridx = 0;
-    c.gridy++;
+    c.gridy = 0;
     c.gridwidth = 2;
 
     deletePreviousBox =
       new JCheckBox(Translate.t("Remove old build folder before each build"));
-    mainSettings.add(deletePreviousBox, c);
+    advancedSettings.add(deletePreviousBox, c);
 
-    c.gridx = 0;
     c.gridy++;
-    c.gridwidth = 2;
 
     saveHex =
       new JCheckBox(Translate.t("Save HEX file to sketch folder"));
-    mainSettings.add(saveHex, c);
+    advancedSettings.add(saveHex, c);
+
+    c.gridy++;
+
+    disablePrototypes =
+      new JCheckBox(Translate.t("Disable adding of function prototypes"));
+    advancedSettings.add(disablePrototypes, c);
 
     c.gridy++;
     externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
-    mainSettings.add(externalEditorBox, c);
+    advancedSettings.add(externalEditorBox, c);
 
 
     c.gridy++;
     checkUpdatesBox = new JCheckBox(Translate.t("Check for updates on startup"));
-    mainSettings.add(checkUpdatesBox, c);
+    advancedSettings.add(checkUpdatesBox, c);
 
     if (Base.isWindows()) {
       c.gridy++;
       autoAssociateBox =
         new JCheckBox("Automatically associate .pde files with " + Theme.get("product.cap"));
-      mainSettings.add(autoAssociateBox, c);
+      advancedSettings.add(autoAssociateBox, c);
     }
 
     tabs.add(Translate.t("Main Settings"), mainSettings);
+    tabs.add(Translate.t("Advanced Settings"), advancedSettings);
 
     dialog.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
@@ -474,6 +481,7 @@ public class Preferences {
                deletePreviousBox.isSelected());
 
     setBoolean("export.save_hex", saveHex.isSelected());
+    setBoolean("compiler.disable_prototypes", disablePrototypes.isSelected());
 
 //    setBoolean("sketchbook.closing_last_window_quits",
 //               closingLastQuitsBox.isSelected());
@@ -526,6 +534,7 @@ public class Preferences {
     deletePreviousBox.
       setSelected(getBoolean("export.delete_target_folder"));
     saveHex.setSelected(getBoolean("export.save_hex"));
+    disablePrototypes.setSelected(getBoolean("compiler.disable_prototypes"));
 
     //closingLastQuitsBox.
     //  setSelected(getBoolean("sketchbook.closing_last_window_quits"));

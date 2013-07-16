@@ -208,9 +208,6 @@ Building for ${brand} version ${version}${suffix}
             <fileset dir="shared/examples" />
         </copy>
     
-        <!-- Unzip documentation -->
-        <unzip dest="${target.path}" src="shared/reference.zip" overwrite="false"/>
-
         <copy todir="${target.path}/lib/theme/">
             <fileset dir="themes/${theme}/ide/" includes="**/*"/>
         </copy>
@@ -601,11 +598,11 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 
         <copy todir="windows/work">
             <fileset dir="themes/${theme}/windows/" 
-                includes="about.bmp, application.ico, config.xml"/>
+                includes="application.ico, config.xml"/>
         </copy>
         <launch4j configFile="windows/work/config.xml" />
         <delete dir="windows/work" 
-            includes="about.bmp, application.ico, config.xml" />
+            includes="application.ico, config.xml" />
 
         <!-- cygwin requires html, dll, and exe to have the +x flag -->
         <chmod perm="755">
