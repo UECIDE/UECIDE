@@ -2251,6 +2251,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
         loadKeywordsFromFile(tm, Base.getContentFile("lib/keywords.txt"));
         loadKeywordsFromFile(tm, new File(core.getFolder(), "keywords.txt"));
+        loadKeywordsFromFile(tm, new File(board.getFolder(), "keywords.txt"));
 
         for (String entry : entries) {
             File libFolder = sketch.importToLibraryTable.get(entry);
