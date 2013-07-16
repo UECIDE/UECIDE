@@ -589,6 +589,7 @@ public class Preferences {
     saveHex.setSelected(getBoolean("export.save_hex"));
     createLss.setSelected(getBoolean("compiler.generate_lss"));
     saveLss.setEnabled(getBoolean("compiler.generate_lss"));
+    saveLss.setSelected(getBoolean("export.save_lss"));
     disablePrototypes.setSelected(getBoolean("compiler.disable_prototypes"));
 
     //closingLastQuitsBox.
