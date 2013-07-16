@@ -40,6 +40,8 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.border.*;
 import javax.swing.JToolBar;
+import java.nio.charset.*;
+
 
 import org.apache.log4j.BasicConfigurator;
 //import org.apache.log4j.PropertyConfigurator;
@@ -47,6 +49,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 
 import gnu.io.*;
+import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rsyntaxtextarea.modes.ArduinoTokenMaker;
 
 /**
  * Main editor panel for the Processing Development Environment.
@@ -1541,6 +1545,13 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     public SketchEditor addTab(File file) {
         String fileName = file.getName();
         SketchEditor newEditor = new SketchEditor(file);
+        if (sketch != null) {
+            if (sketch.importToLibraryTable != null) {
+                if (fileName.endsWith(".ino") || fileName.endsWith(".pde")) {
+                    createExtraTokens(newEditor);
+                }
+            }
+        }
         tabs.add(fileName, newEditor);
         return newEditor;
     }
@@ -1888,6 +1899,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         sketch.importToLibraryTable.putAll(globalLibraries);
         sketch.importToLibraryTable.putAll(coreLibraries);
         sketch.importToLibraryTable.putAll(contributedLibraries);
+        System.err.println("ITLT size: " + sketch.importToLibraryTable.size());
     }
 
     public void rebuildExamplesMenu() {
@@ -2046,11 +2058,20 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     public void selectBoard(Board b) {
         board = b;
         core = board.getCore();
-        populateMenus();
         sketch.settings.put("board.root", board.getFolder().getAbsolutePath());
         lineStatus.setText(b.getLongName() + " on " + Preferences.get("serial.port"));
         rebuildBoardsMenu();
         Preferences.set("board", b.getName());
+        populateMenus();
+
+        for (int i = 0; i < tabs.getTabCount(); i++) {
+            SketchEditor se = (SketchEditor)tabs.getComponentAt(i);
+            String fileName = se.getFile().getName();
+
+            if (fileName.endsWith(".ino") || fileName.endsWith(".pde")) {
+                createExtraTokens((SketchEditor)tabs.getComponentAt(i));
+            }
+        }
     }
 
     public void rebuildCoresMenu()
@@ -2218,6 +2239,67 @@ static Logger logger = Logger.getLogger(Base.class.getName());
 
     public void message(String m, int c) {
         sketch.message(m, c);
+    }
+
+    public void createExtraTokens(SketchEditor se) {
+        RSyntaxTextArea ta = se.textArea;
+        String[] entries = (String[]) sketch.importToLibraryTable.keySet().toArray(new String[0]);
+
+        ArduinoTokenMaker tm = (ArduinoTokenMaker)((RSyntaxDocument)ta.getDocument()).getSyntaxStyle();
+
+        tm.clear();
+
+        loadKeywordsFromFile(tm, Base.getContentFile("lib/keywords.txt"));
+        loadKeywordsFromFile(tm, new File(core.getFolder(), "keywords.txt"));
+
+        for (String entry : entries) {
+            File libFolder = sketch.importToLibraryTable.get(entry);
+            File keywords = new File(libFolder, "keywords.txt");
+            loadKeywordsFromFile(tm, keywords);
+        }
+    }
+
+    public void loadKeywordsFromFile(ArduinoTokenMaker tm, File keywords) {
+        if (!keywords.exists()) {
+            return;
+        }
+        try {
+            FileInputStream fis;
+            BufferedReader br;
+            String line;
+
+            fis = new FileInputStream(keywords);
+            br = new BufferedReader(new InputStreamReader(fis, Charset
+.forName("UTF-8")));
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("#")) continue;
+                if (line.startsWith("//")) continue;
+                line = line.replaceAll("\\s+", " ");
+                String[] kv = line.split(" ");
+                if (kv.length >= 2) {
+                    String keyword = kv[0];
+                    String type = kv[1];
+                    if (type.equals("KEYWORD1")) {
+                        tm.addKeyword(keyword, TokenTypes.RESERVED_WORD);
+                    }
+                    if (type.equals("KEYWORD2")) {
+                        tm.addKeyword(keyword, TokenTypes.FUNCTION);
+                    }
+                    if (type.equals("KEYWORD3")) {
+                        tm.addKeyword(keyword, TokenTypes.RESERVED_WORD);
+                    }
+                    if (type.equals("LITERAL1")) {
+                        tm.addKeyword(keyword, TokenTypes.PREPROCESSOR);
+                    }
+                    if (type.equals("LITERAL2")) {
+                        tm.addKeyword(keyword, TokenTypes.IDENTIFIER);
+                    }
+                }
+            }
+            br.close();
+        } catch (Exception e) {
+        }
     }
 }
 

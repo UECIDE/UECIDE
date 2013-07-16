@@ -38,7 +38,10 @@ class SketchEditor extends JPanel {
         super();
         setLayout(new BorderLayout());
         textArea = new RSyntaxTextArea();
-        if (file.getName().endsWith(".cpp") || file.getName().endsWith(".ino") || file.getName().endsWith(".pde") || file.getName().endsWith(".h")) {
+        if (file.getName().endsWith(".ino") || file.getName().endsWith(".pde")) {
+            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_ARDUINO);
+        }
+        if (file.getName().endsWith(".cpp") || file.getName().endsWith(".h")) {
             textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS);
         }
         if (file.getName().endsWith(".c")) {
@@ -298,5 +301,9 @@ class SketchEditor extends JPanel {
                scrollPane.getVerticalScrollBar().setValue(pos);
            }
         });
+    }
+
+    public File getFile() {
+        return file;
     }
 }

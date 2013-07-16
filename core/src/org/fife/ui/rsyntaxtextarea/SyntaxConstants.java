@@ -50,6 +50,11 @@ public interface SyntaxConstants {
 	 */
 	public static final String SYNTAX_STYLE_ASSEMBLER_AVR	= "text/asm-avr";
 
+	/**
+	 * Style for highlighting Arduino INO or PDE.
+	 */
+	public static final String SYNTAX_STYLE_ARDUINO	= "text/ino";
+
 
 	/**
 	 * Style for highlighting BBCode.
