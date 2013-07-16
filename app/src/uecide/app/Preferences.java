@@ -124,6 +124,8 @@ public class Preferences {
   JTextField consoleFontField;
   JCheckBox autoAssociateBox;
   JCheckBox saveHex;
+  JCheckBox saveLss;
+  JCheckBox createLss;
   JCheckBox disablePrototypes;
 
   JTabbedPane tabs;
@@ -403,6 +405,28 @@ public class Preferences {
     advancedSettings.add(saveHex, c);
 
     c.gridy++;
+    createLss = 
+        new JCheckBox(Translate.t("Generate assembly listing (requires core support)"));
+    createLss.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            saveLss.setEnabled(createLss.isSelected());
+        }
+    });
+    advancedSettings.add(createLss, c);
+
+    c.gridy++;
+    c.gridwidth = 1;
+    c.weightx = 0.1;
+    advancedSettings.add(Box.createHorizontalGlue(), c);
+    c.gridx = 1;
+    c.weightx = 0.9;
+    saveLss = 
+        new JCheckBox(Translate.t("Save assembly listing to sketch folder"));
+    advancedSettings.add(saveLss, c);
+
+    c.gridy++;
+    c.gridx = 0;
+    c.gridwidth = 2;
 
     disablePrototypes =
       new JCheckBox(Translate.t("Disable adding of function prototypes"));
@@ -506,6 +530,8 @@ public class Preferences {
     setBoolean("export.delete_target_folder",
                deletePreviousBox.isSelected());
 
+    setBoolean("compiler.generate_lss", createLss.isSelected());
+    setBoolean("export.save_lss", saveLss.isSelected());
     setBoolean("export.save_hex", saveHex.isSelected());
     setBoolean("compiler.disable_prototypes", disablePrototypes.isSelected());
 
@@ -561,6 +587,8 @@ public class Preferences {
     deletePreviousBox.
       setSelected(getBoolean("export.delete_target_folder"));
     saveHex.setSelected(getBoolean("export.save_hex"));
+    createLss.setSelected(getBoolean("compiler.generate_lss"));
+    saveLss.setEnabled(getBoolean("compiler.generate_lss"));
     disablePrototypes.setSelected(getBoolean("compiler.disable_prototypes"));
 
     //closingLastQuitsBox.
