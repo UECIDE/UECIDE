@@ -821,11 +821,15 @@ public class Sketch implements MessageConsumer {
         setCompilingProgress(70);
 
         if (editor.core.get("recipe.objcopy.lss.pattern") != null) {
+            System.err.println("LSS available");
             if (Preferences.getBoolean("compiler.generate_lss")) {
+                System.err.println("LSS enabled");
                 File redirectTo = new File(buildFolder, name + ".lss");
                 if (redirectTo.exists()) {
                     redirectTo.delete();
                 }                
+
+                System.err.println("Redirect to " + redirectTo.getAbsolutePath());
 
                 boolean result = false;
                 try {
@@ -836,6 +840,8 @@ public class Sketch implements MessageConsumer {
                     result = false;
                 }
                 unredirectChannel(1);
+
+                System.err.println("LSS finished: " + result);
                 
                 if (!result) {
                     return false;
