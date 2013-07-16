@@ -48,7 +48,6 @@ import processing.core.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-
 /**
  * The base class for the main uecide.application.
  * Primary role of this class is for platform identification and
@@ -2081,5 +2080,4 @@ public class Base {
             ed.applyPreferences();
         }
     }
-
 }

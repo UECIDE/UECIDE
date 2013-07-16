@@ -463,6 +463,10 @@ public class RSyntaxDocument extends RDocument implements SyntaxConstants {
 		this.syntaxStyle = styleKey;
 	}
 
+    public TokenMaker getSyntaxStyle() {
+        return tokenMaker;
+    }
+
 
 	/**
 	 * Sets the syntax style being used for syntax highlighting in this
