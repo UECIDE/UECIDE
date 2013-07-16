@@ -160,6 +160,34 @@ public class Preferences {
         return font;
     }
 
+    static public Font stringToFont(String value) {
+        if (value == null) {
+            value="Monospaced,plain,12";
+        }
+
+        String[] pieces = PApplet.split(value, ',');
+        if (pieces.length != 3) {
+            return new Font("Monospaced", Font.PLAIN, 12);
+        }
+
+        String name = pieces[0];
+        int style = Font.PLAIN;  // equals zero
+        if (pieces[1].indexOf("bold") != -1) {
+            style |= Font.BOLD;
+        }
+        if (pieces[1].indexOf("italic") != -1) {
+            style |= Font.ITALIC;
+        }
+        int size = PApplet.parseInt(pieces[2], 12);
+        Font font = new Font(name, style, size);
+
+        if (font == null) {
+            font = new Font("Monospaced", Font.PLAIN, 12);
+        }
+        return font;
+    }
+
+
 
   static protected void init(String commandLinePrefs) {
 
@@ -319,11 +347,10 @@ public class Preferences {
     mainSettings.add(selectEditorFont, c);
 
     final Container parent = mainSettings;
-    final Font xFont = getFont("editor.font");
     selectEditorFont.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             JFontChooser fc = new JFontChooser(false);
-            fc.setSelectedFont(xFont);
+            fc.setSelectedFont(stringToFont(editorFontField.getText()));
             int res = fc.showDialog(parent);
             if (res == JFontChooser.OK_OPTION) {
                 Font f = fc.getSelectedFont();
@@ -349,11 +376,10 @@ public class Preferences {
     c.gridx = 1;
     mainSettings.add(selectConsoleFont, c);
 
-    final Font yFont = getFont("console.font");
     selectConsoleFont.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             JFontChooser fc = new JFontChooser(false);
-            fc.setSelectedFont(yFont);
+            fc.setSelectedFont(stringToFont(consoleFontField.getText()));
             int res = fc.showDialog(parent);
             if (res == JFontChooser.OK_OPTION) {
                 Font f = fc.getSelectedFont();
@@ -524,6 +550,7 @@ public class Preferences {
             }
         }
     Base.applyPreferences();
+    save();
   }
 
 

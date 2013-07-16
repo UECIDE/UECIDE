@@ -245,7 +245,8 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         final Container parent = p;
         selectSerialFont.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFontChooser fc = new JFontChooser(true);
+                JFontChooser fc = new JFontChooser(false);
+                fc.setSelectedFont(Preferences.stringToFont(fontSizeField.getText()));
                 int res = fc.showDialog(parent);
                 if (res == JFontChooser.OK_OPTION) {
                     Font f = fc.getSelectedFont();
