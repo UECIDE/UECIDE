@@ -621,10 +621,11 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <launch4j configFile="windows/work/config.xml" />
         <delete dir="windows/work" 
             includes="application.ico, config.xml" />
+        <copy todir="windows/work" file="windows/dist/debug.bat"/>
 
         <!-- cygwin requires html, dll, and exe to have the +x flag -->
         <chmod perm="755">
-            <fileset dir="windows/work" includes="**/*.html, **/*.dll, **/*.exe" />
+            <fileset dir="windows/work" includes="**/*.html, **/*.dll, **/*.exe, **/*.bat" />
         </chmod>
     </target>
 
