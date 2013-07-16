@@ -59,6 +59,9 @@ public class Sketch implements MessageConsumer {
     public File buildFolder;
     public String uuid; // used for temporary folders etc
 
+    PrintWriter stdoutRedirect = null;
+    PrintWriter stderrRedirect = null;
+
     public ArrayList<SketchFile> sketchFiles = new ArrayList<SketchFile>();
 
     public HashMap<String, File> importedLibraries = new HashMap<String, File>();
@@ -730,6 +733,30 @@ public class Sketch implements MessageConsumer {
         return !canWrite;
     }
 
+    public void redirectChannel(int c, PrintWriter pw) {
+        if (c == 1) {
+            stdoutRedirect = pw;
+        }
+        if (c == 2) {
+            stderrRedirect = pw;
+        }
+    }
+
+    public void unredirectChannel(int c) {
+        if (c == 1) {
+            if (stdoutRedirect != null) {
+                stdoutRedirect.close();
+                stdoutRedirect = null;
+            }
+        }
+        if (c == 2) {
+            if (stderrRedirect != null) {
+                stderrRedirect.close();
+                stderrRedirect = null;
+            }
+        }
+    }
+
     public void message(String m) {
         message(m, 1);
     }
@@ -737,9 +764,17 @@ public class Sketch implements MessageConsumer {
     public void message(String m, int chan) {
         if (m.trim() != "") {
             if (chan == 2) {
-                editor.console.message(m, true, false);
+                if (stderrRedirect == null) {
+                    editor.console.message(m, true, false);
+                } else {
+                    stderrRedirect.print(m);
+                }
             } else {
-                editor.console.message(m, false, false);
+                if (stdoutRedirect == null) {
+                    editor.console.message(m, false, false);
+                } else {
+                    stdoutRedirect.print(m);
+                }
             }
         }
     }
@@ -783,6 +818,36 @@ public class Sketch implements MessageConsumer {
         if (!compileEEP()) {
             return false;
         }
+
+        if (editor.core.get("recipe.objcopy.lss.pattern") != null) {
+            if (Preferences.getBoolean("compiler.generate_lss")) {
+                File redirectTo = new File(buildFolder, name + ".lss");
+                if (redirectTo.exists()) {
+                    redirectTo.delete();
+                }                
+
+                boolean result = false;
+                try {
+                    redirectChannel(1, new PrintWriter(redirectTo));
+                    result = compileLSS();
+                    unredirectChannel(1);
+                } catch (Exception e) {
+                    result = false;
+                }
+                
+                if (!result) {
+                    return false;
+                }
+                if (Preferences.getBoolean("export.save_lss")) {
+                    try {
+                        Base.copyFile(new File(buildFolder, name + ".lss"), new File(folder, name + ".lss"));
+                    } catch (Exception e) {
+                        message("Error copying LSS file: " + e.getMessage() + "\n", 2);
+                    }
+                }
+            }
+        }
+
         setCompilingProgress(70);
 
         if (!compileHEX()) {
@@ -1122,6 +1187,10 @@ public class Sketch implements MessageConsumer {
 
     private boolean compileEEP() {
         return execAsynchronously(parseString(editor.core.get("recipe.objcopy.eep.pattern")));
+    }
+
+    private boolean compileLSS() {
+        return execAsynchronously(parseString(editor.core.get("recipe.objcopy.lss.pattern")));
     }
 
     private boolean compileHEX() {
