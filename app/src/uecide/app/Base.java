@@ -23,6 +23,7 @@
 package uecide.app;
 
 import java.awt.*;
+import java.awt.image.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
@@ -33,6 +34,7 @@ import uecide.plugin.*;
 
 
 import javax.swing.*;
+import javax.imageio.*;
 
 import org.apache.log4j.BasicConfigurator;
 //import org.apache.log4j.PropertyConfigurator;
@@ -108,6 +110,7 @@ public class Base {
     public static HashMap<String, Board> boards;
     public static HashMap<String, Core> cores;
     public static HashMap<String, Plugin> plugins;
+    static Splash splashScreen;
 
     // Location for untitled items
     static File untitledFolder;
@@ -132,8 +135,9 @@ public class Base {
             e.printStackTrace();
         }
 
-        // setup the theme coloring fun
         Theme.init();
+        splashScreen = new Splash();
+        // setup the theme coloring fun
 
         initPlatform();
 
@@ -144,6 +148,7 @@ public class Base {
         // because the platform has to be inited properly first.
 
         // run static initialization that grabs all the prefs
+        splashScreen.setMessage("Loading Preferences...", 12);
         Preferences.init(null);
 
         // Set the look and feel before opening the window
@@ -165,6 +170,7 @@ public class Base {
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
+        splashScreen.setMessage("Loading Application...", 24);
         new Base(args);
     }
 
@@ -253,12 +259,14 @@ public class Base {
         boards = new HashMap<String, Board>();
         plugins = new HashMap<String, Plugin>();
 
+        splashScreen.setMessage("Loading Cores...", 36);
         loadCores();
         if (cores.size() == 0) {
             System.err.println("You have no cores installed!");
             System.err.println("Please install at least one core.");
             return;
         }
+        splashScreen.setMessage("Loading Boards...", 48);
         loadBoards();
         if (cores.size() == 0) {
             System.err.println("You have no boards installed!");
@@ -266,10 +274,13 @@ public class Base {
             return;
         }
 
+        splashScreen.setMessage("Loading Plugins...", 60);
         loadPlugins();
+        splashScreen.setMessage("Loading Libraries...", 72);
         gatherLibraries();
         initMRU();
 
+        splashScreen.setMessage("Opening Editor...", 84);
         boolean opened = false;
         // Check if any files were passed in on the command line
         for (int i = 0; i < args.length; i++) {
@@ -295,6 +306,8 @@ public class Base {
         if (!opened) {
             handleNew();
         }
+        splashScreen.setMessage("Complete", 100);
+        splashScreen.dispose();
     }
 
     public static void initMRU()
@@ -713,7 +726,6 @@ public class Base {
         window.setBounds((screen.width-w)/2, (screen.height-h)/2, w, h);
         window.setVisible(true);
     }
-
 
     /**
     * Show the Preferences window.
@@ -1344,6 +1356,15 @@ public class Base {
             tracker.waitForAll();
         } catch (InterruptedException e) { }
         return image;
+    }
+
+    public static BufferedImage getLibBufferedImage(String name) {
+        try {
+            BufferedImage image = ImageIO.read(new File(getContentFile("lib"), name));
+            return image;
+        } catch (Exception e){
+            return null;
+        }
     }
 
 

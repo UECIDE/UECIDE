@@ -242,9 +242,11 @@ public class Sketch implements MessageConsumer {
                 sb.append("\n");
                 f.headerLines ++;
                 
-                for (String prototype : f.prototypes) {
-                    sb.append(prototype + "\n");
-                    f.headerLines++;
+                if (Preferences.getBoolean("compiler.disable_prototypes") == false) {
+                    for (String prototype : f.prototypes) {
+                        sb.append(prototype + "\n");
+                        f.headerLines++;
+                    }
                 }
 
                 sb.append("\n");

@@ -122,6 +122,8 @@ about.version.x = 365
 about.version.y = 215
 about.version.color = #656565
 about.version.font = SansSerif,normal,14
+splash.message.x = 170
+splash.message.y = 170
 
 product=uecide
 product.cap=UECIDE
