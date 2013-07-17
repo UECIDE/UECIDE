@@ -1067,6 +1067,11 @@ public class Sketch implements MessageConsumer {
             settings.put("source.name", file.getAbsolutePath());
             settings.put("object.name", objectFile.getAbsolutePath());
 
+            if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
+                message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                continue;
+            }
+
             if(!execAsynchronously(parseString(editor.core.get("recipe.S.o.pattern"))))
                 return null;
             if (!objectFile.exists()) 
@@ -1080,6 +1085,11 @@ public class Sketch implements MessageConsumer {
             settings.put("source.name", file.getAbsolutePath());
             settings.put("object.name", objectFile.getAbsolutePath());
 
+            if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
+                message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                continue;
+            }
+
             if(!execAsynchronously(parseString(editor.core.get("recipe.c.o.pattern"))))
                 return null;
             if (!objectFile.exists()) 
@@ -1092,6 +1102,11 @@ public class Sketch implements MessageConsumer {
 
             settings.put("source.name", file.getAbsolutePath());
             settings.put("object.name", objectFile.getAbsolutePath());
+
+            if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
+                message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                continue;
+            }
 
             if(!execAsynchronously(parseString(editor.core.get("recipe.cpp.o.pattern"))))
                 return null;
