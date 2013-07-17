@@ -110,13 +110,16 @@ public class Sketch implements MessageConsumer {
     }
 
     public void loadSketchFromFolder() {
-        if (!loadFile(new File(folder, folder.getName() + ".ino"))) {
-            loadFile(new File(folder, folder.getName() + ".pde"));
-        }
         File fileList[] = folder.listFiles();
         for (File f : fileList){
             String lcn = f.getName().toLowerCase();
-            if (lcn.endsWith(".h") || lcn.endsWith(".c") || lcn.endsWith(".cpp") || lcn.endsWith(".s")) {
+            if (
+                lcn.endsWith(".ino") || 
+                lcn.endsWith(".pde") || 
+                lcn.endsWith(".h") || 
+                lcn.endsWith(".c") || 
+                lcn.endsWith(".cpp") || 
+                lcn.endsWith(".s")) {
                 loadFile(f);
             }
         }
@@ -224,7 +227,12 @@ public class Sketch implements MessageConsumer {
         importedLibraries = new HashMap<String, File>();
         for (SketchFile f : sketchFiles) {
             String lcn = f.file.getName().toLowerCase();
-            if (lcn.endsWith(".h") || lcn.endsWith(".c") || lcn.endsWith(".cpp") || lcn.endsWith(".s")) {
+            if (
+                lcn.endsWith(".h") || 
+                lcn.endsWith(".c") || 
+                lcn.endsWith(".cpp") || 
+                lcn.endsWith(".s")
+            ) {
                 f.writeToFolder(buildFolder);
             }
             if (lcn.endsWith(".pde") || lcn.endsWith(".ino")) {
@@ -275,19 +283,23 @@ public class Sketch implements MessageConsumer {
     }
 
     public String stripComments(String data) {
-        String out = data;
-        boolean found = false;
-        do {
-            found = false;
-            int start = out.indexOf("/*");
-            int end = out.indexOf("*/");
-            if (start >= 0 && end >= 0) {
-                String front = out.substring(0, start);
-                String back = out.substring(end);
-                out = front + back;
-                found = true;
+        StringBuilder b = new StringBuilder();
+
+        String[] lines = data.split("\n");
+        for (String line : lines) {
+            int comment = line.indexOf("//");
+            if (comment > -1) {
+                line = line.substring(0, comment);
             }
-        } while(found);
+            b.append(line);
+            b.append("\n");
+        }
+
+        String out = b.toString();
+
+        out = Pattern.compile("//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", Pattern.DOTALL).matcher(out).replaceAll("\n");
+
+        System.err.println(out);
         return out;
     }
 
@@ -311,6 +323,7 @@ public class Sketch implements MessageConsumer {
                     qe = line.indexOf("\"", qs);
                 }
                 String i = line.substring(qs, qe);
+                System.err.println(i);
                 if (importToLibraryTable.get(i) != null) {
                     includes.add(i);
                     if (importedLibraries.get(i) == null) {
@@ -623,8 +636,15 @@ public class Sketch implements MessageConsumer {
         }
 
         String lcn = sourceFile.getName().toLowerCase();
-        if (!(lcn.endsWith(".h") || lcn.endsWith(".cpp") || lcn.endsWith(".c") || lcn.endsWith(".s"))) {
-            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .c, .cpp, .h or .S files to a sketch", 40, "\n"), null);
+        if (!(
+                lcn.endsWith(".ino") || 
+                lcn.endsWith(".pde") || 
+                lcn.endsWith(".h") || 
+                lcn.endsWith(".cpp") || 
+                lcn.endsWith(".c") || 
+                lcn.endsWith(".s")
+        )) {
+            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h or .S files to a sketch", 40, "\n"), null);
             return false;
         }
 
@@ -708,11 +728,17 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean isReadOnly() {
+
+        if (isInternal()) {
+            return true;
+        }
+
         File testFile = new File(folder, ".testWrite");
         boolean canWrite = false;
         try {
             testFile.createNewFile();
             if (testFile.exists()) {
+                testFile.delete();
                 canWrite = true;
             }
         } catch (Exception e) {
@@ -1284,6 +1310,34 @@ public class Sketch implements MessageConsumer {
                 return true;
             }
         }
+        return false;
+    }
+
+    // Walk up the file tree until it either reaches the top (external file) or
+    // reaches the installation directory (internal file).
+
+    public boolean isInternal() {
+        File p = folder.getParentFile();
+        while (p != null) {
+            if (p.equals(Base.getContentFile("."))) {
+                return true;
+            }
+            p = p.getParentFile();
+        }
+        return false;
+    }
+
+    public boolean validSourceFile(File f) {
+        return validSourceFile(f.getName());
+    }
+
+    public boolean validSourceFile(String f) {
+        if (f.endsWith(".ino")) return true;
+        if (f.endsWith(".pde")) return true;
+        if (f.endsWith(".cpp")) return true;
+        if (f.endsWith(".c")) return true;
+        if (f.endsWith(".h")) return true;
+        if (f.endsWith(".S")) return true;
         return false;
     }
 }

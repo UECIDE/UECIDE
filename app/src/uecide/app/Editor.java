@@ -1567,7 +1567,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
    * <A HREF="http://dev.processing.org/bugs/show_bug.cgi?id=276">Bug 276</A>.
    */
     public boolean handleSave() {
-        if (sketch.isUntitled()) {
+        if (sketch.isUntitled() || sketch.isReadOnly()) {
             boolean ret = handleSaveAs();
             if (ret) {
                 Base.updateMRU(sketch.getFolder());
@@ -2218,8 +2218,15 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     public void handleStatusOk(int function, String data) {
         switch (function) {
             case ADD_NEW_FILE:
-                if (!(data.endsWith(".cpp") || data.endsWith(".c") || data.endsWith(".h") || data.endsWith(".S"))) {
-                    Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .c, .cpp, .h or .S files to a sketch", 40, "\n"), null);
+                if (!(
+                    data.endsWith(".ino") || 
+                    data.endsWith(".pde") || 
+                    data.endsWith(".cpp") || 
+                    data.endsWith(".c") || 
+                    data.endsWith(".h") || 
+                    data.endsWith(".S")
+                )) {
+                    Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h or .S files to a sketch", 40, "\n"), null);
                     return;
                 }
                 sketch.createBlankFile(data);
