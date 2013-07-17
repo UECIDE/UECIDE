@@ -69,6 +69,7 @@ public class Sketch implements MessageConsumer {
     public HashMap<String, String> settings = new HashMap<String, String>();
     public HashMap<String, File> importToLibraryTable;
     public boolean runInVerboseMode = false;
+    public HashMap<String, String> parameters = new HashMap<String, String>();
 
     public Sketch(Editor ed, String path) {
         this(ed, new File(path));
@@ -224,6 +225,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void prepare() {
+        parameters = new HashMap<String, String>();
         importedLibraries = new HashMap<String, File>();
         StringBuilder combinedMain = new StringBuilder();
         SketchFile mainFile = getMainFile();
@@ -357,8 +359,17 @@ public class Sketch implements MessageConsumer {
         String[] data = stripComments(f.textArea.getText()).split("\n");
         ArrayList<String> includes = new ArrayList<String>();
 
+        Pattern pragma = Pattern.compile("#pragma\\s+parameter\\s+(.*)\\s*=\\s*(.*)");
+
         for (String line : data) {
             line = line.trim();
+            if (line.startsWith("#pragma")) {
+                Matcher m = pragma.matcher(line);
+                if (m.find()) {
+                    parameters.put(m.group(1), m.group(2));
+                }
+                continue;
+            }
             if (line.startsWith("#include")) {
                 int qs = line.indexOf("<");
                 if (qs == -1) {
@@ -1093,9 +1104,12 @@ public class Sketch implements MessageConsumer {
 
     private String preparePaths(ArrayList<String> includePaths) {
         String includes = "";
+        if (parameters.get("extension") != null) {
+            includes = includes + "-I" + parameters.get("extension") + "::";
+        }
         for (int i = 0; i < includePaths.size(); i++)
         {
-            includes = includes + (" -I" + (String) includePaths.get(i)) + "::";
+            includes = includes + ("-I" + (String) includePaths.get(i)) + "::";
         }
         return includes;
     }
@@ -1194,6 +1208,16 @@ public class Sketch implements MessageConsumer {
         ArrayList<File> sFiles = findFilesInFolder(corePath, "S", true);
         ArrayList<File> cFiles = findFilesInFolder(corePath, "c", true);
         ArrayList<File> cppFiles = findFilesInFolder(corePath, "cpp", true);
+ 
+        if (parameters.get("extension") != null) {
+            ArrayList<File> esFiles = findFilesInFolder(new File(parameters.get("extension")), "S", true);
+            ArrayList<File> ecFiles = findFilesInFolder(new File(parameters.get("extension")), "c", true);
+            ArrayList<File> ecppFiles = findFilesInFolder(new File(parameters.get("extension")), "cpp", true);
+
+            sFiles.addAll(esFiles);
+            cFiles.addAll(ecFiles);
+            cppFiles.addAll(ecppFiles);
+        }
 
         String boardFiles = editor.board.getAny("build.files", "");
         if (boardFiles != null) {
