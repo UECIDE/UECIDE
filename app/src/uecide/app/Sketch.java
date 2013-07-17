@@ -225,6 +225,11 @@ public class Sketch implements MessageConsumer {
 
     public void prepare() {
         importedLibraries = new HashMap<String, File>();
+        StringBuilder combinedMain = new StringBuilder();
+        SketchFile mainFile = getMainFile();
+        if (Preferences.getBoolean("compiler.combine_ino")) {
+            combinedMain.append(mainFile.textArea.getText());
+        }
         for (SketchFile f : sketchFiles) {
             String lcn = f.file.getName().toLowerCase();
             if (
@@ -237,48 +242,94 @@ public class Sketch implements MessageConsumer {
             }
             if (lcn.endsWith(".pde") || lcn.endsWith(".ino")) {
 
-                String rawData = f.textArea.getText();
-                PdePreprocessor proc = new PdePreprocessor();
-
-                f.includes = gatherIncludes(f);
-                f.prototypes = proc.prototypes(rawData).toArray(new String[0]);
-                StringBuilder sb = new StringBuilder();
-                f.headerLines = 0;
-                String coreHeader = editor.board.getAny("core.header", "");
-                if (coreHeader != "") {
-                    sb.append("#include <" + coreHeader + ">\n");
-                    f.headerLines ++;
-                }
-
-                sb.append("\n");
-                f.headerLines ++;
-                
-                if (Preferences.getBoolean("compiler.disable_prototypes") == false) {
-                    for (String prototype : f.prototypes) {
-                        sb.append(prototype + "\n");
-                        f.headerLines++;
+                if (Preferences.getBoolean("compiler.combine_ino")) {
+                    if (!(f.equals(mainFile))) {
+                        combinedMain.append(f.textArea.getText());
                     }
-                }
+                } else {
+                    String rawData = f.textArea.getText();
+                    PdePreprocessor proc = new PdePreprocessor();
 
-                sb.append("\n");
-                f.headerLines ++;
+                    f.includes = gatherIncludes(f);
+                    f.prototypes = proc.prototypes(rawData).toArray(new String[0]);
+                    StringBuilder sb = new StringBuilder();
+                    f.headerLines = 0;
+                    String coreHeader = editor.board.getAny("core.header", "");
+                    if (coreHeader != "") {
+                        sb.append("#include <" + coreHeader + ">\n");
+                        f.headerLines ++;
+                    }
 
-                sb.append(f.textArea.getText());
+                    sb.append("\n");
+                    f.headerLines ++;
+                
+                    if (Preferences.getBoolean("compiler.disable_prototypes") == false) {
+                        for (String prototype : f.prototypes) {
+                            sb.append(prototype + "\n");
+                            f.headerLines++;
+                        }
+                    }
 
-                String newFileName = f.file.getName();
-                int dot = newFileName.lastIndexOf(".");
-                newFileName = newFileName.substring(0, dot);
-                newFileName = newFileName + "." + editor.board.getAny("build.extension","cpp");
+                    sb.append("\n");
+                    f.headerLines ++;
 
-                try {
-                    PrintWriter pw = new PrintWriter(new File(buildFolder, newFileName));
-                    pw.print(sb.toString());
-                    pw.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    sb.append(f.textArea.getText());
+
+                    String newFileName = f.file.getName();
+                    int dot = newFileName.lastIndexOf(".");
+                    newFileName = newFileName.substring(0, dot);
+                    newFileName = newFileName + "." + editor.board.getAny("build.extension","cpp");
+
+                    try {
+                        PrintWriter pw = new PrintWriter(new File(buildFolder, newFileName));
+                        pw.print(sb.toString());
+                        pw.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             f.textArea.setNumberOffset(f.headerLines+1);
+        }
+        if (Preferences.getBoolean("compiler.combine_ino")) {
+            SketchFile f = getMainFile();
+            String rawData = combinedMain.toString();
+            PdePreprocessor proc = new PdePreprocessor();
+
+            f.includes = gatherIncludes(f);
+            f.prototypes = proc.prototypes(rawData).toArray(new String[0]);
+            StringBuilder sb = new StringBuilder();
+            f.headerLines = 0;
+            String coreHeader = editor.board.getAny("core.header", "");
+            if (coreHeader != "") {
+                sb.append("#include <" + coreHeader + ">\n");
+                f.headerLines ++;
+            }
+
+            sb.append("\n");
+            f.headerLines ++;
+        
+            if (Preferences.getBoolean("compiler.disable_prototypes") == false) {
+                for (String prototype : f.prototypes) {
+                    sb.append(prototype + "\n");
+                    f.headerLines++;
+                }
+            }
+
+            sb.append("\n");
+            f.headerLines ++;
+
+            sb.append(combinedMain.toString());
+
+            String newFileName = name + "." + editor.board.getAny("build.extension","cpp");
+
+            try {
+                PrintWriter pw = new PrintWriter(new File(buildFolder, newFileName));
+                pw.print(sb.toString());
+                pw.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -299,7 +350,6 @@ public class Sketch implements MessageConsumer {
 
         out = Pattern.compile("//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", Pattern.DOTALL).matcher(out).replaceAll("\n");
 
-        System.err.println(out);
         return out;
     }
 
@@ -323,7 +373,6 @@ public class Sketch implements MessageConsumer {
                     qe = line.indexOf("\"", qs);
                 }
                 String i = line.substring(qs, qe);
-                System.err.println(i);
                 if (importToLibraryTable.get(i) != null) {
                     includes.add(i);
                     if (importedLibraries.get(i) == null) {
@@ -464,7 +513,6 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        System.err.println(commandString);
         boolean res = execAsynchronously(commandString);
         if (dtr || rts) {
             assertDTRRTS(false, false);
@@ -847,15 +895,11 @@ public class Sketch implements MessageConsumer {
         setCompilingProgress(70);
 
         if (editor.core.get("recipe.objcopy.lss.pattern") != null) {
-            System.err.println("LSS available");
             if (Preferences.getBoolean("compiler.generate_lss")) {
-                System.err.println("LSS enabled");
                 File redirectTo = new File(buildFolder, name + ".lss");
                 if (redirectTo.exists()) {
                     redirectTo.delete();
                 }                
-
-                System.err.println("Redirect to " + redirectTo.getAbsolutePath());
 
                 boolean result = false;
                 try {
@@ -867,8 +911,6 @@ public class Sketch implements MessageConsumer {
                 }
                 unredirectChannel(1);
 
-                System.err.println("LSS finished: " + result);
-                
                 if (!result) {
                     return false;
                 }
@@ -956,17 +998,13 @@ public class Sketch implements MessageConsumer {
 
                 File found;
                 found = new File(editor.board.getFolder(), f);
-                System.err.println("Checking 1: " + found.getAbsolutePath());
                 if (!found.exists()) {
                     found = new File(editor.core.getAPIFolder(), f);
-                    System.err.println("Checking 2: " + found.getAbsolutePath());
                 }
                 if (!found.exists()) {
                     mid = "NOTFOUND";
-                    System.err.println("Not Found");
                 } else {
                     mid = found.getAbsolutePath();
-                    System.err.println("Found");
                 }
             } else if (mid.equals("verbose")) {
                 if (runInVerboseMode)

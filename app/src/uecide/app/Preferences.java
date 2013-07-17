@@ -127,6 +127,7 @@ public class Preferences {
   JCheckBox saveLss;
   JCheckBox createLss;
   JCheckBox disablePrototypes;
+  JCheckBox combineIno;
 
   JTabbedPane tabs;
 
@@ -433,6 +434,11 @@ public class Preferences {
     advancedSettings.add(disablePrototypes, c);
 
     c.gridy++;
+    combineIno =
+      new JCheckBox(Translate.t("Combine all INO/PDE files into one CPP file"));
+    advancedSettings.add(combineIno, c);
+
+    c.gridy++;
     externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
     advancedSettings.add(externalEditorBox, c);
 
@@ -534,6 +540,7 @@ public class Preferences {
     setBoolean("export.save_lss", saveLss.isSelected());
     setBoolean("export.save_hex", saveHex.isSelected());
     setBoolean("compiler.disable_prototypes", disablePrototypes.isSelected());
+    setBoolean("compiler.combine_ino", combineIno.isSelected());
 
 //    setBoolean("sketchbook.closing_last_window_quits",
 //               closingLastQuitsBox.isSelected());
@@ -591,6 +598,7 @@ public class Preferences {
     saveLss.setEnabled(getBoolean("compiler.generate_lss"));
     saveLss.setSelected(getBoolean("export.save_lss"));
     disablePrototypes.setSelected(getBoolean("compiler.disable_prototypes"));
+    combineIno.setSelected(getBoolean("compiler.combine_ino"));
 
     //closingLastQuitsBox.
     //  setSelected(getBoolean("sketchbook.closing_last_window_quits"));
