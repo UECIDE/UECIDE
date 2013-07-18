@@ -531,6 +531,12 @@ public class Base {
      */
 
     public static Editor createNewEditor(String path) {
+        if (activeEditor != null) {
+            if (activeEditor.getSketch().isUntitled() && !activeEditor.getSketch().isModified()) {
+                activeEditor.openInternal(path);
+                return activeEditor;
+            }
+        }
         Editor editor = new Editor(path);
         editors.add(editor);
         editor.setVisible(true);
