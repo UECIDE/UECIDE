@@ -759,11 +759,23 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         int start = pointToAbsolute(selectStart);
         int end = pointToAbsolute(selectEnd);
 
+        if (start > end) {
+            int x = start;
+            start = end;
+            end = x;
+        }
+
         StringBuilder selection = new StringBuilder();
+        StringBuilder line = new StringBuilder();
         for (int i = start; i <= end; i++) {
             Point p = absoluteToPoint(i);
-            selection.append(Character.toString(characterIn(p)));
+            if (p.x == 0) {
+                selection.append(line.toString().replaceAll("\\s+$", "") + "\n");
+                line = new StringBuilder();
+            }
+            line.append(Character.toString(characterIn(p)));
         }
+        selection.append(line.toString().replaceAll("\\s+$", ""));
 
         clipboard.setContents(new StringSelection(selection.toString()),null);
     }
