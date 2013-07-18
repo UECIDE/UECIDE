@@ -219,7 +219,6 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
     public void populatePreferences(JPanel p) {
         GridBagConstraints c = new GridBagConstraints();
-
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridwidth = 1;
         c.gridheight = 1;

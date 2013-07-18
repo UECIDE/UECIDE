@@ -291,7 +291,11 @@ public class Sketch implements MessageConsumer {
                     }
                 }
             }
-            f.textArea.setNumberOffset(f.headerLines+1);
+            if (Preferences.getBoolean("editor.correct_numbers")) {
+                f.textArea.setNumberOffset(f.headerLines+1);
+            } else {
+                f.textArea.setNumberOffset(1);
+            }
         }
         if (Preferences.getBoolean("compiler.combine_ino")) {
             SketchFile f = getMainFile();
@@ -647,6 +651,9 @@ public class Sketch implements MessageConsumer {
             String n = f.file.getName();
             f.file = new File(newFolder, n);
         }
+
+        SketchFile mf = getMainFile();
+        mf.file = new File(newFolder, newFolder.getName() + ".ino");
         folder = newFolder;
         name = folder.getName();
         save();

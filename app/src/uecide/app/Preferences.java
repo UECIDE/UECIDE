@@ -119,7 +119,6 @@ public class Preferences {
   JCheckBox externalEditorBox;
   JCheckBox memoryOverrideBox;
   JTextField memoryField;
-  JCheckBox checkUpdatesBox;
   JTextField editorFontField;
   JTextField consoleFontField;
   JCheckBox autoAssociateBox;
@@ -128,6 +127,7 @@ public class Preferences {
   JCheckBox createLss;
   JCheckBox disablePrototypes;
   JCheckBox combineIno;
+  JCheckBox correctNumbers;
 
   JTabbedPane tabs;
 
@@ -299,163 +299,16 @@ public class Preferences {
     JPanel mainSettings = new JPanel(new GridBagLayout());
     JPanel advancedSettings = new JPanel(new GridBagLayout());
 
-    GridBagConstraints c = new GridBagConstraints();
     mainSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-
-    c.fill = GridBagConstraints.HORIZONTAL;
-    c.gridwidth = 2;
-    c.gridheight = 1;
-    c.gridx = 0;
-    c.gridy = 0;
-
-    JLabel label;
-    JButton button;
-    label = new JLabel("Sketchbook location:");
-    mainSettings.add(label);
-
-    c.gridwidth = 1;
-    c.gridy++;
-    sketchbookLocationField = new JTextField(40);
-    mainSettings.add(sketchbookLocationField, c);
-
-    sketchbookLocationField.setEditable(false);
-    button = new JButton(PROMPT_BROWSE);
-    button.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            File dflt = new File(sketchbookLocationField.getText());
-            File file = Base.selectFolder("Select new sketchbook location", dflt, dialog);
-            if (file != null) {
-                sketchbookLocationField.setText(file.getAbsolutePath());
-            }
-        }
-    });
-    c.gridx = 1;
-    mainSettings.add(button, c);
-
-    c.gridx = 0;
-    c.gridy++;
-
-    label = new JLabel("Editor font: ");
-    mainSettings.add(label, c);
-
-    c.gridy++;
-    editorFontField = new JTextField(40);
-    editorFontField.setEditable(false);
-    mainSettings.add(editorFontField, c);
-
-    editorFontField.setText(get("editor.font"));
-
-    JButton selectEditorFont = new JButton(Translate.t("Select Font..."));
-    c.gridx = 1;
-    mainSettings.add(selectEditorFont, c);
-
-    final Container parent = mainSettings;
-    selectEditorFont.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            JFontChooser fc = new JFontChooser(false);
-            fc.setSelectedFont(stringToFont(editorFontField.getText()));
-            int res = fc.showDialog(parent);
-            if (res == JFontChooser.OK_OPTION) {
-                Font f = fc.getSelectedFont();
-                editorFontField.setText(Preferences.fontToString(f));
-            }
-        }
-    });
-
-    c.gridx = 0;
-    c.gridy++;
-
-    label = new JLabel("Console font: ");
-    mainSettings.add(label, c);
-    c.gridy++;
-
-    consoleFontField = new JTextField(40);
-    consoleFontField.setEditable(false);
-    mainSettings.add(consoleFontField, c);
-
-    consoleFontField.setText(get("console.font"));
-
-    JButton selectConsoleFont = new JButton(Translate.t("Select Font..."));
-    c.gridx = 1;
-    mainSettings.add(selectConsoleFont, c);
-
-    selectConsoleFont.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            JFontChooser fc = new JFontChooser(false);
-            fc.setSelectedFont(stringToFont(consoleFontField.getText()));
-            int res = fc.showDialog(parent);
-            if (res == JFontChooser.OK_OPTION) {
-                Font f = fc.getSelectedFont();
-                consoleFontField.setText(Preferences.fontToString(f));
-            }
-        }
-    });
-
-    c.gridx = 0;
-    c.gridy = 0;
-    c.gridwidth = 2;
-
-    deletePreviousBox =
-      new JCheckBox(Translate.t("Remove old build folder before each build"));
-    advancedSettings.add(deletePreviousBox, c);
-
-    c.gridy++;
-
-    saveHex =
-      new JCheckBox(Translate.t("Save HEX file to sketch folder"));
-    advancedSettings.add(saveHex, c);
-
-    c.gridy++;
-    createLss = 
-        new JCheckBox(Translate.t("Generate assembly listing (requires core support)"));
-    createLss.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            saveLss.setEnabled(createLss.isSelected());
-        }
-    });
-    advancedSettings.add(createLss, c);
-
-    c.gridy++;
-    c.gridwidth = 1;
-    c.weightx = 0.1;
-    advancedSettings.add(Box.createHorizontalGlue(), c);
-    c.gridx = 1;
-    c.weightx = 0.9;
-    saveLss = 
-        new JCheckBox(Translate.t("Save assembly listing to sketch folder"));
-    advancedSettings.add(saveLss, c);
-
-    c.gridy++;
-    c.gridx = 0;
-    c.gridwidth = 2;
-
-    disablePrototypes =
-      new JCheckBox(Translate.t("Disable adding of function prototypes"));
-    advancedSettings.add(disablePrototypes, c);
-
-    c.gridy++;
-    combineIno =
-      new JCheckBox(Translate.t("Combine all INO/PDE files into one CPP file"));
-    advancedSettings.add(combineIno, c);
-
-    c.gridy++;
-    externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
-    advancedSettings.add(externalEditorBox, c);
+    advancedSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 
-    c.gridy++;
-    checkUpdatesBox = new JCheckBox(Translate.t("Check for updates on startup"));
-    advancedSettings.add(checkUpdatesBox, c);
 
-    if (Base.isWindows()) {
-      c.gridy++;
-      autoAssociateBox =
-        new JCheckBox("Automatically associate .pde files with " + Theme.get("product.cap"));
-      advancedSettings.add(autoAssociateBox, c);
-    }
+    tabs.add(Translate.t("Editor"), mainSettings);
+    tabs.add(Translate.t("Compiler"), advancedSettings);
 
-    tabs.add(Translate.t("Main Settings"), mainSettings);
-    tabs.add(Translate.t("Advanced Settings"), advancedSettings);
+    populateEditorSettings(mainSettings);
+    populateCompilerSettings(advancedSettings);
 
     dialog.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
@@ -510,6 +363,167 @@ public class Preferences {
             
     }
 
+    public void populateEditorSettings(JPanel p) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 2;
+        c.gridheight = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+
+        JLabel label;
+        JButton button;
+        label = new JLabel("Sketchbook location:");
+        p.add(label, c);
+        c.gridwidth = 1;
+        c.gridy++;
+        sketchbookLocationField = new JTextField(40);
+        p.add(sketchbookLocationField, c);
+
+        sketchbookLocationField.setEditable(false);
+        button = new JButton(PROMPT_BROWSE);
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                File dflt = new File(sketchbookLocationField.getText());
+                File file = Base.selectFolder("Select new sketchbook location", dflt, dialog);
+                if (file != null) {
+                    sketchbookLocationField.setText(file.getAbsolutePath());
+                }
+            }
+        });
+        c.gridx = 1;
+        p.add(button, c);
+
+        c.gridx = 0;
+        c.gridy++;
+
+        label = new JLabel("Editor font: ");
+        p.add(label, c);
+
+        c.gridy++;
+        editorFontField = new JTextField(40);
+        editorFontField.setEditable(false);
+        p.add(editorFontField, c);
+
+        editorFontField.setText(get("editor.font"));
+
+        JButton selectEditorFont = new JButton(Translate.t("Select Font..."));
+        c.gridx = 1;
+        p.add(selectEditorFont, c);
+
+        final Container parent = p;
+        selectEditorFont.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFontChooser fc = new JFontChooser(false);
+                fc.setSelectedFont(stringToFont(editorFontField.getText()));
+                int res = fc.showDialog(parent);
+                if (res == JFontChooser.OK_OPTION) {
+                    Font f = fc.getSelectedFont();
+                    editorFontField.setText(Preferences.fontToString(f));
+                }
+            }
+        });
+
+        c.gridx = 0;
+        c.gridy++;
+
+        label = new JLabel("Console font: ");
+        p.add(label, c);
+        c.gridy++;
+
+        consoleFontField = new JTextField(40);
+        consoleFontField.setEditable(false);
+        p.add(consoleFontField, c);
+
+        consoleFontField.setText(get("console.font"));
+
+        JButton selectConsoleFont = new JButton(Translate.t("Select Font..."));
+        c.gridx = 1;
+        p.add(selectConsoleFont, c);
+
+        selectConsoleFont.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFontChooser fc = new JFontChooser(false);
+                fc.setSelectedFont(stringToFont(consoleFontField.getText()));
+                int res = fc.showDialog(parent);
+                if (res == JFontChooser.OK_OPTION) {
+                    Font f = fc.getSelectedFont();
+                    consoleFontField.setText(Preferences.fontToString(f));
+                }
+            }
+        });
+        c.gridx = 0;
+        c.gridwidth = 2;
+        c.gridy++;
+        correctNumbers =
+          new JCheckBox(Translate.t("Correct line numbering to match error messages"));
+        p.add(correctNumbers, c);
+
+        c.gridy++;
+        externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
+        p.add(externalEditorBox, c);
+
+        if (Base.isWindows()) {
+          c.gridy++;
+          autoAssociateBox =
+            new JCheckBox("Automatically associate .pde files with " + Theme.get("product.cap"));
+          p.add(autoAssociateBox, c);
+        }
+    }
+
+    public void populateCompilerSettings(JPanel p) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 2;
+        c.gridheight = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+
+        deletePreviousBox =
+          new JCheckBox(Translate.t("Remove old build folder before each build"));
+        p.add(deletePreviousBox, c);
+
+        c.gridy++;
+
+        saveHex =
+          new JCheckBox(Translate.t("Save HEX file to sketch folder"));
+        p.add(saveHex, c);
+
+        c.gridy++;
+        createLss = 
+            new JCheckBox(Translate.t("Generate assembly listing (requires core support)"));
+        createLss.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveLss.setEnabled(createLss.isSelected());
+            }
+        });
+        p.add(createLss, c);
+
+        c.gridy++;
+        c.gridwidth = 1;
+        c.weightx = 0.1;
+        p.add(Box.createHorizontalGlue(), c);
+        c.gridx = 1;
+        c.weightx = 0.9;
+        saveLss = 
+            new JCheckBox(Translate.t("Save assembly listing to sketch folder"));
+        p.add(saveLss, c);
+
+        c.gridy++;
+        c.gridx = 0;
+        c.gridwidth = 2;
+
+        disablePrototypes =
+          new JCheckBox(Translate.t("Disable adding of function prototypes"));
+        p.add(disablePrototypes, c);
+
+        c.gridy++;
+        combineIno =
+          new JCheckBox(Translate.t("Combine all INO/PDE files into one CPP file"));
+        p.add(combineIno, c);
+
+    }
+
 
   public Dimension getPreferredSize() {
     return new Dimension(wide, high);
@@ -541,6 +555,7 @@ public class Preferences {
     setBoolean("export.save_hex", saveHex.isSelected());
     setBoolean("compiler.disable_prototypes", disablePrototypes.isSelected());
     setBoolean("compiler.combine_ino", combineIno.isSelected());
+    setBoolean("editor.correct_numbers", correctNumbers.isSelected());
 
 //    setBoolean("sketchbook.closing_last_window_quits",
 //               closingLastQuitsBox.isSelected());
@@ -548,7 +563,6 @@ public class Preferences {
     //setBoolean("sketchbook.auto_clean", sketchCleanBox.isSelected());
 
     setBoolean("editor.external", externalEditorBox.isSelected());
-    setBoolean("update.check", checkUpdatesBox.isSelected());
 
     /*
       // was gonna use this to check memory settings,
@@ -599,6 +613,7 @@ public class Preferences {
     saveLss.setSelected(getBoolean("export.save_lss"));
     disablePrototypes.setSelected(getBoolean("compiler.disable_prototypes"));
     combineIno.setSelected(getBoolean("compiler.combine_ino"));
+    correctNumbers.setSelected(getBoolean("editor.correct_numbers"));
 
     //closingLastQuitsBox.
     //  setSelected(getBoolean("sketchbook.closing_last_window_quits"));
@@ -611,8 +626,6 @@ public class Preferences {
       setText(get("sketchbook.path"));
     externalEditorBox.
       setSelected(getBoolean("editor.external"));
-    checkUpdatesBox.
-      setSelected(getBoolean("update.check"));
 
     if (autoAssociateBox != null) {
       autoAssociateBox.
