@@ -2334,6 +2334,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     public void openInternal(String path) {
         tabs.removeAll();
         sketch = new Sketch(this, new File(path));
+        rebuildImportMenu();
     }
 }
 
