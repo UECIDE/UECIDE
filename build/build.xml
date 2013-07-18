@@ -744,6 +744,11 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 
     <target name="auto">
         <antcall target="clean" />
+        <antcall target="upgrade-dist" />
+        <copy todir="/var/www/uecide/downloads" file="upgrade/${product}-${version}${suffix}-upgrade.zip" overwrite="true" />
+        <delete file="upgrade/${product}-${version}${suffix}-upgrade.zip" />
+
+        <antcall target="clean" />
         <antcall target="linux-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-linux.zip" overwrite="true" />
         <delete file="linux/${product}-${version}${suffix}-linux.zip" />
@@ -775,10 +780,6 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows-lite.zip" overwrite="true" />
         <delete file="windows/${product}-${version}${suffix}-windows-lite.zip" />
 
-        <antcall target="clean" />
-        <antcall target="upgrade-dist" />
-        <copy todir="/var/www/uecide/downloads" file="upgrade/${product}-${version}${suffix}-upgrade.zip" overwrite="true" />
-        <delete file="upgrade/${product}-${version}${suffix}-upgrade.zip" />
 
         <antcall target="clean" />
 
