@@ -32,6 +32,8 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
     Point selectStart = null;
     Point selectEnd = null;
 
+    boolean autoCr = false;
+
     boolean hasFocus = false;
 
     boolean cursorShow = true;
@@ -396,6 +398,11 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         }
     }
 
+    public void setAutoCr(boolean acr)
+    {
+        autoCr = acr;
+    }
+
     public void message(String m, int c)
     {
         message(m);
@@ -425,6 +432,9 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
                     if (cursorPosition.y == textSize.height) {
                         cursorPosition.y = textSize.height - 1;
                         scrollUp();
+                    }
+                    if (autoCr) {
+                        cursorPosition.x = 0;
                     }
                     break;
                 case '\r':

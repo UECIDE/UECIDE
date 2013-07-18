@@ -31,6 +31,8 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     JTextField fontSizeField;
     JTextField widthField;
     JTextField heightField;
+    JCheckBox  autoCrIn;
+    JCheckBox  autoCrOut;
 
     JTextField lineEntryBox;
     JComboBox<String> lineEndings;
@@ -89,6 +91,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         }
 
         term.setSize(new Dimension(width, height));
+        term.setAutoCr(Preferences.getBoolean("serial.autocr_in"));
 
         line.add(term);
         scrollbackBar = new JScrollBar(JScrollBar.VERTICAL);
@@ -257,6 +260,10 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
             win.setVisible(false);
             return;
         }
+        if (Preferences.getBoolean("serial.autocr_out")) {
+            m = m.replace("\n", "\r\n");
+        }
+
         if (localEcho.isSelected()) {
             term.message(m);
         }
@@ -349,6 +356,19 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         s = heightField.getMaximumSize();
         s.width = 40;
         heightField.setMaximumSize(s);
+
+        c.gridy++;
+        c.gridx = 0;
+        JLabel tl = new JLabel(Translate.t("Add CR to LF: "));
+        p.add(tl, c);
+        c.gridx++;
+        autoCrIn = new JCheckBox(Translate.t("Incoming"));
+        autoCrIn.setSelected(Preferences.getBoolean("serial.autocr_in"));
+        p.add(autoCrIn, c);
+        c.gridx++;
+        autoCrOut = new JCheckBox(Translate.t("Outgoing"));
+        autoCrOut.setSelected(Preferences.getBoolean("serial.autocr_out"));
+        p.add(autoCrOut, c);
     }
 
     public void savePreferences() {
@@ -368,6 +388,9 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
         Preferences.set("serial.width", Integer.toString(w));
         Preferences.set("serial.height", Integer.toString(h));
+
+        Preferences.setBoolean("serial.autocr_in", autoCrIn.isSelected());
+        Preferences.setBoolean("serial.autocr_out", autoCrOut.isSelected());
             
     }
 }
