@@ -889,6 +889,7 @@ public class Sketch implements MessageConsumer {
 
         tobjs = compileSketch();
         if (tobjs == null) {
+            message("Failed compiling sketch\n", 2);
             return false;
         }
         objectFiles.addAll(tobjs);
@@ -896,6 +897,7 @@ public class Sketch implements MessageConsumer {
 
         tobjs = compileLibraries();
         if (tobjs == null) {
+            message("Failed compiling libraries\n", 2);
             return false;
         }
 
@@ -903,17 +905,20 @@ public class Sketch implements MessageConsumer {
         setCompilingProgress(40);
 
         if (!compileCore()) {
+            message("Failed compiling core\n", 2);
             return false;
         }
         setCompilingProgress(50);
 
         settings.put("filename", name);
         if (!compileLink(objectFiles)) {
+            message("Failed linking elf file\n", 2);
             return false;
         }
         setCompilingProgress(60);
 
         if (!compileEEP()) {
+            message("Failed generating eeprom file\n", 2);
             return false;
         }
         setCompilingProgress(70);
@@ -936,6 +941,7 @@ public class Sketch implements MessageConsumer {
                 unredirectChannel(1);
 
                 if (!result) {
+                    message("Failed generating lss file\n", 2);
                     return false;
                 }
                 if (Preferences.getBoolean("export.save_lss")) {
@@ -951,6 +957,7 @@ public class Sketch implements MessageConsumer {
         setCompilingProgress(80);
 
         if (!compileHEX()) {
+            message("Failed generating hex file\n", 2);
             return false;
         }
         setCompilingProgress(90);
