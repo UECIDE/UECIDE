@@ -332,24 +332,27 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         }
         screen.drawImage(offscreen, 0, 0, null);
         if (cursorShow) {
-            screen.setColor(brightColors[cursorColor]);
+            Point scrolledCursorPosition = new Point(cursorPosition.x, cursorPosition.y + scrollbackPosition);
+            if (scrolledCursorPosition.y < textSize.height) {
+                screen.setColor(brightColors[cursorColor]);
 
-            if (cursorBox) {
-                Point cursorStart = charToGraphic(cursorPosition);
-                if (hasFocus) {
-                    screen.setXORMode(getBGColor());
-                    screen.fillRect(cursorStart.x, cursorStart.y, characterSize.width, characterSize.height);
-                    screen.setPaintMode();
+                if (cursorBox) {
+                    Point cursorStart = charToGraphic(scrolledCursorPosition);
+                    if (hasFocus) {
+                        screen.setXORMode(getBGColor());
+                        screen.fillRect(cursorStart.x, cursorStart.y, characterSize.width, characterSize.height);
+                        screen.setPaintMode();
+                    } else {
+                        screen.drawRect(cursorStart.x, cursorStart.y, characterSize.width, characterSize.height);
+                    }
                 } else {
-                    screen.drawRect(cursorStart.x, cursorStart.y, characterSize.width, characterSize.height);
-                }
-            } else {
-                Point cursorStart = charToGraphicBaseline(cursorPosition);
+                    Point cursorStart = charToGraphicBaseline(scrolledCursorPosition);
 
-                screen.drawLine(cursorStart.x, cursorStart.y + 1,
-                    cursorStart.x + characterSize.width - 1, cursorStart.y + 1);
-                screen.drawLine(cursorStart.x, cursorStart.y + 2,
-                    cursorStart.x + characterSize.width - 1, cursorStart.y + 2);
+                    screen.drawLine(cursorStart.x, cursorStart.y + 1,
+                        cursorStart.x + characterSize.width - 1, cursorStart.y + 1);
+                    screen.drawLine(cursorStart.x, cursorStart.y + 2,
+                        cursorStart.x + characterSize.width - 1, cursorStart.y + 2);
+                }
             }
         }
     }
@@ -723,11 +726,13 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         copyContent();
         selectStart = null;
         selectEnd = null;
+        repaint();
     }
 
     public void mousePressed(MouseEvent e) {
         selectStart = scrollbackAt(graphicToChar(e.getPoint()));
         selectEnd = scrollbackAt(graphicToChar(e.getPoint()));
+        repaint();
     }
 
     public void mouseMoved(MouseEvent e) {
@@ -735,6 +740,7 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
 
     public void mouseDragged(MouseEvent e) {
         selectEnd = scrollbackAt(graphicToChar(e.getPoint()));
+        repaint();
     }
 
     public void focusGained(FocusEvent e) {
