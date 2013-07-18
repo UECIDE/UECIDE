@@ -363,6 +363,9 @@ Building for ${brand} version ${version}${suffix}
     <copy todir="upgrade/work/lib/theme/">
         <fileset dir="themes/${theme}/ide/" includes="**/*"/>
     </copy>
+        <foreach list="${plugins}" param="plugin" target="install_plugin">
+            <param name="target.path" value="upgrade/work"/>
+        </foreach>
   </target>
 
   <target name="linux-build" depends="linux-checkos, subprojects-build" description="Build linux version">
@@ -562,6 +565,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
   <!-- - - - - - - - -->
   <!-- Windows       -->
   <!-- - - - - - - - -->
+
+    <target name="upgrade-clean" depends="subprojects-clean">
+        <delete dir="upgrade/work"/>
+    </target>
   
   <target name="windows-clean" depends="subprojects-clean"
 	  description="Clean windows version">
@@ -707,7 +714,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
   <!-- - - - - - - - -->
   
   <target name="clean" description="Perform a spring cleaning" 
-	  depends="linux-clean, windows-clean, macosx-clean, subprojects-clean">
+	  depends="upgrade-clean, linux-clean, windows-clean, macosx-clean, subprojects-clean">
   </target>
 
 
@@ -742,12 +749,17 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     	<typedef name="contentencoding.mapping" classname="it.corley.ant.ContentEncodingMapping" classpathref="tasks.path"/>
     </target>
 
-    <target name="auto">
+    <target name="upgrade-auto">
         <antcall target="clean" />
         <antcall target="upgrade-dist" />
         <copy todir="/var/www/uecide/downloads" file="upgrade/${product}-${version}${suffix}-upgrade.zip" overwrite="true" />
+        <copy todir="/var/www/uecide/plugins" flatten="true">
+            <fileset dir="../plugins" includes="*/*.jar" />
+        </copy>
         <delete file="upgrade/${product}-${version}${suffix}-upgrade.zip" />
+    </target>
 
+    <target name="linux-auto">
         <antcall target="clean" />
         <antcall target="linux-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-linux.zip" overwrite="true" />
@@ -755,7 +767,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="linux-deb" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-i386.deb" overwrite="true" />
         <delete file="linux/${product}-${version}${suffix}-i386.deb" />
+    </target>
 
+    <target name="linux64-auto">
         <antcall target="clean" />
         <antcall target="linux64-dist" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-linux64.zip" overwrite="true" />
@@ -763,24 +777,37 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="linux64-deb" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-amd64.deb" overwrite="true" />
         <delete file="linux/${product}-${version}${suffix}-amd64.deb" />
+    </target>
 
+    <target name="macosx-auto">
         <antcall target="clean" />
         <antcall target="macosx-dist" />
         <copy todir="/var/www/uecide/downloads" file="macosx/${product}-${version}${suffix}-macosx.zip" overwrite="true" />
         <delete file="macosx/${product}-${version}${suffix}-macosx.zip" />
         <delete file="macosx/${product}-${version}${suffix}-macosx.dmg" />
+    </target>
 
+    <target name="windows-auto">
         <antcall target="clean" />
         <antcall target="windows-dist" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows.zip" overwrite="true" />
         <delete file="windows/${product}-${version}${suffix}-windows.zip" />
+    </target>
 
+    <target name="windows-lite-auto">
         <antcall target="clean" />
         <antcall target="windows-dist-lite" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows-lite.zip" overwrite="true" />
         <delete file="windows/${product}-${version}${suffix}-windows-lite.zip" />
+    </target>
 
-
+    <target name="auto">
+        <antcall target="upgrade-auto" />
+        <antcall target="linux-auto" />
+        <antcall target="linux64-auto" />
+        <antcall target="macosx-auto" />
+        <antcall target="windows-auto" />
+        <antcall target="windows-lite-auto" />
         <antcall target="clean" />
 
     </target>
