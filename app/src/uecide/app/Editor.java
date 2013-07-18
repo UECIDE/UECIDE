@@ -2346,5 +2346,13 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         sketch = new Sketch(this, new File(path));
         rebuildImportMenu();
     }
+
+    public void setTabName(int i, String name) {
+        tabs.setTitleAt(i, name);
+    }
+
+    public int getTabByFile(SketchFile f) {
+        return tabs.indexOfComponent(f.textArea);
+    }
 }
 

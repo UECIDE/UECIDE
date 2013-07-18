@@ -661,6 +661,8 @@ public class Sketch implements MessageConsumer {
         name = folder.getName();
         save();
         editor.setTitle(Theme.get("product.cap") + " | " + name);
+        int index = editor.getTabByFile(mf);
+        editor.setTabName(index, mf.file.getName());
         return true;
     }
 
