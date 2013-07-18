@@ -745,30 +745,16 @@ public class Preferences {
 
 
   static public int getInteger(String attribute /*, int defaultValue*/) {
-    return Integer.parseInt(get(attribute));
-
-    /*
-    String value = get(attribute, null);
-    if (value == null) return defaultValue;
-
     try {
-      return Integer.parseInt(value);
-    } catch (NumberFormatException e) {
-      // ignored will just fall through to returning the default
-      System.err.println("expecting an integer: " + attribute + " = " + value);
+        return Integer.parseInt(get(attribute));
+    } catch (Exception e) {
+        return 0;
     }
-    return defaultValue;
-    //if (value == null) return defaultValue;
-    //return (value == null) ? defaultValue :
-    //Integer.parseInt(value);
-    */
-  }
-
+  }    
 
   static public void setInteger(String key, int value) {
     set(key, String.valueOf(value));
   }
-
 
   static public Color getColor(String name) {
     Color parsed = Color.GRAY;  // set a default

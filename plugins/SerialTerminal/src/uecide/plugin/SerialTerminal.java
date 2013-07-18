@@ -45,9 +45,9 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     public void run()
     {
         if (SerialTerminal.isOpen) {
+            editor.message("I think the serial terminal is already open.\n", 2);
             return;
         }
-        SerialTerminal.isOpen = true;
         win = new JFrame(Translate.t("Serial Terminal"));
         win.getContentPane().setLayout(new BorderLayout());
         win.setResizable(false);
@@ -181,6 +181,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         port.addListener(term);
         win.setVisible(true);
         ready = true;
+        SerialTerminal.isOpen = true;
     }
 
     public void close()

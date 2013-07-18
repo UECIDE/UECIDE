@@ -338,7 +338,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
             splitPane.setDividerSize(dividerSize);
         }
 
-        splitPane.setMinimumSize(new Dimension(600, 400));
         box.add(splitPane);
 
         pain.add(box);
@@ -370,8 +369,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         }
 
         // All set, now show the window
-        setSize(new Dimension(350, 550));
-        setPreferredSize(new Dimension(350, 550));
+//        setSize(new Dimension(350, 550));
+//        setPreferredSize(new Dimension(350, 550));
         setMinimumSize(new Dimension(
             Preferences.getInteger("editor.window.width.min"),
             Preferences.getInteger("editor.window.height.min")
@@ -382,6 +381,18 @@ static Logger logger = Logger.getLogger(Base.class.getName());
             setSize(oSize.width, oSize.height);
             Point oPos = Base.activeEditor.getLocation();
             setLocation(oPos.x + 20, oPos.y + 20);
+        } else {
+            int width = Preferences.getInteger("editor.window.width");
+            if (width < Preferences.getInteger("editor.window.width.min")) {
+                width = Preferences.getInteger("editor.window.width.min");
+            }
+            int height = Preferences.getInteger("editor.window.height");
+            if (height < Preferences.getInteger("editor.window.height.min")) {
+                height = Preferences.getInteger("editor.window.height.min");
+            }
+
+            setSize(width, height);
+            setLocation(Preferences.getInteger("editor.window.x"), Preferences.getInteger("editor.window.y"));
         }
         applyPreferences();
         setVisible(true);
@@ -2127,6 +2138,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
                 final Editor me = this;
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
+                        System.gc();
                         t.init(me);
                         SwingUtilities.invokeLater(t);
                     }
@@ -2211,6 +2223,15 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         }
 
         Base.removeDir(sketch.buildFolder);
+
+        Dimension d = getSize();
+        Preferences.setInteger("editor.window.width", d.width);
+        Preferences.setInteger("editor.window.height", d.height);
+        Point p = getLocation();
+        Preferences.setInteger("editor.window.x", p.x);
+        Preferences.setInteger("editor.window.y", p.y);
+
+        Preferences.save();
 
         Base.handleClose(this);
     }
@@ -2308,6 +2329,11 @@ static Logger logger = Logger.getLogger(Base.class.getName());
             br.close();
         } catch (Exception e) {
         }
+    }
+
+    public void openInternal(String path) {
+        tabs.removeAll();
+        sketch = new Sketch(this, new File(path));
     }
 }
 
