@@ -25,11 +25,18 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     JComboBox<String> baudRates;
     JCheckBox showCursor;
     JCheckBox localEcho;
+    JCheckBox lineEntry;
     JScrollBar scrollbackBar;
 
     JTextField fontSizeField;
     JTextField widthField;
     JTextField heightField;
+
+    JTextField lineEntryBox;
+    JComboBox<String> lineEndings;
+    JButton lineSubmit;
+
+    Box entryLineArea;
 
     int baudRate;
 
@@ -131,7 +138,22 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         line.add(baudRates);
 
         localEcho = new JCheckBox(Translate.t("Local Echo"));
+
+        final JFrame subwin = win;
         
+        lineEntry = new JCheckBox(Translate.t("Line Entry"));
+        lineEntry.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                entryLineArea.setVisible(lineEntry.isSelected());
+                subwin.pack();
+                subwin.revalidate();
+                subwin.repaint();
+                lineEntryBox.requestFocusInWindow();
+            }
+        });
+
+        line.add(lineEntry);
+
         showCursor = new JCheckBox(Translate.t("Show Cursor"));
         showCursor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -145,6 +167,39 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         line.add(localEcho);
         line.add(showCursor);
         box.add(line);
+
+        entryLineArea = Box.createHorizontalBox();
+
+        ActionListener al = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                port.write(lineEntryBox.getText());
+                if (((String)lineEndings.getSelectedItem()).equals("Carriage Return")) {
+                    port.write("\r");
+                }
+                if (((String)lineEndings.getSelectedItem()).equals("Line Feed")) {
+                    port.write("\n");
+                }
+                if (((String)lineEndings.getSelectedItem()).equals("CR + LF")) {
+                    port.write("\r\n");
+                }
+                lineEntryBox.setText("");
+                lineEntryBox.requestFocusInWindow();
+            }
+        };
+
+        entryLineArea.setVisible(false);
+        lineEntryBox = new JTextField();
+        lineEntryBox.setBackground(new Color(255, 255, 255));
+        lineEntryBox.addActionListener(al);
+
+        lineEndings = new JComboBox(new String[] {"None", "Carriage Return", "Line Feed", "CR + LF"});
+        lineSubmit = new JButton("Send");
+        lineSubmit.addActionListener(al);
+                
+        entryLineArea.add(lineEntryBox);
+        entryLineArea.add(lineSubmit);
+        entryLineArea.add(lineEndings);
+        box.add(entryLineArea);
 
         win.getContentPane().add(box);
         win.pack();

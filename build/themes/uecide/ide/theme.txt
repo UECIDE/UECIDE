@@ -14,7 +14,7 @@ status.notice.fgcolor = #000000
 status.notice.bgcolor = #666666
 status.error.fgcolor = #ffffff
 status.error.bgcolor = #666666
-status.edit.fgcolor = #000000
+status.edit.fgcolor = #ffff88
 status.edit.bgcolor = #2d649f
 status.font = SansSerif,plain,12
 
