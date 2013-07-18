@@ -225,6 +225,9 @@ public class Sketch implements MessageConsumer {
     }
 
     public void prepare() {
+        if (Preferences.getBoolean("export.delete_target_folder")) {
+            cleanBuild();
+        }
         parameters = new HashMap<String, String>();
         importedLibraries = new HashMap<String, File>();
         StringBuilder combinedMain = new StringBuilder();
@@ -1424,6 +1427,11 @@ public class Sketch implements MessageConsumer {
         if (f.endsWith(".h")) return true;
         if (f.endsWith(".S")) return true;
         return false;
+    }
+
+    public void cleanBuild() {
+        System.gc();
+        Base.removeDescendants(buildFolder);
     }
 }
 
