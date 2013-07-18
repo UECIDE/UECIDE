@@ -671,6 +671,16 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     sketchMenu.add(item);
 
+    item = newJMenuItem(Translate.t("Clean Build Folder"), 'R');
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          sketch.cleanBuild();
+          statusNotice(Translate.t("Clean finished."));
+        }
+      });
+    sketchMenu.add(item);
+
+
     sketchMenu.addSeparator();
 
     if (importMenu == null) {
