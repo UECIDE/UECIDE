@@ -233,6 +233,7 @@ public class Sketch implements MessageConsumer {
         StringBuilder combinedMain = new StringBuilder();
         SketchFile mainFile = getMainFile();
         if (Preferences.getBoolean("compiler.combine_ino")) {
+            combinedMain.append("#line 1 \"" + mainFile.file.getName() + "\"\n");
             combinedMain.append(mainFile.textArea.getText());
         }
         for (SketchFile f : sketchFiles) {
@@ -249,6 +250,7 @@ public class Sketch implements MessageConsumer {
 
                 if (Preferences.getBoolean("compiler.combine_ino")) {
                     if (!(f.equals(mainFile))) {
+                        combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
                         combinedMain.append(f.textArea.getText());
                     }
                 } else {
@@ -276,6 +278,9 @@ public class Sketch implements MessageConsumer {
                     }
 
                     sb.append("\n");
+                    f.headerLines ++;
+
+                    sb.append("#line 1 \"" + f.file.getName() + "\"\n");
                     f.headerLines ++;
 
                     sb.append(f.textArea.getText());
