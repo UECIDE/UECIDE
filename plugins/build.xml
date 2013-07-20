@@ -9,6 +9,8 @@
         <subant buildpath="FixEncoding" target="build"/>
         <subant buildpath="Grapher" target="build"/>
         <subant buildpath="SerialTerminal" target="build"/>
+        <subant buildpath="PluginManager" target="build"/>
+        <subant buildpath="CopyForForum" target="build"/>
     </target>
     <target name="clean">
         <subant buildpath="Archiver" target="clean"/>
@@ -19,5 +21,7 @@
         <subant buildpath="FixEncoding" target="clean"/>
         <subant buildpath="Grapher" target="clean"/>
         <subant buildpath="SerialTerminal" target="clean"/>
+        <subant buildpath="PluginManager" target="clean"/>
+        <subant buildpath="CopyForForum" target="clean"/>
     </target>
 </project>

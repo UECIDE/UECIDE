@@ -1911,9 +1911,15 @@ public class Base {
         new ZipExtractor(inputFile, bf).execute();
     }
 
-    public static void handleInstallPlugin()
+    public static void handleInstallPlugin() {
+        handleInstallPlugin((File)null);
+    }
+
+    public static void handleInstallPlugin(File inputFile)
     {
-        File inputFile = openFileDialog(Translate.t("Add Plugin..."), "zip,jar");
+        if (inputFile == null) {
+            inputFile = openFileDialog(Translate.t("Add Plugin..."), "zip,jar");
+        }
 
         if (inputFile == null) {
             return;
@@ -1986,8 +1992,6 @@ public class Base {
     public static void loadPlugin(File jar)
     {
         try {
-
-
             URL[] urlList = new URL[1];
             urlList[0]  = jar.toURI().toURL();
 
@@ -2014,11 +2018,21 @@ public class Base {
             pluginInfo.put("jarfile", jar.getAbsolutePath());
             pluginInfo.put("shortcut", manifestContents.getValue("Shortcut"));
             pluginInfo.put("modifier", manifestContents.getValue("Modifier"));
-
-            if (className.startsWith("processing.")) {
-                System.err.println(Translate.t("Plugin %1 is not compatible with this version. Please upgrade the plugin.", jar.getName()));
-                return;
+            System.err.println("Adding class " + className);
+            Plugin op = plugins.get(className);
+            if (op != null) {
+                System.err.println("Duplicate class");
+                String oldVersion = op.getVersion();
+                String newVersion = manifestContents.getValue("Version");
+                int diff = oldVersion.compareTo(newVersion);
+                System.err.println("Existing version: " + oldVersion);
+                System.err.println("This version: " + newVersion);
+                if (diff != -1) { // New version no newer than old version
+                    System.err.println("Skipping " + jar.getAbsolutePath() + ": " + newVersion + " <= " + oldVersion);
+                    return;
+                }
             }
+                
 
             Class<?> pluginClass;
             try {
@@ -2084,6 +2098,13 @@ public class Base {
     public static void applyPreferences() {
         for (Editor ed : editors) {
             ed.applyPreferences();
+        }
+    }
+
+    public static void reloadPlugins() {
+        loadPlugins();
+        for (Editor e : editors) {
+            e.rebuildPluginsMenu();
         }
     }
 }
