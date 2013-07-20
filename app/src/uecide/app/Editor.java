@@ -965,6 +965,8 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     });
     menu.add(item);
 
+    addPluginsToMenu(menu, BasePlugin.MENU_EDIT_TOP);
+
     menu.addSeparator();
 
     // TODO "cut" and "copy" should really only be enabled
@@ -984,31 +986,6 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         }
       });
     menu.add(item);
-/*
-    item = newJMenuItemShift("Copy for Forum", 'C');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-//          SwingUtilities.invokeLater(new Runnable() {
-//              public void run() {
-//          new DiscourseFormat(Editor.this, false).show();
-//              }
-//            });
-        }
-      });
-    menu.add(item);
-
-    item = newJMenuItemAlt("Copy as HTML", 'C');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-//          SwingUtilities.invokeLater(new Runnable() {
-//              public void run() {
-//          new DiscourseFormat(Editor.this, true).show();
-//              }
-//            });
-        }
-      });
-    menu.add(item);
-*/
     item = newJMenuItem(Translate.t("Paste"), 'V');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -1025,6 +1002,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
+    addPluginsToMenu(menu, BasePlugin.MENU_EDIT_MID);
     menu.addSeparator();
 
     item = newJMenuItem(Translate.t("Comment/Uncomment"), '/');
@@ -1051,6 +1029,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     });
     menu.add(item);
 
+    addPluginsToMenu(menu, BasePlugin.MENU_EDIT_LOW);
     menu.addSeparator();
 
     item = newJMenuItem(Translate.t("Find..."), 'F');
@@ -1061,6 +1040,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
       });
     menu.add(item);
 
+    addPluginsToMenu(menu, BasePlugin.MENU_EDIT_BOT);
     return menu;
   }
 
@@ -2122,7 +2102,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
     {
         toolsMenu.removeAll();
         JMenuItem item;
-
+/*
         item = new JMenuItem(Translate.t("Add Plugin..."));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -2130,8 +2110,15 @@ static Logger logger = Logger.getLogger(Base.class.getName());
             }
         });
         toolsMenu.add(item);
-        toolsMenu.addSeparator();
+*/
 
+        addPluginsToMenu(toolsMenu, BasePlugin.MENU_PLUGIN_TOP);
+        toolsMenu.addSeparator();
+        addPluginsToMenu(toolsMenu, BasePlugin.MENU_PLUGIN_MAIN);
+    }
+
+    public void addPluginsToMenu(JMenu menu, int filterFlags) {
+        JMenuItem item;
         String[] entries = (String[]) Base.plugins.keySet().toArray(new String[0]);
 
         HashMap<String, JMenuItem> menus = new HashMap<String, JMenuItem>();
@@ -2141,9 +2128,9 @@ static Logger logger = Logger.getLogger(Base.class.getName());
             try {
                 flags = t.flags();
             } catch (Exception e) {
-                flags = BasePlugin.MENU;
+                flags = 0;
             }
-            if ((flags & BasePlugin.MENU) != 0) {
+            if ((flags & filterFlags) == filterFlags) {
                 item = new JMenuItem(t.getMenuTitle());
                 final Editor me = this;
                 item.addActionListener(new ActionListener() {
@@ -2168,7 +2155,7 @@ static Logger logger = Logger.getLogger(Base.class.getName());
         entries = (String[]) menus.keySet().toArray(new String[0]);
         Arrays.sort(entries);
         for (String entry : entries) {
-            toolsMenu.add(menus.get(entry));
+            menu.add(menus.get(entry));
         }
     }
 

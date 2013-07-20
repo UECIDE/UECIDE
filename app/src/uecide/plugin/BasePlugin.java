@@ -39,15 +39,20 @@ import javax.swing.text.*;
 
 public class BasePlugin implements Plugin {
 
-    public static final int MENU = 1;
+    public static final int MENU_PLUGIN_MAIN = 1;
     public static final int LOADER = 2;
+    public static final int MENU_PLUGIN_TOP = 4;
+    public static final int MENU_EDIT_TOP = 8;
+    public static final int MENU_EDIT_MID = 16;
+    public static final int MENU_EDIT_LOW = 32;
+    public static final int MENU_EDIT_BOT = 64;
 
     public Editor editor;
     public Map pluginInfo;
     public URLClassLoader loader;
 
     public int flags() {
-        return MENU;
+        return MENU_PLUGIN_MAIN;
     }
 
     public void init(Editor editor)
