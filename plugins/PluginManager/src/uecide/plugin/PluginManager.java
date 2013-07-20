@@ -190,6 +190,11 @@ public class PluginManager extends BasePlugin
         Base.setIcon(win);
 
         win.setVisible(true);
+
+        if (PluginManager.availableVersions.size() == 0) {
+            updateList();
+        }
+            
     }
 
     public void close()

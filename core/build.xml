@@ -1,29 +1,40 @@
 <?xml version="1.0"?>
 <project name="Processing Core" default="build">
 
-  <target name="clean" description="Clean out the build directories">
-    <delete dir="bin" />
-    <delete file="core.jar" />
-  </target>
+
+    <property file="../build/build.settings"/>
+    <tstamp>
+        <format property="TODAY" pattern="yyyyMMdd" />
+    </tstamp>
+
+    <target name="clean" description="Clean out the build directories">
+        <delete dir="bin" />
+        <delete file="uecide.jar" />
+    </target>
   
-  <target name="compile" description="Compile">
-    <taskdef name="methods" 
-	     classname="PAppletMethods" 
-	     classpath="methods/methods.jar" />
-    <methods dir="${basedir}/src/processing/core" />
+    <target name="compile" description="Compile">
+        <mkdir dir="bin" />
+        <javac target="1.6" 
+               source="1.6"
+               encoding="UTF-8"
+               includeAntRuntime="false"
+               srcdir="src" destdir="bin"
+               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/RXTXcomm.jar">
 
-    <mkdir dir="bin" />
-    <javac target="1.6" 
-           source="1.6"
-	   encoding="UTF-8"
-	   includeAntRuntime="false"
-	   srcdir="src" destdir="bin">
-     </javac>
-  </target>		
+        </javac>
+    </target>		
 
-  <target name="build" depends="compile" description="Build core library">
-    <jar basedir="bin" destfile="core.jar" />
-    <jar basedir="i18n" destfile="core.jar" update="true" />
-  </target>
+    <target name="build" depends="compile" description="Build uecide">
+        <jar basedir="bin" destfile="uecide.jar">
+            <manifest>
+                <attribute name="Built-By" value="Matt Jenkins"/>
+                <attribute name="Main-Class" value="uecide.app.Base"/>
+                <attribute name="Class-Path" value="RXTXcomm.jar ecj.jar jna.jar uecide.jar"/>
+                <attribute name="Version" value="${version}"/>
+                <attribute name="Compiled" value="${TODAY}"/>
+            </manifest>
+        </jar>
+        <jar basedir="i18n" destfile="uecide.jar" update="true" />
+    </target>
   
 </project>
