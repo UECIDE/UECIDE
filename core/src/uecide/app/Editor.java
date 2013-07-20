@@ -2279,6 +2279,7 @@ public class Editor extends JFrame implements RunnerListener {
     public void openInternal(String path) {
         tabs.removeAll();
         sketch = new Sketch(this, new File(path));
+        sketch.checkForSettings();
         rebuildImportMenu();
     }
 
