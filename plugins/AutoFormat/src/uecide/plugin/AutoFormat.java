@@ -1,31 +1,6 @@
-/* -*- mode: java; c-basic-offset: 2; indent-tabs-mode: nil -*- */
-
-/*
-  Part of the Processing project - http://processing.org
-
-  Original Copyright (c) 1997, 1998 Van Di-Han HO. All Rights Reserved.
-  Updates Copyright (c) 2001 Jason Pell.
-  Further updates Copyright (c) 2003 Martin Gomez, Ateneo de Manila University
-  Bug fixes Copyright (c) 2005-09 Ben Fry and Casey Reas
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, version 2.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-
 package uecide.plugin;
 
 import uecide.app.*;
-import processing.core.PApplet;
 
 import java.io.*;
 import java.net.*;
@@ -548,8 +523,8 @@ public class AutoFormat extends BasePlugin {
         case '{':
           if(lookup(w_else) == 1)gotelse();
           if (s_if_lev.length == c_level) {
-            s_if_lev = PApplet.expand(s_if_lev);
-            s_if_flg = PApplet.expand(s_if_flg);
+            s_if_lev = Base.expand(s_if_lev);
+            s_if_flg = Base.expand(s_if_flg);
           }
           s_if_lev[c_level] = if_lev;
           s_if_flg[c_level] = if_flg;

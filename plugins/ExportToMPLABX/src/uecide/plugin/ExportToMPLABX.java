@@ -2,7 +2,6 @@
 package uecide.plugin;
 
 import uecide.app.*;
-import processing.core.*;
 import uecide.app.debug.*;
 
 import java.io.*;

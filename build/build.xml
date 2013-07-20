@@ -55,15 +55,12 @@
 
   <!-- Libraries required for running IDE -->
   <fileset dir=".." id="runtime.jars">
-    <include name="core/core.jar" />
-    <include name="app/uecide.jar" />
-    <include name="app/lib/ecj.jar" />
-    <include name="app/lib/jna.jar" />
-    <include name="app/lib/RXTXcomm.jar" />
-    <include name="app/lib/ant.jar" />
-    <include name="app/lib/ant-launcher.jar" />
-    <include name="app/lib/log4j-1.2.16.jar" />
-    <include name="app/lib/log4j.properties" />
+    <include name="core/uecide.jar" />
+    <include name="core/lib/ecj.jar" />
+    <include name="core/lib/jna.jar" />
+    <include name="core/lib/RXTXcomm.jar" />
+    <include name="core/lib/ant.jar" />
+    <include name="core/lib/ant-launcher.jar" />
   </fileset>
 
   <target name="build" description="Build IDE.">
@@ -79,15 +76,15 @@ Building for ${brand} version ${version}${suffix}
   
   <target name="win-debug" description="Run IDE from Java." depends="build">
       <java dir="./${platform}/work"
-          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/core.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar:${platform}/work/lib/log4j-1.2.16.jar:${platform}/work/lib/uecide.jar"
+          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/uecide.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar"
           fork="true"
-          jar="./${platform}/work/lib/uecide.jar">
+          jar="./${platform}/work/lib/uecire.jar">
     </java>
   </target>
 
    <target name="linux-debug" description="Run IDE from Java." depends="build">
       <java dir="./${platform}/work"
-          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/core.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar:${platform}/work/lib/log4j-1.2.16.jar:${platform}/work/lib/uecide.jar"
+          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/uecide.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar"
           fork="true"
           jar="./${platform}/work/lib/uecide.jar">
     </java>
@@ -139,13 +136,11 @@ Building for ${brand} version ${version}${suffix}
 
   <target name="subprojects-clean">
     <subant buildpath="../core" target="clean"/>
-    <subant buildpath="../app" target="clean"/>
     <subant buildpath="../plugins" target="clean"/>
   </target>
 
   <target name="subprojects-build">
     <subant buildpath="../core" target="build"/>
-    <subant buildpath="../app" target="build"/>
     <subant buildpath="../plugins" target="build"/>
   </target>
 

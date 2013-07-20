@@ -2,8 +2,6 @@
 package uecide.plugin;
 
 import uecide.app.*;
-import processing.core.PApplet;
-
 
 import java.awt.*;
 import java.awt.event.*;
