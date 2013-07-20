@@ -103,7 +103,8 @@ public class Preferences {
   JCheckBox createLss;
   JCheckBox disablePrototypes;
   JCheckBox combineIno;
-  JCheckBox correctNumbers;
+  JCheckBox verboseCompile;
+  JCheckBox verboseUpload;
 
   JTabbedPane tabs;
 
@@ -435,13 +436,6 @@ public class Preferences {
                 }
             }
         });
-        c.gridx = 0;
-        c.gridwidth = 2;
-        c.gridy++;
-        correctNumbers =
-          new JCheckBox(Translate.t("Correct line numbering to match error messages"));
-        p.add(correctNumbers, c);
-
         c.gridy++;
         externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
         p.add(externalEditorBox, c);
@@ -505,6 +499,21 @@ public class Preferences {
           new JCheckBox(Translate.t("Combine all INO/PDE files into one CPP file"));
         p.add(combineIno, c);
 
+        c.gridx = 0;
+        c.gridwidth = 2;
+        c.gridy++;
+        verboseCompile =
+          new JCheckBox(Translate.t("Verbose output during compile"));
+        p.add(verboseCompile, c);
+
+        c.gridx = 0;
+        c.gridwidth = 2;
+        c.gridy++;
+        verboseUpload =
+          new JCheckBox(Translate.t("Verbose output during upload"));
+        p.add(verboseUpload, c);
+
+
     }
 
 
@@ -538,7 +547,8 @@ public class Preferences {
     setBoolean("export.save_hex", saveHex.isSelected());
     setBoolean("compiler.disable_prototypes", disablePrototypes.isSelected());
     setBoolean("compiler.combine_ino", combineIno.isSelected());
-    setBoolean("editor.correct_numbers", correctNumbers.isSelected());
+    setBoolean("compiler.verbose", verboseCompile.isSelected());
+    setBoolean("export.verbose", verboseUpload.isSelected());
 
 //    setBoolean("sketchbook.closing_last_window_quits",
 //               closingLastQuitsBox.isSelected());
@@ -596,7 +606,8 @@ public class Preferences {
     saveLss.setSelected(getBoolean("export.save_lss"));
     disablePrototypes.setSelected(getBoolean("compiler.disable_prototypes"));
     combineIno.setSelected(getBoolean("compiler.combine_ino"));
-    correctNumbers.setSelected(getBoolean("editor.correct_numbers"));
+    verboseCompile.setSelected(getBoolean("compiler.verbose"));
+    verboseUpload.setSelected(getBoolean("export.verbose"));
 
     //closingLastQuitsBox.
     //  setSelected(getBoolean("sketchbook.closing_last_window_quits"));

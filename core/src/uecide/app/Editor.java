@@ -68,7 +68,6 @@ public class Editor extends JFrame implements RunnerListener {
 
     static SerialMenuListener serialMenuListener;
   
-    //EditorHeader header;
     public EditorStatus status;
     EditorConsole console;
 
@@ -174,11 +173,7 @@ public class Editor extends JFrame implements RunnerListener {
         runButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e)
             {
-                if ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
-                    handleRun(true);
-                } else {
-                    handleRun(false);
-                }
+                handleRun();
             }
         });
         toolbar.add(runButton);
@@ -190,11 +185,7 @@ public class Editor extends JFrame implements RunnerListener {
         burnButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e)
             {
-                if ((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0) {
-                    handleExport(true);
-                } else {
-                    handleExport(false);
-                }
+                handleExport();
             }
         });
         toolbar.add(burnButton);
@@ -337,9 +328,6 @@ public class Editor extends JFrame implements RunnerListener {
             selectBoard(Base.getDefaultBoard());
         }
 
-        // All set, now show the window
-//        setSize(new Dimension(350, 550));
-//        setPreferredSize(new Dimension(350, 550));
         setMinimumSize(new Dimension(
             Preferences.getInteger("editor.window.width.min"),
             Preferences.getInteger("editor.window.height.min")
@@ -585,10 +573,10 @@ public class Editor extends JFrame implements RunnerListener {
       });
     fileMenu.add(saveAsMenuItem);
 
-    item = newJMenuItem(Translate.t("Upload to I/O Board"), 'U');
+    item = newJMenuItem(Translate.t("Compile and Upload"), 'U');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          handleExport(false);
+          handleExport();
         }
       });
     fileMenu.add(item);
@@ -644,7 +632,7 @@ public class Editor extends JFrame implements RunnerListener {
     item = newJMenuItem(Translate.t("Verify / Compile"), 'R');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          handleRun(false);
+          handleRun();
         }
       });
     sketchMenu.add(item);
@@ -1392,14 +1380,8 @@ public class Editor extends JFrame implements RunnerListener {
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 
-  /**
-   * Implements Sketch &rarr; Run.
-   * @param verbose Set true to run with verbose output.
-   */
-  public void handleRun(final boolean verbose) {
+  public void handleRun() {
     running = true;
-    board.setVerbose(verbose);
-    sketch.runInVerboseMode = verbose;
     status.progress(Translate.t("Compiling sketch..."));
 
     // clear the console on each run, unless the user doesn't want to
@@ -1418,9 +1400,7 @@ public class Editor extends JFrame implements RunnerListener {
       try {
         sketch.prepare();
         if(sketch.build()) {
-            statusNotice(Translate.t("Done compiling."));
-        } else {
-            statusNotice(Translate.t("Compilation failed."));
+            reportSize();
         }
       } catch (Exception e) {
         status.unprogress();
@@ -1640,33 +1620,23 @@ public class Editor extends JFrame implements RunnerListener {
    * Made synchronized to (hopefully) avoid problems of people
    * hitting export twice, quickly, and horking things up.
    */
-  synchronized public void handleExport(boolean verbose) {
+  synchronized public void handleExport() {
     console.clear();
-    status.progress(Translate.t("Uploading to I/O Board..."));
-    board.setVerbose(verbose);
-    sketch.runInVerboseMode = verbose;
+    status.progress(Translate.t("Starting Upload..."));
 
     new Thread(exportHandler, "Uploader").start();
   }
 
   // DAM: in Arduino, this is upload
-  class DefaultExportHandler implements Runnable {
-    public void run() {
-
-        uploading = true;
-          
-        boolean success = sketch.upload();
-        if (success) {
-          statusNotice(Translate.t("Done uploading."));
-        } else {
-          // error message will already be visible
+    class DefaultExportHandler implements Runnable {
+        public void run() {
+            boolean success = sketch.upload();
+            if (success) {
+                reportSize();
+            }
+            status.unprogress();
         }
-      status.unprogress();
-      uploading = false;
-      //toolbar.clear();
-      //toolbar.deactivate(EditorToolbar.EXPORT);
     }
-  }
 
   /**
    * Handler for File &rarr; Page Setup.
@@ -2318,6 +2288,52 @@ public class Editor extends JFrame implements RunnerListener {
 
     public int getTabByFile(SketchFile f) {
         return tabs.indexOfComponent(f.textArea);
+    }
+
+    public void reportSize() {
+        int maxFlash = 0;
+        int maxRam = 0;
+        try {
+            maxFlash = Integer.parseInt(board.getAny("upload.maximum_size", "0"));
+        } catch (Exception e) {
+            maxFlash = 0;
+        }
+
+        try {
+            maxRam = Integer.parseInt(board.getAny("upload.maximum_ram", "0"));
+        } catch (Exception e) {
+            maxRam = 0;
+        }
+
+        int flashUsed = 0;
+        int ramUsed = 0;
+    
+        try {
+            Sizer sizer = new Sizer(this);
+            sizer.computeSize();
+            
+            flashUsed = (int)sizer.progSize();
+            ramUsed = (int)sizer.ramSize();
+        } catch (Exception e) {
+            flashUsed = 0;
+            ramUsed = 0;
+        }
+
+        message("Program Size:\n", 1);
+
+        if (maxFlash > 0) {
+            int flashPercent = (int)(flashUsed * 100 / maxFlash);
+            message("  Flash: " + flashPercent + "% (" + flashUsed + " bytes out of " + maxFlash + " bytes max)\n", 1);
+        } else {
+            message("  Flash: " + flashUsed + " bytes\n", 1);
+        }
+
+        if (maxRam > 0) {
+            int ramPercent = (int)(ramUsed * 100 / maxRam);
+            message("    RAM: " + ramPercent + "% (" + ramUsed + " bytes out of " + maxRam + " bytes max)\n", 1);
+        } else {
+            message("    RAM: " + ramUsed + " bytes\n", 1);
+        }
     }
 }
 

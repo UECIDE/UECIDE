@@ -41,7 +41,6 @@ public class Sketch implements MessageConsumer {
 
     public HashMap<String, String> settings = new HashMap<String, String>();
     public HashMap<String, File> importToLibraryTable;
-    public boolean runInVerboseMode = false;
     public HashMap<String, String> parameters = new HashMap<String, String>();
 
     public Sketch(Editor ed, String path) {
@@ -395,6 +394,7 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
+        editor.statusNotice(Translate.t("Uploading to Board..."));
         settings.put("filename", name);
         settings.put("filename.elf", name + ".elf");
         settings.put("filename.hex", name + ".hex");
@@ -427,6 +427,7 @@ public class Sketch implements MessageConsumer {
 
         if (uploadCommand == null) {
             message("No upload command defined for board\n", 2);
+            editor.statusNotice(Translate.t("Upload Failed"));
             return false;
         }
  
@@ -436,18 +437,22 @@ public class Sketch implements MessageConsumer {
             uploader = Base.plugins.get(uploadCommand);
             if (uploader == null) {
                 message("Upload class " + uploadCommand + " not found.\n", 2);
+                editor.statusNotice(Translate.t("Upload Failed"));
                 return false;
             }
             try {
                 if ((uploader.flags() & BasePlugin.LOADER) == 0) {
                     message(uploadCommand + "is not a valid loader plugin.\n", 2);
+                    editor.statusNotice(Translate.t("Upload Failed"));
                     return false;
                 }
                 uploader.run();
             } catch (Exception e) {
-                e.printStackTrace();
+                editor.statusNotice(Translate.t("Upload Failed"));
+                message(e.toString(), 2);
                 return false;
             }
+            editor.statusNotice(Translate.t("Upload Complete"));
             return true;
         }
 
@@ -513,6 +518,11 @@ public class Sketch implements MessageConsumer {
         if (dtr || rts) {
             assertDTRRTS(false, false);
         }
+        if (res) {
+            editor.statusNotice(Translate.t("Upload Complete"));
+        } else {
+            editor.statusNotice(Translate.t("Upload Failed"));
+        }
         return res;
     }
 
@@ -529,6 +539,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean build() {
+        editor.statusNotice(Translate.t("Compiling..."));
         prepare();
         return compile();
     }
@@ -865,44 +876,51 @@ public class Sketch implements MessageConsumer {
         settings.put("filename", name);
         settings.put("includes", preparePaths(includePaths));
 
+        editor.statusNotice(Translate.t("Compiling Sketch..."));
+
         tobjs = compileSketch();
         if (tobjs == null) {
-            message("Failed compiling sketch\n", 2);
+            editor.statusNotice(Translate.t("Error Compiling Sketch"));
             return false;
         }
         objectFiles.addAll(tobjs);
         setCompilingProgress(30);
 
+        editor.statusNotice(Translate.t("Compiling Libraries..."));
         tobjs = compileLibraries();
         if (tobjs == null) {
-            message("Failed compiling libraries\n", 2);
+            editor.statusNotice(Translate.t("Error Compiling Libraries"));
             return false;
         }
 
         objectFiles.addAll(tobjs);
         setCompilingProgress(40);
 
+        editor.statusNotice(Translate.t("Compiling Core..."));
         if (!compileCore()) {
-            message("Failed compiling core\n", 2);
+            editor.statusNotice(Translate.t("Error Compiling Core"));
             return false;
         }
         setCompilingProgress(50);
 
+        editor.statusNotice(Translate.t("Linking Sketch..."));
         settings.put("filename", name);
         if (!compileLink(objectFiles)) {
-            message("Failed linking elf file\n", 2);
+            editor.statusNotice(Translate.t("Error Linking Sketch"));
             return false;
         }
         setCompilingProgress(60);
 
+        editor.statusNotice(Translate.t("Extracting EEPROM..."));
         if (!compileEEP()) {
-            message("Failed generating eeprom file\n", 2);
+            editor.statusNotice(Translate.t("Error Extracting EEPROM"));
             return false;
         }
         setCompilingProgress(70);
 
         if (editor.core.get("recipe.objcopy.lss.pattern") != null) {
             if (Preferences.getBoolean("compiler.generate_lss")) {
+                editor.statusNotice(Translate.t("Generating Listing..."));
                 File redirectTo = new File(buildFolder, name + ".lss");
                 if (redirectTo.exists()) {
                     redirectTo.delete();
@@ -919,7 +937,7 @@ public class Sketch implements MessageConsumer {
                 unredirectChannel(1);
 
                 if (!result) {
-                    message("Failed generating lss file\n", 2);
+                    editor.statusNotice(Translate.t("Error Generating Listing"));
                     return false;
                 }
                 if (Preferences.getBoolean("export.save_lss")) {
@@ -934,21 +952,12 @@ public class Sketch implements MessageConsumer {
 
         setCompilingProgress(80);
 
+        editor.statusNotice(Translate.t("Converting to HEX..."));
         if (!compileHEX()) {
-            message("Failed generating hex file\n", 2);
+            editor.statusNotice(Translate.t("Error Converting to HEX"));
             return false;
         }
         setCompilingProgress(90);
-
-        try {
-            Sizer sizer = new Sizer(editor);
-            sizer.computeSize();
-            message("Program Size:\n", 1);
-            message("  Flash: " + sizer.progSize() + " bytes\n", 1);
-            message("  RAM:   " + sizer.ramSize() + " bytes\n", 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         if (Preferences.getBoolean("export.save_hex")) {
             try {
@@ -958,6 +967,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
+        editor.statusNotice(Translate.t("Compiling Done"));
         return true;
     }
 
@@ -1016,7 +1026,7 @@ public class Sketch implements MessageConsumer {
                     mid = found.getAbsolutePath();
                 }
             } else if (mid.equals("verbose")) {
-                if (runInVerboseMode)
+                if (Preferences.getBoolean("export.verbose")) 
                     mid = editor.board.getAny("upload.verbose", "");
                 else 
                     mid = editor.board.getAny("upload.quiet", "");
@@ -1066,7 +1076,9 @@ public class Sketch implements MessageConsumer {
             settings.put("object.name", objectFile.getAbsolutePath());
 
             if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                if (Preferences.getBoolean("compiler.verbose")) {
+                    message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                }
                 continue;
             }
 
@@ -1084,7 +1096,9 @@ public class Sketch implements MessageConsumer {
             settings.put("object.name", objectFile.getAbsolutePath());
 
             if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                if (Preferences.getBoolean("compiler.verbose")) {
+                    message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                }
                 continue;
             }
 
@@ -1102,7 +1116,9 @@ public class Sketch implements MessageConsumer {
             settings.put("object.name", objectFile.getAbsolutePath());
 
             if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                if (Preferences.getBoolean("compiler.verbose")) {
+                    message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                }
                 continue;
             }
 
@@ -1339,9 +1355,9 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        if (runInVerboseMode) {
+        if (Preferences.getBoolean("compiler.verbose")) {
             for (String component : stringList) {
-                message("[" + component + "] ", 1);
+                message(component + " ", 1);
             }
             message("\n", 1);
         }
@@ -1350,7 +1366,7 @@ public class Sketch implements MessageConsumer {
         try {
             proc = process.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            message(e.toString(), 2);
             return false;
         }
 
