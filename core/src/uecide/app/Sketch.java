@@ -1064,6 +1064,24 @@ public class Sketch implements MessageConsumer {
 
     private List<File> compileFiles(File dest, List<File> sSources, List<File> cSources, List<File> cppSources) {
 
+        String cflags = parameters.get("cflags");
+        if (cflags == null) {
+            cflags = "";
+        }
+        cflags = cflags.replaceAll("\\s+", "::");
+        if (cflags != "") {
+            cflags = "::" + cflags;
+        }
+
+        String cxxflags = parameters.get("cxxflags");
+        if (cxxflags == null) {
+            cxxflags = "";
+        }
+        cxxflags = cxxflags.replaceAll("\\s+", "::");
+        if (cxxflags != "") {
+            cxxflags = "::" + cxxflags;
+        }
+
         List<File> objectPaths = new ArrayList<File>();
 
         settings.put("build.path", dest.getAbsolutePath());
@@ -1082,7 +1100,7 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!execAsynchronously(parseString(editor.core.get("recipe.S.o.pattern"))))
+            if(!execAsynchronously(parseString(editor.core.get("recipe.S.o.pattern") + cflags)))
                 return null;
             if (!objectFile.exists()) 
                 return null;
@@ -1102,7 +1120,7 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!execAsynchronously(parseString(editor.core.get("recipe.c.o.pattern"))))
+            if(!execAsynchronously(parseString(editor.core.get("recipe.c.o.pattern") + cflags)))
                 return null;
             if (!objectFile.exists()) 
                 return null;
@@ -1122,7 +1140,7 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!execAsynchronously(parseString(editor.core.get("recipe.cpp.o.pattern"))))
+            if(!execAsynchronously(parseString(editor.core.get("recipe.cpp.o.pattern") + cxxflags)))
                 return null;
             if (!objectFile.exists()) 
                 return null;
@@ -1284,7 +1302,15 @@ public class Sketch implements MessageConsumer {
     }
 
     private boolean compileLink(List<File> objectFiles) {
-        String baseCommandString = editor.board.getAny("recipe.c.combine.pattern", "");
+        String ldflags = parameters.get("ldflags");
+        if (ldflags == null) {
+            ldflags = "";
+        }
+        ldflags = ldflags.replaceAll("\\s+", "::");
+        if (ldflags != "") {
+            ldflags = "::" + ldflags;
+        }
+        String baseCommandString = editor.board.getAny("recipe.c.combine.pattern", "") + ldflags;
         String commandString = "";
         String objectFileList = "";
 
