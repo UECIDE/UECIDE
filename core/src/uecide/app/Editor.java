@@ -1972,7 +1972,15 @@ public class Editor extends JFrame implements RunnerListener {
     }
     
     public void selectBoard(String b) {
-        selectBoard(Base.boards.get(b));
+        Board brd = Base.boards.get(b);
+        if (brd == null) {
+            Base.showWarning(Translate.t("Invalid Board"),
+                Translate.t("Unable to locate board '%1'", b),
+                null
+            );
+            return;
+        }
+        selectBoard(brd);
     }
 
     public void selectBoard(Board b) {
