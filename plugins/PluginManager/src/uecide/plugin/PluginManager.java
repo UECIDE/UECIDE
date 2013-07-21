@@ -217,20 +217,6 @@ public class PluginManager extends BasePlugin
     public ImageIcon toolbarIcon() {
         return null;
     }
-/*
-    public void populatePreferences(JPanel p) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-
-        c.gridx = 0;
-        c.gridy = 0;
-    }
-
-    public void savePreferences() {
-    }
-*/
 
     public void updatePlugins() {
         try {
@@ -327,16 +313,19 @@ public class PluginManager extends BasePlugin
                 if (item.available.equals("")) continue;
                 if (item.installed.equals(item.available)) continue;
                 publish(entry);
+                editor.message("Upgrading " + entry + "...", 1);
 
                 try {
                     File dest = getJarFileToTmp(entry, item.url);
                     if (dest == null) { 
+                        editor.message("failed\n", 2);
                         continue;
                     }
                     if (dest.exists()) {
                         Base.handleInstallPlugin(dest);
                 
                         dest.delete();
+                        editor.message("done\n", 1);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -351,6 +340,8 @@ public class PluginManager extends BasePlugin
         }
 
         public void done() {
+            updateDisplay();
+            win.repaint();
         }
 
     }
