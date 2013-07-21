@@ -83,6 +83,9 @@ public class Sketch implements MessageConsumer {
     }
 
     public void loadSketchFromFolder() {
+        if (!isUntitled()) {
+            Base.updateMRU(folder);
+        }
         File fileList[] = folder.listFiles();
         for (File f : fileList){
             if (validSourceFile(f)) {
