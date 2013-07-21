@@ -263,6 +263,21 @@ class SketchEditor extends JPanel {
         }
     }
 
+    public void selectLines(int start, int end) {
+        if (start > end) {
+            int x = end;
+            end = start;
+            start = x;
+        }
+        try {
+            int startChar = textArea.getLineStartOffset(start);
+            int endChar = textArea.getLineEndOffset(end);
+            textArea.setSelectionStart(startChar);
+            textArea.setSelectionEnd(endChar);
+        } catch (Exception e) {
+        }
+    }
+
     public void setModified(boolean m) {
         if (m != modified) {
             modified = m;
@@ -301,4 +316,9 @@ class SketchEditor extends JPanel {
     public void setNumberOffset(int off) {
         scrollPane.getGutter().setLineNumberingStartIndex(off);
     }
+
+    public int getCaretLineNumber() {
+        return textArea.getCaretLineNumber();
+    }
+
 }

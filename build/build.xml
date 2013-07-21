@@ -13,11 +13,6 @@
         </not>
     </condition>
 
-  <!--echo message="os.name = ${os.name}" /-->
-  <!--echo message="os.arch = ${os.arch}" /-->
-  <!--echo message="os.version = ${os.version}" /-->
-  <!-- Sets properties for macosx/windows/linux depending on current system -->
-    <!--property name="theme" value="mpide"/-->
     <sequential>
         <property file="build.settings"/>
         <property name="aws.bucket" value="chipkit" />
@@ -53,52 +48,23 @@
         <format property="TODAY" pattern="yyyyMMdd" />
     </tstamp>
 
-  <!-- Libraries required for running IDE -->
-  <fileset dir=".." id="runtime.jars">
-    <include name="core/uecide.jar" />
-    <include name="core/lib/ecj.jar" />
-    <include name="core/lib/jna.jar" />
-    <include name="core/lib/RXTXcomm.jar" />
-    <include name="core/lib/ant.jar" />
-    <include name="core/lib/ant-launcher.jar" />
-  </fileset>
+    <fileset dir=".." id="runtime.jars">
+        <include name="core/uecide.jar" />
+        <include name="core/lib/ecj.jar" />
+        <include name="core/lib/jna.jar" />
+        <include name="core/lib/RXTXcomm.jar" />
+        <include name="core/lib/ant.jar" />
+        <include name="core/lib/ant-launcher.jar" />
+    </fileset>
 
-  <target name="build" description="Build IDE.">
-    <echo>
+    <target name="build" description="Build IDE.">
+        <echo>
 Building for ${brand} version ${version}${suffix}
-    </echo>
-    <antcall target="${platform}-build" />
-  </target>
-
-  <target name="run" description="Run IDE.">
-    <antcall target="${platform}-run" />
-  </target>
-  
-  <target name="win-debug" description="Run IDE from Java." depends="build">
-      <java dir="./${platform}/work"
-          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/uecide.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar"
-          fork="true"
-          jar="./${platform}/work/lib/uecire.jar">
-    </java>
-  </target>
-
-   <target name="linux-debug" description="Run IDE from Java." depends="build">
-      <java dir="./${platform}/work"
-          classpath="${platform}/work/lib:${platform}/work/lib/RXTXcomm.jar:${platform}/work/lib/uecide.jar:${platform}/work/lib/ecj.jar:${platform}/work/lib/jna.jar"
-          fork="true"
-          jar="./${platform}/work/lib/uecide.jar">
-    </java>
-  </target>
-
-
-    <target name="version-number" description="Get the version number">
-        <input message="Enter version number:" 
-        addproperty="version"
-        defaultvalue="${revision}-${TODAY}-${platform}" />
+        </echo>
+        <antcall target="${platform}-build" />
     </target>
 
-    <target name="dist" depends="version-number"
-          description="Build IDE for distribution.">
+    <target name="dist" description="Build IDE for distribution.">
         <antcall target="${platform}-dist" />
     </target>
 
@@ -106,48 +72,16 @@ Building for ${brand} version ${version}${suffix}
         <antcall target="${platform}-deb" />
     </target>
 
+    <target name="subprojects-clean">
+        <subant buildpath="../core" target="clean"/>
+        <subant buildpath="../plugins" target="clean"/>
+    </target>
 
-  <target name="dist-test" 
-          description="Build IDE for distribution.">
-    <input message="Enter version number:"
-           addproperty="version"
-           defaultvalue="${revision}-${platform}-${TODAY}-test" />
-    <antcall target="${platform}-dist" />
-  </target>
+    <target name="subprojects-build">
+        <subant buildpath="../core" target="build"/>
+        <subant buildpath="../plugins" target="build"/>
+    </target>
 
-  <target name="deb-test" 
-          description="Build IDE for distribution.">
-    <input message="Enter version number:"
-           addproperty="version"
-           defaultvalue="${revision}-${platform}-${TODAY}-test" />
-    <antcall target="${platform}-deb" />
-  </target>
-
-  <!-- "§$§$&, ant doesn't have a built-in help target :(  -->
-  <target name="help" description="Show project help">
-    <java classname="org.apache.tools.ant.Main">
-      <arg value="-p" />
-    </java>
-  </target>
-
-  <!-- - - - - - - - - - - - - - - - - - -->
-  <!-- Subprojects: Core, App, Libraries -->
-  <!-- - - - - - - - - - - - - - - - - - -->
-
-  <target name="subprojects-clean">
-    <subant buildpath="../core" target="clean"/>
-    <subant buildpath="../plugins" target="clean"/>
-  </target>
-
-  <target name="subprojects-build">
-    <subant buildpath="../core" target="build"/>
-    <subant buildpath="../plugins" target="build"/>
-  </target>
-
-
-  <!-- - - - - - - - - -->
-  <!-- Basic Assembly  -->
-  <!-- - - - - - - - - -->
 
     <target name="download-file" if="download.enable">
         <get src="${src}" dest="${dest}" usetimestamp="true" />    
@@ -211,28 +145,12 @@ Building for ${brand} version ${version}${suffix}
         <echo file="${target.path}/lib/version.txt" message="${version}" />
     </target>
 
-  
-  <!-- - - - - - - - -->
-  <!-- Mac OS X      -->
-  <!-- - - - - - - - -->
-
-  <target name="macosx-clean" depends="subprojects-clean" description="Clean Mac OS X build">
-    <delete dir="macosx/work" />
-    <delete dir="macosx/working_dir" />
-    <delete dir="macosx/working.dmg" />
-    <delete file="macosx/${product}-*.dmg" />
-  </target>
-  
-  <target name="macosx-checkos" unless="macosx">
-    <echo>
-      =======================================================
-      ${product.cap} for Mac OS X can only be built on Mac OS X.
-      
-      Bye. 
-      =======================================================
-    </echo>
-    <fail message="wrong platform (${os.name})" />
-  </target>
+    <target name="macosx-clean" depends="subprojects-clean" description="Clean Mac OS X build">
+        <delete dir="macosx/work" />
+        <delete dir="macosx/working_dir" />
+        <delete dir="macosx/working.dmg" />
+        <delete file="macosx/${product}-*.dmg" />
+    </target>
   
   <target name="macosx-build" depends="subprojects-build" description="Build Mac OS X version">
     	<mkdir dir="macosx/work" />
@@ -332,18 +250,6 @@ Building for ${brand} version ${version}${suffix}
     <delete dir="linux/work" />
   </target>
   
-  <target name="linux-checkos" unless="linux">
-    <echo>
-      =======================================================
-      ${product.cap} for Linux can only be built on on unix systems.
-      
-      Bye. 
-      =======================================================
-    </echo>
-    
-    <fail message="wrong platform (${os.name})" />
-  </target>
-  
   <target name="upgrade-build" depends="subprojects-build" description="Build upgrade version">
     <mkdir dir="upgrade/work" />
     
@@ -363,7 +269,7 @@ Building for ${brand} version ${version}${suffix}
         </foreach>
   </target>
 
-  <target name="linux-build" depends="linux-checkos, subprojects-build" description="Build linux version">
+  <target name="linux-build" depends="subprojects-build" description="Build linux version">
     <mkdir dir="linux/work" />
     
     <copy todir="linux/work">
@@ -392,7 +298,7 @@ Building for ${brand} version ${version}${suffix}
     <target name="linux32-build" depends="linux-build" description="Build linux (32-bit) version">
     </target>
 
-    <target name="linux64-build" depends="linux-checkos, subprojects-build" description="Build linux (64-bit) version">
+    <target name="linux64-build" depends="subprojects-build" description="Build linux (64-bit) version">
         <mkdir dir="linux/work" />
     
         <copy todir="linux/work">
@@ -468,7 +374,7 @@ Building for ${brand} version ${version}${suffix}
         </echo>
     </target>
 
-	<target name="linux-generate-debian" depends="version-number, build" description="Build debian tree ready for packaging">
+	<target name="linux-generate-debian" depends="build" description="Build debian tree ready for packaging">
         <property name="proot" value="linux/${product}-${version}${suffix}-${arch}" />
         <mkdir dir="${proot}" />
         <mkdir dir="${proot}/usr" />
@@ -555,32 +461,14 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="linux-generate-debian"/>
     </target>
 
-
-  
-  <!-- - - - - - - - -->
-  <!-- Windows       -->
-  <!-- - - - - - - - -->
-
     <target name="upgrade-clean" depends="subprojects-clean">
         <delete dir="upgrade/work"/>
     </target>
   
-  <target name="windows-clean" depends="subprojects-clean"
-	  description="Clean windows version">
-    <delete dir="windows/work" />
-  </target>
-  
-  <target name="windows-checkos" unless="windows">
-    <echo>
-      =======================================================
-      ${product.cap} for Windows can only be built on windows.
-      
-      Bye. 
-      =======================================================
-    </echo>
-    
-    <fail message="wrong platform (${os.name})" />
-  </target>
+    <target name="windows-clean" depends="subprojects-clean"
+            description="Clean windows version">
+        <delete dir="windows/work" />
+    </target>
   
     <target name="windows-build" 
         depends="subprojects-build" 
@@ -643,14 +531,6 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <zip destfile="windows/${product}-${version}${suffix}-windows-lite.zip">
             <zipfileset dir="windows/work" prefix="${product}-${version}${suffix}" filemode="755" />
         </zip>
-    
-        <echo>
-      =======================================================
-      ${product.cap} for Windows was built. Grab the archive from   
-      
-      windows/${product}-${version}${suffix}-windows.zip
-      =======================================================
-        </echo>
     </target>
   
     <target name="windows-dist" depends="windows-build" 
@@ -661,77 +541,24 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <zip destfile="windows/${product}-${version}${suffix}-windows.zip">
             <zipfileset dir="windows/work" prefix="${product}-${version}${suffix}" filemode="755" />
         </zip>
-    
-        <echo>
-      =======================================================
-      ${product.cap} for Windows was built. Grab the archive from   
-      
-      windows/${product}-${version}${suffix}-windows.zip
-      =======================================================
-        </echo>
     </target>
   
+    <target name="clean" description="Perform a spring cleaning" 
+        depends="upgrade-clean, linux-clean, windows-clean, macosx-clean, subprojects-clean">
+    </target>
 
-  <!-- - - - - - - - -->
-  <!-- Source        -->
-  <!-- - - - - - - - -->
- 
-   <target name="source-dist" 
-	  description="Build .tar.gz of source code">
-    <input message="Enter version number:" 
-	   addproperty="version"
-	   defaultvalue="${revision}" />
+    <target name="update-avrdude-macosx" description="Update the avrdude configuration to latest version." depends="">
+        <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/etc/">
+            <fileset file="macosx/dist/avrdude.conf" />
+        </copy>
+    </target>
 
-    <tar compression="gzip" longfile="gnu" destfile="${product}-${version}${suffix}-src.tar.gz">
-      <tarfileset dir="../" 
-		  prefix="${product}-${version}${suffix}" 
-		  excludes="**/*.tgz,
-			     **/macosx/,
-			     **/windows/,
-			     **/work/,
-			     **/.git/,
-			     **/*.class"
-		  /> 
-    </tar>
+    <target name="update-avrdude-windows" description="Update the avrdude configuration to latest version." depends="">
+        <copy todir="windows/work/hardware/cores/pic32/tools/avr/etc/">
+            <fileset file="windows/dist/avrdude.conf" />
+        </copy>
+    </target>
 
-    <echo>
-      =======================================================
-      ${product.cap} source distribution was built. Grab the archive from   
-      
-      ${product}-${version}${suffix}-src.tar.gz
-      =======================================================
-    </echo>
-  </target>
-  
-
-  <!-- - - - - - - - -->
-  <!-- Run It!       -->
-  <!-- - - - - - - - -->
-  
-  <target name="clean" description="Perform a spring cleaning" 
-	  depends="upgrade-clean, linux-clean, windows-clean, macosx-clean, subprojects-clean">
-  </target>
-
-
-  <target name="update-avrdude-macosx" description="Update the avrdude configuration to latest version." depends="">
-      <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java/hardware/cores/pic32/tools/avr/etc/">
-        <fileset file="macosx/dist/avrdude.conf" />
-    </copy>
-  </target>
-
-  <target name="update-avrdude-windows" description="Update the avrdude configuration to latest version." depends="">
-      <copy todir="windows/work/hardware/cores/pic32/tools/avr/etc/">
-        <fileset file="windows/dist/avrdude.conf" />
-    </copy>
-  </target>
-  <!-- not need linux does this already.
-    <target name="update-avrdude-linux" description="Update the avrdude configuration to latest version." depends="">
-      <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java/hardware/tools/avr/etc/">
-        <fileset file="linux/dist/tools/avrdude.conf" />
-    </copy>
-  </target>
-    -->
-   <!-- Task for setting up the aws-ant-tasks -->
     <target name="awstasks.setup">
         <path id="tasks.path">
             <fileset dir="antlibs" includes="*.jar"/>
