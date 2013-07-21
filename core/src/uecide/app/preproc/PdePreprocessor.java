@@ -44,7 +44,7 @@ public class PdePreprocessor {
    * Setup a new preprocessor.
    */
   public PdePreprocessor() { 
-    int tabSize = Preferences.getInteger("editor.tabs.size");
+    int tabSize = Base.preferences.getInteger("editor.tabs.size");
     char[] indentChars = new char[tabSize];
     Arrays.fill(indentChars, ' ');
     indent = new String(indentChars);

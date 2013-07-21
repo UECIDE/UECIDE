@@ -53,11 +53,11 @@ public class Splash extends Window {
         int mx = 0;
         int my = 0;
         try {
-            x = Integer.parseInt(Theme.get("about.version.x"));
-            y = Integer.parseInt(Theme.get("about.version.y"));
+            x = Integer.parseInt(Base.theme.get("about.version.x"));
+            y = Integer.parseInt(Base.theme.get("about.version.y"));
 
-            mx = Integer.parseInt(Theme.get("splash.message.x"));
-            my = Integer.parseInt(Theme.get("splash.message.y"));
+            mx = Integer.parseInt(Base.theme.get("splash.message.x"));
+            my = Integer.parseInt(Base.theme.get("splash.message.y"));
         } catch (Exception e) {
         }
 
@@ -76,8 +76,8 @@ public class Splash extends Window {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
         RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2.setFont(Theme.getFont("about.version.font"));
-        g2.setColor(Theme.getColor("about.version.color"));
+        g2.setFont(Base.theme.getFont("about.version.font"));
+        g2.setColor(Base.theme.getColor("about.version.color"));
         g2.drawString("v" + Base.VERSION_NAME, x, y);
         g2.drawString(message, mx, my);
 

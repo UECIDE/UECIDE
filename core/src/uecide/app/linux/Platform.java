@@ -21,13 +21,11 @@
 */
 
 package uecide.app.linux;
+import uecide.app.Base;
 
 import java.io.File;
 
 import javax.swing.UIManager;
-
-import uecide.app.Preferences;
-import uecide.app.Theme;
 
 
 /**
@@ -51,7 +49,7 @@ public class Platform extends uecide.app.Platform {
     // Java 1.5, and we aren't going there yet)
 //    UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
 
-    String laf = Theme.get("window.laf");
+    String laf = Base.theme.get("window.laf");
     if ((laf != null) && (laf != "default")) {
        UIManager.setLookAndFeel(laf);
     }
@@ -60,7 +58,7 @@ public class Platform extends uecide.app.Platform {
 
   public void openURL(String url) throws Exception {
     if (openFolderAvailable()) {
-      String launcher = Preferences.get("launcher");
+      String launcher = Base.preferences.get("launcher");
       if (launcher != null) {
         Runtime.getRuntime().exec(new String[] { launcher, url });
       }
@@ -69,7 +67,7 @@ public class Platform extends uecide.app.Platform {
 
 
   public boolean openFolderAvailable() {
-    if (Preferences.get("launcher") != null) {
+    if (Base.preferences.get("launcher") != null) {
       return true;
     }
 
@@ -77,7 +75,7 @@ public class Platform extends uecide.app.Platform {
     try {
       Process p = Runtime.getRuntime().exec(new String[] { "xdg-open" });
       p.waitFor();
-      Preferences.set("launcher", "xdg-open");
+      Base.preferences.set("launcher", "xdg-open");
       return true;
     } catch (Exception e) { }
 
@@ -86,7 +84,7 @@ public class Platform extends uecide.app.Platform {
       Process p = Runtime.getRuntime().exec(new String[] { "gnome-open" });
       p.waitFor();
       // Not installed will throw an IOException (JDK 1.4.2, Ubuntu 7.04)
-      Preferences.set("launcher", "gnome-open");
+      Base.preferences.set("launcher", "gnome-open");
       return true;
     } catch (Exception e) { }
 
@@ -94,7 +92,7 @@ public class Platform extends uecide.app.Platform {
     try {
       Process p = Runtime.getRuntime().exec(new String[] { "kde-open" });
       p.waitFor();
-      Preferences.set("launcher", "kde-open");
+      Base.preferences.set("launcher", "kde-open");
       return true;
     } catch (Exception e) { }
 
@@ -104,7 +102,7 @@ public class Platform extends uecide.app.Platform {
 
   public void openFolder(File file) throws Exception {
     if (openFolderAvailable()) {
-      String lunch = Preferences.get("launcher");
+      String lunch = Base.preferences.get("launcher");
       try {
         String[] params = new String[] { lunch, file.getAbsolutePath() };
         //processing.core.PApplet.println(params);

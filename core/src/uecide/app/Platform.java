@@ -74,7 +74,7 @@ public class Platform {
   public File getSettingsFolder() throws Exception {
     // otherwise make a .processing directory int the user's home dir
     File home = new File(System.getProperty("user.home"));
-    File dataFolder = new File(home, "." + Theme.get("product"));
+    File dataFolder = new File(home, "." + Base.theme.get("product"));
     if (!dataFolder.exists()) {
         dataFolder.mkdirs();
     }
@@ -107,7 +107,7 @@ public class Platform {
   
   
   public void openURL(String url) throws Exception {
-    String launcher = Preferences.get("launcher");
+    String launcher = Base.preferences.get("launcher");
     if (launcher != null) {
       Runtime.getRuntime().exec(new String[] { launcher, url });
     } else {
@@ -117,12 +117,12 @@ public class Platform {
 
 
   public boolean openFolderAvailable() {
-    return Preferences.get("launcher") != null;
+    return Base.preferences.get("launcher") != null;
   }
   
   
   public void openFolder(File file) throws Exception {
-    String launcher = Preferences.get("launcher");
+    String launcher = Base.preferences.get("launcher");
     if (launcher != null) {
       String folder = file.getAbsolutePath();
       Runtime.getRuntime().exec(new String[] { launcher, folder });

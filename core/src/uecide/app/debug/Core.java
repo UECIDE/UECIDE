@@ -3,16 +3,12 @@ package uecide.app.debug;
 import java.io.*;
 import java.util.*;
 
-import uecide.app.Preferences;
-import uecide.app.Base;
-import uecide.app.Sketch;
-import uecide.app.SketchFile;
-import java.text.MessageFormat;
+import uecide.app.*;
 
 public class Core implements MessageConsumer {
     private String name;
     private File folder;
-    public Map corePreferences;
+    public PropertyFile corePreferences;
     private boolean valid;
     private File api;
     private boolean runInVerboseMode;
@@ -26,8 +22,7 @@ public class Core implements MessageConsumer {
 
         try {
             if(coreFile.exists()) {
-                corePreferences = new LinkedHashMap();
-                Preferences.load(coreFile, corePreferences);
+                corePreferences = new PropertyFile(coreFile);
                 this.name = folder.getName();
                 this.api = new File(folder, get("library.core.path","api"));
             }
@@ -101,6 +96,10 @@ public class Core implements MessageConsumer {
         };
 
         return (new File(path)).list(onlyHFiles);
+    }
+
+    public PropertyFile getPreferences() {
+        return corePreferences;
     }
 
 }
