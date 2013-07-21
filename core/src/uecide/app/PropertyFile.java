@@ -66,20 +66,32 @@ public class PropertyFile {
     public String getPlatformSpecific(String attribute) {
         String t = properties.getProperty(attribute + "." + Base.getOSName());
         if (t != null) {
-            return t;
+            return t.trim();
         }
-        return properties.getProperty(attribute);
+        t  = properties.getProperty(attribute);
+        if (t != null) {
+            return t.trim();
+        }
+        return null;
     }
 
     public String get(String attribute) {
         if (doPlatformOverride) {
             return getPlatformSpecific(attribute);
         }
-        return properties.getProperty(attribute);
+        String t = properties.getProperty(attribute);
+        if (t != null) {
+            return t.trim();
+        }
+        return null;
     }
 
     public String getDefault(String attribute) {
-        return defaultProperties.getProperty(attribute);
+        String t = defaultProperties.getProperty(attribute);
+        if (t != null) {
+            return t.trim();
+        }
+        return null;
     }
 
     public void set(String attribute, String value) {
