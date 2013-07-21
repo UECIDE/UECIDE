@@ -441,9 +441,8 @@ public class Preferences {
    */
   protected void applyFrame() {
     // put each of the settings into the table
-    Base.preferences.setBoolean("export.delete_target_folder",
-               deletePreviousBox.isSelected());
 
+    Base.preferences.setBoolean("export.delete_target_folder", deletePreviousBox.isSelected());
     Base.preferences.setBoolean("compiler.generate_lss", createLss.isSelected());
     Base.preferences.setBoolean("export.save_lss", saveLss.isSelected());
     Base.preferences.setBoolean("export.save_hex", saveHex.isSelected());
@@ -452,6 +451,13 @@ public class Preferences {
     Base.preferences.setBoolean("compiler.verbose", verboseCompile.isSelected());
     Base.preferences.setBoolean("export.verbose", verboseUpload.isSelected());
 
+    File f = new File(sketchbookLocationField.getText());
+    if (!f.exists()) {
+        f.mkdirs();
+    }
+
+    Base.preferences.setFile("sketchbook.path", f);
+
 //    setBoolean("sketchbook.closing_last_window_quits",
 //               closingLastQuitsBox.isSelected());
     //setBoolean("sketchbook.prompt", sketchPromptBox.isSelected());
@@ -459,24 +465,11 @@ public class Preferences {
 
     Base.preferences.setBoolean("editor.external", externalEditorBox.isSelected());
 
-    /*
-      // was gonna use this to check memory settings,
-      // but it quickly gets much too messy
-    if (Base.preferences.getBoolean("run.options.memory")) {
-      Process process = Runtime.getRuntime().exec(new String[] {
-          "java", "-Xms" + memoryMin + "m", "-Xmx" + memoryMax + "m"
-        });
-      processInput = new SystemOutSiphon(process.getInputStream());
-      processError = new MessageSiphon(process.getErrorStream(), this);
-    }
-    */
-
     Base.preferences.set("editor.font", editorFontField.getText());
     Base.preferences.set("console.font", consoleFontField.getText());
 
     if (autoAssociateBox != null) {
-      Base.preferences.setBoolean("platform.auto_file_type_associations",
-                 autoAssociateBox.isSelected());
+      Base.preferences.setBoolean("platform.auto_file_type_associations", autoAssociateBox.isSelected());
     }
 
         String[] entries = Base.plugins.keySet().toArray(new String[0]);
@@ -500,8 +493,7 @@ public class Preferences {
     this.editor = editor;
 
     // set all settings entry boxes to their actual status
-    deletePreviousBox.
-      setSelected(Base.preferences.getBoolean("export.delete_target_folder"));
+    deletePreviousBox.  setSelected(Base.preferences.getBoolean("export.delete_target_folder"));
     saveHex.setSelected(Base.preferences.getBoolean("export.save_hex"));
     createLss.setSelected(Base.preferences.getBoolean("compiler.generate_lss"));
     saveLss.setEnabled(Base.preferences.getBoolean("compiler.generate_lss"));
@@ -511,14 +503,11 @@ public class Preferences {
     verboseCompile.setSelected(Base.preferences.getBoolean("compiler.verbose"));
     verboseUpload.setSelected(Base.preferences.getBoolean("export.verbose"));
 
-    sketchbookLocationField.
-      setText(Base.preferences.get("sketchbook.path"));
-    externalEditorBox.
-      setSelected(Base.preferences.getBoolean("editor.external"));
+    sketchbookLocationField.  setText(Base.preferences.get("sketchbook.path"));
+    externalEditorBox.  setSelected(Base.preferences.getBoolean("editor.external"));
 
     if (autoAssociateBox != null) {
-      autoAssociateBox.
-        setSelected(Base.preferences.getBoolean("platform.auto_file_type_associations"));
+      autoAssociateBox.  setSelected(Base.preferences.getBoolean("platform.auto_file_type_associations"));
     }
 
     dialog.setVisible(true);
