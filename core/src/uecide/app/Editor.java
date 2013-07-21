@@ -953,7 +953,7 @@ public class Editor extends JFrame implements RunnerListener {
     item = newJMenuItem(Translate.t("Increase Indent"), ']');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          handleIndentOutdent(true);
+          increaseIndent();
         }
     });
     menu.add(item);
@@ -961,7 +961,7 @@ public class Editor extends JFrame implements RunnerListener {
     item = newJMenuItem(Translate.t("Decrease Indent"), '[');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          handleIndentOutdent(false);
+          decreaseIndent();
         }
     });
     menu.add(item);
@@ -1304,53 +1304,60 @@ public class Editor extends JFrame implements RunnerListener {
   }
 
 
-  protected void handleIndentOutdent(boolean indent) {
-    int tabSize = Base.preferences.getInteger("editor.tabs.size");
-    String tabString = "\t";
-
-    SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
-    ed.beginAtomicEdit();
-
-    int startLine = ed.getSelectionStartLine();
-    int stopLine = ed.getSelectionStopLine();
-
-    // If the selection ends at the beginning of the last line,
-    // then don't (un)comment that line.
-    int lastLineStart = ed.getLineStartOffset(stopLine);
-    int selectionStop = ed.getSelectionStop();
-    if (selectionStop == lastLineStart) {
-      // Though if there's no selection, don't do that
-      if (ed.isSelectionActive()) {
-        stopLine--;
-      }
-    }
-
-    for (int line = startLine; line <= stopLine; line++) {
-      int location = ed.getLineStartOffset(line);
-
-      if (indent) {
-        ed.select(location, location);
-        ed.setSelectedText(tabString);
-
-      } else {  // outdent
-        ed.select(location, location + tabSize);
-        // Don't eat code if it's not indented
-        if (ed.getSelectedText().equals(tabString)) {
-          ed.setSelectedText("");
+    public void increaseIndent() {
+        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
+        ed.beginAtomicEdit();
+        int startLine;
+        int stopLine;
+        if (!ed.isSelectionActive()) {
+            startLine = stopLine = ed.getCaretLineNumber();    
+        } else {
+            startLine = ed.getSelectionStartLine();
+            stopLine = ed.getSelectionStopLine();
         }
-      }
+        ed.selectLines(startLine, stopLine);
+        String text = ed.getSelectedText();
+        String lines[] = text.split("\n");
+        StringBuilder out = new StringBuilder();
+        for (String line : lines) {
+            out.append("\t");
+            out.append(line);
+            out.append("\n");
+        }
+        ed.setSelectedText(out.toString());
+        ed.selectLines(startLine, stopLine-1);
+        ed.endAtomicEdit();
     }
-    // Subtract one from the end, otherwise selects past the current line.
-    // (Which causes subsequent calls to keep expanding the selection)
-    ed.select(ed.getLineStartOffset(startLine),
-              ed.getLineEndOffset(stopLine) - 1);
-    ed.endAtomicEdit();
-  }
-
-
-  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-
+            
+    public void decreaseIndent() {
+        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
+        ed.beginAtomicEdit();
+        int startLine;
+        int stopLine;
+        if (!ed.isSelectionActive()) {
+            startLine = stopLine = ed.getCaretLineNumber();    
+        } else {
+            startLine = ed.getSelectionStartLine();
+            stopLine = ed.getSelectionStopLine();
+        }
+        ed.selectLines(startLine, stopLine);
+        String text = ed.getSelectedText();
+        String lines[] = text.split("\n");
+        StringBuilder out = new StringBuilder();
+        for (String line : lines) {
+            if (line.startsWith("\t")) {
+                line = line.substring(1);
+            } else if (line.startsWith("  ")) {
+                line = line.substring(2);
+            } 
+            out.append(line);
+            out.append("\n");
+        }
+        ed.setSelectedText(out.toString());
+        ed.selectLines(startLine, stopLine-1);
+        ed.endAtomicEdit();
+    }
+            
   public void handleRun() {
     running = true;
     status.progress(Translate.t("Compiling sketch..."));
@@ -2029,15 +2036,6 @@ public class Editor extends JFrame implements RunnerListener {
     {
         toolsMenu.removeAll();
         JMenuItem item;
-/*
-        item = new JMenuItem(Translate.t("Add Plugin..."));
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Base.handleInstallPlugin();
-            }
-        });
-        toolsMenu.add(item);
-*/
 
         addPluginsToMenu(toolsMenu, BasePlugin.MENU_PLUGIN_TOP);
         toolsMenu.addSeparator();
