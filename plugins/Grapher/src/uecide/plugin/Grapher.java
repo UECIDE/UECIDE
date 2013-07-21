@@ -86,10 +86,10 @@ public class Grapher extends BasePlugin implements MessageConsumer
         Box line = Box.createHorizontalBox();
 
         graph = new JGrapher();
-        Font f = Preferences.getFont("grapher.font");
+        Font f = Base.preferences.getFont("grapher.font");
         if (f == null) {
             f = new Font("Monospaced", Font.PLAIN, 12);
-            Preferences.set("grapher.font", "Monospaced,plain,12");
+            Base.preferences.set("grapher.font", "Monospaced,plain,12");
         }
         graph.setFont(f);
 
@@ -110,7 +110,7 @@ public class Grapher extends BasePlugin implements MessageConsumer
                 if (ready) {
                     String value = (String) baudRates.getSelectedItem();
                     baudRate = Integer.parseInt(value);
-                    Preferences.set("serial.debug_rate", value);
+                    Base.preferences.set("serial.debug_rate", value);
                     try {
                         if (port != null) {
                             port.dispose();
@@ -150,8 +150,8 @@ public class Grapher extends BasePlugin implements MessageConsumer
         Base.setIcon(win);
 
         try {
-            baudRate = Integer.parseInt(Preferences.get("serial.debug_rate"));
-            baudRates.setSelectedItem(Preferences.get("serial.debug_rate"));
+            baudRate = Base.preferences.getInteger("serial.debug_rate");
+            baudRates.setSelectedItem(Base.preferences.get("serial.debug_rate"));
             port = new Serial(baudRate);
         } catch(Exception e) {
             editor.message("Unable to open serial port: " + e.getMessage() + "\n", 2);
@@ -357,8 +357,8 @@ public class Grapher extends BasePlugin implements MessageConsumer
         c.gridy = 1;
         p.add(selectSerialFont, c);
 
-        final Font grapherFont = Preferences.getFont("grapher.font");
-        fontSizeField.setText(Preferences.fontToString(grapherFont));
+        final Font grapherFont = Base.preferences.getFont("grapher.font");
+        fontSizeField.setText(Base.preferences.fontToString(grapherFont));
 
         final Container parent = p;
         selectSerialFont.addActionListener(new ActionListener() {
@@ -368,16 +368,16 @@ public class Grapher extends BasePlugin implements MessageConsumer
                 int res = fc.showDialog(parent);
                 if (res == JFontChooser.OK_OPTION) {
                     Font f = fc.getSelectedFont();
-                    fontSizeField.setText(Preferences.fontToString(f));
+                    fontSizeField.setText(Base.preferences.fontToString(f));
                 }
             }
         });
 
-        fontSizeField.setText(Preferences.get("grapher.font"));
+        fontSizeField.setText(Base.preferences.get("grapher.font"));
     }
 
     public void savePreferences() {
-        Preferences.set("grapher.font", fontSizeField.getText());
+        Base.preferences.set("grapher.font", fontSizeField.getText());
     }
 
 }

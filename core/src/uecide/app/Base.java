@@ -71,7 +71,14 @@ public class Base {
     static ArrayList<Editor> editors = new ArrayList<Editor>();
     public static Editor activeEditor;
 
+    public static PropertyFile preferences;
+    public static PropertyFile theme;
+
     public static void main(String args[]) {
+        new Base(args);
+    }
+
+    public Base(String[] args) {
         try {
             JarFile myself = new JarFile("lib/uecide.jar");
             Manifest manifest = myself.getManifest();
@@ -85,89 +92,38 @@ public class Base {
             e.printStackTrace();
         }
 
-        Theme.init();
-        splashScreen = new Splash();
-        // setup the theme coloring fun
-
+        theme = new PropertyFile(getContentFile("lib/theme/theme.txt"));
+        theme.setPlatformAutoOverride(true);
         initPlatform();
+        preferences = new PropertyFile(getSettingsFile("preferences.txt"), getContentFile("lib/preferences.txt"));
+        preferences.setPlatformAutoOverride(true);
+        theme = new PropertyFile(getSettingsFile("theme.txt"), getContentFile("lib/theme/theme.txt"));
+        theme.setPlatformAutoOverride(true);
 
-        // Use native popups so they don't look so crappy on osx
+        splashScreen = new Splash();
+        splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 12);
+
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
-        // Don't put anything above this line that might make GUI,
-        // because the platform has to be inited properly first.
-
-        // run static initialization that grabs all the prefs
-        splashScreen.setMessage("Loading Preferences...", 12);
-        Preferences.init(null);
-
-        // Set the look and feel before opening the window
         try {
             platform.setLookAndFeel();
         } catch (Exception e) {
             String mess = e.getMessage();
             if (mess.indexOf("ch.randelshofer.quaqua.QuaquaLookAndFeel") == -1) {
                 System.err.println("Non-fatal error while setting the Look & Feel.");
-                System.err.println("The error message follows, however " + Theme.get("product.cap") + " should run fine.");
+                System.err.println("The error message follows, however " + theme.get("product.cap") + " should run fine.");
                 System.err.println(mess);
             }
         }
 
-        UIManager.getDefaults().put("TabbedPane.contentBorderInsets", new Insets(0,0,0,0));
-        UIManager.getDefaults().put("TabbedPane.tabsOverlapBorder", true);
+//        UIManager.getDefaults().put("TabbedPane.contentBorderInsets", new Insets(0,0,0,0));
+//        UIManager.getDefaults().put("TabbedPane.tabsOverlapBorder", true);
 
         // Create a location for untitled sketches
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
         splashScreen.setMessage("Loading Application...", 24);
-        new Base(args);
-    }
-
-
-    static protected void setCommandLine() {
-        commandLine = true;
-    }
-
-
-    static protected boolean isCommandLine() {
-        return commandLine;
-    }
-
-
-    static protected void initPlatform() {
-        try {
-            Class<?> platformClass = Class.forName("uecide.app.Platform");
-            if (Base.isMacOS()) {
-                platformClass = Class.forName("uecide.app.macosx.Platform");
-            } else if (Base.isWindows()) {
-                platformClass = Class.forName("uecide.app.windows.Platform");
-            } else if (Base.isLinux()) {
-                platformClass = Class.forName("uecide.app.linux.Platform");
-            }
-            platform = (Platform) platformClass.newInstance();
-        } catch (Exception e) {
-            Base.showError("Problem Setting the Platform",
-                            "An unknown error occurred while trying to load\n" +
-                            "platform-specific code for your machine.", e);
-        }
-    }
-
-
-    static protected void initRequirements() {
-        try {
-            Class.forName("com.sun.jdi.VirtualMachine");
-        } catch (ClassNotFoundException cnfe) {
-            Base.showPlatforms();
-            Base.showError("Please install JDK 1.5 or later",
-                            Theme.get("product.cap") + " requires a full JDK (not just a JRE)\n" +
-                            "to run. Please install JDK 1.5 or later.\n" +
-                            "More information can be found in the reference.", cnfe);
-        }
-    }
-
-
-    public Base(String[] args) {
         platform.init(this);
 
         // Get paths for the libraries and examples in the Processing folder
@@ -177,7 +133,7 @@ public class Base {
         toolsFolder = getContentFile("tools");
 
         // Get the sketchbook path, and make sure it's set properly
-        String sketchbookPath = Preferences.get("sketchbook.path");
+        String sketchbookPath = preferences.get("sketchbook.path");
 
 //        Translate.load("swedish");
 
@@ -188,9 +144,9 @@ public class Base {
             if (!skechbookFolder.exists()) {
                 Base.showWarning("Sketchbook folder disappeared",
                          "The sketchbook folder no longer exists.\n" +
-                         Theme.get("product.cap") + " will switch to the default sketchbook\n" +
+                         theme.get("product.cap") + " will switch to the default sketchbook\n" +
                          "location, and create a new sketchbook folder if\n" +
-                         "necessary. " + Theme.get("product.cap") + " will then stop talking about\n" +
+                         "necessary. " + theme.get("product.cap") + " will then stop talking about\n" +
                          "himself in the third person.", null);
                 sketchbookPath = null;
             }
@@ -199,7 +155,7 @@ public class Base {
         // If no path is set, get the default sketchbook folder for this platform
         if (sketchbookPath == null) {
             File defaultFolder = getDefaultSketchbookFolder();
-            Preferences.set("sketchbook.path", defaultFolder.getAbsolutePath());
+            preferences.set("sketchbook.path", defaultFolder.getAbsolutePath());
             if (!defaultFolder.exists()) {
                 defaultFolder.mkdirs();
             }
@@ -260,12 +216,54 @@ public class Base {
         splashScreen.dispose();
     }
 
+
+    static protected void setCommandLine() {
+        commandLine = true;
+    }
+
+
+    static protected boolean isCommandLine() {
+        return commandLine;
+    }
+
+    static protected void initPlatform() {
+        try {
+            Class<?> platformClass = Class.forName("uecide.app.Platform");
+            if (Base.isMacOS()) {
+                platformClass = Class.forName("uecide.app.macosx.Platform");
+            } else if (Base.isWindows()) {
+                platformClass = Class.forName("uecide.app.windows.Platform");
+            } else if (Base.isLinux()) {
+                platformClass = Class.forName("uecide.app.linux.Platform");
+            }
+            platform = (Platform) platformClass.newInstance();
+        } catch (Exception e) {
+            Base.showError("Problem Setting the Platform",
+                            "An unknown error occurred while trying to load\n" +
+                            "platform-specific code for your machine.", e);
+        }
+    }
+
+
+    static protected void initRequirements() {
+        try {
+            Class.forName("com.sun.jdi.VirtualMachine");
+        } catch (ClassNotFoundException cnfe) {
+            Base.showPlatforms();
+            Base.showError("Please install JDK 1.5 or later",
+                            theme.get("product.cap") + " requires a full JDK (not just a JRE)\n" +
+                            "to run. Please install JDK 1.5 or later.\n" +
+                            "More information can be found in the reference.", cnfe);
+        }
+    }
+
+
     public static void initMRU()
     {
         MRUList = new ArrayList<File>();
         for (int i = 0; i < 10; i++) {
-            if (Preferences.get("sketch.mru." + i) != null) {
-                File f = new File(Preferences.get("sketch.mru." + i));
+            if (preferences.get("sketch.mru." + i) != null) {
+                File f = new File(preferences.get("sketch.mru." + i));
                 if (f.exists()) {
                     if (MRUList.indexOf(f) == -1) {
                         MRUList.add(f);
@@ -287,18 +285,18 @@ public class Base {
         }
         for (int i = 0; i < 10; i++) {
             if (i < MRUList.size()) {
-                Preferences.set("sketch.mru." + i, MRUList.get(i).getAbsolutePath());
+                preferences.set("sketch.mru." + i, MRUList.get(i).getAbsolutePath());
             } else {
-                Preferences.unset("sketch.mru." + i);
+                preferences.unset("sketch.mru." + i);
             }
         }
-        Preferences.save();
+        preferences.save();
         rebuildSketchbookMenus();
     }
 
     public static Board getDefaultBoard() {
         Board tb;
-        String prefsBoard = Preferences.get("board");
+        String prefsBoard = preferences.get("board");
         String[] entries;
 
         tb = boards.get(prefsBoard);
@@ -380,48 +378,6 @@ public class Base {
         // set the current window to be the console that's getting output
     }
 
-    protected static int[] nextEditorLocation() {
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        int defaultWidth = Preferences.getInteger("editor.window.width.default");
-        int defaultHeight = Preferences.getInteger("editor.window.height.default");
-
-        if (activeEditor == null) {
-            // If no current active editor, use default placement
-            return new int[] {
-                (screen.width - defaultWidth) / 2,
-                (screen.height - defaultHeight) / 2,
-                defaultWidth, defaultHeight, 0
-            };
-
-        } else {
-            // With a currently active editor, open the new window
-            // using the same dimensions, but offset slightly.
-            final int OVER = 50;
-            // In release 0160, don't
-            //location = activeEditor.getPlacement();
-            Editor lastOpened = editors.get(editors.size() - 1);
-            int[] location = lastOpened.getPlacement();
-            // Just in case the bounds for that window are bad
-            location[0] += OVER;
-            location[1] += OVER;
-
-            if (location[0] == OVER ||
-                location[2] == OVER ||
-                location[0] + location[2] > screen.width ||
-                location[1] + location[3] > screen.height
-            ) {
-                // Warp the next window to a randomish location on screen.
-                return new int[] {
-                    (int) (Math.random() * (screen.width - defaultWidth)),
-                    (int) (Math.random() * (screen.height - defaultHeight)),
-                    defaultWidth, defaultHeight, 0
-                };
-            }
-            return location;
-        }
-    }
-
-
     // .................................................................
 
 
@@ -445,7 +401,7 @@ public class Base {
     public static void handleOpenPrompt() {
         // get the frontmost window frame for placing file dialog
         FileDialog fd = new FileDialog(activeEditor,
-            Translate.t("Open %1 sketch...", Theme.get("product.cap")),
+            Translate.t("Open %1 sketch...", theme.get("product.cap")),
             FileDialog.LOAD);
 
         fd.setDirectory(Base.getSketchbookFolder().getAbsolutePath());
@@ -513,7 +469,7 @@ public class Base {
                     "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
                     "</style> </head>" +
                     "<b>" + Translate.t("Are you sure you want to Quit?") + "</b>" +
-                    "<p>" + Translate.t("Closing the last open sketch will quit %1.", Theme.get("product.cap"));
+                    "<p>" + Translate.t("Closing the last open sketch will quit %1.", theme.get("product.cap"));
 
                 int result = JOptionPane.showOptionDialog(editor,
                     prompt,
@@ -534,7 +490,7 @@ public class Base {
             editors.remove(editor);
 
             // Save out the current prefs state
-            Preferences.save();
+            preferences.save();
 
             // Since this wasn't an actual Quit event, call System.exit()
             System.exit(0);
@@ -560,7 +516,7 @@ public class Base {
 
         if (handleQuitEach()) {
             // Save out the current prefs state
-            Preferences.save();
+            preferences.save();
 
             if (!Base.isMacOS()) {
                 // If this was fired from the menu or an AppleEvent (the Finder),
@@ -648,8 +604,8 @@ public class Base {
         final Image image = Base.getLibImage("theme/about.png", activeEditor);
         final Window window = new Window(activeEditor) {
             public void paint(Graphics g) {
-                int x = Integer.parseInt(Theme.get("about.version.x"));
-                int y = Integer.parseInt(Theme.get("about.version.y"));
+                int x = Integer.parseInt(theme.get("about.version.x"));
+                int y = Integer.parseInt(theme.get("about.version.y"));
 
                 if (x < 0) {
                     x = image.getWidth(activeEditor) + x;
@@ -665,8 +621,8 @@ public class Base {
                 g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-                g.setFont(Theme.getFont("about.version.font"));
-                g.setColor(Theme.getColor("about.version.color"));
+                g.setFont(theme.getFont("about.version.font"));
+                g.setColor(theme.getColor("about.version.color"));
                 g.drawString("v" + Base.VERSION_NAME, x, y);
             }
         };
@@ -696,11 +652,11 @@ public class Base {
     }
 
 
-    public static String osNameFull() {
-        return osName() + "_" + System.getProperty("os.arch");
+    public static String getOSFullName() {
+        return getOSName() + "_" + System.getProperty("os.arch");
     }
     
-    public static String osName() {
+    public static String getOSName() {
         String osname = System.getProperty("os.name");
 
         if (osname.indexOf("Mac") != -1) {
@@ -747,24 +703,20 @@ public class Base {
     public static File getSettingsFolder() {
         File settingsFolder = null;
 
-        String preferencesPath = Preferences.get("settings.path");
-        if (preferencesPath != null) {
-            settingsFolder = new File(preferencesPath);
-
-        } else {
-            try {
-                settingsFolder = platform.getSettingsFolder();
-            } catch (Exception e) {
-                showError(Translate.t("Problem getting data folder"),
-                Translate.t("Error getting the %1 data folder.", Theme.get("product.cap")), e);
-            }
+        try {
+            settingsFolder = platform.getSettingsFolder();
+        } catch (Exception e) {
+            showError(Translate.t("Problem getting data folder"),
+            Translate.t("Error getting the data folder."), e);
+            e.printStackTrace();
+            return null;
         }
 
-        // create the folder if it doesn't exist already
         if (!settingsFolder.exists()) {
             if (!settingsFolder.mkdirs()) {
                 showError(Translate.t("Settings issues"),
-                        Translate.t("%1 cannot run because it could not create a folder to store your settings.", Theme.get("product.cap")), null);
+                Translate.t("Cannot run because I could not create a folder to store your settings."), null);
+                return null;
             }
         }
         return settingsFolder;
@@ -862,7 +814,7 @@ public class Base {
     }
 
     public static File getSketchbookFolder() {
-        return new File(Preferences.get("sketchbook.path"));
+        return new File(preferences.get("sketchbook.path"));
     }
 
 
@@ -899,7 +851,7 @@ public class Base {
 
         if (!result) {
             showError(Translate.t("You forgot your sketchbook"),
-            Translate.t("%1 cannot run because it could not create a folder to store your sketchbook.", Theme.get("product.cap")), null);
+            Translate.t("I cannot run because I could not create a folder to store your sketchbook."), null);
         }
 
         return sketchbookFolder;
@@ -1360,22 +1312,6 @@ public class Base {
         targetFile.setLastModified(sourceFile.lastModified());
     }
 
-
-    /**
-    * Grab the contents of a file as a string.
-    */
-    public static String loadFile(File file) throws IOException {
-        ArrayList<String> contents = Preferences.loadStrings(file);
-        if (contents == null) return null;
-        StringBuilder sb = new StringBuilder();
-        for (String s : contents) {
-            sb.append(s);
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
-
-
     /**
     * Copy a folder from one place to another. This ignores all dot files and
     * folders found in the source directory, to avoid copying silly .DS_Store
@@ -1428,7 +1364,7 @@ public class Base {
             if (files[i].equals(".") || files[i].equals("..")) continue;
             File dead = new File(dir, files[i]);
             if (!dead.isDirectory()) {
-                if (!Preferences.getBoolean("compiler.save_build_files")) {
+                if (!preferences.getBoolean("compiler.save_build_files")) {
                     if (!dead.delete()) {
                         // temporarily disabled
                         System.err.println(Translate.t("Could not delete %1", dead.getName()));
@@ -1897,17 +1833,12 @@ public class Base {
             pluginInfo.put("jarfile", jar.getAbsolutePath());
             pluginInfo.put("shortcut", manifestContents.getValue("Shortcut"));
             pluginInfo.put("modifier", manifestContents.getValue("Modifier"));
-            System.err.println("Adding class " + className);
             Plugin op = plugins.get(className);
             if (op != null) {
-                System.err.println("Duplicate class");
                 String oldVersion = op.getVersion();
                 String newVersion = manifestContents.getValue("Version");
                 int diff = oldVersion.compareTo(newVersion);
-                System.err.println("Existing version: " + oldVersion);
-                System.err.println("This version: " + newVersion);
                 if (diff != -1) { // New version no newer than old version
-                    System.err.println("Skipping " + jar.getAbsolutePath() + ": " + newVersion + " <= " + oldVersion);
                     return;
                 }
             }

@@ -81,20 +81,20 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
 
     if (bgcolor == null) {
       bgcolor = new Color[6];
-      bgcolor[0] = Theme.getColor("status.notice.bgcolor");
-      bgcolor[1] = Theme.getColor("status.error.bgcolor");
-      bgcolor[2] = Theme.getColor("status.edit.bgcolor");
+      bgcolor[0] = Base.theme.getColor("status.notice.bgcolor");
+      bgcolor[1] = Base.theme.getColor("status.error.bgcolor");
+      bgcolor[2] = Base.theme.getColor("status.edit.bgcolor");
       bgcolor[3] = null;
       bgcolor[4] = null;
-      bgcolor[5] = Theme.getColor("status.notice.bgcolor");
+      bgcolor[5] = Base.theme.getColor("status.notice.bgcolor");
 
       fgcolor = new Color[6];
-      fgcolor[0] = Theme.getColor("status.notice.fgcolor");
-      fgcolor[1] = Theme.getColor("status.error.fgcolor");
-      fgcolor[2] = Theme.getColor("status.edit.fgcolor");
+      fgcolor[0] = Base.theme.getColor("status.notice.fgcolor");
+      fgcolor[1] = Base.theme.getColor("status.error.fgcolor");
+      fgcolor[2] = Base.theme.getColor("status.edit.fgcolor");
       fgcolor[3] = null;
       fgcolor[4] = null;
-      fgcolor[5] = Theme.getColor("status.notice.fgcolor");
+      fgcolor[5] = Base.theme.getColor("status.notice.fgcolor");
 }
   }
 
@@ -207,7 +207,7 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
   
   public void unprogress()
   {
-    if (Preferences.getBoolean("editor.beep.compile")) {
+    if (Base.preferences.getBoolean("editor.beep.compile")) {
       Toolkit.getDefaultToolkit().beep();
     }
     progressBar.setVisible(false);
@@ -270,7 +270,7 @@ public class EditorStatus extends JPanel /*implements ActionListener*/ {
 
     Graphics g = offscreen.getGraphics();
     if (font == null) {
-      font = Theme.getFont("status.font");
+      font = Base.theme.getFont("status.font");
       //new Font("SansSerif", Font.PLAIN, 12));
       g.setFont(font);
       metrics = g.getFontMetrics();

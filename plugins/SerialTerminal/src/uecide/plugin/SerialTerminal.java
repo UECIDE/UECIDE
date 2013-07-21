@@ -66,10 +66,10 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         Box line = Box.createHorizontalBox();
 
         term = new JTerminal();
-        Font f = Preferences.getFont("serial.font");
+        Font f = Base.preferences.getFont("serial.font");
         if (f == null) {
             f = new Font("Monospaced", Font.PLAIN, 12);
-            Preferences.set("serial.font", "Monospaced,plain,12");
+            Base.preferences.set("serial.font", "Monospaced,plain,12");
         }
         term.setFont(f);
         term.setKeypressConsumer(this);
@@ -79,19 +79,19 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         int height = 24;
 
         try {
-            height = Integer.parseInt(Preferences.get("serial.height"));
+            height = Integer.parseInt(Base.preferences.get("serial.height"));
         } catch (Exception e) {
             height = 24;
         }
 
         try {
-            width = Integer.parseInt(Preferences.get("serial.width"));
+            width = Integer.parseInt(Base.preferences.get("serial.width"));
         } catch (Exception e) {
             width = 80;
         }
 
         term.setSize(new Dimension(width, height));
-        term.setAutoCr(Preferences.getBoolean("serial.autocr_in"));
+        term.setAutoCr(Base.preferences.getBoolean("serial.autocr_in"));
 
         line.add(term);
         scrollbackBar = new JScrollBar(JScrollBar.VERTICAL);
@@ -119,7 +119,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
                 if (ready) {
                     String value = (String) baudRates.getSelectedItem();
                     baudRate = Integer.parseInt(value);
-                    Preferences.set("serial.debug_rate", value);
+                    Base.preferences.set("serial.debug_rate", value);
                     try {
                         if (port != null) {
                             port.dispose();
@@ -162,7 +162,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
             public void actionPerformed(ActionEvent event) {
                 if (ready) {
                     term.showCursor(showCursor.isSelected());
-                    Preferences.setBoolean("serial.debug_cursor", showCursor.isSelected());
+                    Base.preferences.setBoolean("serial.debug_cursor", showCursor.isSelected());
                 }
             }
         });
@@ -227,15 +227,15 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
         term.clearScreen();
         try {
-            baudRate = Integer.parseInt(Preferences.get("serial.debug_rate"));
-            baudRates.setSelectedItem(Preferences.get("serial.debug_rate"));
+            baudRate = Base.preferences.getInteger("serial.debug_rate");
+            baudRates.setSelectedItem(Base.preferences.get("serial.debug_rate"));
             port = new Serial(baudRate);
         } catch(Exception e) {
             editor.message("Unable to open serial port: " + e.getMessage() + "\n", 2);
             return;
         }
-        showCursor.setSelected(Preferences.getBoolean("serial.debug_cursor"));
-        term.showCursor(Preferences.getBoolean("serial.debug_cursor"));
+        showCursor.setSelected(Base.preferences.getBoolean("serial.debug_cursor"));
+        term.showCursor(Base.preferences.getBoolean("serial.debug_cursor"));
         port.addListener(term);
         win.setVisible(true);
         ready = true;
@@ -260,7 +260,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
             win.setVisible(false);
             return;
         }
-        if (Preferences.getBoolean("serial.autocr_out")) {
+        if (Base.preferences.getBoolean("serial.autocr_out")) {
             m = m.replace("\n", "\r\n");
         }
 
@@ -301,23 +301,23 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         c.gridy = 1;
         p.add(selectSerialFont, c);
 
-        Font serialFont = Preferences.getFont("serial.font");
-        fontSizeField.setText(Preferences.fontToString(serialFont));
+        Font serialFont = Base.preferences.getFont("serial.font");
+        fontSizeField.setText(Base.preferences.fontToString(serialFont));
 
         final Container parent = p;
         selectSerialFont.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFontChooser fc = new JFontChooser(false);
-                fc.setSelectedFont(Preferences.stringToFont(fontSizeField.getText()));
+                fc.setSelectedFont(Base.preferences.stringToFont(fontSizeField.getText()));
                 int res = fc.showDialog(parent);
                 if (res == JFontChooser.OK_OPTION) {
                     Font f = fc.getSelectedFont();
-                    fontSizeField.setText(Preferences.fontToString(f));
+                    fontSizeField.setText(Base.preferences.fontToString(f));
                 }
             }
         });
 
-        fontSizeField.setText(Preferences.get("serial.font"));
+        fontSizeField.setText(Base.preferences.get("serial.font"));
 
         label = new JLabel("Display size: ");
         c.gridx = 0;
@@ -332,12 +332,12 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         int w = 80;
         int h = 24;
         try {
-            w = Integer.parseInt(Preferences.get("serial.width"));
+            w = Integer.parseInt(Base.preferences.get("serial.width"));
         } catch (Exception e) {
             w = 80;
         }
         try {
-            h = Integer.parseInt(Preferences.get("serial.height"));
+            h = Integer.parseInt(Base.preferences.get("serial.height"));
         } catch (Exception e) {
             h = 24;
         }
@@ -363,16 +363,16 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         p.add(tl, c);
         c.gridx++;
         autoCrIn = new JCheckBox(Translate.t("Incoming"));
-        autoCrIn.setSelected(Preferences.getBoolean("serial.autocr_in"));
+        autoCrIn.setSelected(Base.preferences.getBoolean("serial.autocr_in"));
         p.add(autoCrIn, c);
         c.gridx++;
         autoCrOut = new JCheckBox(Translate.t("Outgoing"));
-        autoCrOut.setSelected(Preferences.getBoolean("serial.autocr_out"));
+        autoCrOut.setSelected(Base.preferences.getBoolean("serial.autocr_out"));
         p.add(autoCrOut, c);
     }
 
     public void savePreferences() {
-        Preferences.set("serial.font", fontSizeField.getText());
+        Base.preferences.set("serial.font", fontSizeField.getText());
         int w = 80;
         int h = 24;
         try {
@@ -386,11 +386,11 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
             h = 80;
         }
 
-        Preferences.set("serial.width", Integer.toString(w));
-        Preferences.set("serial.height", Integer.toString(h));
+        Base.preferences.set("serial.width", Integer.toString(w));
+        Base.preferences.set("serial.height", Integer.toString(h));
 
-        Preferences.setBoolean("serial.autocr_in", autoCrIn.isSelected());
-        Preferences.setBoolean("serial.autocr_out", autoCrOut.isSelected());
+        Base.preferences.setBoolean("serial.autocr_in", autoCrIn.isSelected());
+        Base.preferences.setBoolean("serial.autocr_out", autoCrOut.isSelected());
             
     }
 }

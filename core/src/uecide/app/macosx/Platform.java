@@ -11,7 +11,6 @@ import javax.swing.UIManager;
 import com.apple.eio.FileManager;
 
 import uecide.app.Base;
-import uecide.app.Theme;
 
 /**
  * Platform handler for Mac OS X.
@@ -20,7 +19,7 @@ public class Platform extends uecide.app.Platform {
 
   public void setLookAndFeel() throws Exception {
     // Use the Quaqua L & F on OS X to make JFileChooser less awful
-    String laf = Theme.get("window.laf.macosx");
+    String laf = Base.theme.get("window.laf.macosx");
     if ((laf != null) && (laf != "default")) {
        UIManager.setLookAndFeel(laf);
     } else {
@@ -67,12 +66,12 @@ public class Platform extends uecide.app.Platform {
 
 
   public File getSettingsFolder() throws Exception {
-    return new File(getLibraryFolder(), Theme.get("product"));
+    return new File(getLibraryFolder(), Base.theme.get("product"));
   }
 
 
   public File getDefaultSketchbookFolder() throws Exception {
-    return new File(getDocumentsFolder(), Theme.get("product"));
+    return new File(getDocumentsFolder(), Base.theme.get("product"));
     /*
     // looking for /Users/blah/Documents/Processing
     try {

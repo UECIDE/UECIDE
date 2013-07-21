@@ -40,31 +40,31 @@ public class Serial implements SerialPortEventListener {
   MessageConsumer consumer;
 
   public Serial() throws SerialException {
-    this(Preferences.get("serial.port"),
-      Preferences.getInteger("serial.debug_rate"),
-      Preferences.get("serial.parity").charAt(0),
-      Preferences.getInteger("serial.databits"), 
-      new Float(Preferences.get("serial.stopbits")).floatValue());
+    this(Base.preferences.get("serial.port"),
+      Base.preferences.getInteger("serial.debug_rate"),
+      Base.preferences.get("serial.parity").charAt(0),
+      Base.preferences.getInteger("serial.databits"), 
+      new Float(Base.preferences.get("serial.stopbits")).floatValue());
   }
 
   public Serial(int irate) throws SerialException {
-    this(Preferences.get("serial.port"), irate,
-      Preferences.get("serial.parity").charAt(0),
-      Preferences.getInteger("serial.databits"), 
-      new Float(Preferences.get("serial.stopbits")).floatValue());
+    this(Base.preferences.get("serial.port"), irate,
+      Base.preferences.get("serial.parity").charAt(0),
+      Base.preferences.getInteger("serial.databits"), 
+      new Float(Base.preferences.get("serial.stopbits")).floatValue());
   }
 
   public Serial(String iname, int irate) throws SerialException {
-    this(iname, irate, Preferences.get("serial.parity").charAt(0),
-    Preferences.getInteger("serial.databits"), 
-    new Float(Preferences.get("serial.stopbits")).floatValue());
+    this(iname, irate, Base.preferences.get("serial.parity").charAt(0),
+    Base.preferences.getInteger("serial.databits"), 
+    new Float(Base.preferences.get("serial.stopbits")).floatValue());
   }
 
   public Serial(String iname) throws SerialException {
-    this(iname, Preferences.getInteger("serial.debug_rate"),
-      Preferences.get("serial.parity").charAt(0),
-      Preferences.getInteger("serial.databits"),
-      new Float(Preferences.get("serial.stopbits")).floatValue());
+    this(iname, Base.preferences.getInteger("serial.debug_rate"),
+      Base.preferences.get("serial.parity").charAt(0),
+      Base.preferences.getInteger("serial.databits"),
+      new Float(Base.preferences.get("serial.stopbits")).floatValue());
   }
 
   public Serial(String iname, int irate,

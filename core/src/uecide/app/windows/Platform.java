@@ -8,8 +8,6 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 
 import uecide.app.Base;
-import uecide.app.Preferences;
-import uecide.app.Theme;
 import uecide.app.windows.Registry.REGISTRY_ROOT_KEY;
 
 import javax.swing.UIManager;
@@ -30,7 +28,7 @@ public class Platform extends uecide.app.Platform {
 
   public void setLookAndFeel() throws Exception {
     // Use the Quaqua L & F on OS X to make JFileChooser less awful
-    String laf = Theme.get("window.laf.windows");
+    String laf = Base.theme.get("window.laf.windows");
     if ((laf != null) && (laf != "default")) {
        UIManager.setLookAndFeel(laf);
     } 
@@ -54,13 +52,13 @@ public class Platform extends uecide.app.Platform {
         Registry.getStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT,
                                 DOC + "\\shell\\open\\command", "");
       if (knownCommand == null) {
-        if (Preferences.getBoolean("platform.auto_file_type_associations")) {
+        if (Base.preferences.getBoolean("platform.auto_file_type_associations")) {
           setAssociations();
         }
 
       } else if (!knownCommand.equals(openCommand)) {
         // If the value is set differently, just change the registry setting.
-        if (Preferences.getBoolean("platform.auto_file_type_associations")) {
+        if (Base.preferences.getBoolean("platform.auto_file_type_associations")) {
           setAssociations();
         }
       }
@@ -96,7 +94,7 @@ public class Platform extends uecide.app.Platform {
       // hooray!
 
     } else {
-      Preferences.setBoolean("platform.auto_file_type_associations", false);
+      Base.preferences.setBoolean("platform.auto_file_type_associations", false);
     }
   }
 
@@ -182,7 +180,7 @@ public class Platform extends uecide.app.Platform {
     String appDataPath =
       Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "AppData");
 
-    File dataFolder = new File(appDataPath, Theme.get("product"));
+    File dataFolder = new File(appDataPath, Base.theme.get("product"));
     return dataFolder;
   }
 
@@ -211,7 +209,7 @@ public class Platform extends uecide.app.Platform {
     String personalPath =
       Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "Personal");
 
-    return new File(personalPath, Theme.get("product"));
+    return new File(personalPath, Base.theme.get("product"));
   }
 
 

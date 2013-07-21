@@ -112,7 +112,7 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     public Editor(String path) {
-        super(Theme.get("product"));
+        super(Base.theme.get("product"));
 
         Base.setIcon(this);
  
@@ -156,7 +156,7 @@ public class Editor extends JFrame implements RunnerListener {
         Box upper = Box.createVerticalBox();
 
         toolbar = new JToolBar();
-        toolbar.setBackground(Theme.getColor("buttons.bgcolor"));
+        toolbar.setBackground(Base.theme.getColor("buttons.bgcolor"));
         toolbar.setFloatable(false);
 
         File themeFolder = Base.getContentFile("lib/theme");
@@ -293,7 +293,7 @@ public class Editor extends JFrame implements RunnerListener {
         splitPane.setBorder(null);
 
         // the default size on windows is too small and kinda ugly
-        int dividerSize = Preferences.getInteger("editor.divider.size");
+        int dividerSize = Base.preferences.getInteger("editor.divider.size");
         if (dividerSize != 0) {
             splitPane.setDividerSize(dividerSize);
         }
@@ -329,8 +329,8 @@ public class Editor extends JFrame implements RunnerListener {
         }
 
         setMinimumSize(new Dimension(
-            Preferences.getInteger("editor.window.width.min"),
-            Preferences.getInteger("editor.window.height.min")
+            Base.preferences.getInteger("editor.window.width.min"),
+            Base.preferences.getInteger("editor.window.height.min")
         ));
     
         if (Base.activeEditor != null) {
@@ -339,17 +339,17 @@ public class Editor extends JFrame implements RunnerListener {
             Point oPos = Base.activeEditor.getLocation();
             setLocation(oPos.x + 20, oPos.y + 20);
         } else {
-            int width = Preferences.getInteger("editor.window.width");
-            if (width < Preferences.getInteger("editor.window.width.min")) {
-                width = Preferences.getInteger("editor.window.width.min");
+            int width = Base.preferences.getInteger("editor.window.width");
+            if (width < Base.preferences.getInteger("editor.window.width.min")) {
+                width = Base.preferences.getInteger("editor.window.width.min");
             }
-            int height = Preferences.getInteger("editor.window.height");
-            if (height < Preferences.getInteger("editor.window.height.min")) {
-                height = Preferences.getInteger("editor.window.height.min");
+            int height = Base.preferences.getInteger("editor.window.height");
+            if (height < Base.preferences.getInteger("editor.window.height.min")) {
+                height = Base.preferences.getInteger("editor.window.height.min");
             }
 
             setSize(width, height);
-            setLocation(Preferences.getInteger("editor.window.x"), Preferences.getInteger("editor.window.y"));
+            setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));
         }
         applyPreferences();
         setVisible(true);
@@ -442,44 +442,15 @@ public class Editor extends JFrame implements RunnerListener {
     }
   }
 
-
-  protected void setPlacement(int[] location) {
-    setBounds(location[0], location[1], location[2], location[3]);
-    if (location[4] != 0) {
-      splitPane.setDividerLocation(location[4]);
-    }
-  }
-
-
-  protected int[] getPlacement() {
-    int[] location = new int[5];
-
-    // Get the dimensions of the Frame
-    Rectangle bounds = getBounds();
-    location[0] = bounds.x;
-    location[1] = bounds.y;
-    location[2] = bounds.width;
-    location[3] = bounds.height;
-
-    // Get the current placement of the divider
-    location[4] = splitPane.getDividerLocation();
-
-    return location;
-  }
-
-
-  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-
   /**
    * Read and apply new values from the preferences, either because
    * the app is just starting up, or the user just finished messing
-   * with things in the Preferences window.
+   * with things in the Base.preferences window.
    */
   protected void applyPreferences() {
 
     // apply the setting for 'use external editor'
-    boolean external = Preferences.getBoolean("editor.external");
+    boolean external = Base.preferences.getBoolean("editor.external");
 
     saveMenuItem.setEnabled(!external);
     saveAsMenuItem.setEnabled(!external);
@@ -488,12 +459,12 @@ public class Editor extends JFrame implements RunnerListener {
         SketchEditor ed = (SketchEditor) tabs.getComponentAt(i);
         ed.setEditable(!external);
         ed.setBackground( external ?
-            Theme.getColor("editor.external.bgcolor") :
-            Theme.getColor("editor.bgcolor") 
+            Base.theme.getColor("editor.external.bgcolor") :
+            Base.theme.getColor("editor.bgcolor") 
         );
 
-        ed.setFont(Preferences.getFont("editor.font"));
-        console.setFont(Preferences.getFont("console.font"));
+        ed.setFont(Base.preferences.getFont("editor.font"));
+        console.setFont(Base.preferences.getFont("console.font"));
     }
   }
 
@@ -753,8 +724,8 @@ public class Editor extends JFrame implements RunnerListener {
       if (name.equals(item.getText())) selection = item;
     }
     if (selection != null) selection.setState(true);
-    Preferences.set("serial.port", name);
-    lineStatus.setText(board.getLongName() + " on " + Preferences.get("serial.port"));
+    Base.preferences.set("serial.port", name);
+    lineStatus.setText(board.getLongName() + " on " + Base.preferences.get("serial.port"));
   }
 
 
@@ -774,7 +745,7 @@ public class Editor extends JFrame implements RunnerListener {
         if (commportidentifier.getPortType() == CommPortIdentifier.PORT_SERIAL)
         {
           String curr_port = commportidentifier.getName();
-          rbMenuItem = new JCheckBoxMenuItem(curr_port, curr_port.equals(Preferences.get("serial.port")));
+          rbMenuItem = new JCheckBoxMenuItem(curr_port, curr_port.equals(Base.preferences.get("serial.port")));
           rbMenuItem.addActionListener(serialMenuListener);
           //serialGroup.add(rbMenuItem);
           serialMenu.add(rbMenuItem);
@@ -808,74 +779,74 @@ public class Editor extends JFrame implements RunnerListener {
     JMenu menu = new JMenu(Translate.t("Help"));
     JMenuItem item;
 
-    if (Theme.get("links.gettingstarted.url") != null) {
+    if (Base.theme.get("links.gettingstarted.url") != null) {
         item = new JMenuItem(Translate.t("Getting Started"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              Base.openURL(Theme.get("links.gettingstarted.url"));
+              Base.openURL(Base.theme.get("links.gettingstarted.url"));
             }
           });
         menu.add(item);
     }
 
-    if (Theme.get("links.environment.url") != null) {
+    if (Base.theme.get("links.environment.url") != null) {
         item = new JMenuItem(Translate.t("Environment"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              Base.openURL(Theme.get("links.environment.url"));
+              Base.openURL(Base.theme.get("links.environment.url"));
             }
           });
         menu.add(item);
     }
 
-    if (Theme.get("links.troubleshooting.url") != null) {
+    if (Base.theme.get("links.troubleshooting.url") != null) {
         item = new JMenuItem(Translate.t("Troubleshooting"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              Base.openURL(Theme.get("links.troubleshooting.url"));
+              Base.openURL(Base.theme.get("links.troubleshooting.url"));
             }
           });
         menu.add(item);
     }
 
 
-    if (Theme.get("links.reference.url") != null) {
+    if (Base.theme.get("links.reference.url") != null) {
         item = new JMenuItem(Translate.t("Reference"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              Base.openURL(Theme.get("links.reference.url"));
+              Base.openURL(Base.theme.get("links.reference.url"));
             }
           });
         menu.add(item);
     }
 
-    if (Theme.get("links.faq.url") != null) {
+    if (Base.theme.get("links.faq.url") != null) {
         item = new JMenuItem(Translate.t("Frequently Asked Questions"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              Base.openURL(Theme.get("links.faq.url"));
+              Base.openURL(Base.theme.get("links.faq.url"));
             }
           });
         menu.add(item);
     }
 
-    String linkName = Theme.get("links.homepage.name");
+    String linkName = Base.theme.get("links.homepage.name");
     if (linkName != null) {
         item = new JMenuItem(linkName);
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              Base.openURL(Theme.get("links.homepage.url"));
+              Base.openURL(Base.theme.get("links.homepage.url"));
             }
         });
         menu.add(item);
     }
 
-    linkName = Theme.get("links.forums.name");
+    linkName = Base.theme.get("links.forums.name");
     if (linkName != null) {
         item = new JMenuItem(linkName);
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-              Base.openURL(Theme.get("links.forums.url"));
+              Base.openURL(Base.theme.get("links.forums.url"));
             }
         });
         menu.add(item);
@@ -884,7 +855,7 @@ public class Editor extends JFrame implements RunnerListener {
     // macosx already has its own about menu
     if (!Base.isMacOS()) {
       menu.addSeparator();
-      item = new JMenuItem(Translate.t("About %1", Theme.get("product.cap")));
+      item = new JMenuItem(Translate.t("About %1", Base.theme.get("product.cap")));
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             Base.handleAbout();
@@ -1334,7 +1305,7 @@ public class Editor extends JFrame implements RunnerListener {
 
 
   protected void handleIndentOutdent(boolean indent) {
-    int tabSize = Preferences.getInteger("editor.tabs.size");
+    int tabSize = Base.preferences.getInteger("editor.tabs.size");
     String tabString = "\t";
 
     SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
@@ -1385,7 +1356,7 @@ public class Editor extends JFrame implements RunnerListener {
     status.progress(Translate.t("Compiling sketch..."));
 
     // clear the console on each run, unless the user doesn't want to
-    if (Preferences.getBoolean("console.auto_clear")) {
+    if (Base.preferences.getBoolean("console.auto_clear")) {
       console.clear();
     }
 
@@ -1593,7 +1564,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     String result = (String)
       JOptionPane.showInputDialog(this,
-                                  Translate.w("Serial port %1 not found. Retry the upload with another serial port?", 30, "\n", Preferences.get("serial.port")),
+                                  Translate.w("Serial port %1 not found. Retry the upload with another serial port?", 30, "\n", Base.preferences.get("serial.port")),
                                   Translate.t("Serial port not found"),
                                   JOptionPane.PLAIN_MESSAGE,
                                   null,
@@ -2008,9 +1979,9 @@ public class Editor extends JFrame implements RunnerListener {
         board = b;
         core = board.getCore();
         sketch.settings.put("board.root", board.getFolder().getAbsolutePath());
-        lineStatus.setText(b.getLongName() + " on " + Preferences.get("serial.port"));
+        lineStatus.setText(b.getLongName() + " on " + Base.preferences.get("serial.port"));
         rebuildBoardsMenu();
-        Preferences.set("board", b.getName());
+        Base.preferences.set("board", b.getName());
         populateMenus();
 
         for (int i = 0; i < tabs.getTabCount(); i++) {
@@ -2118,7 +2089,7 @@ public class Editor extends JFrame implements RunnerListener {
                 } else {
                     Base.showWarning("Sketch Does Not Exist",
                                 "The selected sketch no longer exists.\n" +
-                                "You may need to restart " + Theme.get("product.cap") + " to update\n" +
+                                "You may need to restart " + Base.theme.get("product.cap") + " to update\n" +
                                 "the sketchbook menu.", null);
                 }
             }
@@ -2170,13 +2141,13 @@ public class Editor extends JFrame implements RunnerListener {
         Base.removeDir(sketch.buildFolder);
 
         Dimension d = getSize();
-        Preferences.setInteger("editor.window.width", d.width);
-        Preferences.setInteger("editor.window.height", d.height);
+        Base.preferences.setInteger("editor.window.width", d.width);
+        Base.preferences.setInteger("editor.window.height", d.height);
         Point p = getLocation();
-        Preferences.setInteger("editor.window.x", p.x);
-        Preferences.setInteger("editor.window.y", p.y);
+        Base.preferences.setInteger("editor.window.x", p.x);
+        Base.preferences.setInteger("editor.window.y", p.y);
 
-        Preferences.save();
+        Base.preferences.save();
 
         Base.handleClose(this);
     }
@@ -2189,10 +2160,11 @@ public class Editor extends JFrame implements RunnerListener {
                     data.endsWith(".pde") || 
                     data.endsWith(".cpp") || 
                     data.endsWith(".c") || 
+                    data.endsWith(".hh") || 
                     data.endsWith(".h") || 
                     data.endsWith(".S")
                 )) {
-                    Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h or .S files to a sketch", 40, "\n"), null);
+                    Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h, .hh or .S files to a sketch", 40, "\n"), null);
                     return;
                 }
                 sketch.createBlankFile(data);

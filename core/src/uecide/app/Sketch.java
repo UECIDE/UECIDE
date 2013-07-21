@@ -68,7 +68,7 @@ public class Sketch implements MessageConsumer {
         folder = path;
         name = folder.getName();
         loadSketchFromFolder();
-        editor.setTitle(Theme.get("product.cap") + " | " + name);
+        editor.setTitle(Base.theme.get("product.cap") + " | " + name);
     }
 
     public void createBlankFile(String fileName) {
@@ -85,14 +85,7 @@ public class Sketch implements MessageConsumer {
     public void loadSketchFromFolder() {
         File fileList[] = folder.listFiles();
         for (File f : fileList){
-            String lcn = f.getName().toLowerCase();
-            if (
-                lcn.endsWith(".ino") || 
-                lcn.endsWith(".pde") || 
-                lcn.endsWith(".h") || 
-                lcn.endsWith(".c") || 
-                lcn.endsWith(".cpp") || 
-                lcn.endsWith(".s")) {
+            if (validSourceFile(f)) {
                 loadFile(f);
             }
         }
@@ -197,14 +190,14 @@ public class Sketch implements MessageConsumer {
     }
 
     public void prepare() {
-        if (Preferences.getBoolean("export.delete_target_folder")) {
+        if (Base.preferences.getBoolean("export.delete_target_folder")) {
             cleanBuild();
         }
         parameters = new HashMap<String, String>();
         importedLibraries = new HashMap<String, File>();
         StringBuilder combinedMain = new StringBuilder();
         SketchFile mainFile = getMainFile();
-        if (Preferences.getBoolean("compiler.combine_ino")) {
+        if (Base.preferences.getBoolean("compiler.combine_ino")) {
             combinedMain.append("#line 1 \"" + mainFile.file.getName() + "\"\n");
             combinedMain.append(mainFile.textArea.getText());
         }
@@ -212,6 +205,7 @@ public class Sketch implements MessageConsumer {
             String lcn = f.file.getName().toLowerCase();
             if (
                 lcn.endsWith(".h") || 
+                lcn.endsWith(".hh") || 
                 lcn.endsWith(".c") || 
                 lcn.endsWith(".cpp") || 
                 lcn.endsWith(".s")
@@ -220,7 +214,7 @@ public class Sketch implements MessageConsumer {
             }
             if (lcn.endsWith(".pde") || lcn.endsWith(".ino")) {
 
-                if (Preferences.getBoolean("compiler.combine_ino")) {
+                if (Base.preferences.getBoolean("compiler.combine_ino")) {
                     if (!(f.equals(mainFile))) {
                         combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
                         combinedMain.append(f.textArea.getText());
@@ -242,7 +236,7 @@ public class Sketch implements MessageConsumer {
                     sb.append("\n");
                     f.headerLines ++;
                 
-                    if (Preferences.getBoolean("compiler.disable_prototypes") == false) {
+                    if (Base.preferences.getBoolean("compiler.disable_prototypes") == false) {
                         for (String prototype : f.prototypes) {
                             sb.append(prototype + "\n");
                             f.headerLines++;
@@ -271,13 +265,13 @@ public class Sketch implements MessageConsumer {
                     }
                 }
             }
-            if (Preferences.getBoolean("editor.correct_numbers")) {
+            if (Base.preferences.getBoolean("editor.correct_numbers")) {
                 f.textArea.setNumberOffset(f.headerLines+1);
             } else {
                 f.textArea.setNumberOffset(1);
             }
         }
-        if (Preferences.getBoolean("compiler.combine_ino")) {
+        if (Base.preferences.getBoolean("compiler.combine_ino")) {
             SketchFile f = getMainFile();
             String rawData = combinedMain.toString();
             PdePreprocessor proc = new PdePreprocessor();
@@ -295,7 +289,7 @@ public class Sketch implements MessageConsumer {
             sb.append("\n");
             f.headerLines ++;
         
-            if (Preferences.getBoolean("compiler.disable_prototypes") == false) {
+            if (Base.preferences.getBoolean("compiler.disable_prototypes") == false) {
                 for (String prototype : f.prototypes) {
                     sb.append(prototype + "\n");
                     f.headerLines++;
@@ -407,19 +401,19 @@ public class Sketch implements MessageConsumer {
         }
         if (uploadCommand == null) {
             isJava = false;
-            uploadCommand = editor.board.get("upload.command." + Base.osNameFull());
+            uploadCommand = editor.board.get("upload.command." + Base.getOSFullName());
         }
         if (uploadCommand == null) {
-            uploadCommand = editor.board.get("upload.command." + Base.osName());
+            uploadCommand = editor.board.get("upload.command." + Base.getOSName());
         }
         if (uploadCommand == null) {
             uploadCommand = editor.board.get("upload.command");
         }
         if (uploadCommand == null) {
-            uploadCommand = editor.core.get("upload.command." + Base.osNameFull());
+            uploadCommand = editor.core.get("upload.command." + Base.getOSFullName());
         }
         if (uploadCommand == null) {
-            uploadCommand = editor.core.get("upload.command." + Base.osName());
+            uploadCommand = editor.core.get("upload.command." + Base.getOSName());
         }
         if (uploadCommand == null) {
             uploadCommand = editor.core.get("upload.command");
@@ -605,7 +599,7 @@ public class Sketch implements MessageConsumer {
                                    Translate.t("Save sketch folder as..."),
                                    FileDialog.SAVE);
 
-        fd.setDirectory(Preferences.get("sketchbook.path"));
+        fd.setDirectory(Base.preferences.get("sketchbook.path"));
 
         fd.setFile(name);
 
@@ -649,7 +643,7 @@ public class Sketch implements MessageConsumer {
         folder = newFolder;
         name = folder.getName();
         save();
-        editor.setTitle(Theme.get("product.cap") + " | " + name);
+        editor.setTitle(Base.theme.get("product.cap") + " | " + name);
         int index = editor.getTabByFile(mf);
         editor.setTabName(index, mf.file.getName());
         return true;
@@ -696,16 +690,8 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        String lcn = sourceFile.getName().toLowerCase();
-        if (!(
-                lcn.endsWith(".ino") || 
-                lcn.endsWith(".pde") || 
-                lcn.endsWith(".h") || 
-                lcn.endsWith(".cpp") || 
-                lcn.endsWith(".c") || 
-                lcn.endsWith(".s")
-        )) {
-            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h or .S files to a sketch", 40, "\n"), null);
+        if (!(validSourceFile(sourceFile))) {
+            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h, .hh or .S files to a sketch", 40, "\n"), null);
             return false;
         }
 
@@ -919,7 +905,7 @@ public class Sketch implements MessageConsumer {
         setCompilingProgress(70);
 
         if (editor.core.get("recipe.objcopy.lss.pattern") != null) {
-            if (Preferences.getBoolean("compiler.generate_lss")) {
+            if (Base.preferences.getBoolean("compiler.generate_lss")) {
                 editor.statusNotice(Translate.t("Generating Listing..."));
                 File redirectTo = new File(buildFolder, name + ".lss");
                 if (redirectTo.exists()) {
@@ -940,7 +926,7 @@ public class Sketch implements MessageConsumer {
                     editor.statusNotice(Translate.t("Error Generating Listing"));
                     return false;
                 }
-                if (Preferences.getBoolean("export.save_lss")) {
+                if (Base.preferences.getBoolean("export.save_lss")) {
                     try {
                         Base.copyFile(new File(buildFolder, name + ".lss"), new File(folder, name + ".lss"));
                     } catch (Exception e) {
@@ -959,7 +945,7 @@ public class Sketch implements MessageConsumer {
         }
         setCompilingProgress(90);
 
-        if (Preferences.getBoolean("export.save_hex")) {
+        if (Base.preferences.getBoolean("export.save_hex")) {
             try {
                 Base.copyFile(new File(buildFolder, name + ".hex"), new File(folder, name + ".hex"));
             } catch (Exception e) {
@@ -982,9 +968,16 @@ public class Sketch implements MessageConsumer {
         String mid;
 
         HashMap<String, String> tokens = new HashMap<String, String>();
+
         
-        tokens.putAll(editor.core.corePreferences);
-        tokens.putAll(editor.board.boardPreferences);
+        Properties properties = editor.core.getPreferences().getProperties();
+        for (final String name: properties.stringPropertyNames())
+            tokens.put(name, properties.getProperty(name));
+
+        properties = editor.board.getPreferences().getProperties();
+        for (final String name: properties.stringPropertyNames())
+            tokens.put(name, properties.getProperty(name));
+
         tokens.putAll(settings);
 
         out = in;
@@ -1026,15 +1019,15 @@ public class Sketch implements MessageConsumer {
                     mid = found.getAbsolutePath();
                 }
             } else if (mid.equals("verbose")) {
-                if (Preferences.getBoolean("export.verbose")) 
+                if (Base.preferences.getBoolean("export.verbose")) 
                     mid = editor.board.getAny("upload.verbose", "");
                 else 
                     mid = editor.board.getAny("upload.quiet", "");
             } else if (mid.equals("port")) {
                 if (Base.isWindows()) 
-                    mid = "\\\\.\\" + Preferences.get("serial.port");
+                    mid = "\\\\.\\" + Base.preferences.get("serial.port");
                 else 
-                    mid = Preferences.get("serial.port");
+                    mid = Base.preferences.get("serial.port");
             } else {
                 mid = tokens.get(mid);
             }
@@ -1094,7 +1087,7 @@ public class Sketch implements MessageConsumer {
             settings.put("object.name", objectFile.getAbsolutePath());
 
             if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if (Preferences.getBoolean("compiler.verbose")) {
+                if (Base.preferences.getBoolean("compiler.verbose")) {
                     message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
                 }
                 continue;
@@ -1114,7 +1107,7 @@ public class Sketch implements MessageConsumer {
             settings.put("object.name", objectFile.getAbsolutePath());
 
             if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if (Preferences.getBoolean("compiler.verbose")) {
+                if (Base.preferences.getBoolean("compiler.verbose")) {
                     message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
                 }
                 continue;
@@ -1134,7 +1127,7 @@ public class Sketch implements MessageConsumer {
             settings.put("object.name", objectFile.getAbsolutePath());
 
             if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if (Preferences.getBoolean("compiler.verbose")) {
+                if (Base.preferences.getBoolean("compiler.verbose")) {
                     message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
                 }
                 continue;
@@ -1381,7 +1374,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        if (Preferences.getBoolean("compiler.verbose")) {
+        if (Base.preferences.getBoolean("compiler.verbose")) {
             for (String component : stringList) {
                 message(component + " ", 1);
             }
@@ -1454,6 +1447,7 @@ public class Sketch implements MessageConsumer {
         if (f.endsWith(".cpp")) return true;
         if (f.endsWith(".c")) return true;
         if (f.endsWith(".h")) return true;
+        if (f.endsWith(".hh")) return true;
         if (f.endsWith(".S")) return true;
         return false;
     }
