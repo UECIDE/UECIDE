@@ -61,9 +61,6 @@ class SketchEditor extends JPanel {
         });
         scrollPane = new RTextScrollPane(textArea);
         scrollPane.setFoldIndicatorEnabled(true);
-        Gutter g = scrollPane.getGutter();
-        g.setBackground(Base.theme.getColor("status.gutter.bgcolor"));
-        g.setForeground(Base.theme.getColor("status.gutter.fgcolor"));
         setBackground(Base.theme.getColor("editor.bgcolor"));
         setFont(Base.preferences.getFont("editor.font"));
 
