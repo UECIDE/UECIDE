@@ -146,6 +146,18 @@ public class PropertyFile {
         set(attr, fontToString(value));
     }
 
+    public void setFile(String attr, File f) {
+        set(attr, f.getAbsolutePath());
+    }
+
+    public File getFile(String attr) {
+        String s = get(attr);
+        if (s != null) {
+            return new File(s);
+        }
+        return null;
+    }
+
     public String fontToString(Font f)
     {
         String font = f.getName();
