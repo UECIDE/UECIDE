@@ -608,7 +608,7 @@ public class Editor extends JFrame implements RunnerListener {
       });
     sketchMenu.add(item);
 
-    item = newJMenuItem(Translate.t("Clean Build Folder"), 'R');
+    item = newJMenuItem(Translate.t("Clean Build Folder"), 'D');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           sketch.cleanBuild();
