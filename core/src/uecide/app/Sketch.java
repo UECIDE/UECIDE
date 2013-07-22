@@ -876,25 +876,35 @@ public class Sketch implements MessageConsumer {
         setCompilingProgress(30);
 
         editor.statusNotice(Translate.t("Compiling Libraries..."));
-        tobjs = compileLibraries();
-        if (tobjs == null) {
+        if (!compileLibraries()) {
             editor.statusNotice(Translate.t("Error Compiling Libraries"));
             return false;
         }
 
-        objectFiles.addAll(tobjs);
         setCompilingProgress(40);
 
         editor.statusNotice(Translate.t("Compiling Core..."));
-        if (!compileCore()) {
+        if (!compileCore(editor.core.getAPIFolder(), "core")) {
             editor.statusNotice(Translate.t("Error Compiling Core"));
             return false;
         }
+        String coreLibs = "-lcore";
         setCompilingProgress(50);
+
+        if (parameters.get("extension") != null) {
+            editor.statusNotice(Translate.t("Compiling Extension..."));
+            File extension = new File(parameters.get("extension"));
+            if (extension.exists() && extension.isDirectory()) {
+                if (!compileCore(extension, extension.getName())) {
+                    return false;
+                }
+                coreLibs += "::-l" + extension.getName();
+            }
+        }
 
         editor.statusNotice(Translate.t("Linking Sketch..."));
         settings.put("filename", name);
-        if (!compileLink(objectFiles)) {
+        if (!compileLink(objectFiles, coreLibs)) {
             editor.statusNotice(Translate.t("Error Linking Sketch"));
             return false;
         }
@@ -1058,6 +1068,182 @@ public class Sketch implements MessageConsumer {
         return out;
     }
 
+    private File compileFile(File src) {
+        String cflags = parameters.get("cflags");
+        if (cflags == null) {
+            cflags = "";
+        }
+        cflags = cflags.replaceAll("\\s+", "::");
+        if (cflags != "") {
+            cflags = "::" + cflags;
+        }
+
+        String cxxflags = parameters.get("cxxflags");
+        if (cxxflags == null) {
+            cxxflags = "";
+        }
+        cxxflags = cxxflags.replaceAll("\\s+", "::");
+        if (cxxflags != "") {
+            cxxflags = "::" + cxxflags;
+        }
+
+        String fileName = src.getName();
+        String recipe = null;
+
+        if (fileName.endsWith(".cpp")) {
+            recipe = editor.board.getAny("recipe.cpp.o.pattern") + cxxflags;
+        }
+    
+        if (fileName.endsWith(".c")) {
+            recipe = editor.board.getAny("recipe.c.o.pattern") + cflags;
+        }
+    
+        if (fileName.endsWith(".S")) {
+            recipe = editor.board.getAny("recipe.S.o.pattern") + cflags;
+        }
+
+        if (recipe == null) {
+            message("Error: I don't know how to compile " + fileName);
+            return null;
+        }
+
+        String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+        File dest = new File(buildFolder, baseName + ".o");
+
+        if (dest.exists()) {
+            if (dest.lastModified() > src.lastModified()) {
+                return dest;
+            }
+        }
+
+        settings.put("build.path", buildFolder.getAbsolutePath());
+        settings.put("source.name", src.getAbsolutePath());
+        settings.put("object.name", dest.getAbsolutePath());
+
+        String compiledString = parseString(recipe);
+
+        if (!execAsynchronously(compiledString)) {
+            return null;
+        }
+        if (!dest.exists()) {
+            return null;
+        }
+
+        return dest;
+    }
+
+    public File getCacheFolder() {
+        File cacheRoot = Base.getSettingsFile("cache");
+        File coreCache = new File(cacheRoot, editor.core.getName());
+        File boardCache = new File(coreCache, editor.board.getName());
+        if (!boardCache.exists()) {  
+            boardCache.mkdirs();
+        }
+        return boardCache;
+    }
+
+    public File getCacheFile(String fileName) {
+        File cacheFolder = getCacheFolder();
+        File out = new File(cacheFolder, fileName);
+        return out;
+    }
+
+    public boolean compileCore(File core, String name) {
+        File archive = getCacheFile("lib" + name + ".a");
+
+        String recipe = editor.board.getAny("recipe.ar.pattern");
+
+        settings.put("library", archive.getAbsolutePath());
+
+        long archiveDate = 0;
+        if (archive.exists()) {
+            archiveDate = archive.lastModified();
+        }
+
+        ArrayList<File> fileList = new ArrayList<File>();
+
+        fileList.addAll(findFilesInFolder(core, "S", true));
+        fileList.addAll(findFilesInFolder(core, "c", true));
+        fileList.addAll(findFilesInFolder(core, "cpp", true));
+
+        String boardFiles = editor.board.getAny("build.files");
+        if (boardFiles != null) {
+            String[] bfl = boardFiles.split("::");
+            for (String bf : bfl) {
+                File f = new File(editor.board.getFolder(), bf);
+                if (f.exists()) {
+                    if (!f.isDirectory()) {
+                        if (f.getName().endsWith(".S") || f.getName().endsWith(".c") || f.getName().endsWith(".cpp")) {
+                            fileList.add(f);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (File f : fileList) {
+            if (f.lastModified() > archiveDate) {
+                File out = compileFile(f);
+                if (out == null) {
+                    return false;
+                }
+                settings.put("object.name", out.getAbsolutePath());
+                String command = parseString(recipe);
+                boolean ok = execAsynchronously(command);
+                if (!ok) {
+                    return false;
+                }
+                out.delete();
+            }
+        }
+        return true;
+    }
+
+    public boolean compileLibrary(File lib) {
+        File archive = getCacheFile("lib" + lib.getName() + ".a");
+        File utility = new File(lib, "utility");
+
+        String recipe = editor.board.getAny("recipe.ar.pattern");
+
+        settings.put("library", archive.getAbsolutePath());
+
+        long archiveDate = 0;
+        if (archive.exists()) {
+            archiveDate = archive.lastModified();
+        }
+
+        ArrayList<File> fileList = new ArrayList<File>();
+
+        fileList.addAll(findFilesInFolder(lib, "S", false));
+        fileList.addAll(findFilesInFolder(lib, "c", false));
+        fileList.addAll(findFilesInFolder(lib, "cpp", false));
+
+        fileList.addAll(findFilesInFolder(utility, "S", false));
+        fileList.addAll(findFilesInFolder(utility, "c", false));
+        fileList.addAll(findFilesInFolder(utility, "cpp", false));
+
+        String origIncs = settings.get("includes");
+        settings.put("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
+
+        for (File f : fileList) {
+            if (f.lastModified() > archiveDate) {
+                File out = compileFile(f);
+                if (out == null) {
+                    return false;
+                }
+                settings.put("object.name", out.getAbsolutePath());
+                String command = parseString(recipe);
+                boolean ok = execAsynchronously(command);
+                if (!ok) {
+                    return false;
+                }
+                out.delete();
+            }
+        }
+        settings.put("includes", origIncs);
+        return true;
+    }
+
     private List<File> compileFiles(File dest, List<File> sSources, List<File> cSources, List<File> cppSources) {
 
         String cflags = parameters.get("cflags");
@@ -1195,109 +1381,16 @@ public class Sketch implements MessageConsumer {
         return true;
     }
 
-    private List<File> compileLibraries () {
-        List<File> objectFiles = new ArrayList<File>();
-        List<File> tobjs;
-
-        String origIncs = settings.get("includes");
-        
-        for (File libraryFolder : getImportedLibraries())
-        {
-            File outputFolder = new File(buildFolder, libraryFolder.getName());
-            File utilityFolder = new File(libraryFolder, "utility");
-            if (!createFolder(outputFolder))
-                return null;
-            // this library can use includes in its utility/ folder
-            settings.put("includes", origIncs + "::-I" + utilityFolder.getAbsolutePath());
-            tobjs = compileFiles(
-                    outputFolder,
-                    findFilesInFolder(libraryFolder, "S", false),
-                    findFilesInFolder(libraryFolder, "c", false),
-                    findFilesInFolder(libraryFolder, "cpp", false));
-            if (tobjs == null) {
-                return null;
-            }
-
-            objectFiles.addAll(tobjs);
-
-            outputFolder = new File(outputFolder, "utility");
-            if (!createFolder(outputFolder))
-                return null;
-            tobjs = compileFiles(
-                    outputFolder,
-                    findFilesInFolder(utilityFolder, "S", false),
-                    findFilesInFolder(utilityFolder, "c", false),
-                    findFilesInFolder(utilityFolder, "cpp", false));
-            // other libraries should not see this library's utility/ folder
-            if (tobjs == null) {
-                return null;
-            }
-            objectFiles.addAll(tobjs);
-            settings.put("includes", origIncs);
-        }
-        return objectFiles;
-    }
-
-    private boolean compileCore() {
-
-        List<File> objectFiles = new ArrayList<File>();
-        ArrayList<String> includePaths =  new ArrayList();
-
-        File corePath = editor.core.getAPIFolder();
-
-        includePaths.add(corePath.getAbsolutePath());
-        includePaths.add(editor.board.getFolder().getAbsolutePath());
-
-        ArrayList<File> sFiles = findFilesInFolder(corePath, "S", true);
-        ArrayList<File> cFiles = findFilesInFolder(corePath, "c", true);
-        ArrayList<File> cppFiles = findFilesInFolder(corePath, "cpp", true);
- 
-        if (parameters.get("extension") != null) {
-            ArrayList<File> esFiles = findFilesInFolder(new File(parameters.get("extension")), "S", true);
-            ArrayList<File> ecFiles = findFilesInFolder(new File(parameters.get("extension")), "c", true);
-            ArrayList<File> ecppFiles = findFilesInFolder(new File(parameters.get("extension")), "cpp", true);
-
-            sFiles.addAll(esFiles);
-            cFiles.addAll(ecFiles);
-            cppFiles.addAll(ecppFiles);
-        }
-
-        String boardFiles = editor.board.getAny("build.files", "");
-        if (boardFiles != null) {
-            String[] bfl = boardFiles.split("::");
-            for (String bf : bfl) {
-                File f = new File(editor.board.getFolder(), bf);
-                if (f.exists()) {
-                    if (bf.endsWith(".S")) {
-                        sFiles.add(f);
-                    }
-                    if (bf.endsWith(".c")) {
-                        cFiles.add(f);
-                    }
-                    if (bf.endsWith(".cpp")) {
-                        cppFiles.add(f);
-                    }
-                }
-            }
-        }
-
-        List<File> coreObjectFiles   = compileFiles(buildFolder, sFiles, cFiles, cppFiles);
-
-        if (coreObjectFiles == null) {
-            return false;
-        }
-
-        for (File file : coreObjectFiles) {
-            settings.put("object.name", file.getAbsolutePath());
-
-            if (!execAsynchronously(parseString(editor.core.get("recipe.ar.pattern")))) {
+    private boolean compileLibraries () {
+        for (File libraryFolder : getImportedLibraries()) {
+            if (!compileLibrary(libraryFolder)) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean compileLink(List<File> objectFiles) {
+    private boolean compileLink(List<File> objectFiles, String coreLibs) {
         String ldflags = parameters.get("ldflags");
         if (ldflags == null) {
             ldflags = "";
@@ -1309,6 +1402,15 @@ public class Sketch implements MessageConsumer {
         String baseCommandString = editor.board.getAny("recipe.c.combine.pattern", "") + ldflags;
         String commandString = "";
         String objectFileList = "";
+
+        settings.put("libraries.path", getCacheFolder().getAbsolutePath());
+
+        String liblist = coreLibs;
+        for (File libraryFolder : getImportedLibraries()) {
+            liblist += "::-l" + libraryFolder.getName();
+        }
+
+        settings.put("libraries", liblist);
 
         for (File file : objectFiles) {
             objectFileList = objectFileList + file.getAbsolutePath() + "::";
