@@ -888,7 +888,7 @@ public class Sketch implements MessageConsumer {
             editor.statusNotice(Translate.t("Error Compiling Core"));
             return false;
         }
-        String coreLibs = "-lcore";
+        String coreLibs = "";
         setCompilingProgress(50);
 
         if (parameters.get("extension") != null) {
@@ -901,6 +901,8 @@ public class Sketch implements MessageConsumer {
                 coreLibs += "::-l" + extension.getName();
             }
         }
+
+        coreLibs += "::-lcore";
 
         editor.statusNotice(Translate.t("Linking Sketch..."));
         settings.put("filename", name);
@@ -1405,10 +1407,12 @@ public class Sketch implements MessageConsumer {
 
         settings.put("libraries.path", getCacheFolder().getAbsolutePath());
 
-        String liblist = coreLibs;
+        String liblist = "";
         for (File libraryFolder : getImportedLibraries()) {
             liblist += "::-l" + libraryFolder.getName();
         }
+
+        liblist += coreLibs;
 
         settings.put("libraries", liblist);
 

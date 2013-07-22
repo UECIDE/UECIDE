@@ -268,7 +268,7 @@ public class ConvertWaveFile extends BasePlugin {
                 newText.append("};\n");
                 newText.append("const unsigned long " + newFilename.getText() + "_len = " + numSamples + ";\n\n");
 
-                File newFile = new File(editor.getSketch().getFolder(), newFilename + ".h");
+                File newFile = new File(editor.getSketch().getFolder(), newFilename.getText() + ".h");
                 PrintWriter pw = new PrintWriter(newFile);
                 pw.print(newText.toString());
                 pw.close();
