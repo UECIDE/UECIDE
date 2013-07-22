@@ -201,7 +201,7 @@ public class Sketch implements MessageConsumer {
         StringBuilder combinedMain = new StringBuilder();
         SketchFile mainFile = getMainFile();
         if (Base.preferences.getBoolean("compiler.combine_ino")) {
-            combinedMain.append("#line 1 \"" + mainFile.file.getName() + "\"\n");
+            //combinedMain.append("#line 1 \"" + mainFile.file.getName() + "\"\n");
             combinedMain.append(mainFile.textArea.getText());
         }
         for (SketchFile f : sketchFiles) {
@@ -219,7 +219,7 @@ public class Sketch implements MessageConsumer {
 
                 if (Base.preferences.getBoolean("compiler.combine_ino")) {
                     if (!(f.equals(mainFile))) {
-                        combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
+                    //    combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
                         combinedMain.append(f.textArea.getText());
                     }
                 } else {
@@ -236,9 +236,38 @@ public class Sketch implements MessageConsumer {
                         f.headerLines ++;
                     }
 
-                    sb.append("\n");
-                    f.headerLines ++;
-                
+                    // Copy the includes etc
+                    String[] data = rawData.split("\n");
+
+                    sb.append("#line 1 \"" + f.file.getName() + "\"\n");
+
+                    int codeOffset = 1;
+                    int lineno = 0;
+                    boolean inHead = true;
+                    while (inHead && lineno < data.length) {
+                        if (data[lineno].trim().startsWith("#")) {
+                            sb.append(data[lineno]);
+                            sb.append("\n");
+                            lineno++;
+                            codeOffset++;
+                            continue;
+                        }
+                        if (data[lineno].trim().startsWith("/")) {
+                            sb.append(data[lineno]);
+                            sb.append("\n");
+                            lineno++;
+                            codeOffset++;
+                            continue;
+                        }
+                        if (data[lineno].trim().length() == 0) {
+                            sb.append("\n");
+                            lineno++;
+                            codeOffset++;
+                            continue;
+                        }
+                        inHead = false;
+                    }
+
                     if (Base.preferences.getBoolean("compiler.disable_prototypes") == false) {
                         for (String prototype : f.prototypes) {
                             sb.append(prototype + "\n");
@@ -249,10 +278,14 @@ public class Sketch implements MessageConsumer {
                     sb.append("\n");
                     f.headerLines ++;
 
-                    sb.append("#line 1 \"" + f.file.getName() + "\"\n");
+                    sb.append("#line " + codeOffset + " \"" + f.file.getName() + "\"\n");
                     f.headerLines ++;
 
-                    sb.append(f.textArea.getText());
+                    while (lineno < data.length) {
+                        sb.append(data[lineno]);
+                        sb.append("\n");
+                        lineno++;
+                    }
 
                     String newFileName = f.file.getName();
                     int dot = newFileName.lastIndexOf(".");
@@ -289,20 +322,56 @@ public class Sketch implements MessageConsumer {
                 f.headerLines ++;
             }
 
-            sb.append("\n");
-            f.headerLines ++;
-        
-            if (Base.preferences.getBoolean("compiler.disable_prototypes") == false) {
-                for (String prototype : f.prototypes) {
-                    sb.append(prototype + "\n");
-                    f.headerLines++;
-                }
-            }
+                    String[] data = rawData.split("\n");
 
-            sb.append("\n");
-            f.headerLines ++;
+                    sb.append("#line 1 \"" + f.file.getName() + "\"\n");
 
-            sb.append(combinedMain.toString());
+                    int codeOffset = 1;
+                    int lineno = 0;
+                    boolean inHead = true;
+                    while (inHead && lineno < data.length) {
+                        if (data[lineno].trim().startsWith("#")) {
+                            sb.append(data[lineno]);
+                            sb.append("\n");
+                            lineno++;
+                            codeOffset++;
+                            continue;
+                        }
+                        if (data[lineno].trim().startsWith("/")) {
+                            sb.append(data[lineno]);
+                            sb.append("\n");
+                            lineno++;
+                            codeOffset++;
+                            continue;
+                        }
+                        if (data[lineno].trim().length() == 0) {
+                            sb.append("\n");
+                            lineno++;
+                            codeOffset++;
+                            continue;
+                        }
+                        inHead = false;
+                    }
+
+                    if (Base.preferences.getBoolean("compiler.disable_prototypes") == false) {
+                        for (String prototype : f.prototypes) {
+                            sb.append(prototype + "\n");
+                            f.headerLines++;
+                        }
+                    }
+
+                    sb.append("\n");
+                    f.headerLines ++;
+
+                    sb.append("#line " + codeOffset + " \"" + f.file.getName() + "\"\n");
+                    f.headerLines ++;
+
+                    while (lineno < data.length) {
+                        sb.append(data[lineno]);
+                        sb.append("\n");
+                        lineno++;
+                    }
+
 
             String newFileName = name + "." + editor.board.getAny("build.extension","cpp");
 
