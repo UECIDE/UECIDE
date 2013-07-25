@@ -575,14 +575,19 @@ public class Sketch implements MessageConsumer {
 
         if (editor.board.getAny("upload.using", "serial").equals("serial"))
         {
+            editor.grabSerialPort();
             if (dtr || rts) {
                 assertDTRRTS(dtr, rts);
             }
         }
 
         boolean res = execAsynchronously(commandString);
-        if (dtr || rts) {
-            assertDTRRTS(false, false);
+        if (editor.board.getAny("upload.using", "serial").equals("serial"))
+        {
+            if (dtr || rts) {
+                assertDTRRTS(false, false);
+            }
+            editor.releaseSerialPort();
         }
         if (res) {
             editor.statusNotice(Translate.t("Upload Complete"));
@@ -594,7 +599,7 @@ public class Sketch implements MessageConsumer {
 
     public void assertDTRRTS(boolean dtr, boolean rts) {
         try {
-            Serial serialPort = new Serial();
+            Serial serialPort = new Serial(editor.getSerialPort());
             serialPort.setDTR(dtr);
             serialPort.setRTS(rts);
             serialPort.dispose();
@@ -1109,9 +1114,9 @@ public class Sketch implements MessageConsumer {
                     mid = editor.board.getAny("upload.quiet", "");
             } else if (mid.equals("port")) {
                 if (Base.isWindows()) 
-                    mid = "\\\\.\\" + Base.preferences.get("serial.port");
+                    mid = "\\\\.\\" + editor.getSerialPort();
                 else 
-                    mid = Base.preferences.get("serial.port");
+                    mid = editor.getSerialPort();
             } else {
                 mid = tokens.get(mid);
             }

@@ -32,6 +32,7 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
     Point selectStart = null;
     Point selectEnd = null;
 
+    boolean disconnected = false;
     boolean autoCr = false;
 
     boolean hasFocus = false;
@@ -354,6 +355,10 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
                         cursorStart.x + characterSize.width - 1, cursorStart.y + 2);
                 }
             }
+        }
+        if (disconnected) {
+            screen.setColor(new Color(255, 0, 0));
+            screen.drawString("Disconnected", 20, 20);
         }
     }
 
@@ -784,5 +789,9 @@ public class JTerminal extends JComponent implements MessageConsumer,KeyListener
         textSize = d;
         topOfScreen = 2000 - d.height;
         setDimension();
+    }
+
+    public void setDisconnected(boolean b) {
+        disconnected = b;
     }
 }
