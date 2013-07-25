@@ -154,10 +154,10 @@ public class JGrapher extends JComponent
             float[] vals = s.getValues();
 
             g.setColor(s.getColor());
-            float oval = vals[0] * scale;
+            float oval = (vals[0] - axisY1Min) * scale;
 
             for (int x=1; x<numPoints; x++) {
-                float val = vals[x] * scale;
+                float val = (vals[x] - axisY1Min) * scale;
                 g.drawLine(leftMargin + x, screenSize.height - bottomMargin - (int)oval, leftMargin + x + 1, screenSize.height - bottomMargin - (int)val);
                 oval = val;
             }
