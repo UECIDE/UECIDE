@@ -38,25 +38,22 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     JComboBox<String> lineEndings;
     JButton lineSubmit;
 
+    String serialPort;
+
     Box entryLineArea;
 
     int baudRate;
 
     boolean ready = false;
 
-    static boolean isOpen = false;
-
     public void init(Editor editor)
     {
         this.editor = editor;
+        this.serialPort = editor.getSerialPort();
     }
 
     public void run()
     {
-        if (SerialTerminal.isOpen) {
-            editor.message("I think the serial terminal is already open.\n", 2);
-            return;
-        }
         win = new JFrame(Translate.t("Serial Terminal"));
         win.getContentPane().setLayout(new BorderLayout());
         win.setResizable(false);
@@ -129,8 +126,9 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
                         editor.message("Unable to release port\n", 2);
                     }
                     try {
-                        port = new Serial(baudRate);
+                        port = new Serial(serialPort, baudRate);
                         port.addListener(term);
+                        term.setDisconnected(false);
                     } catch (Exception e) {
                         editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
                     }
@@ -218,18 +216,14 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
                 close();
             }
         });
-//        Base.registerWindowCloseKeys(win.getRootPane(), new ActionListener() {
-//            public void actionPerformed(ActionEvent actionEvent) {
-//                close();
-//            }
-//        });
         Base.setIcon(win);
 
         term.clearScreen();
         try {
             baudRate = Base.preferences.getInteger("serial.debug_rate");
             baudRates.setSelectedItem(Base.preferences.get("serial.debug_rate"));
-            port = new Serial(baudRate);
+            port = new Serial(serialPort, baudRate);
+            term.setDisconnected(false);
         } catch(Exception e) {
             editor.message("Unable to open serial port: " + e.getMessage() + "\n", 2);
             return;
@@ -237,17 +231,19 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         showCursor.setSelected(Base.preferences.getBoolean("serial.debug_cursor"));
         term.showCursor(Base.preferences.getBoolean("serial.debug_cursor"));
         port.addListener(term);
+        win.setTitle(Translate.t("Serial Terminal") + " :: " + serialPort);
         win.setVisible(true);
         ready = true;
-        SerialTerminal.isOpen = true;
     }
 
     public void close()
     {
         port.dispose();
         win.dispose();
-        ready = false;
-        SerialTerminal.isOpen = false;
+        int p = Base.pluginInstances.indexOf(this);
+        if (p>=0) {
+            Base.pluginInstances.remove(p);
+        }
     }
 
     public String getMenuTitle()
@@ -392,6 +388,28 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         Base.preferences.setBoolean("serial.autocr_in", autoCrIn.isSelected());
         Base.preferences.setBoolean("serial.autocr_out", autoCrOut.isSelected());
             
+    }
+
+    public void releasePort(String portName) {
+        if (portName.equals(serialPort)) {
+            port.dispose();
+            port = null;
+            term.setDisconnected(true);
+            win.repaint();
+        }
+    }
+
+    public void obtainPort(String portName) {
+        if (portName.equals(serialPort)) {
+            try {
+                port = new Serial(serialPort, baudRate);
+                port.addListener(term);
+                term.setDisconnected(false);
+                win.repaint();
+            } catch (Exception e) {
+                editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
+            }
+        }
     }
 }
 

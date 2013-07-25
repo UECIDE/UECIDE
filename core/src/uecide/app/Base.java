@@ -63,6 +63,7 @@ public class Base {
     public static HashMap<String, Board> boards;
     public static HashMap<String, Core> cores;
     public static HashMap<String, Plugin> plugins;
+    public static ArrayList<Plugin> pluginInstances;
     static Splash splashScreen;
 
     // Location for untitled items
@@ -164,6 +165,7 @@ public class Base {
         cores = new HashMap<String, Core>();
         boards = new HashMap<String, Board>();
         plugins = new HashMap<String, Plugin>();
+        pluginInstances = new ArrayList<Plugin>();
 
         splashScreen.setMessage("Loading Cores...", 36);
         loadCores();

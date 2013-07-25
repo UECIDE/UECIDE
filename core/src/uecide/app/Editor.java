@@ -23,6 +23,9 @@ import gnu.io.*;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rsyntaxtextarea.modes.ArduinoTokenMaker;
 
+import java.lang.reflect.Method;
+
+
 /**
  * Main editor panel for the Processing Development Environment.
  */
@@ -74,6 +77,8 @@ public class Editor extends JFrame implements RunnerListener {
     JSplitPane splitPane;
     JPanel consolePanel;
 
+    String serialPort = null;
+
     // currently opened program
     public Sketch sketch;
 
@@ -113,6 +118,8 @@ public class Editor extends JFrame implements RunnerListener {
 
     public Editor(String path) {
         super(Base.theme.get("product"));
+
+        serialPort = Base.preferences.get("serial.port");
 
         Base.setIcon(this);
  
@@ -241,8 +248,7 @@ public class Editor extends JFrame implements RunnerListener {
                     button.setToolTipText(t.getMenuTitle());
                     button.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
-                            t.init(me);
-                            SwingUtilities.invokeLater(t);
+                            launchPlugin(t);
                         }
                     });
                     toolbar.add(button);
@@ -707,27 +713,31 @@ public class Editor extends JFrame implements RunnerListener {
     }
   }
   
-  protected void selectSerialPort(String name) {
-    if(serialMenu == null) {
-      return;
+    protected void selectSerialPort(String name) {
+        if(serialMenu == null) {
+            return;
+        }
+        if (name == null) {
+            return;
+        }
+        JCheckBoxMenuItem selection = null;
+        for (int i = 0; i < serialMenu.getItemCount(); i++) {
+            JCheckBoxMenuItem item = ((JCheckBoxMenuItem)serialMenu.getItem(i));
+            if (item == null) {
+                continue;
+            }
+            item.setState(false);
+            if (name.equals(item.getText())) selection = item;
+        }
+        if (selection != null) selection.setState(true);
+        Base.preferences.set("serial.port", name);
+        serialPort = name;
+        lineStatus.setText(board.getLongName() + " on " + serialPort);
     }
-    if (name == null) {
-      return;
-    }
-    JCheckBoxMenuItem selection = null;
-    for (int i = 0; i < serialMenu.getItemCount(); i++) {
-      JCheckBoxMenuItem item = ((JCheckBoxMenuItem)serialMenu.getItem(i));
-      if (item == null) {
-        continue;
-      }
-      item.setState(false);
-      if (name.equals(item.getText())) selection = item;
-    }
-    if (selection != null) selection.setState(true);
-    Base.preferences.set("serial.port", name);
-    lineStatus.setText(board.getLongName() + " on " + Base.preferences.get("serial.port"));
-  }
 
+    public String getSerialPort() {
+        return serialPort;
+    }
 
   protected void populateSerialMenu() {
     // getting list of ports
@@ -745,7 +755,7 @@ public class Editor extends JFrame implements RunnerListener {
         if (commportidentifier.getPortType() == CommPortIdentifier.PORT_SERIAL)
         {
           String curr_port = commportidentifier.getName();
-          rbMenuItem = new JCheckBoxMenuItem(curr_port, curr_port.equals(Base.preferences.get("serial.port")));
+          rbMenuItem = new JCheckBoxMenuItem(curr_port, curr_port.equals(serialPort));
           rbMenuItem.addActionListener(serialMenuListener);
           //serialGroup.add(rbMenuItem);
           serialMenu.add(rbMenuItem);
@@ -1571,7 +1581,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     String result = (String)
       JOptionPane.showInputDialog(this,
-                                  Translate.w("Serial port %1 not found. Retry the upload with another serial port?", 30, "\n", Base.preferences.get("serial.port")),
+                                  Translate.w("Serial port %1 not found. Retry the upload with another serial port?", 30, "\n", serialPort),
                                   Translate.t("Serial port not found"),
                                   JOptionPane.PLAIN_MESSAGE,
                                   null,
@@ -1994,7 +2004,7 @@ public class Editor extends JFrame implements RunnerListener {
         board = b;
         core = board.getCore();
         sketch.settings.put("board.root", board.getFolder().getAbsolutePath());
-        lineStatus.setText(b.getLongName() + " on " + Base.preferences.get("serial.port"));
+        lineStatus.setText(b.getLongName() + " on " + serialPort);
         rebuildBoardsMenu();
         Base.preferences.set("board", b.getName());
         populateMenus();
@@ -2060,9 +2070,7 @@ public class Editor extends JFrame implements RunnerListener {
                 final Editor me = this;
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        System.gc();
-                        t.init(me);
-                        SwingUtilities.invokeLater(t);
+                        launchPlugin(t);
                     }
                 });
                 try {
@@ -2312,6 +2320,50 @@ public class Editor extends JFrame implements RunnerListener {
             message("    RAM: " + ramPercent + "% (" + ramUsed + " bytes out of " + maxRam + " bytes max)\n", 1);
         } else {
             message("    RAM: " + ramUsed + " bytes\n", 1);
+        }
+    }
+    
+    public void launchPlugin(Plugin p) {
+        try {
+            Plugin instance = p.getClass().newInstance();
+            Base.pluginInstances.add(instance);
+            System.gc();
+            instance.init(this);
+            SwingUtilities.invokeLater(instance);
+        } catch (Exception e) {
+            message("Error launching plugin: " + e.getMessage() + "\n", 2);
+        }
+    }
+
+    public void grabSerialPort() {
+        try {
+            Class[] cArg = new Class[1];
+            cArg[0] = new String().getClass();
+
+            for (Plugin p : Base.pluginInstances) {
+                Method m = p.getClass().getMethod("releasePort", cArg);
+                if (m != null) {
+                    m.invoke(p, serialPort);
+                }
+            }
+        } catch (Exception e) {
+            message("Error grabbing serial port: " + e.getMessage() + "\n", 2);
+        }
+    }
+
+    public void releaseSerialPort() {
+        try {
+            Class[] cArg = new Class[1];
+            cArg[0] = new String().getClass();
+
+            for (Plugin p : Base.pluginInstances) {
+                Method m = p.getClass().getMethod("obtainPort", cArg);
+                if (m != null) {
+                    m.invoke(p, serialPort);
+                }
+            }
+        } catch (Exception e) {
+            message("Error releasing serial port: " + e.getMessage() + "\n", 2);
         }
     }
 }

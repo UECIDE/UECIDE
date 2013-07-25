@@ -29,6 +29,7 @@ public class Grapher extends BasePlugin implements MessageConsumer
     ImageIcon playIcon;
     ImageIcon pauseIcon;
     boolean playPauseState = false;
+    String serialPort;
 
     JTextField fontSizeField;
 
@@ -36,18 +37,15 @@ public class Grapher extends BasePlugin implements MessageConsumer
 
     boolean ready = false;
 
-    static boolean isOpen = false;
 
     public void init(Editor editor)
     {
         this.editor = editor;
+        serialPort = editor.getSerialPort();
     }
 
     public void run()
     {
-        if (Grapher.isOpen) {
-            return;
-        }
         win = new JFrame(Translate.t("Grapher"));
         win.getContentPane().setLayout(new BorderLayout());
         win.setResizable(false);
@@ -120,7 +118,7 @@ public class Grapher extends BasePlugin implements MessageConsumer
                         editor.message("Unable to release port: " + e.getMessage() + "\n", 2);
                     }
                     try {
-                        port = new Serial(baudRate);
+                        port = new Serial(serialPort, baudRate);
                         port.addListener(mc);
                     } catch (Exception e) {
                         editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
@@ -152,7 +150,7 @@ public class Grapher extends BasePlugin implements MessageConsumer
         try {
             baudRate = Base.preferences.getInteger("serial.debug_rate");
             baudRates.setSelectedItem(Base.preferences.get("serial.debug_rate"));
-            port = new Serial(baudRate);
+            port = new Serial(serialPort, baudRate);
         } catch(Exception e) {
             editor.message("Unable to open serial port: " + e.getMessage() + "\n", 2);
             win.dispose();
@@ -161,7 +159,6 @@ public class Grapher extends BasePlugin implements MessageConsumer
         port.addListener(this);
         win.setVisible(true);
         ready = true;
-        Grapher.isOpen = true;
     }
 
     public void close()
@@ -169,7 +166,6 @@ public class Grapher extends BasePlugin implements MessageConsumer
         port.dispose();
         win.dispose();
         ready = false;
-        Grapher.isOpen = false;
     }
 
     public String getMenuTitle()
@@ -378,6 +374,26 @@ public class Grapher extends BasePlugin implements MessageConsumer
 
     public void savePreferences() {
         Base.preferences.set("grapher.font", fontSizeField.getText());
+    }
+
+
+
+    public void releasePort(String portName) {
+        if (portName.equals(serialPort)) {
+            port.dispose();
+            port = null;
+        }
+    }
+
+    public void obtainPort(String portName) {
+        if (portName.equals(serialPort)) {
+            try {
+                port = new Serial(serialPort, baudRate);
+                port.addListener(this);
+            } catch (Exception e) {
+                editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
+            }
+        }
     }
 
 }
