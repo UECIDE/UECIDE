@@ -104,10 +104,10 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="install_boards">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/boards/boards-${boards.name}-current.zip" />
-            <param name="dest" value="tmp/boards-${boards.name}-current.zip" />
+            <param name="src" value="http://www.uecide.org/boards/${boards.name}.zip" />
+            <param name="dest" value="tmp/${boards.name}.zip" />
         </antcall>
-        <unzip dest="${target.path}/hardware/boards/${boards.name}" src="tmp/boards-${boards.name}-current.zip" overwrite="false" />
+        <unzip dest="${target.path}/hardware/boards/${boards.name}" src="tmp/${boards.name}.zip" overwrite="false" />
         <chmod perm="+x">
             <fileset dir="${target.path}/hardware/boards/${boards.name}" includes="**/*" />
         </chmod>
