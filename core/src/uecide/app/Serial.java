@@ -95,7 +95,7 @@ public class Serial implements SerialPortEventListener {
 
         if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
           if (portId.getName().equals(iname)) {
-            port = (SerialPort)portId.open("serial madness", 2000);
+            port = (SerialPort)portId.open("UECIDE", 10000);
             input = port.getInputStream();
             output = port.getOutputStream();
             port.setSerialPortParams(rate, databits, stopbits, parity);
@@ -105,6 +105,8 @@ public class Serial implements SerialPortEventListener {
         }
       }
     } catch (PortInUseException e) {
+        System.err.println(e.getMessage());
+        e.printStackTrace();
       throw new SerialException("Serial port '" + iname + "' already in use.  Try quiting any programs that may be using it.");
     } catch (Exception e) {
       throw new SerialException("Error opening serial port '" + iname + "'.", e);
