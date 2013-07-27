@@ -2278,8 +2278,11 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     public void reportSize() {
-        int maxFlash = 0;
-        int maxRam = 0;
+        long maxFlash = 0;
+        long maxRam = 0;
+        long text = 0;
+        long data = 0;
+        long bss = 0;
         try {
             maxFlash = Integer.parseInt(board.getAny("upload.maximum_size", "0"));
         } catch (Exception e) {
@@ -2292,15 +2295,19 @@ public class Editor extends JFrame implements RunnerListener {
             maxRam = 0;
         }
 
-        int flashUsed = 0;
-        int ramUsed = 0;
+        long flashUsed = 0;
+        long ramUsed = 0;
     
         try {
             Sizer sizer = new Sizer(this);
             sizer.computeSize();
             
-            flashUsed = (int)sizer.progSize();
-            ramUsed = (int)sizer.ramSize();
+            flashUsed = sizer.progSize();
+            ramUsed = sizer.ramSize();
+            text = sizer.textSize();
+            data = sizer.dataSize();
+            bss = sizer.bssSize();
+            
         } catch (Exception e) {
             flashUsed = 0;
             ramUsed = 0;
@@ -2320,6 +2327,9 @@ public class Editor extends JFrame implements RunnerListener {
             message("    RAM: " + ramPercent + "% (" + ramUsed + " bytes out of " + maxRam + " bytes max)\n", 1);
         } else {
             message("    RAM: " + ramUsed + " bytes\n", 1);
+        }
+        if (Base.preferences.getBoolean("compiler.verbose")) {
+            message("         (text: " + text + ", data: " + data + ", bss: " + bss + ")\n", 1);
         }
     }
     

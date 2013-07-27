@@ -34,9 +34,10 @@ import java.text.MessageFormat;
 public class Sizer implements MessageConsumer {
     private String buildPath, sketchName;
     private String firstLine;
-    private long sizeProg;
-    private long sizeRam;
     private RunnerException exception;
+    private long text;
+    private long data;
+    private long bss;
 
     private Editor editor;
 
@@ -44,7 +45,7 @@ public class Sizer implements MessageConsumer {
         this.editor = editor;
     }
   
-    public long computeSize() throws RunnerException {
+    public void computeSize() throws RunnerException {
 
         editor.sketch.settings.put("filename", editor.sketch.name);
         String commandSize[] = editor.sketch.parseString(editor.core.get("compiler.size")).split("::");
@@ -52,8 +53,6 @@ public class Sizer implements MessageConsumer {
         int r = 0;
         try {
             exception = null;
-            sizeProg = -1;
-            sizeRam = -1;
             firstLine = null;
             Process process = Runtime.getRuntime().exec(commandSize);
             MessageSiphon in = new MessageSiphon(process.getInputStream(), this);
@@ -83,19 +82,26 @@ public class Sizer implements MessageConsumer {
 
         if (exception != null)
             throw exception;
-
-        if (sizeProg == -1)
-            throw new RunnerException(firstLine);
-  
-        return sizeProg;
     }
 
     public long progSize() {
-        return sizeProg;
+        return (text + data);
     }
 
     public long ramSize() {
-        return sizeRam;
+        return (data + bss);
+    }
+
+    public long textSize() {
+        return text;
+    }
+
+    public long dataSize() {
+        return data;
+    }
+
+    public long bssSize() {
+        return bss;
     }
 
     public void message(String s, int c) {
@@ -112,9 +118,9 @@ public class Sizer implements MessageConsumer {
     else {
       StringTokenizer st = new StringTokenizer(s, " ");
       try {
-        sizeProg = (new Integer(st.nextToken().trim())).longValue();
-        sizeRam = (new Integer(st.nextToken().trim())).longValue();
-        sizeRam += (new Integer(st.nextToken().trim())).longValue();
+        text = (new Integer(st.nextToken().trim())).longValue();
+        data = (new Integer(st.nextToken().trim())).longValue();
+        bss += (new Integer(st.nextToken().trim())).longValue();
       } catch (NoSuchElementException e) {
         exception = new RunnerException(e.toString());
       } catch (NumberFormatException e) {
