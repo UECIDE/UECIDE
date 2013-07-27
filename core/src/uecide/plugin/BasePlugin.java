@@ -49,7 +49,7 @@ public class BasePlugin implements Plugin {
 
     public Editor editor;
     public Map pluginInfo;
-    public static URLClassLoader loader;
+    public URLClassLoader loader;
 
     public int flags() {
         return MENU_PLUGIN_MAIN;
@@ -89,8 +89,17 @@ public class BasePlugin implements Plugin {
         this.loader = loader;
     }
 
+    public URLClassLoader getLoader()
+    {
+        return loader;
+    }
+
     public InputStream getResourceAsStream(String file) 
     {
+        if (loader == null) {
+            System.err.println("I don't have a loader!!!");
+            return null;
+        }
         try {
             return loader.getResourceAsStream(file);
         } catch (Exception e) {
@@ -101,8 +110,17 @@ public class BasePlugin implements Plugin {
 
     public URL getResourceURL(String file)
     {
+        if (loader == null) {
+            System.err.println("I don't have a loader!!!");
+            return null;
+        }
+        URL out;
         try {
-            return loader.getResource(file);
+            out = loader.getResource(file);
+            if (out == null) {
+                System.err.println("Unable to locate " + file);
+            }   
+            return out;
         } catch (Exception e) {
             System.err.println("Resource not found: " + file);
         }
