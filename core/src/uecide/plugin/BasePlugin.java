@@ -49,7 +49,7 @@ public class BasePlugin implements Plugin {
 
     public Editor editor;
     public Map pluginInfo;
-    public URLClassLoader loader;
+    public static URLClassLoader loader;
 
     public int flags() {
         return MENU_PLUGIN_MAIN;
