@@ -2338,6 +2338,7 @@ public class Editor extends JFrame implements RunnerListener {
             Plugin instance = p.getClass().newInstance();
             Base.pluginInstances.add(instance);
             System.gc();
+            instance.setLoader(p.getLoader());
             instance.init(this);
             SwingUtilities.invokeLater(instance);
         } catch (Exception e) {

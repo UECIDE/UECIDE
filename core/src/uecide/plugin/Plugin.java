@@ -50,6 +50,7 @@ public interface Plugin extends Runnable {
   public char getShortcut();
   public int getModifier();
   public void setLoader(URLClassLoader loader);
+  public URLClassLoader getLoader();
   public int flags();
   public ImageIcon toolbarIcon();
 }
