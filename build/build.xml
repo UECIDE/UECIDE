@@ -389,6 +389,7 @@ Building for ${brand} version ${version}${suffix}
         <copy todir="${proot}/usr/share/${product}">
             <fileset dir="linux/work" />
         </copy>
+        <delete file="${proot}/usr/share/${product}/lib/librxtxSerial.so" />
         <chmod perm="755">
             <fileset dir="${proot}/usr/share/${product}" includes="${product}" />
             <fileset dir="${proot}/usr/share/${product}/hardware" includes="**/*" />
@@ -451,12 +452,12 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     </target>
 
 
-	<target name="linux-deb" description="Build .deb of linux version">
+	<target name="linux-deb" depends="linux-build" description="Build .deb of linux version">
         <property name="arch" value="i386"/>
         <antcall target="linux-generate-debian"/>
     </target>
 
-    <target name="linux64-deb" description="Build .deb of linux version">
+    <target name="linux64-deb" depends="linux64-build" description="Build .deb of linux version">
         <property name="arch" value="amd64"/>
         <antcall target="linux-generate-debian"/>
     </target>
@@ -571,6 +572,28 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     	<typedef name="contentencoding.mapping" classname="it.corley.ant.ContentEncodingMapping" classpathref="tasks.path"/>
     </target>
 
+    <target name="publish">
+        <exec executable="reprepro">
+            <arg value="-b" />
+            <arg value="/var/www/dist" />
+            <arg value="--section" />
+            <arg value="development" />
+            <arg value="-C" />
+            <arg value="contrib" />
+            <arg value="--priority" />
+            <arg value="optional" />
+            <arg value="installdeb" />
+            <arg value="${distro}" />
+            <arg value="${file}" />
+        </exec>
+    </target>
+
+    <target name="publish-all">
+        <foreach list="sarge, lucid, maverick, natty, oneiric, precise, quantal, raring" param="distro" target="publish">
+            <param name="file" value="${file}"/>
+        </foreach>
+    </target>
+
     <target name="upgrade-auto">
         <antcall target="clean" />
         <antcall target="upgrade-dist" />
@@ -588,6 +611,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <delete file="linux/${product}-${version}${suffix}-linux.zip" />
         <antcall target="linux-deb" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-i386.deb" overwrite="true" />
+        <antcall target="publish-all">
+            <param name="file" value="linux/${product}-${version}${suffix}-i386.deb" />
+        </antcall>
         <delete file="linux/${product}-${version}${suffix}-i386.deb" />
     </target>
 
@@ -598,6 +624,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <delete file="linux/${product}-${version}${suffix}-linux64.zip" />
         <antcall target="linux64-deb" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-amd64.deb" overwrite="true" />
+        <antcall target="publish-all">
+            <param name="file" value="linux/${product}-${version}${suffix}-i386.deb" />
+        </antcall>
         <delete file="linux/${product}-${version}${suffix}-amd64.deb" />
     </target>
 
@@ -631,7 +660,6 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="windows-auto" />
         <antcall target="windows-lite-auto" />
         <antcall target="clean" />
-
     </target>
 
     <target name="plugins">
