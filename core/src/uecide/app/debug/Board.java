@@ -16,7 +16,6 @@ import uecide.app.SerialNotFoundException;
 public class Board {
     private String name;
     private String longname;
-    private Core core;
     private String group;
     private File folder;
     private boolean valid;
@@ -34,11 +33,8 @@ public class Board {
             }
             this.name = folder.getName();
             this.longname = (String) boardPreferences.get("name");
-            this.core = Base.cores.get(boardPreferences.get("build.core"));
             this.group = (String) boardPreferences.get("group");
-            if (this.core != null) {
-                valid = true;
-            }
+            valid = true;
         } catch (Exception e) {
             System.err.print("Bad board file format: " + folder);
         }
@@ -56,10 +52,6 @@ public class Board {
         return folder;
     }
 
-    public Core getCore() {
-        return core;
-    }
-  
     public String getName() { 
         return name; 
     }
@@ -88,41 +80,15 @@ public class Board {
         return (String) boardPreferences.get(k);
     }
 
-    public File getLDScript() {
-        String fn = get("ldscript", "");
-        File found;
-
-        if (fn == null) {
-            return null;
-        }
-
-        found = new File(folder, fn);
-        if (found != null) {
-            if (found.exists()) {
-                return found;
-            }
-        }
-
-        found = new File(core.getAPIFolder(), fn);
-        if (found != null) {
-            if (found.exists()) {
-                return found;
-            }
-        }
-
-        System.err.print("Link script not found: " + fn);
-
-        return null;
-    }
-
-    public String getAny(String key) {
-        return getAny(key, "");
-    }
-    public String getAny(String key, String def) {
-        return get(key, core.get(key, def));
-    }
-
     public PropertyFile getPreferences() {
+        return boardPreferences;
+    }
+
+    public String getFamily() {
+        return boardPreferences.get("family");
+    }
+
+    public PropertyFile getProperties() {
         return boardPreferences;
     }
 }

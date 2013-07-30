@@ -108,6 +108,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     public Board board = null;
     public Core core = null;
+    public uecide.app.debug.Compiler compiler = null;
 
     static final int ADD_NEW_FILE = 1;
     static final int RENAME_FILE = 2;
@@ -732,7 +733,7 @@ public class Editor extends JFrame implements RunnerListener {
         if (selection != null) selection.setState(true);
         Base.preferences.set("serial.port", name);
         serialPort = name;
-        lineStatus.setText(board.getLongName() + " on " + serialPort);
+        updateLineStatus();
     }
 
     public String getSerialPort() {
@@ -1386,7 +1387,9 @@ public class Editor extends JFrame implements RunnerListener {
   class DefaultRunHandler implements Runnable {
     public void run() {
       try {
-        sketch.prepare();
+        if (!sketch.prepare()) {
+            return;
+        }
         if(sketch.build()) {
             reportSize();
         }
@@ -1785,9 +1788,6 @@ public class Editor extends JFrame implements RunnerListener {
         importMenu.add(item);
         importMenu.addSeparator();
 
-        HashMap<String, File> globalLibraries = Base.getLibraryCollection("global");
-        HashMap<String, File> coreLibraries = Base.getLibraryCollection(core.getName());
-        HashMap<String, File> contributedLibraries = Base.getLibraryCollection("sketchbook");
 
         ActionListener listener = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -1795,6 +1795,9 @@ public class Editor extends JFrame implements RunnerListener {
             }
         };
 
+        sketch.importToLibraryTable = new HashMap<String, File>();
+
+        HashMap<String, File> globalLibraries = Base.getLibraryCollection("global");
         if (globalLibraries.size() > 0) {
             JMenu globalMenu = new JMenu(Translate.t("Standard"));
             String[] entries = (String[]) globalLibraries.keySet().toArray(new String[0]);
@@ -1805,20 +1808,26 @@ public class Editor extends JFrame implements RunnerListener {
                 globalMenu.add(item);
             }
             importMenu.add(globalMenu);
+            sketch.importToLibraryTable.putAll(globalLibraries);
         }
 
-        if (coreLibraries.size() > 0) {
-            JMenu coreMenu = new JMenu(core.getName());
-            String[] entries = (String[]) coreLibraries.keySet().toArray(new String[0]);
-            for (String entry : entries) {
-                item = new JMenuItem(entry);
-                item.addActionListener(listener);
-                item.setActionCommand(entry);
-                coreMenu.add(item);
+        if (core != null) {
+            HashMap<String, File> coreLibraries = Base.getLibraryCollection(core.getName());
+            if (coreLibraries.size() > 0) {
+                JMenu coreMenu = new JMenu(core.getName());
+                String[] entries = (String[]) coreLibraries.keySet().toArray(new String[0]);
+                for (String entry : entries) {
+                    item = new JMenuItem(entry);
+                    item.addActionListener(listener);
+                    item.setActionCommand(entry);
+                    coreMenu.add(item);
+                }
+                importMenu.add(coreMenu);
+                sketch.importToLibraryTable.putAll(coreLibraries);
             }
-            importMenu.add(coreMenu);
         }
 
+        HashMap<String, File> contributedLibraries = Base.getLibraryCollection("sketchbook");
         if (contributedLibraries.size() > 0) {
             JMenu contributedMenu = new JMenu(Translate.t("Contributed"));
             String[] entries = (String[]) contributedLibraries.keySet().toArray(new String[0]);
@@ -1829,39 +1838,36 @@ public class Editor extends JFrame implements RunnerListener {
                 contributedMenu.add(item);
             }
             importMenu.add(contributedMenu);
+            sketch.importToLibraryTable.putAll(contributedLibraries);
         }
-
-        // reset the table mapping imports to libraries
-        sketch.importToLibraryTable = new HashMap<String, File>();
-        sketch.importToLibraryTable.putAll(globalLibraries);
-        sketch.importToLibraryTable.putAll(coreLibraries);
-        sketch.importToLibraryTable.putAll(contributedLibraries);
-        System.err.println("ITLT size: " + sketch.importToLibraryTable.size());
     }
 
     public void rebuildExamplesMenu() {
-        File coreExamples = new File(core.getFolder(), "examples");
-        File coreLibs = new File(core.getFolder(), "libraries");
-        File sbLibs = new File(Base.getSketchbookFolder(),"libraries");
 
         if (examplesMenu == null) return;
         examplesMenu.removeAll();
         addSketches(examplesMenu, Base.getExamplesFolder());
 
-        JMenu coreItem = new JMenu(core.get("name", core.getName()));
-        examplesMenu.add(coreItem);
-        if (coreExamples.isDirectory()) {
-            examplesMenu.addSeparator();
-            addSketches(examplesMenu, coreExamples);
-        }
+        if (core != null) {
+            File coreExamples = new File(core.getFolder(), "examples");
 
-        if (coreLibs.isDirectory()) {
-            addSketches(coreItem, coreLibs);
+            JMenu coreItem = new JMenu(core.get("name", core.getName()));
+            examplesMenu.add(coreItem);
+            if (coreExamples.isDirectory()) {
+                examplesMenu.addSeparator();
+                addSketches(examplesMenu, coreExamples);
+            }
+
+            File coreLibs = new File(core.getFolder(), "libraries");
+            if (coreLibs.isDirectory()) {
+                addSketches(coreItem, coreLibs);
+            }
         }
 
         JMenu contributedItem = new JMenu(Translate.t("Contributed"));
         examplesMenu.add(contributedItem);
 
+        File sbLibs = new File(Base.getSketchbookFolder(),"libraries");
         if (sbLibs.isDirectory()) {
             addSketches(contributedItem, sbLibs);
         }
@@ -1951,7 +1957,7 @@ public class Editor extends JFrame implements RunnerListener {
         ButtonGroup group = new ButtonGroup();
         HashMap<String, JMenu> groupings;
         groupings = new HashMap<String, JMenu>();
-
+/*
         JMenuItem addboard = new JMenuItem(Translate.t("Add Boards..."));
         addboard.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -1961,7 +1967,7 @@ public class Editor extends JFrame implements RunnerListener {
 
         boardsMenu.add(addboard);
         boardsMenu.addSeparator();
-
+*/
         for (Board thisboard : Base.boards.values()) {
             AbstractAction action = new AbstractAction(thisboard.getLongName()) {
                 public void actionPerformed(ActionEvent actionevent) {
@@ -1989,6 +1995,10 @@ public class Editor extends JFrame implements RunnerListener {
     }
     
     public void selectBoard(String b) {
+        if (b == null) {
+            selectBoard((Board)null);
+            return;
+        }
         Board brd = Base.boards.get(b);
         if (brd == null) {
             Base.showWarning(Translate.t("Invalid Board"),
@@ -2000,13 +2010,64 @@ public class Editor extends JFrame implements RunnerListener {
         selectBoard(brd);
     }
 
+    public void updateLineStatus() {
+        String boardName;
+        String coreName;
+        String portName;
+
+        if (board != null) {
+            boardName = board.getLongName();
+        } else {
+            boardName = "No board";
+        }
+
+        if (core != null) {
+            coreName = core.getName();
+        } else {
+            coreName = "no core";
+        }
+
+        portName = serialPort;
+
+        lineStatus.setText(boardName + " (" + coreName + ") on " + portName);
+    }
+
     public void selectBoard(Board b) {
+        if (b == null) {
+            board = null;
+            core = null;
+            compiler = null;
+            lineStatus.setText("No board on " + serialPort);
+            return; 
+        }
+
         board = b;
-        core = board.getCore();
+
+        String pc = Base.preferences.get("core." + board.getName());
+        if (pc != null && pc != "") {
+            core = Base.cores.get(pc);
+        } else {
+            core = null;
+            String entries[] = Base.cores.keySet().toArray(new String[0]);
+            for (String entry : entries) {
+                if (Base.cores.get(entry).getFamily().equals(board.getFamily())) {
+                    core = Base.cores.get(entry);
+                    Base.preferences.set("core." + board.getName(), entry);
+                    break;
+                }
+            }
+        }
+
+        if (core != null) {
+            compiler = core.getCompiler();
+        } else {
+            compiler = null;
+        }
         sketch.settings.put("board.root", board.getFolder().getAbsolutePath());
-        lineStatus.setText(b.getLongName() + " on " + serialPort);
-        rebuildBoardsMenu();
+        updateLineStatus();
         Base.preferences.set("board", b.getName());
+        rebuildBoardsMenu();
+        rebuildCoresMenu();
         populateMenus();
 
         for (int i = 0; i < tabs.getTabCount(); i++) {
@@ -2021,25 +2082,43 @@ public class Editor extends JFrame implements RunnerListener {
 
     public void rebuildCoresMenu()
     {
+        ButtonGroup group = new ButtonGroup();
         coresMenu.removeAll();
-        JMenuItem item = new JMenuItem(Translate.t("Add Core..."));
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Base.handleAddCore();
-            }
-        });
-        coresMenu.add(item);
-        coresMenu.addSeparator();
-        item = new JMenuItem(Translate.t("Installed Cores") + ":");
-        coresMenu.add(item);
+        JMenuItem item;
 
         String[] entries = (String[]) Base.cores.keySet().toArray(new String[0]);
 
-        for (int i = 0; i < entries.length; i++) {
-            Core c = Base.cores.get(entries[i]);
-            item = new JMenuItem("  " + c.get("name", entries[i]));
-            coresMenu.add(item);
+        if (board != null) {
+            for (int i = 0; i < entries.length; i++) {
+                Core c = Base.cores.get(entries[i]);
+                String fam = c.getFamily();
+                if (fam != null) {
+                    if (fam.equals(board.getFamily())) {
+                        item = new JRadioButtonMenuItem(c.get("name", entries[i]) + " (v" + c.getFullVersion() + ")");
+                        item.setActionCommand(entries[i]);
+                        if (c == core) {
+                            item.setSelected(true);
+                        }
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                selectCore(e.getActionCommand());
+                            }
+                        });
+                        group.add(item);
+                        coresMenu.add(item);
+                    }
+                }
+            }
         }
+    }
+
+    public void selectCore(String c) {
+        core = Base.cores.get(c);
+        Base.preferences.set("core." + board.getName(), c);
+        updateLineStatus();
+        rebuildBoardsMenu();
+        rebuildCoresMenu();
+        populateMenus();
     }
 
     public void rebuildPluginsMenu()
@@ -2209,13 +2288,19 @@ public class Editor extends JFrame implements RunnerListener {
         tm.clear();
 
         loadKeywordsFromFile(tm, Base.getContentFile("lib/keywords.txt"));
-        loadKeywordsFromFile(tm, new File(core.getFolder(), "keywords.txt"));
-        loadKeywordsFromFile(tm, new File(board.getFolder(), "keywords.txt"));
+        if (core != null) {
+            loadKeywordsFromFile(tm, new File(core.getFolder(), "keywords.txt"));
+        }
+        if (board != null) {
+            loadKeywordsFromFile(tm, new File(board.getFolder(), "keywords.txt"));
+        }
 
         for (String entry : entries) {
             File libFolder = sketch.importToLibraryTable.get(entry);
             File keywords = new File(libFolder, "keywords.txt");
-            loadKeywordsFromFile(tm, keywords);
+            if (keywords.exists()) {
+                loadKeywordsFromFile(tm, keywords);
+            }
         }
     }
 
@@ -2284,13 +2369,13 @@ public class Editor extends JFrame implements RunnerListener {
         long data = 0;
         long bss = 0;
         try {
-            maxFlash = Integer.parseInt(board.getAny("upload.maximum_size", "0"));
+            maxFlash = Integer.parseInt(board.get("upload.maximum_size", "0"));
         } catch (Exception e) {
             maxFlash = 0;
         }
 
         try {
-            maxRam = Integer.parseInt(board.getAny("upload.maximum_ram", "0"));
+            maxRam = Integer.parseInt(board.get("upload.maximum_ram", "0"));
         } catch (Exception e) {
             maxRam = 0;
         }

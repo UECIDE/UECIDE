@@ -1,9 +1,9 @@
-version=0.6.4e
+version=0.7.0a
 download.enable=yes
 
 default.theme=uecide
-default.cores=avr105
-default.boards=Arduino
+default.cores=
+default.boards=
 default.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,PluginManager
 default.suffix=
 

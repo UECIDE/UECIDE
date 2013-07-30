@@ -48,7 +48,8 @@ public class Sizer implements MessageConsumer {
     public void computeSize() throws RunnerException {
 
         editor.sketch.settings.put("filename", editor.sketch.name);
-        String commandSize[] = editor.sketch.parseString(editor.core.get("compiler.size")).split("::");
+        HashMap<String, String> all = editor.sketch.mergeAllProperties();
+        String commandSize[] = editor.sketch.parseString(all.get("compile.size")).split("::");
 
         int r = 0;
         try {
