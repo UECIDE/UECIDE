@@ -143,4 +143,12 @@ public class Core implements MessageConsumer {
     public Compiler getCompiler() {
         return Base.compilers.get(corePreferences.get("compiler"));
     }
+
+    public File getExamplesFolder() {
+        String f = corePreferences.get("examples.path");
+        if (f == null || f == "") {
+            f = "examples";
+        }
+        return new File(folder, f);
+    }
 }
