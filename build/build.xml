@@ -50,11 +50,10 @@
 
     <fileset dir=".." id="runtime.jars">
         <include name="core/uecide.jar" />
-        <include name="core/lib/ecj.jar" />
         <include name="core/lib/jna.jar" />
         <include name="core/lib/RXTXcomm.jar" />
-        <include name="core/lib/ant.jar" />
-        <include name="core/lib/ant-launcher.jar" />
+        <!--include name="core/lib/ant.jar" /-->
+        <!--include name="core/lib/ant-launcher.jar" /-->
     </fileset>
 
     <target name="build" description="Build IDE.">
@@ -140,9 +139,6 @@ Building for ${brand} version ${version}${suffix}
         <copy todir="${target.path}/lib/theme/">
             <fileset dir="themes/${theme}/ide/" includes="**/*"/>
         </copy>
-    
-        <!-- Write the revision file! -->
-        <echo file="${target.path}/lib/version.txt" message="${version}" />
     </target>
 
     <target name="macosx-clean" depends="subprojects-clean" description="Clean Mac OS X build">
@@ -177,9 +173,9 @@ Building for ${brand} version ${version}${suffix}
       <fileset refid="runtime.jars"/>
     </copy>
     
-    <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java">
-      <fileset dir="shared" includes="lib/**" />
-      <fileset file="shared/revisions.txt" />
+    <copy todir="macosx/work/${product.cap}.app/Contents/Resources/Java/lib">
+            <fileset file="shared/lib/preferences.txt"/>
+            <fileset file="shared/lib/keywords.txt"/>
     </copy>
 
     <antcall target="assemble">
@@ -253,9 +249,9 @@ Building for ${brand} version ${version}${suffix}
   <target name="upgrade-build" depends="subprojects-build" description="Build upgrade version">
     <mkdir dir="upgrade/work" />
     
-    <copy todir="upgrade/work">
-      <fileset dir="shared" includes="lib/**" />
-      <fileset file="shared/revisions.txt" />
+    <copy todir="upgrade/work/lib">
+            <fileset file="shared/lib/preferences.txt"/>
+            <fileset file="shared/lib/keywords.txt"/>
     </copy>
     
     <copy todir="upgrade/work/lib" flatten="true">
@@ -272,9 +268,9 @@ Building for ${brand} version ${version}${suffix}
   <target name="linux-build" depends="subprojects-build" description="Build linux version">
     <mkdir dir="linux/work" />
     
-    <copy todir="linux/work">
-      <fileset dir="shared" includes="lib/**" />
-      <fileset file="shared/revisions.txt" />
+    <copy todir="linux/work/lib">
+            <fileset file="shared/lib/preferences.txt"/>
+            <fileset file="shared/lib/keywords.txt"/>
     </copy>
     
     <copy todir="linux/work">
@@ -301,9 +297,9 @@ Building for ${brand} version ${version}${suffix}
     <target name="linux64-build" depends="subprojects-build" description="Build linux (64-bit) version">
         <mkdir dir="linux/work" />
     
-        <copy todir="linux/work">
-          <fileset dir="shared" includes="lib/**" />
-          <fileset file="shared/revisions.txt" />
+        <copy todir="linux/work/lib">
+            <fileset file="shared/lib/preferences.txt"/>
+            <fileset file="shared/lib/keywords.txt"/>
         </copy>
         
         <copy todir="linux/work">
@@ -482,9 +478,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
             <fileset refid="runtime.jars" />
         </copy>
     
-        <copy todir="windows/work">
-            <fileset dir="shared" includes="lib/**" />
-            <fileset file="shared/revisions.txt" />
+        <copy todir="windows/work/lib">
+            <fileset file="shared/lib/preferences.txt"/>
+            <fileset file="shared/lib/keywords.txt"/>
         </copy>
     
         <copy todir="windows/work">

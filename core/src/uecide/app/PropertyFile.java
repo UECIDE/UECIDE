@@ -53,6 +53,12 @@ public class PropertyFile {
         }
     }
 
+    public PropertyFile() {
+        userFile = null;
+        defaultProperties = new Properties();
+        properties = new Properties();
+    }
+
     public void save() {
         if (userFile != null) {
             try {
@@ -212,7 +218,14 @@ public class PropertyFile {
         return font;
     }
 
-    Properties getProperties() {
+    public Properties getProperties() {
         return properties;
+    }
+
+    public HashMap<String, String> toHashMap() {
+        HashMap<String, String> map = new HashMap<String, String>();
+        for (final String name: properties.stringPropertyNames())
+            map.put(name, properties.getProperty(name));
+        return map;
     }
 }

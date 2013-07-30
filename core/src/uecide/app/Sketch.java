@@ -192,7 +192,16 @@ public class Sketch implements MessageConsumer {
         return folder;
     }
 
-    public void prepare() {
+    public boolean prepare() {
+        HashMap<String, String> all = mergeAllProperties();
+        if (editor.board == null) {
+            Base.showWarning(Translate.t("No Board Selected"), Translate.w("You have no board selected.  You must select a board before you can compile your sketch.", 40, "\n"), null);
+            return false;
+        }
+        if (editor.core == null) {
+            Base.showWarning(Translate.t("No Core Selected"), Translate.w("You have no core selected.  You must select a core before you can compile your sketch.", 40, "\n"), null);
+            return false;
+        }
         if (Base.preferences.getBoolean("export.delete_target_folder")) {
             cleanBuild();
         }
@@ -230,7 +239,7 @@ public class Sketch implements MessageConsumer {
                     f.prototypes = proc.prototypes(rawData).toArray(new String[0]);
                     StringBuilder sb = new StringBuilder();
                     f.headerLines = 0;
-                    String coreHeader = editor.board.getAny("core.header", "");
+                    String coreHeader = all.get("core.header");
                     if (coreHeader != "") {
                         sb.append("#include <" + coreHeader + ">\n");
                         f.headerLines ++;
@@ -290,7 +299,9 @@ public class Sketch implements MessageConsumer {
                     String newFileName = f.file.getName();
                     int dot = newFileName.lastIndexOf(".");
                     newFileName = newFileName.substring(0, dot);
-                    newFileName = newFileName + "." + editor.board.getAny("build.extension","cpp");
+                    String ext = all.get("build.extension"); 
+                    if (ext == null) ext = "cpp";
+                    newFileName = newFileName + "." + ext;
 
                     try {
                         PrintWriter pw = new PrintWriter(new File(buildFolder, newFileName));
@@ -316,7 +327,7 @@ public class Sketch implements MessageConsumer {
             f.prototypes = proc.prototypes(rawData).toArray(new String[0]);
             StringBuilder sb = new StringBuilder();
             f.headerLines = 0;
-            String coreHeader = editor.board.getAny("core.header", "");
+            String coreHeader = all.get("core.header");
             if (coreHeader != "") {
                 sb.append("#include <" + coreHeader + ">\n");
                 f.headerLines ++;
@@ -373,7 +384,9 @@ public class Sketch implements MessageConsumer {
                     }
 
 
-            String newFileName = name + "." + editor.board.getAny("build.extension","cpp");
+                String ext = all.get("build.extension"); 
+                if (ext == null) ext = "cpp";
+            String newFileName = name + "." + ext;
 
             try {
                 PrintWriter pw = new PrintWriter(new File(buildFolder, newFileName));
@@ -383,6 +396,7 @@ public class Sketch implements MessageConsumer {
                 e.printStackTrace();
             }
         }
+        return true;
     }
 
     public String stripComments(String data) {
@@ -460,6 +474,7 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
+        HashMap<String, String> all = mergeAllProperties();
         editor.statusNotice(Translate.t("Uploading to Board..."));
         settings.put("filename", name);
         settings.put("filename.elf", name + ".elf");
@@ -566,14 +581,17 @@ public class Sketch implements MessageConsumer {
 
         boolean dtr = false;
         boolean rts = false;
-        if (editor.board.getAny("upload.dtr", "").equals("yes")) {
+        if (all.get("upload.dtr").equals("yes")) {
             dtr = true;
         }
-        if (editor.board.getAny("upload.rts", "").equals("yes")) {
+        if (all.get("upload.rts").equals("yes")) {
             rts = true;
         }
 
-        if (editor.board.getAny("upload.using", "serial").equals("serial"))
+        String ulu = all.get("upload.using");
+        if (ulu == null) ulu = "serial";
+
+        if (ulu.equals("serial"))
         {
             editor.grabSerialPort();
             if (dtr || rts) {
@@ -582,7 +600,7 @@ public class Sketch implements MessageConsumer {
         }
 
         boolean res = execAsynchronously(commandString);
-        if (editor.board.getAny("upload.using", "serial").equals("serial"))
+        if (ulu.equals("serial"))
         {
             if (dtr || rts) {
                 assertDTRRTS(false, false);
@@ -611,7 +629,11 @@ public class Sketch implements MessageConsumer {
 
     public boolean build() {
         editor.statusNotice(Translate.t("Compiling..."));
-        prepare();
+        if (!prepare()) {
+            System.err.println("Prepare failed");
+            editor.statusNotice(Translate.t("Compile Failed"));
+            return false;
+        }
         return compile();
     }
 
@@ -944,6 +966,7 @@ public class Sketch implements MessageConsumer {
         tobjs = compileSketch();
         if (tobjs == null) {
             editor.statusNotice(Translate.t("Error Compiling Sketch"));
+            System.err.println("compileSketch() failed");
             return false;
         }
         objectFiles.addAll(tobjs);
@@ -952,6 +975,7 @@ public class Sketch implements MessageConsumer {
         editor.statusNotice(Translate.t("Compiling Libraries..."));
         if (!compileLibraries()) {
             editor.statusNotice(Translate.t("Error Compiling Libraries"));
+            System.err.println("compileLibraries() failed");
             return false;
         }
 
@@ -960,6 +984,7 @@ public class Sketch implements MessageConsumer {
         editor.statusNotice(Translate.t("Compiling Core..."));
         if (!compileCore(editor.core.getAPIFolder(), "core")) {
             editor.statusNotice(Translate.t("Error Compiling Core"));
+            System.err.println("compileCore() failed");
             return false;
         }
         String coreLibs = "";
@@ -993,7 +1018,9 @@ public class Sketch implements MessageConsumer {
         }
         setCompilingProgress(70);
 
-        if (editor.core.get("recipe.objcopy.lss.pattern") != null) {
+        HashMap<String, String> all = mergeAllProperties();
+
+        if (all.get("compile.lss") != null) {
             if (Base.preferences.getBoolean("compiler.generate_lss")) {
                 editor.statusNotice(Translate.t("Generating Listing..."));
                 File redirectTo = new File(buildFolder, name + ".lss");
@@ -1056,18 +1083,7 @@ public class Sketch implements MessageConsumer {
         String end;
         String mid;
 
-        HashMap<String, String> tokens = new HashMap<String, String>();
-
-        
-        Properties properties = editor.core.getPreferences().getProperties();
-        for (final String name: properties.stringPropertyNames())
-            tokens.put(name, properties.getProperty(name));
-
-        properties = editor.board.getPreferences().getProperties();
-        for (final String name: properties.stringPropertyNames())
-            tokens.put(name, properties.getProperty(name));
-
-        tokens.putAll(settings);
+        HashMap<String, String> tokens = mergeAllProperties();
 
         out = in;
 
@@ -1092,8 +1108,12 @@ public class Sketch implements MessageConsumer {
             end = out.substring(iEnd+1);
             mid = out.substring(iStart+2, iEnd);
 
-            if (mid.equals("core.root")) {
+            if (mid.equals("compiler.root")) {
+                mid = editor.compiler.getFolder().getAbsolutePath();
+            } else if (mid.equals("core.root")) {
                 mid = editor.core.getFolder().getAbsolutePath();
+            } else if (mid.equals("board.root")) {
+                mid = editor.board.getFolder().getAbsolutePath();
             } else if ((mid.length() > 5) && (mid.substring(0,5).equals("find:"))) {
                 String f = mid.substring(5);
 
@@ -1109,9 +1129,9 @@ public class Sketch implements MessageConsumer {
                 }
             } else if (mid.equals("verbose")) {
                 if (Base.preferences.getBoolean("export.verbose")) 
-                    mid = editor.board.getAny("upload.verbose", "");
+                    mid = tokens.get("upload.verbose");
                 else 
-                    mid = editor.board.getAny("upload.quiet", "");
+                    mid = tokens.get("upload.quiet");
             } else if (mid.equals("port")) {
                 if (Base.isWindows()) 
                     mid = "\\\\.\\" + editor.getSerialPort();
@@ -1145,37 +1165,22 @@ public class Sketch implements MessageConsumer {
     }
 
     private File compileFile(File src) {
-        String cflags = parameters.get("cflags");
-        if (cflags == null) {
-            cflags = "";
-        }
-        cflags = cflags.replaceAll("\\s+", "::");
-        if (cflags != "") {
-            cflags = "::" + cflags;
-        }
-
-        String cxxflags = parameters.get("cxxflags");
-        if (cxxflags == null) {
-            cxxflags = "";
-        }
-        cxxflags = cxxflags.replaceAll("\\s+", "::");
-        if (cxxflags != "") {
-            cxxflags = "::" + cxxflags;
-        }
 
         String fileName = src.getName();
         String recipe = null;
 
+        HashMap<String, String> all = mergeAllProperties();
+
         if (fileName.endsWith(".cpp")) {
-            recipe = editor.board.getAny("recipe.cpp.o.pattern") + cxxflags;
+            recipe = all.get("compile.cpp");
         }
     
         if (fileName.endsWith(".c")) {
-            recipe = editor.board.getAny("recipe.c.o.pattern") + cflags;
+            recipe = all.get("compile.c");
         }
     
         if (fileName.endsWith(".S")) {
-            recipe = editor.board.getAny("recipe.S.o.pattern") + cflags;
+            recipe = all.get("compile.S");
         }
 
         if (recipe == null) {
@@ -1227,7 +1232,8 @@ public class Sketch implements MessageConsumer {
     public boolean compileCore(File core, String name) {
         File archive = getCacheFile("lib" + name + ".a");
 
-        String recipe = editor.board.getAny("recipe.ar.pattern");
+        HashMap<String, String> all = mergeAllProperties();
+        String recipe = all.get("compile.ar");
 
         settings.put("library", archive.getAbsolutePath());
 
@@ -1242,7 +1248,7 @@ public class Sketch implements MessageConsumer {
         fileList.addAll(findFilesInFolder(core, "c", true));
         fileList.addAll(findFilesInFolder(core, "cpp", true));
 
-        String boardFiles = editor.board.getAny("build.files");
+        String boardFiles = all.get("build.files");
         if (boardFiles != null) {
             String[] bfl = boardFiles.split("::");
             for (String bf : bfl) {
@@ -1278,8 +1284,9 @@ public class Sketch implements MessageConsumer {
     public boolean compileLibrary(File lib) {
         File archive = getCacheFile("lib" + lib.getName() + ".a");
         File utility = new File(lib, "utility");
+        HashMap<String, String> all = mergeAllProperties();
 
-        String recipe = editor.board.getAny("recipe.ar.pattern");
+        String recipe = all.get("compile.ar");
 
         settings.put("library", archive.getAbsolutePath());
 
@@ -1322,25 +1329,8 @@ public class Sketch implements MessageConsumer {
 
     private List<File> compileFiles(File dest, List<File> sSources, List<File> cSources, List<File> cppSources) {
 
-        String cflags = parameters.get("cflags");
-        if (cflags == null) {
-            cflags = "";
-        }
-        cflags = cflags.replaceAll("\\s+", "::");
-        if (cflags != "") {
-            cflags = "::" + cflags;
-        }
-
-        String cxxflags = parameters.get("cxxflags");
-        if (cxxflags == null) {
-            cxxflags = "";
-        }
-        cxxflags = cxxflags.replaceAll("\\s+", "::");
-        if (cxxflags != "") {
-            cxxflags = "::" + cxxflags;
-        }
-
         List<File> objectPaths = new ArrayList<File>();
+        HashMap<String, String> all = mergeAllProperties();
 
         settings.put("build.path", dest.getAbsolutePath());
 
@@ -1358,7 +1348,7 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!execAsynchronously(parseString(editor.core.get("recipe.S.o.pattern") + cflags)))
+            if(!execAsynchronously(parseString(all.get("compile.S"))))
                 return null;
             if (!objectFile.exists()) 
                 return null;
@@ -1378,7 +1368,7 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!execAsynchronously(parseString(editor.core.get("recipe.c.o.pattern") + cflags)))
+            if(!execAsynchronously(parseString(all.get("compile.c"))))
                 return null;
             if (!objectFile.exists()) 
                 return null;
@@ -1398,7 +1388,7 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!execAsynchronously(parseString(editor.core.get("recipe.cpp.o.pattern") + cxxflags)))
+            if(!execAsynchronously(parseString(all.get("compile.cpp"))))
                 return null;
             if (!objectFile.exists()) 
                 return null;
@@ -1467,15 +1457,8 @@ public class Sketch implements MessageConsumer {
     }
 
     private boolean compileLink(List<File> objectFiles, String coreLibs) {
-        String ldflags = parameters.get("ldflags");
-        if (ldflags == null) {
-            ldflags = "";
-        }
-        ldflags = ldflags.replaceAll("\\s+", "::");
-        if (ldflags != "") {
-            ldflags = "::" + ldflags;
-        }
-        String baseCommandString = editor.board.getAny("recipe.c.combine.pattern", "") + ldflags;
+        HashMap<String, String> all = mergeAllProperties();
+        String baseCommandString = all.get("compile.link");
         String commandString = "";
         String objectFileList = "";
 
@@ -1494,17 +1477,6 @@ public class Sketch implements MessageConsumer {
             objectFileList = objectFileList + file.getAbsolutePath() + "::";
         }
 
-        File ldscript = editor.board.getLDScript();
-
-        String ldScriptFile;
-        String ldScriptPath;
-        if (ldscript == null) {
-            ldScriptFile = "";
-            ldScriptPath = "";
-        } else {
-            ldScriptFile = ldscript.getName();
-            ldScriptPath = ldscript.getParentFile().getAbsolutePath();
-        }
         settings.put("build.path", buildFolder.getAbsolutePath());
         settings.put("object.filelist", objectFileList);
 
@@ -1513,18 +1485,22 @@ public class Sketch implements MessageConsumer {
     }
 
     private boolean compileEEP() {
-        return execAsynchronously(parseString(editor.core.get("recipe.objcopy.eep.pattern")));
+        HashMap<String, String> all = mergeAllProperties();
+        return execAsynchronously(parseString(all.get("compile.eep")));
     }
 
     private boolean compileLSS() {
-        return execAsynchronously(parseString(editor.core.get("recipe.objcopy.lss.pattern")));
+        HashMap<String, String> all = mergeAllProperties();
+        return execAsynchronously(parseString(all.get("compile.lss")));
     }
 
     private boolean compileHEX() {
-        return execAsynchronously(parseString(editor.core.get("recipe.objcopy.hex.pattern")));
+        HashMap<String, String> all = mergeAllProperties();
+        return execAsynchronously(parseString(all.get("compile.hex")));
     }
 
     public boolean execAsynchronously(String command) {
+        HashMap<String, String> all = mergeAllProperties();
         if (command == null) {
             return true;
         }
@@ -1548,12 +1524,14 @@ public class Sketch implements MessageConsumer {
             process.directory(buildFolder);
         }
         Map<String, String> environment = process.environment();
-        
-        String[] env = editor.board.getAny("environment","").split("::");
-        for (String ev : env) {
-            String[] bits = ev.split("=");
-            if (bits.length == 2) {
-                environment.put(bits[0], bits[1]);
+    
+        String env = all.get("environment");
+        if (env != null) {
+            for (String ev : env.split("::")) {
+                String[] bits = ev.split("=");
+                if (bits.length == 2) {
+                    environment.put(bits[0], bits[1]);
+                }
             }
         }
 
@@ -1638,6 +1616,34 @@ public class Sketch implements MessageConsumer {
     public void cleanBuild() {
         System.gc();
         Base.removeDescendants(buildFolder);
+    }
+
+    // Merge all the layers into one single property file
+    // class.  This will be the compiler, then the core, then
+    // the board, then the pragmas and finally the run-time settings.
+
+    public HashMap<String, String> mergeAllProperties() {
+        HashMap<String, String> total = new HashMap<String, String>();
+
+        if (editor.compiler == null) System.err.println("==> No compiler");
+        if (editor.core == null) System.err.println("==> No core");
+        if (editor.board == null) System.err.println("==> No board");
+
+        if (editor.compiler.getProperties() == null) System.err.println("==> No compiler properties");
+        if (editor.core.getProperties() == null) System.err.println("==> No core properties");
+        if (editor.board.getProperties() == null) System.err.println("==> No board properties");
+
+        total.putAll(editor.compiler.getProperties().toHashMap());
+        total.putAll(editor.core.getProperties().toHashMap());
+        total.putAll(editor.board.getProperties().toHashMap());
+        if (parameters != null) {
+            total.putAll(parameters);
+        }
+        if (settings != null) {
+            total.putAll(settings);
+        }
+
+        return total;
     }
 }
 

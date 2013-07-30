@@ -16,6 +16,7 @@ import javax.imageio.*;
 
 import uecide.app.debug.Board;
 import uecide.app.debug.Core;
+import uecide.app.debug.Compiler;
 
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -60,6 +61,7 @@ public class Base {
     // found in the sketchbook)
     public static String librariesClassPath;
   
+    public static HashMap<String, Compiler> compilers;
     public static HashMap<String, Board> boards;
     public static HashMap<String, Core> cores;
     public static HashMap<String, Plugin> plugins;
@@ -69,7 +71,7 @@ public class Base {
     // Location for untitled items
     static File untitledFolder;
 
-    static ArrayList<Editor> editors = new ArrayList<Editor>();
+    public static ArrayList<Editor> editors = new ArrayList<Editor>();
     public static Editor activeEditor;
 
     public static PropertyFile preferences;
@@ -102,7 +104,7 @@ public class Base {
         theme.setPlatformAutoOverride(true);
 
         splashScreen = new Splash();
-        splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 12);
+        splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
 
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
@@ -124,7 +126,7 @@ public class Base {
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
-        splashScreen.setMessage("Loading Application...", 24);
+        splashScreen.setMessage("Loading Application...", 20);
         platform.init(this);
 
         // Get paths for the libraries and examples in the Processing folder
@@ -162,33 +164,25 @@ public class Base {
             }
         }
     
+        compilers = new HashMap<String, Compiler>();
         cores = new HashMap<String, Core>();
         boards = new HashMap<String, Board>();
         plugins = new HashMap<String, Plugin>();
         pluginInstances = new ArrayList<Plugin>();
 
-        splashScreen.setMessage("Loading Cores...", 36);
+        splashScreen.setMessage("Loading Compilers...", 30);
+        loadCompilers();
+        splashScreen.setMessage("Loading Cores...", 40);
         loadCores();
-        if (cores.size() == 0) {
-            System.err.println("You have no cores installed!");
-            System.err.println("Please install at least one core.");
-            return;
-        }
-        splashScreen.setMessage("Loading Boards...", 48);
+        splashScreen.setMessage("Loading Boards...", 50);
         loadBoards();
-        if (cores.size() == 0) {
-            System.err.println("You have no boards installed!");
-            System.err.println("Please install at least one board.");
-            return;
-        }
-
         splashScreen.setMessage("Loading Plugins...", 60);
         loadPlugins();
-        splashScreen.setMessage("Loading Libraries...", 72);
+        splashScreen.setMessage("Loading Libraries...", 70);
         gatherLibraries();
         initMRU();
 
-        splashScreen.setMessage("Opening Editor...", 84);
+        splashScreen.setMessage("Opening Editor...", 80);
         boolean opened = false;
         // Check if any files were passed in on the command line
         for (int i = 0; i < args.length; i++) {
@@ -301,6 +295,10 @@ public class Base {
         String prefsBoard = preferences.get("board");
         String[] entries;
 
+        if (boards.size() == 0) {
+            return null;
+        }
+
         tb = boards.get(prefsBoard);
         if (tb != null) {
             return tb;
@@ -314,13 +312,19 @@ public class Base {
         return null;
     }
 
-    private static void loadCores() {
-        cores.clear();
-        loadCoresFromFolder(new File(getHardwareFolder(),"cores"));
-        loadCoresFromFolder(new File(getSketchbookFolder(),"cores"));
+    public static void loadCompilers() {
+        compilers.clear();
+        loadCompilersFromFolder(new File(getHardwareFolder(),"compilers"));
+        loadCompilersFromFolder(getUserCompilersFolder());
     }
 
-    private static void loadCoresFromFolder(File folder) {
+    public static void loadCompilersFromFolder(File folder) {
+        if (folder == null) {
+            return;
+        }
+        if (!folder.exists()) {
+            return;
+        }
         if (!folder.isDirectory()) 
             return;
         String cl[] = folder.list();
@@ -330,21 +334,52 @@ public class Base {
                 continue;
             File cdir = new File(folder, cl[i]);
             if (cdir.isDirectory()) {
-                Core newCore = new Core(cdir);
-                if (newCore.isValid()) {
-                    cores.put(newCore.getName(), newCore);
+                File cfile = new File(cdir, "compiler.txt");
+                if (cfile.exists()) {
+                    Compiler newCompiler = new Compiler(cdir);
+                    if (newCompiler.isValid()) {
+                        compilers.put(newCompiler.getName(), newCompiler);
+                    }
                 }
             }
         }
     }
 
-    private static void loadBoards() {
-        boards.clear();
-        loadBoardsFromFolder(new File(getHardwareFolder(), "boards"));
-        loadBoardsFromFolder(new File(getSketchbookFolder(), "boards"));
+
+    public static void loadCores() {
+        cores.clear();
+        loadCoresFromFolder(new File(getHardwareFolder(),"cores"));
+        loadCoresFromFolder(getUserCoresFolder());
+    }
+    public static void loadCoresFromFolder(File folder) {
+        if (!folder.isDirectory()) 
+            return;
+        String cl[] = folder.list();
+ 
+        for (int i = 0; i < cl.length; i++) {
+            if (cl[i].charAt(0) == '.')
+                continue;
+            File cdir = new File(folder, cl[i]);
+            if (cdir.isDirectory()) {
+                File cfile = new File(cdir, "core.txt");
+                if (cfile.exists()) {
+                    Core newCore = new Core(cdir);
+                    if (newCore.isValid()) {
+                        cores.put(newCore.getName(), newCore);
+                    }
+                }
+            }
+        }
     }
 
-    private static void loadBoardsFromFolder(File folder) {
+
+    public static void loadBoards() {
+        boards.clear();
+        loadBoardsFromFolder(new File(getHardwareFolder(), "boards"));
+        loadBoardsFromFolder(getUserBoardsFolder());
+    }
+
+    public static void loadBoardsFromFolder(File folder) {
         String bl[] = folder.list();
 
         if (bl == null) {
@@ -653,9 +688,13 @@ public class Base {
         return platform;
     }
 
+    public static String getOSArch() {
+        return System.getProperty("os.arch");
+    }
+
 
     public static String getOSFullName() {
-        return getOSName() + "_" + System.getProperty("os.arch");
+        return getOSName() + "_" + getOSArch();
     }
     
     public static String getOSName() {
@@ -1704,13 +1743,13 @@ public class Base {
             return;
         }
 
-        final File bf = new File(getSketchbookFolder(), "boards");
+        final File bf = getUserBoardsFolder();
         new ZipExtractor(inputFile, bf).execute();
     }
 
     public static void handleAddCore()
     {
-        File inputFile = openFileDialog(Translate.t("Add Core..."), "zip");
+        File inputFile = openFileDialog(Translate.t("Add Core..."), "jar");
 
         if (inputFile == null) {
             return;
@@ -1721,11 +1760,32 @@ public class Base {
             return;
         }
 
-        final File bf = new File(getSketchbookFolder(), "cores");
+        final File bf = getUserCoresFolder();
         if (!bf.exists()) {
             bf.mkdirs();
         }
-        new ZipExtractor(inputFile, bf).execute();
+
+        try {
+            JarFile jf = new JarFile(inputFile);
+            Manifest manifest = jf.getManifest();
+            Attributes manifestContents = manifest.getMainAttributes();
+
+            String plat = manifestContents.getValue("Platform");
+            System.err.println("Core is for " + plat);
+
+            if (!(
+                plat.equals(getOSFullName()) ||
+                plat.equals(getOSName()) ||
+                plat.equals("any")
+            )) {
+                Base.showWarning(Translate.t("Incompatible Core"), Translate.w("The core you selected is for %1.  You are running on %2.", 40, "\n", plat, getOSFullName()), null);
+                return;
+            }
+
+            new ZipExtractor(inputFile, bf).execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void handleInstallPlugin() {
@@ -1746,14 +1806,14 @@ public class Base {
             System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
             return;
         }
-        File bf = new File(getSketchbookFolder(), "plugins");
+        File bf = getUserPluginsFolder();
         if (!bf.exists()) {
             bf.mkdirs();
         }
         if (bf.getName().toLowerCase().endsWith(".zip")) {
             new ZipExtractor(inputFile, bf).execute();
         } else {
-            File d = new File(getSketchbookFolder(), "plugins");
+            File d = getUserPluginsFolder();
             if (!d.exists()) {
                 d.mkdirs();
             }
@@ -1787,7 +1847,7 @@ public class Base {
             if (pf != null) loadPluginsFromFolder(pf);
         }
 
-        pf = new File(getSketchbookFolder(), "plugins");
+        pf = getUserPluginsFolder();
         if (pf != null) loadPluginsFromFolder(pf);
     }
 
@@ -1997,4 +2057,37 @@ public class Base {
     System.arraycopy(list, 0, temp, 0, Math.min(newSize, list.length));
     return temp;
   }
+
+    static public File getUserCoresFolder() {
+        File f = getSettingsFile("cores");
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
+    }
+
+    static public File getUserBoardsFolder() {
+        File f = getSettingsFile("boards");
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
+    }
+
+    static public File getUserPluginsFolder() {
+        File f = getSettingsFile("plugins");
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
+    }
+
+    static public File getUserCompilersFolder() {
+        File f = getSettingsFile("compilers");
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
+    }
+
 }
