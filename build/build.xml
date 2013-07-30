@@ -20,6 +20,7 @@
         <propertycopy property="suffix" from="${brand}.suffix" />
         <propertycopy property="theme" from="${brand}.theme" />
         <propertycopy property="cores" from="${brand}.cores" />
+        <propertycopy property="compilers" from="${brand}.compilers" />
         <propertycopy property="boards" from="${brand}.boards" />
         <propertycopy property="plugins" from="${brand}.plugins" />
         <property file="themes/${theme}/ide/theme.txt"/>
@@ -28,7 +29,6 @@
     <condition property="macosx"><os family="mac" /></condition>
     <condition property="windows"><os family="windows" /></condition>
     <condition property="linux"><os family="unix" /></condition>
-    <condition property="linux64"><os family="unix" arch="amd64" /></condition>
 
     <condition property="platform" value="macosx">
         <os family="mac" />
@@ -38,9 +38,6 @@
     </condition>
     <condition property="platform"  value="linux">
         <os family="unix" arch="i386" />
-    </condition>
-    <condition property="platform" value="linux64">
-        <os family="unix" arch="amd64" />
     </condition>
 
     <!-- set time propert -->  
@@ -86,12 +83,23 @@ Building for ${brand} version ${version}${suffix}
         <get src="${src}" dest="${dest}" usetimestamp="true" />    
     </target>
 
+    <target name="install_compiler">
+        <antcall target="download-file">
+            <param name="src" value="http://www.uecide.org/compilers/${compiler.name}-${target.platform}.jar" />
+            <param name="dest" value="tmp/${compiler.name}-${target.platform}.jar" />
+        </antcall>
+        <unzip dest="${target.path}/hardware/compilers" src="tmp/${compiler.name}-${target.platform}.jar" overwrite="false" />
+        <chmod perm="+x">
+            <fileset dir="${target.path}/hardware/compilers/${compiler.name}" includes="**/*" />
+        </chmod>
+    </target>
+
     <target name="install_core">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/cores/${core.name}-${target.platform}-current.zip" />
-            <param name="dest" value="tmp/${core.name}-${target.platform}-current.zip" />
+            <param name="src" value="http://www.uecide.org/cores/${core.name}.jar" />
+            <param name="dest" value="tmp/${core.name}.jar" />
         </antcall>
-        <unzip dest="${target.path}/hardware/cores" src="tmp/${core.name}-${target.platform}-current.zip" overwrite="false" />
+        <unzip dest="${target.path}/hardware/cores" src="tmp/${core.name}.jar" overwrite="false" />
         <chmod perm="+x">
             <fileset dir="${target.path}/hardware/cores/${core.name}" includes="**/*" />
         </chmod>
@@ -103,10 +111,10 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="install_boards">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/boards/${boards.name}.zip" />
-            <param name="dest" value="tmp/${boards.name}.zip" />
+            <param name="src" value="http://www.uecide.org/boards/${boards.name}.jar" />
+            <param name="dest" value="tmp/${boards.name}.jar" />
         </antcall>
-        <unzip dest="${target.path}/hardware/boards/${boards.name}" src="tmp/${boards.name}.zip" overwrite="false" />
+        <unzip dest="${target.path}/hardware/boards/" src="tmp/${boards.name}.jar" overwrite="false" />
         <chmod perm="+x">
             <fileset dir="${target.path}/hardware/boards/${boards.name}" includes="**/*" />
         </chmod>
@@ -115,6 +123,13 @@ Building for ${brand} version ${version}${suffix}
     <target name="assemble">
         <fail unless="target.path" 
             message="Do not call assemble from the command line." />
+
+        <mkdir dir="${target.path}/hardware"/>
+
+        <foreach list="${compilers}" param="compiler.name" target="install_compiler">
+            <param name="target.path" value="${target.path}"/>
+            <param name="target.platform" value="${target.platform}"/>
+        </foreach>
 
         <foreach list="${cores}" param="core.name" target="install_core">
             <param name="target.path" value="${target.path}"/>
@@ -294,41 +309,11 @@ Building for ${brand} version ${version}${suffix}
     <target name="linux32-build" depends="linux-build" description="Build linux (32-bit) version">
     </target>
 
-    <target name="linux64-build" depends="subprojects-build" description="Build linux (64-bit) version">
-        <mkdir dir="linux/work" />
-    
-        <copy todir="linux/work/lib">
-            <fileset file="shared/lib/preferences.txt"/>
-            <fileset file="shared/lib/keywords.txt"/>
-        </copy>
-        
-        <copy todir="linux/work">
-          <fileset dir="linux/dist" includes="lib/**" />
-        </copy>
-
-        <copy todir="linux/work/lib" flatten="true">
-          <fileset refid="runtime.jars" />
-        </copy>
-        
-        <antcall target="assemble">
-          <param name="target.path" value="linux/work" />
-          <param name="target.platform" value="linux64" />
-        </antcall>
-
-        <copy tofile="linux/work/${product}" file="linux/dist/linuxrunner" />
-        <chmod perm="755" file="linux/work/${product}" />
-        <copy tofile="linux/work/lib/librxtxSerial.so" file="linux/dist/lib/librxtxSerial64.so" overwrite="true" />   
-    </target>
-  
   <target name="linux-run" depends="linux-build" 
 	  description="Run Linux (32-bit) version">
     <exec executable="./linux/work/${product}" spawn="false"/>
   </target>
   
-  <target name="linux64-run" depends="linux64-build" 
-	  description="Run Linux (64-bit) version">
-    <exec executable="./linux/work/${product}" spawn="false"/>
-  </target>
 
     <target name="upgrade-dist" depends="upgrade-build"
         description="Build distribution version">
@@ -349,23 +334,6 @@ Building for ${brand} version ${version}${suffix}
       ${product.cap} for Linux was built. Grab the archive from   
       
       build/linux/${product}-${version}${suffix}-linux.zip
-      =======================================================
-        </echo>
-    </target>
-
-    <target name="linux64-dist" depends="linux64-build" 
-        description="Build .tar.gz of linux64 version">
-
-
-        <zip destfile="linux/${product}-${version}${suffix}-linux64.zip">
-            <zipfileset dir="linux/work" prefix="${product}-${version}${suffix}" filemode="755"/>
-        </zip>
-
-        <echo>
-      =======================================================
-      ${product.cap} for Linux was built. Grab the archive from   
-      
-      build/linux/${product}-${version}${suffix}-linux64.zip
       =======================================================
         </echo>
     </target>
@@ -453,7 +421,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="linux-generate-debian"/>
     </target>
 
-    <target name="linux64-deb" depends="linux64-build" description="Build .deb of linux version">
+    <target name="linux64-deb" depends="linux-build" description="Build .deb of linux version">
         <property name="arch" value="amd64"/>
         <antcall target="linux-generate-debian"/>
     </target>
@@ -611,19 +579,12 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
             <param name="file" value="linux/${product}-${version}${suffix}-i386.deb" />
         </antcall>
         <delete file="linux/${product}-${version}${suffix}-i386.deb" />
-    </target>
-
-    <target name="linux64-auto">
-        <antcall target="clean" />
-        <antcall target="linux64-dist" />
-        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-linux64.zip" overwrite="true" />
-        <delete file="linux/${product}-${version}${suffix}-linux64.zip" />
         <antcall target="linux64-deb" />
         <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-amd64.deb" overwrite="true" />
         <antcall target="publish-all">
             <param name="file" value="linux/${product}-${version}${suffix}-amd64.deb" />
         </antcall>
-        <delete file="linux/${product}-${version}${suffix}-amd64.deb" />
+        <delete file="linux/${product}-${version}${suffix}-i386.deb" />
     </target>
 
     <target name="macosx-auto">
@@ -651,7 +612,6 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     <target name="auto">
         <antcall target="upgrade-auto" />
         <antcall target="linux-auto" />
-        <antcall target="linux64-auto" />
         <antcall target="macosx-auto" />
         <antcall target="windows-auto" />
         <antcall target="windows-lite-auto" />
