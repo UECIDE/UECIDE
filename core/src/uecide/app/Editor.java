@@ -1846,17 +1846,17 @@ public class Editor extends JFrame implements RunnerListener {
 
         if (examplesMenu == null) return;
         examplesMenu.removeAll();
-        addSketches(examplesMenu, Base.getExamplesFolder());
+//        addSketches(examplesMenu, Base.getExamplesFolder());
 
         if (core != null) {
-            File coreExamples = new File(core.getFolder(), "examples");
+            File coreExamples = core.getExamplesFolder();
 
+            if (coreExamples.isDirectory()) {
+                addSketches(examplesMenu, coreExamples);
+                examplesMenu.addSeparator();
+            }
             JMenu coreItem = new JMenu(core.get("name", core.getName()));
             examplesMenu.add(coreItem);
-            if (coreExamples.isDirectory()) {
-                examplesMenu.addSeparator();
-                addSketches(examplesMenu, coreExamples);
-            }
 
             File coreLibs = new File(core.getFolder(), "libraries");
             if (coreLibs.isDirectory()) {

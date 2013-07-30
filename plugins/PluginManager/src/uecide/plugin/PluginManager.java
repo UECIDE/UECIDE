@@ -21,10 +21,6 @@ public class PluginManager extends BasePlugin
 {
     JFrame win;
     JButton refreshButton;
-    JButton upgradeAllButton;
-    JButton upgradeButton;
-    JButton installButton;
-    JButton cancelButton;
     JTabbedPane tabs;
     JPanel plugins;
     JPanel cores;
@@ -103,6 +99,17 @@ public class PluginManager extends BasePlugin
         populatePlugins();
         populateCores();
         populateBoards();
+
+        Box line = Box.createHorizontalBox();
+        refreshButton = new JButton(Translate.t("Refresh"));
+        refreshButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                updatePlugins();
+            }
+        });
+        line.add(refreshButton);
+        box.add(line);
+        
 
         win.getContentPane().add(box);
         win.pack();
@@ -199,7 +206,6 @@ public class PluginManager extends BasePlugin
         JLabel label;
         JButton button;
         for (String entry : entries) {
-            System.err.println(entry);
             JSONObject plugin = PluginManager.availableCores.get(entry);
             label = new JLabel(entry);
             c.weightx = 0.9;
@@ -404,70 +410,6 @@ public class PluginManager extends BasePlugin
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    class GetLatestVersions extends SwingWorker<Void, Void> {
-        @Override
-        public Void doInBackground() {
-            updatePlugins();
-            return null;
-        }
-        public void done() {
-            win.repaint();
-            refreshButton.setEnabled(true);
-            installButton.setEnabled(false);
-            upgradeButton.setEnabled(false);
-            upgradeAllButton.setEnabled(true);
-            win.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            pluginListModel.fireTableDataChanged();
-        }
-    }
-
-    public void upgradeAllPlugins() {
-        new DoFullUpgrade().execute();
-    }
-
-    public class DoFullUpgrade extends SwingWorker<Void, String> {
-        public Void doInBackground() {
-            String[] entries = pluginList.keySet().toArray(new String[pluginList.size()]);
-            for (String entry : entries) {
-                PluginInfo item = pluginList.get(entry);
-                if (item.installed == null) continue;
-                if (item.installed.equals("")) continue;
-                if (item.available == null) continue;
-                if (item.available.equals("")) continue;
-                if (item.installed.equals(item.available)) continue;
-                publish(entry);
-                editor.message("Upgrading " + entry + "...", 1);
-
-                try {
-                    File dest = getJarFileToTmp(entry, item.url);
-                    if (dest == null) { 
-                        editor.message("failed\n", 2);
-                        continue;
-                    }
-                    if (dest.exists()) {
-                        Base.handleInstallPlugin(dest);
-                
-                        dest.delete();
-                        editor.message("done\n", 1);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        public void progress(java.util.List<String> el) {
-            for (String e : el) {
-            }
-        }
-
-        public void done() {
-            win.repaint();
-        }
-
     }
 
     public File getJarFileToTmp(String name, String url) {
