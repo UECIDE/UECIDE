@@ -6,15 +6,18 @@ default.cores=
 default.boards=
 default.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,PluginManager
 default.suffix=
+default.compilers=
 
 prfm.theme=uecide
-prfm.cores=pic32
+prfm.cores=chipKIT
 prfm.boards=Majenko
 prfm.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,ConvertWaveFile,PluginManager
 prfm.suffix=-prfm
+prfm.compilers=pic32-gcc
 
 mpide.theme=mpide
 mpide.cores=pic32
 mpide.boards=Majenko
 mpide.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,PluginManager
 mpide.suffix=
+mpide.compilers=
