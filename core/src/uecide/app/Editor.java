@@ -1387,9 +1387,9 @@ public class Editor extends JFrame implements RunnerListener {
   class DefaultRunHandler implements Runnable {
     public void run() {
       try {
-        if (!sketch.prepare()) {
-            return;
-        }
+//        if (!sketch.prepare()) {
+//            return;
+//        }
         if(sketch.build()) {
             reportSize();
         }
@@ -2114,10 +2114,11 @@ public class Editor extends JFrame implements RunnerListener {
 
     public void selectCore(String c) {
         core = Base.cores.get(c);
+        compiler = core.getCompiler();
         Base.preferences.set("core." + board.getName(), c);
         updateLineStatus();
-        rebuildBoardsMenu();
-        rebuildCoresMenu();
+//        rebuildBoardsMenu();
+//        rebuildCoresMenu();
         populateMenus();
     }
 

@@ -31,10 +31,6 @@ public class PluginManager extends BasePlugin
     JScrollPane boardsScroll;
     JScrollPane compilersScroll;
 
-    AbstractTableModel pluginListModel;
-    AbstractTableModel coreListModel;
-    AbstractTableModel boardListModel;
-
     public static HashMap<String, JSONObject> availablePlugins = new HashMap<String, JSONObject>();
     public static HashMap<String, JSONObject> availableCores = new HashMap<String, JSONObject>();
     public static HashMap<String, JSONObject> availableBoards = new HashMap<String, JSONObject>();
@@ -50,8 +46,6 @@ public class PluginManager extends BasePlugin
         public String available;
         public String url;
     }
-
-    public HashMap<String, PluginInfo> pluginList = null;
 
     public void init(Editor editor)
     {
@@ -99,6 +93,7 @@ public class PluginManager extends BasePlugin
         populatePlugins();
         populateCores();
         populateBoards();
+        populateCompilers();
 
         Box line = Box.createHorizontalBox();
         refreshButton = new JButton(Translate.t("Refresh"));
@@ -358,9 +353,70 @@ public class PluginManager extends BasePlugin
         win.pack();
     }
 
+    public boolean isDownloading() {
+        boolean isDownloading = false;
+
+        for (String e : pluginObjects.keySet().toArray(new String[0])) {
+            if (pluginObjects.get(e).isDownloading()) {
+                isDownloading = true;
+            }
+        }
+
+        for (String e : boardObjects.keySet().toArray(new String[0])) {
+            if (boardObjects.get(e).isDownloading()) {
+                isDownloading = true;
+            }
+        }
+
+        for (String e : coreObjects.keySet().toArray(new String[0])) {
+            if (coreObjects.get(e).isDownloading()) {
+                isDownloading = true;
+            }
+        }
+
+        for (String e : compilerObjects.keySet().toArray(new String[0])) {
+            if (compilerObjects.get(e).isDownloading()) {
+                isDownloading = true;
+            }
+        }
+
+        return isDownloading;
+
+    }
+
+    public void cancelDownloads() {
+
+        for (String e : pluginObjects.keySet().toArray(new String[0])) {
+            pluginObjects.get(e).cancelAll();
+        }
+
+        for (String e : boardObjects.keySet().toArray(new String[0])) {
+            boardObjects.get(e).cancelAll();
+        }
+
+        for (String e : coreObjects.keySet().toArray(new String[0])) {
+            coreObjects.get(e).cancelAll();
+        }
+
+        for (String e : compilerObjects.keySet().toArray(new String[0])) {
+            compilerObjects.get(e).cancelAll();
+        }
+    }
+
     public void close()
     {
+        cancelDownloads();
+        if (isDownloading()) {
+            Base.showWarning("Downloading", "You have active downloads.\nYou may not close", null);
+            return;
+        }
         win.dispose();
+        
+        int p = Base.pluginInstances.indexOf(this);
+        if (p>=0) {
+            Base.pluginInstances.remove(p);
+        }
+
     }
 
     public String getMenuTitle()
@@ -380,36 +436,41 @@ public class PluginManager extends BasePlugin
     }
 
     public void updatePlugins() {
+        String data = null;
         try {
             URL page = new URL("http://uecide.org/version.php?platform=" + Base.getOSName() + "&arch=" + Base.getOSArch());
             BufferedReader in = new BufferedReader(new InputStreamReader(page.openStream()));
-            String data = in.readLine();
+            data = in.readLine();
             in.close();
-
-            JSONObject ob = (JSONObject)JSONValue.parse(data);
-            try {
-                JSONObject plugins = (JSONObject)ob.get("plugins");
-                PluginManager.availablePlugins.putAll(plugins);
-            } catch (Exception ignored) {}
-            try {
-                JSONObject cores = (JSONObject)ob.get("cores");
-                PluginManager.availableCores.putAll(cores);
-            } catch (Exception ignored) {}
-            try {
-                JSONObject boards = (JSONObject)ob.get("boards");
-                PluginManager.availableBoards.putAll(boards);
-            } catch (Exception ignored) {}
-            try {
-                JSONObject compilers = (JSONObject)ob.get("compilers");
-                PluginManager.availableCompilers.putAll(compilers);
-            } catch (Exception ignored) {}
-            populatePlugins();
-            populateCores();
-            populateBoards();
-            populateCompilers();
+        } catch (UnknownHostException e) {
+            Base.showWarning(Translate.t("Update Failed"), Translate.w("The update failed because I could not find the host %1", 40, "\n", e.getMessage()), e);
+            return;
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.showWarning(Translate.t("Update Failed"), Translate.w("An unknown error occurred: %1", 40, "\n", e.toString()), e);
+            return;
         }
+
+        JSONObject ob = (JSONObject)JSONValue.parse(data);
+        try {
+            JSONObject plugins = (JSONObject)ob.get("plugins");
+            PluginManager.availablePlugins.putAll(plugins);
+        } catch (Exception ignored) {}
+        try {
+            JSONObject cores = (JSONObject)ob.get("cores");
+            PluginManager.availableCores.putAll(cores);
+        } catch (Exception ignored) {}
+        try {
+            JSONObject boards = (JSONObject)ob.get("boards");
+            PluginManager.availableBoards.putAll(boards);
+        } catch (Exception ignored) {}
+        try {
+            JSONObject compilers = (JSONObject)ob.get("compilers");
+            PluginManager.availableCompilers.putAll(compilers);
+        } catch (Exception ignored) {}
+        populatePlugins();
+        populateCores();
+        populateBoards();
+        populateCompilers();
     }
 
     public File getJarFileToTmp(String name, String url) {
@@ -445,10 +506,13 @@ public class PluginManager extends BasePlugin
         JLabel label;
         JProgressBar bar;
         int type;
-        SwingWorker sw;
         File dest;
         String mainClass;
         JSONObject data;
+        boolean isDownloading = false;
+
+        SwingWorker<Void, Long> downloader = null;
+        ZipExtractor installer = null;
 
         public int PLUGIN = 1;
         public int CORE = 2;
@@ -526,6 +590,16 @@ public class PluginManager extends BasePlugin
             }
         }
 
+        public void cancelAll() {   
+            if (downloader != null) {
+                downloader.cancel(true);
+            }
+            if (installer != null) {
+                installer.cancel(true);
+            }
+            isDownloading = false;
+        }
+
         public void actionPerformed(ActionEvent e) {
             startDownload();
         }
@@ -549,6 +623,9 @@ public class PluginManager extends BasePlugin
                         bar.setStringPainted(true);
                         this.add(bar);
                         this.getParent().revalidate();
+                        return;
+                    } else {
+                        Base.showWarning(Translate.t("Unable to install"), Translate.w("That core cannot be installed right now. You do not have the compiler installed, and I cannot find the compiler in my list of packages. Try refreshing the list and trying again.", 40, "\n"), null);
                         return;
                     }
                 }
@@ -586,6 +663,9 @@ public class PluginManager extends BasePlugin
         }
 
         public void download() {
+
+            isDownloading = true;
+
             try {
                 
                 dest = new File(Base.getTmpDir(), name + ".jar");
@@ -602,7 +682,7 @@ public class PluginManager extends BasePlugin
 
                 setMax(contentLength);
 
-                sw = new SwingWorker<Void, Long>(){
+                downloader = new SwingWorker<Void, Long>(){
                     @Override
                     public Void doInBackground() {
                         try {
@@ -615,6 +695,8 @@ public class PluginManager extends BasePlugin
                                 out.write(buffer, 0, n);
                             }
                         } catch (Exception ex) {
+                            Base.showWarning(Translate.t("Download Failed"), Translate.w("The download failed at point 1 because %1", 40, "\n", ex.toString()), ex);
+                            isDownloading = false;
                         }
                         return null;
                     }
@@ -624,9 +706,12 @@ public class PluginManager extends BasePlugin
                         try {
                             in.close();
                             out.close();
-                            PluginEntry.this.install();
                         } catch (Exception ex) {
+                            Base.showWarning(Translate.t("Download Failed"), Translate.w("The download failed at point 2 because %1", 40, "\n", ex.toString()), ex);
+                            isDownloading = false;
+                            return;
                         }
+                        PluginEntry.this.install();
                     }
 
                     @Override
@@ -637,9 +722,11 @@ public class PluginManager extends BasePlugin
                     }
                 
                 };
-                sw.execute();
+                downloader.execute();
             } catch (Exception e) {
                 e.printStackTrace();
+                Base.showWarning(Translate.t("Download Failed"), Translate.w("The download failed at point 3 because %1", 40, "\n", e.toString()), e);
+                isDownloading = false;
             }
         }
 
@@ -655,22 +742,23 @@ public class PluginManager extends BasePlugin
                     setInstalled();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Base.showWarning(Translate.t("Install Failed"), Translate.w("The install failed because %1", 40, "\n", e.toString()), e);
                 }
             }
 
             if (type == CORE) {
-                ZipExtractor ze = new ZipExtractor(dest, Base.getUserCoresFolder(), this);
-                ze.execute();
+                installer = new ZipExtractor(dest, Base.getUserCoresFolder(), this);
+                installer.execute();
             }
 
             if (type == BOARD) {
-                ZipExtractor ze = new ZipExtractor(dest, Base.getUserBoardsFolder(), this);
-                ze.execute();
+                installer = new ZipExtractor(dest, Base.getUserBoardsFolder(), this);
+                installer.execute();
             }
 
             if (type == COMPILER) {
-                ZipExtractor ze = new ZipExtractor(dest, Base.getUserCompilersFolder(), this);
-                ze.execute();
+                installer = new ZipExtractor(dest, Base.getUserCompilersFolder(), this);
+                installer.execute();
             }
             
         }
@@ -684,6 +772,11 @@ public class PluginManager extends BasePlugin
                 installNext.startDownload();
                 installNext = null;
             }
+            isDownloading = false;
+        }
+
+        public boolean isDownloading() {
+            return isDownloading;
         }
         
     }
@@ -714,6 +807,7 @@ public class PluginManager extends BasePlugin
             pi.setMax((long)files);
             if (files == -1) {
                 System.err.println("Zip file empty");
+                Base.showWarning(Translate.t("Install Failed"), Translate.w("The install failed: The jar file has no entries.", 40, "\n"), null);
                 return null;
             }
             int done = 0;
@@ -747,6 +841,7 @@ public class PluginManager extends BasePlugin
                 zis.close();
             } catch (Exception e) {
                 e.printStackTrace();
+                Base.showWarning(Translate.t("Install Failed"), Translate.w("The install failed because %1", 40, "\n", e.toString()), e);
                 return null;
             }
             return null;
