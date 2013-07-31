@@ -23,8 +23,11 @@
         <propertycopy property="compilers" from="${brand}.compilers" />
         <propertycopy property="boards" from="${brand}.boards" />
         <propertycopy property="plugins" from="${brand}.plugins" />
+        <propertycopy property="publish" from="${brand}.publish" />
         <property file="themes/${theme}/ide/theme.txt"/>
     </sequential>
+
+    <condition property="doPublish"><equals arg1="${publish}" arg2="yes"/></condition>
 
     <condition property="macosx"><os family="mac" /></condition>
     <condition property="windows"><os family="windows" /></condition>
@@ -534,7 +537,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     	<typedef name="contentencoding.mapping" classname="it.corley.ant.ContentEncodingMapping" classpathref="tasks.path"/>
     </target>
 
-    <target name="publish">
+    <target name="publish" if="doPublish">
         <exec executable="reprepro">
             <arg value="-b" />
             <arg value="/var/www/dist" />
