@@ -37,7 +37,7 @@
             <os family="windows" />
     </condition>
     <condition property="platform"  value="linux">
-        <os family="unix" arch="i386" />
+        <os family="unix" />
     </condition>
 
     <!-- set time propert -->  
@@ -303,7 +303,6 @@ Building for ${brand} version ${version}${suffix}
 
     <copy tofile="linux/work/${product}" file="linux/dist/linuxrunner" />
     <chmod perm="755" file="linux/work/${product}" />
-        <copy tofile="linux/work/lib/librxtxSerial.so" file="linux/dist/lib/librxtxSerial32.so" overwrite="true" />   
   </target>
 
     <target name="linux32-build" depends="linux-build" description="Build linux (32-bit) version">
@@ -353,7 +352,6 @@ Building for ${brand} version ${version}${suffix}
         <copy todir="${proot}/usr/share/${product}">
             <fileset dir="linux/work" />
         </copy>
-        <delete file="${proot}/usr/share/${product}/lib/librxtxSerial.so" />
         <chmod perm="755">
             <fileset dir="${proot}/usr/share/${product}" includes="${product}" />
             <fileset dir="${proot}/usr/share/${product}/hardware" includes="**/*" />

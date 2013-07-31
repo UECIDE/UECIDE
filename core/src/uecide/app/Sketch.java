@@ -628,6 +628,18 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean build() {
+        if (editor.board == null) {
+            Base.showWarning(Translate.t("No Board Selected"), Translate.w("The sketch cannot be compiled: You have no board selected. If you haven't yet installed any boards please do so through the Plugin Manager.", 40, "\n"), null);
+            return false;
+        }
+        if (editor.core == null) {
+            Base.showWarning(Translate.t("No Core Selected"), Translate.w("The sketch cannot be compiled: You have no core selected. If you haven't yet installed a core please do so through the Plugin Manager.", 40, "\n"), null);
+            return false;
+        }
+        if (editor.compiler == null) {
+            Base.showWarning(Translate.t("No Compiler Available"), Translate.w("The sketch cannot be compiled: The compiler for the selected core is not available. Please ensure the compiler is installed using the Plugin Manager.", 40, "\n"), null);
+            return false;
+        }
         editor.statusNotice(Translate.t("Compiling..."));
         if (!prepare()) {
             System.err.println("Prepare failed");
