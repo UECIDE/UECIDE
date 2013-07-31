@@ -44,7 +44,7 @@
                 <attribute name="Shortcut" value="-" />
             </manifest>
         </jar>
-        <!--jar basedir="src" destfile="${plugin.name}.jar" includes="uecide/plugin/${plugin.name}/**" update="true"/-->
+        <jar basedir="src" destfile="${plugin.name}.jar" includes="uecide/plugin/${plugin.name}/**" update="true"/>
 
     </target>
 </project>

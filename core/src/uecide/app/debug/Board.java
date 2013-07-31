@@ -91,4 +91,12 @@ public class Board {
     public PropertyFile getProperties() {
         return boardPreferences;
     }
+
+    public String getVersion() {
+        String v = boardPreferences.get("version");
+        if (v == null) {
+            v = "0";
+        }
+        return v;
+    }
 }
