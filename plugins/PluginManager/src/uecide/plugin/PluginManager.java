@@ -12,6 +12,7 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.table.*;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import say.swing.*;
@@ -21,15 +22,8 @@ public class PluginManager extends BasePlugin
 {
     JFrame win;
     JButton refreshButton;
-    JTabbedPane tabs;
-    JPanel plugins;
-    JPanel cores;
-    JPanel boards;
-    JPanel compilers;
-    JScrollPane pluginsScroll;
-    JScrollPane coresScroll;
-    JScrollPane boardsScroll;
-    JScrollPane compilersScroll;
+    JScrollPane scroll;
+    JPanel body;
 
     public static HashMap<String, JSONObject> availablePlugins = new HashMap<String, JSONObject>();
     public static HashMap<String, JSONObject> availableCores = new HashMap<String, JSONObject>();
@@ -54,46 +48,16 @@ public class PluginManager extends BasePlugin
 
     public void run()
     {
-        JPanel tp;
-
         win = new JFrame(Translate.t("Plugin Manager"));
         win.getContentPane().setLayout(new BorderLayout());
         win.setResizable(false);
 
-        tabs = new JTabbedPane();
-
-        plugins = new JPanel(new GridBagLayout());
-        tp = new JPanel(new BorderLayout());
-        tp.add(plugins, BorderLayout.NORTH);
-        pluginsScroll = new JScrollPane(tp);
-        tabs.add("Plugins", pluginsScroll);
-
-        boards = new JPanel(new GridBagLayout());
-        tp = new JPanel(new BorderLayout());
-        tp.add(boards, BorderLayout.NORTH);
-        boardsScroll = new JScrollPane(tp);
-        tabs.add("Boards", boardsScroll);
-
-        cores = new JPanel(new GridBagLayout());
-        tp = new JPanel(new BorderLayout());
-        tp.add(cores, BorderLayout.NORTH);
-        coresScroll = new JScrollPane(tp);
-        tabs.add("Cores", coresScroll);
-
-        compilers = new JPanel(new GridBagLayout());
-        tp = new JPanel(new BorderLayout());
-        tp.add(compilers, BorderLayout.NORTH);
-        compilersScroll = new JScrollPane(tp);
-        tabs.add("Compilers", compilersScroll);
-
         Box box = Box.createVerticalBox();
+        body = new JPanel(new BorderLayout());
 
-        box.add(tabs);
+        box.add(body);
 
-        populatePlugins();
-        populateCores();
-        populateBoards();
-        populateCompilers();
+        populate();
 
         Box line = Box.createHorizontalBox();
         refreshButton = new JButton(Translate.t("Refresh"));
@@ -133,60 +97,7 @@ public class PluginManager extends BasePlugin
         }
             
     }
-
-    public void populatePlugins() {
-        plugins.removeAll();
-        String[] entries = PluginManager.availablePlugins.keySet().toArray(new String[0]);
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-
-        pluginObjects.clear();
-
-        JLabel label;
-        JButton button;
-        for (String entry : entries) {
-            JSONObject plugin = PluginManager.availablePlugins.get(entry);
-            label = new JLabel(entry);
-            c.weightx = 0.9;
-            c.gridwidth = 1;
-            plugins.add(label, c);
-
-            int compare = 0; // Not installed
-
-            c.weightx = 0.1;
-            c.gridx = 1;
-
-            PluginEntry pe = new PluginEntry(plugin, 1);
-            pluginObjects.put((String)plugin.get("Main-Class"), pe);
-            plugins.add(pe, c);
-                
-            c.gridx = 0;
-            c.gridy ++;
-            c.gridwidth = 2;
-            label = new JLabel("Version: " + (String)plugin.get("Version"));
-            plugins.add(label, c);
-            c.gridy ++;
-            String d = (String)plugin.get("Description");
-            if (d == null) d = "";
-            JTextArea ta = new JTextArea("\n" + d);
-            ta.setLineWrap(true);
-            ta.setEditable(false);
-            ta.setOpaque(false);
-            plugins.add(ta, c);
-            c.gridy++;
-
-
-            JSeparator s = new JSeparator(SwingConstants.HORIZONTAL);
-            plugins.add(s, c);
-            c.gridy ++;
-        }
-        win.pack();
-    }
-
+/*
     public void populateCores() {
         cores.removeAll();
         String[] entries = PluginManager.availableCores.keySet().toArray(new String[0]);
@@ -247,59 +158,237 @@ public class PluginManager extends BasePlugin
         }
         win.pack();
     }
+*/
+    public void populate() {
+        body.removeAll();
 
-    public void populateBoards() {
-        boards.removeAll();
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode(Translate.t("Root"));
+        final JTree root = new JTree(top);
+        root.setVisibleRowCount(15);
+        scroll = new JScrollPane(root);
+
+        final JPanel infoPanel = new JPanel(new BorderLayout());
+
+        JLabel test = new JLabel("");
+        infoPanel.add(test);
+
+        body.add(scroll, BorderLayout.NORTH);
+        body.add(infoPanel, BorderLayout.SOUTH);
+
+        // ---- Plugins ---- //
+
+        DefaultMutableTreeNode pluginRoot = new DefaultMutableTreeNode(Translate.t("Plugins"));
+        top.add(pluginRoot);
+
+        for (String entry : PluginManager.availablePlugins.keySet().toArray(new String[0])) {
+            JSONObject plugin = PluginManager.availablePlugins.get(entry);
+            PluginEntry pe = new PluginEntry(plugin, 1);
+            DefaultMutableTreeNode brdNode = new DefaultMutableTreeNode(pe);
+            brdNode.setUserObject(pe);
+            pluginRoot.add(brdNode);
+            pluginObjects.put(entry, pe);
+        }
+
+        // ---- Boards ---- //
+
+        DefaultMutableTreeNode boardRoot = new DefaultMutableTreeNode(Translate.t("Boards"));
+        top.add(boardRoot);
         String[] entries = PluginManager.availableBoards.keySet().toArray(new String[0]);
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
 
-        boardObjects.clear();
-        JLabel label;
-        JButton button;
+        ArrayList<String> families = new ArrayList<String>();
         for (String entry : entries) {
             JSONObject plugin = PluginManager.availableBoards.get(entry);
-            label = new JLabel((String)plugin.get("Boards"));
-            c.weightx = 0.9;
-            c.gridwidth = 1;
-            boards.add(label, c);
-
-            int compare = 0; // Not installed
-
-            c.weightx = 0.1;
-            c.gridx = 1;
-
-            PluginEntry pe = new PluginEntry(plugin, 3);
-            boardObjects.put(entry, pe);
-            boards.add(pe, c);
-                
-            c.gridx = 0;
-            c.gridy ++;
-            c.gridwidth = 2;
-            label = new JLabel("Version: " + (String)plugin.get("Version") + ", Family: " + (String)plugin.get("Family"));
-            boards.add(label, c);
-            c.gridy ++;
-            String d = (String)plugin.get("Description");
-            if (d == null) d = "";
-            JTextArea ta = new JTextArea("\n" + d);
-            ta.setLineWrap(true);
-            ta.setEditable(false);
-            ta.setOpaque(false);
-            boards.add(ta, c);
-            c.gridy++;
-
-
-            JSeparator s = new JSeparator(SwingConstants.HORIZONTAL);
-            boards.add(s, c);
-            c.gridy ++;
+            String family = (String)plugin.get("Family");
+            if (families.indexOf(family) == -1) {
+                families.add(family);
+            }
         }
+        
+        for (String family : families) {
+            DefaultMutableTreeNode famNode = new DefaultMutableTreeNode(family);
+            boardRoot.add(famNode);
+            ArrayList<String> groups = new ArrayList<String>();
+            for (String entry : entries) {
+                JSONObject plugin = PluginManager.availableBoards.get(entry);
+                String eFam = (String)plugin.get("Family");
+                String eGrp = (String)plugin.get("Group");
+                if (family.equals(eFam)) {
+                    if (groups.indexOf(eGrp) == -1) {
+                        groups.add(eGrp);
+                    }
+                }
+            }
+            for (String group : groups) {
+                DefaultMutableTreeNode grpNode = new DefaultMutableTreeNode(group);
+                famNode.add(grpNode);
+
+                ArrayList<String> validBoards = new ArrayList<String>();
+                for (String entry : entries) {
+                    JSONObject plugin = PluginManager.availableBoards.get(entry);
+                    String eFam = (String)plugin.get("Family");
+                    String eGrp = (String)plugin.get("Group");
+                    if (eFam.equals(family) && eGrp.equals(group)) {
+                        if (validBoards.indexOf(entry) == -1) {
+                            validBoards.add(entry);
+                        }
+                    }
+                }
+
+                for (String board : validBoards) {
+                    JSONObject plugin = PluginManager.availableBoards.get(board);
+                    PluginEntry pe = new PluginEntry(plugin, 3);
+                    DefaultMutableTreeNode brdNode = new DefaultMutableTreeNode(pe);
+                    brdNode.setUserObject(pe);
+                    grpNode.add(brdNode);
+                    boardObjects.put(board, pe);
+                }
+            }
+        }
+
+        // ---- Cores ---- //
+
+        DefaultMutableTreeNode coreRoot = new DefaultMutableTreeNode(Translate.t("Cores"));
+        top.add(coreRoot);
+        entries = PluginManager.availableCores.keySet().toArray(new String[0]);
+
+        families = new ArrayList<String>();
+        for (String entry : entries) {
+            JSONObject plugin = PluginManager.availableCores.get(entry);
+            String family = (String)plugin.get("Family");
+            if (families.indexOf(family) == -1) {
+                families.add(family);
+            }
+        }
+        
+        for (String family : families) {
+            DefaultMutableTreeNode famNode = new DefaultMutableTreeNode(family);
+            coreRoot.add(famNode);
+            for (String entry : entries) {
+                JSONObject plugin = PluginManager.availableCores.get(entry);
+                String eFam = (String)plugin.get("Family");
+                if (family.equals(eFam)) {
+                    JSONObject plugin1 = PluginManager.availableCores.get(entry);
+                    PluginEntry pe = new PluginEntry(plugin1, 2);
+                    DefaultMutableTreeNode brdNode = new DefaultMutableTreeNode(pe);
+                    brdNode.setUserObject(pe);
+                    famNode.add(brdNode);
+                    coreObjects.put(entry, pe);
+                }
+            }
+        }
+
+        // ---- Compilers ---- //
+
+        DefaultMutableTreeNode compilerRoot = new DefaultMutableTreeNode(Translate.t("Compilers"));
+        top.add(compilerRoot);
+
+        for (String entry : PluginManager.availableCompilers.keySet().toArray(new String[0])) {
+            JSONObject plugin = PluginManager.availableCompilers.get(entry);
+            PluginEntry pe = new PluginEntry(plugin, 4);
+            DefaultMutableTreeNode brdNode = new DefaultMutableTreeNode(pe);
+            brdNode.setUserObject(pe);
+            compilerRoot.add(brdNode);
+            compilerObjects.put(entry, pe);
+        }
+
+        // Set up the tree 
+
+        PluginNodeRenderer renderer = new PluginNodeRenderer();
+        root.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        root.setCellRenderer(renderer);
+        root.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode)root.getLastSelectedPathComponent();
+                if (node == null) {
+                    return;
+                }
+                Object uo = node.getUserObject();
+
+                if (uo instanceof PluginEntry) {
+                    PluginEntry pe = (PluginEntry)node.getUserObject();
+
+                    if (pe != null) {
+                        infoPanel.removeAll();
+                        win.pack();
+                        JLabel l = new JLabel(pe.getDescription());
+                        infoPanel.add(l, BorderLayout.NORTH);
+                        if (pe.isOutdated()) {
+                            l = new JLabel("Installed: " + pe.getInstalledVersion() + " Available: " + pe.getAvailableVersion());
+                        } else if (pe.isInstalled()) {
+                            l = new JLabel("Installed: " + pe.getInstalledVersion());
+                        } else {
+                            l = new JLabel("Available: " + pe.getAvailableVersion());
+                        }
+                        infoPanel.add(l, BorderLayout.SOUTH);
+                        infoPanel.add(pe, BorderLayout.CENTER);
+                        win.pack();
+                    }
+                }
+            }
+        });
+
+        root.expandRow(0);
+        root.setRootVisible(false);
+
         win.pack();
     }
 
+    public class PluginNodeRenderer extends DefaultTreeCellRenderer {
+        DefaultTreeCellRenderer nonLeafRenderer = new DefaultTreeCellRenderer();
+        JLabel name = new JLabel("");
+        Icon installed;
+        Icon available;
+        Icon downloading;
+        Icon queued;
+        Icon upgrade;
+
+        public PluginNodeRenderer() {
+            installed = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/installed.png"));
+            available = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/available.png"));
+            downloading = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/downloading.png"));
+            queued = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/queued.png"));
+            upgrade = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/upgrade.png"));
+        }
+        
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            Object o = null;
+            if (value instanceof DefaultMutableTreeNode) {
+                o = ((DefaultMutableTreeNode)value).getUserObject();
+            }
+
+            if (o == null) {
+                return nonLeafRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+            }
+
+            if (o instanceof PluginEntry) {
+                PluginEntry pe = (PluginEntry)o;
+                String text = pe.getDisplayName();
+                name.setText(text);
+                if (pe.isDownloading()) {
+                    name.setIcon(downloading);
+                } else if (pe.isQueued()) {
+                    name.setIcon(queued);
+                } else if (pe.isOutdated()) {
+                    name.setIcon(upgrade);
+                } else if (pe.isInstalled()) {
+                    name.setIcon(installed);
+                } else {
+                    name.setIcon(available);
+                }
+
+                name.setOpaque(false);
+                
+                return name;
+            } else if (o instanceof String) {
+                name.setText((String)o);
+                name.setOpaque(false);
+                name.setIcon(null);
+                return name;
+            }
+            return nonLeafRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+        }
+    }
+/*
     public void populateCompilers() {
         compilers.removeAll();
         String[] entries = PluginManager.availableCompilers.keySet().toArray(new String[0]);
@@ -352,7 +441,7 @@ public class PluginManager extends BasePlugin
         }
         win.pack();
     }
-
+*/
     public boolean isDownloading() {
         boolean isDownloading = false;
 
@@ -438,7 +527,7 @@ public class PluginManager extends BasePlugin
     public void updatePlugins() {
         String data = null;
         try {
-            URL page = new URL("http://uecide.org/version.php?platform=" + Base.getOSName() + "&arch=" + Base.getOSArch());
+            URL page = new URL("http://uecide.org/version2.php?platform=" + Base.getOSName() + "&arch=" + Base.getOSArch());
             BufferedReader in = new BufferedReader(new InputStreamReader(page.openStream()));
             data = in.readLine();
             in.close();
@@ -467,10 +556,7 @@ public class PluginManager extends BasePlugin
             JSONObject compilers = (JSONObject)ob.get("compilers");
             PluginManager.availableCompilers.putAll(compilers);
         } catch (Exception ignored) {}
-        populatePlugins();
-        populateCores();
-        populateBoards();
-        populateCompilers();
+        populate();
     }
 
     public File getJarFileToTmp(String name, String url) {
@@ -510,6 +596,7 @@ public class PluginManager extends BasePlugin
         String mainClass;
         JSONObject data;
         boolean isDownloading = false;
+        boolean isQueued = false;
 
         SwingWorker<Void, Long> downloader = null;
         ZipExtractor installer = null;
@@ -526,6 +613,9 @@ public class PluginManager extends BasePlugin
             this.type = type;
             url = (String)o.get("url");
             availableVersion = (String)o.get("Version");
+            if (availableVersion == null) {
+                availableVersion = "unknown";
+            }
 
             installedVersion = "";
             if (type == PLUGIN) {
@@ -546,10 +636,10 @@ public class PluginManager extends BasePlugin
             }
 
             if (type == BOARD) {
-                name = (String)o.get("Name");
+                name = (String)o.get("Board");
                 Board c = Base.boards.get(name);
                 if (c != null) {    
-                    installedVersion = "Unknown";
+                    installedVersion = c.getVersion();
                 }
             }
 
@@ -561,33 +651,74 @@ public class PluginManager extends BasePlugin
                 }
             }
 
-            if (availableVersion == null) {
-                return;
-            }
-            if (installedVersion == null) {
-                button = new JButton("Install");
-                this.add(button);
-                return;
-            }
-            if (installedVersion == "") {
+            if (!isOutdated() && !isInstalled()) {
                 button = new JButton("Install");
                 button.addActionListener(this);
-                button.setActionCommand("install");
                 this.add(button);
                 return;
             }
-            if (installedVersion.equals(availableVersion)) {
+            if (isInstalled()) {
                 label = new JLabel("Installed");
                 this.add(label);
                 return;
             }
-            if (installedVersion.compareTo(availableVersion) < 0) {
+            if (isOutdated()) {
                 button = new JButton("Upgrade");
                 button.addActionListener(this);
-                button.setActionCommand("upgrade");
                 this.add(button);
                 return;
             }
+        }
+        
+        public boolean isOutdated() {
+            if (installedVersion == "") {
+                return false;
+            }
+            if (installedVersion.compareTo(availableVersion) < 0) {
+                return true;
+            }
+            return false;
+        }
+
+        public boolean isInstalled() {
+            if (installedVersion.equals(availableVersion)) {
+                return true;
+            }
+            return false;
+        }
+
+        public String get(String k) {
+            return (String)data.get(k);
+        }
+
+        public String getAvailableVersion() {
+            return availableVersion;
+        }
+
+        public String getInstalledVersion() {
+            return installedVersion;
+        }
+
+        public String getDisplayName() {
+            switch (type) {
+                case 1:
+                    return name;
+                case 2:
+                    return name;
+                case 3:
+                    return get("Description");
+                case 4:
+                    return name;
+            }
+            return "---";
+        }
+ 
+        public String getDescription() {
+            String d = get("Description");
+            if (d == null) {
+                return getDisplayName();
+            }
+            return d;
         }
 
         public void cancelAll() {   
@@ -611,18 +742,26 @@ public class PluginManager extends BasePlugin
 
         public void startDownload() {
             this.removeAll();
+            win.pack();
             bar = new JProgressBar(0, 100);
+
+            System.err.println("Downloading " + name);
 
             if (type == CORE) {
                 if (Base.compilers.get((String)data.get("Compiler")) == null) {
                     PluginEntry pe = compilerObjects.get((String)data.get("Compiler"));
                     if (pe != null) {
+                        isQueued = true;
                         pe.startDownload(this);
                         bar.setIndeterminate(false);
                         bar.setString("Installing Compiler...");
                         bar.setStringPainted(true);
                         this.add(bar);
-                        this.getParent().revalidate();
+                        Component p = this.getParent();
+                        if (p != null) {
+                            p.revalidate();
+                        }
+                        win.repaint();
                         return;
                     } else {
                         Base.showWarning(Translate.t("Unable to install"), Translate.w("That core cannot be installed right now. You do not have the compiler installed, and I cannot find the compiler in my list of packages. Try refreshing the list and trying again.", 40, "\n"), null);
@@ -634,7 +773,11 @@ public class PluginManager extends BasePlugin
             bar.setStringPainted(true);
             bar.setIndeterminate(false);
             this.add(bar);
-            this.getParent().revalidate();
+            Component p = this.getParent();
+            if (p != null) {
+                p.revalidate();
+            }
+            win.repaint();
 
             download();
         }
@@ -664,6 +807,7 @@ public class PluginManager extends BasePlugin
 
         public void download() {
 
+            isQueued = false;
             isDownloading = true;
 
             try {
@@ -765,14 +909,25 @@ public class PluginManager extends BasePlugin
 
         public void setInstalled() {
             this.removeAll();
+            win.pack();
             label = new JLabel("Installed");
             this.add(label);
-            this.getParent().revalidate();
+            Component p = this.getParent();
+            if (p != null) {
+                p.revalidate();
+            }
+            win.repaint();
             if (installNext != null) {
                 installNext.startDownload();
                 installNext = null;
             }
             isDownloading = false;
+            installedVersion = availableVersion;
+            win.pack();
+        }
+
+        public boolean isQueued() {
+            return isQueued;
         }
 
         public boolean isDownloading() {
