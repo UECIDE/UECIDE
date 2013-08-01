@@ -1226,7 +1226,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public File getCacheFolder() {
-        File cacheRoot = Base.getSettingsFile("cache");
+        File cacheRoot = Base.getUserCacheFolder();
         File coreCache = new File(cacheRoot, editor.core.getName());
         File boardCache = new File(coreCache, editor.board.getName());
         if (!boardCache.exists()) {  

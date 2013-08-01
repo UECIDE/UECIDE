@@ -97,68 +97,7 @@ public class PluginManager extends BasePlugin
         }
             
     }
-/*
-    public void populateCores() {
-        cores.removeAll();
-        String[] entries = PluginManager.availableCores.keySet().toArray(new String[0]);
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        coreObjects.clear();
 
-        JLabel label;
-        JButton button;
-        for (String entry : entries) {
-            JSONObject plugin = PluginManager.availableCores.get(entry);
-            label = new JLabel(entry);
-            c.weightx = 0.9;
-            c.gridwidth = 1;
-            cores.add(label, c);
-
-            int compare = 0; // Not installed
-
-            c.weightx = 0.1;
-            c.gridx = 1;
-
-            PluginEntry pe = new PluginEntry(plugin, 2);
-            coreObjects.put((String)plugin.get("Core"), pe);
-            cores.add(pe, c);
-                
-            c.gridx = 0;
-            c.gridy ++;
-            c.gridwidth = 2;
-
-            label = new JLabel("Version: " + (String)plugin.get("Version"));
-            cores.add(label, c);
-            c.gridy ++;
-
-            String comp = (String)plugin.get("Compiler");
-            if (Base.compilers.get(comp) == null) {
-                label = new JLabel("Requires Compiler: " + comp + " (not installed)");
-                cores.add(label, c);
-                c.gridy ++;
-            }
-
-            String d = (String)plugin.get("Description");
-            if (d == null) d = "";
-            JTextArea ta = new JTextArea("\n" + d);
-            ta.setLineWrap(true);
-            ta.setEditable(false);
-            ta.setOpaque(false);
-            cores.add(ta, c);
-            c.gridy++;
-
-
-            JSeparator s = new JSeparator(SwingConstants.HORIZONTAL);
-            cores.add(s, c);
-            c.gridy ++;
-        }
-        win.pack();
-    }
-*/
     public void populate() {
         body.removeAll();
 
@@ -203,6 +142,8 @@ public class PluginManager extends BasePlugin
                 families.add(family);
             }
         }
+
+        Collections.sort(families);
         
         for (String family : families) {
             DefaultMutableTreeNode famNode = new DefaultMutableTreeNode(family);
@@ -218,6 +159,8 @@ public class PluginManager extends BasePlugin
                     }
                 }
             }
+
+            Collections.sort(groups);     
             for (String group : groups) {
                 DefaultMutableTreeNode grpNode = new DefaultMutableTreeNode(group);
                 famNode.add(grpNode);
@@ -234,6 +177,17 @@ public class PluginManager extends BasePlugin
                     }
                 }
 
+                Collections.sort(validBoards, new Comparator() {
+                    public int compare(Object a, Object b) {
+                        String s1 = (String)a;
+                        String s2 = (String)b;
+                        JSONObject p1 = PluginManager.availableBoards.get(s1);
+                        JSONObject p2 = PluginManager.availableBoards.get(s2);
+                        String t1 = ((String)p1.get("Description")).toLowerCase();
+                        String t2 = ((String)p2.get("Description")).toLowerCase();
+                        return t1.compareTo(t2);
+                    }
+                });
                 for (String board : validBoards) {
                     JSONObject plugin = PluginManager.availableBoards.get(board);
                     PluginEntry pe = new PluginEntry(plugin, 3);
@@ -312,7 +266,7 @@ public class PluginManager extends BasePlugin
                         win.pack();
                         JLabel l = new JLabel(pe.getDescription());
                         infoPanel.add(l, BorderLayout.NORTH);
-                        if (pe.isOutdated()) {
+                        if (pe.isOutdated() || pe.isNewer()) {
                             l = new JLabel("Installed: " + pe.getInstalledVersion() + " Available: " + pe.getAvailableVersion());
                         } else if (pe.isInstalled()) {
                             l = new JLabel("Installed: " + pe.getInstalledVersion());
@@ -341,6 +295,7 @@ public class PluginManager extends BasePlugin
         Icon downloading;
         Icon queued;
         Icon upgrade;
+        Icon newer;
 
         public PluginNodeRenderer() {
             installed = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/installed.png"));
@@ -348,6 +303,7 @@ public class PluginManager extends BasePlugin
             downloading = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/downloading.png"));
             queued = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/queued.png"));
             upgrade = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/upgrade.png"));
+            newer = new ImageIcon(getResourceURL("uecide/plugin/PluginManager/newer.png"));
         }
         
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
@@ -368,6 +324,8 @@ public class PluginManager extends BasePlugin
                     name.setIcon(downloading);
                 } else if (pe.isQueued()) {
                     name.setIcon(queued);
+                } else if (pe.isNewer()) {
+                    name.setIcon(newer);
                 } else if (pe.isOutdated()) {
                     name.setIcon(upgrade);
                 } else if (pe.isInstalled()) {
@@ -388,60 +346,7 @@ public class PluginManager extends BasePlugin
             return nonLeafRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         }
     }
-/*
-    public void populateCompilers() {
-        compilers.removeAll();
-        String[] entries = PluginManager.availableCompilers.keySet().toArray(new String[0]);
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
 
-        compilerObjects.clear();
-
-        JLabel label;
-        JButton button;
-        for (String entry : entries) {
-            JSONObject plugin = PluginManager.availableCompilers.get(entry);
-            label = new JLabel(entry);
-            c.weightx = 0.9;
-            c.gridwidth = 1;
-            compilers.add(label, c);
-
-            int compare = 0; // Not installed
-
-            c.weightx = 0.1;
-            c.gridx = 1;
-
-            PluginEntry pe = new PluginEntry(plugin, 4);
-            compilerObjects.put((String)plugin.get("Compiler"), pe);
-            compilers.add(pe, c);
-                
-            c.gridx = 0;
-            c.gridy ++;
-            c.gridwidth = 2;
-            label = new JLabel("Version: " + (String)plugin.get("Version"));
-            compilers.add(label, c);
-            c.gridy ++;
-            String d = (String)plugin.get("Description");
-            if (d == null) d = "";
-            JTextArea ta = new JTextArea("\n" + d);
-            ta.setLineWrap(true);
-            ta.setEditable(false);
-            ta.setOpaque(false);
-            compilers.add(ta, c);
-            c.gridy++;
-
-
-            JSeparator s = new JSeparator(SwingConstants.HORIZONTAL);
-            compilers.add(s, c);
-            c.gridy ++;
-        }
-        win.pack();
-    }
-*/
     public boolean isDownloading() {
         boolean isDownloading = false;
 
@@ -651,25 +556,51 @@ public class PluginManager extends BasePlugin
                 }
             }
 
-            if (!isOutdated() && !isInstalled()) {
+            updateDisplay();
+        }
+    
+        public void updateDisplay() {
+
+            this.removeAll();
+            win.pack();
+
+            if (!isOutdated() && !isInstalled() && !isNewer()) {
                 button = new JButton("Install");
                 button.addActionListener(this);
+                button.setActionCommand("install");
                 this.add(button);
-                return;
-            }
-            if (isInstalled()) {
+            } else if (isInstalled()) {
                 label = new JLabel("Installed");
                 this.add(label);
-                return;
-            }
-            if (isOutdated()) {
+            } else if (isNewer()) {
+                label = new JLabel("Test Version");
+                this.add(label);
+            } else if (isOutdated()) {
                 button = new JButton("Upgrade");
                 button.addActionListener(this);
+                button.setActionCommand("upgrade");
                 this.add(button);
-                return;
             }
+
+            if (isOutdated() || isInstalled() || isNewer()) {
+                button = new JButton("Uninstall");
+                button.addActionListener(this);
+                button.setActionCommand("uninstall");
+                this.add(button);
+            }
+            win.pack();
         }
         
+        public boolean isNewer() {
+            if (installedVersion == "") {
+                return false;
+            }
+            if (installedVersion.compareTo(availableVersion) > 0) {
+                return true;
+            }
+            return false;
+        }
+
         public boolean isOutdated() {
             if (installedVersion == "") {
                 return false;
@@ -732,7 +663,78 @@ public class PluginManager extends BasePlugin
         }
 
         public void actionPerformed(ActionEvent e) {
-            startDownload();
+            String command = e.getActionCommand();
+            if (command.equals("install") || command.equals("upgrade")) {
+                startDownload();
+            }
+            if (command.equals("uninstall")) {
+                uninstall();
+            }
+        }
+
+        public void uninstall() {
+            if (type == PLUGIN) {
+                if (mainClass.equals(PluginManager.this.getClass().getName())) {
+                    Base.showWarning(Translate.t("Unable To Uninstall"), Translate.w("If you uninstall the Plugin Manager you won't be able to install any new plugins. That would be a bit silly, don't you think? I'm not going to let you do it.", 40, "\n"), null);
+                    return;
+                }
+                Plugin p = Base.plugins.get(mainClass);
+                if (p != null) {
+                    File jf = p.getJarFile();
+                    if (jf.exists()) {
+                        jf.delete();
+                        installedVersion = "";
+                    }
+                }
+            }
+
+            if (type == BOARD) {
+                Board b = Base.boards.get(name);
+                if (b != null) {
+                    File bf = b.getFolder();
+                    if (bf.exists() && bf.isDirectory()) {
+                        Base.removeDir(bf);
+                        installedVersion = "";
+                    }
+                }
+            }
+
+            if (type == CORE) {
+                Core c = Base.cores.get(name);
+                if (c != null) {
+                    File cf = c.getFolder();
+                    if (cf.exists() && cf.isDirectory()) {
+                        Base.removeDir(cf);
+                        installedVersion = "";
+                    }
+                }
+            }
+
+            if (type == COMPILER) {
+                uecide.app.debug.Compiler c = Base.compilers.get(name);
+                if (c != null) {
+                    File cf = c.getFolder();
+                    if (cf.exists() && cf.isDirectory()) {
+                        Base.removeDir(cf);
+                        installedVersion = "";
+                    }
+                }
+            }
+
+            Base.loadCompilers();
+            Base.loadCores();
+            Base.loadBoards();
+            Base.gatherLibraries();
+            for (Editor e : Base.editors) {
+                e.rebuildCoresMenu();
+                e.rebuildBoardsMenu();
+                e.rebuildImportMenu();
+                e.rebuildExamplesMenu();
+                e.rebuildPluginsMenu();
+            }
+
+            updateDisplay();
+
         }
 
         public void startDownload(PluginEntry pe) {
@@ -908,10 +910,6 @@ public class PluginManager extends BasePlugin
         }
 
         public void setInstalled() {
-            this.removeAll();
-            win.pack();
-            label = new JLabel("Installed");
-            this.add(label);
             Component p = this.getParent();
             if (p != null) {
                 p.revalidate();
@@ -923,6 +921,7 @@ public class PluginManager extends BasePlugin
             }
             isDownloading = false;
             installedVersion = availableVersion;
+            updateDisplay();
             win.pack();
         }
 

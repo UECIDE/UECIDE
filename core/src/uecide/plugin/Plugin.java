@@ -53,5 +53,6 @@ public interface Plugin extends Runnable {
   public URLClassLoader getLoader();
   public int flags();
   public ImageIcon toolbarIcon();
+  public File getJarFile();
 }
 

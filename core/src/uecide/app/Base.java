@@ -2058,6 +2058,14 @@ public class Base {
     return temp;
   }
 
+    static public File getUserCacheFolder() {
+        File f = getSettingsFile("cache");
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
+    }
+
     static public File getUserCoresFolder() {
         File f = getSettingsFile("cores");
         if (!f.exists()) {
