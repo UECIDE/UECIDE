@@ -151,5 +151,9 @@ public class BasePlugin implements Plugin {
         }
         return 0;
     }
+
+    public File getJarFile() {
+        return new File((String)pluginInfo.get("jarfile"));
+    }
 }
 

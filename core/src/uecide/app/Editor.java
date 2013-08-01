@@ -624,6 +624,15 @@ public class Editor extends JFrame implements RunnerListener {
       });
     sketchMenu.add(item);
 
+    item = newJMenuItem(Translate.t("Purge Cache Folder"), 'D');
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            Base.removeDir(Base.getUserCacheFolder());
+            statusNotice(Translate.t("Purge finished."));
+        }
+      });
+    sketchMenu.add(item);
+
 
     sketchMenu.addSeparator();
 

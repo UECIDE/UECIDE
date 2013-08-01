@@ -304,6 +304,9 @@ Building for ${brand} version ${version}${suffix}
       <param name="target.platform" value="linux" />
     </antcall>
 
+    <copy todir="linux/work/lib/rxtx" file="linux/dist/lib/librxtxSerial32.so" />
+    <copy todir="linux/work/lib/rxtx" file="linux/dist/lib/librxtxSerial64.so" />
+
     <copy tofile="linux/work/${product}" file="linux/dist/linuxrunner" />
     <chmod perm="755" file="linux/work/${product}" />
   </target>
