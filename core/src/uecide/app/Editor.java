@@ -2358,6 +2358,9 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     public void openInternal(String path) {
+        if (path == null) {
+            return;
+        }
         tabs.removeAll();
         sketch = new Sketch(this, new File(path));
         sketch.checkForSettings();
