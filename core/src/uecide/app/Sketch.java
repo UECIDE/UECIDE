@@ -598,6 +598,21 @@ public class Sketch implements MessageConsumer {
                 assertDTRRTS(dtr, rts);
             }
         }
+        if (ulu.equals("usbcdc")) {
+            try {
+                String baud = all.get("upload.reset.baud");
+                if (baud != null) {
+                    int b = Integer.parseInt(baud);
+                    editor.grabSerialPort();
+                    
+                    Serial serialPort = new Serial(editor.getSerialPort(), b);
+                    serialPort.dispose();
+                    Thread.sleep(1000);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         boolean res = execAsynchronously(commandString);
         if (ulu.equals("serial"))
