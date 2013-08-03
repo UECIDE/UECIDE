@@ -263,6 +263,7 @@ public class PluginManager extends BasePlugin
 
                     if (pe != null) {
                         infoPanel.removeAll();
+                        win.repaint();
                         win.pack();
                         JLabel l = new JLabel(pe.getDescription());
                         infoPanel.add(l, BorderLayout.NORTH);
@@ -275,6 +276,7 @@ public class PluginManager extends BasePlugin
                         }
                         infoPanel.add(l, BorderLayout.SOUTH);
                         infoPanel.add(pe, BorderLayout.CENTER);
+                        win.repaint();
                         win.pack();
                     }
                 }
@@ -284,6 +286,7 @@ public class PluginManager extends BasePlugin
         root.expandRow(0);
         root.setRootVisible(false);
 
+        win.repaint();
         win.pack();
     }
 
@@ -562,6 +565,8 @@ public class PluginManager extends BasePlugin
         public void updateDisplay() {
 
             this.removeAll();
+            repaint();
+            win.repaint();
             win.pack();
 
             if (!isOutdated() && !isInstalled() && !isNewer()) {
@@ -588,6 +593,8 @@ public class PluginManager extends BasePlugin
                 button.setActionCommand("uninstall");
                 this.add(button);
             }
+            repaint();
+            win.repaint();
             win.pack();
         }
         
@@ -744,6 +751,8 @@ public class PluginManager extends BasePlugin
 
         public void startDownload() {
             this.removeAll();
+            repaint();
+            win.repaint();
             win.pack();
             bar = new JProgressBar(0, 100);
 
@@ -759,11 +768,9 @@ public class PluginManager extends BasePlugin
                         bar.setString("Installing Compiler...");
                         bar.setStringPainted(true);
                         this.add(bar);
-                        Component p = this.getParent();
-                        if (p != null) {
-                            p.revalidate();
-                        }
+                        repaint();
                         win.repaint();
+                        win.pack();
                         return;
                     } else {
                         Base.showWarning(Translate.t("Unable to install"), Translate.w("That core cannot be installed right now. You do not have the compiler installed, and I cannot find the compiler in my list of packages. Try refreshing the list and trying again.", 40, "\n"), null);
@@ -775,11 +782,9 @@ public class PluginManager extends BasePlugin
             bar.setStringPainted(true);
             bar.setIndeterminate(false);
             this.add(bar);
-            Component p = this.getParent();
-            if (p != null) {
-                p.revalidate();
-            }
+            repaint();
             win.repaint();
+            win.pack();
 
             download();
         }
@@ -910,11 +915,6 @@ public class PluginManager extends BasePlugin
         }
 
         public void setInstalled() {
-            Component p = this.getParent();
-            if (p != null) {
-                p.revalidate();
-            }
-            win.repaint();
             if (installNext != null) {
                 installNext.startDownload();
                 installNext = null;
@@ -922,6 +922,8 @@ public class PluginManager extends BasePlugin
             isDownloading = false;
             installedVersion = availableVersion;
             updateDisplay();
+            repaint();
+            win.repaint();
             win.pack();
         }
 

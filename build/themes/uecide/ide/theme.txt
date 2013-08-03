@@ -4,6 +4,7 @@
 
 window.laf = default
 window.laf.linux = com.sun.java.swing.plaf.gtk.GTKLookAndFeel
+window.laf.windows = com.sun.java.swing.plaf.windows.WindowsLookAndFeel
 
 editor.antialias = yes
 editor.font = SansSerif,plain,24

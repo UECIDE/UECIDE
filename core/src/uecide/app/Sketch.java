@@ -607,7 +607,8 @@ public class Sketch implements MessageConsumer {
                     
                     Serial serialPort = new Serial(editor.getSerialPort(), b);
                     serialPort.dispose();
-                    Thread.sleep(1000);
+                    System.gc();
+                    Thread.sleep(1500);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
