@@ -13,7 +13,7 @@ import uecide.app.SerialException;
 import uecide.app.SerialNotFoundException;
 
 
-public class Board {
+public class Board implements Comparable {
     private String name;
     private String longname;
     private String group;
@@ -98,5 +98,17 @@ public class Board {
             v = "0";
         }
         return v;
+    }
+
+    public int compareTo(Object o) {
+        if (o instanceof Board) {
+            Board b = (Board)o;
+            String foreignName = b.getLongName();
+            return longname.compareTo(foreignName);
+        }
+        if (o instanceof String) {
+            return name.compareTo((String)o);
+        }
+        return 0;
     }
 }
