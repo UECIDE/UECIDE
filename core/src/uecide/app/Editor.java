@@ -1966,39 +1966,40 @@ public class Editor extends JFrame implements RunnerListener {
         ButtonGroup group = new ButtonGroup();
         HashMap<String, JMenu> groupings;
         groupings = new HashMap<String, JMenu>();
-/*
-        JMenuItem addboard = new JMenuItem(Translate.t("Add Boards..."));
-        addboard.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Base.handleAddBoards();
-            }
-        });
 
-        boardsMenu.add(addboard);
-        boardsMenu.addSeparator();
-*/
-        for (Board thisboard : Base.boards.values()) {
-            AbstractAction action = new AbstractAction(thisboard.getLongName()) {
-                public void actionPerformed(ActionEvent actionevent) {
-                    selectBoard((String) getValue("board"));
-                }
-            };
-            action.putValue("board", thisboard.getName());
-            JMenuItem item = new JRadioButtonMenuItem(action);
-            if (thisboard.equals(board)) {
-                item.setSelected(true);
+        HashMap<String, TreeSet<Board>> blist = new HashMap<String, TreeSet<Board>>();
+        ArrayList<String> groupNames = new ArrayList<String>();
+
+        for (String thisBoard : Base.boards.keySet()) {
+            Board b = Base.boards.get(thisBoard);
+            String thisGroup = b.getGroup();
+            if (blist.get(thisGroup) == null) {
+                blist.put(thisGroup, new TreeSet<Board>());
+                groupNames.add(thisGroup);
             }
-            group.add(item);
-            if (thisboard.getGroup() != null) {
-                if (groupings.get(thisboard.getGroup()) == null) {
-                    groupings.put(thisboard.getGroup(), new JMenu(thisboard.getGroup()));
+            blist.get(thisGroup).add(b);
+        }
+
+        Collections.sort(groupNames);
+
+        for (String groupName : groupNames) {
+            JMenu groupMenu = new JMenu(groupName);
+            boardsMenu.add(groupMenu);
+
+            for (Board b : blist.get(groupName)) {
+                AbstractAction action = new AbstractAction(b.getLongName()) {
+                    public void actionPerformed(ActionEvent actionevent) {
+                        selectBoard((String) getValue("board"));
+                    }
+                };
+                action.putValue("board", b.getName());
+                JMenuItem boardMenu = new JRadioButtonMenuItem(action);
+                if (board != null) {
+                    if (b.compareTo(board) == 0) {
+                        boardMenu.setSelected(true);
+                    }
                 }
-                groupings.get(thisboard.getGroup()).add(item);
-            } else {
-                boardsMenu.add(item);
-            }
-            for (String grp : groupings.keySet()) {
-                boardsMenu.add(groupings.get(grp));
+                groupMenu.add(boardMenu);
             }
         }
     }
