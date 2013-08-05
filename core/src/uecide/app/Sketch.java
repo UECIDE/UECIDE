@@ -238,44 +238,28 @@ public class Sketch implements MessageConsumer {
                     f.includes = gatherIncludes(f);
                     f.prototypes = proc.prototypes(rawData).toArray(new String[0]);
                     StringBuilder sb = new StringBuilder();
+
                     f.headerLines = 0;
+                    int firstStat = proc.firstStatement(rawData);
+
+                    String header = rawData.substring(0, firstStat);
+                    String body = rawData.substring(firstStat);
+
+                    Matcher m = Pattern.compile("(\n)|(\r)|(\r\n)").matcher(header);
+                    int headerLength = 1;
+                    while (m.find())
+                    {
+                        headerLength++;
+                    }
+
                     String coreHeader = all.get("core.header");
                     if (coreHeader != "") {
                         sb.append("#include <" + coreHeader + ">\n");
                         f.headerLines ++;
                     }
-
-                    // Copy the includes etc
-                    String[] data = rawData.split("\n");
-
                     sb.append("#line 1 \"" + f.file.getName() + "\"\n");
-
-                    int codeOffset = 1;
-                    int lineno = 0;
-                    boolean inHead = true;
-                    while (inHead && lineno < data.length) {
-                        if (data[lineno].trim().startsWith("#")) {
-                            sb.append(data[lineno]);
-                            sb.append("\n");
-                            lineno++;
-                            codeOffset++;
-                            continue;
-                        }
-                        if (data[lineno].trim().startsWith("/")) {
-                            sb.append(data[lineno]);
-                            sb.append("\n");
-                            lineno++;
-                            codeOffset++;
-                            continue;
-                        }
-                        if (data[lineno].trim().length() == 0) {
-                            sb.append("\n");
-                            lineno++;
-                            codeOffset++;
-                            continue;
-                        }
-                        inHead = false;
-                    }
+                    sb.append(header);
+                    f.headerLines += headerLength;
 
                     if (Base.preferences.getBoolean("compiler.disable_prototypes") == false) {
                         for (String prototype : f.prototypes) {
@@ -287,14 +271,9 @@ public class Sketch implements MessageConsumer {
                     sb.append("\n");
                     f.headerLines ++;
 
-                    sb.append("#line " + codeOffset + " \"" + f.file.getName() + "\"\n");
+                    sb.append("#line " + headerLength + " \"" + f.file.getName() + "\"\n");
                     f.headerLines ++;
-
-                    while (lineno < data.length) {
-                        sb.append(data[lineno]);
-                        sb.append("\n");
-                        lineno++;
-                    }
+                    sb.append(body);
 
                     String newFileName = f.file.getName();
                     int dot = newFileName.lastIndexOf(".");
