@@ -44,9 +44,6 @@ public class Editor extends JFrame implements RunnerListener {
     /** Command-Option on Mac OS X, Ctrl-Alt on Windows and Linux */
     static final int SHORTCUT_ALT_KEY_MASK = ActionEvent.ALT_MASK | Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-    /**
-    * true if this file has not yet been given a name by the user
-    */
     PageFormat pageFormat;
     PrinterJob printerJob;
 
@@ -84,12 +81,8 @@ public class Editor extends JFrame implements RunnerListener {
 
     // runtime information and window placement
 
-    JMenuItem exportAppItem;
     JMenuItem saveMenuItem;
     JMenuItem saveAsMenuItem;
-
-    boolean running;
-    boolean uploading;
 
     Runnable runHandler;
     Runnable presentHandler;
@@ -624,7 +617,7 @@ public class Editor extends JFrame implements RunnerListener {
       });
     sketchMenu.add(item);
 
-    item = newJMenuItem(Translate.t("Purge Cache Folder"), 'D');
+    item = new JMenuItem(Translate.t("Purge Cache Folder"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             Base.removeDir(Base.getUserCacheFolder());
@@ -900,201 +893,143 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
 
-  protected JMenu buildEditMenu() {
-    JMenu menu = new JMenu(Translate.t("Edit"));
-    JMenuItem item;
+    protected JMenu buildEditMenu() {
+        JMenu menu = new JMenu(Translate.t("Edit"));
+        JMenuItem item;
 
-    final Editor me = this;
+        final Editor me = this;
 
-    item = newJMenuItem(Translate.t("Undo"), 'Z');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            ((SketchEditor)tabs.getSelectedComponent()).undo();
-        }
-    });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Undo"), 'Z');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ((SketchEditor)tabs.getSelectedComponent()).undo();
+            }
+        });
+        menu.add(item);
 
-    item = newJMenuItem(Translate.t("Redo"), 'Y');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            ((SketchEditor)tabs.getSelectedComponent()).redo();
-        }
-    });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Redo"), 'Y');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ((SketchEditor)tabs.getSelectedComponent()).redo();
+            }
+        });
+        menu.add(item);
 
-    addPluginsToMenu(menu, BasePlugin.MENU_EDIT_TOP);
+        addPluginsToMenu(menu, BasePlugin.MENU_EDIT_TOP);
 
-    menu.addSeparator();
+        menu.addSeparator();
 
-    // TODO "cut" and "copy" should really only be enabled
-    // if some text is currently selected
-    item = newJMenuItem(Translate.t("Cut"), 'X');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          handleCut();
-        }
-      });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Cut"), 'X');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleCut();
+            }
+        });
+        menu.add(item);
 
-    item = newJMenuItem(Translate.t("Copy"), 'C');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          ((SketchEditor)tabs.getSelectedComponent()).copy();
-        }
-      });
-    menu.add(item);
-    item = newJMenuItem(Translate.t("Paste"), 'V');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          ((SketchEditor)tabs.getSelectedComponent()).paste();
-        }
-      });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Copy"), 'C');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ((SketchEditor)tabs.getSelectedComponent()).copy();
+            }
+        });
+        menu.add(item);
+        item = newJMenuItem(Translate.t("Paste"), 'V');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ((SketchEditor)tabs.getSelectedComponent()).paste();
+            }
+        });
+        menu.add(item);
 
-    item = newJMenuItem(Translate.t("Select All"), 'A');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          ((SketchEditor)tabs.getSelectedComponent()).selectAll();
-        }
-      });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Select All"), 'A');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ((SketchEditor)tabs.getSelectedComponent()).selectAll();
+            }
+        });
+        menu.add(item);
 
-    addPluginsToMenu(menu, BasePlugin.MENU_EDIT_MID);
-    menu.addSeparator();
+        addPluginsToMenu(menu, BasePlugin.MENU_EDIT_MID);
+        menu.addSeparator();
 
-    item = newJMenuItem(Translate.t("Comment/Uncomment"), '/');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          handleCommentUncomment();
-        }
-    });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Comment/Uncomment"), '/');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              handleCommentUncomment();
+            }
+        });
+        menu.add(item);
 
-    item = newJMenuItem(Translate.t("Increase Indent"), ']');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          increaseIndent();
-        }
-    });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Increase Indent"), ']');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              increaseIndent();
+            }
+        });
+        menu.add(item);
 
-    item = newJMenuItem(Translate.t("Decrease Indent"), '[');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          decreaseIndent();
-        }
-    });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Decrease Indent"), '[');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              decreaseIndent();
+            }
+        });
+        menu.add(item);
 
-    addPluginsToMenu(menu, BasePlugin.MENU_EDIT_LOW);
-    menu.addSeparator();
+        addPluginsToMenu(menu, BasePlugin.MENU_EDIT_LOW);
+        menu.addSeparator();
 
-    item = newJMenuItem(Translate.t("Find..."), 'F');
-    item.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            findAndReplace = new FindAndReplace(me);
-        }
-      });
-    menu.add(item);
+        item = newJMenuItem(Translate.t("Find..."), 'F');
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                findAndReplace = new FindAndReplace(me);
+            }
+        });
+        menu.add(item);
 
-    addPluginsToMenu(menu, BasePlugin.MENU_EDIT_BOT);
-    return menu;
-  }
+        addPluginsToMenu(menu, BasePlugin.MENU_EDIT_BOT);
+        return menu;
+    }
 
-
-  /**
-   * A software engineer, somewhere, needs to have his abstraction
-   * taken away. In some countries they jail or beat people for writing
-   * the sort of API that would require a five line helper function
-   * just to set the command key for a menu item.
-   */
-  static public JMenuItem newJMenuItem(String title, int what) {
-    JMenuItem menuItem = new JMenuItem(title);
-    int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-    menuItem.setAccelerator(KeyStroke.getKeyStroke(what, modifiers));
-    return menuItem;
-  }
+    static public JMenuItem newJMenuItem(String title, int what) {
+        JMenuItem menuItem = new JMenuItem(title);
+        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(what, modifiers));
+        return menuItem;
+    }
 
 
-  /**
-   * Like newJMenuItem() but adds shift as a modifier for the key command.
-   */
-  static public JMenuItem newJMenuItemShift(String title, int what) {
-    JMenuItem menuItem = new JMenuItem(title);
-    int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-    modifiers |= ActionEvent.SHIFT_MASK;
-    menuItem.setAccelerator(KeyStroke.getKeyStroke(what, modifiers));
-    return menuItem;
-  }
+    static public JMenuItem newJMenuItemShift(String title, int what) {
+        JMenuItem menuItem = new JMenuItem(title);
+        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        modifiers |= ActionEvent.SHIFT_MASK;
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(what, modifiers));
+        return menuItem;
+    }
 
+    static public JMenuItem newJMenuItemAlt(String title, int what) {
+        JMenuItem menuItem = new JMenuItem(title);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(what, SHORTCUT_ALT_KEY_MASK));
+        return menuItem;
+    }
 
-  /**
-   * Same as newJMenuItem(), but adds the ALT (on Linux and Windows)
-   * or OPTION (on Mac OS X) key as a modifier.
-   */
-  static public JMenuItem newJMenuItemAlt(String title, int what) {
-    JMenuItem menuItem = new JMenuItem(title);
-    //int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-    //menuItem.setAccelerator(KeyStroke.getKeyStroke(what, modifiers));
-    menuItem.setAccelerator(KeyStroke.getKeyStroke(what, SHORTCUT_ALT_KEY_MASK));
-    return menuItem;
-  }
+    public void resetHandlers() {
+        runHandler = new DefaultRunHandler();
+        exportHandler = new DefaultExportHandler();
+    }
 
+    public Sketch getSketch() {
+        return sketch;
+    }
 
+    public SketchEditor getTextArea() {
+        return (SketchEditor)tabs.getSelectedComponent();
+    }
 
-  // these will be done in a more generic way soon, more like:
-  // setHandler("action name", Runnable);
-  // but for the time being, working out the kinks of how many things to
-  // abstract from the editor in this fashion.
-
-
-  public void setHandlers(Runnable runHandler, Runnable presentHandler,
-                          Runnable stopHandler,
-                          Runnable exportHandler, Runnable exportAppHandler) {
-    this.runHandler = runHandler;
-    this.presentHandler = presentHandler;
-    this.stopHandler = stopHandler;
-    this.exportHandler = exportHandler;
-    this.exportAppHandler = exportAppHandler;
-  }
-
-
-  public void resetHandlers() {
-    runHandler = new DefaultRunHandler();
-//-    stopHandler = new DefaultStopHandler();
-    exportHandler = new DefaultExportHandler();
-  }
-
-
-  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-
-  /**
-   * Gets the current sketch object.
-   */
-  public Sketch getSketch() {
-    return sketch;
-  }
-
-
-  /**
-   * Get the JEditTextArea object for use (not recommended). This should only
-   * be used in obscure cases that really need to hack the internals of the
-   * JEditTextArea. Most tools should only interface via the get/set functions
-   * found in this class. This will maintain compatibility with future releases,
-   * which will not use JEditTextArea.
-   */
-  public SketchEditor getTextArea() {
-    return (SketchEditor)tabs.getSelectedComponent();
-  }
-
-
-  /**
-   * Get the contents of the current buffer. Used by the Sketch class.
-   */
-  public String getText() {
-    return ((SketchEditor)tabs.getSelectedComponent()).getText();
-  }
+    public String getText() {
+        return ((SketchEditor)tabs.getSelectedComponent()).getText();
+    }
 
     public String getText(String filename) {
         int iot = tabs.indexOfTab(filename);
@@ -1105,223 +1040,144 @@ public class Editor extends JFrame implements RunnerListener {
         return ed.getText();
     }
 
-
-  /**
-   * Get a range of text from the current buffer.
-   */
-  public String getText(int start, int stop) {
-    return ((SketchEditor)tabs.getSelectedComponent()).getText(start, stop - start);
-  }
-
-
-  /**
-   * Replace the entire contents of the front-most tab.
-   */
-  public void setText(String what) {
-    SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
-    ed.beginAtomicEdit();
-    ed.setText(what);
-    ed.endAtomicEdit();
-  }
-
-
-  public void insertText(String what) {
-    SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
-    ed.beginAtomicEdit();
-    int caret = ed.getCaretPosition();
-    ed.insert(what, caret);
-    ed.endAtomicEdit();
-  }
-
-
-  public String getSelectedText() {
-    return ((SketchEditor)tabs.getSelectedComponent()).getSelectedText();
-  }
-
-
-  public void setSelectedText(String what) {
-    ((SketchEditor)tabs.getSelectedComponent()).setSelectedText(what);
-  }
-
-
-  public void setSelection(int start, int stop) {
-    // make sure that a tool isn't asking for a bad location
-    SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
-    if (start < 0) start = 0;
-    if (start > ed.getDocumentLength()) start = ed.getDocumentLength();
-    if (stop < 0) stop = 0;
-    if (stop > ed.getDocumentLength()) start = ed.getDocumentLength();
-
-    ed.select(start, stop);
-  }
-
-
-  /**
-   * Get the position (character offset) of the caret. With text selected,
-   * this will be the last character actually selected, no matter the direction
-   * of the selection. That is, if the user clicks and drags to select lines
-   * 7 up to 4, then the caret position will be somewhere on line four.
-   */
-  public int getCaretOffset() {
-    return ((SketchEditor)tabs.getSelectedComponent()).getCaretPosition();
-  }
-
-
-  /**
-   * True if some text is currently selected.
-   */
-  public boolean isSelectionActive() {
-    return ((SketchEditor)tabs.getSelectedComponent()).isSelectionActive();
-  }
-
-
-  /**
-   * Get the beginning point of the current selection.
-   */
-  public int getSelectionStart() {
-    return ((SketchEditor)tabs.getSelectedComponent()).getSelectionStart();
-  }
-
-
-  /**
-   * Get the end point of the current selection.
-   */
-  public int getSelectionStop() {
-    return ((SketchEditor)tabs.getSelectedComponent()).getSelectionStop();
-  }
-
-
-  /**
-   * Get text for a specified line.
-   */
-  public String getLineText(int line) {
-    return ((SketchEditor)tabs.getSelectedComponent()).getLineText(line);
-  }
-
-
-  /**
-   * Replace the text on a specified line.
-   */
-  public void setLineText(int line, String what) {
-    SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
-    ed.beginAtomicEdit();
-    ed.select(ed.getLineStartOffset(line), ed.getLineEndOffset(line));
-    ed.setSelectedText(what);
-    ed.endAtomicEdit();
-  }
-
-
-  /**
-   * Get character offset for the start of a given line of text.
-   */
-  public int getLineStartOffset(int line) {
-    return ((SketchEditor)tabs.getSelectedComponent()).getLineStartOffset(line);
-  }
-
-
-  /**
-   * Get character offset for end of a given line of text.
-   */
-  public int getLineStopOffset(int line) {
-    return ((SketchEditor)tabs.getSelectedComponent()).getLineEndOffset(line);
-  }
-
-
-  /**
-   * Get the number of lines in the currently displayed buffer.
-   */
-  public int getLineCount() {
-    return ((SketchEditor)tabs.getSelectedComponent()).getLineCount();
-  }
-
-
-  /**
-   * Implements Edit &rarr; Cut.
-   */
-  public void handleCut() {
-    ((SketchEditor)tabs.getSelectedComponent()).cut();
-  }
-
-
-  /**
-   * Implements Edit &rarr; Copy.
-   */
-  public void handleCopy() {
-    ((SketchEditor)tabs.getSelectedComponent()).copy();
-  }
-
-
-
-  /**
-   * Implements Edit &rarr; Paste.
-   */
-  public void handlePaste() {
-    ((SketchEditor)tabs.getSelectedComponent()).paste();
-  }
-
-
-  /**
-   * Implements Edit &rarr; Select All.
-   */
-  public void handleSelectAll() {
-    ((SketchEditor)tabs.getSelectedComponent()).selectAll();
-  }
-
-
-  protected void handleCommentUncomment() {
-    SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
-    ed.beginAtomicEdit();
-
-    int startLine = ed.getSelectionStartLine();
-    int stopLine = ed.getSelectionStopLine();
-
-    int lastLineStart = ed.getLineStartOffset(stopLine);
-    int selectionStop = ed.getSelectionStop();
-    // If the selection ends at the beginning of the last line,
-    // then don't (un)comment that line.
-    if (selectionStop == lastLineStart) {
-      // Though if there's no selection, don't do that
-      if (ed.isSelectionActive()) {
-        stopLine--;
-      }
+    public String getText(int start, int stop) {
+        return ((SketchEditor)tabs.getSelectedComponent()).getText(start, stop - start);
     }
 
-    // If the text is empty, ignore the user.
-    // Also ensure that all lines are commented (not just the first)
-    // when determining whether to comment or uncomment.
-    int length = ed.getDocumentLength();
-    boolean commented = true;
-    for (int i = startLine; commented && (i <= stopLine); i++) {
-      int pos = ed.getLineStartOffset(i);
-      if (pos + 2 > length) {
-        commented = false;
-      } else {
-        // Check the first two characters to see if it's already a comment.
-        String begin = ed.getText(pos, 2);
-        commented = begin.equals("//");
-      }
+    public void setText(String what) {
+        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
+        ed.beginAtomicEdit();
+        ed.setText(what);
+        ed.endAtomicEdit();
     }
 
-    for (int line = startLine; line <= stopLine; line++) {
-      int location = ed.getLineStartOffset(line);
-      if (commented) {
-        // remove a comment
-        ed.select(location, location+2);
-        if (ed.getSelectedText().equals("//")) {
-          ed.setSelectedText("");
+    public void insertText(String what) {
+        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
+        ed.beginAtomicEdit();
+        int caret = ed.getCaretPosition();
+        ed.insert(what, caret);
+        ed.endAtomicEdit();
+    }
+
+    public String getSelectedText() {
+        return ((SketchEditor)tabs.getSelectedComponent()).getSelectedText();
+    }
+
+
+    public void setSelectedText(String what) {
+        ((SketchEditor)tabs.getSelectedComponent()).setSelectedText(what);
+    }
+
+    public void setSelection(int start, int stop) {
+        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
+        if (start < 0) start = 0;
+        if (start > ed.getDocumentLength()) start = ed.getDocumentLength();
+        if (stop < 0) stop = 0;
+        if (stop > ed.getDocumentLength()) start = ed.getDocumentLength();
+
+        ed.select(start, stop);
+    }
+
+    public int getCaretOffset() {
+        return ((SketchEditor)tabs.getSelectedComponent()).getCaretPosition();
+    }
+
+    public boolean isSelectionActive() {
+        return ((SketchEditor)tabs.getSelectedComponent()).isSelectionActive();
+    }
+
+    public int getSelectionStart() {
+        return ((SketchEditor)tabs.getSelectedComponent()).getSelectionStart();
+    }
+
+    public int getSelectionStop() {
+        return ((SketchEditor)tabs.getSelectedComponent()).getSelectionStop();
+    }
+
+    public String getLineText(int line) {
+        return ((SketchEditor)tabs.getSelectedComponent()).getLineText(line);
+    }
+
+    public void setLineText(int line, String what) {
+        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
+        ed.beginAtomicEdit();
+        ed.select(ed.getLineStartOffset(line), ed.getLineEndOffset(line));
+        ed.setSelectedText(what);
+        ed.endAtomicEdit();
+    }
+
+    public int getLineStartOffset(int line) {
+        return ((SketchEditor)tabs.getSelectedComponent()).getLineStartOffset(line);
+    }
+
+    public int getLineStopOffset(int line) {
+        return ((SketchEditor)tabs.getSelectedComponent()).getLineEndOffset(line);
+    }
+
+    public int getLineCount() {
+        return ((SketchEditor)tabs.getSelectedComponent()).getLineCount();
+    }
+
+    public void handleCut() {
+        ((SketchEditor)tabs.getSelectedComponent()).cut();
+    }
+
+    public void handleCopy() {
+        ((SketchEditor)tabs.getSelectedComponent()).copy();
+    }
+
+    public void handlePaste() {
+        ((SketchEditor)tabs.getSelectedComponent()).paste();
+    }
+
+    public void handleSelectAll() {
+        ((SketchEditor)tabs.getSelectedComponent()).selectAll();
+    }
+
+    protected void handleCommentUncomment() {
+        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
+        ed.beginAtomicEdit();
+
+        int startLine = ed.getSelectionStartLine();
+        int stopLine = ed.getSelectionStopLine();
+
+        int lastLineStart = ed.getLineStartOffset(stopLine);
+        int selectionStop = ed.getSelectionStop();
+
+        if (selectionStop == lastLineStart) {
+            if (ed.isSelectionActive()) {
+                stopLine--;
+            }
         }
-      } else {
-        // add a comment
-        ed.select(location, location);
-        ed.setSelectedText("//");
-      }
+
+        int length = ed.getDocumentLength();
+        boolean commented = true;
+        for (int i = startLine; commented && (i <= stopLine); i++) {
+            int pos = ed.getLineStartOffset(i);
+            if (pos + 2 > length) {
+                commented = false;
+            } else {
+                String begin = ed.getText(pos, 2);
+                commented = begin.equals("//");
+            }
+        }
+
+        for (int line = startLine; line <= stopLine; line++) {
+            int location = ed.getLineStartOffset(line);
+            if (commented) {
+                ed.select(location, location+2);
+                if (ed.getSelectedText().equals("//")) {
+                    ed.setSelectedText("");
+                }
+            } else {
+                ed.select(location, location);
+                ed.setSelectedText("//");
+            }
+        }
+        ed.select(ed.getLineStartOffset(startLine),
+        ed.getLineEndOffset(stopLine) - 1);
+        ed.endAtomicEdit();
     }
-    // Subtract one from the end, otherwise selects past the current line.
-    // (Which causes subsequent calls to keep expanding the selection)
-    ed.select(ed.getLineStartOffset(startLine),
-              ed.getLineEndOffset(stopLine) - 1);
-    ed.endAtomicEdit();
-  }
 
 
     public void increaseIndent() {
@@ -1378,130 +1234,81 @@ public class Editor extends JFrame implements RunnerListener {
         ed.endAtomicEdit();
     }
             
-  public void handleRun() {
-    running = true;
-    status.progress(Translate.t("Compiling sketch..."));
+    public void handleRun() {
+        status.progress(Translate.t("Compiling sketch..."));
 
-    // clear the console on each run, unless the user doesn't want to
-    if (Base.preferences.getBoolean("console.auto_clear")) {
-      console.clear();
-    }
-
-    // Cannot use invokeLater() here, otherwise it gets
-    // placed on the event thread and causes a hang--bad idea all around.
-    new Thread(runHandler, "Compiler").start();
-  }
-
-  // DAM: in Arduino, this is compile
-  class DefaultRunHandler implements Runnable {
-    public void run() {
-      try {
-//        if (!sketch.prepare()) {
-//            return;
-//        }
-        if(sketch.build()) {
-            reportSize();
+        if (Base.preferences.getBoolean("console.auto_clear")) {
+            console.clear();
         }
-      } catch (Exception e) {
-        status.unprogress();
-        statusError(e);
-      }
 
-      status.unprogress();
+        new Thread(runHandler, "Compiler").start();
     }
-  }
 
-  class DefaultStopHandler implements Runnable {
-    public void run() {
-      try {
-        // DAM: we should try to kill the compilation or upload process here.
-      } catch (Exception e) {
-        statusError(e);
-      }
+    class DefaultRunHandler implements Runnable {
+        public void run() {
+            try {
+                if(sketch.build()) {
+                    reportSize();
+                }
+            } catch (Exception e) {
+                status.unprogress();
+                statusError(e);
+            }
+
+            status.unprogress();
+        }
     }
-  }
 
+    protected boolean checkModified() {
+        if (!sketch.isModified()) return true;
 
-  /**
-   * Check if the sketch is modified and ask user to save changes.
-   * @return false if canceling the close/quit operation
-   */
-  protected boolean checkModified() {
-    if (!sketch.isModified()) return true;
+        String prompt = Translate.t("Save changes to %1?", sketch.getName());
 
-    // As of Processing 1.0.10, this always happens immediately.
-    // http://dev.processing.org/bugs/show_bug.cgi?id=1456
+        if (!Base.isMacOS()) {
+            int result =
+                JOptionPane.showConfirmDialog(this, prompt, Translate.t("Close"),
+                                              JOptionPane.YES_NO_CANCEL_OPTION,
+                                              JOptionPane.QUESTION_MESSAGE);
 
-    String prompt = Translate.t("Save changes to %1?", sketch.getName());
+            if (result == JOptionPane.YES_OPTION) {
+                return handleSave();
+            } else if (result == JOptionPane.NO_OPTION) {
+                return true;
+            } else if (result == JOptionPane.CANCEL_OPTION) {
+                return false;
+            } else {
+                return false;
+            }
+        } else {
+            JOptionPane pane = new JOptionPane("<html> " +
+                    "<head> <style type=\"text/css\">"+
+                    "b { font: 13pt \"Lucida Grande\" }"+
+                    "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
+                    "</style> </head>" +
+                    "<b>" + Translate.t("Do you want to save changes to this sketch before closing?") + "</b>" +
+                    "<p>" + Translate.t("If you don't save, your changes will be lost."),
+                    JOptionPane.QUESTION_MESSAGE);
 
-    if (!Base.isMacOS()) {
-      int result =
-        JOptionPane.showConfirmDialog(this, prompt, Translate.t("Close"),
-                                      JOptionPane.YES_NO_CANCEL_OPTION,
-                                      JOptionPane.QUESTION_MESSAGE);
+            String[] options = new String[] {
+                Translate.t("Save"), Translate.t("Cancel"), Translate.t("Don't Save")
+            };
+            pane.setOptions(options);
+            pane.setInitialValue(options[0]);
+            pane.putClientProperty("Quaqua.OptionPane.destructiveOption", new Integer(2));
 
-      if (result == JOptionPane.YES_OPTION) {
-        return handleSave();
+            JDialog dialog = pane.createDialog(this, null);
+            dialog.setVisible(true);
 
-      } else if (result == JOptionPane.NO_OPTION) {
-        return true;  // ok to continue
-
-      } else if (result == JOptionPane.CANCEL_OPTION) {
-        return false;
-
-      } else {
-        return false;
-      }
-
-    } else {
-      // This code is disabled unless Java 1.5 is being used on Mac OS X
-      // because of a Java bug that prevents the initial value of the
-      // dialog from being set properly (at least on my MacBook Pro).
-      // The bug causes the "Don't Save" option to be the highlighted,
-      // blinking, default. This sucks. But I'll tell you what doesn't
-      // suck--workarounds for the Mac and Apple's snobby attitude about it!
-      // I think it's nifty that they treat their developers like dirt.
-
-      // Pane formatting adapted from the quaqua guide
-      // http://www.randelshofer.ch/quaqua/guide/joptionpane.html
-      JOptionPane pane =
-        new JOptionPane("<html> " +
-                        "<head> <style type=\"text/css\">"+
-                        "b { font: 13pt \"Lucida Grande\" }"+
-                        "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
-                        "</style> </head>" +
-                        "<b>" + Translate.t("Do you want to save changes to this sketch before closing?") + "</b>" +
-                        "<p>" + Translate.t("If you don't save, your changes will be lost."),
-                        JOptionPane.QUESTION_MESSAGE);
-
-      String[] options = new String[] {
-        Translate.t("Save"), Translate.t("Cancel"), Translate.t("Don't Save")
-      };
-      pane.setOptions(options);
-
-      // highlight the safest option ala apple hig
-      pane.setInitialValue(options[0]);
-
-      // on macosx, setting the destructive property places this option
-      // away from the others at the lefthand side
-      pane.putClientProperty("Quaqua.OptionPane.destructiveOption",
-                             new Integer(2));
-
-      JDialog dialog = pane.createDialog(this, null);
-      dialog.setVisible(true);
-
-      Object result = pane.getValue();
-      if (result == options[0]) {  // save (and close/quit)
-        return handleSave();
-
-      } else if (result == options[2]) {  // don't save (still close/quit)
-        return true;
-
-      } else {  // cancel?
-        return false;
-      }
+            Object result = pane.getValue();
+            if (result == options[0]) {
+                return handleSave();
+            } else if (result == options[2]) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
-  }
 
     public SketchEditor addTab(File file) {
         String fileName = file.getName();
@@ -1517,117 +1324,81 @@ public class Editor extends JFrame implements RunnerListener {
         return newEditor;
     }
 
-
-  /**
-   * Actually handle the save command. If 'immediately' is set to false,
-   * this will happen in another thread so that the message area
-   * will update and the save button will stay highlighted while the
-   * save is happening. If 'immediately' is true, then it will happen
-   * immediately. This is used during a quit, because invokeLater()
-   * won't run properly while a quit is happening. This fixes
-   * <A HREF="http://dev.processing.org/bugs/show_bug.cgi?id=276">Bug 276</A>.
-   */
     public boolean handleSave() {
         if (sketch.isUntitled() || sketch.isReadOnly()) {
             boolean ret = handleSaveAs();
-            if (ret) {
-                Base.updateMRU(sketch.getFolder());
-            }
             return ret;
         } else {
             boolean ret = handleSave2();
-            if (ret) {
-                Base.updateMRU(sketch.getFolder());
-            }
             return ret;
         }
     }
 
-
-  protected boolean handleSave2() {
-    statusNotice(Translate.t("Saving..."));
-    boolean saved = false;
-    try {
-      saved = sketch.save();
-      if (saved)
-        statusNotice(Translate.t("Done Saving."));
-      else
-        statusEmpty();
-    } catch (Exception e) {
-      // show the error as a message in the window
-      statusError(e);
+    protected boolean handleSave2() {
+        statusNotice(Translate.t("Saving..."));
+        boolean saved = false;
+        try {
+            saved = sketch.save();
+            if (saved) {
+                statusNotice(Translate.t("Done Saving."));
+                Base.updateMRU(sketch.getFolder());
+            } else {
+                statusEmpty();
+            }
+        } catch (Exception e) {
+            statusError(e);
+        }
+        return saved;
     }
-    return saved;
-  }
 
-
-  public boolean handleSaveAs() {
+    public boolean handleSaveAs() {
         System.out.println("Saving AS");
-    statusNotice(Translate.t("Saving..."));
-    try {
-      if (sketch.saveAs()) {
-        statusNotice(Translate.t("Done Saving."));
-      } else {
-        statusNotice(Translate.t("Save Canceled."));
-        return false;
-      }
-    } catch (Exception e) {
-      // show the error as a message in the window
-      statusError(e);
+        statusNotice(Translate.t("Saving..."));
+        try {
+            if (sketch.saveAs()) {
+                statusNotice(Translate.t("Done Saving."));
+                sketch.cleanBuild();
+            } else {
+                statusNotice(Translate.t("Save Canceled."));
+                return false;
+            }
+        } catch (Exception e) {
+            statusError(e);
+        }
 
-    } finally {
-      // make sure the toolbar button deactivates
-      //toolbar.deactivate(EditorToolbar.SAVE);
+        Base.updateMRU(sketch.getFolder());
+        return true;
     }
-
-    return true;
-  }
   
   
-  public boolean serialPrompt() {
-    int count = serialMenu.getItemCount();
-    Object[] names = new Object[count];
-    for (int i = 0; i < count; i++) {
-      names[i] = ((JCheckBoxMenuItem)serialMenu.getItem(i)).getText();
+    public boolean serialPrompt() {
+        int count = serialMenu.getItemCount();
+        Object[] names = new Object[count];
+        for (int i = 0; i < count; i++) {
+            names[i] = ((JCheckBoxMenuItem)serialMenu.getItem(i)).getText();
+        }
+
+        String result = (String)
+        JOptionPane.showInputDialog(this,
+            Translate.w("Serial port %1 not found. Retry the upload with another serial port?", 30, "\n", serialPort),
+            Translate.t("Serial port not found"),
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            names,
+            0);
+        if (result == null) return false;
+        selectSerialPort(result);
+        return true;
     }
 
-    String result = (String)
-      JOptionPane.showInputDialog(this,
-                                  Translate.w("Serial port %1 not found. Retry the upload with another serial port?", 30, "\n", serialPort),
-                                  Translate.t("Serial port not found"),
-                                  JOptionPane.PLAIN_MESSAGE,
-                                  null,
-                                  names,
-                                  0);
-    if (result == null) return false;
-    selectSerialPort(result);
-    return true;
-  }
 
+    synchronized public void handleExport() {
+        console.clear();
+        status.progress(Translate.t("Starting Upload..."));
 
-  /**
-   * Called by Sketch &rarr; Export.
-   * Handles calling the export() function on sketch, and
-   * queues all the gui status stuff that comes along with it.
-   * <p/>
-   * Made synchronized to (hopefully) avoid problems of people
-   * hitting export twice, quickly, and horking things up.
-   */
-  /**
-   * Handles calling the export() function on sketch, and
-   * queues all the gui status stuff that comes along with it.
-   *
-   * Made synchronized to (hopefully) avoid problems of people
-   * hitting export twice, quickly, and horking things up.
-   */
-  synchronized public void handleExport() {
-    console.clear();
-    status.progress(Translate.t("Starting Upload..."));
+        new Thread(exportHandler, "Uploader").start();
+    }
 
-    new Thread(exportHandler, "Uploader").start();
-  }
-
-  // DAM: in Arduino, this is upload
     class DefaultExportHandler implements Runnable {
         public void run() {
             boolean success = sketch.upload();
@@ -1638,120 +1409,84 @@ public class Editor extends JFrame implements RunnerListener {
         }
     }
 
-  /**
-   * Handler for File &rarr; Page Setup.
-   */
-  public void handlePageSetup() {
-    //printerJob = null;
-    if (printerJob == null) {
-      printerJob = PrinterJob.getPrinterJob();
-    }
-    if (pageFormat == null) {
-      pageFormat = printerJob.defaultPage();
-    }
-    pageFormat = printerJob.pageDialog(pageFormat);
-  }
-
-
-  /**
-   * Handler for File &rarr; Print.
-   */
-  public void handlePrint() {
-    statusNotice(Translate.t("Printing..."));
-    //printerJob = null;
-    if (printerJob == null) {
-      printerJob = PrinterJob.getPrinterJob();
-    }
-    if (pageFormat != null) {
-      printerJob.setPrintable(getTextArea().textArea, pageFormat);
-    } else {
-      printerJob.setPrintable(getTextArea().textArea);
-    }
-    // set the name of the job to the code name
-    printerJob.setJobName(sketch.getCodeByEditor((SketchEditor)tabs.getSelectedComponent()).file.getName());
-
-    if (printerJob.printDialog()) {
-      try {
-        printerJob.print();
-        statusNotice(Translate.t("Done printing."));
-
-      } catch (PrinterException pe) {
-        statusError(Translate.t("Error while printing."));
-        pe.printStackTrace();
-      }
-    } else {
-      statusNotice(Translate.t("Printing canceled."));
-    }
-    //printerJob = null;  // clear this out?
-  }
-
-
-  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-
-  /**
-   * Show an error int the status bar.
-   */
-  public void statusError(String what) {
-    status.error(what);
-    //new Exception("deactivating RUN").printStackTrace();
-    //toolbar.deactivate(EditorToolbar.RUN);
-  }
-
-
-  /**
-   * Show an exception in the editor status bar.
-   */
-  public void statusError(Exception e) {
-    e.printStackTrace();
-
-    SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
-
-    if (e instanceof RunnerException) {
-      RunnerException re = (RunnerException) e;
-      if (re.hasCodeIndex()) {
-        tabs.setSelectedIndex(re.getCodeIndex());
-      }
-      if (re.hasCodeLine()) {
-        int line = re.getCodeLine();
-        // subtract one from the end so that the \n ain't included
-        if (line >= ed.getLineCount()) {
-          // The error is at the end of this current chunk of code,
-          // so the last line needs to be selected.
-          line = ed.getLineCount() - 1;
-          if (ed.getLineText(line).length() == 0) {
-            // The last line may be zero length, meaning nothing to select.
-            // If so, back up one more line.
-            line--;
-          }
+    public void handlePageSetup() {
+        if (printerJob == null) {
+            printerJob = PrinterJob.getPrinterJob();
         }
-        if (line < 0 || line >= ed.getLineCount()) {
+        if (pageFormat == null) {
+            pageFormat = printerJob.defaultPage();
+        }
+        pageFormat = printerJob.pageDialog(pageFormat);
+    }
 
-          message("Bad error line: " + line + "\n", 2);
+    public void handlePrint() {
+        statusNotice(Translate.t("Printing..."));
+        if (printerJob == null) {
+            printerJob = PrinterJob.getPrinterJob();
+        }
+        if (pageFormat != null) {
+            printerJob.setPrintable(getTextArea().textArea, pageFormat);
         } else {
-          ed.select(ed.getLineStartOffset(line),
-                          ed.getLineEndOffset(line) - 1);
+            printerJob.setPrintable(getTextArea().textArea);
         }
-      }
+        printerJob.setJobName(sketch.getCodeByEditor((SketchEditor)tabs.getSelectedComponent()).file.getName());
+
+        if (printerJob.printDialog()) {
+            try {
+                printerJob.print();
+                statusNotice(Translate.t("Done printing."));
+            } catch (PrinterException pe) {
+                statusError(Translate.t("Error while printing."));
+                pe.printStackTrace();
+            }
+        } else {
+            statusNotice(Translate.t("Printing canceled."));
+        }
     }
 
-    // Since this will catch all Exception types, spend some time figuring
-    // out which kind and try to give a better error message to the user.
-    String mess = e.getMessage();
-    if (mess != null) {
-      String javaLang = "java.lang.";
-      if (mess.indexOf(javaLang) == 0) {
-        mess = mess.substring(javaLang.length());
-      }
-      String rxString = "RuntimeException: ";
-      if (mess.indexOf(rxString) == 0) {
-        mess = mess.substring(rxString.length());
-      }
-      statusError(mess);
+    public void statusError(String what) {
+        status.error(what);
     }
-//    e.printStackTrace();
-  }
 
+    public void statusError(Exception e) {
+        e.printStackTrace();
+
+        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
+
+        if (e instanceof RunnerException) {
+            RunnerException re = (RunnerException) e;
+            if (re.hasCodeIndex()) {
+                tabs.setSelectedIndex(re.getCodeIndex());
+            }
+            if (re.hasCodeLine()) {
+                int line = re.getCodeLine();
+                if (line >= ed.getLineCount()) {
+                    line = ed.getLineCount() - 1;
+                    if (ed.getLineText(line).length() == 0) {
+                        line--;
+                    }
+                }
+                if (line < 0 || line >= ed.getLineCount()) {
+                    message("Bad error line: " + line + "\n", 2);
+                } else {
+                    ed.select(ed.getLineStartOffset(line), ed.getLineEndOffset(line) - 1);
+                }
+            }
+        }
+
+        String mess = e.getMessage();
+        if (mess != null) {
+            String javaLang = "java.lang.";
+            if (mess.indexOf(javaLang) == 0) {
+                mess = mess.substring(javaLang.length());
+            }
+            String rxString = "RuntimeException: ";
+            if (mess.indexOf(rxString) == 0) {
+                mess = mess.substring(rxString.length());
+            }
+            statusError(mess);
+        }
+    }
 
   /**
    * Show a notice message in the editor status bar.
@@ -2374,6 +2109,10 @@ public class Editor extends JFrame implements RunnerListener {
 
     public int getTabByFile(SketchFile f) {
         return tabs.indexOfComponent(f.textArea);
+    }
+
+    public void selectTab(int tab) {
+        tabs.setSelectedIndex(tab);
     }
 
     public void reportSize() {

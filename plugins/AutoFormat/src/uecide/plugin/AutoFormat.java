@@ -406,8 +406,8 @@ public class AutoFormat extends BasePlugin {
     // Adding an additional newline as a hack around other errors
     String originalText = editor.getText() + "\n";
     strOut = new StringBuffer();
-    indentValue = Base.preferences.getInteger("editor.tabs.size");
-    indentChar = new String(" ");
+    indentValue = 1;
+    indentChar = new String("\t");
 
     lineNumber = 0;
     c_level = if_lev = level = e_flg = paren = 0;
