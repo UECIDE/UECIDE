@@ -943,7 +943,6 @@ public class Sketch implements MessageConsumer {
         if (m.trim() != "") {
             if (chan == 2) {
                 if (stderrRedirect == null) {
-                    editor.console.message(m, true, false);
                     Pattern p = Pattern.compile(editor.compiler.getErrorRegex());
                     Matcher match = p.matcher(m);
                     if (match.find()) {
@@ -951,7 +950,7 @@ public class Sketch implements MessageConsumer {
                         if (filename.startsWith(getBuildFolder().getAbsolutePath())) {
                             filename = filename.substring(getBuildFolder().getAbsolutePath().length() + 1);
                         }
-                        editor.console.message("Error at line " + match.group(2) + " in file " + filename + " : " + match.group(3), true, false);
+                        editor.console.message("Error at line " + match.group(2) + " in file " + filename + ":\n    " + match.group(3) + "\n", true, false);
                         SketchFile f = getFileByName(filename);
                         if (f != null) {
                             int tn = editor.getTabByFile(f);
@@ -959,6 +958,8 @@ public class Sketch implements MessageConsumer {
                             f.textArea.setCaretLineNumber(Integer.parseInt(match.group(2)));
                             f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), new Color(255, 200, 200));
                         }
+                    } else {
+                        editor.console.message(m, true, false);
                     }
                 } else {
                     stderrRedirect.print(m);
