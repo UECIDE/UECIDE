@@ -1492,7 +1492,10 @@ public class Sketch implements MessageConsumer {
 
         String liblist = "";
         for (File libraryFolder : getImportedLibraries()) {
-            liblist += "::-l" + libraryFolder.getName();
+            File cppFile = new File(libraryFolder, libraryFolder.getName() + ".cpp");
+            if (cppFile.exists()) {
+                liblist += "::-l" + libraryFolder.getName();
+            }
         }
 
         liblist += coreLibs;
