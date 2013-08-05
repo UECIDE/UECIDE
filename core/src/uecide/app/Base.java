@@ -314,8 +314,10 @@ public class Base {
 
     public static void loadCompilers() {
         compilers.clear();
-        loadCompilersFromFolder(new File(getHardwareFolder(),"compilers"));
-        loadCompilersFromFolder(getUserCompilersFolder());
+        loadCompilersFromFolder(getSystemCompilersFolder());
+        if (getUserCompilersFolder() != getSystemCompilersFolder()) {
+            loadCompilersFromFolder(getUserCompilersFolder());
+        }
     }
 
     public static void loadCompilersFromFolder(File folder) {
@@ -348,9 +350,12 @@ public class Base {
 
     public static void loadCores() {
         cores.clear();
-        loadCoresFromFolder(new File(getHardwareFolder(),"cores"));
-        loadCoresFromFolder(getUserCoresFolder());
+        loadCoresFromFolder(getSystemCoresFolder());
+        if (getUserCoresFolder() != getSystemCoresFolder()) {
+            loadCoresFromFolder(getUserCoresFolder());
+        }
     }
+
     public static void loadCoresFromFolder(File folder) {
         if (!folder.isDirectory()) 
             return;
@@ -375,8 +380,10 @@ public class Base {
 
     public static void loadBoards() {
         boards.clear();
-        loadBoardsFromFolder(new File(getHardwareFolder(), "boards"));
-        loadBoardsFromFolder(getUserBoardsFolder());
+        loadBoardsFromFolder(getSystemBoardsFolder());
+        if (getUserBoardsFolder() != getSystemBoardsFolder()) {
+            loadBoardsFromFolder(getUserBoardsFolder());
+        }
     }
 
     public static void loadBoardsFromFolder(File folder) {
@@ -404,19 +411,9 @@ public class Base {
         }
     }
 
-
-    // Because of variations in native windowing systems, no guarantees about
-    // changes to the focused and active Windows can be made. Developers must
-    // never assume that this Window is the focused or active Window until this
-    // Window receives a WINDOW_GAINED_FOCUS or WINDOW_ACTIVATED event.
     protected static void handleActivated(Editor whichEditor) {
         activeEditor = whichEditor;
-
-        // set the current window to be the console that's getting output
     }
-
-    // .................................................................
-
 
     boolean breakTime = false;
     String[] months = {
@@ -1834,9 +1831,8 @@ public class Base {
     {
         plugins.clear();
 
-        File pf;
+        File pf = getSystemPluginsFolder();;
 
-        pf = getContentFile("plugins");
         if (pf != null) loadPluginsFromFolder(pf);
 
         String[] entries = (String[]) cores.keySet().toArray(new String[0]);
@@ -1848,7 +1844,9 @@ public class Base {
         }
 
         pf = getUserPluginsFolder();
-        if (pf != null) loadPluginsFromFolder(pf);
+        if (pf != getSystemPluginsFolder()) {
+            if (pf != null) loadPluginsFromFolder(pf);
+        }
     }
 
     public static void loadPluginsFromFolder(File f)
@@ -2059,6 +2057,13 @@ public class Base {
   }
 
     static public File getUserCacheFolder() {
+        File uf = preferences.getFile("location.cache");
+        if (uf != null) {
+            if (!uf.exists()) {
+                uf.mkdirs();
+            }
+            return uf;
+        }
         File f = getSettingsFile("cache");
         if (!f.exists()) {
             f.mkdirs();
@@ -2066,7 +2071,15 @@ public class Base {
         return f;
     }
 
+
     static public File getUserCoresFolder() {
+        File uf = preferences.getFile("location.cores");
+        if (uf != null) {
+            if (!uf.exists()) {
+                uf.mkdirs();
+            }
+            return uf;
+        }
         File f = getSettingsFile("cores");
         if (!f.exists()) {
             f.mkdirs();
@@ -2074,7 +2087,18 @@ public class Base {
         return f;
     }
 
+    static public File getSystemCoresFolder() {
+        return new File(getHardwareFolder(),"cores");
+    }
+
     static public File getUserBoardsFolder() {
+        File uf = preferences.getFile("location.boards");
+        if (uf != null) {
+            if (!uf.exists()) {
+                uf.mkdirs();
+            }
+            return uf;
+        }
         File f = getSettingsFile("boards");
         if (!f.exists()) {
             f.mkdirs();
@@ -2082,7 +2106,18 @@ public class Base {
         return f;
     }
 
+    static public File getSystemBoardsFolder() {
+        return new File(getHardwareFolder(),"boards");
+    }
+
     static public File getUserPluginsFolder() {
+        File uf = preferences.getFile("location.plugins");
+        if (uf != null) {
+            if (!uf.exists()) {
+                uf.mkdirs();
+            }
+            return uf;
+        }
         File f = getSettingsFile("plugins");
         if (!f.exists()) {
             f.mkdirs();
@@ -2090,7 +2125,18 @@ public class Base {
         return f;
     }
 
+    static public File getSystemPluginsFolder() {
+        return getContentFile("plugins");
+    }
+
     static public File getUserCompilersFolder() {
+        File uf = preferences.getFile("location.compilers");
+        if (uf != null) {
+            if (!uf.exists()) {
+                uf.mkdirs();
+            }
+            return uf;
+        }
         File f = getSettingsFile("compilers");
         if (!f.exists()) {
             f.mkdirs();
@@ -2098,4 +2144,7 @@ public class Base {
         return f;
     }
 
+    static public File getSystemCompilersFolder() {
+        return new File(getHardwareFolder(),"compilers");
+    }
 }
