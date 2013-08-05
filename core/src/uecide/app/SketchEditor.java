@@ -47,6 +47,7 @@ class SketchEditor extends JPanel {
         textArea.setCodeFoldingEnabled(true);
         textArea.setAntiAliasingEnabled(true);
         textArea.setMarkOccurrences(true);
+        textArea.setTabSize(4);
         Document d = textArea.getDocument();
         d.addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
@@ -321,4 +322,17 @@ class SketchEditor extends JPanel {
         return textArea.getCaretLineNumber();
     }
 
+    public void setCaretLineNumber(int lineNumber) {
+        setCaretPosition(getLineStartOffset(lineNumber-1));
+    }
+
+    public void addLineHighlight(int lineNumber, Color c) {
+        try {
+            textArea.addLineHighlight(lineNumber - 1, c);
+        } catch (Exception ignored) {}
+    }
+
+    public void removeAllLineHighlights() {
+        textArea.removeAllLineHighlights();
+    }
 }

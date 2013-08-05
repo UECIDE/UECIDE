@@ -327,65 +327,43 @@ public class Sketch implements MessageConsumer {
             f.prototypes = proc.prototypes(rawData).toArray(new String[0]);
             StringBuilder sb = new StringBuilder();
             f.headerLines = 0;
+            int firstStat = proc.firstStatement(rawData);
+
+            String header = rawData.substring(0, firstStat);
+            String body = rawData.substring(firstStat);
+
+            Matcher m = Pattern.compile("(\n)|(\r)|(\r\n)").matcher(header);
+            int headerLength = 1;
+            while (m.find())
+            {
+                headerLength++;
+            }
+
             String coreHeader = all.get("core.header");
             if (coreHeader != "") {
                 sb.append("#include <" + coreHeader + ">\n");
                 f.headerLines ++;
             }
+            sb.append("#line 1 \"" + f.file.getName() + "\"\n");
+            sb.append(header);
+            f.headerLines += headerLength;
 
-                    String[] data = rawData.split("\n");
+            if (Base.preferences.getBoolean("compiler.disable_prototypes") == false) {
+                for (String prototype : f.prototypes) {
+                    sb.append(prototype + "\n");
+                    f.headerLines++;
+                }
+            }
 
-                    sb.append("#line 1 \"" + f.file.getName() + "\"\n");
+            sb.append("\n");
+            f.headerLines ++;
 
-                    int codeOffset = 1;
-                    int lineno = 0;
-                    boolean inHead = true;
-                    while (inHead && lineno < data.length) {
-                        if (data[lineno].trim().startsWith("#")) {
-                            sb.append(data[lineno]);
-                            sb.append("\n");
-                            lineno++;
-                            codeOffset++;
-                            continue;
-                        }
-                        if (data[lineno].trim().startsWith("/")) {
-                            sb.append(data[lineno]);
-                            sb.append("\n");
-                            lineno++;
-                            codeOffset++;
-                            continue;
-                        }
-                        if (data[lineno].trim().length() == 0) {
-                            sb.append("\n");
-                            lineno++;
-                            codeOffset++;
-                            continue;
-                        }
-                        inHead = false;
-                    }
+            sb.append("#line " + headerLength + " \"" + f.file.getName() + "\"\n");
+            f.headerLines ++;
+            sb.append(body);
 
-                    if (Base.preferences.getBoolean("compiler.disable_prototypes") == false) {
-                        for (String prototype : f.prototypes) {
-                            sb.append(prototype + "\n");
-                            f.headerLines++;
-                        }
-                    }
-
-                    sb.append("\n");
-                    f.headerLines ++;
-
-                    sb.append("#line " + codeOffset + " \"" + f.file.getName() + "\"\n");
-                    f.headerLines ++;
-
-                    while (lineno < data.length) {
-                        sb.append(data[lineno]);
-                        sb.append("\n");
-                        lineno++;
-                    }
-
-
-                String ext = all.get("build.extension"); 
-                if (ext == null) ext = "cpp";
+            String ext = all.get("build.extension"); 
+            if (ext == null) ext = "cpp";
             String newFileName = name + "." + ext;
 
             try {
@@ -966,6 +944,22 @@ public class Sketch implements MessageConsumer {
             if (chan == 2) {
                 if (stderrRedirect == null) {
                     editor.console.message(m, true, false);
+                    Pattern p = Pattern.compile(editor.compiler.getErrorRegex());
+                    Matcher match = p.matcher(m);
+                    if (match.find()) {
+                        String filename = match.group(1);
+                        if (filename.startsWith(getBuildFolder().getAbsolutePath())) {
+                            filename = filename.substring(getBuildFolder().getAbsolutePath().length() + 1);
+                        }
+                        editor.console.message("Error at line " + match.group(2) + " in file " + filename + " : " + match.group(3), true, false);
+                        SketchFile f = getFileByName(filename);
+                        if (f != null) {
+                            int tn = editor.getTabByFile(f);
+                            editor.selectTab(tn);
+                            f.textArea.setCaretLineNumber(Integer.parseInt(match.group(2)));
+                            f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), new Color(255, 200, 200));
+                        }
+                    }
                 } else {
                     stderrRedirect.print(m);
                 }
@@ -983,6 +977,10 @@ public class Sketch implements MessageConsumer {
         ArrayList<String> includePaths;
         List<File> objectFiles = new ArrayList<File>();
         List<File> tobjs;
+
+        for (SketchFile f : sketchFiles) {
+            f.textArea.removeAllLineHighlights();
+        }
 
         includePaths = getIncludePaths();
 

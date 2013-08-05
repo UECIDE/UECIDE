@@ -44,5 +44,13 @@ public class Compiler {
     public File getFolder() {
         return folder;
     }
+
+    public String getErrorRegex() {
+        String r = properties.get("compiler.error");
+        if (r == null) {
+            r = "^([^:]+):(\\d+): error: (.*)";
+        }
+        return r;
+    }
 }
 
