@@ -1793,12 +1793,17 @@ public class Editor extends JFrame implements RunnerListener {
             core = Base.cores.get(pc);
         } else {
             core = null;
-            String entries[] = Base.cores.keySet().toArray(new String[0]);
-            for (String entry : entries) {
-                if (Base.cores.get(entry).getFamily().equals(board.getFamily())) {
-                    core = Base.cores.get(entry);
-                    Base.preferences.set("core." + board.getName(), entry);
-                    break;
+            String defaultCore = board.get("core");
+            if (defaultCore != null) {
+                core = Base.cores.get(defaultCore);
+            } else {
+                String entries[] = Base.cores.keySet().toArray(new String[0]);
+                for (String entry : entries) {
+                    if (Base.cores.get(entry).getFamily().equals(board.getFamily())) {
+                        core = Base.cores.get(entry);
+                        Base.preferences.set("core." + board.getName(), entry);
+                        break;
+                    }
                 }
             }
         }
