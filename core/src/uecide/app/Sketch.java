@@ -1129,7 +1129,10 @@ public class Sketch implements MessageConsumer {
                     found = new File(editor.core.getAPIFolder(), f);
                 }
                 if (!found.exists()) {
-                    mid = "NOTFOUND";
+                    found = new File(editor.compiler.getFolder(), f);
+                }
+                if (!found.exists()) {
+                    mid = f;
                 } else {
                     mid = found.getAbsolutePath();
                 }
@@ -1139,10 +1142,11 @@ public class Sketch implements MessageConsumer {
                 else 
                     mid = tokens.get("upload.quiet");
             } else if (mid.equals("port")) {
-                if (Base.isWindows()) 
+                if (Base.isWindows()) {
                     mid = "\\\\.\\" + editor.getSerialPort();
-                else 
+                } else {
                     mid = editor.getSerialPort();
+                }
             } else {
                 mid = tokens.get(mid);
             }
@@ -1162,7 +1166,7 @@ public class Sketch implements MessageConsumer {
         }
 
         // This shouldn't be needed as the methodology should always find any tokens put in
-        // by other token replaceements.  But just in case, eh?
+        // by other token replacements.  But just in case, eh?
         if (out != in) {
             out = parseString(out);
         }

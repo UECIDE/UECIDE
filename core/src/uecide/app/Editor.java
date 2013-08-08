@@ -1542,47 +1542,53 @@ public class Editor extends JFrame implements RunnerListener {
         sketch.importToLibraryTable = new HashMap<String, File>();
 
         HashMap<String, File> globalLibraries = Base.getLibraryCollection("global");
-        if (globalLibraries.size() > 0) {
-            JMenu globalMenu = new JMenu(Translate.t("Standard"));
-            String[] entries = (String[]) globalLibraries.keySet().toArray(new String[0]);
-            for (String entry : entries) {
-                item = new JMenuItem(entry);
-                item.addActionListener(listener);
-                item.setActionCommand(entry);
-                globalMenu.add(item);
-            }
-            importMenu.add(globalMenu);
-            sketch.importToLibraryTable.putAll(globalLibraries);
-        }
-
-        if (core != null) {
-            HashMap<String, File> coreLibraries = Base.getLibraryCollection(core.getName());
-            if (coreLibraries.size() > 0) {
-                JMenu coreMenu = new JMenu(core.getName());
-                String[] entries = (String[]) coreLibraries.keySet().toArray(new String[0]);
+        if (globalLibraries != null) {
+            if (globalLibraries.size() > 0) {
+                JMenu globalMenu = new JMenu(Translate.t("Standard"));
+                String[] entries = (String[]) globalLibraries.keySet().toArray(new String[0]);
                 for (String entry : entries) {
                     item = new JMenuItem(entry);
                     item.addActionListener(listener);
                     item.setActionCommand(entry);
-                    coreMenu.add(item);
+                    globalMenu.add(item);
                 }
-                importMenu.add(coreMenu);
-                sketch.importToLibraryTable.putAll(coreLibraries);
+                importMenu.add(globalMenu);
+                sketch.importToLibraryTable.putAll(globalLibraries);
+            }
+        }
+
+        if (core != null) {
+            HashMap<String, File> coreLibraries = Base.getLibraryCollection(core.getName());
+            if (coreLibraries != null) {
+                if (coreLibraries.size() > 0) {
+                    JMenu coreMenu = new JMenu(core.getName());
+                    String[] entries = (String[]) coreLibraries.keySet().toArray(new String[0]);
+                    for (String entry : entries) {
+                        item = new JMenuItem(entry);
+                        item.addActionListener(listener);
+                        item.setActionCommand(entry);
+                        coreMenu.add(item);
+                    }
+                    importMenu.add(coreMenu);
+                    sketch.importToLibraryTable.putAll(coreLibraries);
+                }
             }
         }
 
         HashMap<String, File> contributedLibraries = Base.getLibraryCollection("sketchbook");
-        if (contributedLibraries.size() > 0) {
-            JMenu contributedMenu = new JMenu(Translate.t("Contributed"));
-            String[] entries = (String[]) contributedLibraries.keySet().toArray(new String[0]);
-            for (String entry : entries) {
-                item = new JMenuItem(entry);
-                item.addActionListener(listener);
-                item.setActionCommand(entry);
-                contributedMenu.add(item);
+        if (contributedLibraries != null) {
+            if (contributedLibraries.size() > 0) {
+                JMenu contributedMenu = new JMenu(Translate.t("Contributed"));
+                String[] entries = (String[]) contributedLibraries.keySet().toArray(new String[0]);
+                for (String entry : entries) {
+                    item = new JMenuItem(entry);
+                    item.addActionListener(listener);
+                    item.setActionCommand(entry);
+                    contributedMenu.add(item);
+                }
+                importMenu.add(contributedMenu);
+                sketch.importToLibraryTable.putAll(contributedLibraries);
             }
-            importMenu.add(contributedMenu);
-            sketch.importToLibraryTable.putAll(contributedLibraries);
         }
     }
 

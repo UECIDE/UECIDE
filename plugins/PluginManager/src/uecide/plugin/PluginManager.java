@@ -898,16 +898,25 @@ public class PluginManager extends BasePlugin
             }
 
             if (type == CORE) {
+                if (isOutdated() || isInstalled()) {
+                    uninstall();
+                }
                 installer = new ZipExtractor(dest, Base.getUserCoresFolder(), this);
                 installer.execute();
             }
 
             if (type == BOARD) {
+                if (isOutdated() || isInstalled()) {
+                    uninstall();
+                }
                 installer = new ZipExtractor(dest, Base.getUserBoardsFolder(), this);
                 installer.execute();
             }
 
             if (type == COMPILER) {
+                if (isOutdated() || isInstalled()) {
+                    uninstall();
+                }
                 installer = new ZipExtractor(dest, Base.getUserCompilersFolder(), this);
                 installer.execute();
             }
