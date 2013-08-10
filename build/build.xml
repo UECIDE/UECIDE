@@ -88,7 +88,7 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="install_compiler">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/compilers/${compiler.name}-${target.platform}.jar" />
+            <param name="src" value="http://www.uecide.org/p/compilers/${compiler.name}-${target.platform}.jar" />
             <param name="dest" value="tmp/${compiler.name}-${target.platform}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/compilers" src="tmp/${compiler.name}-${target.platform}.jar" overwrite="false" />
@@ -99,7 +99,7 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="install_core">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/cores/${core.name}.jar" />
+            <param name="src" value="http://www.uecide.org/p/cores/${core.name}.jar" />
             <param name="dest" value="tmp/${core.name}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/cores" src="tmp/${core.name}.jar" overwrite="false" />
@@ -114,12 +114,12 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="install_boards">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/boards/${boards.name}.jar" />
+            <param name="src" value="http://www.uecide.org/p/boards/${boards.name}.jar" />
             <param name="dest" value="tmp/${boards.name}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/boards/" src="tmp/${boards.name}.jar" overwrite="false" />
         <chmod perm="+x">
-            <fileset dir="${target.path}/hardware/boards/${boards.name}" includes="**/*" />
+            <fileset dir="${target.path}/hardware/boards/" includes="**/*" />
         </chmod>
     </target>
         
@@ -149,11 +149,6 @@ Building for ${brand} version ${version}${suffix}
             <param name="target.platform" value="${target.platform}"/>
         </foreach>
 
-        <!-- copy shared examples folder -->
-        <copy todir="${target.path}/examples">
-            <fileset dir="shared/examples" />
-        </copy>
-    
         <copy todir="${target.path}/lib/theme/">
             <fileset dir="themes/${theme}/ide/" includes="**/*"/>
         </copy>
@@ -430,6 +425,11 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="linux-generate-debian"/>
     </target>
 
+    <target name="linuxPi-deb" depends="linux-build" description="Build .deb of linux version">
+        <property name="arch" value="armhf"/>
+        <antcall target="linux-generate-debian"/>
+    </target>
+
     <target name="upgrade-clean" depends="subprojects-clean">
         <delete dir="upgrade/work"/>
     </target>
@@ -566,10 +566,16 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="clean" />
         <antcall target="upgrade-dist" />
         <copy todir="/var/www/uecide/downloads" file="upgrade/${product}-${version}${suffix}-upgrade.zip" overwrite="true" />
-        <copy todir="/var/www/uecide/plugins" flatten="true">
+        <copy todir="/var/www/uecide/p/plugins" flatten="true">
             <fileset dir="../plugins" includes="*/*.jar" />
         </copy>
         <delete file="upgrade/${product}-${version}${suffix}-upgrade.zip" />
+    </target>
+
+    <target name="tt">
+        <antcall target="publish-all">
+            <param name="file" value="linux/${product}-${version}${suffix}-armhf.deb" />
+        </antcall>
     </target>
 
     <target name="linux-auto">
@@ -588,7 +594,13 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="publish-all">
             <param name="file" value="linux/${product}-${version}${suffix}-amd64.deb" />
         </antcall>
-        <delete file="linux/${product}-${version}${suffix}-i386.deb" />
+        <delete file="linux/${product}-${version}${suffix}-amd64.deb" />
+        <antcall target="linuxPi-deb" />
+        <copy todir="/var/www/uecide/downloads" file="linux/${product}-${version}${suffix}-armhf.deb" overwrite="true" />
+        <antcall target="publish-all">
+            <param name="file" value="linux/${product}-${version}${suffix}-armhf.deb" />
+        </antcall>
+        <delete file="linux/${product}-${version}${suffix}-armhf.deb" />
     </target>
 
     <target name="macosx-auto">

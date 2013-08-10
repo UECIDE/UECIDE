@@ -1,4 +1,4 @@
-version=0.7.2g
+version=0.7.3a
 download.enable=yes
 
 default.theme=uecide
@@ -11,7 +11,7 @@ default.publish=yes
 
 prfm.theme=uecide
 prfm.cores=chipKIT
-prfm.boards=Majenko
+prfm.boards=Majenko_Technologies-prfmv2,Majenko_Technologies-prfmv2usb
 prfm.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,ConvertWaveFile,PluginManager
 prfm.suffix=-prfm
 prfm.compilers=pic32-gcc
