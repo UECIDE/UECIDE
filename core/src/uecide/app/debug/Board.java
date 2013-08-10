@@ -101,13 +101,20 @@ public class Board implements Comparable {
     }
 
     public int compareTo(Object o) {
+        if (o == null) {
+            return 0;
+        }
         if (o instanceof Board) {
             Board b = (Board)o;
             String foreignName = b.getLongName();
-            return longname.compareTo(foreignName);
+            if (longname != null && foreignName != null) {
+                return longname.compareTo(foreignName);
+            }
         }
         if (o instanceof String) {
-            return name.compareTo((String)o);
+            if (name != null) {
+                return name.compareTo((String)o);
+            }
         }
         return 0;
     }

@@ -134,3 +134,4 @@ links.homepage.url=http://uecide.org
 links.forums.name=Visit forums
 links.forums.url=http://uecide.org/forum
 
+plugins.url=http://uecide.org/plugins.php

@@ -24,6 +24,7 @@ public class PluginManager extends BasePlugin
     JButton refreshButton;
     JScrollPane scroll;
     JPanel body;
+    JButton upgradeAllButton;
 
     public static HashMap<String, JSONObject> availablePlugins = new HashMap<String, JSONObject>();
     public static HashMap<String, JSONObject> availableCores = new HashMap<String, JSONObject>();
@@ -60,6 +61,14 @@ public class PluginManager extends BasePlugin
         populate();
 
         Box line = Box.createHorizontalBox();
+        upgradeAllButton = new JButton(Translate.t("Upgrade All"));
+        upgradeAllButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                upgradeAll();
+            }
+        });
+        line.add(upgradeAllButton);
+
         refreshButton = new JButton(Translate.t("Refresh"));
         refreshButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -67,6 +76,8 @@ public class PluginManager extends BasePlugin
             }
         });
         line.add(refreshButton);
+
+
         box.add(line);
         
 
@@ -435,7 +446,7 @@ public class PluginManager extends BasePlugin
     public void updatePlugins() {
         String data = null;
         try {
-            URL page = new URL("http://uecide.org/version2.php?platform=" + Base.getOSName() + "&arch=" + Base.getOSArch());
+            URL page = new URL(Base.theme.get("plugins.url") + "?platform=" + Base.getOSName() + "&arch=" + Base.getOSArch());
             BufferedReader in = new BufferedReader(new InputStreamReader(page.openStream()));
             data = in.readLine();
             in.close();
@@ -488,6 +499,33 @@ public class PluginManager extends BasePlugin
 
     public int flags() {
         return BasePlugin.MENU_PLUGIN_TOP;
+    }
+
+    public void upgradeAll() {
+        for (PluginEntry pe : pluginObjects.values()) {
+            if (pe.isOutdated()) {
+                pe.startDownload();
+            }
+        }
+
+        for (PluginEntry pe : boardObjects.values()) {
+            if (pe.isOutdated()) {
+                pe.startDownload();
+            }
+        }
+
+        for (PluginEntry pe : coreObjects.values()) {
+            if (pe.isOutdated()) {
+                pe.startDownload();
+            }
+        }
+
+        for (PluginEntry pe : compilerObjects.values()) {
+            if (pe.isOutdated()) {
+                pe.startDownload();
+            }
+        }
+
     }
 
 
