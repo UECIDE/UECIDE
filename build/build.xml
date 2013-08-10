@@ -494,12 +494,24 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
             dir="windows/work" spawn="true"/>
     </target>
 
+    <target name="windows-installer">
+        <copy todir="windows" file="windows/dist/script.nsi" />
+        <replace file="windows/script.nsi" token="%VERSION%" value="${version}-${itype}" />
+        <exec executable="makensis">
+            <arg value="windows/script.nsi"/>
+        </exec>
+        <delete file="windows/script.nsi" />
+    </target>
+
     <target name="windows-dist-lite" depends="windows-build" 
         description="Create .zip files of windows version">
 
         <zip destfile="windows/${product}-${version}${suffix}-windows-lite.zip">
             <zipfileset dir="windows/work" prefix="${product}-${version}${suffix}" filemode="755" />
         </zip>
+        <antcall target="windows-installer">
+            <param name="itype" value="lite" />
+        </antcall>
     </target>
   
     <target name="windows-dist" depends="windows-build" 
@@ -510,6 +522,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <zip destfile="windows/${product}-${version}${suffix}-windows.zip">
             <zipfileset dir="windows/work" prefix="${product}-${version}${suffix}" filemode="755" />
         </zip>
+        <antcall target="windows-installer">
+            <param name="itype" value="full" />
+        </antcall>
     </target>
   
     <target name="clean" description="Perform a spring cleaning" 
@@ -615,6 +630,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="clean" />
         <antcall target="windows-dist" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows.zip" overwrite="true" />
+        <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-full.exe" overwrite="true" />
         <delete file="windows/${product}-${version}${suffix}-windows.zip" />
     </target>
 
@@ -622,11 +638,12 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="clean" />
         <antcall target="windows-dist-lite" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows-lite.zip" overwrite="true" />
+        <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-lite.exe" overwrite="true" />
         <delete file="windows/${product}-${version}${suffix}-windows-lite.zip" />
     </target>
 
     <target name="auto">
-        <antcall target="upgrade-auto" />
+        <!--antcall target="upgrade-auto" /-->
         <antcall target="linux-auto" />
         <antcall target="macosx-auto" />
         <antcall target="windows-auto" />
