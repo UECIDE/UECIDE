@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.zip.*;
+import java.util.regex.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -65,6 +66,7 @@ public class Editor extends JFrame implements RunnerListener {
     JMenu boardsMenu;
     JMenu coresMenu;
     JMenu serialMenu;
+    JMenu programmersMenu;
 
     static SerialMenuListener serialMenuListener;
   
@@ -99,6 +101,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     JTabbedPane tabs;
 
+    public String programmer = null;
     public Board board = null;
     public Core core = null;
     public uecide.app.debug.Compiler compiler = null;
@@ -687,7 +690,7 @@ public class Editor extends JFrame implements RunnerListener {
       serialMenu = new JMenu(Translate.t("Serial Port"));
     populateSerialMenu();
     menu.add(serialMenu);
-    
+
     menu.addMenuListener(new MenuListener() {
       public void menuCanceled(MenuEvent e) {}
       public void menuDeselected(MenuEvent e) {}
@@ -695,6 +698,12 @@ public class Editor extends JFrame implements RunnerListener {
         populateSerialMenu();
       }
     });
+
+    if (programmersMenu == null) {
+        programmersMenu = new JMenu(Translate.t("Programmers"));
+        rebuildProgrammersMenu();
+    }
+    menu.add(programmersMenu);
     return menu;
   }
 
@@ -1701,6 +1710,45 @@ public class Editor extends JFrame implements RunnerListener {
         return ifound;  // actually ignored, but..
     }
 
+    public void rebuildProgrammersMenu() {
+        programmersMenu.removeAll();
+        if (sketch == null) {
+            return;
+        }
+
+        HashMap<String, String> all = sketch.mergeAllProperties();
+
+        String plist = all.get("sketch.upload");
+
+        if (plist == null) {
+            return;
+        }
+
+        String[] parr = plist.split("::");
+
+        ButtonGroup group = new ButtonGroup();
+
+        for (String progEntry : parr) {
+
+            if (!isValidProgrammer(progEntry)) {
+                continue;
+            }
+
+            String name = all.get("upload." + progEntry + ".name");
+            AbstractAction action = new AbstractAction(name) {
+                public void actionPerformed(ActionEvent actionevent) {
+                    selectProgrammer((String) getValue("programmer"));
+                }
+            };
+            action.putValue("programmer", progEntry);
+            JMenuItem item = new JRadioButtonMenuItem(action);
+            if (progEntry.equals(programmer)) {
+                item.setSelected(true);
+            }
+            programmersMenu.add(item);
+        }
+    }
+
     public void rebuildBoardsMenu() {
 
         boardsMenu.removeAll();
@@ -1744,6 +1792,15 @@ public class Editor extends JFrame implements RunnerListener {
             }
         }
     }
+
+    public void selectProgrammer(String p) {
+        programmer = p;
+        System.err.println("selectProgrammer(" + p + ")");
+        if (board != null) {
+            Base.preferences.set("sketch.upload." + board.getName(), p);
+        }
+        updateLineStatus();
+    }
     
     public void selectBoard(String b) {
         if (b == null) {
@@ -1765,6 +1822,7 @@ public class Editor extends JFrame implements RunnerListener {
         String boardName;
         String coreName;
         String portName;
+        String programmerName;
 
         if (board != null) {
             boardName = board.getLongName();
@@ -1778,9 +1836,15 @@ public class Editor extends JFrame implements RunnerListener {
             coreName = "no core";
         }
 
+        if (programmer != null) {
+            programmerName = programmer;
+        } else {
+            programmerName = "no programmer";
+        }
+
         portName = serialPort;
 
-        lineStatus.setText(boardName + " (" + coreName + ") on " + portName);
+        lineStatus.setText(boardName + " (" + coreName + ") on " + portName + " using " + programmerName);
     }
 
     public void selectBoard(Board b) {
@@ -1820,11 +1884,32 @@ public class Editor extends JFrame implements RunnerListener {
             compiler = null;
         }
         sketch.settings.put("board.root", board.getFolder().getAbsolutePath());
-        updateLineStatus();
         Base.preferences.set("board", b.getName());
         rebuildBoardsMenu();
         rebuildCoresMenu();
         populateMenus();
+
+
+        programmer = Base.preferences.get("sketch.upload." + board.getName());
+
+        if (programmer == null) {
+            HashMap<String, String> all = sketch.mergeAllProperties();
+            String pstr = all.get("sketch.upload");
+            if (pstr != null) { 
+                String[] parr = pstr.split("::");
+                programmer = parr[0];
+            }
+        }
+
+        if (programmer != null) {
+            if (!isValidProgrammer(programmer)) {
+                programmer = null;
+            }
+        }
+
+        System.err.println("selectBoard() programmer: " + programmer);
+
+        rebuildProgrammersMenu();
 
         for (int i = 0; i < tabs.getTabCount(); i++) {
             SketchEditor se = (SketchEditor)tabs.getComponentAt(i);
@@ -1834,6 +1919,26 @@ public class Editor extends JFrame implements RunnerListener {
                 createExtraTokens((SketchEditor)tabs.getComponentAt(i));
             }
         }
+        updateLineStatus();
+    }
+
+    public boolean isValidProgrammer(String progEntry) {
+        HashMap<String, String> all = sketch.mergeAllProperties();
+        String name = all.get("upload." + progEntry + ".name");
+        String osCommand = all.get("upload." + progEntry + ".command." + Base.getOSName());
+        String osArchCommand = all.get("upload." + progEntry + ".command." + Base.getOSFullName());
+        String genericCommand = all.get("upload." + progEntry + ".command");
+        String javaCommand = all.get("upload." + progEntry + ".command.java");
+
+        if (name == null) {
+            return false;
+        }
+
+        if (osCommand == null && osArchCommand == null && genericCommand == null && javaCommand == null) {
+            return false;
+        }
+
+        return true;
     }
 
     public void rebuildCoresMenu()
@@ -1875,6 +1980,7 @@ public class Editor extends JFrame implements RunnerListener {
         updateLineStatus();
 //        rebuildBoardsMenu();
 //        rebuildCoresMenu();
+        rebuildProgrammersMenu();
         populateMenus();
     }
 

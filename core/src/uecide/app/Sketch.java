@@ -439,28 +439,28 @@ public class Sketch implements MessageConsumer {
         settings.put("filename.eep", name + ".eep");
 
         boolean isJava = true;
-        uploadCommand = editor.board.get("upload.command.java");
+        uploadCommand = editor.board.get("upload." + editor.programmer + ".command.java");
         if (uploadCommand == null) {
-            uploadCommand = editor.core.get("upload.command.java");
+            uploadCommand = editor.core.get("upload." + editor.programmer + ".command.java");
         }
         if (uploadCommand == null) {
             isJava = false;
-            uploadCommand = editor.board.get("upload.command." + Base.getOSFullName());
+            uploadCommand = editor.board.get("upload." + editor.programmer + ".command." + Base.getOSFullName());
         }
         if (uploadCommand == null) {
-            uploadCommand = editor.board.get("upload.command." + Base.getOSName());
+            uploadCommand = editor.board.get("upload." + editor.programmer + ".command." + Base.getOSName());
         }
         if (uploadCommand == null) {
-            uploadCommand = editor.board.get("upload.command");
+            uploadCommand = editor.board.get("upload." + editor.programmer + ".command");
         }
         if (uploadCommand == null) {
-            uploadCommand = editor.core.get("upload.command." + Base.getOSFullName());
+            uploadCommand = editor.core.get("upload." + editor.programmer + ".command." + Base.getOSFullName());
         }
         if (uploadCommand == null) {
-            uploadCommand = editor.core.get("upload.command." + Base.getOSName());
+            uploadCommand = editor.core.get("upload." + editor.programmer + ".command." + Base.getOSName());
         }
         if (uploadCommand == null) {
-            uploadCommand = editor.core.get("upload.command");
+            uploadCommand = editor.core.get("upload." + editor.programmer + ".command");
         }
 
         if (uploadCommand == null) {
@@ -468,6 +468,8 @@ public class Sketch implements MessageConsumer {
             editor.statusNotice(Translate.t("Upload Failed"));
             return false;
         }
+
+        System.err.println("Using command " + uploadCommand);
  
    
         if (isJava) {
@@ -538,18 +540,27 @@ public class Sketch implements MessageConsumer {
 
         boolean dtr = false;
         boolean rts = false;
-        if (all.get("upload.dtr").equals("yes")) {
-            dtr = true;
-        }
-        if (all.get("upload.rts").equals("yes")) {
-            rts = true;
-        }
 
-        String ulu = all.get("upload.using");
+
+        String ulu = all.get("upload." + editor.programmer + ".using");
         if (ulu == null) ulu = "serial";
+
+        String doDtr = all.get("upload." + editor.programmer + ".dtr");
+        if (doDtr != null) {
+            if (doDtr.equals("yes")) {
+                dtr = true;
+            }
+        }
+        String doRts = all.get("upload." + editor.programmer + ".rts");
+        if (doRts != null) {
+            if (doRts.equals("yes")) {
+                rts = true;
+            }
+        }
 
         if (ulu.equals("serial"))
         {
+            System.err.println("Asserting serial port");
             editor.grabSerialPort();
             if (dtr || rts) {
                 assertDTRRTS(dtr, rts);
@@ -557,7 +568,7 @@ public class Sketch implements MessageConsumer {
         }
         if (ulu.equals("usbcdc")) {
             try {
-                String baud = all.get("upload.reset.baud");
+                String baud = all.get("upload." + editor.programmer + ".reset.baud");
                 if (baud != null) {
                     int b = Integer.parseInt(baud);
                     editor.grabSerialPort();
@@ -1138,9 +1149,9 @@ public class Sketch implements MessageConsumer {
                 }
             } else if (mid.equals("verbose")) {
                 if (Base.preferences.getBoolean("export.verbose")) 
-                    mid = tokens.get("upload.verbose");
+                    mid = tokens.get("upload." + editor.programmer + ".verbose");
                 else 
-                    mid = tokens.get("upload.quiet");
+                    mid = tokens.get("upload." + editor.programmer + ".quiet");
             } else if (mid.equals("port")) {
                 if (Base.isWindows()) {
                     mid = "\\\\.\\" + editor.getSerialPort();
@@ -1263,6 +1274,7 @@ public class Sketch implements MessageConsumer {
             String[] bfl = boardFiles.split("::");
             for (String bf : bfl) {
                 File f = new File(editor.board.getFolder(), bf);
+                System.err.println("Board file " + f.getAbsolutePath());
                 if (f.exists()) {
                     if (!f.isDirectory()) {
                         if (f.getName().endsWith(".S") || f.getName().endsWith(".c") || f.getName().endsWith(".cpp")) {
@@ -1275,6 +1287,7 @@ public class Sketch implements MessageConsumer {
 
         for (File f : fileList) {
             if (f.lastModified() > archiveDate) {
+                System.err.println("Compile " + f.getAbsolutePath());
                 File out = compileFile(f);
                 if (out == null) {
                     return false;
@@ -1477,7 +1490,8 @@ public class Sketch implements MessageConsumer {
         String liblist = "";
         for (File libraryFolder : getImportedLibraries()) {
             File cppFile = new File(libraryFolder, libraryFolder.getName() + ".cpp");
-            if (cppFile.exists()) {
+            File cFile = new File(libraryFolder, libraryFolder.getName() + ".c");
+            if (cppFile.exists() || cFile.exists()) {
                 liblist += "::-l" + libraryFolder.getName();
             }
         }
