@@ -632,6 +632,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows.zip" overwrite="true" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-full.exe" overwrite="true" />
         <delete file="windows/${product}-${version}${suffix}-windows.zip" />
+        <delete file="windows/${product}-${version}${suffix}-full.exe" />
     </target>
 
     <target name="windows-lite-auto">
@@ -640,6 +641,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-windows-lite.zip" overwrite="true" />
         <copy todir="/var/www/uecide/downloads" file="windows/${product}-${version}${suffix}-lite.exe" overwrite="true" />
         <delete file="windows/${product}-${version}${suffix}-windows-lite.zip" />
+        <delete file="windows/${product}-${version}${suffix}-lite.exe" />
     </target>
 
     <target name="auto">
