@@ -112,10 +112,12 @@ public class PluginManager extends BasePlugin
     public void populate() {
         body.removeAll();
 
-        DefaultMutableTreeNode top = new DefaultMutableTreeNode(Translate.t("Root"));
+        DefaultMutableTreeNode top = new DefaultMutableTreeNode(Translate.t("Updating..."));
         final JTree root = new JTree(top);
         root.setVisibleRowCount(15);
         scroll = new JScrollPane(root);
+        root.setShowsRootHandles(true);
+        root.setToggleClickCount(1);
 
         final JPanel infoPanel = new JPanel(new BorderLayout());
 
@@ -348,12 +350,25 @@ public class PluginManager extends BasePlugin
                     name.setIcon(available);
                 }
 
-                name.setOpaque(false);
+                if (Base.isWindows()) {
+                    if (selected) {
+                        name.setOpaque(true);
+                        name.setBackground(new Color(100,100,200));
+                        name.setForeground(new Color(255,255,255));
+                    } else {
+                        name.setOpaque(true);
+                        name.setBackground(new Color(255,255,255));
+                        name.setForeground(new Color(0,0,0)); 
+                    }
+                } else {
+                    name.setOpaque(false);
+                }
                 
                 return name;
             } else if (o instanceof String) {
                 name.setText((String)o);
                 name.setOpaque(false);
+                name.setForeground(new Color(0,0,0)); 
                 name.setIcon(null);
                 return name;
             }
@@ -444,38 +459,46 @@ public class PluginManager extends BasePlugin
     }
 
     public void updatePlugins() {
-        String data = null;
-        try {
-            URL page = new URL(Base.theme.get("plugins.url") + "?platform=" + Base.getOSName() + "&arch=" + Base.getOSArch());
-            BufferedReader in = new BufferedReader(new InputStreamReader(page.openStream()));
-            data = in.readLine();
-            in.close();
-        } catch (UnknownHostException e) {
-            Base.showWarning(Translate.t("Update Failed"), Translate.w("The update failed because I could not find the host %1", 40, "\n", e.getMessage()), e);
-            return;
-        } catch (Exception e) {
-            Base.showWarning(Translate.t("Update Failed"), Translate.w("An unknown error occurred: %1", 40, "\n", e.toString()), e);
-            return;
-        }
+        body.removeAll();
+        SwingWorker sw = new SwingWorker<Void, Void>() {
+            @Override
+            public Void doInBackground() {
+                String data = null;
+                try {
+                    URL page = new URL(Base.theme.get("plugins.url") + "?platform=" + Base.getOSName() + "&arch=" + Base.getOSArch());
+                    BufferedReader in = new BufferedReader(new InputStreamReader(page.openStream()));
+                    data = in.readLine();
+                    in.close();
+                } catch (UnknownHostException e) {
+                    Base.showWarning(Translate.t("Update Failed"), Translate.w("The update failed because I could not find the host %1", 40, "\n", e.getMessage()), e);
+                    return null;
+                } catch (Exception e) {
+                    Base.showWarning(Translate.t("Update Failed"), Translate.w("An unknown error occurred: %1", 40, "\n", e.toString()), e);
+                    return null;
+                }
 
-        JSONObject ob = (JSONObject)JSONValue.parse(data);
-        try {
-            JSONObject plugins = (JSONObject)ob.get("plugins");
-            PluginManager.availablePlugins.putAll(plugins);
-        } catch (Exception ignored) {}
-        try {
-            JSONObject cores = (JSONObject)ob.get("cores");
-            PluginManager.availableCores.putAll(cores);
-        } catch (Exception ignored) {}
-        try {
-            JSONObject boards = (JSONObject)ob.get("boards");
-            PluginManager.availableBoards.putAll(boards);
-        } catch (Exception ignored) {}
-        try {
-            JSONObject compilers = (JSONObject)ob.get("compilers");
-            PluginManager.availableCompilers.putAll(compilers);
-        } catch (Exception ignored) {}
-        populate();
+                JSONObject ob = (JSONObject)JSONValue.parse(data);
+                try {
+                    JSONObject plugins = (JSONObject)ob.get("plugins");
+                    PluginManager.availablePlugins.putAll(plugins);
+                } catch (Exception ignored) {}
+                try {
+                    JSONObject cores = (JSONObject)ob.get("cores");
+                    PluginManager.availableCores.putAll(cores);
+                } catch (Exception ignored) {}
+                try {
+                    JSONObject boards = (JSONObject)ob.get("boards");
+                    PluginManager.availableBoards.putAll(boards);
+                } catch (Exception ignored) {}
+                try {
+                    JSONObject compilers = (JSONObject)ob.get("compilers");
+                    PluginManager.availableCompilers.putAll(compilers);
+                } catch (Exception ignored) {}
+                populate();
+                return null;
+            }
+        };
+        sw.execute();
     }
 
     public File getJarFileToTmp(String name, String url) {
