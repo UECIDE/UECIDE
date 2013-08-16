@@ -1543,7 +1543,6 @@ public class Sketch implements MessageConsumer {
 
         stringList.set(0, stringList.get(0).replace("//", "/"));
 
-
         ProcessBuilder process = new ProcessBuilder(stringList);
         process.redirectOutput(ProcessBuilder.Redirect.PIPE);
         process.redirectError(ProcessBuilder.Redirect.PIPE);
@@ -1551,15 +1550,36 @@ public class Sketch implements MessageConsumer {
             process.directory(buildFolder);
         }
         Map<String, String> environment = process.environment();
-    
+
+        String pathvar = "PATH";
+        if (Base.isWindows()) {
+            pathvar = "Path";
+        }
+
+        String paths = all.get("path");
+        if (paths != null) {
+            for (String p : paths.split("::")) {
+                String oPath = environment.get(pathvar);
+                if (oPath == null) {
+                    oPath = System.getenv(pathvar);
+                }
+                environment.put(pathvar, oPath + File.pathSeparator + parseString(p));
+                System.err.println("Path is now " + environment.get(pathvar));
+            }
+        }
+
         String env = all.get("environment");
         if (env != null) {
             for (String ev : env.split("::")) {
                 String[] bits = ev.split("=");
                 if (bits.length == 2) {
-                    environment.put(bits[0], bits[1]);
+                    environment.put(bits[0], parseString(bits[1]));
                 }
             }
+        }
+
+        for (String envEnt : environment.keySet()) {
+            System.err.println(envEnt + " = " + environment.get(envEnt));
         }
 
         if (Base.preferences.getBoolean("compiler.verbose")) {
