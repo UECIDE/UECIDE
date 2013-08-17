@@ -12,6 +12,7 @@ import java.net.*;
 import java.util.*;
 import java.util.zip.*;
 import java.util.regex.*;
+import java.text.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -1429,27 +1430,18 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     public void handlePrint() {
-        statusNotice(Translate.t("Printing..."));
-        if (printerJob == null) {
-            printerJob = PrinterJob.getPrinterJob();
-        }
-        if (pageFormat != null) {
-            printerJob.setPrintable(getTextArea().textArea, pageFormat);
-        } else {
-            printerJob.setPrintable(getTextArea().textArea);
-        }
-        printerJob.setJobName(sketch.getCodeByEditor((SketchEditor)tabs.getSelectedComponent()).file.getName());
+        JTextArea tempBuffer = new JTextArea();
 
-        if (printerJob.printDialog()) {
-            try {
-                printerJob.print();
-                statusNotice(Translate.t("Done printing."));
-            } catch (PrinterException pe) {
-                statusError(Translate.t("Error while printing."));
-                pe.printStackTrace();
-            }
-        } else {
-            statusNotice(Translate.t("Printing canceled."));
+        MessageFormat header = new MessageFormat(getSelectedTabName());
+        MessageFormat footer = new MessageFormat("Page {0}");
+
+        tempBuffer.setText(getText());
+        tempBuffer.setTabSize(4);
+        tempBuffer.setFont(new Font("Monospaced", Font.PLAIN, 6));
+        try {
+            tempBuffer.print(header, footer);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -2218,6 +2210,14 @@ public class Editor extends JFrame implements RunnerListener {
         sketch = new Sketch(this, new File(path));
         sketch.checkForSettings();
         rebuildImportMenu();
+    }
+
+    public String getTabName(int i) {
+        return tabs.getTitleAt(i);
+    }
+
+    public String getSelectedTabName() {
+        return getTabName(tabs.getSelectedIndex());
     }
 
     public void setTabName(int i, String name) {
