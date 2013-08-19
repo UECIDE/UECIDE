@@ -645,6 +645,8 @@ public class Sketch implements MessageConsumer {
     }
 
     public File[] getImportedLibraries() {
+        return importedLibraries.values().toArray(new File[importedLibraries.size()]);
+/*
         ArrayList<File> libFiles = new ArrayList<File>();
       
         String[] entries = (String[]) importedLibraries.keySet().toArray(new String[0]);
@@ -653,6 +655,7 @@ public class Sketch implements MessageConsumer {
             libFiles.add(importedLibraries.get(e));
         }
         return libFiles.toArray(new File[libFiles.size()]);
+*/
     }
 
     public ArrayList<String> getIncludePaths() {
@@ -1491,10 +1494,13 @@ public class Sketch implements MessageConsumer {
         for (File libraryFolder : getImportedLibraries()) {
             File cppFile = new File(libraryFolder, libraryFolder.getName() + ".cpp");
             File cFile = new File(libraryFolder, libraryFolder.getName() + ".c");
-            if (cppFile.exists() || cFile.exists()) {
+            File aFile = getCacheFile("lib" + libraryFolder.getName() + ".a");
+
+            if (aFile.exists()) {
                 liblist += "::-l" + libraryFolder.getName();
             }
         }
+        liblist += "";
 
         liblist += coreLibs;
 
