@@ -11,7 +11,7 @@ default.publish=yes
 
 prfm.theme=uecide
 prfm.cores=chipKIT
-prfm.boards=Majenko_Technologies-prfmv2,Majenko_Technologies-prfmv2usb
+prfm.boards=Majenko_Technologies-prfmv2,Majenko_Technologies-prfmv2usb,Majenko_Technologies-prfmv2-575,Majenko_Technologies-prfmv2-575usb
 prfm.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,ConvertWaveFile,PluginManager
 prfm.suffix=-prfm
 prfm.compilers=pic32-gcc
