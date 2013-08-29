@@ -82,6 +82,12 @@ public class Base {
     }
 
     public Base(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            public void uncaughtException(Thread t, Throwable e) {
+                Base.errorReport(t, e);
+            }
+        });
+
         try {
             JarFile myself = new JarFile("lib/uecide.jar");
             Manifest manifest = myself.getManifest();
@@ -622,10 +628,23 @@ public class Base {
         File[] list = folder.listFiles();
         for (File f : list) {
             if (f.isDirectory()) {
-                File header = new File(f, f.getName() + ".h");
-                if (header.exists()) {
-                    out.put(header.getName(), f);
+                File[] hlist = f.listFiles();
+                for (File h : hlist) {
+                    if (!(h.getName().endsWith(".h"))) {
+                        continue;
+                    }
+                    if (
+                        (h.getName().equals(f.getName() + ".h")) ||
+                        (h.getName().startsWith(f.getName() + "_"))
+                    ) {
+                        out.put(h.getName(), f);
+                    }
                 }
+
+//                File header = new File(f, f.getName() + ".h");
+//                if (header.exists()) {
+//                    out.put(header.getName(), f);
+//                }
             }
         }
         return out;
@@ -2146,5 +2165,11 @@ public class Base {
 
     static public File getSystemCompilersFolder() {
         return new File(getHardwareFolder(),"compilers");
+    }
+
+    static public void errorReport(Thread t, Throwable e) {
+        showError("Uncaught Exception", "An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")\n" +
+                                        "The cause is: " + e.getCause() + "\n" +
+                                        "The message is: " + e.getMessage() + "\n", e);
     }
 }

@@ -1579,13 +1579,23 @@ public class Editor extends JFrame implements RunnerListener {
         HashMap<String, File> contributedLibraries = Base.getLibraryCollection("sketchbook");
         if (contributedLibraries != null) {
             if (contributedLibraries.size() > 0) {
+                int menuSize = 0;
                 JMenu contributedMenu = new JMenu(Translate.t("Contributed"));
+                JMenu addTo = contributedMenu;
                 String[] entries = (String[]) contributedLibraries.keySet().toArray(new String[0]);
+                Arrays.sort(entries);
                 for (String entry : entries) {
                     item = new JMenuItem(entry);
                     item.addActionListener(listener);
                     item.setActionCommand(entry);
-                    contributedMenu.add(item);
+                    addTo.add(item);
+                    menuSize++;
+                    if (menuSize == 20) {
+                        JMenu newMenu = new JMenu(Translate.t("More..."));
+                        addTo.add(newMenu);
+                        addTo = newMenu;
+                        menuSize = 0;
+                    }
                 }
                 importMenu.add(contributedMenu);
                 sketch.importToLibraryTable.putAll(contributedLibraries);
