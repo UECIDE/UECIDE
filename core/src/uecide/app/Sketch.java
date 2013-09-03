@@ -1550,8 +1550,8 @@ public class Sketch implements MessageConsumer {
         stringList.set(0, stringList.get(0).replace("//", "/"));
 
         ProcessBuilder process = new ProcessBuilder(stringList);
-        process.redirectOutput(ProcessBuilder.Redirect.PIPE);
-        process.redirectError(ProcessBuilder.Redirect.PIPE);
+//        process.redirectOutput(ProcessBuilder.Redirect.PIPE);
+//        process.redirectError(ProcessBuilder.Redirect.PIPE);
         if (buildFolder != null) {
             process.directory(buildFolder);
         }
