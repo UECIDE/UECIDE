@@ -1155,6 +1155,13 @@ public class Sketch implements MessageConsumer {
                     mid = tokens.get("upload." + editor.programmer + ".verbose");
                 else 
                     mid = tokens.get("upload." + editor.programmer + ".quiet");
+            } else if (mid.equals("port.base")) {
+                if (Base.isWindows()) {
+                    mid = editor.getSerialPort();
+                } else {
+                    String sp = editor.getSerialPort();
+                    mid = sp.substring(sp.lastIndexOf('/') + 1);
+                }
             } else if (mid.equals("port")) {
                 if (Base.isWindows()) {
                     mid = "\\\\.\\" + editor.getSerialPort();
