@@ -45,8 +45,7 @@ public class Sizer implements MessageConsumer {
         this.editor = editor;
     }
   
-    public void computeSize() throws RunnerException {
-
+    public void computeSize() {
         editor.sketch.settings.put("filename", editor.sketch.name);
         HashMap<String, String> all = editor.sketch.mergeAllProperties();
         String commandSize[] = editor.sketch.parseString(all.get("compile.size")).split("::");
@@ -77,12 +76,8 @@ public class Sizer implements MessageConsumer {
             // The default Throwable.toString() never returns null, but apparently
             // some sub-class has overridden it to do so, thus we need to check for
             // it.  See: http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1166589459
-            exception = new RunnerException(
-                (e.toString() == null) ? e.getClass().getName() + r : e.toString() + r);
+            e.printStackTrace();
         }
-
-        if (exception != null)
-            throw exception;
     }
 
     public long progSize() {

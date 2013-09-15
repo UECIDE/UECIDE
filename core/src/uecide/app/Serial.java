@@ -39,7 +39,7 @@ public class Serial implements SerialPortEventListener {
   
   MessageConsumer consumer;
 
-  public Serial() throws SerialException {
+  public Serial() {
     this(Base.preferences.get("serial.port"),
       Base.preferences.getInteger("serial.debug_rate"),
       Base.preferences.get("serial.parity").charAt(0),
@@ -47,76 +47,74 @@ public class Serial implements SerialPortEventListener {
       new Float(Base.preferences.get("serial.stopbits")).floatValue());
   }
 
-  public Serial(int irate) throws SerialException {
+  public Serial(int irate) {
     this(Base.preferences.get("serial.port"), irate,
       Base.preferences.get("serial.parity").charAt(0),
       Base.preferences.getInteger("serial.databits"), 
       new Float(Base.preferences.get("serial.stopbits")).floatValue());
   }
 
-  public Serial(String iname, int irate) throws SerialException {
+  public Serial(String iname, int irate) {
     this(iname, irate, Base.preferences.get("serial.parity").charAt(0),
     Base.preferences.getInteger("serial.databits"), 
     new Float(Base.preferences.get("serial.stopbits")).floatValue());
   }
 
-  public Serial(String iname) throws SerialException {
+  public Serial(String iname) {
     this(iname, Base.preferences.getInteger("serial.debug_rate"),
       Base.preferences.get("serial.parity").charAt(0),
       Base.preferences.getInteger("serial.databits"),
       new Float(Base.preferences.get("serial.stopbits")).floatValue());
   }
 
-  public Serial(String iname, int irate,
-                 char iparity, int idatabits, float istopbits)
-  throws SerialException {
-    //if (port != null) port.close();
-    //this.parent = parent;
-    //parent.attach(this);
-
-    this.rate = irate;
-
-    parity = SerialPort.PARITY_NONE;
-    if (iparity == 'E') parity = SerialPort.PARITY_EVEN;
-    if (iparity == 'O') parity = SerialPort.PARITY_ODD;
-
-    this.databits = idatabits;
-
-    stopbits = SerialPort.STOPBITS_1;
-    if (istopbits == 1.5f) stopbits = SerialPort.STOPBITS_1_5;
-    if (istopbits == 2) stopbits = SerialPort.STOPBITS_2;
-
+  public Serial(String iname, int irate, char iparity, int idatabits, float istopbits) {
     try {
-      port = null;
-      Enumeration portList = CommPortIdentifier.getPortIdentifiers();
-      while (portList.hasMoreElements()) {
-        CommPortIdentifier portId =
-          (CommPortIdentifier) portList.nextElement();
+        this.rate = irate;
 
-        if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-          if (portId.getName().equals(iname)) {
-            port = (SerialPort)portId.open("UECIDE", 10000);
-            input = port.getInputStream();
-            output = port.getOutputStream();
-            port.setSerialPortParams(rate, databits, stopbits, parity);
-            port.addEventListener(this);
-            port.notifyOnDataAvailable(true);
+        parity = SerialPort.PARITY_NONE;
+        if (iparity == 'E') parity = SerialPort.PARITY_EVEN;
+        if (iparity == 'O') parity = SerialPort.PARITY_ODD;
+
+        this.databits = idatabits;
+
+        stopbits = SerialPort.STOPBITS_1;
+        if (istopbits == 1.5f) stopbits = SerialPort.STOPBITS_1_5;
+        if (istopbits == 2) stopbits = SerialPort.STOPBITS_2;
+
+        try {
+          port = null;
+          Enumeration portList = CommPortIdentifier.getPortIdentifiers();
+          while (portList.hasMoreElements()) {
+            CommPortIdentifier portId =
+              (CommPortIdentifier) portList.nextElement();
+
+            if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+              if (portId.getName().equals(iname)) {
+                port = (SerialPort)portId.open("UECIDE", 10000);
+                input = port.getInputStream();
+                output = port.getOutputStream();
+                port.setSerialPortParams(rate, databits, stopbits, parity);
+                port.addEventListener(this);
+                port.notifyOnDataAvailable(true);
+              }
+            }
           }
+        } catch (PortInUseException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+          throw new SerialException("Serial port '" + iname + "' already in use.  Try quiting any programs that may be using it.");
+        } catch (Exception e) {
+          throw new SerialException("Error opening serial port '" + iname + "'.", e);
+    //      //errorMessage("<init>", e);
+    //      //exception = e;
+    //      //e.printStackTrace();
         }
-      }
-    } catch (PortInUseException e) {
-        System.err.println(e.getMessage());
-        e.printStackTrace();
-      throw new SerialException("Serial port '" + iname + "' already in use.  Try quiting any programs that may be using it.");
-    } catch (Exception e) {
-      throw new SerialException("Error opening serial port '" + iname + "'.", e);
-//      //errorMessage("<init>", e);
-//      //exception = e;
-//      //e.printStackTrace();
-    }
-    
-    if (port == null) {
-      throw new SerialNotFoundException("Serial port '" + iname + "' not found.  Did you select the right one from the Tools > Serial Port menu?");
+        
+        if (port == null) {
+          throw new SerialNotFoundException("Serial port '" + iname + "' not found.  Did you select the right one from the Tools > Serial Port menu?");
+        }
+    } catch (Exception exc) {
+        exc.printStackTrace();
     }
   }
 

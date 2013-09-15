@@ -143,7 +143,7 @@ public class PdePreprocessor {
    *
    * @param out         PrintStream to write it to.
    */
-  protected void writeFooter(PrintStream out) throws java.lang.Exception {}
+  protected void writeFooter(PrintStream out) {}
 
 
   public List<String> getExtraImports() {

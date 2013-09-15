@@ -74,7 +74,7 @@ public class ThinkDifferent implements ApplicationListener {
       ae.setHandled(true);
       base.handleAbout();
     } else {
-      throw new IllegalStateException("handleAbout: Base instance detached from listener");
+      System.err.println("handleAbout: Base instance detached from listener");
     }
   }
   
@@ -84,7 +84,7 @@ public class ThinkDifferent implements ApplicationListener {
       base.handlePrefs();
       ae.setHandled(true);
     } else {
-      throw new IllegalStateException("handlePreferences: Base instance detached from listener");
+      System.err.println("handlePreferences: Base instance detached from listener");
     }
   }
 
@@ -118,7 +118,7 @@ public class ThinkDifferent implements ApplicationListener {
       boolean result = base.handleQuit();
       ae.setHandled(result);
     } else {
-      throw new IllegalStateException("handleQuit: Base instance detached from listener");
+      System.err.println("handleQuit: Base instance detached from listener");
     }
   }
   

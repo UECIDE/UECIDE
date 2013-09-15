@@ -1310,8 +1310,13 @@ public class Base {
     /**
     * Return an InputStream for a file inside the Processing lib folder.
     */
-    public static InputStream getLibStream(String filename) throws IOException {
-        return new FileInputStream(new File(getContentFile("lib"), filename));
+    public static InputStream getLibStream(String filename) {
+        try {
+            return new FileInputStream(new File(getContentFile("lib"), filename));
+        } catch (Exception e) {
+            System.err.println("Unable to find " + filename + " in lib");
+            return null;
+        }
     }
 
 
@@ -1330,43 +1335,27 @@ public class Base {
         return count;
     }
 
+    public static void copyFile(File sourceFile, File targetFile) {
+        try {
+            InputStream from =
+                new BufferedInputStream(new FileInputStream(sourceFile));
+            OutputStream to =
+                new BufferedOutputStream(new FileOutputStream(targetFile));
+            byte[] buffer = new byte[16 * 1024];
+            int bytesRead;
+            while ((bytesRead = from.read(buffer)) != -1) {
+                to.write(buffer, 0, bytesRead);
+            }
+            to.flush();
+            from.close(); // ??
+            from = null;
+            to.close(); // ??
+            to = null;
 
-    /**
-    * Same as PApplet.loadBytes(), however never does gzip decoding.
-    */
-    public static byte[] loadBytesRaw(File file) throws IOException {
-        int size = (int) file.length();
-        FileInputStream input = new FileInputStream(file);
-        byte buffer[] = new byte[size];
-        int offset = 0;
-        int bytesRead;
-        while ((bytesRead = input.read(buffer, offset, size-offset)) != -1) {
-            offset += bytesRead;
-            if (bytesRead == 0) break;
+            targetFile.setLastModified(sourceFile.lastModified());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        input.close();  // weren't properly being closed
-        input = null;
-        return buffer;
-    }
-
-
-    public static void copyFile(File sourceFile, File targetFile) throws IOException {
-        InputStream from =
-            new BufferedInputStream(new FileInputStream(sourceFile));
-        OutputStream to =
-            new BufferedOutputStream(new FileOutputStream(targetFile));
-        byte[] buffer = new byte[16 * 1024];
-        int bytesRead;
-        while ((bytesRead = from.read(buffer)) != -1) {
-            to.write(buffer, 0, bytesRead);
-        }
-        to.flush();
-        from.close(); // ??
-        from = null;
-        to.close(); // ??
-        to = null;
-
-        targetFile.setLastModified(sourceFile.lastModified());
     }
 
     /**
@@ -1374,22 +1363,26 @@ public class Base {
     * folders found in the source directory, to avoid copying silly .DS_Store
     * files and potentially troublesome .svn folders.
     */
-    public static void copyDir(File sourceDir, File targetDir) throws IOException {
-        targetDir.mkdirs();
-        String files[] = sourceDir.list();
-        for (int i = 0; i < files.length; i++) {
-            // Ignore dot files (.DS_Store), dot folders (.svn) while copying
-            if (files[i].charAt(0) == '.') continue;
-            //if (files[i].equals(".") || files[i].equals("..")) continue;
-            File source = new File(sourceDir, files[i]);
-            File target = new File(targetDir, files[i]);
-            if (source.isDirectory()) {
-                //target.mkdirs();
-                copyDir(source, target);
-                target.setLastModified(source.lastModified());
-            } else {
-                copyFile(source, target);
+    public static void copyDir(File sourceDir, File targetDir) {
+        try {
+            targetDir.mkdirs();
+            String files[] = sourceDir.list();
+            for (int i = 0; i < files.length; i++) {
+                // Ignore dot files (.DS_Store), dot folders (.svn) while copying
+                if (files[i].charAt(0) == '.') continue;
+                //if (files[i].equals(".") || files[i].equals("..")) continue;
+                File source = new File(sourceDir, files[i]);
+                File target = new File(targetDir, files[i]);
+                if (source.isDirectory()) {
+                    //target.mkdirs();
+                    copyDir(source, target);
+                    target.setLastModified(source.lastModified());
+                } else {
+                    copyFile(source, target);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -2052,7 +2045,7 @@ public class Base {
       return Runtime.getRuntime().exec(argv);
     } catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException("Could not open");
+        return null;
     }
   }
 
@@ -2172,4 +2165,27 @@ public class Base {
                                         "The cause is: " + e.getCause() + "\n" +
                                         "The message is: " + e.getMessage() + "\n", e);
     }
+
+    public static byte[] loadBytesRaw(File file) {
+        try {
+            int size = (int) file.length();
+            FileInputStream input = new FileInputStream(file);
+            byte buffer[] = new byte[size];
+            int offset = 0;
+            int bytesRead;
+            while ((bytesRead = input.read(buffer, offset, size-offset)) != -1) {
+                offset += bytesRead;
+                if (bytesRead == 0) break;
+            }
+            input.close();  // weren't properly being closed
+            input = null;
+            return buffer;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+    }
+
 }
+
+

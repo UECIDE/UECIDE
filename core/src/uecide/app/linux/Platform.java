@@ -35,33 +35,28 @@ import javax.swing.UIManager;
 public class Platform extends uecide.app.Platform {
 
   // TODO Need to be smarter here since KDE people ain't gonna like that GTK.
-  //      It may even throw a weird exception at 'em for their trouble.
-  public void setLookAndFeel() throws Exception {
-    // Linux is by default even uglier than metal (Motif?).
-    // Actually, i'm using native menus, so they're even uglier
-    // and Motif-looking (Lesstif?). Ick. Need to fix this.
-//    String lfname = UIManager.getCrossPlatformLookAndFeelClassName();
-//    UIManager.setLookAndFeel(lfname);
-
-    // For 0120, trying out the gtk+ look and feel as the default.
-    // This is available in Java 1.4.2 and later, and it can't possibly
-    // be any worse than Metal. (Ocean might also work, but that's for
-    // Java 1.5, and we aren't going there yet)
-//    UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-
-    String laf = Base.theme.get("window.laf");
-    if ((laf != null) && (laf != "default")) {
-       UIManager.setLookAndFeel(laf);
+  public void setLookAndFeel() {
+    try {
+        String laf = Base.theme.get("window.laf");
+        if ((laf != null) && (laf != "default")) {
+           UIManager.setLookAndFeel(laf);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
   }
 
 
-  public void openURL(String url) throws Exception {
-    if (openFolderAvailable()) {
-      String launcher = Base.preferences.get("launcher");
-      if (launcher != null) {
-        Runtime.getRuntime().exec(new String[] { launcher, url });
-      }
+  public void openURL(String url) {
+    try {
+        if (openFolderAvailable()) {
+          String launcher = Base.preferences.get("launcher");
+          if (launcher != null) {
+            Runtime.getRuntime().exec(new String[] { launcher, url });
+          }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
   }
 
@@ -83,7 +78,6 @@ public class Platform extends uecide.app.Platform {
     try {
       Process p = Runtime.getRuntime().exec(new String[] { "gnome-open" });
       p.waitFor();
-      // Not installed will throw an IOException (JDK 1.4.2, Ubuntu 7.04)
       Base.preferences.set("launcher", "gnome-open");
       return true;
     } catch (Exception e) { }
@@ -100,20 +94,24 @@ public class Platform extends uecide.app.Platform {
   }
 
 
-  public void openFolder(File file) throws Exception {
-    if (openFolderAvailable()) {
-      String lunch = Base.preferences.get("launcher");
-      try {
-        String[] params = new String[] { lunch, file.getAbsolutePath() };
-        //processing.core.PApplet.println(params);
-        /*Process p =*/ Runtime.getRuntime().exec(params);
-        /*int result =*/ //p.waitFor();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    } else {
-      System.out.println("No launcher set, cannot open " +
-                         file.getAbsolutePath());
+  public void openFolder(File file) {
+    try {
+        if (openFolderAvailable()) {
+          String lunch = Base.preferences.get("launcher");
+          try {
+            String[] params = new String[] { lunch, file.getAbsolutePath() };
+            //processing.core.PApplet.println(params);
+            /*Process p =*/ Runtime.getRuntime().exec(params);
+            /*int result =*/ //p.waitFor();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        } else {
+          System.out.println("No launcher set, cannot open " +
+                             file.getAbsolutePath());
+        }
+    } catch (Exception ex) {
+        ex.printStackTrace();
     }
   }
 }

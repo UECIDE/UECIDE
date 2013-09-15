@@ -1591,10 +1591,6 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        for (String envEnt : environment.keySet()) {
-            System.err.println(envEnt + " = " + environment.get(envEnt));
-        }
-
         if (Base.preferences.getBoolean("compiler.verbose")) {
             for (String component : stringList) {
                 message(component + " ", 1);
