@@ -25,9 +25,8 @@ public class Registry {
    * Testing.
    *
    * @param args arguments
-   * @throws java.lang.Exception on error
    */
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
   }
 
   /**
@@ -79,11 +78,15 @@ public class Registry {
    * Converts a Windows buffer to a Java String.
    *
    * @param buf buffer
-   * @throws java.io.UnsupportedEncodingException on error
    * @return String
    */
-  private static String convertBufferToString(byte[] buf) throws UnsupportedEncodingException {
-    return(new String(buf, 0, buf.length - 2, "UTF-16LE"));
+  private static String convertBufferToString(byte[] buf) {
+    try {
+        return(new String(buf, 0, buf.length - 2, "UTF-16LE"));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
   }
 
   /**
@@ -102,33 +105,37 @@ public class Registry {
    * @param rootKey root key
    * @param subKeyName key name
    * @param name value name
-   * @throws java.io.UnsupportedEncodingException on error
    * @return String or null
    */
-  public static String getStringValue(REGISTRY_ROOT_KEY rootKey, String subKeyName, String name) throws UnsupportedEncodingException {
-    Advapi32 advapi32;
-    IntByReference pType, lpcbData;
-    byte[] lpData = new byte[1];
-    int handle = 0;
-    String ret = null;
+  public static String getStringValue(REGISTRY_ROOT_KEY rootKey, String subKeyName, String name) {
+    try {
+        Advapi32 advapi32;
+        IntByReference pType, lpcbData;
+        byte[] lpData = new byte[1];
+        int handle = 0;
+        String ret = null;
 
-    advapi32 = Advapi32.INSTANCE;
-    pType = new IntByReference();
-    lpcbData = new IntByReference();
-    handle = openKey(rootKey, subKeyName, WINNT.KEY_READ);
+        advapi32 = Advapi32.INSTANCE;
+        pType = new IntByReference();
+        lpcbData = new IntByReference();
+        handle = openKey(rootKey, subKeyName, WINNT.KEY_READ);
 
-    if(handle != 0) {
+        if(handle != 0) {
 
-      if(advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) == WINERROR.ERROR_MORE_DATA) {
-        lpData = new byte[lpcbData.getValue()];
+          if(advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) == WINERROR.ERROR_MORE_DATA) {
+            lpData = new byte[lpcbData.getValue()];
 
-        if(advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) == WINERROR.ERROR_SUCCESS) {
-          ret = convertBufferToString(lpData);
+            if(advapi32.RegQueryValueEx(handle, name, null, pType, lpData, lpcbData) == WINERROR.ERROR_SUCCESS) {
+              ret = convertBufferToString(lpData);
+            }
+          }
+          advapi32.RegCloseKey(handle);
         }
-      }
-      advapi32.RegCloseKey(handle);
+        return(ret);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
     }
-    return(ret);
   }
 
   /**
@@ -199,31 +206,35 @@ public class Registry {
    * @param subKeyName key name
    * @param name value name
    * @param value value
-   * @throws java.io.UnsupportedEncodingException on error
    * @return true on success
    */
-  public static boolean setStringValue(REGISTRY_ROOT_KEY rootKey, String subKeyName, String name, String value) throws UnsupportedEncodingException {
-    Advapi32 advapi32;
-    int handle;
-    byte[] data;
-    boolean ret = false;
+  public static boolean setStringValue(REGISTRY_ROOT_KEY rootKey, String subKeyName, String name, String value) {
+    try {
+        Advapi32 advapi32;
+        int handle;
+        byte[] data;
+        boolean ret = false;
 
-    // appears to be Java 1.6 syntax, removing [fry]
-    //data = Arrays.copyOf(value.getBytes("UTF-16LE"), value.length() * 2 + 2);
-    data = new byte[value.length() * 2 + 2];
-    byte[] src = value.getBytes("UTF-16LE");
-    System.arraycopy(src, 0, data, 0, src.length);
+        // appears to be Java 1.6 syntax, removing [fry]
+        //data = Arrays.copyOf(value.getBytes("UTF-16LE"), value.length() * 2 + 2);
+        data = new byte[value.length() * 2 + 2];
+        byte[] src = value.getBytes("UTF-16LE");
+        System.arraycopy(src, 0, data, 0, src.length);
 
-    advapi32 = Advapi32.INSTANCE;
-    handle = openKey(rootKey, subKeyName, WINNT.KEY_READ | WINNT.KEY_WRITE);
+        advapi32 = Advapi32.INSTANCE;
+        handle = openKey(rootKey, subKeyName, WINNT.KEY_READ | WINNT.KEY_WRITE);
 
-    if(handle != 0) {
-      if(advapi32.RegSetValueEx(handle, name, 0, WINNT.REG_SZ, data, data.length) == WINERROR.ERROR_SUCCESS) {
-        ret = true;
-      }
-      advapi32.RegCloseKey(handle);
+        if(handle != 0) {
+          if(advapi32.RegSetValueEx(handle, name, 0, WINNT.REG_SZ, data, data.length) == WINERROR.ERROR_SUCCESS) {
+            ret = true;
+          }
+          advapi32.RegCloseKey(handle);
+        }
+        return(ret);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
     }
-    return(ret);
   }
 
   /**
@@ -397,60 +408,64 @@ public class Registry {
    *
    * @param rootKey root key
    * @param key jey name
-   * @throws java.io.UnsupportedEncodingException on error
    * @return TreeMap with name and value pairs
    */
-  public static TreeMap<String, Object> getValues(REGISTRY_ROOT_KEY rootKey, String key) throws UnsupportedEncodingException {
-    Advapi32 advapi32;
-    int handle = 0, dwIndex, result = 0;
-    char[] lpValueName;
-    byte[] lpData;
-    IntByReference lpcchValueName, lpType, lpcbData;
-    String name;
-    TreeMap<String, Object> values = new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
+  public static TreeMap<String, Object> getValues(REGISTRY_ROOT_KEY rootKey, String key) {
+    try {
+        Advapi32 advapi32;
+        int handle = 0, dwIndex, result = 0;
+        char[] lpValueName;
+        byte[] lpData;
+        IntByReference lpcchValueName, lpType, lpcbData;
+        String name;
+        TreeMap<String, Object> values = new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
 
-    advapi32 = Advapi32.INSTANCE;
-    handle = openKey(rootKey, key, WINNT.KEY_READ);
-    lpValueName = new char[16384];
-    lpcchValueName = new IntByReference(16384);
-    lpType = new IntByReference();
-    lpData = new byte[1];
-    lpcbData = new IntByReference();
+        advapi32 = Advapi32.INSTANCE;
+        handle = openKey(rootKey, key, WINNT.KEY_READ);
+        lpValueName = new char[16384];
+        lpcchValueName = new IntByReference(16384);
+        lpType = new IntByReference();
+        lpData = new byte[1];
+        lpcbData = new IntByReference();
 
-    if(handle != 0) {
-      dwIndex = 0;
+        if(handle != 0) {
+          dwIndex = 0;
 
-      do {
-        lpcbData.setValue(0);
-        result = advapi32.RegEnumValue(handle, dwIndex, lpValueName, lpcchValueName, null,
-          lpType, lpData, lpcbData);
+          do {
+            lpcbData.setValue(0);
+            result = advapi32.RegEnumValue(handle, dwIndex, lpValueName, lpcchValueName, null,
+              lpType, lpData, lpcbData);
 
-        if(result == WINERROR.ERROR_MORE_DATA) {
-          lpData = new byte[lpcbData.getValue()];
-          lpcchValueName =  new IntByReference(16384);
-          result = advapi32.RegEnumValue(handle, dwIndex, lpValueName, lpcchValueName, null,
-            lpType, lpData, lpcbData);
+            if(result == WINERROR.ERROR_MORE_DATA) {
+              lpData = new byte[lpcbData.getValue()];
+              lpcchValueName =  new IntByReference(16384);
+              result = advapi32.RegEnumValue(handle, dwIndex, lpValueName, lpcchValueName, null,
+                lpType, lpData, lpcbData);
 
-          if(result == WINERROR.ERROR_SUCCESS) {
-            name = new String(lpValueName, 0, lpcchValueName.getValue());
+              if(result == WINERROR.ERROR_SUCCESS) {
+                name = new String(lpValueName, 0, lpcchValueName.getValue());
 
-            switch(lpType.getValue()) {
-              case WINNT.REG_SZ:
-                values.put(name, convertBufferToString(lpData));
-                break;
-              case WINNT.REG_DWORD:
-                values.put(name, convertBufferToInt(lpData));
-                break;
-              default:
-                break;
+                switch(lpType.getValue()) {
+                  case WINNT.REG_SZ:
+                    values.put(name, convertBufferToString(lpData));
+                    break;
+                  case WINNT.REG_DWORD:
+                    values.put(name, convertBufferToInt(lpData));
+                    break;
+                  default:
+                    break;
+                }
+              }
             }
-          }
-        }
-        dwIndex++;
-      } while(result == WINERROR.ERROR_SUCCESS);
+            dwIndex++;
+          } while(result == WINERROR.ERROR_SUCCESS);
 
-      advapi32.RegCloseKey(handle);
+          advapi32.RegCloseKey(handle);
+        }
+        return(values);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
     }
-    return(values);
   }
 }

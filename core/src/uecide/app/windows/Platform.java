@@ -26,12 +26,16 @@ public class Platform extends uecide.app.Platform {
     "\\processing.exe \"%1\"";
   static final String DOC = "Processing.Document";
 
-  public void setLookAndFeel() throws Exception {
-    // Use the Quaqua L & F on OS X to make JFileChooser less awful
-    String laf = Base.theme.get("window.laf.windows");
-    if ((laf != null) && (laf != "default")) {
-       UIManager.setLookAndFeel(laf);
-    } 
+  public void setLookAndFeel() {
+    try {
+        // Use the Quaqua L & F on OS X to make JFileChooser less awful
+        String laf = Base.theme.get("window.laf.windows");
+        if ((laf != null) && (laf != "default")) {
+           UIManager.setLookAndFeel(laf);
+        } 
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
   }
 
   public void init(Base base) {
@@ -71,30 +75,34 @@ public class Platform extends uecide.app.Platform {
   /**
    * Associate .pde files with this version of Processing.
    */
-  protected void setAssociations() throws UnsupportedEncodingException {
-    if (Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                           "", ".pde") &&
-        Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                ".pde", "", DOC) &&
+  protected void setAssociations() {
+    try {
+        if (Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
+                               "", ".pde") &&
+            Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT,
+                                    ".pde", "", DOC) &&
 
-        Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT, "", DOC) &&
-        Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT, DOC, "",
-                                "Processing Source Code") &&
+            Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT, "", DOC) &&
+            Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT, DOC, "",
+                                    "Processing Source Code") &&
 
-        Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                           DOC, "shell") &&
-        Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                           DOC + "\\shell", "open") &&
-        Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                           DOC + "\\shell\\open", "command") &&
-        Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                DOC + "\\shell\\open\\command", "",
-                                openCommand)) {
-      // everything ok
-      // hooray!
+            Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
+                               DOC, "shell") &&
+            Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
+                               DOC + "\\shell", "open") &&
+            Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
+                               DOC + "\\shell\\open", "command") &&
+            Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT,
+                                    DOC + "\\shell\\open\\command", "",
+                                    openCommand)) {
+          // everything ok
+          // hooray!
 
-    } else {
-      Base.preferences.setBoolean("platform.auto_file_type_associations", false);
+        } else {
+          Base.preferences.setBoolean("platform.auto_file_type_associations", false);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
   }
 
@@ -119,7 +127,7 @@ public class Platform extends uecide.app.Platform {
                              cp + File.pathSeparator + qtjavaZipPath);
         }
       }
-    } catch (UnsupportedEncodingException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -167,79 +175,51 @@ public class Platform extends uecide.app.Platform {
 
 
   // looking for Documents and Settings/blah/Application Data/Processing
-  public File getSettingsFolder() throws Exception {
-    // HKEY_CURRENT_USER\Software\Microsoft
-    //   \Windows\CurrentVersion\Explorer\Shell Folders
-    // Value Name: AppData
-    // Value Type: REG_SZ
-    // Value Data: path
+  public File getSettingsFolder() {
 
-    String keyPath =
-      "Software\\Microsoft\\Windows\\CurrentVersion" +
-      "\\Explorer\\Shell Folders";
-    String appDataPath =
-      Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "AppData");
+    try {
+        String keyPath =
+          "Software\\Microsoft\\Windows\\CurrentVersion" +
+          "\\Explorer\\Shell Folders";
+        String appDataPath =
+          Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "AppData");
 
-    File dataFolder = new File(appDataPath, Base.theme.get("product"));
-    return dataFolder;
+        File dataFolder = new File(appDataPath, Base.theme.get("product"));
+        return dataFolder;
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
   }
 
 
   // looking for Documents and Settings/blah/My Documents/Processing
   // (though using a reg key since it's different on other platforms)
-  public File getDefaultSketchbookFolder() throws Exception {
+  public File getDefaultSketchbookFolder() {
+    try {
+        String keyPath =
+          "Software\\Microsoft\\Windows\\CurrentVersion" +
+          "\\Explorer\\Shell Folders";
+        String personalPath =
+          Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "Personal");
 
-    // http://support.microsoft.com/?kbid=221837&sd=RMVP
-    // http://support.microsoft.com/kb/242557/en-us
-
-    // The path to the My Documents folder is stored in the following
-    // registry key, where path is the complete path to your storage location
-
-    // HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders
-    // Value Name: Personal
-    // Value Type: REG_SZ
-    // Value Data: path
-
-    // in some instances, this may be overridden by a policy, in which case check:
-    // HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders
-
-    String keyPath =
-      "Software\\Microsoft\\Windows\\CurrentVersion" +
-      "\\Explorer\\Shell Folders";
-    String personalPath =
-      Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "Personal");
-
-    return new File(personalPath, Base.theme.get("product"));
+        return new File(personalPath, Base.theme.get("product"));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
   }
 
 
-  public void openURL(String url) throws Exception {
-    // this is not guaranteed to work, because who knows if the
-    // path will always be c:\progra~1 et al. also if the user has
-    // a different browser set as their default (which would
-    // include me) it'd be annoying to be dropped into ie.
-    //Runtime.getRuntime().exec("c:\\progra~1\\intern~1\\iexplore "
-    // + currentDir
-
-    // the following uses a shell execute to launch the .html file
-    // note that under cygwin, the .html files have to be chmodded +x
-    // after they're unpacked from the zip file. i don't know why,
-    // and don't understand what this does in terms of windows
-    // permissions. without the chmod, the command prompt says
-    // "Access is denied" in both cygwin and the "dos" prompt.
-    //Runtime.getRuntime().exec("cmd /c " + currentDir + "\\reference\\" +
-    //                    referenceFile + ".html");
-    if (url.startsWith("http://")) {
-      // open dos prompt, give it 'start' command, which will
-      // open the url properly. start by itself won't work since
-      // it appears to need cmd
-      Runtime.getRuntime().exec("cmd /c start " + url);
-    } else {
-      // just launching the .html file via the shell works
-      // but make sure to chmod +x the .html files first
-      // also place quotes around it in case there's a space
-      // in the user.dir part of the url
-      Runtime.getRuntime().exec("cmd /c \"" + url + "\"");
+  public void openURL(String url) {
+    try {
+        if (url.startsWith("http://")) {
+          Runtime.getRuntime().exec("cmd /c start " + url);
+        } else {
+          Runtime.getRuntime().exec("cmd /c \"" + url + "\"");
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
   }
 
@@ -249,17 +229,14 @@ public class Platform extends uecide.app.Platform {
   }
 
 
-  public void openFolder(File file) throws Exception {
-    String folder = file.getAbsolutePath();
+  public void openFolder(File file) {
+    try {
+        String folder = file.getAbsolutePath();
 
-    // doesn't work
-    //Runtime.getRuntime().exec("cmd /c \"" + folder + "\"");
-
-    // works fine on winxp, prolly win2k as well
-    Runtime.getRuntime().exec("explorer \"" + folder + "\"");
-
-    // not tested
-    //Runtime.getRuntime().exec("start explorer \"" + folder + "\"");
+        Runtime.getRuntime().exec("explorer \"" + folder + "\"");
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
   }
 
 

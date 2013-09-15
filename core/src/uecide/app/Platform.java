@@ -61,8 +61,12 @@ public class Platform {
    * 
    * @throws Exception Just like I said.
    */
-  public void setLookAndFeel() throws Exception {
-    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+  public void setLookAndFeel() {
+    try {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
   }
   
   
@@ -72,47 +76,40 @@ public class Platform {
   
   
   public File getSettingsFolder() throws Exception {
-    // otherwise make a .processing directory int the user's home dir
-    File home = new File(System.getProperty("user.home"));
-    File dataFolder = new File(home, "." + Base.theme.get("product"));
-    if (!dataFolder.exists()) {
-        dataFolder.mkdirs();
-    }
-    return dataFolder;
-
-    /*
     try {
-      Class clazz = Class.forName("uecide.app.macosx.ThinkDifferent");
-      Method m = clazz.getMethod("getLibraryFolder", new Class[] { });
-      String libraryPath = (String) m.invoke(null, new Object[] { });
-      //String libraryPath = BaseMacOS.getLibraryFolder();
-      File libraryFolder = new File(libraryPath);
-      dataFolder = new File(libraryFolder, "Processing");
-
+        // otherwise make a .processing directory int the user's home dir
+        File home = new File(System.getProperty("user.home"));
+        File dataFolder = new File(home, "." + Base.theme.get("product"));
+        if (!dataFolder.exists()) {
+            dataFolder.mkdirs();
+        }
+        return dataFolder;
     } catch (Exception e) {
-      showError("Problem getting data folder",
-                "Error getting the Processing data folder.", e);
+        e.printStackTrace();
+        return null;
     }
-    */
   }
   
 
   /**
    * @return null if not overridden, which will cause a prompt to show instead. 
-   * @throws Exception
    */
-  public File getDefaultSketchbookFolder() throws Exception {
+  public File getDefaultSketchbookFolder() {
     return null;
   }
   
   
-  public void openURL(String url) throws Exception {
-    String launcher = Base.preferences.get("launcher");
-    if (launcher != null) {
-      Runtime.getRuntime().exec(new String[] { launcher, url });
-    } else {
-      showLauncherWarning();
-    } 
+  public void openURL(String url) {
+    try {
+        String launcher = Base.preferences.get("launcher");
+        if (launcher != null) {
+          Runtime.getRuntime().exec(new String[] { launcher, url });
+        } else {
+          showLauncherWarning();
+        } 
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
   }
 
 
@@ -121,13 +118,17 @@ public class Platform {
   }
   
   
-  public void openFolder(File file) throws Exception {
-    String launcher = Base.preferences.get("launcher");
-    if (launcher != null) {
-      String folder = file.getAbsolutePath();
-      Runtime.getRuntime().exec(new String[] { launcher, folder });
-    } else {
-      showLauncherWarning();
+  public void openFolder(File file) {
+    try {
+        String launcher = Base.preferences.get("launcher");
+        if (launcher != null) {
+          String folder = file.getAbsolutePath();
+          Runtime.getRuntime().exec(new String[] { launcher, folder });
+        } else {
+          showLauncherWarning();
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
   }
   
