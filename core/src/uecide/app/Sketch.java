@@ -371,13 +371,19 @@ public class Sketch implements MessageConsumer {
 
         String out = b.toString();
 
-        out = Pattern.compile("//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", Pattern.DOTALL).matcher(out).replaceAll("\n");
+        out.replaceAll("/\\*(?:.|[\\n\\r])*?\\*/", "");
+
+//        try {
+//            out = Pattern.compile("//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", Pattern.DOTALL).matcher(out).replaceAll("\n");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         return out;
     }
 
     public String[] gatherIncludes(SketchFile f) {
-        String[] data = stripComments(f.textArea.getText()).split("\n");
+        String[] data = f.textArea.getText().split("\n"); //stripComments(f.textArea.getText()).split("\n");
         ArrayList<String> includes = new ArrayList<String>();
 
         Pattern pragma = Pattern.compile("#pragma\\s+parameter\\s+(.*)\\s*=\\s*(.*)");
@@ -625,9 +631,14 @@ public class Sketch implements MessageConsumer {
             return false;
         }
         editor.statusNotice(Translate.t("Compiling..."));
-        if (!prepare()) {
-            System.err.println("Prepare failed");
-            editor.statusNotice(Translate.t("Compile Failed"));
+        try {
+            if (!prepare()) {
+                System.err.println("Prepare failed");
+                editor.statusNotice(Translate.t("Compile Failed"));
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
         return compile();
