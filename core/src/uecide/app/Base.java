@@ -82,11 +82,13 @@ public class Base {
     }
 
     public Base(String[] args) {
+/*
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, Throwable e) {
                 Base.errorReport(t, e);
             }
         });
+*/
 
         try {
             JarFile myself = new JarFile("lib/uecide.jar");
