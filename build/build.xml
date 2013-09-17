@@ -496,7 +496,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 
     <target name="windows-installer">
         <copy todir="windows" file="windows/dist/script.nsi" />
-        <replace file="windows/script.nsi" token="%VERSION%" value="${version}-${itype}" />
+        <replace file="windows/script.nsi" token="%VERSION%" value="${version}${suffix}-${itype}" />
         <exec executable="makensis">
             <arg value="windows/script.nsi"/>
         </exec>
@@ -572,7 +572,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     </target>
 
     <target name="publish-all">
-        <foreach list="sarge,lucid,maverick,natty,oneiric,precise,quantal,raring" param="distro" target="publish">
+        <foreach list="sarge,lucid,maverick,natty,oneiric,precise,quantal,raring,saucy" param="distro" target="publish">
             <param name="file" value="${file}"/>
         </foreach>
     </target>
