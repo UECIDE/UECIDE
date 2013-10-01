@@ -69,7 +69,7 @@ public class Editor extends JFrame implements RunnerListener {
     JMenu serialMenu;
     JMenu programmersMenu;
 
-    static SerialMenuListener serialMenuListener;
+    SerialMenuListener serialMenuListener;
   
     public EditorStatus status;
     EditorConsole console;
