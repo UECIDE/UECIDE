@@ -387,7 +387,7 @@ Version: ${version}${suffix}
 Maintainer: matt@majenko.co.uk
 Architecture: ${arch}
 Section: Programming
-Depends: avr-libc, avrdude, binutils-avr, extra-xdg-menus, gcc-avr, libftdi1, libjna-java, librxtx-java
+Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java, librxtx-java
 Description: ${product.cap} Development environment
 
 </echo>
