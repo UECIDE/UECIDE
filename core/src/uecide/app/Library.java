@@ -53,7 +53,6 @@ public class Library {
 
         File[] list = folder.listFiles();
         for (File f : list) {
-            System.err.println(f.getAbsolutePath());
             if (f.getName().endsWith(".cpp") || f.getName().endsWith(".c") || f.getName().endsWith(".S")) {
                 sourceFiles.add(f);
             } else if (f.getName().endsWith(".a")) {
@@ -102,7 +101,6 @@ public class Library {
     ArrayList<String> probedFiles;
 
     public void gatherIncludes(File f) {
-        System.err.println("Gather: " + f.getAbsolutePath());
         String[] data;
         try {
             FileReader in = new FileReader(f);
@@ -119,8 +117,6 @@ public class Library {
             return;
         }
         ArrayList<String> includes = new ArrayList<String>();
-
-        System.err.println("Starting gather...");
 
         for (String line : data) {
             line = line.trim();
@@ -139,25 +135,18 @@ public class Library {
                 }
                 String i = line.substring(qs, qe);
 
-                System.err.print("    Checking " + i + "...");
                 // If the file is not local to the library then go ahead and add it.
                 // Local files override other libraries.
                 File localFile = new File(folder, i);
                 if (!localFile.exists()) {
                     if (requiredLibraries.indexOf(i) == -1) {
                         requiredLibraries.add(i);
-                        System.err.println("Added");
-                    } else {
-                        System.err.println("Duplicate");
                     }
                 } else {
                     // This is a local header.  We should check it for libraries.
                     if (probedFiles.indexOf(localFile.getAbsolutePath()) == -1) {
                         probedFiles.add(localFile.getAbsolutePath());
-                        System.err.println("Checking...");
                         gatherIncludes(localFile);
-                    } else {
-                        System.err.println("Already probed");
                     }
                 }
             }

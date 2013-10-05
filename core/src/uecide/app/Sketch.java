@@ -86,11 +86,33 @@ public class Sketch implements MessageConsumer {
             Base.updateMRU(folder);
         }
         File fileList[] = folder.listFiles();
+        Arrays.sort(fileList);
+
         for (File f : fileList){
-            if (validSourceFile(f)) {
+            if (f.getName().endsWith(".ino")) {
                 loadFile(f);
             }
         }
+
+        for (File f : fileList){
+            if (f.getName().endsWith(".pde")) {
+                loadFile(f);
+            }
+        }
+
+        for (File f : fileList){
+            if (f.getName().endsWith(".cpp")) {
+                loadFile(f);
+            }
+        }
+
+        for (File f : fileList){
+            if (f.getName().endsWith(".h")) {
+                loadFile(f);
+            }
+        }
+
+
     }
 
     public boolean loadFile(File f) {
@@ -506,8 +528,6 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        System.err.println("Using command " + uploadCommand);
- 
    
         if (isJava) {
             Plugin uploader;
@@ -597,7 +617,6 @@ public class Sketch implements MessageConsumer {
 
         if (ulu.equals("serial"))
         {
-            System.err.println("Asserting serial port");
             editor.grabSerialPort();
             if (dtr || rts) {
                 assertDTRRTS(dtr, rts);
@@ -664,7 +683,6 @@ public class Sketch implements MessageConsumer {
         editor.statusNotice(Translate.t("Compiling..."));
         try {
             if (!prepare()) {
-                System.err.println("Prepare failed");
                 editor.statusNotice(Translate.t("Compile Failed"));
                 return false;
             }
@@ -1009,11 +1027,6 @@ public class Sketch implements MessageConsumer {
 
         includePaths = getIncludePaths();
 
-        System.err.println("Detected libraries:");
-        for (String s : includePaths) {
-            System.err.println("  " + s);
-        }
-
         settings.put("filename", name);
         settings.put("includes", preparePaths(includePaths));
 
@@ -1022,7 +1035,6 @@ public class Sketch implements MessageConsumer {
         tobjs = compileSketch();
         if (tobjs == null) {
             editor.statusNotice(Translate.t("Error Compiling Sketch"));
-            System.err.println("compileSketch() failed");
             return false;
         }
         objectFiles.addAll(tobjs);
@@ -1031,7 +1043,6 @@ public class Sketch implements MessageConsumer {
         editor.statusNotice(Translate.t("Compiling Libraries..."));
         if (!compileLibraries()) {
             editor.statusNotice(Translate.t("Error Compiling Libraries"));
-            System.err.println("compileLibraries() failed");
             return false;
         }
 
@@ -1040,7 +1051,6 @@ public class Sketch implements MessageConsumer {
         editor.statusNotice(Translate.t("Compiling Core..."));
         if (!compileCore(editor.core.getAPIFolder(), "core")) {
             editor.statusNotice(Translate.t("Error Compiling Core"));
-            System.err.println("compileCore() failed");
             return false;
         }
         String coreLibs = "";
@@ -1320,7 +1330,6 @@ public class Sketch implements MessageConsumer {
             String[] bfl = boardFiles.split("::");
             for (String bf : bfl) {
                 File f = new File(editor.board.getFolder(), bf);
-                System.err.println("Board file " + f.getAbsolutePath());
                 if (f.exists()) {
                     if (!f.isDirectory()) {
                         if (f.getName().endsWith(".S") || f.getName().endsWith(".c") || f.getName().endsWith(".cpp")) {
@@ -1333,7 +1342,6 @@ public class Sketch implements MessageConsumer {
 
         for (File f : fileList) {
             if (f.lastModified() > archiveDate) {
-                System.err.println("Compile " + f.getAbsolutePath());
                 File out = compileFile(f);
                 if (out == null) {
                     return false;
@@ -1603,7 +1611,6 @@ public class Sketch implements MessageConsumer {
                     oPath = System.getenv(pathvar);
                 }
                 environment.put(pathvar, oPath + File.pathSeparator + parseString(p));
-                System.err.println("Path is now " + environment.get(pathvar));
             }
         }
 
@@ -1732,6 +1739,70 @@ public class Sketch implements MessageConsumer {
         editor.message("Sketch folder: " + folder.getAbsolutePath() + "\n", 0);
         editor.message("Selected board: " + editor.board.getName() + "\n", 0);
         editor.message("Board folder: " + editor.board.getFolder().getAbsolutePath() + "\n", 0);
+    }
+
+    public void handleNewFile() {
+        String filename = JOptionPane.showInputDialog("Enter Filename");
+        if (filename == null) {
+            return;
+        }
+        File newFile = new File(folder, filename);
+        if (!validSourceFile(newFile)) {
+            JOptionPane.showMessageDialog(null, "File is not a valid source file", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (newFile.exists()) {
+            JOptionPane.showMessageDialog(null, "File already exists", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try {
+            newFile.createNewFile();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error creating file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (!newFile.exists()) {
+            JOptionPane.showMessageDialog(null, "Error creating file", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        loadFile(newFile);
+    }
+
+    public void handleRenameTab() {
+        SketchEditor activeTab = editor.getActiveTab();
+        File oldFile = activeTab.getFile();
+        if (oldFile.equals(getMainFile().getFile())) {
+            JOptionPane.showMessageDialog(null, "You cannot rename the main sketch file.  Use 'File -> Save As' instead.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String oldName = oldFile.getName();
+        String newName = JOptionPane.showInputDialog("Enter New Filename", oldName);
+        if (newName == null) {
+            return;
+        }
+        File newFile = new File(folder, newName);
+        if (!validSourceFile(newFile)) {
+            JOptionPane.showMessageDialog(null, "File is not a valid source file", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (newFile.exists()) {
+            JOptionPane.showMessageDialog(null, "File already exists", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        SketchFile sf = getFileByName(oldName);
+        try {
+            oldFile.renameTo(newFile);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error renaming file: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+            
+        if (!newFile.exists()) {
+            JOptionPane.showMessageDialog(null, "Error renaming file", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        sf.setFile(newFile);
     }
 }
 

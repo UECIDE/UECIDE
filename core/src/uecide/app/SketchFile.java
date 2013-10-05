@@ -43,5 +43,14 @@ public class SketchFile {
     public void setText(String text) {
         textArea.setText(text);
     }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File f) {
+        file = f;
+        textArea.setFile(f);
+    }
 }
 
