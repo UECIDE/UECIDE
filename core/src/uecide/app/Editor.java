@@ -624,7 +624,7 @@ public class Editor extends JFrame implements RunnerListener {
     item = new JMenuItem(Translate.t("Purge Cache Folder"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            Base.removeDir(Base.getUserCacheFolder());
+            Base.removeDir(sketch.getCacheFolder());
             statusNotice(Translate.t("Purge finished."));
         }
       });
@@ -801,6 +801,14 @@ public class Editor extends JFrame implements RunnerListener {
     // so that the OS doesn't try to insert its slow help menu.
     JMenu menu = new JMenu(Translate.t("Help"));
     JMenuItem item;
+
+    item = new JMenuItem(Translate.t("About This Sketch"));
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            sketch.about();
+        }
+    });
+    menu.add(item);
 
     if (Base.theme.get("links.gettingstarted.url") != null) {
         item = new JMenuItem(Translate.t("Getting Started"));
@@ -1324,10 +1332,8 @@ public class Editor extends JFrame implements RunnerListener {
         String fileName = file.getName();
         SketchEditor newEditor = new SketchEditor(file);
         if (sketch != null) {
-            if (sketch.importToLibraryTable != null) {
-                if (fileName.endsWith(".ino") || fileName.endsWith(".pde")) {
-                    createExtraTokens(newEditor);
-                }
+            if (fileName.endsWith(".ino") || fileName.endsWith(".pde")) {
+                createExtraTokens(newEditor);
             }
         }
         tabs.add(fileName, newEditor);
@@ -1505,13 +1511,20 @@ public class Editor extends JFrame implements RunnerListener {
   }
 
     public void importLibrary(String name) {
+        String[] bits = name.split("::");
+        HashMap<String, Library>libs = Base.getLibraryCollection(bits[0]);
+        if (libs == null) {
+            return;
+        }
+        Library lib = libs.get(bits[1]);
+        if (lib == null) {
+            return;
+        }
         SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
         ed.scrollTo(0);
         ed.beginAtomicEdit();
         ed.setCaretPosition(0);
-        ed.insert("#include <");
-        ed.insert(name);
-        ed.insert(">\n");   
+        ed.insert(lib.getInclude());
         ed.endAtomicEdit();
     }
 
@@ -1540,9 +1553,7 @@ public class Editor extends JFrame implements RunnerListener {
             }
         };
 
-        sketch.importToLibraryTable = new HashMap<String, File>();
-
-        HashMap<String, File> globalLibraries = Base.getLibraryCollection("global");
+        HashMap<String, Library> globalLibraries = Base.getLibraryCollection("global");
         if (globalLibraries != null) {
             if (globalLibraries.size() > 0) {
                 JMenu globalMenu = new JMenu(Translate.t("Standard"));
@@ -1550,16 +1561,15 @@ public class Editor extends JFrame implements RunnerListener {
                 for (String entry : entries) {
                     item = new JMenuItem(entry);
                     item.addActionListener(listener);
-                    item.setActionCommand(entry);
+                    item.setActionCommand("global::" + entry);
                     globalMenu.add(item);
                 }
                 importMenu.add(globalMenu);
-                sketch.importToLibraryTable.putAll(globalLibraries);
             }
         }
 
         if (core != null) {
-            HashMap<String, File> coreLibraries = Base.getLibraryCollection(core.getName());
+            HashMap<String, Library> coreLibraries = Base.getLibraryCollection(core.getName());
             if (coreLibraries != null) {
                 if (coreLibraries.size() > 0) {
                     JMenu coreMenu = new JMenu(core.getName());
@@ -1567,16 +1577,15 @@ public class Editor extends JFrame implements RunnerListener {
                     for (String entry : entries) {
                         item = new JMenuItem(entry);
                         item.addActionListener(listener);
-                        item.setActionCommand(entry);
+                        item.setActionCommand(core.getName() + "::" + entry);
                         coreMenu.add(item);
                     }
                     importMenu.add(coreMenu);
-                    sketch.importToLibraryTable.putAll(coreLibraries);
                 }
             }
         }
 
-        HashMap<String, File> contributedLibraries = Base.getLibraryCollection("sketchbook");
+        HashMap<String, Library> contributedLibraries = Base.getLibraryCollection("sketchbook");
         if (contributedLibraries != null) {
             if (contributedLibraries.size() > 0) {
                 int menuSize = 0;
@@ -1587,7 +1596,7 @@ public class Editor extends JFrame implements RunnerListener {
                 for (String entry : entries) {
                     item = new JMenuItem(entry);
                     item.addActionListener(listener);
-                    item.setActionCommand(entry);
+                    item.setActionCommand("sketchbook::" + entry);
                     addTo.add(item);
                     menuSize++;
                     if (menuSize == 20) {
@@ -1598,7 +1607,6 @@ public class Editor extends JFrame implements RunnerListener {
                     }
                 }
                 importMenu.add(contributedMenu);
-                sketch.importToLibraryTable.putAll(contributedLibraries);
             }
         }
     }
@@ -2146,7 +2154,9 @@ public class Editor extends JFrame implements RunnerListener {
 
     public void createExtraTokens(SketchEditor se) {
         RSyntaxTextArea ta = se.textArea;
-        String[] entries = (String[]) sketch.importToLibraryTable.keySet().toArray(new String[0]);
+        HashMap<String, Library> allLibraries = Base.getLibraryCollection("global");
+        allLibraries.putAll(Base.getLibraryCollection(core.getName()));
+        allLibraries.putAll(Base.getLibraryCollection("sketchbook"));
 
         ArduinoTokenMaker tm = (ArduinoTokenMaker)((RSyntaxDocument)ta.getDocument()).getSyntaxStyle();
 
@@ -2160,8 +2170,8 @@ public class Editor extends JFrame implements RunnerListener {
             loadKeywordsFromFile(tm, new File(board.getFolder(), "keywords.txt"));
         }
 
-        for (String entry : entries) {
-            File libFolder = sketch.importToLibraryTable.get(entry);
+        for (Library lib : allLibraries.values()) {
+            File libFolder = lib.getFolder();
             File keywords = new File(libFolder, "keywords.txt");
             if (keywords.exists()) {
                 loadKeywordsFromFile(tm, keywords);

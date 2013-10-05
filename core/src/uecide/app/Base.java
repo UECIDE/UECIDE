@@ -604,14 +604,15 @@ public class Base {
         }
     }
 
-    public static HashMap<String, File> getLibraryCollection(String name) {
+    public static HashMap<String, Library> getLibraryCollection(String name) {
         return libraryCollections.get(name);
     }
 
-    public static HashMap<String, HashMap<String, File>> libraryCollections;
+    public static HashMap<String, HashMap<String, Library>> libraryCollections;
 
     public static void gatherLibraries() {
-        libraryCollections = new HashMap<String, HashMap<String, File>>();
+        libraryCollections = new HashMap<String, HashMap<String, Library>>();
+
         libraryCollections.put("global", loadLibrariesFromFolder(getContentFile("libraries"))); // Global libraries
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
@@ -622,34 +623,21 @@ public class Base {
         libraryCollections.put("sketchbook", loadLibrariesFromFolder(new File(getSketchbookFolder(), "libraries"))); // Contributed libraries
     }
 
-    public static HashMap<String, File> loadLibrariesFromFolder(File folder) {
-        HashMap out = new HashMap<String, File>();
+    public static HashMap<String, Library> loadLibrariesFromFolder(File folder) {
+        HashMap theseLibraries = new HashMap<String, Library>();
         if (!folder.exists()) {
-            return out;
+            return theseLibraries;
         }
         File[] list = folder.listFiles();
         for (File f : list) {
             if (f.isDirectory()) {
-                File[] hlist = f.listFiles();
-                for (File h : hlist) {
-                    if (!(h.getName().endsWith(".h"))) {
-                        continue;
-                    }
-                    if (
-                        (h.getName().equals(f.getName() + ".h")) ||
-                        (h.getName().startsWith(f.getName() + "_"))
-                    ) {
-                        out.put(h.getName(), f);
-                    }
+                Library newLibrary = new Library(f);
+                if (newLibrary.isValid()) {
+                    theseLibraries.put(newLibrary.getName(), newLibrary);
                 }
-
-//                File header = new File(f, f.getName() + ".h");
-//                if (header.exists()) {
-//                    out.put(header.getName(), f);
-//                }
             }
         }
-        return out;
+        return theseLibraries;
     }
 
     /**
