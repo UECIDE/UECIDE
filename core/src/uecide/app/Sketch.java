@@ -37,10 +37,9 @@ public class Sketch implements MessageConsumer {
 
     public ArrayList<SketchFile> sketchFiles = new ArrayList<SketchFile>();
 
-    public HashMap<String, File> importedLibraries = new HashMap<String, File>();
+    public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
 
     public HashMap<String, String> settings = new HashMap<String, String>();
-    public HashMap<String, File> importToLibraryTable;
     public HashMap<String, String> parameters = new HashMap<String, String>();
 
     public Sketch(Editor ed, String path) {
@@ -206,7 +205,7 @@ public class Sketch implements MessageConsumer {
             cleanBuild();
         }
         parameters = new HashMap<String, String>();
-        importedLibraries = new HashMap<String, File>();
+        importedLibraries = new HashMap<String, Library>();
         StringBuilder combinedMain = new StringBuilder();
         SketchFile mainFile = getMainFile();
         if (Base.preferences.getBoolean("compiler.combine_ino")) {
@@ -385,7 +384,7 @@ public class Sketch implements MessageConsumer {
     public String[] gatherIncludes(SketchFile f) {
         String[] data = f.textArea.getText().split("\n"); //stripComments(f.textArea.getText()).split("\n");
         ArrayList<String> includes = new ArrayList<String>();
-
+    
         Pattern pragma = Pattern.compile("#pragma\\s+parameter\\s+(.*)\\s*=\\s*(.*)");
 
         for (String line : data) {
@@ -411,15 +410,47 @@ public class Sketch implements MessageConsumer {
                     qe = line.indexOf("\"", qs);
                 }
                 String i = line.substring(qs, qe);
-                if (importToLibraryTable.get(i) != null) {
-                    includes.add(i);
-                    if (importedLibraries.get(i) == null) {
-                        importedLibraries.put(i, importToLibraryTable.get(i));
-                    }
-                }
+                addLibraryToImportList(i);
             }
         }
         return includes.toArray(new String[includes.size()]);
+    }
+
+    public void addLibraryToImportList(String l) {
+        if (l.endsWith(".h")) {
+            l = l.substring(0, l.lastIndexOf("."));
+        }
+        HashMap<String, Library> globalLibraries = Base.getLibraryCollection("global");
+        HashMap<String, Library> coreLibraries = Base.getLibraryCollection(editor.core.getName());
+        HashMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook");
+
+        if (importedLibraries.get(l) != null) {
+            // The library has already been imported.  Do nothing
+            return;
+        }
+
+        Library lib = globalLibraries.get(l);
+        if (lib == null) {
+            lib = coreLibraries.get(l);
+        }
+        if (lib == null) {
+            lib = contribLibraries.get(l);
+        }
+
+        if (lib == null) {
+            // The library doesn't exist - either it's a system header or a library that isn't installed.
+            return;
+        }
+
+        // At this point we have a valid library that hasn't yet been imported.  Now to recurse.
+        // First add the library to the imported list
+        importedLibraries.put(l, lib);
+
+        // And then work through all the required libraries and add them.
+        ArrayList<String> requiredLibraries = lib.getRequiredLibraries();
+        for (String req : requiredLibraries) {
+            addLibraryToImportList(req);
+        }
     }
 
     public SketchFile getCodeByEditor(SketchEditor e) {
@@ -655,31 +686,20 @@ public class Sketch implements MessageConsumer {
         return name;
     }
 
-    public File[] getImportedLibraries() {
-        return importedLibraries.values().toArray(new File[importedLibraries.size()]);
-/*
-        ArrayList<File> libFiles = new ArrayList<File>();
-      
-        String[] entries = (String[]) importedLibraries.keySet().toArray(new String[0]);
-
-        for (String e : entries) {
-            libFiles.add(importedLibraries.get(e));
-        }
-        return libFiles.toArray(new File[libFiles.size()]);
-*/
+    public Collection<Library> getImportedLibraries() {
+        return importedLibraries.values();
     }
 
     public ArrayList<String> getIncludePaths() {
         ArrayList<String> libFiles = new ArrayList<String>();
       
-        String[] entries = (String[]) importedLibraries.keySet().toArray(new String[0]);
         libFiles.add(buildFolder.getAbsolutePath());
         libFiles.add(editor.board.getFolder().getAbsolutePath());
         libFiles.add(editor.core.getAPIFolder().getAbsolutePath());
         libFiles.add(editor.core.getLibraryFolder().getAbsolutePath());
 
-        for (String e : entries) {
-            libFiles.add(importedLibraries.get(e).getAbsolutePath());
+        for (Library l : getImportedLibraries()) {
+            libFiles.add(l.getFolder().getAbsolutePath());
         }
         return libFiles;
     }
@@ -988,6 +1008,11 @@ public class Sketch implements MessageConsumer {
         }
 
         includePaths = getIncludePaths();
+
+        System.err.println("Detected libraries:");
+        for (String s : includePaths) {
+            System.err.println("  " + s);
+        }
 
         settings.put("filename", name);
         settings.put("includes", preparePaths(includePaths));
@@ -1325,9 +1350,9 @@ public class Sketch implements MessageConsumer {
         return true;
     }
 
-    public boolean compileLibrary(File lib) {
+    public boolean compileLibrary(Library lib) {
         File archive = getCacheFile("lib" + lib.getName() + ".a");
-        File utility = new File(lib, "utility");
+        File utility = lib.getUtilityFolder();
         HashMap<String, String> all = mergeAllProperties();
 
         String recipe = all.get("compile.ar");
@@ -1339,15 +1364,7 @@ public class Sketch implements MessageConsumer {
             archiveDate = archive.lastModified();
         }
 
-        ArrayList<File> fileList = new ArrayList<File>();
-
-        fileList.addAll(findFilesInFolder(lib, "S", false));
-        fileList.addAll(findFilesInFolder(lib, "c", false));
-        fileList.addAll(findFilesInFolder(lib, "cpp", false));
-
-        fileList.addAll(findFilesInFolder(utility, "S", false));
-        fileList.addAll(findFilesInFolder(utility, "c", false));
-        fileList.addAll(findFilesInFolder(utility, "cpp", false));
+        ArrayList<File> fileList = lib.getSourceFiles();
 
         String origIncs = settings.get("includes");
         settings.put("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
@@ -1492,8 +1509,8 @@ public class Sketch implements MessageConsumer {
     }
 
     private boolean compileLibraries () {
-        for (File libraryFolder : getImportedLibraries()) {
-            if (!compileLibrary(libraryFolder)) {
+        for (Library lib : getImportedLibraries()) {
+            if (!compileLibrary(lib)) {
                 return false;
             }
         }
@@ -1509,13 +1526,11 @@ public class Sketch implements MessageConsumer {
         settings.put("libraries.path", getCacheFolder().getAbsolutePath());
 
         String liblist = "";
-        for (File libraryFolder : getImportedLibraries()) {
-            File cppFile = new File(libraryFolder, libraryFolder.getName() + ".cpp");
-            File cFile = new File(libraryFolder, libraryFolder.getName() + ".c");
-            File aFile = getCacheFile("lib" + libraryFolder.getName() + ".a");
+        for (Library lib : getImportedLibraries()) {
+            File aFile = getCacheFile("lib" + lib.getName() + ".a");
 
             if (aFile.exists()) {
-                liblist += "::-l" + libraryFolder.getName();
+                liblist += "::-l" + lib.getName();
             }
         }
         liblist += "";
@@ -1711,6 +1726,12 @@ public class Sketch implements MessageConsumer {
         }
 
         return total;
+    }
+
+    public void about() {
+        editor.message("Sketch folder: " + folder.getAbsolutePath() + "\n", 0);
+        editor.message("Selected board: " + editor.board.getName() + "\n", 0);
+        editor.message("Board folder: " + editor.board.getFolder().getAbsolutePath() + "\n", 0);
     }
 }
 

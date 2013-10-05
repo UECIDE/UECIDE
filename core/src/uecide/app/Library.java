@@ -1,0 +1,195 @@
+package uecide.app;
+
+import uecide.app.debug.RunnerException;
+import uecide.app.preproc.*;
+import java.util.regex.*;
+
+
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.*;
+import java.io.*;
+import java.util.*;
+import java.util.List;
+import java.util.zip.*;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+
+public class Library {
+    public ArrayList<String> requiredLibraries;
+    public File folder;
+    public String name;
+    public File examplesFolder;
+    public ArrayList<File> sourceFiles;
+    public ArrayList<File> archiveFiles;
+    public File mainInclude;
+    public File utilityFolder;
+    public HashMap<String, File>examples;
+
+    public boolean valid = false;
+
+    public boolean buildLibrary = false;
+
+    public Library(File root) {
+        name = root.getName();
+        folder = root;
+        mainInclude = new File(root, name + ".h");
+        if (!mainInclude.exists()) {
+            return;
+        }
+        utilityFolder = new File(root, "utility");
+        examplesFolder = new File(root, "examples");
+        rescan();
+        valid = true;
+    }
+
+    public void rescan() {
+        requiredLibraries = new ArrayList<String>();
+        sourceFiles = new ArrayList<File>();
+        archiveFiles = new ArrayList<File>();
+        examples = new HashMap<String, File>();
+
+        File[] list = folder.listFiles();
+        for (File f : list) {
+            System.err.println(f.getAbsolutePath());
+            if (f.getName().endsWith(".cpp") || f.getName().endsWith(".c") || f.getName().endsWith(".S")) {
+                sourceFiles.add(f);
+            } else if (f.getName().endsWith(".a")) {
+                archiveFiles.add(f);
+            }
+        }
+
+        if (utilityFolder.exists() && utilityFolder.isDirectory()) {
+            list = utilityFolder.listFiles();
+            for (File f : list) {
+                if (f.getName().endsWith(".cpp") || f.getName().endsWith(".c") || f.getName().endsWith(".S")) {
+                    sourceFiles.add(f);
+                } else if (f.getName().endsWith(".a")) {
+                    archiveFiles.add(f);
+                }
+            }
+        }
+
+        if (examplesFolder.exists() && examplesFolder.isDirectory()) {
+            list = examplesFolder.listFiles();
+            for (File f : list) {
+                if (f.isDirectory()) {
+                    String sketchName = f.getName();
+                    File sketchFile = new File(f, sketchName + ".pde");
+                    if (sketchFile.exists()) {
+                        examples.put(sketchName, f);
+                    } else {
+                        sketchFile = new File(f, sketchName + ".ino");
+                        if (sketchFile.exists()) {
+                            examples.put(sketchName, f);
+                        }
+                    }
+                }
+            }
+        }
+
+        probedFiles = new ArrayList<String>();
+
+        gatherIncludes(mainInclude);
+
+        for (File f : sourceFiles) {
+            gatherIncludes(f);
+        }
+    }
+
+    ArrayList<String> probedFiles;
+
+    public void gatherIncludes(File f) {
+        System.err.println("Gather: " + f.getAbsolutePath());
+        String[] data;
+        try {
+            FileReader in = new FileReader(f);
+            StringBuilder contents = new StringBuilder();
+            char[] buffer = new char[4096];
+            int read = 0;
+            do {
+                contents.append(buffer, 0, read);
+                read = in.read(buffer);
+            } while (read >= 0);
+            data = contents.toString().split("\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+        ArrayList<String> includes = new ArrayList<String>();
+
+        System.err.println("Starting gather...");
+
+        for (String line : data) {
+            line = line.trim();
+            if (line.startsWith("#include")) {
+                int qs = line.indexOf("<");
+                if (qs == -1) {
+                    qs = line.indexOf("\"");
+                }
+                if (qs == -1) {
+                    continue;
+                }
+                qs++;
+                int qe = line.indexOf(">");
+                if (qe == -1) {
+                    qe = line.indexOf("\"", qs);
+                }
+                String i = line.substring(qs, qe);
+
+                System.err.print("    Checking " + i + "...");
+                // If the file is not local to the library then go ahead and add it.
+                // Local files override other libraries.
+                File localFile = new File(folder, i);
+                if (!localFile.exists()) {
+                    if (requiredLibraries.indexOf(i) == -1) {
+                        requiredLibraries.add(i);
+                        System.err.println("Added");
+                    } else {
+                        System.err.println("Duplicate");
+                    }
+                } else {
+                    // This is a local header.  We should check it for libraries.
+                    if (probedFiles.indexOf(localFile.getAbsolutePath()) == -1) {
+                        probedFiles.add(localFile.getAbsolutePath());
+                        System.err.println("Checking...");
+                        gatherIncludes(localFile);
+                    } else {
+                        System.err.println("Already probed");
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public File getFolder() {
+        return folder;
+    }
+
+    public File getUtilityFolder() {
+        return utilityFolder;
+    }
+
+    public String getInclude() {
+        return "#include <" + mainInclude.getName() + ">\n";
+    }
+
+    public ArrayList<File> getSourceFiles() {
+        return sourceFiles;
+    }
+
+    public ArrayList<String> getRequiredLibraries() {
+        return requiredLibraries;
+    }
+}
+

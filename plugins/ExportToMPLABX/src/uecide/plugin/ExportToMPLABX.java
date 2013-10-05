@@ -226,7 +226,7 @@ public class ExportToMPLABX extends BasePlugin {
             ArrayList<File> sketchC = gatherFiles(sketch.getFolder(), ".c");
             ArrayList<File> sketchH = gatherFiles(sketch.getFolder(), ".h");
             ArrayList<File> sketchS = gatherFiles(sketch.getFolder(), ".S");
-            File[] libs = sketch.getImportedLibraries();
+            Collection<Library> libs = sketch.getImportedLibraries();
 
             ArrayList<File> coreCPP = gatherFiles(core.getAPIFolder(), ".cpp");
             ArrayList<File> coreC = gatherFiles(core.getAPIFolder(), ".c");
@@ -240,7 +240,7 @@ public class ExportToMPLABX extends BasePlugin {
 
             ArrayList<LibraryContainer> libraries = new ArrayList<LibraryContainer>();
 
-            for (File lib : libs) {
+            for (Library lib : libs) {
                 libraries.add(new LibraryContainer(lib));
             }
 
@@ -537,8 +537,11 @@ public class ExportToMPLABX extends BasePlugin {
         public String name;
         public boolean hasUtility;
 
-        public LibraryContainer(File root) {
-            this.root = root;
+        public Library library;
+
+        public LibraryContainer(Library lib) {
+            library = lib;
+            this.root = lib.getFolder();
             this.name = root.getName();
             cppFiles = gatherFiles(root, ".cpp"); 
             cFiles = gatherFiles(root, ".c"); 
