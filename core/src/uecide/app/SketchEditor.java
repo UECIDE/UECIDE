@@ -294,6 +294,15 @@ class SketchEditor extends JPanel {
         }
     }
 
+    public void setFile(File f) {
+        file = f;
+        JTabbedPane tabs = (JTabbedPane)this.getParent();
+        if (tabs != null) {
+            int myIndex = tabs.indexOfComponent(this);
+            tabs.setTitleAt(myIndex, f.getName());
+        }
+    }
+
     public void undo() {
         textArea.undoLastAction();
     }

@@ -648,10 +648,19 @@ public class Editor extends JFrame implements RunnerListener {
     sketchMenu.add(item);
     item.setEnabled(Base.openFolderAvailable());
 
+    item = newJMenuItem(Translate.t("Show Build Folder"), 'K');
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          Base.openFolder(sketch.getBuildFolder());
+        }
+      });
+    sketchMenu.add(item);
+    item.setEnabled(Base.openFolderAvailable());
+
     item = newJMenuItemShift(Translate.t("New File..."), 'N');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          handleNewFile();
+          sketch.handleNewFile();
         }
       });
     sketchMenu.add(item);
@@ -660,6 +669,14 @@ public class Editor extends JFrame implements RunnerListener {
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           sketch.handleAddFile();
+        }
+      });
+    sketchMenu.add(item);
+
+    item = new JMenuItem(Translate.t("Rename Tab..."));
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          sketch.handleRenameTab();
         }
       });
     sketchMenu.add(item);
@@ -1368,7 +1385,6 @@ public class Editor extends JFrame implements RunnerListener {
     }
 
     public boolean handleSaveAs() {
-        System.out.println("Saving AS");
         statusNotice(Translate.t("Saving..."));
         try {
             if (sketch.saveAs()) {
@@ -1544,6 +1560,16 @@ public class Editor extends JFrame implements RunnerListener {
             }
         });
         importMenu.add(item);
+  
+        item = new JMenuItem(Translate.t("Rescan Libraries"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Base.gatherLibraries();
+                rebuildImportMenu();
+            }
+        });
+        importMenu.add(item);
+  
         importMenu.addSeparator();
 
 
@@ -1805,7 +1831,6 @@ public class Editor extends JFrame implements RunnerListener {
 
     public void selectProgrammer(String p) {
         programmer = p;
-        System.err.println("selectProgrammer(" + p + ")");
         if (board != null) {
             Base.preferences.set("sketch.upload." + board.getName(), p);
         }
@@ -1916,8 +1941,6 @@ public class Editor extends JFrame implements RunnerListener {
                 programmer = null;
             }
         }
-
-        System.err.println("selectBoard() programmer: " + programmer);
 
         rebuildProgrammersMenu();
 
@@ -2250,6 +2273,10 @@ public class Editor extends JFrame implements RunnerListener {
 
     public void selectTab(int tab) {
         tabs.setSelectedIndex(tab);
+    }
+
+    public SketchEditor getActiveTab() {
+        return (SketchEditor) tabs.getSelectedComponent();
     }
 
     public void reportSize() {
