@@ -2,6 +2,9 @@
 # GUI with chipKIT related colours
 #
 
+window.laf = default
+window.laf.linux = com.sun.java.swing.plaf.gtk.GTKLookAndFeel
+window.laf.windows = com.sun.java.swing.plaf.windows.WindowsLookAndFeel
 
 # GUI - STATUS
 status.notice.fgcolor = #000000
@@ -18,12 +21,15 @@ editor.font = SansSerif,plain,24
 # GUI - TABS
 # settings for the tabs at the top
 # (tab images are stored in the lib/theme folder)
-header.bgcolor = #666666
+header.bgcolor = #660000
 header.text.selected.color = #000000
 header.text.unselected.color = #ffffff
 header.text.font = SansSerif,plain,12
 header.text.selectedfont = SansSerif,bold,10
 header.text.unselectedfont = SansSerif,plain,10
+
+tabs.bgcolor = #bbbbbb
+tabs.fgcolor = #000000
 
 
 # GUI - CONSOLE
