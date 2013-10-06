@@ -128,6 +128,7 @@ splash.message.y = 170
 
 product=uecide
 product.cap=UECIDE
+publisher=Majenko Technologies
 
 links.homepage.name=Visit uecide.org
 links.homepage.url=http://uecide.org

@@ -1,4 +1,4 @@
-version=0.7.5b
+version=0.7.5c
 download.enable=yes
 
 default.theme=uecide
@@ -8,6 +8,7 @@ default.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,PluginManager
 default.suffix=
 default.compilers=
 default.publish=yes
+default.build64=no
 
 prfm.theme=uecide
 prfm.cores=chipKIT
@@ -16,11 +17,13 @@ prfm.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,ConvertWaveFile,Plug
 prfm.suffix=-prfm
 prfm.compilers=pic32-gcc
 prfm.publish=no
+prfm.build64=yes
 
 mpide.theme=mpide
-mpide.cores=pic32
-mpide.boards=Majenko
+mpide.cores=chipKIT
+mpide.boards=Cerebot-cerebot32mx4,Cerebot-cerebot32mx7,Cerebot-cerebot_mx3ck_512,Cerebot-cerebot_mx3ck,Cerebot-cerebot_mx4ck,Cerebot-cerebot_mx7ck,chipKIT-chipkit_DP32,chipKIT-chipkit_Pi,chipKIT-chipkit_uc32,chipKIT-chipkit_WF32,chipKIT-cmod,chipKIT-mega_pic32,chipKIT-mega_usb_pic32,chipKIT-uno_pic32,CUI32-cui32,CUI32-CUI32stem,Fubarino-fubarino_mini_dev,Fubarino-fubarino_mini,Fubarino-fubarino_sd,Fubarino-fubarino_sd_seeed,Microchip-mc_pic32_ethernet_starterkit,Microchip-mc_pic32_explorer16,Microchip-mc_pic32_starterkit,Microchip-mc_pic32_usb_starterkit,MicroElektronika-mikroe_mikromedia,MicroElektronika-mikroe_multimedia,Olimex-Olimex_Pinguino32,PONTECH-quick240_usb_pic32,PONTECH-usbono_pic32,UBW32-ubw32_mx460,UBW32-ubw32_mx795
 mpide.plugins=Archiver,AutoFormat,FixEncoding,SerialTerminal,PluginManager
 mpide.suffix=
-mpide.compilers=
+mpide.compilers=pic32-gcc
 mpide.publish=no
+mpide.build64=yes

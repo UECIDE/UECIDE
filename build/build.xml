@@ -299,8 +299,8 @@ Building for ${brand} version ${version}${suffix}
       <param name="target.platform" value="linux" />
     </antcall>
 
-    <copy todir="linux/work/lib/rxtx" file="linux/dist/lib/librxtxSerial32.so" />
-    <copy todir="linux/work/lib/rxtx" file="linux/dist/lib/librxtxSerial64.so" />
+    <copy tofile="linux/work/lib/32/librxtxSerial.so" file="linux/dist/lib/librxtxSerial32.so" />
+    <copy tofile="linux/work/lib/64/librxtxSerial.so" file="linux/dist/lib/librxtxSerial64.so" />
 
     <copy tofile="linux/work/${product}" file="linux/dist/linuxrunner" />
     <chmod perm="755" file="linux/work/${product}" />
@@ -497,6 +497,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     <target name="windows-installer">
         <copy todir="windows" file="windows/dist/script.nsi" />
         <replace file="windows/script.nsi" token="%VERSION%" value="${version}${suffix}-${itype}" />
+        <replace file="windows/script.nsi" token="%PRODUCT%" value="${product}" />
+        <replace file="windows/script.nsi" token="%PRODUCTCAP%" value="${product.cap}" />
+        <replace file="windows/script.nsi" token="%PUBLISHER%" value="${publisher}" />
+        <replace file="windows/script.nsi" token="%THEME%" value="${theme}" />
         <exec executable="makensis">
             <arg value="windows/script.nsi"/>
         </exec>
@@ -577,16 +581,6 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         </foreach>
     </target>
 
-    <target name="upgrade-auto">
-        <antcall target="clean" />
-        <antcall target="upgrade-dist" />
-        <copy todir="/var/www/uecide/downloads" file="upgrade/${product}-${version}${suffix}-upgrade.zip" overwrite="true" />
-        <copy todir="/var/www/uecide/p/plugins" flatten="true">
-            <fileset dir="../plugins" includes="*/*.jar" />
-        </copy>
-        <delete file="upgrade/${product}-${version}${suffix}-upgrade.zip" />
-    </target>
-
     <target name="tt">
         <antcall target="publish-all">
             <param name="file" value="linux/${product}-${version}${suffix}-armhf.deb" />
@@ -645,11 +639,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     </target>
 
     <target name="auto">
-        <!--antcall target="upgrade-auto" /-->
+        <antcall target="windows-lite-auto" />
+        <antcall target="windows-auto" />
         <antcall target="linux-auto" />
         <antcall target="macosx-auto" />
-        <antcall target="windows-auto" />
-        <antcall target="windows-lite-auto" />
         <antcall target="clean" />
     </target>
 
