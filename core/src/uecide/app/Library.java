@@ -118,9 +118,12 @@ public class Library {
         }
         ArrayList<String> includes = new ArrayList<String>();
 
+//        System.err.println(f.getAbsolutePath());
+
         for (String line : data) {
             line = line.trim();
             if (line.startsWith("#include")) {
+                //System.err.println("    " + line);
                 int qs = line.indexOf("<");
                 if (qs == -1) {
                     qs = line.indexOf("\"");
