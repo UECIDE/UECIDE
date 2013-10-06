@@ -1545,11 +1545,25 @@ public class Sketch implements MessageConsumer {
 
         settings.put("libraries.path", getCacheFolder().getAbsolutePath());
 
+        String neverInclude = all.get("neverinclude");
+        if (neverInclude == null) {
+            neverInclude = "";
+        }
+        neverInclude.replaceAll(" ", "::");
+        String neverIncludes[] = neverInclude.split("::");
+
         String liblist = "";
         for (Library lib : getImportedLibraries()) {
             File aFile = getCacheFile("lib" + lib.getName() + ".a");
+            String headerName = lib.getName() + ".h";
+            boolean inc = true;
+            for (String ni : neverIncludes) {
+                if (ni.equals(headerName)) {
+                    inc = false;
+                }
+            }
 
-            if (aFile.exists()) {
+            if (aFile.exists() && inc) {
                 liblist += "::-l" + lib.getName();
             }
         }
