@@ -115,13 +115,19 @@ linestatus.font	   = SansSerif,plain,10
 linestatus.height  = 20
 product=mpide
 product.cap=MPIDE
+publisher=chipKIT
 
-about.version.x = 5 
-about.version.y = 19
-about.version.color = #000000
-about.version.font = SansSerif,normal,14
+about.version.x = 312 
+about.version.y = 190
+about.version.color = #777777
+about.version.font = SansSerif,normal,18
+splash.message.x = 220
+splash.message.y = 150
 
 links.homepage.name=Visit chipKIT.net
 links.homepage.url=http://chipkit.net
 links.forums.name=Visit forums
 links.forums.url=http://chipkit.org/forum
+
+plugins.url=http://uecide.org/plugins.php
+

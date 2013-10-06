@@ -107,6 +107,18 @@ public class Sketch implements MessageConsumer {
         }
 
         for (File f : fileList){
+            if (f.getName().endsWith(".c")) {
+                loadFile(f);
+            }
+        }
+
+        for (File f : fileList){
+            if (f.getName().endsWith(".S")) {
+                loadFile(f);
+            }
+        }
+
+        for (File f : fileList){
             if (f.getName().endsWith(".h")) {
                 loadFile(f);
             }
@@ -407,14 +419,14 @@ public class Sketch implements MessageConsumer {
         String[] data = f.textArea.getText().split("\n"); //stripComments(f.textArea.getText()).split("\n");
         ArrayList<String> includes = new ArrayList<String>();
     
-        Pattern pragma = Pattern.compile("#pragma\\s+parameter\\s+(.*)\\s*=\\s*(.*)");
+        Pattern pragma = Pattern.compile("#pragma\\s+parameter\\s+([^=]+)\\s*=\\s*(.*)");
 
         for (String line : data) {
             line = line.trim();
             if (line.startsWith("#pragma")) {
                 Matcher m = pragma.matcher(line);
                 if (m.find()) {
-                    parameters.put(m.group(1), m.group(2));
+                    parameters.put(m.group(1), m.group(2).replaceAll(" ", "::"));
                 }
                 continue;
             }
