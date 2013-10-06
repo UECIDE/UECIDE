@@ -264,6 +264,7 @@ public class Editor extends JFrame implements RunnerListener {
         upper.add(toolbar);
 
         tabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+
         upper.add(tabs);
 
         // assemble console panel, consisting of status area and the console itself
