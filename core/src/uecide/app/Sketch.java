@@ -1010,10 +1010,25 @@ public class Sketch implements MessageConsumer {
                             int tn = editor.getTabByFile(f);
                             editor.selectTab(tn);
                             f.textArea.setCaretLineNumber(Integer.parseInt(match.group(2)));
-                            f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), new Color(255, 200, 200));
+                            f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), Base.theme.getColor("editor.error.bgcolor"));
                         }
                     } else {
-                        editor.console.message(m, true, false);
+
+                        p = Pattern.compile(editor.compiler.getWarningRegex());
+                        match = p.matcher(m);
+                        if (match.find()) {
+                            String filename = match.group(1);
+                            if (filename.startsWith(getBuildFolder().getAbsolutePath())) {
+                                filename = filename.substring(getBuildFolder().getAbsolutePath().length() + 1);
+                            }
+                            editor.console.message("Warning at line " + match.group(2) + " in file " + filename + ":\n    " + match.group(3) + "\n", true, false);
+                            SketchFile f = getFileByName(filename);
+                            if (f != null) {
+                                f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), Base.theme.getColor("editor.warning.bgcolor"));
+                            }
+                        } else {
+                            editor.console.message(m, true, false);
+                        }
                     }
                 } else {
                     stderrRedirect.print(m);

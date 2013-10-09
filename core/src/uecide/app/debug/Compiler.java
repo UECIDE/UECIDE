@@ -52,5 +52,13 @@ public class Compiler {
         }
         return r;
     }
+
+    public String getWarningRegex() {
+        String r = properties.get("compiler.warning");
+        if (r == null) {
+            r = "^([^:]+):(\\d+): warning: (.*)";
+        }
+        return r;
+    }
 }
 
