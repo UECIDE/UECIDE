@@ -1047,6 +1047,7 @@ public class Sketch implements MessageConsumer {
         ArrayList<String> includePaths;
         List<File> objectFiles = new ArrayList<File>();
         List<File> tobjs;
+        HashMap<String, String> all = mergeAllProperties();
 
         for (SketchFile f : sketchFiles) {
             f.textArea.removeAllLineHighlights();
@@ -1083,6 +1084,11 @@ public class Sketch implements MessageConsumer {
         String coreLibs = "";
         setCompilingProgress(50);
 
+        String liboption = all.get("compile.liboption");
+        if (liboption == null) {
+            liboption = "-l${library}";
+        }
+
         if (parameters.get("extension") != null) {
             editor.statusNotice(Translate.t("Compiling Extension..."));
             File extension = new File(parameters.get("extension"));
@@ -1090,11 +1096,13 @@ public class Sketch implements MessageConsumer {
                 if (!compileCore(extension, extension.getName())) {
                     return false;
                 }
-                coreLibs += "::-l" + extension.getName();
+                settings.put("library", extension.getName());
+                coreLibs += "::" + parseString(liboption);
             }
         }
 
-        coreLibs += "::-lcore";
+        settings.put("library", "core");
+        coreLibs += "::" + parseString(liboption);
 
         editor.statusNotice(Translate.t("Linking Sketch..."));
         settings.put("filename", name);
@@ -1111,7 +1119,6 @@ public class Sketch implements MessageConsumer {
         }
         setCompilingProgress(70);
 
-        HashMap<String, String> all = mergeAllProperties();
 
         if (all.get("compile.lss") != null) {
             if (Base.preferences.getBoolean("compiler.generate_lss")) {
@@ -1203,6 +1210,8 @@ public class Sketch implements MessageConsumer {
 
             if (mid.equals("compiler.root")) {
                 mid = editor.compiler.getFolder().getAbsolutePath();
+            } else if (mid.equals("cache.root")) {
+                mid = getCacheFolder().getAbsolutePath();
             } else if (mid.equals("core.root")) {
                 mid = editor.core.getFolder().getAbsolutePath();
             } else if (mid.equals("board.root")) {
@@ -1567,6 +1576,11 @@ public class Sketch implements MessageConsumer {
         neverInclude.replaceAll(" ", "::");
         String neverIncludes[] = neverInclude.split("::");
 
+        String liboption = all.get("compile.liboption");
+        if (liboption == null) {
+            liboption = "-l${library}";
+        }
+
         String liblist = "";
         for (Library lib : getImportedLibraries()) {
             File aFile = getCacheFile("lib" + lib.getName() + ".a");
@@ -1579,7 +1593,8 @@ public class Sketch implements MessageConsumer {
             }
 
             if (aFile.exists() && inc) {
-                liblist += "::-l" + lib.getName();
+                settings.put("library", lib.getName());
+                liblist += "::" + parseString(liboption);
             }
         }
         liblist += "";
