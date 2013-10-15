@@ -1646,17 +1646,33 @@ public class Editor extends JFrame implements RunnerListener {
 
         if (core != null) {
             File coreExamples = core.getExamplesFolder();
-
-            if (coreExamples.isDirectory()) {
-                addSketches(examplesMenu, coreExamples);
-                examplesMenu.addSeparator();
+            if (coreExamples != null) {
+                if (coreExamples.isDirectory()) {
+                    addSketches(examplesMenu, coreExamples);
+                    examplesMenu.addSeparator();
+                }
             }
+
             JMenu coreItem = new JMenu(core.get("name", core.getName()));
             examplesMenu.add(coreItem);
+            File coreLibs = core.getLibraryFolder();
+            if (coreLibs != null) {
+                if (coreLibs.isDirectory()) {
+                    addSketches(coreItem, coreLibs);
+                }
+            }
+        }
 
-            File coreLibs = new File(core.getFolder(), "libraries");
-            if (coreLibs.isDirectory()) {
-                addSketches(coreItem, coreLibs);
+        if (board != null) {
+            File boardExamples = board.getExamplesFolder();
+            if (boardExamples != null) {
+                if (boardExamples.isDirectory()) {
+                    JMenu boardItem = new JMenu(board.getLongName());
+                    addSketches(boardItem, boardExamples);
+                    if (boardItem.getMenuComponentCount() > 0) {
+                        examplesMenu.add(boardItem);
+                    }
+                }
             }
         }
 

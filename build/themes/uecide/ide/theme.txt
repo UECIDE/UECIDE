@@ -49,5 +49,5 @@ plugins.url=http://uecide.org/plugins.php
 editor.line.enabled=true
 editor.line.fade=true
 
-editor.error.bgcolor=#FF6666
-editor.warning.bgcolor=#FFFF66
+editor.compile.error.bgcolor=#FFaaaa
+editor.compile.warning.bgcolor=#FFFFaa
