@@ -1010,7 +1010,7 @@ public class Sketch implements MessageConsumer {
                             int tn = editor.getTabByFile(f);
                             editor.selectTab(tn);
                             f.textArea.setCaretLineNumber(Integer.parseInt(match.group(2)));
-                            f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), Base.theme.getColor("editor.error.bgcolor"));
+                            f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), Base.theme.getColor("editor.compile.error.bgcolor"));
                         }
                     } else {
 
@@ -1024,7 +1024,7 @@ public class Sketch implements MessageConsumer {
                             editor.console.message("Warning at line " + match.group(2) + " in file " + filename + ":\n    " + match.group(3) + "\n", true, false);
                             SketchFile f = getFileByName(filename);
                             if (f != null) {
-                                f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), Base.theme.getColor("editor.warning.bgcolor"));
+                                f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), Base.theme.getColor("editor.compile.warning.bgcolor"));
                             }
                         } else {
                             editor.console.message(m, true, false);

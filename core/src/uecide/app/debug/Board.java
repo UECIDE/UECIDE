@@ -60,6 +60,22 @@ public class Board implements Comparable {
         return longname;
     }
 
+    public File getExamplesFolder() {
+        String ex = boardPreferences.get("board.examples");
+        if (ex == null) {
+            ex = "examples";
+        }
+        return new File (folder, ex);
+    }
+
+    public File getLibraryFolder() {
+        String ex = boardPreferences.get("board.libraries");
+        if (ex == null) {
+            ex = "libraries";
+        }
+        return new File (folder, ex);
+    }
+
     public boolean isValid() {
         return valid;
     }
