@@ -243,8 +243,9 @@ public class Sketch implements MessageConsumer {
         StringBuilder combinedMain = new StringBuilder();
         SketchFile mainFile = getMainFile();
         if (Base.preferences.getBoolean("compiler.combine_ino")) {
-            //combinedMain.append("#line 1 \"" + mainFile.file.getName() + "\"\n");
+            combinedMain.append("#line 1 \"" + mainFile.file.getName() + "\"\n");
             combinedMain.append(mainFile.textArea.getText());
+            combinedMain.append("\n");
         }
         for (SketchFile f : sketchFiles) {
             String lcn = f.file.getName().toLowerCase();
@@ -261,8 +262,9 @@ public class Sketch implements MessageConsumer {
 
                 if (Base.preferences.getBoolean("compiler.combine_ino")) {
                     if (!(f.equals(mainFile))) {
-                    //    combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
+                        combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
                         combinedMain.append(f.textArea.getText());
+                        combinedMain.append("\n");
                     }
                 } else {
                     String rawData = f.textArea.getText();
