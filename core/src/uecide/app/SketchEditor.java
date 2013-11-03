@@ -45,10 +45,7 @@ class SketchEditor extends JPanel {
         if (file.getName().endsWith(".S")) {
             textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_AVR);
         }
-        textArea.setCodeFoldingEnabled(true);
-        textArea.setAntiAliasingEnabled(true);
-        textArea.setMarkOccurrences(true);
-        textArea.setTabSize(4);
+
         Document d = textArea.getDocument();
         d.addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
@@ -61,7 +58,27 @@ class SketchEditor extends JPanel {
                 setModified(true);
             }
         });
+
         scrollPane = new RTextScrollPane(textArea);
+        refreshSettings();
+        this.add(scrollPane, BorderLayout.CENTER);
+        if (file != null) {
+            loadFile(file);
+        }
+    }
+
+    public void refreshSettings() {
+        textArea.setCodeFoldingEnabled(true);
+        textArea.setAntiAliasingEnabled(true);
+        textArea.setMarkOccurrences(true);
+        if (Base.preferences.get("editor.tabsize") != null) {
+            textArea.setTabSize(Base.preferences.getInteger("editor.tabsize"));
+        } else {
+            textArea.setTabSize(4);
+        }
+        textArea.setTabsEmulated(Base.preferences.getBoolean("editor.expandtabs"));
+        textArea.setPaintTabLines(Base.preferences.getBoolean("editor.showtabs"));
+
         scrollPane.setFoldIndicatorEnabled(true);
         setBackground(Base.theme.getColor("editor.bgcolor"));
         textArea.setForeground(Base.theme.getColor("editor.fgcolor"));
@@ -138,10 +155,6 @@ class SketchEditor extends JPanel {
         scheme = textArea.getSyntaxScheme();
         applyThemeSettings();
 
-        this.add(scrollPane, BorderLayout.CENTER);
-        if (file != null) {
-            loadFile(file);
-        }
     }
 
     public boolean loadFile(File file) {
