@@ -55,24 +55,27 @@ public class Preferences {
   JFrame dialog;
   int wide, high;
 
-  JTextField sketchbookLocationField;
-  JCheckBox exportSeparateBox;
-  JCheckBox deletePreviousBox;
-  JCheckBox externalEditorBox;
-  JCheckBox memoryOverrideBox;
-  JTextField memoryField;
-  JTextField editorFontField;
-  JTextField consoleFontField;
-  JCheckBox autoAssociateBox;
-  JCheckBox saveHex;
-  JCheckBox saveLss;
-  JCheckBox createLss;
-  JCheckBox disablePrototypes;
-  JCheckBox combineIno;
-  JCheckBox verboseCompile;
-  JCheckBox verboseUpload;
+    JTextField sketchbookLocationField;
+    JCheckBox exportSeparateBox;
+    JCheckBox deletePreviousBox;
+    JCheckBox externalEditorBox;
+    JCheckBox memoryOverrideBox;
+    JTextField memoryField;
+    JTextField editorFontField;
+    JTextField consoleFontField;
+    JCheckBox autoAssociateBox;
+    JCheckBox saveHex;
+    JCheckBox saveLss;
+    JCheckBox createLss;
+    JCheckBox disablePrototypes;
+    JCheckBox combineIno;
+    JCheckBox verboseCompile;
+    JCheckBox verboseUpload;
+    JCheckBox useSpacesForTabs;
+    JCheckBox visibleTabs;
+    JTextField tabSize;
 
-  JTabbedPane tabs;
+    JTabbedPane tabs;
 
     JTextField pluginsLocationField;
     JTextField cacheLocationField;
@@ -259,7 +262,7 @@ public class Preferences {
     public void populateEditorSettings(JPanel p) {
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 2;
+        c.gridwidth = 3;
         c.gridheight = 1;
         c.gridx = 0;
         c.gridy = 0;
@@ -268,7 +271,7 @@ public class Preferences {
         JButton button;
         label = new JLabel("Sketchbook location:");
         p.add(label, c);
-        c.gridwidth = 1;
+        c.gridwidth = 2;
         c.gridy++;
         sketchbookLocationField = new JTextField(40);
         p.add(sketchbookLocationField, c);
@@ -284,16 +287,18 @@ public class Preferences {
                 }
             }
         });
-        c.gridx = 1;
+        c.gridx = 2;
+        c.gridwidth = 1;
         p.add(button, c);
 
         c.gridx = 0;
         c.gridy++;
-
+        c.gridwidth = 3;
         label = new JLabel("Editor font: ");
         p.add(label, c);
 
         c.gridy++;
+        c.gridwidth = 2;
         editorFontField = new JTextField(40);
         editorFontField.setEditable(false);
         p.add(editorFontField, c);
@@ -301,7 +306,8 @@ public class Preferences {
         editorFontField.setText(Base.preferences.get("editor.font"));
 
         JButton selectEditorFont = new JButton(Translate.t("Select Font..."));
-        c.gridx = 1;
+        c.gridx = 2;
+        c.gridwidth = 1;
         p.add(selectEditorFont, c);
 
         final Container parent = p;
@@ -319,10 +325,12 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridy++;
+        c.gridwidth = 3;
 
         label = new JLabel("Console font: ");
         p.add(label, c);
         c.gridy++;
+        c.gridwidth = 2;
 
         consoleFontField = new JTextField(40);
         consoleFontField.setEditable(false);
@@ -331,7 +339,8 @@ public class Preferences {
         consoleFontField.setText(Base.preferences.get("console.font"));
 
         JButton selectConsoleFont = new JButton(Translate.t("Select Font..."));
-        c.gridx = 1;
+        c.gridx = 2;
+        c.gridwidth = 1;
         p.add(selectConsoleFont, c);
 
         selectConsoleFont.addActionListener(new ActionListener() {
@@ -345,7 +354,9 @@ public class Preferences {
                 }
             }
         });
+        c.gridx = 0;
         c.gridy++;
+        c.gridwidth = 3;
         externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
         p.add(externalEditorBox, c);
 
@@ -355,6 +366,24 @@ public class Preferences {
             new JCheckBox("Automatically associate .pde files with " + Base.theme.get("product.cap"));
           p.add(autoAssociateBox, c);
         }
+        c.gridx = 0;
+        c.gridy++;
+        useSpacesForTabs = new JCheckBox(Translate.t("Editor uses spaces for tabs"));
+        p.add(useSpacesForTabs, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        visibleTabs = new JCheckBox(Translate.t("Show tabs and indents"));
+        p.add(visibleTabs, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 1;
+        label = new JLabel("Number of spaces to use for a tab:");
+        p.add(label, c);
+        c.gridx++;
+        tabSize = new JTextField(5);
+        p.add(tabSize, c);
     }
 
     public void populateLocationSettings(JPanel p) {
@@ -615,6 +644,10 @@ public class Preferences {
     Base.preferences.setBoolean("compiler.verbose", verboseCompile.isSelected());
     Base.preferences.setBoolean("export.verbose", verboseUpload.isSelected());
 
+    Base.preferences.setBoolean("editor.expandtabs", useSpacesForTabs.isSelected());
+    Base.preferences.setBoolean("editor.showtabs", visibleTabs.isSelected());
+    Base.preferences.set("editor.tabsize", tabSize.getText());
+
     File f = new File(sketchbookLocationField.getText());
     if (!f.exists()) {
         f.mkdirs();
@@ -663,7 +696,7 @@ public class Preferences {
     this.editor = editor;
 
     // set all settings entry boxes to their actual status
-    deletePreviousBox.  setSelected(Base.preferences.getBoolean("export.delete_target_folder"));
+    deletePreviousBox.setSelected(Base.preferences.getBoolean("export.delete_target_folder"));
     saveHex.setSelected(Base.preferences.getBoolean("export.save_hex"));
     createLss.setSelected(Base.preferences.getBoolean("compiler.generate_lss"));
     saveLss.setEnabled(Base.preferences.getBoolean("compiler.generate_lss"));
@@ -672,6 +705,10 @@ public class Preferences {
     combineIno.setSelected(Base.preferences.getBoolean("compiler.combine_ino"));
     verboseCompile.setSelected(Base.preferences.getBoolean("compiler.verbose"));
     verboseUpload.setSelected(Base.preferences.getBoolean("export.verbose"));
+
+    useSpacesForTabs.setSelected(Base.preferences.getBoolean("editor.expandtabs"));
+    visibleTabs.setSelected(Base.preferences.getBoolean("editor.showtabs"));
+    tabSize.setText(Base.preferences.get("editor.tabsize") == null ? "4" : Base.preferences.get("editor.tabsize"));
 
     sketchbookLocationField.setText(Base.preferences.get("sketchbook.path"));
     externalEditorBox.setSelected(Base.preferences.getBoolean("editor.external"));

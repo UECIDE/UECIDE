@@ -462,6 +462,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     for (int i = 0; i < tabs.getTabCount(); i++) {
         SketchEditor ed = (SketchEditor) tabs.getComponentAt(i);
+        ed.refreshSettings();
         ed.setEditable(!external);
         ed.setBackground( external ?
             Base.theme.getColor("editor.external.bgcolor") :
