@@ -1772,17 +1772,30 @@ public class Sketch implements MessageConsumer {
     public HashMap<String, String> mergeAllProperties() {
         HashMap<String, String> total = new HashMap<String, String>();
 
-        if (editor.compiler == null) System.err.println("==> No compiler");
-        if (editor.core == null) System.err.println("==> No core");
-        if (editor.board == null) System.err.println("==> No board");
+        if (editor.compiler == null) {
+            System.err.println("==> No compiler");
+        } else if (editor.compiler.getProperties() == null) {
+            System.err.println("==> No compiler properties");
+        } else {
+            total.putAll(editor.compiler.getProperties().toHashMap());
+        }
 
-        if (editor.compiler.getProperties() == null) System.err.println("==> No compiler properties");
-        if (editor.core.getProperties() == null) System.err.println("==> No core properties");
-        if (editor.board.getProperties() == null) System.err.println("==> No board properties");
+        if (editor.core == null) { 
+            System.err.println("==> No core");
+        } else if (editor.core.getProperties() == null) {
+            System.err.println("==> No core properties");
+        } else {
+            total.putAll(editor.core.getProperties().toHashMap());
+        }
 
-        total.putAll(editor.compiler.getProperties().toHashMap());
-        total.putAll(editor.core.getProperties().toHashMap());
-        total.putAll(editor.board.getProperties().toHashMap());
+        if (editor.board == null) {
+            System.err.println("==> No board");
+        } else if (editor.board.getProperties() == null) {
+            System.err.println("==> No board properties");
+        } else {
+            total.putAll(editor.board.getProperties().toHashMap());
+        }
+
         if (parameters != null) {
             total.putAll(parameters);
         }
