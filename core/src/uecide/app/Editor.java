@@ -21,7 +21,6 @@ import javax.swing.border.*;
 import javax.swing.JToolBar;
 import java.nio.charset.*;
 
-import gnu.io.*;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rsyntaxtextarea.modes.ArduinoTokenMaker;
 
@@ -771,48 +770,22 @@ public class Editor extends JFrame implements RunnerListener {
         return serialPort;
     }
 
-  protected void populateSerialMenu() {
-    // getting list of ports
-
-    JMenuItem rbMenuItem;
+    protected void populateSerialMenu() {
+        JMenuItem rbMenuItem;
     
-    serialMenu.removeAll();
-    boolean empty = true;
+        serialMenu.removeAll();
+        boolean empty = true;
 
-    try
-    {
-      for (Enumeration enumeration = CommPortIdentifier.getPortIdentifiers(); enumeration.hasMoreElements();)
-      {
-        CommPortIdentifier commportidentifier = (CommPortIdentifier)enumeration.nextElement();
-        if (commportidentifier.getPortType() == CommPortIdentifier.PORT_SERIAL)
-        {
-          String curr_port = commportidentifier.getName();
-          rbMenuItem = new JCheckBoxMenuItem(curr_port, curr_port.equals(serialPort));
-          rbMenuItem.addActionListener(serialMenuListener);
-          //serialGroup.add(rbMenuItem);
-          serialMenu.add(rbMenuItem);
-          empty = false;
+        Serial.updatePortList();
+        String[] portList = Serial.getPortList();
+        for (String p : portList) {
+            rbMenuItem = new JCheckBoxMenuItem(p, p.equals(serialPort));
+            rbMenuItem.addActionListener(serialMenuListener);
+            serialMenu.add(rbMenuItem);
+            empty = false;
         }
-      }
-      if (!empty) {
-        serialMenu.setEnabled(true);
-      }
-
+        serialMenu.setEnabled(!empty);
     }
-
-    catch (Exception exception)
-    {
-      message(Translate.t("Error retrieving port list") + "\n", 2);
-      exception.printStackTrace();
-    }
-	
-    if (serialMenu.getItemCount() == 0) {
-      serialMenu.setEnabled(false);
-    }
-
-    //serialMenu.addSeparator();
-    //serialMenu.add(item);
-  }
 
 
   protected JMenu buildHelpMenu() {

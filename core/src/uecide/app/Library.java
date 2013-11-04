@@ -32,10 +32,11 @@ public class Library {
 
     public boolean buildLibrary = false;
 
-    public Library(File root) {
-        name = root.getName();
+    public Library(File hdr) {
+        File root = hdr.getParentFile();
+        name = hdr.getName().substring(0, hdr.getName().indexOf(".h"));;
         folder = root;
-        mainInclude = new File(root, name + ".h");
+        mainInclude = hdr;
         if (!mainInclude.exists()) {
             return;
         }

@@ -17,8 +17,6 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.JToolBar;
 
-import gnu.io.*;
-
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.*;
 

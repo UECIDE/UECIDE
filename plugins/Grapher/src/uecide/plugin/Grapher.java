@@ -15,13 +15,14 @@ import javax.imageio.*;
 import java.awt.*;
 import java.awt.event.*;
 import say.swing.*;
+import jssc.*;
 
 
-public class Grapher extends BasePlugin implements MessageConsumer
+public class Grapher extends BasePlugin implements SerialPortEventListener
 {
     JFrame win;
     JGrapher graph;
-    Serial port;
+    SerialPort port;
     JComboBox<String> baudRates;
     JScrollBar scrollbackBar;
 
@@ -102,7 +103,7 @@ public class Grapher extends BasePlugin implements MessageConsumer
         line.add(label);
         String[] baudRateList = new String[] { "300", "1200", "2400", "4800", "9600", "14400", "28800", "38400", "57600", "115200", "230400", "460800", "500000", "576000", "1000000", "1152000"};
         baudRates = new JComboBox<String>(baudRateList);
-        final MessageConsumer mc = this;
+        final SerialPortEventListener mc = this;
         baudRates.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 if (ready) {
@@ -111,15 +112,19 @@ public class Grapher extends BasePlugin implements MessageConsumer
                     Base.preferences.set("serial.debug_rate", value);
                     try {
                         if (port != null) {
-                            port.dispose();
+                            Serial.releasePort(port);
                             port = null;
                         }
                     } catch (Exception e) {
                         editor.message("Unable to release port: " + e.getMessage() + "\n", 2);
                     }
                     try {
-                        port = new Serial(serialPort, baudRate);
-                        port.addListener(mc);
+                        port = Serial.requestPort(serialPort, mc, baudRate);
+                        if (port == null) {
+                            editor.message("Unable to reopen port\n", 2);
+                        } else {
+                            port.addEventListener(mc);
+                        }
                     } catch (Exception e) {
                         editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
                     }
@@ -150,20 +155,24 @@ public class Grapher extends BasePlugin implements MessageConsumer
         try {
             baudRate = Base.preferences.getInteger("serial.debug_rate");
             baudRates.setSelectedItem(Base.preferences.get("serial.debug_rate"));
-            port = new Serial(serialPort, baudRate);
+            port = Serial.requestPort(serialPort, this, baudRate); 
         } catch(Exception e) {
             editor.message("Unable to open serial port: " + e.getMessage() + "\n", 2);
             win.dispose();
             return;
         }
-        port.addListener(this);
+        try {
+            port.addEventListener(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         win.setVisible(true);
         ready = true;
     }
 
     public void close()
     {
-        port.dispose();
+        Serial.releasePort(port);
         win.dispose();
         ready = false;
     }
@@ -175,33 +184,6 @@ public class Grapher extends BasePlugin implements MessageConsumer
 
     char command = 0;
     String data = "";
-
-    public void message(String m) {
-        for (char c : m.toCharArray()) {
-            if (command == 0) {
-                switch(c) {
-                    case 'A':
-                    case 'V':
-                    case 'R':
-                    case 'S':
-                    case 'M':
-                    case 'B':
-                    case 'F':
-                    case 'Y':
-                        command = c;
-                        break;
-                }
-            } else {
-                if(c == '\n') {
-                    executeCommand();
-                    command = 0;
-                    data = "";
-                } else {
-                    data += Character.toString(c);
-                }
-            }
-        }
-    }
 
     public void executeCommand() {
         String params[] = data.split(":");
@@ -282,10 +264,6 @@ public class Grapher extends BasePlugin implements MessageConsumer
         }
     }
     
-    public void message(String m, int c) {
-        message(m);
-    }
-
     public ImageIcon toolbarIcon() {
         ImageIcon icon = new ImageIcon(getResourceURL("uecide/plugin/Grapher/grapher.png"));
         return icon;
@@ -376,25 +354,63 @@ public class Grapher extends BasePlugin implements MessageConsumer
         Base.preferences.set("grapher.font", fontSizeField.getText());
     }
 
-
-
-    public void releasePort(String portName) {
+    public boolean releasePort(String portName) {
         if (portName.equals(serialPort)) {
-            port.dispose();
+            try {
+                port.removeEventListener();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            boolean rok = Serial.releasePort(port);
             port = null;
+            return rok;
         }
+        return false;
     }
 
     public void obtainPort(String portName) {
         if (portName.equals(serialPort)) {
             try {
-                port = new Serial(serialPort, baudRate);
-                port.addListener(this);
+                port = Serial.requestPort(serialPort, this, baudRate);
+                port.addEventListener(this);
             } catch (Exception e) {
                 editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
             }
         }
     }
 
+    public void serialEvent(SerialPortEvent e) {
+        if (e.isRXCHAR()) {
+            try {
+                byte[] bytes = port.readBytes();
+                for (byte c : bytes) {
+                    if (command == 0) {
+                        switch(c) {
+                            case 'A':
+                            case 'V':
+                            case 'R':
+                            case 'S':
+                            case 'M':
+                            case 'B':
+                            case 'F':
+                            case 'Y':
+                                command = (char)c;
+                                break;
+                        }
+                    } else {
+                        if(c == '\n') {
+                            executeCommand();
+                            command = 0;
+                            data = "";
+                        } else {
+                            data += Character.toString((char)c);
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
 }
 
