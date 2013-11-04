@@ -2196,7 +2196,9 @@ public class Editor extends JFrame implements RunnerListener {
     public void createExtraTokens(SketchEditor se) {
         RSyntaxTextArea ta = se.textArea;
         HashMap<String, Library> allLibraries = Base.getLibraryCollection("global");
-        allLibraries.putAll(Base.getLibraryCollection(core.getName()));
+        if (core != null) {
+            allLibraries.putAll(Base.getLibraryCollection(core.getName()));
+        }
         allLibraries.putAll(Base.getLibraryCollection("sketchbook"));
 
         ArduinoTokenMaker tm = (ArduinoTokenMaker)((RSyntaxDocument)ta.getDocument()).getSyntaxStyle();
