@@ -31,7 +31,7 @@
            source="1.6"
            target="1.6"
 	       includeAntRuntime="false"
-	       classpath="${uecide.path}/core/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/RXTXcomm.jar" />
+	       classpath="${uecide.path}/core/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/jssc.jar" />
     </target>
 
     <target name="build" depends="compile" description="Build the plugin jars">

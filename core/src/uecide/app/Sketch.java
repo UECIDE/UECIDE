@@ -8,7 +8,7 @@ import uecide.plugin.*;
 
 import java.util.regex.*;
 
-
+import jssc.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -629,7 +629,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        if (ulu.equals("serial"))
+        if (ulu.equals("serial") || ulu.equals("usbcdc"))
         {
             editor.grabSerialPort();
             if (dtr || rts) {
@@ -640,11 +640,18 @@ public class Sketch implements MessageConsumer {
             try {
                 String baud = all.get("upload." + editor.programmer + ".reset.baud");
                 if (baud != null) {
+                    System.err.println("Opening serial port at " + baud + " baud");
                     int b = Integer.parseInt(baud);
-                    editor.grabSerialPort();
+          //          editor.grabSerialPort();
                     
-                    Serial serialPort = new Serial(editor.getSerialPort(), b);
-                    serialPort.dispose();
+                    SerialPort serialPort = Serial.requestPort(editor.getSerialPort(), this, b);
+                    if (serialPort == null) {
+                        Base.error("Unable to lock serial port");
+                        return false;
+                    }
+                    Thread.sleep(1000);
+                    Serial.releasePort(serialPort);
+                    serialPort = null;
                     System.gc();
                     Thread.sleep(1500);
                 }
@@ -654,7 +661,7 @@ public class Sketch implements MessageConsumer {
         }
 
         boolean res = execAsynchronously(commandString);
-        if (ulu.equals("serial"))
+        if (ulu.equals("serial") || ulu.equals("usbcdc"))
         {
             if (dtr || rts) {
                 assertDTRRTS(false, false);
@@ -670,11 +677,15 @@ public class Sketch implements MessageConsumer {
     }
 
     public void assertDTRRTS(boolean dtr, boolean rts) {
+        System.err.println("Asserting DTR...");
         try {
-            Serial serialPort = new Serial(editor.getSerialPort());
+            SerialPort serialPort = Serial.requestPort(editor.getSerialPort(), this);
+            if (serialPort == null) {
+                Base.error("Unable to lock serial port");
+            }
             serialPort.setDTR(dtr);
             serialPort.setRTS(rts);
-            serialPort.dispose();
+            Serial.releasePort(serialPort);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }

@@ -51,7 +51,7 @@
     <fileset dir=".." id="runtime.jars">
         <include name="core/uecide.jar" />
         <include name="core/lib/jna.jar" />
-        <include name="core/lib/RXTXcomm.jar" />
+        <include name="core/lib/jssc.jar" />
         <!--include name="core/lib/ant.jar" /-->
         <!--include name="core/lib/ant-launcher.jar" /-->
     </fileset>

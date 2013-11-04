@@ -16,9 +16,10 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import java.awt.datatransfer.*;
+import jssc.*;
 
 
-public class JTerminal extends JComponent implements MessageConsumer,KeyListener,MouseListener,FocusListener,MouseMotionListener
+public class JTerminal extends JComponent implements KeyListener,MouseListener,FocusListener,MouseMotionListener
 {
     BufferedImage offscreen = null;
     

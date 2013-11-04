@@ -19,7 +19,7 @@
                encoding="UTF-8"
                includeAntRuntime="false"
                srcdir="src" destdir="bin"
-               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/jna.jar; lib/RXTXcomm.jar">
+               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/jna.jar; lib/jssc.jar">
 
         </javac>
     </target>		
@@ -29,7 +29,7 @@
             <manifest>
                 <attribute name="Built-By" value="Matt Jenkins"/>
                 <attribute name="Main-Class" value="uecide.app.Base"/>
-                <attribute name="Class-Path" value="RXTXcomm.jar ecj.jar jna.jar uecide.jar"/>
+                <attribute name="Class-Path" value="jssc.jar ecj.jar jna.jar uecide.jar"/>
                 <attribute name="Version" value="${version}"/>
                 <attribute name="Compiled" value="${TODAY}"/>
             </manifest>

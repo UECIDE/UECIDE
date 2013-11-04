@@ -31,7 +31,7 @@
            target="1.6"
 	       destdir="bin" 
 	       includeAntRuntime="false"
-	       classpath="${uecide.path}/core/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; lib/RXTXcomm.jar" >
+	       classpath="${uecide.path}/core/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/ecj.jar; lib/jna.jar; ${uecide.path}/core/lib/jssc.jar" >
            <compilerarg value="-Xlint:unchecked" />
     </javac>
     </target>

@@ -178,6 +178,8 @@ public class Base {
         plugins = new HashMap<String, Plugin>();
         pluginInstances = new ArrayList<Plugin>();
 
+        Serial.updatePortList();
+
         splashScreen.setMessage("Loading Compilers...", 30);
         loadCompilers();
         splashScreen.setMessage("Loading Cores...", 40);
@@ -631,9 +633,14 @@ public class Base {
         File[] list = folder.listFiles();
         for (File f : list) {
             if (f.isDirectory()) {
-                Library newLibrary = new Library(f);
-                if (newLibrary.isValid()) {
-                    theseLibraries.put(newLibrary.getName(), newLibrary);
+                File files[] = f.listFiles();
+                for (File sf : files) {
+                    if ((sf.getName().equals(f.getName() + ".h") || (sf.getName().startsWith(f.getName() + "_") && sf.getName().endsWith(".h")))) {
+                        Library newLibrary = new Library(sf);
+                        if (newLibrary.isValid()) {
+                            theseLibraries.put(newLibrary.getName(), newLibrary);
+                        }
+                    }
                 }
             }
         }
@@ -1590,25 +1597,22 @@ public class Base {
         }
 
         // Now look through fileList for an entry of X/X.cpp and X/X.h where X==X
-        boolean foundCPP = false;
         boolean foundHeader = false;
 
         for (int i=0; i<fileList.size(); i++) {
             String entry = fileList.get(i);
             if (entry.endsWith(".h")) {
                 String[] bits = entry.split("/");
-                if (bits[1].equals(bits[0] + ".h")) {
+                String dn = bits[0];
+                if (dn.endsWith("-master")) { // It is a github zip
+                    dn = dn.substring(0, dn.indexOf("-master"));
+                }
+                if (bits[1].equals(dn + ".h")) {
                     foundHeader = true;
                 }
             }
-            if (entry.endsWith(".cpp")) {
-                String[] bits = entry.split("/");
-                if (bits[1].equals(bits[0] + ".cpp")) {
-                    foundCPP = true;
-                }
-            }
         }
-        return (foundHeader && foundCPP);
+        return (foundHeader);
     }
 
     public static int countZipEntries(File inputFile)
@@ -1660,6 +1664,20 @@ public class Base {
                 ZipEntry ze = zis.getNextEntry();
                 while (ze != null) {
                     String fileName = ze.getName();
+                    String[] bits = fileName.split("/");
+                    String dn = bits[0];
+                    if (dn.endsWith("-master")) { // It is a github zip
+                        dn = dn.substring(0, dn.indexOf("-master"));
+                    }
+                    
+                    bits[0] = dn;
+                    fileName = "";
+                    for (int i = 0; i < bits.length-1; i++) {
+                        fileName += bits[i] + "/";
+                    }
+                    fileName += bits[bits.length-1];
+                    System.err.println(fileName);
+
                     File newFile = new File(destination, fileName);
 
                     new File(newFile.getParent()).mkdirs();
@@ -2176,6 +2194,10 @@ public class Base {
     }
     }
 
+
+    public static void error(String e) {
+        System.err.println(e);
+    }
 }
 
 

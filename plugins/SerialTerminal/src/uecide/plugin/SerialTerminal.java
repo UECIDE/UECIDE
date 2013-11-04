@@ -14,14 +14,16 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import jssc.*;
+
 import say.swing.*;
 
 
-public class SerialTerminal extends BasePlugin implements MessageConsumer
+public class SerialTerminal extends BasePlugin implements SerialPortEventListener,MessageConsumer
 {
     JFrame win;
     JTerminal term;
-    Serial port;
+    SerialPort port;
     JComboBox<String> baudRates;
     JCheckBox showCursor;
     JCheckBox localEcho;
@@ -111,6 +113,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         JLabel label = new JLabel(Translate.t("Baud Rate") + ": ");
         line.add(label);
         baudRates = new JComboBox<String>(new String[] { "300", "1200", "2400", "4800", "9600", "14400", "28800", "38400", "57600", "115200", "230400", "460800", "500000", "576000", "1000000", "1152000"});
+        final SerialPortEventListener mc = this;
         baudRates.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 if (ready) {
@@ -119,15 +122,19 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
                     Base.preferences.set("serial.debug_rate", value);
                     try {
                         if (port != null) {
-                            port.dispose();
+                            Serial.releasePort(port);
                             port = null;
                         }
                     } catch (Exception e) {
                         editor.message("Unable to release port\n", 2);
                     }
                     try {
-                        port = new Serial(serialPort, baudRate);
-                        port.addListener(term);
+                        port = Serial.requestPort(serialPort, mc, baudRate);
+                        if (port == null) {
+                            editor.message("Unable to reopen port\n");
+                            return;
+                        }
+                        port.addEventListener(mc);
                         term.setDisconnected(false);
                     } catch (Exception e) {
                         editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
@@ -173,18 +180,22 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
         ActionListener al = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                port.write(lineEntryBox.getText());
-                if (((String)lineEndings.getSelectedItem()).equals("Carriage Return")) {
-                    port.write("\r");
+                try {
+                    port.writeString(lineEntryBox.getText());
+                    if (((String)lineEndings.getSelectedItem()).equals("Carriage Return")) {
+                        port.writeString("\r");
+                    }
+                    if (((String)lineEndings.getSelectedItem()).equals("Line Feed")) {
+                        port.writeString("\n");
+                    }
+                    if (((String)lineEndings.getSelectedItem()).equals("CR + LF")) {
+                        port.writeString("\r\n");
+                    }
+                    lineEntryBox.setText("");
+                    lineEntryBox.requestFocusInWindow();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-                if (((String)lineEndings.getSelectedItem()).equals("Line Feed")) {
-                    port.write("\n");
-                }
-                if (((String)lineEndings.getSelectedItem()).equals("CR + LF")) {
-                    port.write("\r\n");
-                }
-                lineEntryBox.setText("");
-                lineEntryBox.requestFocusInWindow();
             }
         };
 
@@ -222,7 +233,12 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         try {
             baudRate = Base.preferences.getInteger("serial.debug_rate");
             baudRates.setSelectedItem(Base.preferences.get("serial.debug_rate"));
-            port = new Serial(serialPort, baudRate);
+            port = Serial.requestPort(serialPort, this, baudRate);
+            if (port == null) {
+                editor.message("Unable to open serial port\n", 2);
+                return;
+            }
+                
             term.setDisconnected(false);
         } catch(Exception e) {
             editor.message("Unable to open serial port: " + e.getMessage() + "\n", 2);
@@ -230,7 +246,11 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         }
         showCursor.setSelected(Base.preferences.getBoolean("serial.debug_cursor"));
         term.showCursor(Base.preferences.getBoolean("serial.debug_cursor"));
-        port.addListener(term);
+        try {
+            port.addEventListener(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         win.setTitle(Translate.t("Serial Terminal") + " :: " + serialPort);
         win.setVisible(true);
         ready = true;
@@ -238,7 +258,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
     public void close()
     {
-        port.dispose();
+        Serial.releasePort(port);
         win.dispose();
         int p = Base.pluginInstances.indexOf(this);
         if (p>=0) {
@@ -263,7 +283,11 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
         if (localEcho.isSelected()) {
             term.message(m);
         }
-        port.write(m);
+        try {
+            port.writeString(m);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     public void message(String m, int c) {
@@ -392,7 +416,7 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
 
     public void releasePort(String portName) {
         if (portName.equals(serialPort)) {
-            port.dispose();
+            Serial.releasePort(port);
             port = null;
             term.setDisconnected(true);
             win.repaint();
@@ -402,12 +426,22 @@ public class SerialTerminal extends BasePlugin implements MessageConsumer
     public void obtainPort(String portName) {
         if (portName.equals(serialPort)) {
             try {
-                port = new Serial(serialPort, baudRate);
-                port.addListener(term);
+                port = Serial.requestPort(serialPort, this, baudRate);
+                port.addEventListener(this);
                 term.setDisconnected(false);
                 win.repaint();
             } catch (Exception e) {
                 editor.message("Unable to reopen port: " + e.getMessage() + "\n", 2);
+            }
+        }
+    }
+
+    public void serialEvent(SerialPortEvent e) {
+        if (e.isRXCHAR()) {
+            try {
+                term.message(port.readString());
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
     }
