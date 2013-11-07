@@ -39,7 +39,7 @@ public class Base {
   
     static Platform platform;
 
-    static private boolean commandLine;
+    static private boolean headless;
 
     // A single instance of the preferences window
     static Preferences preferencesFrame;
@@ -90,6 +90,14 @@ public class Base {
         });
 */
 
+        headless = false;
+
+        if (isLinux()) {
+            if ((System.getenv("DISPLAY") == null) || (System.getenv("DISPLAY").equals(""))) {
+                headless = true;
+            }
+        }
+
         try {
             JarFile myself = new JarFile("lib/uecide.jar");
             Manifest manifest = myself.getManifest();
@@ -111,13 +119,15 @@ public class Base {
         theme = new PropertyFile(getSettingsFile("theme.txt"), getContentFile("lib/theme/theme.txt"));
         theme.setPlatformAutoOverride(true);
 
-        splashScreen = new Splash();
-        splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
+        if (!headless) {
+            splashScreen = new Splash();
+            splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
+        }
 
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
         try {
-            platform.setLookAndFeel();
+            if (!headless) platform.setLookAndFeel();
         } catch (Exception e) {
             String mess = e.getMessage();
             if (mess.indexOf("ch.randelshofer.quaqua.QuaquaLookAndFeel") == -1) {
@@ -134,7 +144,7 @@ public class Base {
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
-        splashScreen.setMessage("Loading Application...", 20);
+        if (!headless) splashScreen.setMessage("Loading Application...", 20);
         platform.init(this);
 
         // Get paths for the libraries and examples in the Processing folder
@@ -180,19 +190,24 @@ public class Base {
 
         Serial.updatePortList();
 
-        splashScreen.setMessage("Loading Compilers...", 30);
+        if (!headless) splashScreen.setMessage("Loading Compilers...", 30);
         loadCompilers();
-        splashScreen.setMessage("Loading Cores...", 40);
+        if (!headless) splashScreen.setMessage("Loading Cores...", 40);
         loadCores();
-        splashScreen.setMessage("Loading Boards...", 50);
+        if (!headless) splashScreen.setMessage("Loading Boards...", 50);
         loadBoards();
-        splashScreen.setMessage("Loading Plugins...", 60);
+        if (!headless) splashScreen.setMessage("Loading Plugins...", 60);
         loadPlugins();
-        splashScreen.setMessage("Loading Libraries...", 70);
+        if (!headless) splashScreen.setMessage("Loading Libraries...", 70);
         gatherLibraries();
         initMRU();
 
-        splashScreen.setMessage("Opening Editor...", 80);
+        if (headless) {
+            error("Unable to open editor window - no graphics environment found.");
+            System.exit(10);
+        }
+
+        if (!headless) splashScreen.setMessage("Opening Editor...", 80);
         boolean opened = false;
         // Check if any files were passed in on the command line
         for (int i = 0; i < args.length; i++) {
@@ -218,18 +233,8 @@ public class Base {
         if (!opened) {
             handleNew();
         }
-        splashScreen.setMessage("Complete", 100);
-        splashScreen.dispose();
-    }
-
-
-    static protected void setCommandLine() {
-        commandLine = true;
-    }
-
-
-    static protected boolean isCommandLine() {
-        return commandLine;
+        if (!headless) splashScreen.setMessage("Complete", 100);
+        if (!headless) splashScreen.dispose();
     }
 
     static protected void initPlatform() {
@@ -1106,7 +1111,7 @@ public class Base {
     public static void showMessage(String title, String message) {
         if (title == null) title = Translate.t("Message");
 
-        if (commandLine) {
+        if (headless) {
             System.out.println(title + ": " + message);
 
         } else {
@@ -1122,7 +1127,7 @@ public class Base {
     public static void showWarning(String title, String message, Exception e) {
         if (title == null) title = Translate.t("Warning");
 
-        if (commandLine) {
+        if (headless) {
             System.out.println(title + ": " + message);
 
         } else {
@@ -1142,7 +1147,7 @@ public class Base {
     public static void showError(String title, String message, Throwable e) {
         if (title == null) title = Translate.t("Error");
 
-        if (commandLine) {
+        if (headless) {
             System.err.println(title + ": " + message);
 
         } else {
