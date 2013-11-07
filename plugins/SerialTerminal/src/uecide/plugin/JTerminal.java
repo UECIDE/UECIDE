@@ -475,8 +475,6 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
             }
         }
         repaint();
-        revalidate();
-        this.getParent().revalidate();
         this.getParent().repaint();
     }
 
