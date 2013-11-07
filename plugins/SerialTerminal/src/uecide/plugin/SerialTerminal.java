@@ -154,7 +154,6 @@ public class SerialTerminal extends BasePlugin implements SerialPortEventListene
             public void actionPerformed(ActionEvent event) {
                 entryLineArea.setVisible(lineEntry.isSelected());
                 subwin.pack();
-                subwin.revalidate();
                 subwin.repaint();
                 lineEntryBox.requestFocusInWindow();
             }
