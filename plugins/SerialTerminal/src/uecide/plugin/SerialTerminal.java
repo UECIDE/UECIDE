@@ -413,13 +413,18 @@ public class SerialTerminal extends BasePlugin implements SerialPortEventListene
             
     }
 
-    public void releasePort(String portName) {
+    public boolean releasePort(String portName) {
         if (portName.equals(serialPort)) {
-            Serial.releasePort(port);
+            if (!Serial.releasePort(port)) {
+                Base.error("Error releasing port!");
+                return false;
+            }
             port = null;
             term.setDisconnected(true);
             win.repaint();
+            return true;
         }
+        return false;
     }
 
     public void obtainPort(String portName) {

@@ -49,16 +49,6 @@ public class Serial {
         cArg[0] = new String().getClass();
 
         boolean validPort = false;
-        for (String p : portList) {
-            if (p.equals(name)) {
-                validPort = true;
-            }
-        }
-        if (validPort == false) {
-            Base.error("Port not found: " + name);
-            return null;
-        }
-
 
         if (allocatedPorts.get(name) != null) {
             try {
@@ -73,6 +63,8 @@ public class Serial {
                 }
                 if (released == true) {
                     allocatedPorts.remove(name);
+                    Thread.sleep(10);
+                    System.gc();
                 }
             } catch (Exception ex) {
                 Base.error(ex);
