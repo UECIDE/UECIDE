@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import uecide.app.Base;
 
 import com.sun.jna.ptr.IntByReference;
 
@@ -84,7 +85,7 @@ public class Registry {
     try {
         return(new String(buf, 0, buf.length - 2, "UTF-16LE"));
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return null;
     }
   }
@@ -133,7 +134,7 @@ public class Registry {
         }
         return(ret);
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return null;
     }
   }
@@ -232,7 +233,7 @@ public class Registry {
         }
         return(ret);
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return false;
     }
   }
@@ -464,7 +465,7 @@ public class Registry {
         }
         return(values);
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return null;
     }
   }

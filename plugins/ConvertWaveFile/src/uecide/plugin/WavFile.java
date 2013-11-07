@@ -11,6 +11,8 @@
 
 package uecide.plugin;
 
+import uecide.app.Base;
+
 import java.io.*;
 
 public class WavFile
@@ -750,7 +752,7 @@ public class WavFile
 		catch (Exception e)
 		{
 			System.err.println(e);
-			e.printStackTrace();
+			Base.error(e);
 		}
 	}
 }

@@ -31,7 +31,7 @@ public class Platform extends uecide.app.Platform {
         // hacked that in, bit by bit, over the years
         UIManager.put("Component.visualMargin", new Insets(1, 1, 1, 1));
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
     }
   }
 
@@ -66,7 +66,7 @@ public class Platform extends uecide.app.Platform {
                 eieio.getMethod("openURL", new Class[] { String.class });
               openMethod.invoke(null, new Object[] { url });
             } catch (Exception e) {
-              e.printStackTrace();
+              Base.error(e);
             }
           } else {
           // Assume this is a file instead, and just open it.
@@ -91,11 +91,11 @@ public class Platform extends uecide.app.Platform {
               openMethod.invoke(desktop, new Object[] { new File(url) });
               }
           } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
             }
           }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Base.error(ex);
         }
     }
 
@@ -143,7 +143,7 @@ public class Platform extends uecide.app.Platform {
     try {
         return FileManager.findFolder(kUserDomain, kDomainLibraryFolderType);
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return null;
     }
   }
@@ -153,7 +153,7 @@ public class Platform extends uecide.app.Platform {
     try {
         return FileManager.findFolder(kUserDomain, kDocumentsFolderType);
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return null;
     }
   }

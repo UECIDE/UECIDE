@@ -100,7 +100,7 @@ public class Base {
 
             RELEASE = true;
         } catch (Exception e) {
-            e.printStackTrace();
+            error(e);
         }
 
         theme = new PropertyFile(getContentFile("lib/theme/theme.txt"));
@@ -206,7 +206,7 @@ public class Base {
                     File file = new File(args[i]);
                     path = file.getCanonicalPath();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    error(e);
                 }
             }
             if (createNewEditor(path) != null) {
@@ -762,7 +762,7 @@ public class Base {
         } catch (Exception e) {
             showError(Translate.t("Problem getting data folder"),
             Translate.t("Error getting the data folder."), e);
-            e.printStackTrace();
+            error(e);
             return null;
         }
 
@@ -806,7 +806,7 @@ public class Base {
             return folder;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            error(e);
         }
         return null;
     }
@@ -1130,7 +1130,7 @@ public class Base {
             JOptionPane.showMessageDialog(new Frame(), message, title,
             JOptionPane.WARNING_MESSAGE);
         }
-        if (e != null) e.printStackTrace();
+        if (e != null) error(e);
     }
 
 
@@ -1149,7 +1149,7 @@ public class Base {
             JOptionPane.showMessageDialog(new Frame(), message, title,
             JOptionPane.ERROR_MESSAGE);
         }
-        if (e != null) e.printStackTrace();
+        if (e != null) error(e);
         System.exit(1);
     }
 
@@ -1351,7 +1351,7 @@ public class Base {
 
             targetFile.setLastModified(sourceFile.lastModified());
         } catch (Exception e) {
-            e.printStackTrace();
+            error(e);
         }
     }
 
@@ -1379,7 +1379,7 @@ public class Base {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            error(e);
         }
     }
 
@@ -1703,7 +1703,7 @@ public class Base {
                 zis.close();
             } catch (Exception e) {
                 activeEditor.status.progressNotice(Translate.t("Install failed"));
-                e.printStackTrace();
+                error(e);
                 return null;
             }
             return null;
@@ -1801,7 +1801,7 @@ public class Base {
 
             new ZipExtractor(inputFile, bf).execute();
         } catch (Exception e) {
-            e.printStackTrace();
+            error(e);
         }
     }
 
@@ -1928,7 +1928,7 @@ public class Base {
             try {
                 pluginClass = Class.forName(className, true, loader);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                error(ex);
                 return;
             }
             Plugin plugin = (Plugin) pluginClass.newInstance();
@@ -1976,7 +1976,7 @@ public class Base {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            error(e);
         }
         return null;
     }
@@ -2052,7 +2052,7 @@ public class Base {
     try {
       return Runtime.getRuntime().exec(argv);
     } catch (Exception e) {
-      e.printStackTrace();
+      error(e);
         return null;
     }
   }
@@ -2189,14 +2189,29 @@ public class Base {
             input = null;
             return buffer;
     } catch (Exception e) {
-        e.printStackTrace();
+        error(e);
         return null;
     }
     }
 
 
     public static void error(String e) {
+        for (Editor ed : editors) {
+            ed.message(e + "\n", 2);
+        }
         System.err.println(e);
+    }
+
+    public static void error(Throwable e) {
+
+        for (Editor ed : editors) {
+            ed.message(e.getMessage() + "\n", 2);
+        }
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+
+        System.err.println(sw.toString());
     }
 }
 

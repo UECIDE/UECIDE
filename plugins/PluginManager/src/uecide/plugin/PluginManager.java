@@ -936,7 +936,7 @@ public class PluginManager extends BasePlugin
                 };
                 downloader.execute();
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.error(e);
                 Base.showWarning(Translate.t("Download Failed"), Translate.w("The download failed at point 3 because %1", 40, "\n", e.toString()), e);
                 isDownloading = false;
             }
@@ -953,7 +953,7 @@ public class PluginManager extends BasePlugin
                     Base.reloadPlugins();
                     setInstalled();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Base.error(e);
                     Base.showWarning(Translate.t("Install Failed"), Translate.w("The install failed because %1", 40, "\n", e.toString()), e);
                 }
             }
@@ -1066,7 +1066,7 @@ public class PluginManager extends BasePlugin
                 zis.closeEntry();
                 zis.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.error(e);
                 Base.showWarning(Translate.t("Install Failed"), Translate.w("The install failed because %1", 40, "\n", e.toString()), e);
                 return null;
             }

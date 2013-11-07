@@ -322,7 +322,7 @@ public class Sketch implements MessageConsumer {
                         pw.print(sb.toString());
                         pw.close();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Base.error(e);
                     }
                 }
             }
@@ -385,7 +385,7 @@ public class Sketch implements MessageConsumer {
                 pw.print(sb.toString());
                 pw.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.error(e);
             }
         }
         return true;
@@ -407,12 +407,6 @@ public class Sketch implements MessageConsumer {
         String out = b.toString();
 
         out.replaceAll("/\\*(?:.|[\\n\\r])*?\\*/", "");
-
-//        try {
-//            out = Pattern.compile("//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", Pattern.DOTALL).matcher(out).replaceAll("\n");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
         return out;
     }
@@ -656,7 +650,7 @@ public class Sketch implements MessageConsumer {
                     Thread.sleep(1500);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.error(e);
             }
         }
 
@@ -712,7 +706,7 @@ public class Sketch implements MessageConsumer {
                 return false;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
             return false;
         }
         return compile();

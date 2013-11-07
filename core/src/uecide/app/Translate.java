@@ -52,7 +52,7 @@ public class Translate {
             }
             br.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
     }
 

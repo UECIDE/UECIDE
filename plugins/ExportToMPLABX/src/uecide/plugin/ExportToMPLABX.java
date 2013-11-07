@@ -516,7 +516,7 @@ public class ExportToMPLABX extends BasePlugin {
 
 
         } catch (Exception e){
-            e.printStackTrace();
+            Base.error(e);
         }
     }
 
@@ -627,7 +627,7 @@ public class ExportToMPLABX extends BasePlugin {
                 Base.copyFile(f, destFile);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
     }
     
@@ -657,7 +657,7 @@ public class ExportToMPLABX extends BasePlugin {
             pw.print(out);
             pw.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
     }
 

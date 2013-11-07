@@ -193,7 +193,7 @@ public class SerialTerminal extends BasePlugin implements SerialPortEventListene
                     lineEntryBox.setText("");
                     lineEntryBox.requestFocusInWindow();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.error(ex);
                 }
             }
         };
@@ -248,7 +248,7 @@ public class SerialTerminal extends BasePlugin implements SerialPortEventListene
         try {
             port.addEventListener(this);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
         win.setTitle(Translate.t("Serial Terminal") + " :: " + serialPort);
         win.setVisible(true);
@@ -285,7 +285,7 @@ public class SerialTerminal extends BasePlugin implements SerialPortEventListene
         try {
             port.writeString(m);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
     }
     
@@ -440,7 +440,7 @@ public class SerialTerminal extends BasePlugin implements SerialPortEventListene
             try {
                 term.message(port.readString());
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.error(ex);
             }
         }
     }

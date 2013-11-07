@@ -668,7 +668,7 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
     }
 

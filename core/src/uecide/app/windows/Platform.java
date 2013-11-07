@@ -34,7 +34,7 @@ public class Platform extends uecide.app.Platform {
            UIManager.setLookAndFeel(laf);
         } 
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
     }
   }
 
@@ -67,7 +67,7 @@ public class Platform extends uecide.app.Platform {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      Base.error(e);
     }
   }
 
@@ -102,7 +102,7 @@ public class Platform extends uecide.app.Platform {
           Base.preferences.setBoolean("platform.auto_file_type_associations", false);
         }
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
     }
   }
 
@@ -128,7 +128,7 @@ public class Platform extends uecide.app.Platform {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      Base.error(e);
     }
   }
   
@@ -187,7 +187,7 @@ public class Platform extends uecide.app.Platform {
         File dataFolder = new File(appDataPath, Base.theme.get("product"));
         return dataFolder;
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return null;
     }
   }
@@ -205,7 +205,7 @@ public class Platform extends uecide.app.Platform {
 
         return new File(personalPath, Base.theme.get("product"));
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return null;
     }
   }
@@ -219,7 +219,7 @@ public class Platform extends uecide.app.Platform {
           Runtime.getRuntime().exec("cmd /c \"" + url + "\"");
         }
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
     }
   }
 
@@ -235,7 +235,7 @@ public class Platform extends uecide.app.Platform {
 
         Runtime.getRuntime().exec("explorer \"" + folder + "\"");
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
     }
   }
 
