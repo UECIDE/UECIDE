@@ -1,6 +1,5 @@
 package uecide.app;
 
-import uecide.app.debug.RunnerException;
 import uecide.app.preproc.*;
 import java.util.regex.*;
 
@@ -114,7 +113,7 @@ public class Library {
             } while (read >= 0);
             data = contents.toString().split("\n");
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
             return;
         }
         ArrayList<String> includes = new ArrayList<String>();

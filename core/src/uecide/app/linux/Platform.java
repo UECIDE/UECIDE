@@ -42,7 +42,7 @@ public class Platform extends uecide.app.Platform {
            UIManager.setLookAndFeel(laf);
         }
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
     }
   }
 
@@ -56,7 +56,7 @@ public class Platform extends uecide.app.Platform {
           }
         }
     } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
     }
   }
 
@@ -104,14 +104,14 @@ public class Platform extends uecide.app.Platform {
             /*Process p =*/ Runtime.getRuntime().exec(params);
             /*int result =*/ //p.waitFor();
           } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
           }
         } else {
           System.out.println("No launcher set, cannot open " +
                              file.getAbsolutePath());
         }
     } catch (Exception ex) {
-        ex.printStackTrace();
+        Base.error(ex);
     }
   }
 }

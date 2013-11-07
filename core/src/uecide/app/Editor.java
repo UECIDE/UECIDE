@@ -251,7 +251,7 @@ public class Editor extends JFrame implements RunnerListener {
                     toolbar.add(button);
                 }
             } catch(Exception e) {
-                e.printStackTrace();
+                Base.error(e);
             }
         }
 
@@ -429,7 +429,7 @@ public class Editor extends JFrame implements RunnerListener {
           }
         }
       } catch (Exception e) {
-        e.printStackTrace();
+        Base.error(e);
         return false;
       }
 
@@ -1262,7 +1262,7 @@ public class Editor extends JFrame implements RunnerListener {
                 }
             } catch (Exception e) {
                 status.unprogress();
-                statusError(e);
+                Base.error(e);
             }
 
             status.unprogress();
@@ -1354,7 +1354,7 @@ public class Editor extends JFrame implements RunnerListener {
                 statusEmpty();
             }
         } catch (Exception e) {
-            statusError(e);
+            Base.error(e);
         }
         return saved;
     }
@@ -1370,7 +1370,7 @@ public class Editor extends JFrame implements RunnerListener {
                 return false;
             }
         } catch (Exception e) {
-            statusError(e);
+            Base.error(e);
         }
 
         Base.updateMRU(sketch.getFolder());
@@ -1438,52 +1438,16 @@ public class Editor extends JFrame implements RunnerListener {
         try {
             tempBuffer.print(header, footer);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
     }
 
-    public void statusError(String what) {
-        status.error(what);
-    }
 
     public void statusError(Exception e) {
-        e.printStackTrace();
-
-        SketchEditor ed = (SketchEditor)tabs.getSelectedComponent();
-
-        if (e instanceof RunnerException) {
-            RunnerException re = (RunnerException) e;
-            if (re.hasCodeIndex()) {
-                tabs.setSelectedIndex(re.getCodeIndex());
-            }
-            if (re.hasCodeLine()) {
-                int line = re.getCodeLine();
-                if (line >= ed.getLineCount()) {
-                    line = ed.getLineCount() - 1;
-                    if (ed.getLineText(line).length() == 0) {
-                        line--;
-                    }
-                }
-                if (line < 0 || line >= ed.getLineCount()) {
-                    message("Bad error line: " + line + "\n", 2);
-                } else {
-                    ed.select(ed.getLineStartOffset(line), ed.getLineEndOffset(line) - 1);
-                }
-            }
-        }
-
-        String mess = e.getMessage();
-        if (mess != null) {
-            String javaLang = "java.lang.";
-            if (mess.indexOf(javaLang) == 0) {
-                mess = mess.substring(javaLang.length());
-            }
-            String rxString = "RuntimeException: ";
-            if (mess.indexOf(rxString) == 0) {
-                mess = mess.substring(rxString.length());
-            }
-            statusError(mess);
-        }
+        Base.error(e);
+    }
+    public void statusError(String what) {
+        status.error(what);
     }
 
   /**

@@ -64,7 +64,7 @@ public class Archiver extends BasePlugin {
     try {
       success = sketch.save();
     } catch (Exception e) {
-      e.printStackTrace();
+      Base.error(e);
     }
     if (!success) {
       Base.showWarning("Couldn't archive sketch",
@@ -130,7 +130,7 @@ public class Archiver extends BasePlugin {
         editor.statusNotice("Created archive " + newbie.getName() + ".");
 
       } catch (IOException e) {
-        e.printStackTrace();
+        Base.error(e);
       }
     } else {
       editor.statusNotice("Archive sketch canceled.");

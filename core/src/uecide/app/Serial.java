@@ -55,6 +55,7 @@ public class Serial {
             }
         }
         if (validPort == false) {
+            Base.error("Port not found: " + name);
             return null;
         }
 
@@ -74,7 +75,7 @@ public class Serial {
                     allocatedPorts.remove(name);
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.error(ex);
             }
         }
 
@@ -86,7 +87,7 @@ public class Serial {
                 return nsp;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
         return null;
     }
@@ -103,7 +104,7 @@ public class Serial {
                 return nsp;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
         return null;
     }
@@ -123,7 +124,7 @@ public class Serial {
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
         System.err.println("Close port failed");
         return false;

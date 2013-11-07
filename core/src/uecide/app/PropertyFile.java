@@ -37,7 +37,7 @@ public class PropertyFile {
                 try {
                     defaultProperties.load(new FileReader(defaults));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Base.error(e);
                 }
             }
         }
@@ -47,7 +47,7 @@ public class PropertyFile {
                 try {
                     properties.load(new FileReader(user));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Base.error(e);
                 }
             }
         }
@@ -64,7 +64,7 @@ public class PropertyFile {
             try {
                 properties.store(new FileWriter(userFile), null);
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.error(e);
             }
         }
     }

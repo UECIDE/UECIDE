@@ -1,6 +1,5 @@
 package uecide.app;
 
-import uecide.app.debug.RunnerException;
 import uecide.app.preproc.*;
 
 import java.awt.*;

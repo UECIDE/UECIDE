@@ -34,7 +34,6 @@ import java.text.MessageFormat;
 public class Sizer implements MessageConsumer {
     private String buildPath, sketchName;
     private String firstLine;
-    private RunnerException exception;
     private long text;
     private long data;
     private long bss;
@@ -52,7 +51,6 @@ public class Sizer implements MessageConsumer {
 
         int r = 0;
         try {
-            exception = null;
             firstLine = null;
             Process process = Runtime.getRuntime().exec(commandSize);
             MessageSiphon in = new MessageSiphon(process.getInputStream(), this);
@@ -76,7 +74,7 @@ public class Sizer implements MessageConsumer {
             // The default Throwable.toString() never returns null, but apparently
             // some sub-class has overridden it to do so, thus we need to check for
             // it.  See: http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1166589459
-            e.printStackTrace();
+            Base.error(e);
         }
     }
 
@@ -117,10 +115,8 @@ public class Sizer implements MessageConsumer {
         text = (new Integer(st.nextToken().trim())).longValue();
         data = (new Integer(st.nextToken().trim())).longValue();
         bss += (new Integer(st.nextToken().trim())).longValue();
-      } catch (NoSuchElementException e) {
-        exception = new RunnerException(e.toString());
-      } catch (NumberFormatException e) {
-        exception = new RunnerException(e.toString());
+      } catch (Exception e) {
+        Base.error(e);
       }
     }
   }

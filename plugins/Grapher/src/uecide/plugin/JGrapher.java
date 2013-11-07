@@ -191,11 +191,9 @@ public class JGrapher extends JComponent
         numPoints = screenSize.width - leftMargin - rightMargin;
         recreateDataStore();
         repaint();
-        revalidate();
         Container parent = this.getParent();
         if (parent != null) {
             parent.repaint();
-            parent.revalidate();
         }
     } 
 
@@ -204,11 +202,9 @@ public class JGrapher extends JComponent
         numPoints = screenSize.width - leftMargin - rightMargin;
         recreateDataStore();
         repaint();
-        revalidate();
         Container parent = this.getParent();
         if (parent != null) {
             parent.repaint();
-            parent.revalidate();
         }
     } 
 
@@ -217,11 +213,9 @@ public class JGrapher extends JComponent
         numPoints = screenSize.width - leftMargin - rightMargin;
         recreateDataStore();
         repaint();
-        revalidate();
         Container parent = this.getParent();
         if (parent != null) {
             parent.repaint();
-            parent.revalidate();
         }
     } 
 
@@ -230,11 +224,9 @@ public class JGrapher extends JComponent
         numPoints = screenSize.width - leftMargin - rightMargin;
         recreateDataStore();
         repaint();
-        revalidate();
         Container parent = this.getParent();
         if (parent != null) {
             parent.repaint();
-            parent.revalidate();
         }
     } 
 
@@ -243,11 +235,9 @@ public class JGrapher extends JComponent
         numPoints = screenSize.width - leftMargin - rightMargin;
         recreateDataStore();
         repaint();
-        revalidate();
         Container parent = this.getParent();
         if (parent != null) {
             parent.repaint();
-            parent.revalidate();
         }
     } 
 

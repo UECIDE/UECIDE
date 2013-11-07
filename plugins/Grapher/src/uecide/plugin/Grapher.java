@@ -164,7 +164,7 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
         try {
             port.addEventListener(this);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
         win.setVisible(true);
         ready = true;
@@ -271,7 +271,6 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
 
     public void resizeWindow() {
         win.pack();
-        win.revalidate();
         win.repaint();
     }
 
@@ -293,7 +292,7 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
         try {
             ImageIO.write(graph.renderGraph(), "PNG", df);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.error(e);
         }
     }
 
@@ -359,7 +358,7 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
             try {
                 port.removeEventListener();
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.error(e);
             }
             boolean rok = Serial.releasePort(port);
             port = null;
@@ -408,7 +407,7 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
                     }
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.error(ex);
             }
         }
     }
