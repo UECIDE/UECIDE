@@ -1736,18 +1736,25 @@ public class Sketch implements MessageConsumer {
         return false;
     }
 
-    // Walk up the file tree until it either reaches the top (external file) or
-    // reaches the installation directory (internal file).
+
+    // Scan all the "common" areas where examples may be found, and see if the 
+    // start of the sketch folder's path matches any of them.
 
     public boolean isInternal() {
-        File p = folder.getParentFile();
-        while (p != null) {
-            if (p.equals(Base.getContentFile("."))) {
-                return true;
-            }
-            p = p.getParentFile();
-        }
-        return false;
+        String path = folder.getAbsolutePath();
+        String basePath = Base.getContentFile(".").getAbsolutePath() + File.separator;
+        String libsPath = Base.getSketchbookLibrariesPath() + File.separator;
+        String cachePath = getCacheFolder().getAbsolutePath() + File.separator;
+        String corePath = editor.core.getFolder().getAbsolutePath() + File.separator;
+        String boardPath = editor.board.getFolder().getAbsolutePath() + File.separator;
+
+        if (path.startsWith(basePath)) return true;
+        if (path.startsWith(libsPath)) return true;
+        if (path.startsWith(cachePath)) return true;
+        if (path.startsWith(corePath)) return true;
+        if (path.startsWith(boardPath)) return true;
+
+        return false;    
     }
 
     public boolean validSourceFile(File f) {
@@ -1786,17 +1793,17 @@ public class Sketch implements MessageConsumer {
         }
 
         if (editor.core == null) { 
-            System.err.println("==> No core");
+            Base.error("==> No core");
         } else if (editor.core.getProperties() == null) {
-            System.err.println("==> No core properties");
+            Base.error("==> No core properties");
         } else {
             total.putAll(editor.core.getProperties().toHashMap());
         }
 
         if (editor.board == null) {
-            System.err.println("==> No board");
+            Base.error("==> No board");
         } else if (editor.board.getProperties() == null) {
-            System.err.println("==> No board properties");
+            Base.error("==> No board properties");
         } else {
             total.putAll(editor.board.getProperties().toHashMap());
         }
