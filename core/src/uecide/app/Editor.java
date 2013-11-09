@@ -779,7 +779,15 @@ public class Editor extends JFrame implements RunnerListener {
         Serial.updatePortList();
         ArrayList<String> portList = Serial.getPortList();
         for (String p : portList) {
+            boolean exists = true;
+            if (Base.isLinux() || Base.isMacOS()) {
+                File f = new File(p);
+                if (!f.exists()) {
+                    exists = false;
+                }
+            }
             rbMenuItem = new JCheckBoxMenuItem(p, p.equals(serialPort));
+            rbMenuItem.setEnabled(exists);
             rbMenuItem.addActionListener(serialMenuListener);
             serialMenu.add(rbMenuItem);
             empty = false;
