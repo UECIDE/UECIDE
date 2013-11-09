@@ -13,34 +13,7 @@ import java.util.*;
 import java.lang.reflect.Method;
 
 public class Serial {
-
-  //PApplet parent;
-
-  // properties can be passed in for default values
-  // otherwise defaults to 9600 N81
-
-  // these could be made static, which might be a solution
-  // for the classloading problem.. because if code ran again,
-  // the static class would have an object that could be closed
-
-  SerialPort port;
-
-  int rate;
-  int parity;
-  int databits;
-  int stopbits;
-
-  // read buffer and streams 
-
-  InputStream input;
-  OutputStream output;
-
-  byte buffer[] = new byte[32768];
-  int bufferIndex;
-  int bufferLast;
-  
-  MessageConsumer consumer;
-
+    static ArrayList<String> extraPorts = new ArrayList<String>();
     static HashMap<String, Object> allocatedPorts = new HashMap<String, Object>();
     static String[] portList;
 
@@ -122,7 +95,38 @@ public class Serial {
         return false;
     }
 
-    static public String[] getPortList() {
-        return portList;
+    static public ArrayList<String> getPortList() {
+        ArrayList<String> pl = new ArrayList<String>();
+
+        for (String p : portList) {
+            pl.add(p);
+        }
+
+        for (String p : extraPorts) {
+            pl.add(p);
+        }
+        return pl;
+    }
+
+    static public ArrayList<String> getExtraPorts() {
+        return extraPorts;
+    }
+
+    static public void clearExtraPorts() {
+        extraPorts.clear();
+    }
+
+    static public void addExtraPort(String port) {
+        extraPorts.add(port);
+    }
+
+    static public void fillExtraPorts() {
+        int pnum = 0;
+        String pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
+        while (pname != null) {
+            addExtraPort(pname);
+            pnum++;
+            pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
+        }
     }
 }
