@@ -189,6 +189,7 @@ public class Base {
         pluginInstances = new ArrayList<Plugin>();
 
         Serial.updatePortList();
+        Serial.fillExtraPorts();
 
         if (!headless) splashScreen.setMessage("Loading Compilers...", 30);
         loadCompilers();
