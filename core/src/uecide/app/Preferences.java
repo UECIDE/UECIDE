@@ -83,6 +83,10 @@ public class Preferences {
     JTextField coresLocationField;
     JTextField compilersLocationField;
 
+    JList extraPortList;
+    DefaultListModel extraPortListModel = new DefaultListModel();
+    JTextField portInput;
+
   // the calling editor, so updates can be applied
 
   Editor editor;
@@ -206,6 +210,13 @@ public class Preferences {
     populateCompilerSettings(advancedSettings);
     populateLocationSettings(locationSettings);
 
+    if (Base.isLinux() || Base.isMacOS()) {
+        JPanel serialSettings = new JPanel(new GridBagLayout());
+        serialSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
+        tabs.add(Translate.t("Serial"), serialSettings);
+        populateSerialSettings(serialSettings);
+    }
+
     dialog.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
           disposeFrame();
@@ -257,6 +268,66 @@ public class Preferences {
         dialog.setLocation((screen.width - size.width) / 2,
                           (screen.height - size.height) / 2);
             
+    }
+
+    public void populateSerialSettings(JPanel p) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 3;
+        c.gridheight = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+
+        JLabel label = new JLabel("Extra serial ports:");
+        p.add(label, c);
+        c.gridy++;
+
+        extraPortList = new JList(extraPortListModel);
+
+        JScrollPane jsp = new JScrollPane(extraPortList);
+
+        p.add(jsp, c);
+        c.gridy++;
+        c.gridwidth = 1;
+        portInput = new JTextField("/dev/");
+        p.add(portInput, c);
+
+        c.weightx = 0.2;
+        c.gridx++;
+        JButton add = new JButton("Add");
+        add.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String t = portInput.getText();
+                if (!t.startsWith("/dev/")) {
+                    return;
+                }
+                for (Enumeration<String> en = extraPortListModel.elements(); en.hasMoreElements();) {
+                    String s = en.nextElement();
+                    if (s.equals(t)) {
+                        return;
+                    }
+                }
+                extraPortListModel.addElement(t);
+                portInput.setText("/dev/");
+            }
+        });
+        p.add(add, c);
+
+        c.weightx = 0.2;
+        c.gridx++;
+        JButton del = new JButton("Delete");
+        del.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int sel = extraPortList.getSelectedIndex();
+                while (sel >= 0) {
+                    extraPortListModel.remove(sel);
+                    sel = extraPortList.getSelectedIndex();
+                }
+            }
+        });
+        p.add(del, c);
+
     }
 
     public void populateEditorSettings(JPanel p) {
@@ -687,6 +758,25 @@ public class Preferences {
             } catch (Exception e) {
             }
         }
+
+    if (Base.isLinux() || Base.isMacOS()) {
+        int i = 0;
+        String pref = Base.preferences.get("serial.ports." + Integer.toString(i));
+        while (pref != null) {
+            Base.preferences.unset("serial.ports." + Integer.toString(i));
+            i++;
+            pref = Base.preferences.get("serial.ports." + Integer.toString(i));
+        }
+
+        i = 0;
+        for (Enumeration<String> en = extraPortListModel.elements(); en.hasMoreElements();) {
+            String s = en.nextElement();
+            Base.preferences.set("serial.ports." + Integer.toString(i), s);
+            i++;
+        }
+        Serial.fillExtraPorts();
+    }
+
     Base.applyPreferences();
     Base.preferences.save();
   }
@@ -721,6 +811,15 @@ public class Preferences {
 
     if (autoAssociateBox != null) {
       autoAssociateBox.  setSelected(Base.preferences.getBoolean("platform.auto_file_type_associations"));
+    }
+
+    if (Base.isLinux() || Base.isMacOS()) {
+        ArrayList<String> pl = Serial.getExtraPorts();
+
+        extraPortListModel.clear();
+        for (String port : pl) {
+            extraPortListModel.addElement(port);
+        }
     }
 
     dialog.setVisible(true);

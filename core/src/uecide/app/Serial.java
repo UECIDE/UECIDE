@@ -103,8 +103,11 @@ public class Serial {
         }
 
         for (String p : extraPorts) {
-            pl.add(p);
+            if (pl.indexOf(p) == -1) {
+                pl.add(p);
+            }
         }
+        Collections.sort(pl);
         return pl;
     }
 
@@ -122,6 +125,7 @@ public class Serial {
 
     static public void fillExtraPorts() {
         int pnum = 0;
+        clearExtraPorts();
         String pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
         while (pname != null) {
             addExtraPort(pname);
