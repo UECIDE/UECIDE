@@ -1887,5 +1887,182 @@ public class Sketch implements MessageConsumer {
         }
         sf.setFile(newFile);
     }
+
+    public void programBootloader(String programmer) {
+        String uploadCommand;
+
+        File bootloader = editor.board.getBootloader();
+        String blName = bootloader.getAbsolutePath();
+
+        HashMap<String, String> all = mergeAllProperties();
+        editor.statusNotice(Translate.t("Burning Bootloader..."));
+        settings.put("filename", blName);
+        settings.put("filename.elf", blName + ".elf");
+        settings.put("filename.hex", blName + ".hex");
+        settings.put("filename.eep", blName + ".eep");
+
+        boolean isJava = true;
+        uploadCommand = editor.board.get("upload." + programmer + ".command.java");
+        if (uploadCommand == null) {
+            uploadCommand = editor.core.get("upload." + programmer + ".command.java");
+        }
+        if (uploadCommand == null) {
+            isJava = false;
+            uploadCommand = editor.board.get("upload." + programmer + ".command." + Base.getOSFullName());
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.board.get("upload." + programmer + ".command." + Base.getOSName());
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.board.get("upload." + programmer + ".command");
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.core.get("upload." + programmer + ".command." + Base.getOSFullName());
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.core.get("upload." + programmer + ".command." + Base.getOSName());
+        }
+        if (uploadCommand == null) {
+            uploadCommand = editor.core.get("upload." + programmer + ".command");
+        }
+
+        if (uploadCommand == null) {
+            message("No upload command defined for board\n", 2);
+            editor.statusNotice(Translate.t("Upload Failed"));
+            return;
+        }
+
+   
+        if (isJava) {
+            Plugin uploader;
+            uploader = Base.plugins.get(uploadCommand);
+            if (uploader == null) {
+                message("Upload class " + uploadCommand + " not found.\n", 2);
+                editor.statusNotice(Translate.t("Upload Failed"));
+                return;
+            }
+            try {
+                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
+                    message(uploadCommand + "is not a valid loader plugin.\n", 2);
+                    editor.statusNotice(Translate.t("Upload Failed"));
+                    return;
+                }
+                uploader.run();
+            } catch (Exception e) {
+                editor.statusNotice(Translate.t("Upload Failed"));
+                message(e.toString(), 2);
+                return;
+            }
+            editor.statusNotice(Translate.t("Upload Complete"));
+            return;
+        }
+
+        String[] spl;
+        spl = parseString(uploadCommand).split("::");
+
+        String executable = spl[0];
+        if (Base.isWindows()) {
+            executable = executable + ".exe";
+        }
+
+        File exeFile = new File(folder, executable);
+        File tools;
+        if (!exeFile.exists()) {
+            tools = new File(folder, "tools");
+            exeFile = new File(tools, executable);
+        }
+        if (!exeFile.exists()) {
+            exeFile = new File(editor.core.getFolder(), executable);
+        }
+        if (!exeFile.exists()) {
+            tools = new File(editor.core.getFolder(), "tools");
+            exeFile = new File(tools, executable);
+        }
+        if (!exeFile.exists()) {
+            exeFile = new File(executable);
+        }
+        if (exeFile.exists()) {
+            executable = exeFile.getAbsolutePath();
+        }
+
+        spl[0] = executable;
+
+        // Parse each word, doing String replacement as needed, trimming it, and
+        // generally getting it ready for executing.
+
+        String commandString = executable;
+        for (int i = 1; i < spl.length; i++) {
+            String tmp = spl[i];
+            tmp = tmp.trim();
+            if (tmp.length() > 0) {
+                commandString += "::" + tmp;
+            }
+        }
+
+        boolean dtr = false;
+        boolean rts = false;
+
+
+        String ulu = all.get("upload." + programmer + ".using");
+        if (ulu == null) ulu = "serial";
+
+        String doDtr = all.get("upload." + programmer + ".dtr");
+        if (doDtr != null) {
+            if (doDtr.equals("yes")) {
+                dtr = true;
+            }
+        }
+        String doRts = all.get("upload." + programmer + ".rts");
+        if (doRts != null) {
+            if (doRts.equals("yes")) {
+                rts = true;
+            }
+        }
+
+        if (ulu.equals("serial") || ulu.equals("usbcdc"))
+        {
+            editor.grabSerialPort();
+            if (dtr || rts) {
+                assertDTRRTS(dtr, rts);
+            }
+        }
+        if (ulu.equals("usbcdc")) {
+            try {
+                String baud = all.get("upload." + programmer + ".reset.baud");
+                if (baud != null) {
+                    System.err.println("Opening serial port at " + baud + " baud");
+                    int b = Integer.parseInt(baud);
+          //          editor.grabSerialPort();
+                    
+                    SerialPort serialPort = Serial.requestPort(editor.getSerialPort(), this, b);
+                    if (serialPort == null) {
+                        Base.error("Unable to lock serial port");
+                        return;
+                    }
+                    Thread.sleep(1000);
+                    Serial.releasePort(serialPort);
+                    serialPort = null;
+                    System.gc();
+                    Thread.sleep(1500);
+                }
+            } catch (Exception e) {
+                Base.error(e);
+            }
+        }
+
+        boolean res = execAsynchronously(commandString);
+        if (ulu.equals("serial") || ulu.equals("usbcdc"))
+        {
+            if (dtr || rts) {
+                assertDTRRTS(false, false);
+            }
+            editor.releaseSerialPort();
+        }
+        if (res) {
+            editor.statusNotice(Translate.t("Upload Complete"));
+        } else {
+            editor.statusNotice(Translate.t("Upload Failed"));
+        }
+    }
 }
 
