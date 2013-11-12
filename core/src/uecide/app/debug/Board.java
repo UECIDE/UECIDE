@@ -22,6 +22,8 @@ public class Board implements Comparable {
     private boolean runInVerboseMode;
     public PropertyFile boardPreferences;
 
+    private File bootloader = null;
+
     public Board(File folder) {
         this.folder = folder;
 
@@ -34,10 +36,17 @@ public class Board implements Comparable {
             this.name = folder.getName();
             this.longname = (String) boardPreferences.get("name");
             this.group = (String) boardPreferences.get("group");
+            if (boardPreferences.get("bootloader") != null) {
+                bootloader = new File(folder, boardPreferences.get("bootloader"));
+            }
             valid = true;
         } catch (Exception e) {
             System.err.print("Bad board file format: " + folder);
         }
+    }
+
+    public File getBootloader() {
+        return bootloader;
     }
 
     public void setVerbose(boolean v) {

@@ -67,6 +67,7 @@ public class Editor extends JFrame implements RunnerListener {
     JMenu coresMenu;
     JMenu serialMenu;
     JMenu programmersMenu;
+    JMenu bootloadersMenu;
 
     SerialMenuListener serialMenuListener;
   
@@ -723,6 +724,11 @@ public class Editor extends JFrame implements RunnerListener {
         rebuildProgrammersMenu();
     }
     menu.add(programmersMenu);
+    if (bootloadersMenu == null) {
+        bootloadersMenu = new JMenu(Translate.t("Burn Bootloader"));
+        rebuildBootloadersMenu();
+    }
+    menu.add(bootloadersMenu);
     return menu;
   }
 
@@ -1709,6 +1715,57 @@ public class Editor extends JFrame implements RunnerListener {
         return ifound;  // actually ignored, but..
     }
 
+    public void rebuildBootloadersMenu() {
+        bootloadersMenu.removeAll();
+        if (sketch == null) {
+            return;
+        }
+
+        if (board == null) {
+            return;
+        }
+
+        if (core == null) {
+            return;
+        }
+
+        if (board.getBootloader() == null) {
+            JMenuItem nbl = new JMenuItem("No Bootloader Available");
+            nbl.setEnabled(false);
+            bootloadersMenu.add(nbl);
+            return;
+        }
+
+        HashMap<String, String> all = sketch.mergeAllProperties();
+
+        String plist = all.get("bootloader.upload");
+        if (plist == null) {
+            JMenuItem nbl = new JMenuItem("No Programmer Available");
+            nbl.setEnabled(false);
+            bootloadersMenu.add(nbl);
+            return;
+        }
+            
+        String[] parr = plist.split("::");
+
+        for (String progEntry : parr) {
+
+            if (!isValidProgrammer(progEntry)) {
+                continue;
+            }
+            String name = all.get("upload." + progEntry + ".name");
+            AbstractAction action = new AbstractAction(name) {
+                public void actionPerformed(ActionEvent actionevent) {
+                    sketch.programBootloader((String) getValue("programmer"));
+                }
+            };
+            action.putValue("programmer", progEntry);
+            JMenuItem item = new JMenuItem(action);
+            bootloadersMenu.add(item);
+        }
+    }
+        
+
     public void rebuildProgrammersMenu() {
         programmersMenu.removeAll();
         if (sketch == null) {
@@ -1906,6 +1963,7 @@ public class Editor extends JFrame implements RunnerListener {
         }
 
         rebuildProgrammersMenu();
+        rebuildBootloadersMenu();
 
         for (int i = 0; i < tabs.getTabCount(); i++) {
             SketchEditor se = (SketchEditor)tabs.getComponentAt(i);
@@ -1977,6 +2035,7 @@ public class Editor extends JFrame implements RunnerListener {
 //        rebuildBoardsMenu();
 //        rebuildCoresMenu();
         rebuildProgrammersMenu();
+        rebuildBootloadersMenu();
         populateMenus();
     }
 
