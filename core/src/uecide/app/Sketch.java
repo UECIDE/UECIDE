@@ -1633,6 +1633,7 @@ public class Sketch implements MessageConsumer {
 
     private boolean compileHEX() {
         HashMap<String, String> all = mergeAllProperties();
+        System.err.println(all.get("compile.hex"));
         return execAsynchronously(parseString(all.get("compile.hex")));
     }
 
@@ -1789,7 +1790,7 @@ public class Sketch implements MessageConsumer {
         } else if (editor.compiler.getProperties() == null) {
             System.err.println("==> No compiler properties");
         } else {
-            total.putAll(editor.compiler.getProperties().toHashMap());
+            total.putAll(editor.compiler.getProperties().toHashMap(true));
         }
 
         if (editor.core == null) { 
@@ -1797,7 +1798,7 @@ public class Sketch implements MessageConsumer {
         } else if (editor.core.getProperties() == null) {
             Base.error("==> No core properties");
         } else {
-            total.putAll(editor.core.getProperties().toHashMap());
+            total.putAll(editor.core.getProperties().toHashMap(true));
         }
 
         if (editor.board == null) {
@@ -1805,7 +1806,7 @@ public class Sketch implements MessageConsumer {
         } else if (editor.board.getProperties() == null) {
             Base.error("==> No board properties");
         } else {
-            total.putAll(editor.board.getProperties().toHashMap());
+            total.putAll(editor.board.getProperties().toHashMap(true));
         }
 
         if (parameters != null) {
