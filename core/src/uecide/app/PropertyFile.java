@@ -70,7 +70,11 @@ public class PropertyFile {
     }
 
     public String getPlatformSpecific(String attribute) {
-        String t = properties.getProperty(attribute + "." + Base.getOSName());
+        String t = properties.getProperty(attribute + "." + Base.getOSFullName());
+        if (t != null) {
+            return t.trim();
+        }
+        t = properties.getProperty(attribute + "." + Base.getOSName());
         if (t != null) {
             return t.trim();
         }
@@ -223,9 +227,24 @@ public class PropertyFile {
     }
 
     public HashMap<String, String> toHashMap() {
+        return toHashMap(false);
+    }
+
+    public HashMap<String, String> toHashMap(boolean ps) {
         HashMap<String, String> map = new HashMap<String, String>();
-        for (final String name: properties.stringPropertyNames())
-            map.put(name, properties.getProperty(name));
+        for (String name: properties.stringPropertyNames()) {
+            if (ps) {
+                if (name.endsWith("." + Base.getOSFullName())) {
+                    name = name.substring(0, name.length() - Base.getOSFullName().length() - 1);
+                }
+                if (name.endsWith("." + Base.getOSName())) {
+                    name = name.substring(0, name.length() - Base.getOSName().length() - 1);
+                }
+                map.put(name, getPlatformSpecific(name));
+            } else {
+                map.put(name, properties.getProperty(name));
+            }
+        }
         return map;
     }
 }
