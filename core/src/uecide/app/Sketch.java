@@ -244,8 +244,17 @@ public class Sketch implements MessageConsumer {
         SketchFile mainFile = getMainFile();
         if (Base.preferences.getBoolean("compiler.combine_ino")) {
             combinedMain.append("#line 1 \"" + mainFile.file.getName() + "\"\n");
-            combinedMain.append(mainFile.textArea.getText());
-            combinedMain.append("\n");
+            Pattern pragma = Pattern.compile("#pragma\\s+parameter");
+            String[] bodylines = mainFile.textArea.getText().split("\n");
+            for (String line : bodylines) {
+                if (line.trim().startsWith("#pragma")) {
+                    Matcher mtch = pragma.matcher(line);
+                    if (mtch.find()) {
+                        line = "// " + line;
+                    }
+                }
+                combinedMain.append(line + "\n");
+            }
         }
         for (SketchFile f : sketchFiles) {
             String lcn = f.file.getName().toLowerCase();
@@ -263,8 +272,17 @@ public class Sketch implements MessageConsumer {
                 if (Base.preferences.getBoolean("compiler.combine_ino")) {
                     if (!(f.equals(mainFile))) {
                         combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
-                        combinedMain.append(f.textArea.getText());
-                        combinedMain.append("\n");
+                        Pattern pragma = Pattern.compile("#pragma\\s+parameter");
+                        String[] bodylines = mainFile.textArea.getText().split("\n");
+                        for (String line : bodylines) {
+                            if (line.trim().startsWith("#pragma")) {
+                                Matcher mtch = pragma.matcher(line);
+                                if (mtch.find()) {
+                                    line = "// " + line;
+                                }
+                            }
+                            combinedMain.append(line + "\n");
+                        }
                     }
                 } else {
                     String rawData = f.textArea.getText();
@@ -308,7 +326,18 @@ public class Sketch implements MessageConsumer {
 
                     sb.append("#line " + headerLength + " \"" + f.file.getName() + "\"\n");
                     f.headerLines ++;
-                    sb.append(body);
+
+                    Pattern pragma = Pattern.compile("#pragma\\s+parameter");
+                    String[] bodylines = body.split("\n");
+                    for (String line : bodylines) {
+                        if (line.trim().startsWith("#pragma")) {
+                            Matcher mtch = pragma.matcher(line);
+                            if (mtch.find()) {
+                                line = "// " + line;
+                            }
+                        }
+                        sb.append(line + "\n");
+                    }
 
                     String newFileName = f.file.getName();
                     int dot = newFileName.lastIndexOf(".");
@@ -374,7 +403,17 @@ public class Sketch implements MessageConsumer {
 
             sb.append("#line " + headerLength + " \"" + f.file.getName() + "\"\n");
             f.headerLines ++;
-            sb.append(body);
+            Pattern pragma = Pattern.compile("#pragma\\s+parameter");
+            String[] bodylines = body.split("\n");
+            for (String line : bodylines) {
+                if (line.trim().startsWith("#pragma")) {
+                    Matcher mtch = pragma.matcher(line);
+                    if (mtch.find()) {
+                        line = "// " + line;
+                    }
+                }
+                sb.append(line + "\n");
+            }
 
             String ext = all.get("build.extension"); 
             if (ext == null) ext = "cpp";
