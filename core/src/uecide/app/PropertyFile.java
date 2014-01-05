@@ -247,4 +247,22 @@ public class PropertyFile {
         }
         return map;
     }
+
+    public void loadNewUserFile(File user) {
+        if (user != null) {
+            if (user.exists()) {
+                try {
+                    // If the new properties fail to load (syntax error, for example) we don't
+                    // want to muller the old properties, so we load them into a fresh
+                    // properties object and only replace the old ones with the new if it
+                    // is all successful.
+                    Properties newProperties = new Properties(defaultProperties);
+                    newProperties.load(new FileReader(user));
+                    properties = newProperties;
+                } catch (Exception e) {
+                    Base.error(e);
+                }
+            }
+        }
+    }
 }

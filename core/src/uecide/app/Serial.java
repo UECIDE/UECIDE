@@ -133,4 +133,5 @@ public class Serial {
             pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
         }
     }
+
 }

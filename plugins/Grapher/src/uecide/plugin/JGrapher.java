@@ -26,9 +26,9 @@ public class JGrapher extends JComponent
     Color backgroundColor = new Color(0,0,0);
     Color axisColor = new Color(255,255,255);
 
-    int axisY1Min = 0;
-    int axisY1Max = 1000;
-    int axisY1Step = 100;
+    float axisY1Min = 0;
+    float axisY1Max = 1000;
+    float axisY1Step = 100;
 
     int axisXStep = 100;
 
@@ -87,6 +87,10 @@ public class JGrapher extends JComponent
         public Color getColor() {
             return color;
         }
+
+        public String getName() {
+            return name;
+        }
     }
 
     public JGrapher()
@@ -120,21 +124,21 @@ public class JGrapher extends JComponent
         g.drawLine(leftMargin, screenSize.height - bottomMargin, screenSize.width - rightMargin, screenSize.height - bottomMargin);
 
 
-        int diff = axisY1Max - axisY1Min;
-        int adiff = screenSize.height - topMargin - bottomMargin;
-        float scale = (float)adiff / (float)diff;
+        float diff = axisY1Max - axisY1Min;
+        float adiff = screenSize.height - topMargin - bottomMargin;
+        float scale = adiff / diff;
 
         g.setFont(font);
         FontMetrics fm = g.getFontMetrics();
         int fontShift = fm.getAscent()/2;
 
-        for (int i = 0; i <= diff; i += axisY1Step) {
+        for (float i = 0; i <= diff; i += axisY1Step) {
             int pos = (int) ((float) i * scale);
             for (int j = leftMargin; j < screenSize.width - rightMargin; j+=2) {
                 g.drawLine(j, screenSize.height - bottomMargin - pos, j, screenSize.height - bottomMargin - pos); 
             }
             g.drawLine(leftMargin - 5, screenSize.height - bottomMargin - pos, leftMargin, screenSize.height - bottomMargin - pos);
-            g.drawString(Integer.toString(axisY1Min + i), 0, screenSize.height-bottomMargin-pos+fontShift);
+            g.drawString(Float.toString(axisY1Min + i), 0, screenSize.height-bottomMargin-pos+fontShift);
         }
 
         for (int x=0; x<numPoints; x++) {
@@ -150,6 +154,7 @@ public class JGrapher extends JComponent
         }
         g.setStroke(new BasicStroke(2));
 
+        int ypos = 0;
         for (DataSeries s : series) {
             float[] vals = s.getValues();
 
@@ -161,6 +166,10 @@ public class JGrapher extends JComponent
                 g.drawLine(leftMargin + x, screenSize.height - bottomMargin - (int)oval, leftMargin + x + 1, screenSize.height - bottomMargin - (int)val);
                 oval = val;
             }
+
+            String out = s.getName() + ": " + vals[numPoints-1];
+            g.drawString(out, leftMargin + 10, topMargin + 10 + (ypos * 20));
+            ypos++;
         }
 
         return offscreen;
@@ -275,15 +284,15 @@ public class JGrapher extends JComponent
         repaint();
     }
 
-    public void setYMinimum(int value) {
+    public void setYMinimum(float value) {
         axisY1Min = value;
     }
 
-    public void setYMaximum(int value) {
+    public void setYMaximum(float value) {
         axisY1Max = value;
     }
 
-    public void setYStep(int value) {
+    public void setYStep(float value) {
         axisY1Step = value;
     }
     

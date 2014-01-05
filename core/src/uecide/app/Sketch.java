@@ -225,6 +225,86 @@ public class Sketch implements MessageConsumer {
         return folder;
     }
 
+
+    /*
+     * This is the new preprocessing routine which uses the
+     * compiler's preprocessor to strip comments, include files,
+     * expand macros, etc.  Much better than the old Arduino way
+     * of doing it. 
+     */
+
+    public boolean convertINOtoCPP(File ino, File cpp) {
+        // This is quite a tricky routine to get right.  The steps are
+        // simple enough, but getting them absoltely right and robust
+        // is going to be interesting.
+
+        // Step one is to just take the file and pass it through the
+        // compile.preproc routine.
+
+        return false;
+    }
+
+    public boolean doNewPrepare() {
+        // Step one is to combine all INOs into one
+        // if needed.
+
+        HashMap<String, String> all = mergeAllProperties();
+
+        SketchFile mainFile = getMainFile();
+        String ext = all.get("build.extension"); 
+        if (ext == null) ext = "cpp";
+
+        if (Base.preferences.getBoolean("compiler.combine_ino")) {
+            StringBuilder combinedINO = new StringBuilder();
+            combinedINO.append("#line 1 \"" + mainFile.file.getName() + "\"\n");
+            String[] bodylines = mainFile.textArea.getText().split("\n");
+            for (String line : bodylines) {
+                combinedINO.append(line + "\n");
+            }
+            for (SketchFile f : sketchFiles) {
+                if (f != mainFile) {
+                    combinedINO.append("#line 1 \"" + f.file.getName() + "\"\n");
+                    bodylines = f.textArea.getText().split("\n");
+                    for (String line : bodylines) {
+                        combinedINO.append(line + "\n");
+                    }
+                }
+            }
+
+            File ino = new File(buildFolder, mainFile.file.getName());
+            File cpp = new File(buildFolder, mainFile.file.getName().replace(".ino","." + ext));
+
+            try {
+                PrintWriter pw = new PrintWriter(ino);
+                pw.print(combinedINO.toString());
+                pw.close();
+            } catch (Exception e) {
+                Base.error(e);
+            }
+
+            return convertINOtoCPP(ino, cpp);
+        } else {
+            for (SketchFile f : sketchFiles) {
+                File ino = new File(buildFolder, f.file.getName());
+                File cpp = new File(buildFolder, f.file.getName().replace(".ino","." + ext));
+                try {
+                    PrintWriter pw = new PrintWriter(ino);
+                    pw.print(f.textArea.getText());
+                    pw.close();
+                } catch (Exception e) {
+                    Base.error(e);
+                    return false;
+                }
+                boolean rv = convertINOtoCPP(ino, cpp);
+                if (!rv) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public boolean prepare() {
         HashMap<String, String> all = mergeAllProperties();
         if (editor.board == null) {
@@ -238,6 +318,13 @@ public class Sketch implements MessageConsumer {
         if (Base.preferences.getBoolean("export.delete_target_folder")) {
             cleanBuild();
         }
+
+        if (all.get("compile.preproc") != null) {
+            if (all.get("compile.preproc").equals("") == false) {
+                return doNewPrepare();
+            }
+        }
+
         parameters = new HashMap<String, String>();
         importedLibraries = new HashMap<String, Library>();
         StringBuilder combinedMain = new StringBuilder();
@@ -461,7 +548,39 @@ public class Sketch implements MessageConsumer {
             if (line.startsWith("#pragma")) {
                 Matcher m = pragma.matcher(line);
                 if (m.find()) {
-                    parameters.put(m.group(1), m.group(2).replaceAll(" ", "::"));
+                    String key = m.group(1);
+                    String value = m.group(2);
+                    String munged = "";
+                    for (int i = 0; i < value.length(); i++) {
+
+                        if (value.charAt(i) == '"') {
+                            munged += '"';
+                            i++;
+                            while (value.charAt(i) != '"') {
+                                munged += value.charAt(i++);
+                            }
+                            munged += '"';
+                            continue;
+                        }
+
+                        if (value.charAt(i) == '\'') {
+                            munged += '\'';
+                            i++;
+                            while (value.charAt(i) != '\'') {
+                                munged += value.charAt(i++);
+                            }
+                            munged += '\'';
+                            continue;
+                        }
+
+                        if (value.charAt(i) == ' ') {
+                            munged += "::";
+                            continue;
+                        }
+
+                        munged += value.charAt(i);
+                    }
+                    parameters.put(key, munged);
                 }
                 continue;
             }
@@ -1050,7 +1169,7 @@ public class Sketch implements MessageConsumer {
                         if (filename.startsWith(getBuildFolder().getAbsolutePath())) {
                             filename = filename.substring(getBuildFolder().getAbsolutePath().length() + 1);
                         }
-                        editor.console.message("Error at line " + match.group(2) + " in file " + filename + ":\n    " + match.group(3) + "\n", true, false);
+                        editor.console.message("Error at line " + match.group(2) + " in file " + filename + ":\n    " + match.group(3) + "\n", 2, false);
                         SketchFile f = getFileByName(filename);
                         if (f != null) {
                             int tn = editor.getTabByFile(f);
@@ -1067,13 +1186,13 @@ public class Sketch implements MessageConsumer {
                             if (filename.startsWith(getBuildFolder().getAbsolutePath())) {
                                 filename = filename.substring(getBuildFolder().getAbsolutePath().length() + 1);
                             }
-                            editor.console.message("Warning at line " + match.group(2) + " in file " + filename + ":\n    " + match.group(3) + "\n", true, false);
+                            editor.console.message("Warning at line " + match.group(2) + " in file " + filename + ":\n    " + match.group(3) + "\n", 1, false);
                             SketchFile f = getFileByName(filename);
                             if (f != null) {
                                 f.textArea.addLineHighlight(Integer.parseInt(match.group(2)), Base.theme.getColor("editor.compile.warning.bgcolor"));
                             }
                         } else {
-                            editor.console.message(m, true, false);
+                            editor.console.message(m, 0, false);
                         }
                     }
                 } else {
@@ -1081,7 +1200,7 @@ public class Sketch implements MessageConsumer {
                 }
             } else {
                 if (stdoutRedirect == null) {
-                    editor.console.message(m, false, false);
+                    editor.console.message(m, 0, false);
                 } else {
                     stdoutRedirect.print(m);
                 }
