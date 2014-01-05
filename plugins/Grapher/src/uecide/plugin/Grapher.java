@@ -31,8 +31,11 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
     ImageIcon pauseIcon;
     boolean playPauseState = false;
     String serialPort;
+    JToolBar toolbar;
 
     JTextField fontSizeField;
+    Box box;
+    Box line;
 
     int baudRate;
 
@@ -51,9 +54,9 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
         win.getContentPane().setLayout(new BorderLayout());
         win.setResizable(false);
 
-        Box box = Box.createVerticalBox();
+        box = Box.createVerticalBox();
 
-        JToolBar toolbar = new JToolBar();
+        toolbar = new JToolBar();
         toolbar.setFloatable(false);
 
         File themeFolder = Base.getContentFile("lib/theme");
@@ -82,7 +85,7 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
         toolbar.add(playPauseButton);
         box.add(toolbar);
 
-        Box line = Box.createHorizontalBox();
+//        line = Box.createHorizontalBox();
 
         graph = new JGrapher();
         Font f = Base.preferences.getFont("grapher.font");
@@ -92,8 +95,8 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
         }
         graph.setFont(f);
 
-        line.add(graph);
-        box.add(line);
+//        line.add(graph);
+        box.add(graph);
         
         line = Box.createHorizontalBox();
 
@@ -175,6 +178,10 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
         Serial.releasePort(port);
         win.dispose();
         ready = false;
+        int p = Base.pluginInstances.indexOf(this);
+        if (p>=0) {
+            Base.pluginInstances.remove(p);
+        }
     }
 
     public String getMenuTitle()
@@ -185,82 +192,85 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
     char command = 0;
     String data = "";
 
-    public void executeCommand() {
-        String params[] = data.split(":");
-        switch(command) {
-            case 'A':
-                if(params.length == 4) {
-                    graph.addSeries(params[0], new Color(
-                        Integer.parseInt(params[1]),
-                        Integer.parseInt(params[2]),
-                        Integer.parseInt(params[3])
-                    ));
-                }
-                break;
-            case 'V':
-                if (playPauseState == false) {
-                    float vals[] = new float[params.length];
-                    for (int i = 0; i < params.length; i++) {
-                        vals[i] = Float.parseFloat(params[i]);
+    public void executeCommand(char cmd, String dta) {
+        String params[] = dta.split(":");
+        try {
+            switch(cmd) {
+                case 'A':
+                    if(params.length == 4) {
+                        graph.addSeries(params[0], new Color(
+                            Integer.parseInt(params[1]),
+                            Integer.parseInt(params[2]),
+                            Integer.parseInt(params[3])
+                        ));
                     }
-                    graph.addDataPoint(vals);
-                }
-                break;
-            case 'S':
-                if (params.length == 2) {
-                    graph.setScreenSize(new Dimension(
-                        Integer.parseInt(params[0]),
-                        Integer.parseInt(params[1])
-                    ));
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            resizeWindow();
+                    break;
+                case 'V':
+                    if (playPauseState == false) {
+                        float vals[] = new float[params.length];
+                        for (int i = 0; i < params.length; i++) {
+                            vals[i] = Float.parseFloat(params[i]);
                         }
-                    });
-                }
-                break;
-            case 'M':
-                if (params.length == 4) {
-                    graph.setTopMargin(Integer.parseInt(params[0]));
-                    graph.setRightMargin(Integer.parseInt(params[1]));
-                    graph.setBottomMargin(Integer.parseInt(params[2]));
-                    graph.setLeftMargin(Integer.parseInt(params[3]));
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            resizeWindow();
-                        }
-                    });
-                } 
-                break;
+                        graph.addDataPoint(vals);
+                    }
+                    break;
+                case 'S':
+                    if (params.length == 2) {
+                        graph.setScreenSize(new Dimension(
+                            Integer.parseInt(params[0]),
+                            Integer.parseInt(params[1])
+                        ));
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                resizeWindow();
+                            }
+                        });
+                    }
+                    break;
+                case 'M':
+                    if (params.length == 4) {
+                        graph.setTopMargin(Integer.parseInt(params[0]));
+                        graph.setRightMargin(Integer.parseInt(params[1]));
+                        graph.setBottomMargin(Integer.parseInt(params[2]));
+                        graph.setLeftMargin(Integer.parseInt(params[3]));
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                resizeWindow();
+                            }
+                        });
+                    } 
+                    break;
 
-            case 'B':
-                if (params.length == 3) {
-                    graph.setBackgroundColor(new Color(
-                        Integer.parseInt(params[0]),
-                        Integer.parseInt(params[1]),
-                        Integer.parseInt(params[2])
-                    ));
-                }
-                break;
-            case 'F':
-                if (params.length == 3) {
-                    graph.setAxisColor(new Color(
-                        Integer.parseInt(params[0]),
-                        Integer.parseInt(params[1]),
-                        Integer.parseInt(params[2])
-                    ));
-                }
-                break;
-            case 'Y':
-                if (params.length == 3) {
-                    graph.setYMinimum(Integer.parseInt(params[0]));
-                    graph.setYMaximum(Integer.parseInt(params[1]));
-                    graph.setYStep(Integer.parseInt(params[2]));
-                }
-                break;
-            case 'R':
-                graph.reset();
-                break;
+                case 'B':
+                    if (params.length == 3) {
+                        graph.setBackgroundColor(new Color(
+                            Integer.parseInt(params[0]),
+                            Integer.parseInt(params[1]),
+                            Integer.parseInt(params[2])
+                        ));
+                    }
+                    break;
+                case 'F':
+                    if (params.length == 3) {
+                        graph.setAxisColor(new Color(
+                            Integer.parseInt(params[0]),
+                            Integer.parseInt(params[1]),
+                            Integer.parseInt(params[2])
+                        ));
+                    }
+                    break;
+                case 'Y':
+                    if (params.length == 3) {
+                        graph.setYMinimum(Float.parseFloat(params[0]));
+                        graph.setYMaximum(Float.parseFloat(params[1]));
+                        graph.setYStep(Float.parseFloat(params[2]));
+                    }
+                    break;
+                case 'R':
+                    graph.reset();
+                    break;
+            }
+        } catch (Exception e) {
         }
     }
     
@@ -270,8 +280,12 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
     }
 
     public void resizeWindow() {
+//        win.setPreferredSize(win.getPreferredSize());
+//        win.validate();
+        box.invalidate();
+        box.validate();
         win.pack();
-        win.repaint();
+//        win.repaint();
     }
 
     public void saveImage() {
@@ -354,6 +368,12 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
     }
 
     public boolean releasePort(String portName) {
+        if (portName == null) {
+            return true;
+        }
+        if (port == null) {
+            return true;
+        }
         if (portName.equals(serialPort)) {
             try {
                 port.removeEventListener();
@@ -397,10 +417,12 @@ public class Grapher extends BasePlugin implements SerialPortEventListener
                                 break;
                         }
                     } else {
-                        if(c == '\n') {
-                            executeCommand();
+                        if(c == '\n' || c == '\r') {
+                            char cmd = command;
                             command = 0;
+                            String dta = data;
                             data = "";
+                            executeCommand(cmd, dta);
                         } else {
                             data += Character.toString((char)c);
                         }

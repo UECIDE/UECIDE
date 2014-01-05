@@ -75,7 +75,7 @@ public class Base {
     public static Editor activeEditor;
 
     public static PropertyFile preferences;
-    public static PropertyFile theme;
+    public static Theme theme;
 
     public static void main(String args[]) {
         new Base(args);
@@ -111,12 +111,20 @@ public class Base {
             error(e);
         }
 
-        theme = new PropertyFile(getContentFile("lib/theme/theme.txt"));
+        // Get the initial basic theme data
+        theme = new Theme(getContentFile("lib/theme/theme.txt"));
         theme.setPlatformAutoOverride(true);
+
+        System.err.println("Loading " + theme.get("product") + "...");
+
         initPlatform();
         preferences = new PropertyFile(getSettingsFile("preferences.txt"), getContentFile("lib/preferences.txt"));
         preferences.setPlatformAutoOverride(true);
-        theme = new PropertyFile(getSettingsFile("theme.txt"), getContentFile("lib/theme/theme.txt"));
+
+
+        // Now we reload the theme data with user overrides
+        // (we didn't know where they were before) 
+        theme = new Theme(getSettingsFile("theme.txt"), getContentFile("lib/theme/theme.txt"));
         theme.setPlatformAutoOverride(true);
 
         if (!headless) {
@@ -2134,6 +2142,25 @@ public class Base {
 
     static public File getSystemBoardsFolder() {
         return new File(getHardwareFolder(),"boards");
+    }
+
+    static public File getSystemThemesFolder() {
+        return new File(getHardwareFolder(), "themes");
+    }
+
+    static public File getUserThemesFolder() {
+        File tf = preferences.getFile("location.themes");
+        if (tf != null) {
+            if (!tf.exists()) {
+                tf.mkdirs();
+            }
+            return tf;
+        }
+        File f = getSettingsFile("themes");
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
     }
 
     static public File getUserPluginsFolder() {
