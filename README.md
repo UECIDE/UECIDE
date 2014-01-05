@@ -48,3 +48,72 @@ Another major aim of the project is to make it simple to build the IDE for
 all major platforms (Windows, Linux, Mac, etc) with just one command on a
 single machine.  No need to switch to another operating system just to
 create the IDE for that platform.
+
+How to compile
+==============
+
+First you need to be running Ubuntu or something similar.  While it should
+be possible to compile on any system we have only been developing on Ubuntu
+so if you need any help and you're not on Ubuntu you're on your own I'm
+afraid.
+
+Then you need to install openjdk version 6.  While we'd love to use some of
+the nice features of Java 7, thanks to Apple we're not able to (anything older
+than about 5 minutes ago with Apple only has Java 6 available).
+
+    $ sudo apt-get install openjdk-6-jdk
+
+If you want to build the Windows distribution you will also need the mingw packages:
+
+    $ sudo apt-get install gcc-mingw32
+
+And of course you will need ant to be able to do the compiling:
+
+    $ sudo apt-get install ant
+
+All the building is done from the "build" directory.  In there is a configuration
+file you will need to examine and edit if needed.  The main entry you will need
+to check out is the bootclass.path entry which points to where the Java version 6
+core files are.  On an Ubuntu system these are stored in /usr/lib/jvm somewhere.
+If you are on a 32-bit system the default setting won't be right, so you will need
+to change it.  To confirm what it should be you can find all the installed JDK
+locations with:
+
+    bob@computer:~/UECIDE/build$ find /usr/lib/jvm -name rt.jar
+    /usr/lib/jvm/java-1.5.0-gcj-4.7/jre/lib/rt.jar
+    /usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar
+    /usr/lib/jvm/java-7-openjdk-i386/jre/lib/rt.jar
+
+Copy and paste the openjdk 6 line into the bootclass.path setting in the 
+build.settings file.
+
+You should now be good to build:
+
+    bob@computer:~/UECIDE/build$ ant
+
+Assuming there are no errors, you should now have a freshly built version of
+UECIDE available for testing.  You can run it with:
+
+    bob@computer:~/UECIDE/build$ linux/work/uecide
+
+You can turn your freshly built test version into a zip file for easy distribution
+with:
+
+    bob@computer:~/UECIDE/build$ ant dist
+
+Or a .deb file with:
+
+    bob@computer:~/UECIDE/build$ ant deb
+
+Both of which will end up in the linux directory.
+
+If you want to build for a different target system you can, with
+
+    bob@computer:~/UECIDE/build$ ant windows-build
+
+You can replace "windows-" with "macosx-".  You can also use the "dist" target
+with the prefixes:
+
+    bob@computer:~/UECIDE/build$ ant windows-dist
+
+

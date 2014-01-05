@@ -17,6 +17,7 @@
         <javac target="1.6" 
                source="1.6"
                encoding="UTF-8"
+               bootclasspath="${bootclass.path}"
                includeAntRuntime="false"
                srcdir="src" destdir="bin"
                classpath="${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/jna.jar; lib/jssc.jar">
