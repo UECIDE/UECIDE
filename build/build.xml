@@ -73,12 +73,12 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="subprojects-clean">
         <subant buildpath="../core" target="clean"/>
-        <subant buildpath="../plugins" target="clean"/>
+        <!--subant buildpath="../plugins" target="clean"/-->
     </target>
 
     <target name="subprojects-build">
         <subant buildpath="../core" target="build"/>
-        <subant buildpath="../plugins" target="build"/>
+        <!--subant buildpath="../plugins" target="build"/-->
     </target>
 
 
@@ -109,7 +109,11 @@ Building for ${brand} version ${version}${suffix}
     </target>
 
     <target name="install_plugin">
-        <copy file="../plugins/${plugin}/${plugin}.jar" todir="${target.path}/plugins/"/>
+        <antcall target="download-file">
+            <param name="src" value="http://www.uecide.org/p/plugins/${plugin}.jar" />
+            <param name="dest" value="tmp/${plugin}.jar" />
+        </antcall>
+        <copy file="tmp/${plugin}.jar" todir="${target.path}/plugins/"/>
     </target>
 
     <target name="install_boards">
@@ -286,9 +290,9 @@ Building for ${brand} version ${version}${suffix}
             <fileset file="shared/lib/keywords.txt"/>
     </copy>
     
-    <copy todir="linux/work">
+    <!--copy todir="linux/work">
       <fileset dir="linux/dist" includes="lib/**" />
-    </copy>
+    </copy-->
 
     <copy todir="linux/work/lib" flatten="true">
       <fileset refid="runtime.jars" />
@@ -298,9 +302,6 @@ Building for ${brand} version ${version}${suffix}
       <param name="target.path" value="linux/work" />
       <param name="target.platform" value="linux" />
     </antcall>
-
-    <copy tofile="linux/work/lib/32/librxtxSerial.so" file="linux/dist/lib/librxtxSerial32.so" />
-    <copy tofile="linux/work/lib/64/librxtxSerial.so" file="linux/dist/lib/librxtxSerial64.so" />
 
     <copy tofile="linux/work/${product}" file="linux/dist/linuxrunner" />
     <chmod perm="755" file="linux/work/${product}" />
@@ -387,7 +388,7 @@ Version: ${version}${suffix}
 Maintainer: matt@majenko.co.uk
 Architecture: ${arch}
 Section: Programming
-Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java, librxtx-java
+Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java
 Description: ${product.cap} Development environment
 
 </echo>
@@ -646,8 +647,8 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="clean" />
     </target>
 
-    <target name="plugins">
+    <!--target name="plugins">
         <subant buildpath="../plugins" target="build"/>
-    </target>
+    </target-->
 
 </project>
