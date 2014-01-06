@@ -1680,11 +1680,24 @@ public class Sketch implements MessageConsumer {
     }
 
     private List<File> compileSketch() {
-        return compileFiles(
+        List<File> sf = compileFiles(
                 buildFolder,
                 findFilesInFolder(buildFolder, "S", false),
                 findFilesInFolder(buildFolder, "c", false),
                 findFilesInFolder(buildFolder, "cpp", false));
+
+        File suf = new File(folder, "utility");
+        if (suf.exists()) {
+            File buf = new File(buildFolder, "utility");
+            buf.mkdirs();
+            List<File> uf = compileFiles(
+                buf,
+                findFilesInFolder(suf, "S", true),
+                findFilesInFolder(suf, "c", true),
+                findFilesInFolder(suf, "cpp", true));
+            sf.addAll(uf);
+        }
+        return sf;
     } 
 
     static public ArrayList<File> findFilesInFolder(File folder,
