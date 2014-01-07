@@ -1669,6 +1669,10 @@ public class Sketch implements MessageConsumer {
 
     private String preparePaths(ArrayList<String> includePaths) {
         String includes = "";
+        File suf = new File(folder, "utility");
+        if (suf.exists()) {
+            includes = includes + "-I" + suf.getAbsolutePath() + "::";
+        }
         if (parameters.get("extension") != null) {
             includes = includes + "-I" + parameters.get("extension") + "::";
         }
