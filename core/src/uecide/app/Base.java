@@ -34,6 +34,8 @@ public class Base {
     public static String VERSION_NAME = "0023";
     /** Set true if this a proper release rather than a numbered revision. */
     public static boolean RELEASE = false;
+    public static int BUILDNO = 0;
+    public static String BUILDER = "";
 
     public static ArrayList<Process> processes = new ArrayList<Process>();
   
@@ -105,6 +107,8 @@ public class Base {
 
             VERSION_NAME = manifestContents.getValue("Version");
             REVISION = Integer.parseInt(manifestContents.getValue("Compiled"));
+            BUILDNO = Integer.parseInt(manifestContents.getValue("Build"));
+            BUILDER = manifestContents.getValue("Built-By");
 
             RELEASE = true;
         } catch (Exception e) {
@@ -1502,6 +1506,10 @@ public class Base {
     }
 
     public static void handleSystemInfo() {
+	activeEditor.message(Translate.t("Version: ") + VERSION_NAME + "\n");
+	activeEditor.message(Translate.t("Build Number: ") + BUILDNO + "\n");
+	activeEditor.message(Translate.t("Built By: ") + BUILDER + "\n");
+
         activeEditor.message(Translate.t("Installed plugins") + ":\n");
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
