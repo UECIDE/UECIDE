@@ -3,6 +3,7 @@
 
 
     <property file="../build/build.settings"/>
+    <property file="../build/version.txt"/>
     <tstamp>
         <format property="TODAY" pattern="yyyyMMdd" />
     </tstamp>
