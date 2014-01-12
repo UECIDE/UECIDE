@@ -550,6 +550,21 @@ public class Editor extends JFrame implements RunnerListener {
       });
     fileMenu.add(saveAsMenuItem);
 
+    item = new JMenuItem(Translate.t("Export as SAR..."));
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            sketch.exportSAR();
+        }
+    });
+    fileMenu.add(item);
+    item = new JMenuItem(Translate.t("Import SAR..."));
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            sketch.importSAR();
+        }
+    });
+    fileMenu.add(item);
+
     item = newJMenuItem(Translate.t("Compile and Upload"), 'U');
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
