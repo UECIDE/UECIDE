@@ -1,6 +1,6 @@
 download.enable=yes
 
-bootclass.path=/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar
+bootclass.path=/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/rt.jar
 
 default.theme=uecide
 default.cores=
