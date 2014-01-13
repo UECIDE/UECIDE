@@ -94,8 +94,7 @@ public class Base {
         });
 */
 
-        Translate.load("/uecide/app/i18n/en_GB.lang");
-        Translate.load("/uecide/app/i18n/" + locale + ".lang");
+        
         headless = false;
 
         if (isLinux()) {
@@ -127,6 +126,15 @@ public class Base {
         preferences = new PropertyFile(getSettingsFile("preferences.txt"), getContentFile("lib/preferences.txt"));
         preferences.setPlatformAutoOverride(true);
 
+        Translate.loadIndex();
+
+        locale = preferences.get("locale");
+        if (locale == null) {
+            locale = "en_GB";
+        }
+
+        Translate.load("/uecide/app/i18n/en_GB.lang");
+        Translate.load("/uecide/app/i18n/" + locale + ".lang");
 
         // Now we reload the theme data with user overrides
         // (we didn't know where they were before) 
@@ -221,7 +229,7 @@ public class Base {
             System.exit(10);
         }
 
-        if (!headless) splashScreen.setMessage(Translate.e("Opening Editor"), 80);
+        if (!headless) splashScreen.setMessage(Translate.e("msg.loading.editor"), 80);
         boolean opened = false;
         // Check if any files were passed in on the command line
         for (int i = 0; i < args.length; i++) {

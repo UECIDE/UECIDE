@@ -30,6 +30,37 @@ import java.nio.charset.*;
  */
 public class Translate {
     public static HashMap<String, String> translations = new HashMap<String, String>();
+    public static HashMap<String, String> languages = new HashMap<String, String>();
+
+    public static void loadIndex() {
+        InputStream fis = Translate.class.getResourceAsStream("/uecide/app/i18n/index.txt");
+        if (fis == null) {
+            return;
+        }
+        BufferedReader br;
+        String line;
+
+        try {
+            Pattern p = Pattern.compile("^([^=]+)=(.*)$");
+            br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.length() == 0) {
+                    continue;
+                }
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                Matcher m = p.matcher(line);
+                if (m.find()) {
+                    languages.put(m.group(1).trim(), m.group(2).trim());
+                }
+            }
+            br.close();
+        } catch (Exception e) {
+            Base.error(e);
+        }
+    }
 
     public static void load(String resource) {
         try {

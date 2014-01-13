@@ -1,0 +1,4 @@
+en_GB = English (British)
+en_US = English (American)
+se_SE = Svenska
+fr_FR = Français

@@ -1,0 +1,275 @@
+# File menu
+menu.file = Fil
+menu.file.new = Ny skiss
+menu.file.open = Öppna skiss
+menu.file.recent = Nyliga skisser
+menu.file.examples = Exempel skisser
+menu.file.close = Stäng
+menu.file.save = Spara skiss
+menu.file.saveas = Spara skiss som
+menu.file.export.sar = Exportera som SAR
+menu.file.import.sar = Importera SAR
+menu.file.compileupload = Kompilera och ladda upp
+menu.file.pagesetup = Utskriftsformat
+menu.file.print = Skriva ut
+menu.file.preferences = Inställningar
+menu.file.quit = Sluta
+
+# Edit Menu
+menu.edit = Redigera
+menu.edit.undo = Ångra
+menu.edit.redo = Gör om
+menu.edit.cut = Klipp
+menu.edit.copy = Kopiera
+menu.edit.paste = Klistra
+menu.edit.selectall = Markera alla
+menu.edit.comment = Lägg till / ta bort kommentar
+menu.edit.indent.increase = Öka strecksatsen
+menu.edit.indent.decrease = Minska strecksatsen
+menu.edit.find = Sök och ersätt
+
+# Sketch Menu
+menu.sketch = Skiss
+menu.sketch.compile = Kompilera
+menu.sketch.clean.build = Rengör bygga mapp
+menu.sketch.clean.cache = Rengör cache mapp
+menu.sketch.import = Importera bibliotek
+menu.sketch.showfolder.sketch = Visa skiss mapp
+menu.sketch.showfolder.build = Visa bygga mapp
+menu.sketch.file.new = Ny fil
+menu.sketch.file.add = Lägg till fil
+menu.sketch.tab.rename = Byt namn på fliken
+
+# Hardware Menu
+menu.hardware = Hårdvara
+menu.hardware.board = Styrelser
+menu.hardware.core = Kärnor
+menu.hardware.serial = Serieport
+menu.hardware.programmer = Programmerare
+menu.hardware.burn = Installera laddaren
+
+# Tools Menu
+menu.tools = Verktyg
+
+# Help Menu
+menu.help = Hjälp
+menu.help.about.sketch = Om denna skiss
+menu.help.about.product = Om %1
+menu.help.sysinfo = Systeminformation
+
+# Loading Messages
+
+msg.loading = Lastning %1
+msg.loading.app = Lastning Ansökan
+msg.loading.compilers = Lastning Kompilatorer
+msg.loading.cores = Lastning Kärnor
+msg.loading.boards = Lastning Styrelser
+msg.loading.plugins = Lastning Verktyg
+msg.loading.libs = Lastning Bibliotek
+msg.loading.editor = Öppning Redigeraren
+
+# Error Messages
+
+error.nox11 = Det går inte att öppna redigeringsfönster - inga grafikmiljö hittade
+
+error.datafolder.title = Problem att få datamapp
+error.datafolder.msg = Fel att få datamappen.
+
+error.settings.title = Inställningar problem
+error.settings.msg = Det går inte att köra eftersom jag inte kunde skapa en mapp att spara dina inställningar
+
+error.sketchbook.title = Skiss bok problem
+error.sketchbook.msg = Jag kan inte springa eftersom jag inte kunde skapa en mapp för att lagra din skiss bok
+
+error.url.title = Problem att öppna URL
+error.url.msg = Det gick inte att öppna URL
+
+error.folder.title = Problem att öppna mappen
+error.folder.msg = Det gick inte att öppna mappen
+
+error.delete = Det gick inte att ta bort %1
+
+error.package = Fel: %1 är inte korrekt förpackade
+
+error.install = Installera misslyckades
+
+error.nosketch.title = Skiss existerar inte
+error.nosketch.msg1 = Den valda skiss finns inte längre.
+error.nosketch.msg2 = Du kan behöva starta om för att uppdatera skissbok menyn.
+
+error.board.title = Ogiltig styrelse
+error.board.msg = Det gick inte att hitta board '%1'
+
+error.file.add.title = Fel vid tillägg fil
+error.file.add.badtype = Du kan bara lägga till .ino, .pde, .c, .cpp, .h, .hh eller .S filer till en skiss
+error.file.add.nocreate = Kunde inte skapa fil
+error.file.add.nofile = %1 finns inte
+error.file.add.dup = Den filen finns redan i skissen
+error.file.add.overwrite = Det gick inte att ta bort den befintliga filen %1
+error.file.add.copy = Fel kopiering %1
+
+error.noboard.title = Ingen bräda vald
+error.noboard.msg = Skissen kan inte sammanställas: Du har ingen styrelse valts. Om du ännu inte har installerat några brädor du göra det genom Plugin Manager.
+
+error.nocore.title = Ingen kärna vald
+error.nocore.msg = Skissen kan inte sammanställas: Du har ingen kärna vald. Om du ännu inte har installerat en kärna du göra det genom Plugin Manager.
+
+error.nocompiler.title = Ingen kompilator vald
+error.nocompiler.msg = Skissen kan inte sammanställas: Kompilatorn för den valda kärnan inte är tillgänglig. Se till kompilatorn installeras med hjälp av Plugin Manager.
+
+error.readonly.title = Skiss är skrivskyddad
+error.readonly.msg = Vissa filer är markerade som skrivskyddade, så du måste spara om skissen på en annan plats och försök igen.
+
+error.disappeared.title = Skiss försvann
+error.disappeared.msg = Skissen mapp har försvunnit. Jag kommer att försöka att åter spara på samma plats, men något annat än koden kommer att gå förlorade.
+
+error.resave.title = Det gick inte att åter spara skiss
+error.resave.msg = Det gick inte riktigt åter spara skissen. Du kan vara i trubbel på denna punkt, och det kan vara dags att kopiera och klistra in din kod till en annan textredigerare.
+
+# General messages
+gen.complete = Komplett
+gen.cancel = Avbryt
+gen.ok = OK
+gen.yes = Ja
+gen.no = Nej
+gen.quit = Sluta
+gen.message = Meddelande
+gen.warning = Varning
+gen.error = Fel
+gen.save = Spara
+gen.nosave = Spara inte
+gen.unknown = Okänd
+gen.compiled = Sammanställt
+gen.notfound = Hittades inte
+gen.installed = Installerat
+gen.examining = Undersöka
+gen.installing = Installera
+gen.close = Stäng
+gen.saving = Spara
+gen.save.done = Att spara komplett
+gen.save.cancel = Spara annulleras
+gen.standard = Standard
+gen.contributed = Bidraget
+gen.more = Mer
+gen.import = Importera
+gen.add = Lägg
+gen.delete = Radera
+
+# Confirmation Messages
+conf.quit.title = Är du säker på att du vill avsluta?
+conf.quit.msg = Stänga sista öppna skiss kommer att sluta %1
+
+# Prompts
+prompt.sketchfolder = Välj (eller skapa nya) mapp för skisser
+
+prompt.close.save.warning = Vill du spara ändringarna i denna skiss innan stängning?
+prompt.close.save.reason = Om du inte sparar kommer dina ändringar att gå förlorade.
+
+prompt.file.newname = Nytt filnamn
+
+prompt.save = Spara ändringar till %1?
+
+prompt.addfile = Välj en källa fil att kopiera till din skiss
+
+# System Info
+info.version = Version
+info.build = Byggd antal
+info.builder = Byggd av
+info.plugins = Installerade verktyg
+info.processes = Processer som körs
+info.threads = Running trådar
+
+# Misc Strings
+
+add.library = Lägg bibliotek
+rescan.library = Scanna om bibliotek
+
+# Messages
+
+msg.add.nofiles = Inga lades till skissen
+msg.add.onefile = En fil sattes till skissen
+msg.add.nfiles = %1 filer läggs till skissen
+msg.clean.done = Ren färdiga
+
+# Compilation messages
+comp.sketch = Kompilera skiss
+comp.sketch.error = Fel kompilera skiss
+comp.lib = Kompilering av bibliotek
+comp.lib.error = Fel vid kompilering av bibliotek
+comp.core = Kompilera kärnan
+comp.core.error = Fel kompilera kärna
+comp.extension = Kompilera förlängning
+comp.extension.error = Fel kompilera förlängning
+
+comp.link = Länkning skiss
+comp.ling.error = Fel länkning skiss
+
+comp.eeprom = Extrahera EEPROM
+comp.eeprom.error = Fel extrahera EEPROM
+
+comp.lss = Generera förteckningen
+comp.lss.error = Fel generera förteckningen
+
+comp.hex = Konvertera till HEX
+comp.hex.error = Fel konvertera till HEX
+
+comp.upload.start = Börjar uppladdningen
+comp.upload.running = Ladda upp att gå ombord
+comp.upload.failed = Ladda misslyckades
+comp.upload.complete = Ladda upp
+comp.failed = Kompilera misslyckades
+comp.done = Kompilera gjort
+
+comp.burn = Uppladdning bootloader
+
+# Find and replace
+find.searchfor = Sök efter
+find.replacewith = Ersätt med
+find.find = Sök
+find.replace = Ersätt
+find.replace.all = Ersätt alla
+find.matchcase = Matcha fallet
+find.matchword = Matcha hela ord
+find.backwards = Sök bakåt
+
+# Preferences
+pref.editor = Redigerare
+pref.editor.lang = Visningsspråk
+pref.editor.external = Använd extern redigerare
+pref.editor.spaces = Redigeraren använder utrymmen för flikar
+pref.editor.showtabs = Visa tabbar och indrag
+pref.editor.tabsize = Antal platser att använda för en flik
+pref.font.editor = Redigeraren font
+pref.font.console = Console font
+
+
+pref.locations = Platser
+pref.locations.sketchbook = Skiss bok läge
+pref.locations.plugins = Verktyg läge
+pref.locations.cache = Cache läge
+pref.locations.boards = Styrelser läge
+pref.locations.cores = Kärnor läge
+pref.locations.compilers = Kompilatorer läge
+
+pref.compiler = Kompilator
+pref.compiler.clean = Ta bort gammal build mapp innan varje build
+pref.compiler.savehex = Spara HEX fil att skissa mappen
+pref.compiler.lss = Generera montering notering (kräver kärnstöd)
+pref.compiler.lss.save = Spara montering notering att skissa mappen
+pref.compiler.disableproto = Inaktivera lägga av funktionsprototyper
+pref.compiler.combineino = Kombinera alla INO / PDE-filer till en CPP-fil
+pref.compiler.verbose.compile = Utförlig output under kompilering
+pref.compiler.verbose.upload = Utförlig output under uppladdning
+
+
+
+pref.serial = Serial
+pref.serial.extraports = Extra serieportar
+pref.font.select = Välj typsnitt
+pref.folder.select = Välj mapp
+
+pref.folder.selectall = Välj alla
+
+pref.restart = Ändra dessa inställningar kommer att kräva en omstart av IDE.
+pref.reinstall = Du kommer också att behöva installera några plugins, styrelser, kärnor och kompilatorer.
+

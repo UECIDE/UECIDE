@@ -87,6 +87,8 @@ public class Preferences {
     DefaultListModel extraPortListModel = new DefaultListModel();
     JTextField portInput;
 
+    JComboBox languageSelection;
+
   // the calling editor, so updates can be applied
 
   Editor editor;
@@ -95,6 +97,24 @@ public class Preferences {
   // data model
 
     static PropertyFile properties;
+
+    public class Language {
+        String name;
+        String code;
+
+        public Language(String c, String n) {
+            name = n;
+            code = c;
+        }
+
+        public String toString() {
+            return name;
+        }
+
+        public String getCode() {
+            return code;
+        }
+    }
 
     static public String fontToString(Font f)
     {
@@ -161,8 +181,7 @@ public class Preferences {
 
     // setup dialog for the prefs
 
-    //dialog = new JDialog(editor, "Preferences", true);
-    dialog = new JFrame("Preferences");
+    dialog = new JFrame(Translate.t("menu.file.preferences"));
     dialog.setResizable(false);
 
     Container pane = dialog.getContentPane();
@@ -279,7 +298,7 @@ public class Preferences {
         c.gridy = 0;
         c.weightx = 1.0;
 
-        JLabel label = new JLabel("Extra serial ports:");
+        JLabel label = new JLabel(Translate.c("pref.serial.extraports"));
         p.add(label, c);
         c.gridy++;
 
@@ -295,7 +314,7 @@ public class Preferences {
 
         c.weightx = 0.2;
         c.gridx++;
-        JButton add = new JButton("Add");
+        JButton add = new JButton(Translate.t("gen.add"));
         add.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String t = portInput.getText();
@@ -316,7 +335,7 @@ public class Preferences {
 
         c.weightx = 0.2;
         c.gridx++;
-        JButton del = new JButton("Delete");
+        JButton del = new JButton(Translate.t("gen.delete"));
         del.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int sel = extraPortList.getSelectedIndex();
@@ -340,7 +359,19 @@ public class Preferences {
 
         JLabel label;
         JButton button;
-        label = new JLabel("Sketchbook location:");
+
+        c.gridwidth = 1;
+        label = new JLabel(Translate.c("pref.editor.lang"));
+        p.add(label, c);
+        c.gridwidth = 2;
+        c.gridx = 1;
+        languageSelection = new JComboBox();
+        p.add(languageSelection, c);
+        c.gridy++;
+
+        c.gridx = 0;
+        c.gridwidth = 3;
+        label = new JLabel(Translate.c("pref.locations.sketchbook"));
         p.add(label, c);
         c.gridwidth = 2;
         c.gridy++;
@@ -365,7 +396,7 @@ public class Preferences {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 3;
-        label = new JLabel("Editor font: ");
+        label = new JLabel(Translate.c("pref.font.editor"));
         p.add(label, c);
 
         c.gridy++;
@@ -398,7 +429,7 @@ public class Preferences {
         c.gridy++;
         c.gridwidth = 3;
 
-        label = new JLabel("Console font: ");
+        label = new JLabel(Translate.c("pref.font.console"));
         p.add(label, c);
         c.gridy++;
         c.gridwidth = 2;
@@ -450,7 +481,7 @@ public class Preferences {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 1;
-        label = new JLabel("Number of spaces to use for a tab:");
+        label = new JLabel(Translate.c("pref.editor.tabsize")); 
         p.add(label, c);
         c.gridx++;
         tabSize = new JTextField(5);
@@ -513,7 +544,7 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 2;
-        lab = new JLabel(Translate.t("prefs.locations.boards"));
+        lab = new JLabel(Translate.t("pref.locations.boards"));
         p.add(lab, c);
         c.gridy++;
         c.gridwidth = 1;
@@ -521,7 +552,7 @@ public class Preferences {
         boardsLocationField.setEditable(false);
         p.add(boardsLocationField, c);
         c.gridx = 1;
-        but = new JButton(Translate.e("prefs.folder.select"));
+        but = new JButton(Translate.e("pref.folder.select"));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 File dflt = new File(boardsLocationField.getText());
@@ -777,6 +808,8 @@ public class Preferences {
         Serial.fillExtraPorts();
     }
 
+    Base.preferences.set("locale", ((Language)languageSelection.getSelectedItem()).getCode());
+
     Base.applyPreferences();
     Base.preferences.save();
   }
@@ -819,6 +852,15 @@ public class Preferences {
         extraPortListModel.clear();
         for (String port : pl) {
             extraPortListModel.addElement(port);
+        }
+    }
+
+    languageSelection.removeAllItems();
+    for (String k : Translate.languages.keySet().toArray(new String[0])) {
+        Language l = new Language(k, Translate.languages.get(k));
+        languageSelection.addItem(l);
+        if (l.getCode().equals(Base.preferences.get("locale"))) {
+            languageSelection.setSelectedItem(l);
         }
     }
 
