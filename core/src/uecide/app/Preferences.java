@@ -177,13 +177,13 @@ public class Preferences {
     outerBox.add(buttonLine);
     buttonLine.add(Box.createHorizontalGlue());
 
-    JButton cancelButton = new JButton(Translate.t("Cancel"));
+    JButton cancelButton = new JButton(Translate.t("gen.cancel"));
     cancelButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             disposeFrame();
         }
     });
-    JButton okButton = new JButton(Translate.t("OK"));
+    JButton okButton = new JButton(Translate.t("gen.ok"));
     okButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             applyFrame();
@@ -202,9 +202,9 @@ public class Preferences {
     advancedSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
     locationSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-    tabs.add(Translate.t("Editor"), mainSettings);
-    tabs.add(Translate.t("Compiler"), advancedSettings);
-    tabs.add(Translate.t("Locations"), locationSettings);
+    tabs.add(Translate.t("pref.editor"), mainSettings);
+    tabs.add(Translate.t("pref.compiler"), advancedSettings);
+    tabs.add(Translate.t("pref.locations"), locationSettings);
 
     populateEditorSettings(mainSettings);
     populateCompilerSettings(advancedSettings);
@@ -213,7 +213,7 @@ public class Preferences {
     if (Base.isLinux() || Base.isMacOS()) {
         JPanel serialSettings = new JPanel(new GridBagLayout());
         serialSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-        tabs.add(Translate.t("Serial"), serialSettings);
+        tabs.add(Translate.t("pref.serial"), serialSettings);
         populateSerialSettings(serialSettings);
     }
 
@@ -376,7 +376,7 @@ public class Preferences {
 
         editorFontField.setText(Base.preferences.get("editor.font"));
 
-        JButton selectEditorFont = new JButton(Translate.t("Select Font..."));
+        JButton selectEditorFont = new JButton(Translate.e("pref.font.select"));
         c.gridx = 2;
         c.gridwidth = 1;
         p.add(selectEditorFont, c);
@@ -409,7 +409,7 @@ public class Preferences {
 
         consoleFontField.setText(Base.preferences.get("console.font"));
 
-        JButton selectConsoleFont = new JButton(Translate.t("Select Font..."));
+        JButton selectConsoleFont = new JButton(Translate.e("pref.font.select"));
         c.gridx = 2;
         c.gridwidth = 1;
         p.add(selectConsoleFont, c);
@@ -428,7 +428,7 @@ public class Preferences {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 3;
-        externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
+        externalEditorBox = new JCheckBox(Translate.t("pref.editor.external"));
         p.add(externalEditorBox, c);
 
         if (Base.isWindows()) {
@@ -439,12 +439,12 @@ public class Preferences {
         }
         c.gridx = 0;
         c.gridy++;
-        useSpacesForTabs = new JCheckBox(Translate.t("Editor uses spaces for tabs"));
+        useSpacesForTabs = new JCheckBox(Translate.t("pref.editor.spaces"));
         p.add(useSpacesForTabs, c);
 
         c.gridx = 0;
         c.gridy++;
-        visibleTabs = new JCheckBox(Translate.t("Show tabs and indents"));
+        visibleTabs = new JCheckBox(Translate.t("pref.editor.showtabs"));
         p.add(visibleTabs, c);
 
         c.gridx = 0;
@@ -467,7 +467,7 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Plugins Location"));
+        lab = new JLabel(Translate.t("pref.locations.plugins"));
         p.add(lab, c);
         c.gridy++;
         c.gridwidth = 1;
@@ -475,7 +475,7 @@ public class Preferences {
         pluginsLocationField.setEditable(false);
         p.add(pluginsLocationField, c);
         c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
+        but = new JButton(Translate.e("pref.folder.select"));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 File dflt = new File(pluginsLocationField.getText());
@@ -490,7 +490,7 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Cache Location"));
+        lab = new JLabel(Translate.t("pref.locations.cache"));
         p.add(lab, c);
         c.gridy++;
         c.gridwidth = 1;
@@ -498,7 +498,7 @@ public class Preferences {
         cacheLocationField.setEditable(false);
         p.add(cacheLocationField, c);
         c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
+        but = new JButton(Translate.e("pref.folder.select"));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 File dflt = new File(cacheLocationField.getText());
@@ -513,7 +513,7 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Boards Location"));
+        lab = new JLabel(Translate.t("prefs.locations.boards"));
         p.add(lab, c);
         c.gridy++;
         c.gridwidth = 1;
@@ -521,7 +521,7 @@ public class Preferences {
         boardsLocationField.setEditable(false);
         p.add(boardsLocationField, c);
         c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
+        but = new JButton(Translate.e("prefs.folder.select"));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 File dflt = new File(boardsLocationField.getText());
@@ -536,7 +536,7 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Cores Location"));
+        lab = new JLabel(Translate.t("pref.locations.cores"));
         p.add(lab, c);
         c.gridy++;
         c.gridwidth = 1;
@@ -544,7 +544,7 @@ public class Preferences {
         coresLocationField.setEditable(false);
         p.add(coresLocationField, c);
         c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
+        but = new JButton(Translate.e("pref.folder.select"));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 File dflt = new File(coresLocationField.getText());
@@ -559,7 +559,7 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Compilers Location"));
+        lab = new JLabel(Translate.t("pref.locations.compilers"));
         p.add(lab, c);
         c.gridy++;
         c.gridwidth = 1;
@@ -567,7 +567,7 @@ public class Preferences {
         compilersLocationField.setEditable(false);
         p.add(compilersLocationField, c);
         c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
+        but = new JButton(Translate.e("pref.folder.select"));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 File dflt = new File(compilersLocationField.getText());
@@ -582,12 +582,12 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 1;
-        lab = new JLabel(Translate.t("Changing these settings will require a restart of the IDE."));
+        lab = new JLabel(Translate.t("pref.restart"));
         p.add(lab, c);
         c.gridx = 1;
         c.gridheight = 2;
 
-        but = new JButton(Translate.t("Select All..."));
+        but = new JButton(Translate.e("pref.folder.selectall"));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 File dflt = new File(compilersLocationField.getText());
@@ -608,7 +608,7 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 1;
-        lab = new JLabel(Translate.t("You will also have to reinstall any plugins, boards, cores and compilers."));
+        lab = new JLabel(Translate.t("pref.reinstall"));
         p.add(lab, c);
         c.gridy++;
 
@@ -623,18 +623,18 @@ public class Preferences {
         c.gridy = 0;
 
         deletePreviousBox =
-          new JCheckBox(Translate.t("Remove old build folder before each build"));
+          new JCheckBox(Translate.t("pref.compiler.clean"));
         p.add(deletePreviousBox, c);
 
         c.gridy++;
 
         saveHex =
-          new JCheckBox(Translate.t("Save HEX file to sketch folder"));
+          new JCheckBox(Translate.t("pref.compiler.savehex"));
         p.add(saveHex, c);
 
         c.gridy++;
         createLss = 
-            new JCheckBox(Translate.t("Generate assembly listing (requires core support)"));
+            new JCheckBox(Translate.t("pref.compiler.lss"));
         createLss.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveLss.setEnabled(createLss.isSelected());
@@ -649,7 +649,7 @@ public class Preferences {
         c.gridx = 1;
         c.weightx = 0.9;
         saveLss = 
-            new JCheckBox(Translate.t("Save assembly listing to sketch folder"));
+            new JCheckBox(Translate.t("pref.compiler.lss.save"));
         p.add(saveLss, c);
 
         c.gridy++;
@@ -657,26 +657,26 @@ public class Preferences {
         c.gridwidth = 2;
 
         disablePrototypes =
-          new JCheckBox(Translate.t("Disable adding of function prototypes"));
+          new JCheckBox(Translate.t("pref.compiler.disableproto"));
         p.add(disablePrototypes, c);
 
         c.gridy++;
         combineIno =
-          new JCheckBox(Translate.t("Combine all INO/PDE files into one CPP file"));
+          new JCheckBox(Translate.t("pref.compiler.combineino"));
         p.add(combineIno, c);
 
         c.gridx = 0;
         c.gridwidth = 2;
         c.gridy++;
         verboseCompile =
-          new JCheckBox(Translate.t("Verbose output during compile"));
+          new JCheckBox(Translate.t("pref.compiler.verbose.compile"));
         p.add(verboseCompile, c);
 
         c.gridx = 0;
         c.gridwidth = 2;
         c.gridy++;
         verboseUpload =
-          new JCheckBox(Translate.t("Verbose output during upload"));
+          new JCheckBox(Translate.t("pref.compiler.verbose.upload"));
         p.add(verboseUpload, c);
 
 

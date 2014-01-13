@@ -8,6 +8,8 @@ import java.net.*;
 import java.util.zip.*;
 import java.util.jar.*;
 import uecide.plugin.*;
+import java.util.regex.*;
+
 
 import javax.swing.*;
 
@@ -29,25 +31,35 @@ import java.nio.charset.*;
 public class Translate {
     public static HashMap<String, String> translations = new HashMap<String, String>();
 
-    public static void load(String language)
+    public static void load(String resource) {
+        try {
+            load(Translate.class.getResourceAsStream(resource));
+        } catch (Exception e) {
+        }
+    }
+
+    public static void load(InputStream fis)
     {
-        InputStream fis;
-        BufferedReader br;
-        String line;
-        File lib = Base.getContentFile("lib");
-        File lang = new File(lib, language + ".po");
-    
-        translations = new HashMap<String, String>();
-        if (!lang.exists()) {
+        if (fis == null) {
             return;
         }
+        BufferedReader br;
+        String line;
+
         try {
-            fis = new FileInputStream(lang);
+            Pattern p = Pattern.compile("^([^=]+)=(.*)$");
             br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
             while ((line = br.readLine()) != null) {
-                String[] bits = line.split("::");
-                if (bits.length == 2) {
-                    translations.put(bits[0], bits[1]);
+                line = line.trim();
+                if (line.length() == 0) {
+                    continue;
+                }
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                Matcher m = p.matcher(line);
+                if (m.find()) {
+                    translations.put(m.group(1).trim(), m.group(2).trim());
                 }
             }
             br.close();
@@ -55,6 +67,39 @@ public class Translate {
             Base.error(e);
         }
     }
+
+    public static String c(String i) { return t(i) + ": "; }
+    public static String c(String i, String p1) { return t(i, p1) + ": "; }
+    public static String c(String i, String p1, String p2) { return t(i, p1, p2) + ": "; }
+    public static String c(String i, String p1, String p2, String p3) { return t(i, p1, p2, p3) + ": "; }
+    public static String c(String i, String p1, String p2, String p3, String p4) { return t(i, p1, p2, p3, p4) + ": "; }
+    public static String c(String i, String p1, String p2, String p3, String p4, String p5) { return t(i, p1, p2, p3, p4, p5) + ": "; }
+    public static String c(String i, String p1, String p2, String p3, String p4, String p5, String p6) { return t(i, p1, p2, p3, p4, p5, p6) + ": "; }
+    public static String c(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7) { return t(i, p1, p2, p3, p4, p5, p6, p7) + ": "; }
+    public static String c(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8) { return t(i, p1, p2, p3, p4, p5, p6, p7, p8) + ": "; }
+    public static String c(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8, String p9) { return t(i, p1, p2, p3, p4, p5, p6, p7, p8, p9) + ": "; }
+
+    public static String e(String i) { return t(i) + "..."; }
+    public static String e(String i, String p1) { return t(i, p1) + "..."; }
+    public static String e(String i, String p1, String p2) { return t(i, p1, p2) + "..."; }
+    public static String e(String i, String p1, String p2, String p3) { return t(i, p1, p2, p3) + "..."; }
+    public static String e(String i, String p1, String p2, String p3, String p4) { return t(i, p1, p2, p3, p4) + "..."; }
+    public static String e(String i, String p1, String p2, String p3, String p4, String p5) { return t(i, p1, p2, p3, p4, p5) + "..."; }
+    public static String e(String i, String p1, String p2, String p3, String p4, String p5, String p6) { return t(i, p1, p2, p3, p4, p5, p6) + "..."; }
+    public static String e(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7) { return t(i, p1, p2, p3, p4, p5, p6, p7) + "..."; }
+    public static String e(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8) { return t(i, p1, p2, p3, p4, p5, p6, p7, p8) + "..."; }
+    public static String e(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8, String p9) { return t(i, p1, p2, p3, p4, p5, p6, p7, p8, p9) + "..."; }
+
+    public static String n(String i) { return t(i) + "\n"; }
+    public static String n(String i, String p1) { return t(i, p1) + "\n"; }
+    public static String n(String i, String p1, String p2) { return t(i, p1, p2) + "\n"; }
+    public static String n(String i, String p1, String p2, String p3) { return t(i, p1, p2, p3) + "\n"; }
+    public static String n(String i, String p1, String p2, String p3, String p4) { return t(i, p1, p2, p3, p4) + "\n"; }
+    public static String n(String i, String p1, String p2, String p3, String p4, String p5) { return t(i, p1, p2, p3, p4, p5) + "\n"; }
+    public static String n(String i, String p1, String p2, String p3, String p4, String p5, String p6) { return t(i, p1, p2, p3, p4, p5, p6) + "\n"; }
+    public static String n(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7) { return t(i, p1, p2, p3, p4, p5, p6, p7) + "\n"; }
+    public static String n(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8) { return t(i, p1, p2, p3, p4, p5, p6, p7, p8) + "\n"; }
+    public static String n(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8, String p9) { return t(i, p1, p2, p3, p4, p5, p6, p7, p8, p9) + "\n"; }
 
     public static String t(String i) {
         return t(i, "", "", "", "", "", "", "", "", "");
@@ -95,7 +140,6 @@ public class Translate {
     public static String t(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8, String p9) {
         String j = translations.get(i);
         if (j == null) {
-  //          System.err.println("Unhandled translation: \"" + i + "\"");
             j = i;
         }
         j = j.replace("%1", p1);

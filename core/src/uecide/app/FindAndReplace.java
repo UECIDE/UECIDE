@@ -44,17 +44,17 @@ class FindAndReplace extends JFrame {
         GridBagConstraints c = new GridBagConstraints();
         //setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        findLabel = new JLabel(Translate.t("Search For:"));
-        replaceLabel = new JLabel(Translate.t("Replace With:"));
+        findLabel = new JLabel(Translate.c("find.searchfor"));
+        replaceLabel = new JLabel(Translate.c("find.replacewith"));
         findText = new JTextField(40);
         replaceText = new JTextField(40);
-        findButton = new JButton(Translate.t("Find"));
-        replaceButton = new JButton(Translate.t("Replace"));
-        replaceAllButton = new JButton(Translate.t("Replace All"));
-        closeButton = new JButton(Translate.t("Close"));
-        matchCase = new JCheckBox(Translate.t("Match Case"));
-        wholeWord = new JCheckBox(Translate.t("Match Whole Word"));
-        searchBackwards = new JCheckBox(Translate.t("Search Backwards"));
+        findButton = new JButton(Translate.t("find.find"));
+        replaceButton = new JButton(Translate.t("find.replace"));
+        replaceAllButton = new JButton(Translate.t("find.replace.all"));
+        closeButton = new JButton(Translate.t("gen.close"));
+        matchCase = new JCheckBox(Translate.t("find.matchcase"));
+        wholeWord = new JCheckBox(Translate.t("find.matchword"));
+        searchBackwards = new JCheckBox(Translate.t("find.backwards"));
 
         findText.setBackground(new Color(255, 255, 255));
         replaceText.setBackground(new Color(255, 255, 255));

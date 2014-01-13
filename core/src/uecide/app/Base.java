@@ -28,6 +28,8 @@ import java.util.zip.ZipInputStream;
  * files and images, etc) that comes from that.
  */
 public class Base {
+
+    public static String locale = "en_GB";
 	
     public static int REVISION = 23;
     /** This might be replaced by main() if there's a lib/version.txt file. */
@@ -92,6 +94,8 @@ public class Base {
         });
 */
 
+        Translate.load("/uecide/app/en_GB.lang");
+        Translate.load("/uecide/app/" + locale + ".lang");
         headless = false;
 
         if (isLinux()) {
@@ -119,8 +123,6 @@ public class Base {
         theme = new Theme(getContentFile("lib/theme/theme.txt"));
         theme.setPlatformAutoOverride(true);
 
-        System.err.println("Loading " + theme.get("product") + "...");
-
         initPlatform();
         preferences = new PropertyFile(getSettingsFile("preferences.txt"), getContentFile("lib/preferences.txt"));
         preferences.setPlatformAutoOverride(true);
@@ -133,7 +135,7 @@ public class Base {
 
         if (!headless) {
             splashScreen = new Splash();
-            splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
+            splashScreen.setMessage(Translate.e("msg.loading", theme.get("product.cap")), 10);
         }
 
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
@@ -156,7 +158,7 @@ public class Base {
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
-        if (!headless) splashScreen.setMessage("Loading Application...", 20);
+        if (!headless) splashScreen.setMessage(Translate.e("msg.loading.app"), 20);
         platform.init(this);
 
         // Get paths for the libraries and examples in the Processing folder
@@ -168,7 +170,6 @@ public class Base {
         // Get the sketchbook path, and make sure it's set properly
         String sketchbookPath = preferences.get("sketchbook.path");
 
-//        Translate.load("swedish");
 
         // If a value is at least set, first check to see if the folder exists.
         // If it doesn't, warn the user that the sketchbook folder is being reset.
@@ -203,24 +204,24 @@ public class Base {
         Serial.updatePortList();
         Serial.fillExtraPorts();
 
-        if (!headless) splashScreen.setMessage("Loading Compilers...", 30);
+        if (!headless) splashScreen.setMessage(Translate.e("msg.loading.compilers"), 30);
         loadCompilers();
-        if (!headless) splashScreen.setMessage("Loading Cores...", 40);
+        if (!headless) splashScreen.setMessage(Translate.e("msg.loading.cores"), 40);
         loadCores();
-        if (!headless) splashScreen.setMessage("Loading Boards...", 50);
+        if (!headless) splashScreen.setMessage(Translate.e("msg.loading.boards"), 50);
         loadBoards();
-        if (!headless) splashScreen.setMessage("Loading Plugins...", 60);
+        if (!headless) splashScreen.setMessage(Translate.e("msg.loading.plugins"), 60);
         loadPlugins();
-        if (!headless) splashScreen.setMessage("Loading Libraries...", 70);
+        if (!headless) splashScreen.setMessage(Translate.e("msg.loading.libs"), 70);
         gatherLibraries();
         initMRU();
 
         if (headless) {
-            error("Unable to open editor window - no graphics environment found.");
+            error(Translate.t("error.nox11"));
             System.exit(10);
         }
 
-        if (!headless) splashScreen.setMessage("Opening Editor...", 80);
+        if (!headless) splashScreen.setMessage(Translate.e("Opening Editor"), 80);
         boolean opened = false;
         // Check if any files were passed in on the command line
         for (int i = 0; i < args.length; i++) {
@@ -246,7 +247,7 @@ public class Base {
         if (!opened) {
             handleNew();
         }
-        if (!headless) splashScreen.setMessage("Complete", 100);
+        if (!headless) splashScreen.setMessage(Translate.t("gen.complete"), 100);
         if (!headless) splashScreen.dispose();
     }
 
@@ -463,7 +464,7 @@ public class Base {
     public static void handleOpenPrompt() {
         // get the frontmost window frame for placing file dialog
         FileDialog fd = new FileDialog(activeEditor,
-            Translate.t("Open %1 sketch...", theme.get("product.cap")),
+            Translate.e("menu.file.open"),
             FileDialog.LOAD);
 
         fd.setDirectory(Base.getSketchbookFolder().getAbsolutePath());
@@ -523,19 +524,19 @@ public class Base {
     public static boolean handleClose(Editor editor) {
         if (editors.size() == 1) {
             if (Base.isMacOS()) {
-                Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
+                Object[] options = { Translate.t("gen.ok"), Translate.t("gen.cancel") };
                 String prompt =
                     "<html> " +
                     "<head> <style type=\"text/css\">"+
                     "b { font: 13pt \"Lucida Grande\" }"+
                     "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
                     "</style> </head>" +
-                    "<b>" + Translate.t("Are you sure you want to Quit?") + "</b>" +
-                    "<p>" + Translate.t("Closing the last open sketch will quit %1.", theme.get("product.cap"));
+                    "<b>" + Translate.t("conf.quit.title") + "</b>" +
+                    "<p>" + Translate.t("conf.quit.msg", theme.get("product.cap"));
 
                 int result = JOptionPane.showOptionDialog(editor,
                     prompt,
-                    Translate.t("Quit"),
+                    Translate.t("gen.quit"),
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
                     null,
@@ -778,16 +779,16 @@ public class Base {
         try {
             settingsFolder = platform.getSettingsFolder();
         } catch (Exception e) {
-            showError(Translate.t("Problem getting data folder"),
-            Translate.t("Error getting the data folder."), e);
+            showError(Translate.t("error.datafolder.title"),
+            Translate.t("error.datafolder.msg"), e);
             error(e);
             return null;
         }
 
         if (!settingsFolder.exists()) {
             if (!settingsFolder.mkdirs()) {
-                showError(Translate.t("Settings issues"),
-                Translate.t("Cannot run because I could not create a folder to store your settings."), null);
+                showError(Translate.t("error.settings.title"),
+                Translate.t("error.settings.msg"), null);
                 return null;
             }
         }
@@ -922,8 +923,8 @@ public class Base {
         }
 
         if (!result) {
-            showError(Translate.t("You forgot your sketchbook"),
-            Translate.t("I cannot run because I could not create a folder to store your sketchbook."), null);
+            showError(Translate.t("error.sketchbook.title"),
+            Translate.t("error.sketchbook.msg"), null);
         }
 
         return sketchbookFolder;
@@ -942,7 +943,7 @@ public class Base {
             return folder;
         }
 
-        String prompt = Translate.t("Select (or create new) folder for sketches...");
+        String prompt = Translate.e("prompt.sketchfolder");
         folder = Base.selectFolder(prompt, null, null);
         if (folder == null) {
             System.exit(0);
@@ -966,8 +967,8 @@ public class Base {
             platform.openURL(url);
 
         } catch (Exception e) {
-            showWarning(Translate.t("Problem Opening URL"),
-            Translate.t("Could not open the URL") + "\n" + url, e);
+            showWarning(Translate.t("error.url.title"),
+            Translate.n("error.url.msg") + url, e);
         }
     }
 
@@ -990,8 +991,8 @@ public class Base {
             platform.openFolder(file);
 
         } catch (Exception e) {
-            showWarning(Translate.t("Problem Opening Folder"),
-            Translate.t("Could not open the folder") + "\n" + file.getAbsolutePath(), e);
+            showWarning(Translate.t("error.folder.title"),
+            Translate.n("error.folder.msg") + file.getAbsolutePath(), e);
         }
     }
 
@@ -1122,7 +1123,7 @@ public class Base {
     * much of a bummer, but something to notify the user about.
     */
     public static void showMessage(String title, String message) {
-        if (title == null) title = Translate.t("Message");
+        if (title == null) title = Translate.t("gen.message");
 
         if (headless) {
             System.out.println(title + ": " + message);
@@ -1138,7 +1139,7 @@ public class Base {
     * Non-fatal error message with optional stack trace side dish.
     */
     public static void showWarning(String title, String message, Exception e) {
-        if (title == null) title = Translate.t("Warning");
+        if (title == null) title = Translate.t("gen.warning");
 
         if (headless) {
             System.out.println(title + ": " + message);
@@ -1158,7 +1159,7 @@ public class Base {
     * for errors that allow P5 to continue running.
     */
     public static void showError(String title, String message, Throwable e) {
-        if (title == null) title = Translate.t("Error");
+        if (title == null) title = Translate.t("gen.error");
 
         if (headless) {
             System.err.println(title + ": " + message);
@@ -1191,12 +1192,12 @@ public class Base {
                     "b { font: 13pt \"Lucida Grande\" }"+
                     "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
                     "</style> </head>" +
-                    "<b>" + Translate.t("Do you want to save changes to this sketch before closing?") + "</b>" +
-                    "<p>" + Translate.t("If you don't save, your changes will be lost."),
+                    "<b>" + Translate.t("prompt.close.save.warning") + "</b>" +
+                    "<p>" + Translate.t("prompt.close.save.reason"),
                     JOptionPane.QUESTION_MESSAGE);
 
             String[] options = new String[] {
-                Translate.t("Save"), Translate.t("Cancel"), Translate.t("Don't Save")
+                Translate.t("gen.save"), Translate.t("gen.cancel"), Translate.t("gen.nosave")
             };
             pane.setOptions(options);
 
@@ -1245,7 +1246,7 @@ public class Base {
                     JOptionPane.QUESTION_MESSAGE);
 
             String[] options = new String[] {
-                Translate.t("Yes"), Translate.t("No")
+                Translate.t("gen.yes"), Translate.t("gen.no")
             };
             pane.setOptions(options);
 
@@ -1409,7 +1410,7 @@ public class Base {
         if (dir.exists()) {
             removeDescendants(dir);
             if (!dir.delete()) {
-                System.err.println(Translate.t("Could not delete %1", dir.getName()));
+                System.err.println(Translate.t("error.delete", dir.getName()));
             }
         }
     }
@@ -1432,7 +1433,7 @@ public class Base {
                 if (!preferences.getBoolean("compiler.save_build_files")) {
                     if (!dead.delete()) {
                         // temporarily disabled
-                        System.err.println(Translate.t("Could not delete %1", dead.getName()));
+                        System.err.println(Translate.t("error.delete", dead.getName()));
                     }
                 }
             } else {
@@ -1506,18 +1507,18 @@ public class Base {
     }
 
     public static void handleSystemInfo() {
-	activeEditor.message(Translate.t("Version: ") + VERSION_NAME + "\n");
-	activeEditor.message(Translate.t("Build Number: ") + BUILDNO + "\n");
-	activeEditor.message(Translate.t("Built By: ") + BUILDER + "\n");
+	activeEditor.message(Translate.c("info.version") + VERSION_NAME + "\n");
+	activeEditor.message(Translate.c("info.build") + BUILDNO + "\n");
+	activeEditor.message(Translate.c("info.builder") + BUILDER + "\n");
 
-        activeEditor.message(Translate.t("Installed plugins") + ":\n");
+        activeEditor.message(Translate.t("info.plugins") + ":\n");
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
         for (int i = 0; i < entries.length; i++) {
             Plugin t = plugins.get(entries[i]);
 
-            String ver = Translate.t("unknown");
-            String com = Translate.t("unknown");
+            String ver = Translate.t("gen.unknown");
+            String com = Translate.t("gen.unknown");
 
 
             // Older plugins may not have these methods - ignore them if they don't
@@ -1525,19 +1526,19 @@ public class Base {
                 ver = t.getVersion();
                 com = t.getCompiled();
             } catch (Exception e) {
-                ver = Translate.t("unknown");
-                com = Translate.t("unknown");
+                ver = Translate.t("gen.unknown");
+                com = Translate.t("gen.unknown");
             }
 
-            activeEditor.message("  " + entries[i] + " - " + ver + " " + Translate.t("compiled") + " " + com + "\n");
+            activeEditor.message("  " + entries[i] + " - " + ver + " " + Translate.t("gen.compiled") + " " + com + "\n");
         }
 
-        activeEditor.message("\n" + Translate.t("Processes") + ":\n");
+        activeEditor.message("\n" + Translate.c("info.processes") + "\n");
         for (Process p : processes) {
             activeEditor.message("  " + p + "\n");
         }
 
-        activeEditor.message("\n" + Translate.t("Threads") + ":\n");
+        activeEditor.message("\n" + Translate.c("info.threads") + "\n");
         Thread[] threads = new Thread[Thread.activeCount()];
         Thread.enumerate(threads);
         for (Thread t : threads) {
@@ -1580,19 +1581,19 @@ public class Base {
 
     public static void handleAddLibrary()
     {
-        File inputFile = openFileDialog(Translate.t("Add Library..."), "zip");
+        File inputFile = openFileDialog(Translate.e("add.library"), "zip");
 
         if (inputFile == null) {
             return;
         }
 
         if (!inputFile.exists()) {
-            activeEditor.message(inputFile.getName() + ": " + Translate.t("not found") + "\n", 2);
+            activeEditor.message(inputFile.getName() + ": " + Translate.t("gen.notfound") + "\n", 2);
             return;
         }
 
         if (!testLibraryZipFormat(inputFile.getAbsolutePath())) {
-            activeEditor.message(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()) + "\n", 2);
+            activeEditor.message(Translate.t("error.package", inputFile.getName()) + "\n", 2);
             return;
         }
 
@@ -1724,7 +1725,7 @@ public class Base {
                 zis.closeEntry();
                 zis.close();
             } catch (Exception e) {
-                activeEditor.status.progressNotice(Translate.t("Install failed"));
+                activeEditor.status.progressNotice(Translate.t("error.install"));
                 error(e);
                 return null;
             }
@@ -1733,7 +1734,7 @@ public class Base {
 
         @Override
         protected void done() {
-            activeEditor.status.progressNotice(Translate.t("Installed."));
+            activeEditor.status.progressNotice(Translate.t("gen.installed"));
             activeEditor.status.unprogress();
             loadCores();
             loadBoards();
@@ -1751,10 +1752,10 @@ public class Base {
         protected void process(java.util.List<Integer> pct) {
             int p = pct.get(pct.size() - 1);
             if (p == -1) {
-                activeEditor.status.progress(Translate.t("Examining..."));
-                activeEditor.status.progressIndeterminate(Translate.t("Examining..."));
+                activeEditor.status.progress(Translate.e("gen.examining"));
+                activeEditor.status.progressIndeterminate(Translate.e("gen.examining"));
             } else {
-                activeEditor.status.progress(Translate.t("Installing..."));
+                activeEditor.status.progress(Translate.e("gen.installing"));
                 activeEditor.status.progressUpdate(p);
             }
         }
@@ -1767,106 +1768,6 @@ public class Base {
                 activeEditor.status.progressUpdate(perc);
             }
         });
-    }
-
-    public static void handleAddBoards() 
-    {
-        File inputFile = openFileDialog(Translate.t("Add Boards..."), "zip");
-
-        if (inputFile == null) {
-            return;
-        }
-
-        if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
-            return;
-        }
-
-        final File bf = getUserBoardsFolder();
-        new ZipExtractor(inputFile, bf).execute();
-    }
-
-    public static void handleAddCore()
-    {
-        File inputFile = openFileDialog(Translate.t("Add Core..."), "jar");
-
-        if (inputFile == null) {
-            return;
-        }
-
-        if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
-            return;
-        }
-
-        final File bf = getUserCoresFolder();
-        if (!bf.exists()) {
-            bf.mkdirs();
-        }
-
-        try {
-            JarFile jf = new JarFile(inputFile);
-            Manifest manifest = jf.getManifest();
-            Attributes manifestContents = manifest.getMainAttributes();
-
-            String plat = manifestContents.getValue("Platform");
-            System.err.println("Core is for " + plat);
-
-            if (!(
-                plat.equals(getOSFullName()) ||
-                plat.equals(getOSName()) ||
-                plat.equals("any")
-            )) {
-                Base.showWarning(Translate.t("Incompatible Core"), Translate.w("The core you selected is for %1.  You are running on %2.", 40, "\n", plat, getOSFullName()), null);
-                return;
-            }
-
-            new ZipExtractor(inputFile, bf).execute();
-        } catch (Exception e) {
-            error(e);
-        }
-    }
-
-    public static void handleInstallPlugin() {
-        handleInstallPlugin((File)null);
-    }
-
-    public static void handleInstallPlugin(File inputFile)
-    {
-        if (inputFile == null) {
-            inputFile = openFileDialog(Translate.t("Add Plugin..."), "zip,jar");
-        }
-
-        if (inputFile == null) {
-            return;
-        }
-
-        if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
-            return;
-        }
-        File bf = getUserPluginsFolder();
-        if (!bf.exists()) {
-            bf.mkdirs();
-        }
-        if (bf.getName().toLowerCase().endsWith(".zip")) {
-            new ZipExtractor(inputFile, bf).execute();
-        } else {
-            File d = getUserPluginsFolder();
-            if (!d.exists()) {
-                d.mkdirs();
-            }
-            File dst = new File(d, inputFile.getName());
-            try {
-                copyFile(inputFile, dst);
-            } catch (Exception e) {
-                System.err.println(e);
-            }
-        }
-        loadPlugins();
-        for (Editor e : editors) {
-            e.rebuildPluginsMenu();
-        }
     }
 
     public static void loadPlugins()
@@ -1888,6 +1789,25 @@ public class Base {
         pf = getUserPluginsFolder();
         if (pf != getSystemPluginsFolder()) {
             if (pf != null) loadPluginsFromFolder(pf);
+        }
+        try {
+            for (String k : plugins.keySet().toArray(new String[0])) {
+                String classPath = k.replace(".", "/");
+                String filePath = classPath + "/i18n/en_GB.lang";
+                String locFilePath = classPath + "/i18n/" + locale + ".lang";
+                InputStream fis = plugins.get(k).getResourceAsStream(filePath);
+                if (fis != null) {
+                    Translate.load(fis);
+                }
+                if (locFilePath.equals(filePath) == false) {
+                    fis = plugins.get(k).getResourceAsStream(locFilePath);
+                    if (fis != null) {
+                        System.err.println("Found");
+                        Translate.load(fis);
+                    }
+                }
+            }
+        } catch (Exception e) {
         }
     }
 
@@ -1969,6 +1889,7 @@ public class Base {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
+
     }
 
     public static String findClassInZipFile(File file) {

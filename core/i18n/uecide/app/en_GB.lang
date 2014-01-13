@@ -1,0 +1,265 @@
+# File menu
+menu.file = File
+menu.file.new = New Sketch
+menu.file.open = Open Sketch
+menu.file.recent = Recent Sketches
+menu.file.examples = Example Sketches
+menu.file.close = Close
+menu.file.save = Save Sketch
+menu.file.saveas = Save Sketch As
+menu.file.export.sar = Export as SAR
+menu.file.import.sar = Import SAR
+menu.file.compileupload = Compile & Upload
+menu.file.pagesetup = Page Setup
+menu.file.print = Print
+menu.file.preferences = Preferences
+menu.file.quit = Quit
+
+# Edit Menu
+menu.edit = Edit
+menu.edit.undo = Undo
+menu.edit.redo = Redo
+menu.edit.cut = Cut
+menu.edit.copy = Copy
+menu.edit.paste = Paste
+menu.edit.selectall = Select All
+menu.edit.comment = Add/Remove Comment
+menu.edit.indent.increase = Increase Indent
+menu.edit.indent.decrease = Decrease Indent
+menu.edit.find = Find & Replace
+
+# Sketch Menu
+menu.sketch = Sketch
+menu.sketch.compile = Compile
+menu.sketch.clean.build = Clean Build Folder
+menu.sketch.clean.cache = Clean Cache Folder
+menu.sketch.import = Import Library
+menu.sketch.showfolder.sketch = Show Sketch Folder
+menu.sketch.showfolder.build = Show Build Folder
+menu.sketch.file.new = New File
+menu.sketch.file.add = Add File
+menu.sketch.tab.rename = Rename Tab
+
+# Hardware Menu
+menu.hardware = Hardware
+menu.hardware.board = Boards
+menu.hardware.core = Cores
+menu.hardware.serial = Serial Port
+menu.hardware.programmer = Programmers
+menu.hardware.burn = Burn Bootloader
+
+# Tools Menu
+menu.tools = Tools
+
+# Help Menu
+menu.help = Help
+menu.help.about.sketch = About This Sketch
+menu.help.about.product = About %1
+menu.help.sysinfo = System Information
+
+# Loading Messages
+
+msg.loading = Loading %1
+msg.loading.app = Loading Application
+msg.loading.compilers = Loading Compilers
+msg.loading.cores = Loading Cores
+msg.loading.boards = Loading Boards
+msg.loading.plugins = Loading Plugins
+msg.loading.libs = Loading Libraries
+
+# Error Messages
+
+error.nox11 = Unable to open editor window - no graphics environment found
+
+error.datafolder.title = Problem getting data folder
+error.datafolder.msg = Error getting the data folder
+
+error.settings.title = Settings Problem
+error.settings.msg = Cannot run because I could not create a folder to store your settings
+
+error.sketchbook.title = Sketchbook Problem
+error.sketchbook.msg = I cannot run because I could not create a folder to store your sketchbook
+
+error.url.title = Problem Opening URL
+error.url.msg = Could not open the URL
+
+error.folder.title = Problem Opening Folder
+error.folder.msg = Could not open the folder
+
+error.delete = Could not delete %1
+
+error.package = Error: %1 is not correctly packaged
+
+error.install = Install Failed
+
+error.nosketch.title = Sketch Does Not Exist
+error.nosketch.msg1 = The selected sketch no longer exists.
+error.nosketch.msg2 = You mau need to restart to update the sketchbook menu.
+
+error.board.title = Invalid Board
+error.board.msg = Unable to locate board '%1'
+
+error.file.add.title = Error Adding File
+error.file.add.badtype = You can only add .ino, .pde, .c, .cpp, .h, .hh or .S files to a sketch
+error.file.add.nocreate = Could not create file
+error.file.add.nofile = %1 does not exist
+error.file.add.dup = That file already exists in the sketch
+error.file.add.overwrite = Could not delete the existing file %1
+error.file.add.copy = Error copying %1
+
+error.noboard.title = No Board Selected
+error.noboard.msg = The sketch cannot be compiler: You have no board selected.  If you haven't yet installed any boards please do so throught the Plugin Manager.
+
+error.nocore.title = No Core Selected
+error.nocore.msg = The sketch cannot be compiled: You have no core selected.  If you haven't yet installed a core please do so through the Plugin Manager
+
+error.nocompiler.title = No Compiler Selected
+error.nocompiler.msg = The sketch cannot be compiled: The compiler for the selected core is not available.  Please ensure the compiler is installed using the Plugin Manager.
+
+error.readonly.title = Sketch is Read-Only
+error.readonly.msg = Some files are marked as 'read-only', so you will need to re-save the sketch in another location and try again.
+
+error.disappeared.title = Sketch Disappeared
+error.disappeared.msg = The sketch folder has disappeared.  Will attempt to re-save in the same location, but anything besides the code willbe lost.
+
+error.resave.title = Could not re-save sketch
+error.resave.msg = Could not properly re-save the sketch.  You may be in trouble at this point and it might be time to copy and paste your code to another text editor.
+
+# General messages
+gen.complete = Complete
+gen.cancel = Cancel
+gen.ok = OK
+gen.yes = Yes
+gen.no = No
+gen.quit = Quit
+gen.message = Message
+gen.warning = Warning
+gen.error = Error
+gen.save = Save
+gen.nosave = Don't Save
+gen.unknown = Unknown
+gen.compiled = Compiled
+gen.notfound = Not Found
+gen.installed = Installed
+gen.examining = Examining
+gen.installing = Installing
+gen.close = Close
+gen.saving = Saving
+gen.save.done = Saving Complete
+gen.save.cancel = Save Canceled
+gen.standard = Standard
+gen.contributed = Contributed
+gen.more = More
+gen.import = Import
+
+# Confirmation Messages
+conf.quit.title = Are you sure you want to quit?
+conf.quit.msg = Closing the last open sketch will quit %1
+
+# Prompts
+prompt.sketchfolder = Select (or create new) folder for sketches
+
+prompt.close.save.warning = Do you want to save changes to this sketch before closing?
+prompt.close.save.reason = If you don't save, your changes will be lost.
+
+prompt.file.newname = New File Name
+
+prompt.save = Save changes to %1?
+
+prompt.addfile = Select a source file to copy to your sketch
+
+# System Info
+info.version = Version
+info.build = Build Number
+info.builder = Built By
+info.plugins = Installed Plugins
+info.processes = Running Processes
+info.threads = Running Threads
+
+# Misc Strings
+
+add.library = Add Library
+rescan.library = Rescan Libraries
+
+# Messages
+
+msg.add.nofiles = No files were added to the sketch
+msg.add.onefile = One file added to the sketch
+msg.add.nfiles = %1 files added to the sketch
+msg.clean.done = Clean finished
+
+# Compilation messages
+comp.sketch = Compiling Sketch
+comp.sketch.error = Error Compiling Sketch
+comp.lib = Compiling Libraries
+comp.lib.error = Error Compiling Libraries
+comp.core = Compiling Core
+comp.core.error = Error Compiling Core
+comp.extension = Compiling Extension
+comp.extension.error = Error Compiling Extension
+
+comp.link = Linking Sketch
+comp.ling.error = Error Linking Sketch
+
+comp.eeprom = Extracting EEPROM
+comp.eeprom.error = Error Extracting EEPROM
+
+comp.lss = Generating Listing
+comp.lss.error = Error Generating Listing
+
+comp.hex = Converting to HEX
+comp.hex.error = Error Converting to HEX
+
+comp.upload.start = Starting Upload
+comp.upload.running = Uploading to board
+comp.upload.failed = Upload Failed
+comp.upload.complete = Upload Complete
+comp.failed = Compiling Failed
+comp.done = Compiling Done
+
+comp.burn = Burning Bootloader
+
+# Find and replace
+find.searchfor = Search For
+find.replacewith = Replace With
+find.find = Find
+find.replace = Replace
+find.replace.all = Replace All
+find.matchcase = Match Case
+find.matchword = Match Whole Word
+find.backwards = Search Backwards
+
+# Preferences
+pref.editor = Editor
+pref.editor.external = Use external editor
+pref.editor.spaces = Editor uses spaces for tabs
+pref.editor.showtabs = Show tabs and indents
+
+pref.locations = Locations
+pref.locations.plugins = Plugins Location
+pref.locations.cache = Cache Location
+pref.locations.boards = Boards Location
+pref.locations.cores = Cores Location
+pref.locations.compilers = Compilers Location
+
+pref.compiler = Compiler
+pref.compiler.clean = Remove old build folder before each build
+pref.compiler.savehex = Save HEX file to sketch folder
+pref.compiler.lss = Generate assembly listing (requires core support)
+pref.compiler.lss.save = Save assembly listing to sketch folder
+pref.compiler.disableproto = Disable adding of function prototypes
+pref.compiler.combineino = Combine all INO/PDE files into one CPP file
+pref.compiler.verbose.compile = Verbose output during compile
+pref.compiler.verbose.upload = Verbose output during upload
+
+
+
+pref.serial = Serial
+pref.font.select = Select Font
+pref.folder.select = Select Folder
+
+pref.folder.selectall = Select All
+
+pref.restart = Changing these settings will require a restart of the IDE.
+pref.reinstall = You will also have to reinstall any plugins, boards, cores and compilers.
+

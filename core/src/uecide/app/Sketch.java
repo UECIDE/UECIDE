@@ -310,11 +310,11 @@ public class Sketch implements MessageConsumer {
     public boolean prepare() {
         HashMap<String, String> all = mergeAllProperties();
         if (editor.board == null) {
-            Base.showWarning(Translate.t("No Board Selected"), Translate.w("You have no board selected.  You must select a board before you can compile your sketch.", 40, "\n"), null);
+            Base.showWarning(Translate.t("error.noboard.title"), Translate.w("error.noboard.msg", 40, "\n"), null);
             return false;
         }
         if (editor.core == null) {
-            Base.showWarning(Translate.t("No Core Selected"), Translate.w("You have no core selected.  You must select a core before you can compile your sketch.", 40, "\n"), null);
+            Base.showWarning(Translate.t("error.nocore.title"), Translate.w("error.nocore.msg", 40, "\n"), null);
             return false;
         }
         if (Base.preferences.getBoolean("export.delete_target_folder")) {
@@ -659,7 +659,7 @@ public class Sketch implements MessageConsumer {
         }
 
         HashMap<String, String> all = mergeAllProperties();
-        editor.statusNotice(Translate.t("Uploading to Board..."));
+        editor.statusNotice(Translate.e("comp.upload.running"));
         settings.put("filename", name);
         settings.put("filename.elf", name + ".elf");
         settings.put("filename.hex", name + ".hex");
@@ -692,7 +692,7 @@ public class Sketch implements MessageConsumer {
 
         if (uploadCommand == null) {
             message("No upload command defined for board\n", 2);
-            editor.statusNotice(Translate.t("Upload Failed"));
+            editor.statusNotice(Translate.t("comp.upload.failed"));
             return false;
         }
 
@@ -702,22 +702,22 @@ public class Sketch implements MessageConsumer {
             uploader = Base.plugins.get(uploadCommand);
             if (uploader == null) {
                 message("Upload class " + uploadCommand + " not found.\n", 2);
-                editor.statusNotice(Translate.t("Upload Failed"));
+                editor.statusNotice(Translate.t("comp.upload.failed"));
                 return false;
             }
             try {
                 if ((uploader.flags() & BasePlugin.LOADER) == 0) {
                     message(uploadCommand + "is not a valid loader plugin.\n", 2);
-                    editor.statusNotice(Translate.t("Upload Failed"));
+                    editor.statusNotice(Translate.t("comp.upload.failed"));
                     return false;
                 }
                 uploader.run();
             } catch (Exception e) {
-                editor.statusNotice(Translate.t("Upload Failed"));
+                editor.statusNotice(Translate.t("comp.upload.failed"));
                 message(e.toString(), 2);
                 return false;
             }
-            editor.statusNotice(Translate.t("Upload Complete"));
+            editor.statusNotice(Translate.t("comp.upload.complete"));
             return true;
         }
 
@@ -823,9 +823,9 @@ public class Sketch implements MessageConsumer {
             editor.releaseSerialPort();
         }
         if (res) {
-            editor.statusNotice(Translate.t("Upload Complete"));
+            editor.statusNotice(Translate.t("comp.upload.complete"));
         } else {
-            editor.statusNotice(Translate.t("Upload Failed"));
+            editor.statusNotice(Translate.t("comp.upload.failed"));
         }
         return res;
     }
@@ -848,21 +848,21 @@ public class Sketch implements MessageConsumer {
 
     public boolean build() {
         if (editor.board == null) {
-            Base.showWarning(Translate.t("No Board Selected"), Translate.w("The sketch cannot be compiled: You have no board selected. If you haven't yet installed any boards please do so through the Plugin Manager.", 40, "\n"), null);
+            Base.showWarning(Translate.t("error.noboard.title"), Translate.w("error.noboard.msg", 40, "\n"), null);
             return false;
         }
         if (editor.core == null) {
-            Base.showWarning(Translate.t("No Core Selected"), Translate.w("The sketch cannot be compiled: You have no core selected. If you haven't yet installed a core please do so through the Plugin Manager.", 40, "\n"), null);
+            Base.showWarning(Translate.t("error.nocore.title"), Translate.w("error.nocore.msg", 40, "\n"), null);
             return false;
         }
         if (editor.compiler == null) {
-            Base.showWarning(Translate.t("No Compiler Available"), Translate.w("The sketch cannot be compiled: The compiler for the selected core is not available. Please ensure the compiler is installed using the Plugin Manager.", 40, "\n"), null);
+            Base.showWarning(Translate.t("error.nocompiler.title"), Translate.w("error.nocompiler.msg", 40, "\n"), null);
             return false;
         }
-        editor.statusNotice(Translate.t("Compiling..."));
+        editor.statusNotice(Translate.e("comp.sketch"));
         try {
             if (!prepare()) {
-                editor.statusNotice(Translate.t("Compile Failed"));
+                editor.statusNotice(Translate.t("comp.failed"));
                 return false;
             }
         } catch (Exception e) {
@@ -922,7 +922,7 @@ public class Sketch implements MessageConsumer {
         
     public boolean saveAs() {
         FileDialog fd = new FileDialog(editor,
-                                   Translate.t("Save sketch folder as..."),
+                                   Translate.e("menu.file.saveas"),
                                    FileDialog.SAVE);
 
         fd.setDirectory(Base.preferences.get("sketchbook.path"));
@@ -981,13 +981,13 @@ public class Sketch implements MessageConsumer {
         // if read-only, give an error
         if (isReadOnly()) {
             // if the files are read-only, need to first do a "save as".
-            Base.showMessage(Translate.t("Sketch is Read-Only"),
-                Translate.w("Some files are marked \"read-only\", so you'll need to re-save the sketch in another location, and try again.", 40, "\n"));
+            Base.showMessage(Translate.t("error.readonly.title"),
+                Translate.w("error.readonly.msg", 40, "\n"));
             return;
         }
 
         // get a dialog, select a file to add to the sketch
-        String prompt = Translate.t("Select a source file to copy to your sketch");
+        String prompt = Translate.t("prompt.addfile");
         FileDialog fd = new FileDialog(editor, prompt, FileDialog.LOAD);
         fd.setVisible(true);
 
@@ -1003,7 +1003,7 @@ public class Sketch implements MessageConsumer {
         boolean result = addFile(sourceFile);
 
         if (result) {
-            editor.statusNotice(Translate.t("One file added to the sketch."));
+            editor.statusNotice(Translate.t("msg.add.onefile"));
         }
     }
 
@@ -1012,19 +1012,19 @@ public class Sketch implements MessageConsumer {
         boolean replacement = false;
 
         if (!sourceFile.exists()) {
-            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: %1 does not exist", 40, "\n", sourceFile.getAbsolutePath()), null);
+            Base.showWarning(Translate.t("error.file.add.title"),Translate.w("error.file.add.nofile", 40, "\n", sourceFile.getAbsolutePath()), null);
             return false;
         }
 
         if (!(validSourceFile(sourceFile))) {
-            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h, .hh or .S files to a sketch", 40, "\n"), null);
+            Base.showWarning(Translate.t("error.file.add.title"),Translate.w("error.file.add.badtype", 40, "\n"), null);
             return false;
         }
 
         File destFile = new File(folder, sourceFile.getName());
 
         if (sourceFile.equals(destFile)) {
-            Base.showWarning(Translate.t("Error Adding File"),Translate.t("Error: that file is already in the sketch!"), null);
+            Base.showWarning(Translate.t("error.file.add.title"),Translate.t("error.file.add.dup"), null);
             return false;
         }
 
@@ -1045,7 +1045,7 @@ public class Sketch implements MessageConsumer {
         if (replacement) {
             boolean muchSuccess = destFile.delete();
             if (!muchSuccess) {
-                Base.showWarning(Translate.t("Error Adding File"), Translate.w("Could not delete the existing file %1", 40, "\n",
+                Base.showWarning(Translate.t("error.file.add.title"), Translate.w("error.file.add.overwrite", 40, "\n",
                     destFile.getAbsolutePath()), null);
                 return false;
             }
@@ -1054,7 +1054,7 @@ public class Sketch implements MessageConsumer {
         try {
             Base.copyFile(sourceFile, destFile);
         } catch (Exception e) {
-            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error copying file: %1", 40, "\n", e.getMessage()), null);
+            Base.showWarning(Translate.t("error.file.add.title"),Translate.w("error.file.add.copy", 40, "\n", e.getMessage()), null);
             return false;
         }
 
@@ -1086,8 +1086,8 @@ public class Sketch implements MessageConsumer {
     public void ensureExistence() {
         if (folder.exists() && folder.isDirectory()) return;
 
-        Base.showWarning(Translate.t("Sketch Disappeared"),
-             Translate.w("The sketch folder has disappeared. Will attempt to re-save in the same location, but anything besides the code will be lost.", 40, "\n"), null);
+        Base.showWarning(Translate.t("error.disappeared.title"),
+             Translate.w("error.disappeared.msg", 40, "\n"), null);
         try {
             folder.mkdirs();
 
@@ -1095,8 +1095,8 @@ public class Sketch implements MessageConsumer {
                 c.save();
             }
         } catch (Exception e) {
-            Base.showWarning(Translate.t("Could not re-save sketch"),
-                Translate.w("Could not properly re-save the sketch. You may be in trouble at this point, and it might be time to copy and paste your code to another text editor.", 40, "\n"), e);
+            Base.showWarning(Translate.t("error.resave.title"),
+                Translate.w("error.resave.msg", 40, "\n"), e);
         }
     }
 
@@ -1225,27 +1225,27 @@ public class Sketch implements MessageConsumer {
         settings.put("filename", name);
         settings.put("includes", preparePaths(includePaths));
 
-        editor.statusNotice(Translate.t("Compiling Sketch..."));
+        editor.statusNotice(Translate.e("comp.sketch"));
 
         tobjs = compileSketch();
         if (tobjs == null) {
-            editor.statusNotice(Translate.t("Error Compiling Sketch"));
+            editor.statusNotice(Translate.t("comp.sketch.error"));
             return false;
         }
         objectFiles.addAll(tobjs);
         setCompilingProgress(30);
 
-        editor.statusNotice(Translate.t("Compiling Libraries..."));
+        editor.statusNotice(Translate.e("comp.lib"));
         if (!compileLibraries()) {
-            editor.statusNotice(Translate.t("Error Compiling Libraries"));
+            editor.statusNotice(Translate.t("comp.lib.error"));
             return false;
         }
 
         setCompilingProgress(40);
 
-        editor.statusNotice(Translate.t("Compiling Core..."));
+        editor.statusNotice(Translate.e("comp.core"));
         if (!compileCore(editor.core.getAPIFolder(), "core")) {
-            editor.statusNotice(Translate.t("Error Compiling Core"));
+            editor.statusNotice(Translate.t("comp.core.error"));
             return false;
         }
         String coreLibs = "";
@@ -1257,10 +1257,11 @@ public class Sketch implements MessageConsumer {
         }
 
         if (parameters.get("extension") != null) {
-            editor.statusNotice(Translate.t("Compiling Extension..."));
+            editor.statusNotice(Translate.e("comp.extension"));
             File extension = new File(parameters.get("extension"));
             if (extension.exists() && extension.isDirectory()) {
                 if (!compileCore(extension, extension.getName())) {
+                    editor.statusNotice(Translate.t("comp.extension.error"));
                     return false;
                 }
                 settings.put("library", extension.getName());
@@ -1271,17 +1272,17 @@ public class Sketch implements MessageConsumer {
         settings.put("library", "core");
         coreLibs += "::" + parseString(liboption);
 
-        editor.statusNotice(Translate.t("Linking Sketch..."));
+        editor.statusNotice(Translate.e("comp.link"));
         settings.put("filename", name);
         if (!compileLink(objectFiles, coreLibs)) {
-            editor.statusNotice(Translate.t("Error Linking Sketch"));
+            editor.statusNotice(Translate.t("comp.link.error"));
             return false;
         }
         setCompilingProgress(60);
 
-        editor.statusNotice(Translate.t("Extracting EEPROM..."));
+        editor.statusNotice(Translate.e("comp.eeprom"));
         if (!compileEEP()) {
-            editor.statusNotice(Translate.t("Error Extracting EEPROM"));
+            editor.statusNotice(Translate.t("comp.eeprom.error"));
             return false;
         }
         setCompilingProgress(70);
@@ -1289,7 +1290,7 @@ public class Sketch implements MessageConsumer {
 
         if (all.get("compile.lss") != null) {
             if (Base.preferences.getBoolean("compiler.generate_lss")) {
-                editor.statusNotice(Translate.t("Generating Listing..."));
+                editor.statusNotice(Translate.e("comp.lss"));
                 File redirectTo = new File(buildFolder, name + ".lss");
                 if (redirectTo.exists()) {
                     redirectTo.delete();
@@ -1306,7 +1307,7 @@ public class Sketch implements MessageConsumer {
                 unredirectChannel(1);
 
                 if (!result) {
-                    editor.statusNotice(Translate.t("Error Generating Listing"));
+                    editor.statusNotice(Translate.t("comp.lss.error"));
                     return false;
                 }
                 if (Base.preferences.getBoolean("export.save_lss")) {
@@ -1321,9 +1322,9 @@ public class Sketch implements MessageConsumer {
 
         setCompilingProgress(80);
 
-        editor.statusNotice(Translate.t("Converting to HEX..."));
+        editor.statusNotice(Translate.e("comp.hex"));
         if (!compileHEX()) {
-            editor.statusNotice(Translate.t("Error Converting to HEX"));
+            editor.statusNotice(Translate.t("comp.hex.error"));
             return false;
         }
         setCompilingProgress(90);
@@ -1336,7 +1337,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        editor.statusNotice(Translate.t("Compiling Done"));
+        editor.statusNotice(Translate.t("comp.done"));
         return true;
     }
 
@@ -2073,7 +2074,7 @@ public class Sketch implements MessageConsumer {
         String blName = bootloader.getAbsolutePath();
 
         HashMap<String, String> all = mergeAllProperties();
-        editor.statusNotice(Translate.t("Burning Bootloader..."));
+        editor.statusNotice(Translate.e("comp.burn"));
         settings.put("filename", blName);
         settings.put("filename.elf", blName + ".elf");
         settings.put("filename.hex", blName + ".hex");
@@ -2106,7 +2107,7 @@ public class Sketch implements MessageConsumer {
 
         if (uploadCommand == null) {
             message("No upload command defined for board\n", 2);
-            editor.statusNotice(Translate.t("Upload Failed"));
+            editor.statusNotice(Translate.t("comp.upload.failed"));
             return;
         }
 
@@ -2116,22 +2117,22 @@ public class Sketch implements MessageConsumer {
             uploader = Base.plugins.get(uploadCommand);
             if (uploader == null) {
                 message("Upload class " + uploadCommand + " not found.\n", 2);
-                editor.statusNotice(Translate.t("Upload Failed"));
+                editor.statusNotice(Translate.t("comp.upload.failed"));
                 return;
             }
             try {
                 if ((uploader.flags() & BasePlugin.LOADER) == 0) {
                     message(uploadCommand + "is not a valid loader plugin.\n", 2);
-                    editor.statusNotice(Translate.t("Upload Failed"));
+                    editor.statusNotice(Translate.t("comp.upload.failed"));
                     return;
                 }
                 uploader.run();
             } catch (Exception e) {
-                editor.statusNotice(Translate.t("Upload Failed"));
+                editor.statusNotice(Translate.t("comp.upload.failed"));
                 message(e.toString(), 2);
                 return;
             }
-            editor.statusNotice(Translate.t("Upload Complete"));
+            editor.statusNotice(Translate.t("comp.upload.complete"));
             return;
         }
 
@@ -2237,15 +2238,15 @@ public class Sketch implements MessageConsumer {
             editor.releaseSerialPort();
         }
         if (res) {
-            editor.statusNotice(Translate.t("Upload Complete"));
+            editor.statusNotice(Translate.t("comp.upload.complete"));
         } else {
-            editor.statusNotice(Translate.t("Upload Failed"));
+            editor.statusNotice(Translate.t("comp.upload.failed"));
         }
     }
 
     public void exportSAR() {
         FileDialog fd = new FileDialog(editor,
-                                   Translate.t("Export Sketch..."),
+                                   Translate.e("menu.file.export.sar"),
                                    FileDialog.SAVE);
 
         fd.setDirectory(System.getProperty("user.home"));
@@ -2362,7 +2363,7 @@ public class Sketch implements MessageConsumer {
 
     public void importSAR() {
         FileDialog fd = new FileDialog(editor,
-                                   Translate.t("Import Sketch..."),
+                                   Translate.e("menu.file.import.sar"),
                                    FileDialog.LOAD);
 
         fd.setDirectory(System.getProperty("user.home"));
@@ -2494,14 +2495,14 @@ public class Sketch implements MessageConsumer {
             c.gridwidth = 1;
             final Sketch me = this;
 
-            JButton cancel = new JButton(Translate.t("Cancel"));
+            JButton cancel = new JButton(Translate.t("gen.cancel"));
             cancel.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     me.willDoImport = false;
                     dialog.dispose();
                 }
             });
-            JButton impt = new JButton(Translate.t("Import"));
+            JButton impt = new JButton(Translate.t("gen.import"));
             impt.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     me.willDoImport = true;
