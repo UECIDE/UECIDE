@@ -94,8 +94,8 @@ public class Base {
         });
 */
 
-        Translate.load("/uecide/app/en_GB.lang");
-        Translate.load("/uecide/app/" + locale + ".lang");
+        Translate.load("/uecide/app/i18n/en_GB.lang");
+        Translate.load("/uecide/app/i18n/" + locale + ".lang");
         headless = false;
 
         if (isLinux()) {
