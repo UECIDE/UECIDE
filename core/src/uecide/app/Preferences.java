@@ -98,7 +98,7 @@ public class Preferences {
 
     static PropertyFile properties;
 
-    public class Language {
+    public class Language implements Comparable {
         String name;
         String code;
 
@@ -114,6 +114,12 @@ public class Preferences {
         public String getCode() {
             return code;
         }
+
+        public int compareTo(Object o) {
+            Language l = (Language)o;
+            return name.compareTo(l.toString());
+        }
+
     }
 
     static public String fontToString(Font f)
@@ -856,8 +862,13 @@ public class Preferences {
     }
 
     languageSelection.removeAllItems();
-    for (String k : Translate.languages.keySet().toArray(new String[0])) {
+    ArrayList<Language> la = new ArrayList<Language>();
+    for (String k : Translate.languages.keySet()) {
         Language l = new Language(k, Translate.languages.get(k));
+        la.add(l);
+    }
+    Collections.sort(la);
+    for (Language l : la) {
         languageSelection.addItem(l);
         if (l.getCode().equals(Base.preferences.get("locale"))) {
             languageSelection.setSelectedItem(l);
