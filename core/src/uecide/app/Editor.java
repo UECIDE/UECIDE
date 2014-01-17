@@ -55,6 +55,7 @@ public class Editor extends JFrame implements RunnerListener {
     JMenu sketchMenu;
     JMenu hardwareMenu;
     JMenu toolsMenu;
+    JMenu helpMenu;
 
     JLabel lineStatus;
 
@@ -818,9 +819,13 @@ public class Editor extends JFrame implements RunnerListener {
 
 
   protected JMenu buildHelpMenu() {
-    // To deal with a Mac OS X 10.5 bug, add an extra space after the name
-    // so that the OS doesn't try to insert its slow help menu.
-    JMenu menu = new JMenu(Translate.t("Help"));
+    helpMenu = new JMenu(Translate.t("Help"));
+    rebuildHelpMenu();
+    return helpMenu;
+  }
+
+  public void rebuildHelpMenu() {
+    helpMenu.removeAll();
     JMenuItem item;
 
     item = new JMenuItem(Translate.t("About This Sketch"));
@@ -829,7 +834,31 @@ public class Editor extends JFrame implements RunnerListener {
             sketch.about();
         }
     });
-    menu.add(item);
+    helpMenu.add(item);
+
+    if (board != null) {
+        if (board.getManual() != null) {
+            item = new JMenuItem(Translate.t("Manual for %1", board.getLongName()));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Base.open(board.getManual().getAbsolutePath());
+                }
+            });
+            helpMenu.add(item);
+        }
+    }
+
+    if (core != null) {
+        if (core.getManual() != null) {
+            item = new JMenuItem(Translate.t("Manual for %1", board.getName()));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Base.open(core.getManual().getAbsolutePath());
+                }
+            });
+            helpMenu.add(item);
+        }
+    }
 
     if (Base.theme.get("links.gettingstarted.url") != null) {
         item = new JMenuItem(Translate.t("Getting Started"));
@@ -838,7 +867,7 @@ public class Editor extends JFrame implements RunnerListener {
               Base.openURL(Base.theme.get("links.gettingstarted.url"));
             }
           });
-        menu.add(item);
+        helpMenu.add(item);
     }
 
     if (Base.theme.get("links.environment.url") != null) {
@@ -848,7 +877,7 @@ public class Editor extends JFrame implements RunnerListener {
               Base.openURL(Base.theme.get("links.environment.url"));
             }
           });
-        menu.add(item);
+        helpMenu.add(item);
     }
 
     if (Base.theme.get("links.troubleshooting.url") != null) {
@@ -858,7 +887,7 @@ public class Editor extends JFrame implements RunnerListener {
               Base.openURL(Base.theme.get("links.troubleshooting.url"));
             }
           });
-        menu.add(item);
+        helpMenu.add(item);
     }
 
 
@@ -869,7 +898,7 @@ public class Editor extends JFrame implements RunnerListener {
               Base.openURL(Base.theme.get("links.reference.url"));
             }
           });
-        menu.add(item);
+        helpMenu.add(item);
     }
 
     if (Base.theme.get("links.faq.url") != null) {
@@ -879,7 +908,7 @@ public class Editor extends JFrame implements RunnerListener {
               Base.openURL(Base.theme.get("links.faq.url"));
             }
           });
-        menu.add(item);
+        helpMenu.add(item);
     }
 
     String linkName = Base.theme.get("links.homepage.name");
@@ -890,7 +919,7 @@ public class Editor extends JFrame implements RunnerListener {
               Base.openURL(Base.theme.get("links.homepage.url"));
             }
         });
-        menu.add(item);
+        helpMenu.add(item);
     }
 
     linkName = Base.theme.get("links.forums.name");
@@ -901,19 +930,19 @@ public class Editor extends JFrame implements RunnerListener {
               Base.openURL(Base.theme.get("links.forums.url"));
             }
         });
-        menu.add(item);
+        helpMenu.add(item);
     }
 
     // macosx already has its own about menu
     if (!Base.isMacOS()) {
-      menu.addSeparator();
+      helpMenu.addSeparator();
       item = new JMenuItem(Translate.t("About %1", Base.theme.get("product.cap")));
       item.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             Base.handleAbout();
           }
         });
-      menu.add(item);
+      helpMenu.add(item);
     }
 
     item = new JMenuItem(Translate.t("System Information"));
@@ -922,9 +951,8 @@ public class Editor extends JFrame implements RunnerListener {
             Base.handleSystemInfo();
         }
     });
-    menu.add(item);
+    helpMenu.add(item);
 
-    return menu;
   }
 
     public void handleNewFile() {
@@ -1515,6 +1543,7 @@ public class Editor extends JFrame implements RunnerListener {
     public void populateMenus() {
         rebuildExamplesMenu();
         rebuildImportMenu();
+        rebuildHelpMenu();
     }
 
     public void rebuildImportMenu() {

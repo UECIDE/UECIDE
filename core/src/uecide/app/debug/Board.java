@@ -143,4 +143,16 @@ public class Board implements Comparable {
         }
         return 0;
     }
+
+    public File getManual() {
+        String m = boardPreferences.get("manual");
+        if (m == null) {    
+            return null;
+        }
+        File mf = new File(folder, m);
+        if (!mf.exists()) {
+            return null;
+        }
+        return mf;
+    }
 }
