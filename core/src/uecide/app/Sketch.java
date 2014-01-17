@@ -40,6 +40,7 @@ public class Sketch implements MessageConsumer {
     public ArrayList<SketchFile> sketchFiles = new ArrayList<SketchFile>();
 
     public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
+    public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
 
     public HashMap<String, String> settings = new HashMap<String, String>();
     public HashMap<String, String> parameters = new HashMap<String, String>();
@@ -329,6 +330,7 @@ public class Sketch implements MessageConsumer {
 
         parameters = new HashMap<String, String>();
         importedLibraries = new HashMap<String, Library>();
+        orderedLibraries = new ArrayList<Library>();
         StringBuilder combinedMain = new StringBuilder();
         SketchFile mainFile = getMainFile();
         if (Base.preferences.getBoolean("compiler.combine_ino")) {
@@ -635,6 +637,7 @@ public class Sketch implements MessageConsumer {
         // At this point we have a valid library that hasn't yet been imported.  Now to recurse.
         // First add the library to the imported list
         importedLibraries.put(l, lib);
+        orderedLibraries.add(lib);
 
         // And then work through all the required libraries and add them.
         ArrayList<String> requiredLibraries = lib.getRequiredLibraries();
@@ -887,6 +890,10 @@ public class Sketch implements MessageConsumer {
         return importedLibraries.values();
     }
 
+    public ArrayList<Library> getOrderedLibraries() {
+        return orderedLibraries;
+    }
+
     public ArrayList<String> getIncludePaths() {
         ArrayList<String> libFiles = new ArrayList<String>();
       
@@ -895,7 +902,7 @@ public class Sketch implements MessageConsumer {
         libFiles.add(editor.core.getAPIFolder().getAbsolutePath());
         libFiles.add(editor.core.getLibraryFolder().getAbsolutePath());
 
-        for (Library l : getImportedLibraries()) {
+        for (Library l : getOrderedLibraries()) {
             libFiles.add(l.getFolder().getAbsolutePath());
         }
         return libFiles;
