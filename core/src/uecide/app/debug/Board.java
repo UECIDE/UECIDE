@@ -21,6 +21,8 @@ public class Board implements Comparable {
     private boolean valid;
     private boolean runInVerboseMode;
     public PropertyFile boardPreferences;
+    public HashMap<String, String>optionsSelected = new HashMap<String, String>();
+    public HashMap<String, String>optionsFlags = new HashMap<String, String>();
 
     private File bootloader = null;
 
@@ -154,5 +156,21 @@ public class Board implements Comparable {
             return null;
         }
         return mf;
+    }
+
+    public void setOption(String root, String opt, String flag) {
+        optionsSelected.put(root, opt);
+        optionsFlags.put(root, flag);
+    }
+
+    public boolean optionIsSet(String root, String opt) {
+        if (optionsSelected.get(root) == null) {
+            return false;
+        }
+        System.err.println(optionsSelected.get(root));
+        if (optionsSelected.get(root).equals(opt)) {
+            return true;
+        }
+        return false;
     }
 }

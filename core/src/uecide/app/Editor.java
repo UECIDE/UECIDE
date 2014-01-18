@@ -67,6 +67,7 @@ public class Editor extends JFrame implements RunnerListener {
     JMenu boardsMenu;
     JMenu coresMenu;
     JMenu serialMenu;
+    JMenu optionsMenu;
     JMenu programmersMenu;
     JMenu bootloadersMenu;
 
@@ -727,6 +728,12 @@ public class Editor extends JFrame implements RunnerListener {
     populateSerialMenu();
     menu.add(serialMenu);
 
+    if (optionsMenu == null) {
+        optionsMenu = new JMenu(Translate.t("Options"));
+        rebuildOptionsMenu();
+    }
+    menu.add(optionsMenu);
+
     menu.addMenuListener(new MenuListener() {
       public void menuCanceled(MenuEvent e) {}
       public void menuDeselected(MenuEvent e) {}
@@ -747,6 +754,53 @@ public class Editor extends JFrame implements RunnerListener {
     menu.add(bootloadersMenu);
     return menu;
   }
+
+    public void rebuildOptionsMenu() {
+        System.err.println("Rebuilding options menu");
+        if (board == null) {
+            optionsMenu.setEnabled(false);
+            System.err.println("No board");
+            return;
+        }
+        optionsMenu.removeAll();
+        ArrayList<String>options = board.getPreferences().children("options");
+        for (String opt : options) {
+            System.err.println("Option: " + opt);
+            String optionName = board.getPreferences().get("options." + opt);
+            JMenu optMen = new JMenu(optionName);
+
+            ArrayList<String>optKids = board.getPreferences().children("options." + opt);
+            ButtonGroup bg = new ButtonGroup();
+            for (String kid : optKids) {
+                System.err.println("  Sub-option " + kid);
+                String kidName = board.getPreferences().get("options." + opt + "." + kid + ".name");
+                if (kidName != null) {
+                    AbstractAction action = new AbstractAction(kidName) {
+                        public void actionPerformed(ActionEvent actionevent) {
+                            board.setOption((String)getValue("opt"), (String)getValue("sub"), (String)getValue("flag"));
+                        }
+                    };
+                    action.putValue("opt", opt);
+                    action.putValue("sub", kid);
+                    action.putValue("flag", board.getPreferences().get("options." + opt + "." + kid + ".flags"));
+                    JMenuItem item = new JRadioButtonMenuItem(action);
+                    bg.add(item);
+                    if (board.optionIsSet(opt, kid)) {
+                        item.setSelected(true); 
+                    }
+
+                    optMen.add(item);
+                }
+            }
+            optionsMenu.add(optMen);
+        }
+        if (optionsMenu.getItemCount() == 0) {
+            optionsMenu.setEnabled(false);
+        } else {
+            optionsMenu.setEnabled(true);
+        }
+            
+    }
 
  
     public JMenu buildToolsMenu()
@@ -1544,6 +1598,7 @@ public class Editor extends JFrame implements RunnerListener {
         rebuildExamplesMenu();
         rebuildImportMenu();
         rebuildHelpMenu();
+        rebuildOptionsMenu();
     }
 
     public void rebuildImportMenu() {
