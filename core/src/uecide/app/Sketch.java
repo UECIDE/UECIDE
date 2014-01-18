@@ -1232,6 +1232,11 @@ public class Sketch implements MessageConsumer {
         settings.put("filename", name);
         settings.put("includes", preparePaths(includePaths));
 
+        settings.put("option.flags", editor.getFlags("flags"));
+        settings.put("option.cflags", editor.getFlags("cflags"));
+        settings.put("option.cppflags", editor.getFlags("cppflags"));
+        settings.put("option.ldflags", editor.getFlags("ldflags"));
+
         editor.statusNotice(Translate.t("Compiling Sketch..."));
 
         tobjs = compileSketch();
@@ -2599,4 +2604,5 @@ public class Sketch implements MessageConsumer {
         } catch (Exception e) {
         }
     }
+
 }

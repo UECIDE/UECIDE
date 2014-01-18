@@ -71,6 +71,8 @@ public class Editor extends JFrame implements RunnerListener {
     JMenu programmersMenu;
     JMenu bootloadersMenu;
 
+    HashMap<String, String> selectedOptions = new HashMap<String, String>();
+
     SerialMenuListener serialMenuListener;
   
     public EditorStatus status;
@@ -755,7 +757,56 @@ public class Editor extends JFrame implements RunnerListener {
     return menu;
   }
 
+    public ArrayList<String> getAllChildren(String key) {
+        ArrayList<String> children = new ArrayList<String>();
+        if (compiler != null) {
+            ArrayList<String> compilerChildren = compiler.getProperties().children(key);
+            for (String c : compilerChildren) {
+                int i = children.indexOf(c);
+                if (i >= 0) {
+                    children.remove(i);
+                }
+                children.add(c);
+            }
+        }
+        if (core != null) {
+            ArrayList<String> coreChildren = core.getProperties().children(key);
+            for (String c : coreChildren) {
+                int i = children.indexOf(c);
+                if (i >= 0) {
+                    children.remove(i);
+                }
+                children.add(c);
+            }
+        }
+        if (board != null) {
+            ArrayList<String> boardChildren = board.getProperties().children(key);
+            for (String c : boardChildren) {
+                int i = children.indexOf(c);
+                if (i >= 0) {
+                    children.remove(i);
+                }
+                children.add(c);
+            }
+        }
+        return children;
+    }
+    
+    public String getAllByKey(String key) {
+        if (board.getProperties().get(key) != null) {
+            return board.getProperties().get(key);
+        }
+        if (core.getProperties().get(key) != null) {
+            return core.getProperties().get(key);
+        }
+        if (compiler.getProperties().get(key) != null) {
+            return compiler.getProperties().get(key);
+        }
+        return null;
+    }
+
     public void rebuildOptionsMenu() {
+        selectedOptions = new HashMap<String, String>();
         System.err.println("Rebuilding options menu");
         if (board == null) {
             optionsMenu.setEnabled(false);
@@ -763,32 +814,56 @@ public class Editor extends JFrame implements RunnerListener {
             return;
         }
         optionsMenu.removeAll();
-        ArrayList<String>options = board.getPreferences().children("options");
+        ArrayList<String>options = getAllChildren("options");
         for (String opt : options) {
             System.err.println("Option: " + opt);
-            String optionName = board.getPreferences().get("options." + opt);
+            String optionName = getAllByKey("options." + opt + ".name");
+            String optionDefault = getAllByKey("options." + opt + ".default");
             JMenu optMen = new JMenu(optionName);
+            JMenuItem defaultItem = null;
+            boolean gotSelected = false;
 
-            ArrayList<String>optKids = board.getPreferences().children("options." + opt);
+            ArrayList<String>optKids = getAllChildren("options." + opt);
             ButtonGroup bg = new ButtonGroup();
             for (String kid : optKids) {
+                if (kid.equals("name") || kid.equals("default")) {
+                    continue;
+                }
                 System.err.println("  Sub-option " + kid);
-                String kidName = board.getPreferences().get("options." + opt + "." + kid + ".name");
+                String kidName = getAllByKey("options." + opt + "." + kid + ".name");
                 if (kidName != null) {
                     AbstractAction action = new AbstractAction(kidName) {
                         public void actionPerformed(ActionEvent actionevent) {
-                            board.setOption((String)getValue("opt"), (String)getValue("sub"), (String)getValue("flag"));
+                            setOption((String)getValue("opt"), (String)getValue("sub"));
                         }
                     };
                     action.putValue("opt", opt);
                     action.putValue("sub", kid);
-                    action.putValue("flag", board.getPreferences().get("options." + opt + "." + kid + ".flags"));
                     JMenuItem item = new JRadioButtonMenuItem(action);
+                    if (kid.equals(optionDefault)) {
+                        defaultItem = item;
+                    }
                     bg.add(item);
-                    if (board.optionIsSet(opt, kid)) {
+                    if (optionIsSet(opt, kid)) {
+                        setOption(opt, kid);
                         item.setSelected(true); 
+                        gotSelected = true;
                     }
 
+                    if (Base.preferences.get("options." + board.getName() + "." + opt) != null) {
+                        if (Base.preferences.get("options." + board.getName() + "." + opt).equals(kid)) {
+                            setOption(opt, kid);
+                            item.setSelected(true);
+                            gotSelected = true;
+                        }
+                    }
+
+                    if (!gotSelected) {
+                        if (defaultItem != null) {
+                            setOption(opt, optionDefault);
+                            defaultItem.setSelected(true);
+                        }
+                    }
                     optMen.add(item);
                 }
             }
@@ -799,9 +874,39 @@ public class Editor extends JFrame implements RunnerListener {
         } else {
             optionsMenu.setEnabled(true);
         }
-            
     }
 
+    public void setOption(String opt, String val) {
+        selectedOptions.put(opt, val);
+        optionsToPreferences();
+    }
+
+    public boolean optionIsSet(String opt, String val) {
+        if (selectedOptions.get(opt) != null) {
+            if (selectedOptions.get(opt).equals(val)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void optionsToPreferences() {
+        for (String opt : selectedOptions.keySet()) {
+            Base.preferences.set("options." + board.getName() + "." + opt, selectedOptions.get(opt));
+        }
+    }
+
+    public String getFlags(String type) {
+        String flags = "";
+        for (String opt : selectedOptions.keySet()) {
+            String f = getAllByKey("options." + opt + "." + selectedOptions.get(opt) + "." + type);
+            System.err.println("options." + opt + "." + selectedOptions.get(opt) + "." + type + " = " + f);
+            if (f != null) {
+                flags = flags + "::" + f;
+            }
+        }
+        return flags;
+    }
  
     public JMenu buildToolsMenu()
     {
