@@ -107,10 +107,6 @@ public class Board implements Comparable {
         return (String) boardPreferences.get(k);
     }
 
-    public PropertyFile getPreferences() {
-        return boardPreferences;
-    }
-
     public String getFamily() {
         return boardPreferences.get("family");
     }
@@ -158,9 +154,8 @@ public class Board implements Comparable {
         return mf;
     }
 
-    public void setOption(String root, String opt, String flag) {
+    public void setOption(String root, String opt) {
         optionsSelected.put(root, opt);
-        optionsFlags.put(root, flag);
     }
 
     public boolean optionIsSet(String root, String opt) {
