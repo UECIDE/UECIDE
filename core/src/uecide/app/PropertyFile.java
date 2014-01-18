@@ -265,4 +265,32 @@ public class PropertyFile {
             }
         }
     }
+
+    public ArrayList<String> children(String path) {
+        ArrayList<String> kids = new ArrayList<String>();
+        String root = path;
+
+        if (root.equals("")) {
+            for (String k : properties.stringPropertyNames()) {
+                String[] parts = k.split(".");
+                if (kids.indexOf(parts[0]) == -1) {
+                    kids.add(parts[0]);
+                }
+            }
+            return kids;
+        }
+
+        String[] rootParts = root.split("\\.");
+        root = root + ".";
+
+        for (String k : properties.stringPropertyNames()) {
+            if (k.startsWith(root)) {
+                String[] keyParts = k.split("\\.");
+                if (kids.indexOf(keyParts[rootParts.length]) == -1) {
+                    kids.add(keyParts[rootParts.length]);
+                }
+            }
+        }
+        return kids;
+    }
 }
