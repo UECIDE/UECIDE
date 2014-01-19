@@ -45,6 +45,8 @@ public class Sketch implements MessageConsumer {
     public HashMap<String, String> settings = new HashMap<String, String>();
     public HashMap<String, String> parameters = new HashMap<String, String>();
 
+    public boolean doPrePurge = false;
+
     public Sketch(Editor ed, String path) {
         this(ed, new File(path));
     }
@@ -797,7 +799,6 @@ public class Sketch implements MessageConsumer {
             try {
                 String baud = all.get("upload." + editor.programmer + ".reset.baud");
                 if (baud != null) {
-                    System.err.println("Opening serial port at " + baud + " baud");
                     int b = Integer.parseInt(baud);
           //          editor.grabSerialPort();
                     
@@ -834,7 +835,6 @@ public class Sketch implements MessageConsumer {
     }
 
     public void assertDTRRTS(boolean dtr, boolean rts) {
-        System.err.println("Asserting DTR...");
         try {
             SerialPort serialPort = Serial.requestPort(editor.getSerialPort(), this);
             if (serialPort == null) {
@@ -1217,11 +1217,20 @@ public class Sketch implements MessageConsumer {
         }
     }
 
+    public void needPurge() {
+        doPrePurge = true;
+    }
+
     public boolean compile() {
         ArrayList<String> includePaths;
         List<File> objectFiles = new ArrayList<File>();
         List<File> tobjs;
         HashMap<String, String> all = mergeAllProperties();
+
+        if (doPrePurge) {
+            doPrePurge = false;
+            Base.removeDir(getCacheFolder());
+        }
 
         for (SketchFile f : sketchFiles) {
             f.textArea.removeAllLineHighlights();
@@ -1822,7 +1831,6 @@ public class Sketch implements MessageConsumer {
 
     private boolean compileHEX() {
         HashMap<String, String> all = mergeAllProperties();
-        System.err.println(all.get("compile.hex"));
         return execAsynchronously(parseString(all.get("compile.hex")));
     }
 
@@ -2220,7 +2228,6 @@ public class Sketch implements MessageConsumer {
             try {
                 String baud = all.get("upload." + programmer + ".reset.baud");
                 if (baud != null) {
-                    System.err.println("Opening serial port at " + baud + " baud");
                     int b = Integer.parseInt(baud);
           //          editor.grabSerialPort();
                     

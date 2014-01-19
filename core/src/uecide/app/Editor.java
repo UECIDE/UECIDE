@@ -736,7 +736,7 @@ public class Editor extends JFrame implements RunnerListener {
     }
     menu.add(optionsMenu);
 
-    menu.addMenuListener(new MenuListener() {
+    serialMenu.addMenuListener(new MenuListener() {
       public void menuCanceled(MenuEvent e) {}
       public void menuDeselected(MenuEvent e) {}
       public void menuSelected(MenuEvent e) {
@@ -792,6 +792,18 @@ public class Editor extends JFrame implements RunnerListener {
         return children;
     }
     
+    public boolean getBoolByKey(String key) {
+        if (board.getProperties().get(key) != null) {
+            return board.getProperties().getBoolean(key);
+        }
+        if (core.getProperties().get(key) != null) {
+            return core.getProperties().getBoolean(key);
+        }
+        if (compiler.getProperties().get(key) != null) {
+            return compiler.getProperties().getBoolean(key);
+        }
+        return false;
+    }
     public String getAllByKey(String key) {
         if (board.getProperties().get(key) != null) {
             return board.getProperties().get(key);
@@ -807,16 +819,13 @@ public class Editor extends JFrame implements RunnerListener {
 
     public void rebuildOptionsMenu() {
         selectedOptions = new HashMap<String, String>();
-        System.err.println("Rebuilding options menu");
         if (board == null) {
             optionsMenu.setEnabled(false);
-            System.err.println("No board");
             return;
         }
         optionsMenu.removeAll();
         ArrayList<String>options = getAllChildren("options");
         for (String opt : options) {
-            System.err.println("Option: " + opt);
             String optionName = getAllByKey("options." + opt + ".name");
             String optionDefault = getAllByKey("options." + opt + ".default");
             JMenu optMen = new JMenu(optionName);
@@ -829,7 +838,6 @@ public class Editor extends JFrame implements RunnerListener {
                 if (kid.equals("name") || kid.equals("default")) {
                     continue;
                 }
-                System.err.println("  Sub-option " + kid);
                 String kidName = getAllByKey("options." + opt + "." + kid + ".name");
                 if (kidName != null) {
                     AbstractAction action = new AbstractAction(kidName) {
@@ -879,6 +887,9 @@ public class Editor extends JFrame implements RunnerListener {
     public void setOption(String opt, String val) {
         selectedOptions.put(opt, val);
         optionsToPreferences();
+        if (getBoolByKey("options." + opt + ".purge")) {
+            sketch.needPurge();
+        }
     }
 
     public boolean optionIsSet(String opt, String val) {
@@ -900,7 +911,6 @@ public class Editor extends JFrame implements RunnerListener {
         String flags = "";
         for (String opt : selectedOptions.keySet()) {
             String f = getAllByKey("options." + opt + "." + selectedOptions.get(opt) + "." + type);
-            System.err.println("options." + opt + "." + selectedOptions.get(opt) + "." + type + " = " + f);
             if (f != null) {
                 flags = flags + "::" + f;
             }
