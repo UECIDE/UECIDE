@@ -151,4 +151,17 @@ public class Core implements MessageConsumer {
         }
         return new File(folder, f);
     }
+
+    public File getManual() {
+        String m = corePreferences.get("manual");
+        if (m == null) {
+            return null;
+        }
+        File mf = new File(folder, m);
+        if (!mf.exists()) {
+            return null;
+        }
+        return mf;
+    }
+
 }

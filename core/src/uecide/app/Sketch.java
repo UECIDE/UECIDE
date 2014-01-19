@@ -40,9 +40,12 @@ public class Sketch implements MessageConsumer {
     public ArrayList<SketchFile> sketchFiles = new ArrayList<SketchFile>();
 
     public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
+    public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
 
     public HashMap<String, String> settings = new HashMap<String, String>();
     public HashMap<String, String> parameters = new HashMap<String, String>();
+
+    public boolean doPrePurge = false;
 
     public Sketch(Editor ed, String path) {
         this(ed, new File(path));
@@ -329,6 +332,7 @@ public class Sketch implements MessageConsumer {
 
         parameters = new HashMap<String, String>();
         importedLibraries = new HashMap<String, Library>();
+        orderedLibraries = new ArrayList<Library>();
         StringBuilder combinedMain = new StringBuilder();
         SketchFile mainFile = getMainFile();
         if (Base.preferences.getBoolean("compiler.combine_ino")) {
@@ -635,6 +639,7 @@ public class Sketch implements MessageConsumer {
         // At this point we have a valid library that hasn't yet been imported.  Now to recurse.
         // First add the library to the imported list
         importedLibraries.put(l, lib);
+        orderedLibraries.add(lib);
 
         // And then work through all the required libraries and add them.
         ArrayList<String> requiredLibraries = lib.getRequiredLibraries();
@@ -794,7 +799,6 @@ public class Sketch implements MessageConsumer {
             try {
                 String baud = all.get("upload." + editor.programmer + ".reset.baud");
                 if (baud != null) {
-                    System.err.println("Opening serial port at " + baud + " baud");
                     int b = Integer.parseInt(baud);
           //          editor.grabSerialPort();
                     
@@ -831,7 +835,6 @@ public class Sketch implements MessageConsumer {
     }
 
     public void assertDTRRTS(boolean dtr, boolean rts) {
-        System.err.println("Asserting DTR...");
         try {
             SerialPort serialPort = Serial.requestPort(editor.getSerialPort(), this);
             if (serialPort == null) {
@@ -887,6 +890,10 @@ public class Sketch implements MessageConsumer {
         return importedLibraries.values();
     }
 
+    public ArrayList<Library> getOrderedLibraries() {
+        return orderedLibraries;
+    }
+
     public ArrayList<String> getIncludePaths() {
         ArrayList<String> libFiles = new ArrayList<String>();
       
@@ -895,7 +902,7 @@ public class Sketch implements MessageConsumer {
         libFiles.add(editor.core.getAPIFolder().getAbsolutePath());
         libFiles.add(editor.core.getLibraryFolder().getAbsolutePath());
 
-        for (Library l : getImportedLibraries()) {
+        for (Library l : getOrderedLibraries()) {
             libFiles.add(l.getFolder().getAbsolutePath());
         }
         return libFiles;
@@ -1210,11 +1217,20 @@ public class Sketch implements MessageConsumer {
         }
     }
 
+    public void needPurge() {
+        doPrePurge = true;
+    }
+
     public boolean compile() {
         ArrayList<String> includePaths;
         List<File> objectFiles = new ArrayList<File>();
         List<File> tobjs;
         HashMap<String, String> all = mergeAllProperties();
+
+        if (doPrePurge) {
+            doPrePurge = false;
+            Base.removeDir(getCacheFolder());
+        }
 
         for (SketchFile f : sketchFiles) {
             f.textArea.removeAllLineHighlights();
@@ -1224,6 +1240,11 @@ public class Sketch implements MessageConsumer {
 
         settings.put("filename", name);
         settings.put("includes", preparePaths(includePaths));
+
+        settings.put("option.flags", editor.getFlags("flags"));
+        settings.put("option.cflags", editor.getFlags("cflags"));
+        settings.put("option.cppflags", editor.getFlags("cppflags"));
+        settings.put("option.ldflags", editor.getFlags("ldflags"));
 
         editor.statusNotice(Translate.e("comp.sketch"));
 
@@ -1811,7 +1832,6 @@ public class Sketch implements MessageConsumer {
 
     private boolean compileHEX() {
         HashMap<String, String> all = mergeAllProperties();
-        System.err.println(all.get("compile.hex"));
         return execAsynchronously(parseString(all.get("compile.hex")));
     }
 
@@ -2209,7 +2229,6 @@ public class Sketch implements MessageConsumer {
             try {
                 String baud = all.get("upload." + programmer + ".reset.baud");
                 if (baud != null) {
-                    System.err.println("Opening serial port at " + baud + " baud");
                     int b = Integer.parseInt(baud);
           //          editor.grabSerialPort();
                     
@@ -2593,4 +2612,5 @@ public class Sketch implements MessageConsumer {
         } catch (Exception e) {
         }
     }
+
 }
