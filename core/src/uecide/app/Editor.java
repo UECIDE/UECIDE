@@ -723,18 +723,18 @@ public class Editor extends JFrame implements RunnerListener {
     }
     menu.add(coresMenu);
     
+    if (optionsMenu == null) {
+        optionsMenu = new JMenu(Translate.t("Options"));
+        rebuildOptionsMenu();
+    }
+    menu.add(optionsMenu);
+
     if (serialMenuListener == null)
       serialMenuListener  = new SerialMenuListener();
     if (serialMenu == null)
       serialMenu = new JMenu(Translate.t("Serial Port"));
     populateSerialMenu();
     menu.add(serialMenu);
-
-    if (optionsMenu == null) {
-        optionsMenu = new JMenu(Translate.t("Options"));
-        rebuildOptionsMenu();
-    }
-    menu.add(optionsMenu);
 
     serialMenu.addMenuListener(new MenuListener() {
       public void menuCanceled(MenuEvent e) {}
@@ -835,7 +835,7 @@ public class Editor extends JFrame implements RunnerListener {
             ArrayList<String>optKids = getAllChildren("options." + opt);
             ButtonGroup bg = new ButtonGroup();
             for (String kid : optKids) {
-                if (kid.equals("name") || kid.equals("default")) {
+                if (kid.equals("name") || kid.equals("default") || kid.equals("purge")) {
                     continue;
                 }
                 String kidName = getAllByKey("options." + opt + "." + kid + ".name");
