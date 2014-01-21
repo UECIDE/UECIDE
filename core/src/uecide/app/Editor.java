@@ -1010,7 +1010,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     if (board != null) {
         if (board.getManual() != null) {
-            item = new JMenuItem(Translate.t("Manual for %1", board.getLongName()));
+            item = new JMenuItem(Translate.t("menu.help.manual", board.getLongName()));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Base.open(board.getManual().getAbsolutePath());
@@ -1022,7 +1022,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     if (core != null) {
         if (core.getManual() != null) {
-            item = new JMenuItem(Translate.t("Manual for %1", board.getName()));
+            item = new JMenuItem(Translate.t("menu.help.manual", board.getName()));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Base.open(core.getManual().getAbsolutePath());
@@ -2053,8 +2053,8 @@ public class Editor extends JFrame implements RunnerListener {
         }
         Board brd = Base.boards.get(b);
         if (brd == null) {
-            Base.showWarning(Translate.t("Invalid Board"),
-                Translate.t("Unable to locate board '%1'", b),
+            Base.showWarning(Translate.t("error.board.title"),
+                Translate.t("error.board.msg", b),
                 null
             );
             return;

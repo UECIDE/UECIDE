@@ -56,6 +56,7 @@ menu.help = Hjälp
 menu.help.about.sketch = Om denna skiss
 menu.help.about.product = Om %1
 menu.help.sysinfo = Systeminformation
+menu.help.manual = Manual för %1
 
 # Loading Messages
 

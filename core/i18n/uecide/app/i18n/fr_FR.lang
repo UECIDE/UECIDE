@@ -45,6 +45,7 @@ menu.help = Aider
 menu.help.about.sketch = À propos de ce croquis
 menu.help.about.product = À propos de %1
 menu.help.sysinfo = Informations sur le système
+menu.help.manual = Manuel pour %1
 msg.loading = Chargement en %1
 msg.loading.app = Chargement demande
 msg.loading.compilers = Les compilateurs de chargement
