@@ -202,7 +202,7 @@ comp.extension = Compiling Extension
 comp.extension.error = Error Compiling Extension
 
 comp.link = Linking Sketch
-comp.ling.error = Error Linking Sketch
+comp.link.error = Error Linking Sketch
 
 comp.eeprom = Extracting EEPROM
 comp.eeprom.error = Error Extracting EEPROM

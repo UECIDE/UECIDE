@@ -202,7 +202,7 @@ comp.extension = Kompilera förlängning
 comp.extension.error = Fel kompilera förlängning
 
 comp.link = Länkning skiss
-comp.ling.error = Fel länkning skiss
+comp.link.error = Fel länkning skiss
 
 comp.eeprom = Extrahera EEPROM
 comp.eeprom.error = Fel extrahera EEPROM

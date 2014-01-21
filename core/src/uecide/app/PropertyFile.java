@@ -89,7 +89,11 @@ public class PropertyFile {
         if (doPlatformOverride) {
             return getPlatformSpecific(attribute);
         }
-        String t = properties.getProperty(attribute);
+        String t = properties.getProperty(attribute + "." + Base.locale);
+        if (t != null) {
+            return t.trim();
+        }
+        t = properties.getProperty(attribute);
         if (t != null) {
             return t.trim();
         }
@@ -97,7 +101,11 @@ public class PropertyFile {
     }
 
     public String getDefault(String attribute) {
-        String t = defaultProperties.getProperty(attribute);
+        String t = defaultProperties.getProperty(attribute + "." + Base.locale);
+        if (t != null) {
+            return t.trim();
+        }
+        t = defaultProperties.getProperty(attribute);
         if (t != null) {
             return t.trim();
         }
