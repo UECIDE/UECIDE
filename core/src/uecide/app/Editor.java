@@ -1,7 +1,6 @@
 package uecide.app;
 
 import uecide.plugin.*;
-import uecide.app.debug.*;
 
 import java.awt.*;
 import java.awt.datatransfer.*;
@@ -25,6 +24,8 @@ import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rsyntaxtextarea.modes.ArduinoTokenMaker;
 
 import java.lang.reflect.Method;
+
+import uecide.app.debug.*;
 
 
 /**

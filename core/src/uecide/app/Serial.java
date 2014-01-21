@@ -2,7 +2,7 @@
 
 package uecide.app;
 
-import uecide.app.debug.MessageConsumer;
+//import uecide.app.MessageConsumer;
 
 //import gnu.io.*;
 import jssc.*;

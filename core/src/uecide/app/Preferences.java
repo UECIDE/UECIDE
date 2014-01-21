@@ -815,6 +815,7 @@ public class Preferences {
     }
 
     Base.preferences.set("locale", ((Language)languageSelection.getSelectedItem()).getCode());
+    Translate.setLocale(((Language)languageSelection.getSelectedItem()).getCode());
 
     Base.applyPreferences();
     Base.preferences.save();

@@ -1,7 +1,6 @@
 package uecide.app;
 
 import uecide.plugin.*;
-import uecide.app.debug.*;
 
 import java.awt.*;
 import java.awt.datatransfer.*;

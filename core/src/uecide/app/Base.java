@@ -9,14 +9,13 @@ import java.net.*;
 import java.util.zip.*;
 import java.util.jar.*;
 import uecide.plugin.*;
+import uecide.app.debug.Compiler;
+import uecide.app.debug.Board;
+import uecide.app.debug.Core;
 
 
 import javax.swing.*;
 import javax.imageio.*;
-
-import uecide.app.debug.Board;
-import uecide.app.debug.Core;
-import uecide.app.debug.Compiler;
 
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -29,8 +28,6 @@ import java.util.zip.ZipInputStream;
  */
 public class Base {
 
-    public static String locale = "en_GB";
-	
     public static int REVISION = 23;
     /** This might be replaced by main() if there's a lib/version.txt file. */
     public static String VERSION_NAME = "0023";
@@ -128,13 +125,7 @@ public class Base {
 
         Translate.loadIndex();
 
-        locale = preferences.get("locale");
-        if (locale == null) {
-            locale = "en_GB";
-        }
-
-        Translate.load("/uecide/app/i18n/en_GB.lang");
-        Translate.load("/uecide/app/i18n/" + locale + ".lang");
+        Translate.setLocale(preferences.get("locale"));
 
         // Now we reload the theme data with user overrides
         // (we didn't know where they were before) 
@@ -1802,7 +1793,7 @@ public class Base {
             for (String k : plugins.keySet().toArray(new String[0])) {
                 String classPath = k.replace(".", "/");
                 String filePath = classPath + "/i18n/en_GB.lang";
-                String locFilePath = classPath + "/i18n/" + locale + ".lang";
+                String locFilePath = classPath + "/i18n/" + Translate.getLocale() + ".lang";
                 InputStream fis = plugins.get(k).getResourceAsStream(filePath);
                 if (fis != null) {
                     Translate.load(fis);
@@ -1810,7 +1801,6 @@ public class Base {
                 if (locFilePath.equals(filePath) == false) {
                     fis = plugins.get(k).getResourceAsStream(locFilePath);
                     if (fis != null) {
-                        System.err.println("Found");
                         Translate.load(fis);
                     }
                 }

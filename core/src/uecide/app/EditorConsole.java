@@ -36,7 +36,7 @@ import java.util.*;
  * Message console that sits below the editing area.
  * <P>
  * Debugging this class is tricky... If it's throwing exceptions,
- * don't take over System.err, and debug while watching just System.out
+ * don't take over System.err, and de-bug while watching just System.out
  * or just write println() or whatever directly to systemOut or systemErr.
  */
 public class EditorConsole extends JScrollPane {

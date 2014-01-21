@@ -13,9 +13,6 @@ import java.util.regex.*;
 
 import javax.swing.*;
 
-import uecide.app.debug.Board;
-import uecide.app.debug.Core;
-
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -31,6 +28,8 @@ import java.nio.charset.*;
 public class Translate {
     public static HashMap<String, String> translations = new HashMap<String, String>();
     public static HashMap<String, String> languages = new HashMap<String, String>();
+
+    public static String locale;
 
     public static void loadIndex() {
         InputStream fis = Translate.class.getResourceAsStream("/uecide/app/i18n/index.txt");
@@ -237,5 +236,23 @@ public class Translate {
             }
         }
         return o;
+    }
+
+    public static void setLocale(String l) {
+        if (l == null) {
+            locale = "en_GB";
+        } else {
+            locale = l;
+        }
+
+        translations = new HashMap<String, String>();
+
+        Translate.load("/uecide/app/i18n/en_GB.lang");
+        Translate.load("/uecide/app/i18n/" + locale + ".lang");
+
+    }
+
+    public static String getLocale() {
+        return locale;
     }
 }

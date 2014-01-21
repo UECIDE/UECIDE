@@ -2,7 +2,6 @@
 
 package uecide.app;
 
-import uecide.app.debug.*;
 import uecide.app.preproc.*;
 import uecide.plugin.*;
 
@@ -23,6 +22,8 @@ import java.text.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+
+import uecide.app.debug.*;
 
 /**
  * Stores information about files in the current sketch
