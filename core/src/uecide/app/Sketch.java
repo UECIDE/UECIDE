@@ -1620,6 +1620,45 @@ public class Sketch implements MessageConsumer {
         return true;
     }
 
+    private List<File> convertFiles(File dest, List<File> sources) {
+        List<File> objectPaths = new ArrayList<File>();
+        HashMap<String, String> all = mergeAllProperties();
+
+        settings.put("build.path", dest.getAbsolutePath());
+
+        for (File file : sources) {
+            File objectFile = new File(dest, file.getName() + ".o");
+            objectPaths.add(objectFile);
+            if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
+                if (Base.preferences.getBoolean("compiler.verbose")) {
+                    message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                }
+                continue;
+            }
+            String sp = file.getAbsolutePath();
+            String sf = folder.getAbsolutePath();
+            sp = sp.substring(sf.length() + 1);
+
+            String spf = file.getParentFile().getAbsolutePath();
+            spf = spf.substring(sf.length() + 1);
+
+            File destObjects = new File(dest, spf);
+            destObjects.mkdirs();
+
+            File destFile = new File(destObjects, file.getName());
+            Base.copyFile(file, destFile);
+
+            settings.put("source.name", sp);
+            settings.put("object.name", objectFile.getAbsolutePath());
+
+            if(!execAsynchronously(parseString(all.get("compile.bin"))))
+                return null;
+            if (!objectFile.exists()) 
+                return null;
+        }
+        return objectPaths;
+    } 
+
     private List<File> compileFiles(File dest, List<File> sSources, List<File> cSources, List<File> cppSources) {
 
         List<File> objectPaths = new ArrayList<File>();
@@ -1707,12 +1746,27 @@ public class Sketch implements MessageConsumer {
     }
 
     private List<File> compileSketch() {
-        List<File> sf = compileFiles(
+        List<File> sf = new ArrayList<File>();
+
+        HashMap<String, String> all = mergeAllProperties();
+
+        // We can only do this if the core supports binary conversions
+        if (all.get("compile.bin") != null) {
+            File obj = new File(folder, "objects");
+            if (obj.exists()) {
+                File buf = new File(buildFolder, "objects");
+                buf.mkdirs();
+                List<File> uf = convertFiles(buildFolder, findFilesInFolder(obj, null, true));
+                sf.addAll(uf);
+            }
+        }
+
+        sf.addAll(compileFiles(
                 buildFolder,
                 findFilesInFolder(buildFolder, "S", false),
                 findFilesInFolder(buildFolder, "c", false),
-                findFilesInFolder(buildFolder, "cpp", false));
-
+                findFilesInFolder(buildFolder, "cpp", false))
+        );
         File suf = new File(folder, "utility");
         if (suf.exists()) {
             File buf = new File(buildFolder, "utility");
@@ -1724,6 +1778,7 @@ public class Sketch implements MessageConsumer {
                 findFilesInFolder(suf, "cpp", true));
             sf.addAll(uf);
         }
+
         return sf;
     } 
 
@@ -1738,12 +1793,23 @@ public class Sketch implements MessageConsumer {
             if (file.getName().startsWith("."))
                 continue; // skip hidden files
 
-            if (file.getName().endsWith("." + extension))
-                files.add(file);
-
-            if (recurse && file.isDirectory()) {
-                files.addAll(findFilesInFolder(file, extension, true));
+            if (file.isDirectory()) {
+                if (recurse) {
+                    files.addAll(findFilesInFolder(file, extension, recurse));
+                }
+                continue;
             }
+
+            if (extension == null) {
+                files.add(file);
+                continue;
+            }
+
+            if (file.getName().endsWith("." + extension)) {
+                files.add(file);
+                continue;
+            }
+
         }
 
         return files;

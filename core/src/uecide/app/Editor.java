@@ -983,7 +983,7 @@ public class Editor extends JFrame implements RunnerListener {
             serialMenu.add(rbMenuItem);
             empty = false;
         }
-        serialMenu.setEnabled(!empty);
+        serialMenu.setEnabled(true);
     }
 
 
