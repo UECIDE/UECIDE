@@ -51,28 +51,20 @@ public class Library {
         archiveFiles = new ArrayList<File>();
         examples = new HashMap<String, File>();
 
-        File[] list = folder.listFiles();
-        for (File f : list) {
-            if (f.getName().endsWith(".cpp") || f.getName().endsWith(".c") || f.getName().endsWith(".S")) {
-                sourceFiles.add(f);
-            } else if (f.getName().endsWith(".a")) {
-                archiveFiles.add(f);
-            }
-        }
+        sourceFiles.addAll(Sketch.findFilesInFolder(folder, "cpp", false));
+        sourceFiles.addAll(Sketch.findFilesInFolder(folder, "c", false));
+        sourceFiles.addAll(Sketch.findFilesInFolder(folder, "S", false));
+        archiveFiles.addAll(Sketch.findFilesInFolder(folder, "a", false));
 
         if (utilityFolder.exists() && utilityFolder.isDirectory()) {
-            list = utilityFolder.listFiles();
-            for (File f : list) {
-                if (f.getName().endsWith(".cpp") || f.getName().endsWith(".c") || f.getName().endsWith(".S")) {
-                    sourceFiles.add(f);
-                } else if (f.getName().endsWith(".a")) {
-                    archiveFiles.add(f);
-                }
-            }
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", true));
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "c", true));
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "S", true));
+            archiveFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "a", true));
         }
 
         if (examplesFolder.exists() && examplesFolder.isDirectory()) {
-            list = examplesFolder.listFiles();
+            File[] list = examplesFolder.listFiles();
             for (File f : list) {
                 if (f.isDirectory()) {
                     String sketchName = f.getName();
@@ -118,12 +110,9 @@ public class Library {
         }
         ArrayList<String> includes = new ArrayList<String>();
 
-//        System.err.println(f.getAbsolutePath());
-
         for (String line : data) {
             line = line.trim();
             if (line.startsWith("#include")) {
-                //System.err.println("    " + line);
                 int qs = line.indexOf("<");
                 if (qs == -1) {
                     qs = line.indexOf("\"");
