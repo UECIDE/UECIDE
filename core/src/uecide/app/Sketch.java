@@ -366,7 +366,7 @@ public class Sketch implements MessageConsumer {
                     if (!(f.equals(mainFile))) {
                         combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
                         Pattern pragma = Pattern.compile("#pragma\\s+parameter");
-                        String[] bodylines = mainFile.textArea.getText().split("\n");
+                        String[] bodylines = f.textArea.getText().split("\n");
                         for (String line : bodylines) {
                             if (line.trim().startsWith("#pragma")) {
                                 Matcher mtch = pragma.matcher(line);
