@@ -399,7 +399,7 @@ Version: ${version}${suffix}
 Maintainer: matt@majenko.co.uk
 Architecture: ${arch}
 Section: Programming
-Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java
+Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java${deps.extra}
 Description: ${product.cap} Development environment
 
 </echo>
@@ -429,17 +429,20 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 
 	<target name="linux-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="i386"/>
+        <property name="deps.extra" value="" />
         <antcall target="linux-generate-debian"/>
     </target>
 
     <target name="linux64-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="amd64"/>
+        <property name="deps.extra" value=", libc6-i386" />
         <antcall target="linux-generate-debian"/>
     </target>
 
     <target name="linuxPi-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="armhf"/>
         <antcall target="linux-generate-debian"/>
+        <property name="deps.extra" value="" />
     </target>
 
     <target name="upgrade-clean" depends="subprojects-clean">
