@@ -111,8 +111,30 @@ public class Board implements Comparable {
         return boardPreferences.get("family");
     }
 
+    public boolean inFamily(String fam) {
+        String fly = getFamily();
+        if (fly == null) {
+            return false;
+        }
+        String fams[] = fly.split("::");
+        for (String thisfam : fams) {
+            if (thisfam.equals(fam)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public PropertyFile getProperties() {
         return boardPreferences;
+    }
+
+    public String getRevision() {
+        String v = boardPreferences.get("revision");
+        if (v == null) {
+            v = "0";
+        }
+        return v;
     }
 
     public String getVersion() {
@@ -121,6 +143,10 @@ public class Board implements Comparable {
             v = "0";
         }
         return v;
+    }
+
+    public String getFullVersion() {
+        return getVersion() + "-" + getRevision();
     }
 
     public int compareTo(Object o) {

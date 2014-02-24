@@ -10,7 +10,6 @@ public class Core implements MessageConsumer {
     private File folder;
     public PropertyFile corePreferences;
     private boolean valid;
-    private File api;
     private boolean runInVerboseMode;
     private File coreFile;
 
@@ -25,7 +24,6 @@ public class Core implements MessageConsumer {
             if(coreFile.exists()) {
                 corePreferences = new PropertyFile(coreFile);
                 this.name = folder.getName();
-                this.api = new File(folder, get("core.path","api"));
             }
             valid = true;
         } catch (Exception e) {
@@ -45,7 +43,6 @@ public class Core implements MessageConsumer {
         }
         Core c = Base.cores.get(inc);
         corePreferences = new PropertyFile(coreFile, c.getCoreFile());
-        this.api = new File(folder, get("core.path","api"));
     }
 
     public File getLibraryFolder() {
@@ -59,10 +56,6 @@ public class Core implements MessageConsumer {
 
     public File getFolder() { 
         return folder; 
-    }
-
-    public File getAPIFolder() {
-        return api;
     }
 
     public boolean isValid() {
@@ -120,20 +113,42 @@ public class Core implements MessageConsumer {
         return corePreferences;
     }
 
-    public int getVersion() {
-        return corePreferences.getInteger("core.version");
+    public String getRevision() {
+        String v = corePreferences.get("revision");
+        if (v == null) {
+            v = "0";
+        }
+        return v;
     }
 
-    public int getRevision() {
-        return corePreferences.getInteger("core.revision");
+    public String getVersion() {
+        String v = corePreferences.get("version");
+        if (v == null) {
+            v = "0";
+        }
+        return v;
     }
 
     public String getFullVersion() {
-        return corePreferences.get("core.version") + "." + corePreferences.get("core.revision");
+        return getVersion() + "-" + getRevision();
     }
 
     public String getFamily() {
         return corePreferences.get("family");
+    }
+
+    public boolean inFamily(String fam) {
+        String fly = getFamily();
+        if (fly == null) {
+            return false;
+        }
+        String fams[] = fly.split("::");
+        for (String thisfam : fams) {
+            if (thisfam.equals(fam)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public PropertyFile getProperties() {

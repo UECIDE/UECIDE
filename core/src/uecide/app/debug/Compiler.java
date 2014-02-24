@@ -6,7 +6,7 @@ import java.util.*;
 import uecide.app.*;
 
 public class Compiler {
-    public PropertyFile properties;
+    public PropertyFile compilerPreferences;
     public File folder;
     public File compilerFile;
 
@@ -20,21 +20,17 @@ public class Compiler {
             return;
         }
 
-        properties = new PropertyFile(compilerFile);
+        compilerPreferences = new PropertyFile(compilerFile);
 
         valid = true;
     }
 
     public String getName() {
-        return properties.get("name");
-    }
-
-    public String getVersion() {
-        return properties.get("version");
+        return compilerPreferences.get("name");
     }
 
     public PropertyFile getProperties() {
-        return properties;
+        return compilerPreferences;
     }
 
     public boolean isValid() {
@@ -46,7 +42,7 @@ public class Compiler {
     }
 
     public String getErrorRegex() {
-        String r = properties.get("compiler.error");
+        String r = compilerPreferences.get("compiler.error");
         if (r == null) {
             r = "^([^:]+):(\\d+): error: (.*)";
         }
@@ -54,11 +50,66 @@ public class Compiler {
     }
 
     public String getWarningRegex() {
-        String r = properties.get("compiler.warning");
+        String r = compilerPreferences.get("compiler.warning");
         if (r == null) {
             r = "^([^:]+):(\\d+): warning: (.*)";
         }
         return r;
     }
+
+    public String getFamily() {
+        return compilerPreferences.get("family");
+    }
+
+    public boolean inFamily(String fam) {
+        String fly = getFamily();
+        if (fly == null) {
+            return false;
+        }
+        String fams[] = fly.split("::");
+        for (String thisfam : fams) {
+            if (thisfam.equals(fam)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String get(String k) {
+        if (compilerPreferences == null) {
+            System.err.println("No compiler data getting " + k);
+            return "";
+        }
+        return (String) compilerPreferences.get(k);
+    }
+
+    public String get(String k, String d) {
+        if (get(k) == null) {
+            return d;
+        }
+        return get(k);
+    }
+
+    public String getRevision() {
+        String v = compilerPreferences.get("revision");
+        if (v == null) {
+            v = "0";
+        }
+        return v;
+    }
+
+    public String getVersion() {
+        String v = compilerPreferences.get("version");
+        if (v == null) {
+            v = "0";
+        }
+        return v;
+    }
+
+    public String getFullVersion() {
+        return getVersion() + "-" + getRevision();
+    }
+
+
 }
 

@@ -246,8 +246,22 @@ public class Base {
         if (!opened) {
             handleNew();
         }
-        if (!headless) splashScreen.setMessage("Complete", 100);
-        if (!headless) splashScreen.dispose();
+        if (!headless) {
+            splashScreen.setMessage("Complete", 100);
+            splashScreen.dispose();
+            if (boards.size() == 0) {
+                System.err.println(plugins.keySet());
+                showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } else if (cores.size() == 0) {
+                showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } else if (compilers.size() == 0) {
+                showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } 
+        }
+            
     }
 
     static protected void initPlatform() {
@@ -633,7 +647,6 @@ public class Base {
     public static void gatherLibraries() {
         libraryCollections = new HashMap<String, HashMap<String, Library>>();
 
-        libraryCollections.put("global", loadLibrariesFromFolder(getContentFile("libraries"))); // Global libraries
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
         for (String core : corelist) {
@@ -861,7 +874,7 @@ public class Base {
         return getContentFile("hardware");
     }
 
-    public Editor getActiveEditor()
+    public static Editor getActiveEditor()
     {
         return activeEditor;
     }
