@@ -1307,6 +1307,29 @@ public class Sketch implements MessageConsumer {
 
         editor.statusNotice(Translate.t("Compiling Sketch..."));
 
+        // Copy any specified files from the compiler, core or board folders
+        // into the build folder.  This is especially good if the compiler
+        // executable needs certain DLL files to be in the current working
+        // directory (which is the build folder).
+
+        String precopy = parseString(all.get("compile.precopy"));
+        if (precopy != null) {
+            String[] copyfiles = precopy.split("::");
+            for (String cf : copyfiles) {
+                File src = new File(editor.compiler.getFolder(), cf);
+                if (!src.exists()) {
+                    src = new File(editor.core.getFolder(), cf);
+                }
+                if (!src.exists()) {
+                    src = new File(editor.board.getFolder(), cf);
+                }
+                if (src.exists()) {
+                    File dest = new File(buildFolder, src.getName());
+                    Base.copyFile(src, dest);
+                }
+            }
+        }
+
         tobjs = compileSketch();
         if (tobjs == null) {
             editor.statusNotice(Translate.t("Error Compiling Sketch"));
