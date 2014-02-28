@@ -911,7 +911,7 @@ public class Sketch implements MessageConsumer {
       
         libFiles.add(buildFolder.getAbsolutePath());
         libFiles.add(editor.board.getFolder().getAbsolutePath());
-        libFiles.add(editor.core.getLibraryFolder().getAbsolutePath());
+        libFiles.add(editor.core.getLibrariesFolder().getAbsolutePath());
 
         for (String key : all.keySet()) {
             if (key.startsWith("compiler.library.")) {
@@ -1929,16 +1929,21 @@ public class Sketch implements MessageConsumer {
                 File buf = new File(buildFolder, "objects");
                 buf.mkdirs();
                 List<File> uf = convertFiles(buildFolder, findFilesInFolder(obj, null, true));
-                sf.addAll(uf);
+                if (uf != null) {
+                    sf.addAll(uf);
+                }
             }
         }
 
-        sf.addAll(compileFiles(
+        ArrayList<File> compiledFiles = (ArrayList<File>) compileFiles(
                 buildFolder,
                 findFilesInFolder(buildFolder, "S", false),
                 findFilesInFolder(buildFolder, "c", false),
                 findFilesInFolder(buildFolder, "cpp", false)
-        ));
+        );
+        if (compiledFiles != null) {
+            sf.addAll(compiledFiles);
+        }
 
         
         String boardFiles = all.get("build.files");
@@ -2358,6 +2363,10 @@ public class Sketch implements MessageConsumer {
             return;
         }
         sf.setFile(newFile);
+    }
+
+    public File getLibrariesFolder() {
+        return new File(folder, "libraries");
     }
 
     public void programBootloader(String programmer) {

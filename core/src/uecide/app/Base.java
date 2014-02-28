@@ -650,7 +650,7 @@ public class Base {
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
         for (String core : corelist) {
-            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibraryFolder())); // Core libraries
+            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder())); // Core libraries
         }
 
         libraryCollections.put("sketchbook", loadLibrariesFromFolder(new File(getSketchbookFolder(), "libraries"))); // Contributed libraries
@@ -879,9 +879,8 @@ public class Base {
         return activeEditor;
     }
 
-    //Get the core libraries
-        public static File getCoreLibraries(String path) {
-        return getContentFile(path);	
+    public static File getSystemLibrariesFolder() {
+        return getContentFile("libraries");
     }
 
     public static String getHardwarePath() {
