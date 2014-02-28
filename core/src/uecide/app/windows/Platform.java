@@ -25,6 +25,7 @@ public class Platform extends uecide.app.Platform {
     System.getProperty("user.dir").replace('/', '\\') +
     "\\processing.exe \"%1\"";
   static final String DOC = "Processing.Document";
+    static final String shellFolders = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
 
   public void setLookAndFeel() {
     try {
@@ -178,14 +179,24 @@ public class Platform extends uecide.app.Platform {
   public File getSettingsFolder() {
 
     try {
-        String keyPath =
-          "Software\\Microsoft\\Windows\\CurrentVersion" +
-          "\\Explorer\\Shell Folders";
-        String appDataPath =
-          Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "AppData");
+        String localAppDataPath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, shellFolders, "Local AppData");
+        String roamingAppDataPath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, shellFolders, "AppData");
 
-        File dataFolder = new File(appDataPath, Base.theme.get("product"));
-        return dataFolder;
+        File localDataFolder = new File(localAppDataPath, Base.theme.get("product.cap"));
+        File roamingDataFolder = new File(roamingAppDataPath, Base.theme.get("product.cap"));
+
+        System.err.println("Roaming: " + roamingDataFolder.getAbsolutePath());
+        System.err.println("Local: " + localDataFolder.getAbsolutePath());
+
+        // We don't want old installations to suddenly lose all their data, so stick with the roaming if it
+        // already exists.  A user can delete it or move it if they want.
+        if (roamingDataFolder.exists() && roamingDataFolder.isDirectory()) {
+            System.err.println("Returning roaming");
+            return roamingDataFolder;
+        }
+
+        System.err.println("Returning local");
+        return localDataFolder;
     } catch (Exception e) {
         Base.error(e);
         return null;
@@ -197,13 +208,9 @@ public class Platform extends uecide.app.Platform {
   // (though using a reg key since it's different on other platforms)
   public File getDefaultSketchbookFolder() {
     try {
-        String keyPath =
-          "Software\\Microsoft\\Windows\\CurrentVersion" +
-          "\\Explorer\\Shell Folders";
-        String personalPath =
-          Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, keyPath, "Personal");
+        String personalPath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, shellFolders, "Personal");
 
-        return new File(personalPath, Base.theme.get("product"));
+        return new File(personalPath, Base.theme.get("product.cap"));
     } catch (Exception e) {
         Base.error(e);
         return null;
