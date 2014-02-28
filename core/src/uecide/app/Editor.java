@@ -673,7 +673,7 @@ public class Editor extends JFrame implements RunnerListener {
     sketchMenu.add(item);
     item.setEnabled(Base.openFolderAvailable());
 
-    item = newJMenuItem(Translate.t("Show Build Folder"), 'K');
+    item = new JMenuItem(Translate.t("Show Build Folder"));
     item.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Base.openFolder(sketch.getBuildFolder());
@@ -1017,7 +1017,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     if (board != null) {
         if (board.getManual() != null) {
-            item = new JMenuItem(Translate.t("Manual for %1", board.getLongName()));
+            item = new JMenuItem(Translate.t("Manual for %1", board.getDescription()));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Base.open(board.getManual().getAbsolutePath());
@@ -1816,7 +1816,7 @@ public class Editor extends JFrame implements RunnerListener {
 
             JMenu coreItem = new JMenu(core.get("name", core.getName()));
             examplesMenu.add(coreItem);
-            File coreLibs = core.getLibraryFolder();
+            File coreLibs = core.getLibrariesFolder();
             if (coreLibs != null) {
                 if (coreLibs.isDirectory()) {
                     addSketches(coreItem, coreLibs);
@@ -1828,7 +1828,7 @@ public class Editor extends JFrame implements RunnerListener {
             File boardExamples = board.getExamplesFolder();
             if (boardExamples != null) {
                 if (boardExamples.isDirectory()) {
-                    JMenu boardItem = new JMenu(board.getLongName());
+                    JMenu boardItem = new JMenu(board.getDescription());
                     addSketches(boardItem, boardExamples);
                     if (boardItem.getMenuComponentCount() > 0) {
                         examplesMenu.add(boardItem);
@@ -1840,7 +1840,7 @@ public class Editor extends JFrame implements RunnerListener {
         JMenu contributedItem = new JMenu(Translate.t("Contributed"));
         examplesMenu.add(contributedItem);
 
-        File sbLibs = new File(Base.getSketchbookFolder(),"libraries");
+        File sbLibs = Base.getSketchbookLibrariesFolder();
         if (sbLibs.isDirectory()) {
             addSketches(contributedItem, sbLibs);
         }
@@ -1870,6 +1870,9 @@ public class Editor extends JFrame implements RunnerListener {
 
         boolean ifound = false;
 
+        int menuSize = 0;
+        int subMenuSize = 0;
+
         for (int i = 0; i < list.length; i++) {
             if ((list[i].charAt(0) == '.') || list[i].equals("CVS"))
                 continue;
@@ -1895,6 +1898,15 @@ public class Editor extends JFrame implements RunnerListener {
                     continue;
                 }
 
+                subMenuSize++;
+                if (subMenuSize == 20) {
+                    System.err.println("Expanding....");
+                    JMenu more = new JMenu(Translate.t("More..."));
+                    menu.add(more);
+                    menu = more;
+                    subMenuSize = 0;
+                }
+                    
                 JMenuItem item = new JMenuItem(list[i]);
                 item.addActionListener(listener);
                 item.setActionCommand(entry.getAbsolutePath());
@@ -1908,6 +1920,7 @@ public class Editor extends JFrame implements RunnerListener {
                     if (found)
                         ifound = true;
                 } else {
+
                     // not a sketch folder, but maybe a subfolder containing sketches
                     JMenu submenu = new JMenu(list[i]);
                     // needs to be separate var
@@ -1915,6 +1928,13 @@ public class Editor extends JFrame implements RunnerListener {
                     boolean found = addSketches(submenu, subfolder);
                     //boolean found = addSketches(submenu, subfolder);
                     if (found) {
+                        if (menuSize == 20) {
+                            JMenu more = new JMenu(Translate.t("More..."));
+                            menu.add(more);
+                            menu = more;
+                            menuSize = 0;
+                        }
+                        menuSize++;
                         menu.add(submenu);
                         ifound = true;
                     }
@@ -2041,7 +2061,7 @@ public class Editor extends JFrame implements RunnerListener {
             boardsMenu.add(groupMenu);
 
             for (Board b : blist.get(groupName)) {
-                AbstractAction action = new AbstractAction(b.getLongName()) {
+                AbstractAction action = new AbstractAction(b.getDescription()) {
                     public void actionPerformed(ActionEvent actionevent) {
                         selectBoard((String) getValue("board"));
                     }
@@ -2090,7 +2110,7 @@ public class Editor extends JFrame implements RunnerListener {
         String compilerName;
 
         if (board != null) {
-            boardName = board.getLongName();
+            boardName = board.getDescription();
         } else {
             boardName = "No board";
         }
@@ -2639,7 +2659,7 @@ public class Editor extends JFrame implements RunnerListener {
                 }
             }
         } catch (Exception e) {
-            message("Error grabbing serial port: " + e.getMessage() + "\n", 2);
+//            message("Error grabbing serial port: " + e.getMessage() + "\n", 2);
         }
     }
 
@@ -2655,8 +2675,31 @@ public class Editor extends JFrame implements RunnerListener {
                 }
             }
         } catch (Exception e) {
-            message("Error releasing serial port: " + e.getMessage() + "\n", 2);
+//            message("Error releasing serial port: " + e.getMessage() + "\n", 2);
         }
+    }
+
+    public ArrayList<File> getLibraryFolders() {
+        ArrayList<File> paths = new ArrayList<File>();
+        
+        paths.add(Base.getSystemLibrariesFolder());
+        paths.add(Base.getSketchbookLibrariesFolder());
+        paths.add(core.getLibrariesFolder());
+        paths.add(board.getLibrariesFolder());
+        paths.add(sketch.getLibrariesFolder());
+
+        String elibs = Base.preferences.get("libraries.extra");
+        if (elibs != null) {
+            String[] el = elibs.split("::");
+            for (String elib : el) {
+                File f = new File(elib);
+                if (f.exists() && f.isDirectory()) {
+                    paths.add(f);
+                }
+            }
+        }
+
+        return paths;
     }
 }
 
