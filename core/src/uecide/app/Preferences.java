@@ -302,8 +302,8 @@ public class Preferences {
                 if (!t.startsWith("/dev/")) {
                     return;
                 }
-                for (Enumeration<String> en = extraPortListModel.elements(); en.hasMoreElements();) {
-                    String s = en.nextElement();
+                for (Enumeration en = extraPortListModel.elements(); en.hasMoreElements();) {
+                    String s = (String)en.nextElement();
                     if (s.equals(t)) {
                         return;
                     }
@@ -769,8 +769,8 @@ public class Preferences {
         }
 
         i = 0;
-        for (Enumeration<String> en = extraPortListModel.elements(); en.hasMoreElements();) {
-            String s = en.nextElement();
+        for (Enumeration en = extraPortListModel.elements(); en.hasMoreElements();) {
+            String s = (String)en.nextElement();
             Base.preferences.set("serial.ports." + Integer.toString(i), s);
             i++;
         }

@@ -247,4 +247,50 @@ public class PropertyFile {
         }
         return map;
     }
+
+    public void loadNewUserFile(File user) {
+        if (user != null) {
+            if (user.exists()) {
+                try {
+                    // If the new properties fail to load (syntax error, for example) we don't
+                    // want to muller the old properties, so we load them into a fresh
+                    // properties object and only replace the old ones with the new if it
+                    // is all successful.
+                    Properties newProperties = new Properties(defaultProperties);
+                    newProperties.load(new FileReader(user));
+                    properties = newProperties;
+                } catch (Exception e) {
+                    Base.error(e);
+                }
+            }
+        }
+    }
+
+    public ArrayList<String> children(String path) {
+        ArrayList<String> kids = new ArrayList<String>();
+        String root = path;
+
+        if (root.equals("")) {
+            for (String k : properties.stringPropertyNames()) {
+                String[] parts = k.split(".");
+                if (kids.indexOf(parts[0]) == -1) {
+                    kids.add(parts[0]);
+                }
+            }
+            return kids;
+        }
+
+        String[] rootParts = root.split("\\.");
+        root = root + ".";
+
+        for (String k : properties.stringPropertyNames()) {
+            if (k.startsWith(root)) {
+                String[] keyParts = k.split("\\.");
+                if (kids.indexOf(keyParts[rootParts.length]) == -1) {
+                    kids.add(keyParts[rootParts.length]);
+                }
+            }
+        }
+        return kids;
+    }
 }

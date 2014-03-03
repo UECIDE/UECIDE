@@ -561,6 +561,7 @@ return p + 1;
 				//System.out.println("y-axis baby");
 				int lineCount = host.getLineCount();
 				FoldManager fm = host.getFoldManager();
+                if (fm == null) return 0;
 				for (int i=0; i<lineCount; i++) {
 					if (fm.isLineHidden(i)) {
 						span -= getSpan(View.Y_AXIS, i);

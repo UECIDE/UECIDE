@@ -26,6 +26,7 @@ import uecide.app.Base;
 import java.io.File;
 
 import javax.swing.UIManager;
+import java.awt.*;
 
 
 /**
@@ -41,6 +42,12 @@ public class Platform extends uecide.app.Platform {
         if ((laf != null) && (laf != "default")) {
            UIManager.setLookAndFeel(laf);
         }
+
+        Toolkit xToolkit = Toolkit.getDefaultToolkit();
+        java.lang.reflect.Field awtAppClassNameField =
+            xToolkit.getClass().getDeclaredField("awtAppClassName");
+        awtAppClassNameField.setAccessible(true);
+        awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
     } catch (Exception e) {
         Base.error(e);
     }

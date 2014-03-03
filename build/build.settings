@@ -1,5 +1,8 @@
-version=0.8.1c
 download.enable=yes
+
+bootclass.path=/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar
+
+plugins.url=http://uecide.org/plugins
 
 default.theme=uecide
 default.cores=

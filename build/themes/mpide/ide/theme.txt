@@ -38,6 +38,7 @@ console.font.macosx = Monaco,plain,12
 console.color = #000000
 console.output.color = #cccccc
 console.error.color = #ffffff
+console.warning.color = #cccc00
 
 # GUI - BUTTONS
 buttons.bgcolor = #660000

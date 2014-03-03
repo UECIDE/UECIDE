@@ -7,6 +7,8 @@
         </classpath>
     </taskdef>
 
+    <available file="../.git" type="dir" property="git.present" />
+
     <condition property="brand" value="default">
         <not>
             <isset property="brand" />
@@ -14,6 +16,7 @@
     </condition>
 
     <sequential>
+        <property file="version.txt"/>
         <property file="build.settings"/>
         <property name="aws.bucket" value="chipkit" />
 
@@ -56,9 +59,9 @@
         <!--include name="core/lib/ant-launcher.jar" /-->
     </fileset>
 
-    <target name="build" description="Build IDE.">
+    <target name="build" depends="build.number" description="Build IDE.">
         <echo>
-Building for ${brand} version ${version}${suffix}
+Building for ${brand} version ${version}${suffix}, build ${build.number}
         </echo>
         <antcall target="${platform}-build" />
     </target>
@@ -71,14 +74,22 @@ Building for ${brand} version ${version}${suffix}
         <antcall target="${platform}-deb" />
     </target>
 
+    <target name="build.number" description="Get GIT commit number" if="git.present">
+        <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
+            <arg value="rev-list"/>
+            <arg value="HEAD"/>
+            <arg value="--count"/>
+        </exec>
+    </target>
+
     <target name="subprojects-clean">
         <subant buildpath="../core" target="clean"/>
-        <subant buildpath="../plugins" target="clean"/>
+        <!--subant buildpath="../plugins" target="clean"/-->
     </target>
 
     <target name="subprojects-build">
         <subant buildpath="../core" target="build"/>
-        <subant buildpath="../plugins" target="build"/>
+        <!--subant buildpath="../plugins" target="build"/-->
     </target>
 
 
@@ -88,7 +99,7 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="install_compiler">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/p/compilers/${compiler.name}-${target.platform}.jar" />
+            <param name="src" value="${plugins.url}/compilers/${compiler.name}-${target.platform}.jar" />
             <param name="dest" value="tmp/${compiler.name}-${target.platform}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/compilers" src="tmp/${compiler.name}-${target.platform}.jar" overwrite="false" />
@@ -99,7 +110,7 @@ Building for ${brand} version ${version}${suffix}
 
     <target name="install_core">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/p/cores/${core.name}.jar" />
+            <param name="src" value="${plugins.url}/cores/${core.name}.jar" />
             <param name="dest" value="tmp/${core.name}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/cores" src="tmp/${core.name}.jar" overwrite="false" />
@@ -109,12 +120,16 @@ Building for ${brand} version ${version}${suffix}
     </target>
 
     <target name="install_plugin">
-        <copy file="../plugins/${plugin}/${plugin}.jar" todir="${target.path}/plugins/"/>
+        <antcall target="download-file">
+            <param name="src" value="${plugins.url}/plugins/${plugin}.jar" />
+            <param name="dest" value="tmp/${plugin}.jar" />
+        </antcall>
+        <copy file="tmp/${plugin}.jar" todir="${target.path}/plugins/"/>
     </target>
 
     <target name="install_boards">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/p/boards/${boards.name}.jar" />
+            <param name="src" value="${plugins.url}/boards/${boards.name}.jar" />
             <param name="dest" value="tmp/${boards.name}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/boards/" src="tmp/${boards.name}.jar" overwrite="false" />
@@ -286,9 +301,9 @@ Building for ${brand} version ${version}${suffix}
             <fileset file="shared/lib/keywords.txt"/>
     </copy>
     
-    <copy todir="linux/work">
+    <!--copy todir="linux/work">
       <fileset dir="linux/dist" includes="lib/**" />
-    </copy>
+    </copy-->
 
     <copy todir="linux/work/lib" flatten="true">
       <fileset refid="runtime.jars" />
@@ -298,9 +313,6 @@ Building for ${brand} version ${version}${suffix}
       <param name="target.path" value="linux/work" />
       <param name="target.platform" value="linux" />
     </antcall>
-
-    <copy tofile="linux/work/lib/32/librxtxSerial.so" file="linux/dist/lib/librxtxSerial32.so" />
-    <copy tofile="linux/work/lib/64/librxtxSerial.so" file="linux/dist/lib/librxtxSerial64.so" />
 
     <copy tofile="linux/work/${product}" file="linux/dist/linuxrunner" />
     <chmod perm="755" file="linux/work/${product}" />
@@ -315,14 +327,14 @@ Building for ${brand} version ${version}${suffix}
   </target>
   
 
-    <target name="upgrade-dist" depends="upgrade-build"
+    <target name="upgrade-dist" depends="upgrade-build,build.number"
         description="Build distribution version">
         <zip destfile="upgrade/${product}-${version}${suffix}-upgrade.zip">
             <zipfileset dir="upgrade/work" prefix="${product}-${version}${suffix}" filemode="755"/>
         </zip>
     </target>
 
-    <target name="linux-dist" depends="linux-build" 
+    <target name="linux-dist" depends="linux-build,build.number" 
         description="Build .tar.gz of linux version">
 
         <zip destfile="linux/${product}-${version}${suffix}-linux.zip">
@@ -338,7 +350,7 @@ Building for ${brand} version ${version}${suffix}
         </echo>
     </target>
 
-	<target name="linux-generate-debian" depends="build" description="Build debian tree ready for packaging">
+	<target name="linux-generate-debian" depends="build,build.number" description="Build debian tree ready for packaging">
         <property name="proot" value="linux/${product}-${version}${suffix}-${arch}" />
         <mkdir dir="${proot}" />
         <mkdir dir="${proot}/usr" />
@@ -361,7 +373,7 @@ Building for ${brand} version ${version}${suffix}
 
         <echo file="${proot}/usr/share/applications/${product}.desktop">[Desktop Entry]
 Name=${product.cap}
-Comment=IDE for ${product.cap}
+Comment=Universal Embedded Computing IDE
 Exec=/usr/bin/${product}
 Icon=${product}.png
 Terminal=false
@@ -387,7 +399,7 @@ Version: ${version}${suffix}
 Maintainer: matt@majenko.co.uk
 Architecture: ${arch}
 Section: Programming
-Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java, librxtx-java
+Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java${deps.extra}
 Description: ${product.cap} Development environment
 
 </echo>
@@ -415,18 +427,21 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     </target>
 
 
-	<target name="linux-deb" depends="linux-build" description="Build .deb of linux version">
+	<target name="linux-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="i386"/>
+        <property name="deps.extra" value="" />
         <antcall target="linux-generate-debian"/>
     </target>
 
-    <target name="linux64-deb" depends="linux-build" description="Build .deb of linux version">
+    <target name="linux64-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="amd64"/>
+        <property name="deps.extra" value=", libc6-i386" />
         <antcall target="linux-generate-debian"/>
     </target>
 
-    <target name="linuxPi-deb" depends="linux-build" description="Build .deb of linux version">
+    <target name="linuxPi-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="armhf"/>
+        <property name="deps.extra" value="" />
         <antcall target="linux-generate-debian"/>
     </target>
 
@@ -507,7 +522,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <delete file="windows/script.nsi" />
     </target>
 
-    <target name="windows-dist-lite" depends="windows-build" 
+    <target name="windows-dist-lite" depends="windows-build,build.number" 
         description="Create .zip files of windows version">
 
         <zip destfile="windows/${product}-${version}${suffix}-windows-lite.zip">
@@ -518,7 +533,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         </antcall>
     </target>
   
-    <target name="windows-dist" depends="windows-build" 
+    <target name="windows-dist" depends="windows-build,build.number" 
         description="Create .zip files of windows version">
 
         <unzip dest="windows/work" src="windows/dist/jre7.zip" overwrite="false"/>
@@ -646,8 +661,8 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <antcall target="clean" />
     </target>
 
-    <target name="plugins">
+    <!--target name="plugins">
         <subant buildpath="../plugins" target="build"/>
-    </target>
+    </target-->
 
 </project>

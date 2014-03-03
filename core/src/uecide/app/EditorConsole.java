@@ -47,6 +47,7 @@ public class EditorConsole extends JScrollPane {
 
   MutableAttributeSet stdStyle;
   MutableAttributeSet errStyle;
+  MutableAttributeSet warnStyle;
 
   int maxLineCount;
 
@@ -69,6 +70,7 @@ public class EditorConsole extends JScrollPane {
     Color bgColor    = Base.theme.getColor("console.color");
     Color fgColorOut = Base.theme.getColor("console.output.color");
     Color fgColorErr = Base.theme.getColor("console.error.color");
+    Color fgColorWarn = Base.theme.getColor("console.warning.color");
     Font font        = Base.preferences.getFont("console.font");
 
     stdStyle = new SimpleAttributeSet();
@@ -86,6 +88,14 @@ public class EditorConsole extends JScrollPane {
     StyleConstants.setFontFamily(errStyle, font.getFamily());
     StyleConstants.setBold(errStyle, font.isBold());
     StyleConstants.setItalic(errStyle, font.isItalic());
+
+    warnStyle = new SimpleAttributeSet();
+    StyleConstants.setForeground(warnStyle, fgColorWarn);
+    StyleConstants.setBackground(warnStyle, bgColor);
+    StyleConstants.setFontSize(warnStyle, font.getSize());
+    StyleConstants.setFontFamily(warnStyle, font.getFamily());
+    StyleConstants.setBold(warnStyle, font.isBold());
+    StyleConstants.setItalic(warnStyle, font.isItalic());
 
     consoleTextPane.setBackground(bgColor);
 
@@ -126,26 +136,37 @@ public class EditorConsole extends JScrollPane {
   }
 
 
-  public void write(byte b[], int offset, int length, boolean err) {
+  public void write(byte b[], int offset, int length, int chan) {
     // we could do some cross platform CR/LF mangling here before outputting
     // add text to output document
-    message(new String(b, offset, length), err, false);
+    message(new String(b, offset, length), chan, false);
   }
 
 
   // added sync for 0091.. not sure if it helps or hinders
-  synchronized public void message(String what, boolean err, boolean advance) {
+  synchronized public void message(String what, int chan, boolean advance) {
     if (advance) {
-      appendText("\n", err);
+      appendText("\n", chan);
     }
-    appendText(what, err);
+    appendText(what, chan);
   }
 
-  synchronized private void appendText(String txt, boolean e) {
+  synchronized private void appendText(String txt, int chan) {
     if (consoleDoc == null) {
         System.err.print(txt);
     }
-    consoleDoc.appendString(txt, e ? errStyle : stdStyle);
+    switch (chan) {
+        case 0:
+        default:
+            consoleDoc.appendString(txt, stdStyle);
+            break;
+        case 1:
+            consoleDoc.appendString(txt, warnStyle);
+            break;
+        case 2:
+            consoleDoc.appendString(txt, errStyle);
+            break;
+    }
     consoleDoc.insertAll();
     consoleTextPane.setCaretPosition(consoleDoc.getLength());
   }

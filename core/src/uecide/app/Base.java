@@ -34,6 +34,8 @@ public class Base {
     public static String VERSION_NAME = "0023";
     /** Set true if this a proper release rather than a numbered revision. */
     public static boolean RELEASE = false;
+    public static int BUILDNO = 0;
+    public static String BUILDER = "";
 
     public static ArrayList<Process> processes = new ArrayList<Process>();
   
@@ -75,7 +77,7 @@ public class Base {
     public static Editor activeEditor;
 
     public static PropertyFile preferences;
-    public static PropertyFile theme;
+    public static Theme theme;
 
     public static void main(String args[]) {
         new Base(args);
@@ -105,18 +107,28 @@ public class Base {
 
             VERSION_NAME = manifestContents.getValue("Version");
             REVISION = Integer.parseInt(manifestContents.getValue("Compiled"));
+            BUILDNO = Integer.parseInt(manifestContents.getValue("Build"));
+            BUILDER = manifestContents.getValue("Built-By");
 
             RELEASE = true;
         } catch (Exception e) {
             error(e);
         }
 
-        theme = new PropertyFile(getContentFile("lib/theme/theme.txt"));
+        // Get the initial basic theme data
+        theme = new Theme(getContentFile("lib/theme/theme.txt"));
         theme.setPlatformAutoOverride(true);
+
+        System.err.println("Loading " + theme.get("product") + "...");
+
         initPlatform();
         preferences = new PropertyFile(getSettingsFile("preferences.txt"), getContentFile("lib/preferences.txt"));
         preferences.setPlatformAutoOverride(true);
-        theme = new PropertyFile(getSettingsFile("theme.txt"), getContentFile("lib/theme/theme.txt"));
+
+
+        // Now we reload the theme data with user overrides
+        // (we didn't know where they were before) 
+        theme = new Theme(getSettingsFile("theme.txt"), getContentFile("lib/theme/theme.txt"));
         theme.setPlatformAutoOverride(true);
 
         if (!headless) {
@@ -234,8 +246,22 @@ public class Base {
         if (!opened) {
             handleNew();
         }
-        if (!headless) splashScreen.setMessage("Complete", 100);
-        if (!headless) splashScreen.dispose();
+        if (!headless) {
+            splashScreen.setMessage("Complete", 100);
+            splashScreen.dispose();
+            if (boards.size() == 0) {
+                System.err.println(plugins.keySet());
+                showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } else if (cores.size() == 0) {
+                showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } else if (compilers.size() == 0) {
+                showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } 
+        }
+            
     }
 
     static protected void initPlatform() {
@@ -621,11 +647,10 @@ public class Base {
     public static void gatherLibraries() {
         libraryCollections = new HashMap<String, HashMap<String, Library>>();
 
-        libraryCollections.put("global", loadLibrariesFromFolder(getContentFile("libraries"))); // Global libraries
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
         for (String core : corelist) {
-            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibraryFolder())); // Core libraries
+            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder())); // Core libraries
         }
 
         libraryCollections.put("sketchbook", loadLibrariesFromFolder(new File(getSketchbookFolder(), "libraries"))); // Contributed libraries
@@ -849,14 +874,13 @@ public class Base {
         return getContentFile("hardware");
     }
 
-    public Editor getActiveEditor()
+    public static Editor getActiveEditor()
     {
         return activeEditor;
     }
 
-    //Get the core libraries
-        public static File getCoreLibraries(String path) {
-        return getContentFile(path);	
+    public static File getSystemLibrariesFolder() {
+        return getContentFile("libraries");
     }
 
     public static String getHardwarePath() {
@@ -1494,6 +1518,10 @@ public class Base {
     }
 
     public static void handleSystemInfo() {
+	activeEditor.message(Translate.t("Version: ") + VERSION_NAME + "\n");
+	activeEditor.message(Translate.t("Build Number: ") + BUILDNO + "\n");
+	activeEditor.message(Translate.t("Built By: ") + BUILDER + "\n");
+
         activeEditor.message(Translate.t("Installed plugins") + ":\n");
         String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
@@ -2134,6 +2162,25 @@ public class Base {
 
     static public File getSystemBoardsFolder() {
         return new File(getHardwareFolder(),"boards");
+    }
+
+    static public File getSystemThemesFolder() {
+        return new File(getHardwareFolder(), "themes");
+    }
+
+    static public File getUserThemesFolder() {
+        File tf = preferences.getFile("location.themes");
+        if (tf != null) {
+            if (!tf.exists()) {
+                tf.mkdirs();
+            }
+            return tf;
+        }
+        File f = getSettingsFile("themes");
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        return f;
     }
 
     static public File getUserPluginsFolder() {

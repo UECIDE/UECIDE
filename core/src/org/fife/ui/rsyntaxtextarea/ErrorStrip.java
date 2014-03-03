@@ -604,7 +604,7 @@ private static final Color COLOR = new Color(220, 220, 220);
 				String word = textArea.getText(range.getStartOffset(),
 												getLength());
 				text = msg.getString("OccurrenceOf");
-				text = MessageFormat.format(text, new String[] { word });
+				text = MessageFormat.format(text, (Object[]) new String[] { word });
 			} catch (BadLocationException ble) {
 				UIManager.getLookAndFeel().provideErrorFeedback(textArea);
 			}
