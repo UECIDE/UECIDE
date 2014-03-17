@@ -1521,6 +1521,14 @@ public class Sketch implements MessageConsumer {
                 mid = editor.core.getFolder().getAbsolutePath();
             } else if (mid.equals("board.root")) {
                 mid = editor.board.getFolder().getAbsolutePath();
+            } else if ((mid.length() >8) && (mid.substring(0, 8).equals("replace:"))) {
+                // replace:string,find,replace
+                String[] bits = mid.substring(3).split(",");
+                if (bits.length != 3) {
+                    mid = "Syntax error in replace - bad arg count";
+                } else {
+                    mid = bits[0].replaceAll(bits[1], bits[2]);
+                }
             } else if ((mid.length() >3) && (mid.substring(0, 3).equals("if:"))) {
                 String[] bits = mid.substring(3).split(",");
                 if (bits.length < 2 || bits.length > 3) {
@@ -1572,11 +1580,16 @@ public class Sketch implements MessageConsumer {
                     String data = content.substring(0, commaPos);
                     String fname = content.substring(commaPos + 1);
                     String[] each = data.split("::");
+
+                    System.err.println("Looking for: " + fname);
+
                     String outString = "";
                     for (String chunk : each) {
+                        System.err.println(chunk);
                         File f = new File(chunk);
                         if (f.exists() && f.isDirectory()) {
                             File ff = new File(f, fname);
+                            System.err.println(ff.getAbsolutePath());
                             if (ff.exists()) {
                                 mid = ff.getAbsolutePath();
                                 break;
@@ -2378,9 +2391,6 @@ public class Sketch implements MessageConsumer {
         HashMap<String, String> all = mergeAllProperties();
         editor.statusNotice(Translate.t("Burning Bootloader..."));
         settings.put("filename", blName);
-        settings.put("filename.elf", blName + ".elf");
-        settings.put("filename.hex", blName + ".hex");
-        settings.put("filename.eep", blName + ".eep");
 
         boolean isJava = true;
         uploadCommand = editor.board.get("upload." + programmer + ".command.java");
