@@ -372,6 +372,8 @@ public class Base {
         if (!folder.isDirectory()) 
             return;
         String cl[] = folder.list();
+
+        Debug.message("Loading compilers from " + folder.getAbsolutePath());
  
         for (int i = 0; i < cl.length; i++) {
             if (cl[i].charAt(0) == '.')
@@ -380,6 +382,7 @@ public class Base {
             if (cdir.isDirectory()) {
                 File cfile = new File(cdir, "compiler.txt");
                 if (cfile.exists()) {
+                    Debug.message("    Loading core " + cfile.getAbsolutePath());
                     Compiler newCompiler = new Compiler(cdir);
                     if (newCompiler.isValid()) {
                         compilers.put(newCompiler.getName(), newCompiler);
@@ -402,6 +405,7 @@ public class Base {
         if (!folder.isDirectory()) 
             return;
         String cl[] = folder.list();
+        Debug.message("Loading cores from " + folder.getAbsolutePath());
  
         for (int i = 0; i < cl.length; i++) {
             if (cl[i].charAt(0) == '.')
@@ -410,6 +414,7 @@ public class Base {
             if (cdir.isDirectory()) {
                 File cfile = new File(cdir, "core.txt");
                 if (cfile.exists()) {
+                    Debug.message("    Loading core " + cfile.getAbsolutePath());
                     Core newCore = new Core(cdir);
                     if (newCore.isValid()) {
                         cores.put(newCore.getName(), newCore);
@@ -435,6 +440,8 @@ public class Base {
             return;
         }
 
+        Debug.message("Loading boards from " + folder.getAbsolutePath());
+
         for (int i = 0; i < bl.length; i++) {
             if (bl[i].charAt(0) == '.')
                 continue;
@@ -442,6 +449,7 @@ public class Base {
             if (bdir.isDirectory()) {
                 File bfile = new File(bdir, "board.txt");
                 if (bfile.exists()) {
+                    Debug.message("    Loading board " + bfile.getAbsolutePath());
                     Board newBoard = new Board(bdir);
                     if (newBoard.isValid()) {
                         boards.put(newBoard.getName(), newBoard);
@@ -662,6 +670,7 @@ public class Base {
             return theseLibraries;
         }
         File[] list = folder.listFiles();
+        Debug.message("Loading libraries from " + folder.getAbsolutePath());
         for (File f : list) {
             if (f.isDirectory()) {
                 File files[] = f.listFiles();
@@ -670,6 +679,9 @@ public class Base {
                         Library newLibrary = new Library(sf);
                         if (newLibrary.isValid()) {
                             theseLibraries.put(newLibrary.getName(), newLibrary);
+                            Debug.message("    Adding new library " + newLibrary.getName() + " from " + f.getAbsolutePath());
+                        } else {
+                            Debug.message("    Skipping invalid library " + f.getAbsolutePath());
                         }
                     }
                 }
@@ -1419,6 +1431,7 @@ public class Base {
     */
     public static void removeDir(File dir) {
         if (dir.exists()) {
+            Debug.message("Deleting folder " + dir.getAbsolutePath());
             removeDescendants(dir);
             if (!dir.delete()) {
                 System.err.println(Translate.t("Could not delete %1", dir.getName()));

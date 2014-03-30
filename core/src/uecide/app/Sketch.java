@@ -168,6 +168,7 @@ public class Sketch implements MessageConsumer {
 
     public File createBuildFolder() {
         String name = "build-" + uuid;
+        Debug.message("Creating build folder " + name);
         File f = new File(Base.getTmpDir(), name);
         if (!f.exists()) {
             f.mkdirs();
@@ -2174,12 +2175,16 @@ public class Sketch implements MessageConsumer {
             }
         }
 
+        StringBuilder sb = new StringBuilder();
+        for (String component : stringList) {
+            sb.append(component);
+            sb.append(" ");
+        }
+        Debug.message("Execute: " + sb.toString());
+
         if (Base.preferences.getBoolean("compiler.verbose")) {
             message("\n", 1);
-            for (String component : stringList) {
-                message(component + " ", 1);
-            }
-            message("\n", 1);
+            message(sb.toString() + "\n", 1);
         }
 
         Process proc;
@@ -2187,6 +2192,7 @@ public class Sketch implements MessageConsumer {
             proc = process.start();
         } catch (Exception e) {
             message(e.toString(), 2);
+            Debug.message(" > " + e.toString());
             return false;
         }
 

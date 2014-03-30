@@ -1132,6 +1132,14 @@ public class Editor extends JFrame implements RunnerListener {
     });
     helpMenu.add(item);
 
+    item = new JMenuItem(Translate.t("Debug"));
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            Debug.show();
+        }
+    });
+    helpMenu.add(item);
+
   }
 
     public void handleNewFile() {
