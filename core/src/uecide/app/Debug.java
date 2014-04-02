@@ -34,18 +34,61 @@ public class Debug {
     public static RSyntaxTextArea textArea;
     public static boolean shown = false;
     public static RTextScrollPane scrollPane;
+    public static JToolBar toolbar;
+    public static boolean pause = false;
+    public static JToggleButton pauseButton;
 
     public static void show() {
         if (shown) {
             return;
         }
         win = new JFrame("Debug Console");
+
+        Container contentPane = win.getContentPane();
+        contentPane.setLayout(new BorderLayout());
+
         textArea = new RSyntaxTextArea();
         textArea.setText(debugText.toString());
-        textArea.setEnabled(false);
+//        textArea.setEnabled(false);
+        textArea.setAntiAliasingEnabled(true);
+        textArea.setMarkOccurrences(true);
+
 
         scrollPane = new RTextScrollPane(textArea);
-        win.add(scrollPane);
+
+        toolbar = new JToolBar();
+
+        File themeFolder = Base.getContentFile("lib/theme");
+        if (!themeFolder.exists()) {
+            System.err.println("PANIC: Theme folder doesn't exist! " + themeFolder.getAbsolutePath());
+            return;
+        }
+
+
+        File trashIconFile = new File(themeFolder, "trash.png");
+        ImageIcon trashIcon = new ImageIcon(trashIconFile.getAbsolutePath());
+        JButton trashButton = new JButton(trashIcon);
+        trashButton.setToolTipText(Translate.t("Clear Debug Log"));
+        trashButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+                Debug.debugText = new StringBuilder();
+                textArea.setText("");
+            }
+        });
+        toolbar.add(trashButton);
+
+        File pauseIconFile = new File(themeFolder, "pause.png");
+        ImageIcon pauseIcon = new ImageIcon(pauseIconFile.getAbsolutePath());
+        pauseButton = new JToggleButton(pauseIcon);
+        pauseButton.setToolTipText(Translate.t("Pause Scrolling"));
+        toolbar.add(pauseButton);
+
+
+
+
+        contentPane.add(toolbar, BorderLayout.NORTH);
+        contentPane.add(scrollPane, BorderLayout.CENTER);
 
         Base.setIcon(win);
         win.addWindowListener(new WindowAdapter() {
@@ -58,7 +101,6 @@ public class Debug {
         win.setMinimumSize(new Dimension(400, 400));
         win.setVisible(true);
         shown = true;
-        textArea.setCaretPosition(debugText.length());
     }
 
     public static void hide() {
@@ -74,10 +116,21 @@ public class Debug {
     }
 
     public static void message(String s) {
-        debugText.append(s + "\n");
+        debugText.append(s);
+        if (!s.endsWith("\n")) {
+            debugText.append("\n");
+        }
         if (shown) {
-            textArea.append(s + "\n");
-            textArea.setCaretPosition(debugText.length());
+            textArea.append(s);
+            if (!s.endsWith("\n")) {
+                textArea.append("\n");
+            }
+            if (!pauseButton.isSelected()) {
+                try {
+                    textArea.setCaretPosition(debugText.length());
+                } catch (Exception e) {
+                }
+            }
         }
     }
 }

@@ -84,13 +84,20 @@ public class Base {
     }
 
     public Base(String[] args) {
-/*
+
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, Throwable e) {
-                Base.errorReport(t, e);
+                Base.broken(t, e);
             }
         });
-*/
+
+        for (int i = 0; i < args.length; i++) {
+            String path = args[i];
+            if (path.equals("--debug")) {
+                Debug.show();
+                break;
+            }
+        }
 
         headless = false;
 
@@ -225,6 +232,9 @@ public class Base {
         // Check if any files were passed in on the command line
         for (int i = 0; i < args.length; i++) {
             String path = args[i];
+            if (path.startsWith("--")) {
+                continue;
+            }
             // Fix a problem with systems that use a non-ASCII languages. Paths are
             // being passed in with 8.3 syntax, which makes the sketch loader code
             // unhappy, since the sketch folder naming doesn't match up correctly.
@@ -2240,6 +2250,29 @@ public class Base {
                                         "The message is: " + e.getMessage() + "\n", e);
     }
 
+    static public void broken(Thread t, Throwable e) {
+        try {
+            if (e.getCause() == null) { 
+                return;
+            }
+            Debug.message("");
+            Debug.message("******************** EXCEPTION ********************");
+            Debug.message("An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")");
+            Debug.message("    The cause is: " + e.getCause());
+            Debug.message("    The message is: " + e.getMessage());
+            Debug.message("");
+            for (StackTraceElement element : e.getStackTrace()) {
+                if (element != null) {
+                    Debug.message("        " + element);
+                }
+            }
+            Debug.message("******************** EXCEPTION ********************");
+            Debug.message("");
+        } catch (Exception ee) {
+            ee.printStackTrace();
+        }
+    }
+
     public static byte[] loadBytesRaw(File file) {
         try {
             int size = (int) file.length();
@@ -2266,6 +2299,7 @@ public class Base {
             ed.message(e + "\n", 2);
         }
         System.err.println(e);
+        Debug.message(e);
     }
 
     public static void error(Throwable e) {
@@ -2273,10 +2307,26 @@ public class Base {
         for (Editor ed : editors) {
             ed.message(e.getMessage() + "\n", 2);
         }
+        try {
+            Debug.message("");
+            Debug.message("******************** EXCEPTION ********************");
+            Debug.message("An uncaught exception occurred:");
+            Debug.message("    The cause is: " + e.getCause());
+            Debug.message("    The message is: " + e.getMessage());
+            Debug.message("");
+            for (StackTraceElement element : e.getStackTrace()) {
+                if (element != null) {
+                    Debug.message("        " + element);
+                }
+            }
+            Debug.message("******************** EXCEPTION ********************");
+            Debug.message("");
+        } catch (Exception ee) {
+            ee.printStackTrace();
+        }
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
-
         System.err.println(sw.toString());
     }
 }

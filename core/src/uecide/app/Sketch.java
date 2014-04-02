@@ -1229,6 +1229,7 @@ public class Sketch implements MessageConsumer {
 
     public void message(String m, int chan) {
         if (m.trim() != "") {
+            Debug.message(m);
             if (chan == 2) {
                 if (stderrRedirect == null) {
                     Pattern p = Pattern.compile(editor.compiler.getErrorRegex());
