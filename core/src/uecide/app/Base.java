@@ -37,6 +37,8 @@ public class Base {
     public static int BUILDNO = 0;
     public static String BUILDER = "";
 
+    public static String overrideSettingsFolder = null;
+
     public static ArrayList<Process> processes = new ArrayList<Process>();
   
     static Platform platform;
@@ -96,6 +98,9 @@ public class Base {
             if (path.equals("--debug")) {
                 Debug.show();
                 break;
+            }
+            if (path.startsWith("--datadir=")) {
+                overrideSettingsFolder = path.substring(10);
             }
         }
 
@@ -809,6 +814,14 @@ public class Base {
 
     public static File getSettingsFolder() {
         File settingsFolder = null;
+
+        if (overrideSettingsFolder != null) {
+            settingsFolder = new File(overrideSettingsFolder);
+            if (!settingsFolder.exists()) {
+                settingsFolder.mkdirs();
+            }
+            return settingsFolder;
+        }
 
         try {
             settingsFolder = platform.getSettingsFolder();
