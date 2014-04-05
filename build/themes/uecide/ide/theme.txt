@@ -13,7 +13,6 @@ status.edit.bgcolor = #2d649f
 status.font = SansSerif,bold,12
 
 console.font = Monospaced,plain,10
-console.font.macosx = Monaco,plain,12
 console.color = #000000
 console.output.color = #00cc00
 console.error.color = #ff0000
