@@ -1820,6 +1820,38 @@ public class Editor extends JFrame implements RunnerListener {
                 importMenu.add(contributedMenu);
             }
         }
+
+        for (String key : Base.libraryCollections.keySet()) {
+            if (key.startsWith("cat.")) {
+                String ksub = key.substring(4);
+                HashMap<String, Library> categorizedLibraries = Base.getLibraryCollection(key);
+                if (categorizedLibraries != null) {
+                    if (categorizedLibraries.size() > 0) {
+                        int menuSize = 0;
+                        String cName = Base.libraryCategoryNames.get(ksub);
+                        JMenu categorizedMenu = new JMenu(cName);
+                        JMenu addTo = categorizedMenu;
+                        String[] entries = (String[]) categorizedLibraries.keySet().toArray(new String[0]);
+                        Arrays.sort(entries);
+                        for (String entry : entries) {
+                            item = new JMenuItem(entry);
+                            item.addActionListener(listener);
+                            item.setActionCommand(key + "::" + entry);
+                            addTo.add(item);
+                            menuSize++;
+                            if (menuSize == 20) {
+                                JMenu newMenu = new JMenu(Translate.t("More..."));
+                                addTo.add(newMenu);
+                                addTo = newMenu;
+                                menuSize = 0;
+                            }
+                        }
+                        importMenu.add(categorizedMenu);
+                    }
+                }
+                Debug.message(ksub);
+            }
+        }
     }
 
     public void rebuildExamplesMenu() {
@@ -1866,6 +1898,14 @@ public class Editor extends JFrame implements RunnerListener {
         File sbLibs = Base.getUserLibrariesFolder();
         if (sbLibs.isDirectory()) {
             addSketches(contributedItem, sbLibs);
+        }
+
+        for (String key : Base.libraryCategoryNames.keySet()) {
+            String cName = Base.libraryCategoryNames.get(key);
+            File cPath = Base.libraryCategoryPaths.get(key);
+            JMenu catItem = new JMenu(cName);
+            addSketches(catItem, cPath);
+            examplesMenu.add(catItem);
         }
     }
 
@@ -2546,19 +2586,29 @@ public class Editor extends JFrame implements RunnerListener {
                     String keyword = kv[0];
                     String type = kv[1];
                     if (type.equals("KEYWORD1")) {
-                        tm.addKeyword(keyword, TokenTypes.RESERVED_WORD);
+                        if (keyword != null) {
+                            tm.addKeyword(keyword, TokenTypes.RESERVED_WORD);
+                        }
                     }
                     if (type.equals("KEYWORD2")) {
-                        tm.addKeyword(keyword, TokenTypes.FUNCTION);
+                        if (keyword != null) {
+                            tm.addKeyword(keyword, TokenTypes.FUNCTION);
+                        }
                     }
                     if (type.equals("KEYWORD3")) {
-                        tm.addKeyword(keyword, TokenTypes.RESERVED_WORD);
+                        if (keyword != null) {
+                            tm.addKeyword(keyword, TokenTypes.RESERVED_WORD);
+                        }
                     }
                     if (type.equals("LITERAL1")) {
-                        tm.addKeyword(keyword, TokenTypes.PREPROCESSOR);
+                        if (keyword != null) {
+                            tm.addKeyword(keyword, TokenTypes.PREPROCESSOR);
+                        }
                     }
                     if (type.equals("LITERAL2")) {
-                        tm.addKeyword(keyword, TokenTypes.IDENTIFIER);
+                        if (keyword != null) {
+                            tm.addKeyword(keyword, TokenTypes.IDENTIFIER);
+                        }
                     }
                 }
             }

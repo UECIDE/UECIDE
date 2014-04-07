@@ -9,6 +9,9 @@ import java.lang.reflect.Method;
 
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import say.swing.*;
 
@@ -88,6 +91,119 @@ public class Preferences {
     DefaultListModel extraPortListModel = new DefaultListModel();
     JTextField portInput;
 
+    JTable libraryLocationTable;
+    class LibraryDetail {
+        public String key;
+        public String description;
+        public String path;
+    };
+
+    class LibraryTableModel extends AbstractTableModel {
+        private String[] columnNames = {"Key",
+                                        "Description",
+                                        "Path"};
+        private ArrayList<LibraryDetail> data = new ArrayList<LibraryDetail>();
+ 
+        public int getColumnCount() {
+            return columnNames.length;
+        }
+ 
+        public int getRowCount() {
+            return data.size();
+        }
+ 
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+ 
+        public Object getValueAt(int row, int col) {
+            switch (col) {
+                case 0:
+                    return data.get(row).key;
+                case 1:
+                    return data.get(row).description;
+                case 2:
+                    return data.get(row).path;
+            }
+            return null;
+        }
+ 
+        /*
+         * JTable uses this method to determine the default renderer/
+         * editor for each cell.  If we didn't implement this method,
+         * then the last column would contain text ("true"/"false"),
+         * rather than a check box.
+         */
+        public Class getColumnClass(int c) {
+            return getValueAt(0, c).getClass();
+        }
+ 
+        /*
+         * Don't need to implement this method unless your table's
+         * editable.
+         */
+        public boolean isCellEditable(int row, int col) {
+            return true;
+        }
+ 
+        /*
+         * Don't need to implement this method unless your table's
+         * data can change.
+         */
+        public void setValueAt(Object value, int row, int col) {
+            if (row >= data.size()) {
+                LibraryDetail lib = new LibraryDetail();
+                switch (col) {
+                    case 0:
+                        lib.key = (String)value;
+                        break;
+                    case 1:
+                        lib.description = (String)value;
+                        break;
+                    case 2:
+                        lib.path = (String)value;
+                        break;
+                    default:
+                        return;
+                }
+                data.add(lib);
+            } else {
+                switch (col) {
+                    case 0:
+                        data.get(row).key = (String)value;
+                        break;
+                    case 1:
+                        data.get(row).description = (String)value;
+                        break;
+                    case 2:
+                        data.get(row).path = (String)value;
+                        break;
+                    default:
+                        return;
+                }
+            }
+                    
+            fireTableCellUpdated(row, col);
+        }
+        public void deleteRow(int row) {
+            data.remove(row);
+            fireTableDataChanged();
+        }
+
+        public void addNewRow(String key, String name, String path) {
+            LibraryDetail lib = new LibraryDetail();
+            lib.key = key;
+            lib.description = name;
+            lib.path = path;
+            data.add(lib);
+            fireTableDataChanged();
+        }
+            
+    }
+
+    private LibraryTableModel libraryLocationModel = new LibraryTableModel();
+
+    private JButton deleteSelectedLibraryEntry;
   // the calling editor, so updates can be applied
 
   Editor editor;
@@ -198,18 +314,22 @@ public class Preferences {
     JPanel mainSettings = new JPanel(new GridBagLayout());
     JPanel advancedSettings = new JPanel(new GridBagLayout());
     JPanel locationSettings = new JPanel(new GridBagLayout());
+    JPanel librarySettings = new JPanel(new GridBagLayout());
 
     mainSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
     advancedSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
     locationSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
+    librarySettings.setBorder(new EmptyBorder(5, 5, 5, 5));
 
     tabs.add(Translate.t("Editor"), mainSettings);
     tabs.add(Translate.t("Compiler"), advancedSettings);
     tabs.add(Translate.t("Locations"), locationSettings);
+    tabs.add(Translate.t("Libraries"), librarySettings);
 
     populateEditorSettings(mainSettings);
     populateCompilerSettings(advancedSettings);
     populateLocationSettings(locationSettings);
+    populateLibrarySettings(librarySettings);
 
     if (Base.isLinux() || Base.isMacOS()) {
         JPanel serialSettings = new JPanel(new GridBagLayout());
@@ -803,6 +923,21 @@ public class Preferences {
         Serial.fillExtraPorts();
     }
 
+    for (String k : Base.preferences.children("library")) {
+        Debug.message("Removing library entry " + k);
+        Base.preferences.unset("library." + k + ".name");
+        Base.preferences.unset("library." + k + ".path");
+    }
+
+    for (int i = 0; i < libraryLocationModel.getRowCount(); i++) {
+        String k = (String)libraryLocationModel.getValueAt(i, 0);
+        k = k.toLowerCase();
+        k = k.replaceAll(" ", "_");
+        Base.preferences.set("library." + k + ".name", (String)libraryLocationModel.getValueAt(i, 1));
+        Base.preferences.set("library." + k + ".path", (String)libraryLocationModel.getValueAt(i, 2));
+        Debug.message("Adding library entry " + k);
+    }
+
     Base.applyPreferences();
     Base.preferences.save();
     Base.cleanAndScanAllSettings();
@@ -850,6 +985,77 @@ public class Preferences {
         }
     }
 
+    int i = 0;
+    for (String k : Base.preferences.children("library")) {
+        libraryLocationModel.setValueAt(k, i, 0);
+        libraryLocationModel.setValueAt(Base.preferences.get("library." + k + ".name"), i, 1);
+        libraryLocationModel.setValueAt(Base.preferences.get("library." + k + ".path"), i, 2);
+        i++;
+    }
+
     dialog.setVisible(true);
   }
+
+
+    private void populateLibrarySettings(JPanel p) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 2;
+        c.gridheight = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+
+        JLabel label = new JLabel(Translate.t("Categorized Library Locations"));
+        p.add(label, c);
+        c.gridy++;
+
+
+        libraryLocationTable = new JTable(libraryLocationModel);
+        JScrollPane jsp = new JScrollPane(libraryLocationTable);
+        p.add(jsp, c);
+        c.gridy++;
+        c.gridwidth = 1;
+
+        libraryLocationTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent event) {
+                int row = libraryLocationTable.getSelectedRow();
+                if (row >= 0) {
+                    deleteSelectedLibraryEntry.setEnabled(true);
+                } else {
+                    deleteSelectedLibraryEntry.setEnabled(false);
+                }
+            }
+        });
+
+        deleteSelectedLibraryEntry = new JButton(Translate.t("Delete selected entry"));
+        deleteSelectedLibraryEntry.setEnabled(false);
+        deleteSelectedLibraryEntry.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                int row = libraryLocationTable.getSelectedRow();
+                if (row >= 0) {
+                    libraryLocationModel.deleteRow(row);
+                }
+                row = libraryLocationTable.getSelectedRow();
+                if (row >= 0) {
+                    deleteSelectedLibraryEntry.setEnabled(true);
+                } else {
+                    deleteSelectedLibraryEntry.setEnabled(false);
+                }
+            }
+        });
+        c.gridx = 0;
+        p.add(deleteSelectedLibraryEntry, c);
+
+        JButton addNewRow = new JButton(Translate.t("Add new entry"));
+        addNewRow.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                libraryLocationModel.addNewRow("groupname", "Name Me", "Enter Path");
+            }
+        });
+        c.gridx = 1;
+        p.add(addNewRow, c);
+    }
 }
+
+

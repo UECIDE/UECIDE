@@ -643,6 +643,16 @@ public class Sketch implements MessageConsumer {
         }
 
         if (lib == null) {
+            for (String key : Base.libraryCategoryNames.keySet()) {
+                HashMap<String, Library> catLib = Base.getLibraryCollection("cat." + key);
+                lib = catLib.get(l);
+                if (lib != null) {
+                    break;
+                }
+            }
+        }
+
+        if (lib == null) {
             // The library doesn't exist - either it's a system header or a library that isn't installed.
             return;
         }

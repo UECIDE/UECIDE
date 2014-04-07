@@ -72,6 +72,9 @@ public class Base {
     public static ArrayList<Plugin> pluginInstances;
     static Splash splashScreen;
 
+    public static HashMap<String, String>libraryCategoryNames;
+    public static HashMap<String, File>libraryCategoryPaths;
+
     // Location for untitled items
     static File untitledFolder;
 
@@ -87,11 +90,9 @@ public class Base {
 
     public Base(String[] args) {
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            public void uncaughtException(Thread t, Throwable e) {
-                Base.broken(t, e);
-            }
-        });
+        boolean redirectExceptions = true;
+
+        headless = false;
 
         for (int i = 0; i < args.length; i++) {
             String path = args[i];
@@ -99,12 +100,26 @@ public class Base {
                 Debug.show();
                 break;
             }
+            if (path.equals("--exceptions")) {
+                redirectExceptions = false;
+            }
+            if (path.equals("--headless")) {
+                headless = true;
+            }
             if (path.startsWith("--datadir=")) {
                 overrideSettingsFolder = path.substring(10);
             }
         }
 
-        headless = false;
+        if (redirectExceptions) {
+            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                public void uncaughtException(Thread t, Throwable e) {
+                    Base.broken(t, e);
+                }
+            });
+        }
+
+
 
         if (isLinux()) {
             if ((System.getenv("DISPLAY") == null) || (System.getenv("DISPLAY").equals(""))) {
@@ -668,6 +683,21 @@ public class Base {
     public static HashMap<String, HashMap<String, Library>> libraryCollections;
 
     public static void gatherLibraries() {
+        libraryCategoryNames = new HashMap<String, String>();
+        libraryCategoryPaths = new HashMap<String, File>();
+
+        for (String k : preferences.children("library")) {
+            String cName = preferences.get("library." + k + ".name");
+            String cPath = preferences.get("library." + k + ".path");
+            if (cName != null && cPath != null) {
+                File f = new File(cPath);
+                if (f.exists() && f.isDirectory()) {    
+                    libraryCategoryNames.put(k, cName);
+                    libraryCategoryPaths.put(k, f);
+                }
+            }
+        }
+
         libraryCollections = new HashMap<String, HashMap<String, Library>>();
 
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
@@ -677,6 +707,9 @@ public class Base {
         }
 
         libraryCollections.put("sketchbook", loadLibrariesFromFolder(getUserLibrariesFolder())); // Contributed libraries
+        for (String key : libraryCategoryPaths.keySet()) {
+            libraryCollections.put("cat." + key, loadLibrariesFromFolder(libraryCategoryPaths.get(key)));
+        }
     }
 
     public static HashMap<String, Library> loadLibrariesFromFolder(File folder) {
@@ -2391,6 +2424,15 @@ public class Base {
         gatherLibraries();
         if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Update complete"));
         rebuildSketchbookMenus();
+
+        for (Editor e : editors) {
+            e.rebuildCoresMenu();
+            e.rebuildBoardsMenu();
+            e.rebuildImportMenu();
+            e.rebuildExamplesMenu();
+            e.rebuildPluginsMenu();
+            e.populateMenus();
+        }
     }
 }
 
