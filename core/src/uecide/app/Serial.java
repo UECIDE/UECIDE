@@ -52,7 +52,7 @@ public class Serial {
                 return nsp;
             }
         } catch (Exception e) {
-            Base.error(e);
+            //Base.error(e);
         }
         return null;
     }

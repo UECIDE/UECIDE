@@ -30,11 +30,13 @@ public class Base {
 
     public static int REVISION = 23;
     /** This might be replaced by main() if there's a lib/version.txt file. */
-    public static String VERSION_NAME = "0023";
+    public static String VERSION_NAME = "UNKNOWN";
     /** Set true if this a proper release rather than a numbered revision. */
     public static boolean RELEASE = false;
     public static int BUILDNO = 0;
     public static String BUILDER = "";
+
+    public static String overrideSettingsFolder = null;
 
     public static ArrayList<Process> processes = new ArrayList<Process>();
   
@@ -83,13 +85,23 @@ public class Base {
     }
 
     public Base(String[] args) {
-/*
+
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             public void uncaughtException(Thread t, Throwable e) {
-                Base.errorReport(t, e);
+                Base.broken(t, e);
             }
         });
-*/
+
+        for (int i = 0; i < args.length; i++) {
+            String path = args[i];
+            if (path.equals("--debug")) {
+                Debug.show();
+                break;
+            }
+            if (path.startsWith("--datadir=")) {
+                overrideSettingsFolder = path.substring(10);
+            }
+        }
 
         
         headless = false;
@@ -225,6 +237,9 @@ public class Base {
         // Check if any files were passed in on the command line
         for (int i = 0; i < args.length; i++) {
             String path = args[i];
+            if (path.startsWith("--")) {
+                continue;
+            }
             // Fix a problem with systems that use a non-ASCII languages. Paths are
             // being passed in with 8.3 syntax, which makes the sketch loader code
             // unhappy, since the sketch folder naming doesn't match up correctly.
@@ -246,8 +261,21 @@ public class Base {
         if (!opened) {
             handleNew();
         }
-        if (!headless) splashScreen.setMessage(Translate.t("gen.complete"), 100);
-        if (!headless) splashScreen.dispose();
+        if (!headless) {
+            splashScreen.setMessage(Translate.t("gen.complete"), 100);
+            splashScreen.dispose();
+            if (boards.size() == 0) {
+                System.err.println(plugins.keySet());
+                showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } else if (cores.size() == 0) {
+                showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } else if (compilers.size() == 0) {
+                showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+            } 
+        }
     }
 
     static protected void initPlatform() {
@@ -358,6 +386,8 @@ public class Base {
         if (!folder.isDirectory()) 
             return;
         String cl[] = folder.list();
+
+        Debug.message("Loading compilers from " + folder.getAbsolutePath());
  
         for (int i = 0; i < cl.length; i++) {
             if (cl[i].charAt(0) == '.')
@@ -366,6 +396,7 @@ public class Base {
             if (cdir.isDirectory()) {
                 File cfile = new File(cdir, "compiler.txt");
                 if (cfile.exists()) {
+                    Debug.message("    Loading core " + cfile.getAbsolutePath());
                     Compiler newCompiler = new Compiler(cdir);
                     if (newCompiler.isValid()) {
                         compilers.put(newCompiler.getName(), newCompiler);
@@ -388,6 +419,7 @@ public class Base {
         if (!folder.isDirectory()) 
             return;
         String cl[] = folder.list();
+        Debug.message("Loading cores from " + folder.getAbsolutePath());
  
         for (int i = 0; i < cl.length; i++) {
             if (cl[i].charAt(0) == '.')
@@ -396,6 +428,7 @@ public class Base {
             if (cdir.isDirectory()) {
                 File cfile = new File(cdir, "core.txt");
                 if (cfile.exists()) {
+                    Debug.message("    Loading core " + cfile.getAbsolutePath());
                     Core newCore = new Core(cdir);
                     if (newCore.isValid()) {
                         cores.put(newCore.getName(), newCore);
@@ -421,6 +454,8 @@ public class Base {
             return;
         }
 
+        Debug.message("Loading boards from " + folder.getAbsolutePath());
+
         for (int i = 0; i < bl.length; i++) {
             if (bl[i].charAt(0) == '.')
                 continue;
@@ -428,6 +463,7 @@ public class Base {
             if (bdir.isDirectory()) {
                 File bfile = new File(bdir, "board.txt");
                 if (bfile.exists()) {
+                    Debug.message("    Loading board " + bfile.getAbsolutePath());
                     Board newBoard = new Board(bdir);
                     if (newBoard.isValid()) {
                         boards.put(newBoard.getName(), newBoard);
@@ -633,14 +669,13 @@ public class Base {
     public static void gatherLibraries() {
         libraryCollections = new HashMap<String, HashMap<String, Library>>();
 
-        libraryCollections.put("global", loadLibrariesFromFolder(getContentFile("libraries"))); // Global libraries
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
         for (String core : corelist) {
-            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibraryFolder())); // Core libraries
+            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder())); // Core libraries
         }
 
-        libraryCollections.put("sketchbook", loadLibrariesFromFolder(new File(getSketchbookFolder(), "libraries"))); // Contributed libraries
+        libraryCollections.put("sketchbook", loadLibrariesFromFolder(getUserLibrariesFolder())); // Contributed libraries
     }
 
     public static HashMap<String, Library> loadLibrariesFromFolder(File folder) {
@@ -649,6 +684,7 @@ public class Base {
             return theseLibraries;
         }
         File[] list = folder.listFiles();
+        Debug.message("Loading libraries from " + folder.getAbsolutePath());
         for (File f : list) {
             if (f.isDirectory()) {
                 File files[] = f.listFiles();
@@ -657,6 +693,9 @@ public class Base {
                         Library newLibrary = new Library(sf);
                         if (newLibrary.isValid()) {
                             theseLibraries.put(newLibrary.getName(), newLibrary);
+                            Debug.message("    Adding new library " + newLibrary.getName() + " from " + f.getAbsolutePath());
+                        } else {
+                            Debug.message("    Skipping invalid library " + f.getAbsolutePath());
                         }
                     }
                 }
@@ -775,6 +814,14 @@ public class Base {
     public static File getSettingsFolder() {
         File settingsFolder = null;
 
+        if (overrideSettingsFolder != null) {
+            settingsFolder = new File(overrideSettingsFolder);
+            if (!settingsFolder.exists()) {
+                settingsFolder.mkdirs();
+            }
+            return settingsFolder;
+        }
+
         try {
             settingsFolder = platform.getSettingsFolder();
         } catch (Exception e) {
@@ -861,14 +908,13 @@ public class Base {
         return getContentFile("hardware");
     }
 
-    public Editor getActiveEditor()
+    public static Editor getActiveEditor()
     {
         return activeEditor;
     }
 
-    //Get the core libraries
-        public static File getCoreLibraries(String path) {
-        return getContentFile(path);	
+    public static File getSystemLibrariesFolder() {
+        return getContentFile("libraries");
     }
 
     public static String getHardwarePath() {
@@ -891,12 +937,26 @@ public class Base {
 
 
     public static File getSketchbookLibrariesFolder() {
-        return new File(getSketchbookFolder(), "libraries");
+        return getUserLibrariesFolder();
+    }
+
+    public static File getUserLibrariesFolder() {
+        String psbl = preferences.get("location.libraries");
+        File libdir = null;
+        if (psbl == null) {
+            libdir = new File(getSketchbookFolder(), "libraries");
+        } else {
+            libdir = new File(psbl);
+        } 
+        if (!libdir.exists()) {
+            libdir.mkdirs();
+        }
+        return libdir;
     }
 
 
     public static String getSketchbookLibrariesPath() {
-        return getSketchbookLibrariesFolder().getAbsolutePath();
+        return getUserLibrariesFolder().getAbsolutePath();
     }
 
 
@@ -1407,6 +1467,7 @@ public class Base {
     */
     public static void removeDir(File dir) {
         if (dir.exists()) {
+            Debug.message("Deleting folder " + dir.getAbsolutePath());
             removeDescendants(dir);
             if (!dir.delete()) {
                 System.err.println(Translate.t("error.delete", dir.getName()));
@@ -1597,7 +1658,7 @@ public class Base {
         }
 
 
-        new ZipExtractor(inputFile, getSketchbookLibrariesFolder()).execute();
+        new ZipExtractor(inputFile, getUserLibrariesFolder()).execute();
     }
 
     public static boolean testLibraryZipFormat(String inputFile)
@@ -2134,6 +2195,29 @@ public class Base {
                                         "The message is: " + e.getMessage() + "\n", e);
     }
 
+    static public void broken(Thread t, Throwable e) {
+        try {
+            if (e.getCause() == null) { 
+                return;
+            }
+            Debug.message("");
+            Debug.message("******************** EXCEPTION ********************");
+            Debug.message("An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")");
+            Debug.message("    The cause is: " + e.getCause());
+            Debug.message("    The message is: " + e.getMessage());
+            Debug.message("");
+            for (StackTraceElement element : e.getStackTrace()) {
+                if (element != null) {
+                    Debug.message("        " + element);
+                }
+            }
+            Debug.message("******************** EXCEPTION ********************");
+            Debug.message("");
+        } catch (Exception ee) {
+            ee.printStackTrace();
+        }
+    }
+
     public static byte[] loadBytesRaw(File file) {
         try {
             int size = (int) file.length();
@@ -2160,6 +2244,7 @@ public class Base {
             ed.message(e + "\n", 2);
         }
         System.err.println(e);
+        Debug.message(e);
     }
 
     public static void error(Throwable e) {
@@ -2167,11 +2252,63 @@ public class Base {
         for (Editor ed : editors) {
             ed.message(e.getMessage() + "\n", 2);
         }
+        try {
+            Debug.message("");
+            Debug.message("******************** EXCEPTION ********************");
+            Debug.message("An uncaught exception occurred:");
+            Debug.message("    The cause is: " + e.getCause());
+            Debug.message("    The message is: " + e.getMessage());
+            Debug.message("");
+            for (StackTraceElement element : e.getStackTrace()) {
+                if (element != null) {
+                    Debug.message("        " + element);
+                }
+            }
+            Debug.message("******************** EXCEPTION ********************");
+            Debug.message("");
+        } catch (Exception ee) {
+            ee.printStackTrace();
+        }
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
-
         System.err.println(sw.toString());
+    }
+
+    public static void showLibraryFolder() {
+        File sbl = getUserLibrariesFolder();
+        if (!sbl.exists()) {
+            sbl.mkdirs();
+        }
+        openFolder(sbl);
+    }
+
+    // This handy little function will rebuild the whole of the internals of
+    // UECIDE - that is, all the boards, cores, compilers and libraries etc.
+    public static void cleanAndScanAllSettings() {
+        compilers = new HashMap<String, Compiler>();
+        cores = new HashMap<String, Core>();
+        boards = new HashMap<String, Board>();
+        plugins = new HashMap<String, Plugin>();
+        pluginInstances = new ArrayList<Plugin>();
+
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Updating serial ports..."));
+
+        Serial.updatePortList();
+        Serial.fillExtraPorts();
+
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning compilers..."));
+        loadCompilers();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning cores..."));
+        loadCores();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning boards..."));
+        loadBoards();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning plugins..."));
+        loadPlugins();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning libraries..."));
+        gatherLibraries();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Update complete"));
+        rebuildSketchbookMenus();
     }
 }
 

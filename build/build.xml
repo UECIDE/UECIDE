@@ -99,7 +99,7 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
 
     <target name="install_compiler">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/p/compilers/${compiler.name}-${target.platform}.jar" />
+            <param name="src" value="${plugins.url}/compilers/${compiler.name}-${target.platform}.jar" />
             <param name="dest" value="tmp/${compiler.name}-${target.platform}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/compilers" src="tmp/${compiler.name}-${target.platform}.jar" overwrite="false" />
@@ -110,7 +110,7 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
 
     <target name="install_core">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/p/cores/${core.name}.jar" />
+            <param name="src" value="${plugins.url}/cores/${core.name}.jar" />
             <param name="dest" value="tmp/${core.name}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/cores" src="tmp/${core.name}.jar" overwrite="false" />
@@ -121,7 +121,7 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
 
     <target name="install_plugin">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/p/plugins/${plugin}.jar" />
+            <param name="src" value="${plugins.url}/plugins/${plugin}.jar" />
             <param name="dest" value="tmp/${plugin}.jar" />
         </antcall>
         <copy file="tmp/${plugin}.jar" todir="${target.path}/plugins/"/>
@@ -129,7 +129,7 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
 
     <target name="install_boards">
         <antcall target="download-file">
-            <param name="src" value="http://www.uecide.org/p/boards/${boards.name}.jar" />
+            <param name="src" value="${plugins.url}/boards/${boards.name}.jar" />
             <param name="dest" value="tmp/${boards.name}.jar" />
         </antcall>
         <unzip dest="${target.path}/hardware/boards/" src="tmp/${boards.name}.jar" overwrite="false" />
@@ -399,7 +399,7 @@ Version: ${version}${suffix}
 Maintainer: matt@majenko.co.uk
 Architecture: ${arch}
 Section: Programming
-Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java
+Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java${deps.extra}
 Description: ${product.cap} Development environment
 
 </echo>
@@ -429,16 +429,19 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
 
 	<target name="linux-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="i386"/>
+        <property name="deps.extra" value="" />
         <antcall target="linux-generate-debian"/>
     </target>
 
     <target name="linux64-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="amd64"/>
+        <property name="deps.extra" value=", libc6-i386" />
         <antcall target="linux-generate-debian"/>
     </target>
 
     <target name="linuxPi-deb" depends="linux-build,build.number" description="Build .deb of linux version">
         <property name="arch" value="armhf"/>
+        <property name="deps.extra" value="" />
         <antcall target="linux-generate-debian"/>
     </target>
 

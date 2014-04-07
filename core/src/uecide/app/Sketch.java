@@ -113,6 +113,18 @@ public class Sketch implements MessageConsumer {
         }
 
         for (File f : fileList){
+            if (f.getName().endsWith(".cxx")) {
+                loadFile(f);
+            }
+        }
+
+        for (File f : fileList){
+            if (f.getName().endsWith(".cc")) {
+                loadFile(f);
+            }
+        }
+
+        for (File f : fileList){
             if (f.getName().endsWith(".c")) {
                 loadFile(f);
             }
@@ -157,6 +169,7 @@ public class Sketch implements MessageConsumer {
 
     public File createBuildFolder() {
         String name = "build-" + uuid;
+        Debug.message("Creating build folder " + name);
         File f = new File(Base.getTmpDir(), name);
         if (!f.exists()) {
             f.mkdirs();
@@ -357,6 +370,8 @@ public class Sketch implements MessageConsumer {
                 lcn.endsWith(".hh") || 
                 lcn.endsWith(".c") || 
                 lcn.endsWith(".cpp") || 
+                lcn.endsWith(".cxx") || 
+                lcn.endsWith(".cc") || 
                 lcn.endsWith(".s")
             ) {
                 f.writeToFolder(buildFolder);
@@ -367,7 +382,7 @@ public class Sketch implements MessageConsumer {
                     if (!(f.equals(mainFile))) {
                         combinedMain.append("#line 1 \"" + f.file.getName() + "\"\n");
                         Pattern pragma = Pattern.compile("#pragma\\s+parameter");
-                        String[] bodylines = mainFile.textArea.getText().split("\n");
+                        String[] bodylines = f.textArea.getText().split("\n");
                         for (String line : bodylines) {
                             if (line.trim().startsWith("#pragma")) {
                                 Matcher mtch = pragma.matcher(line);
@@ -615,7 +630,6 @@ public class Sketch implements MessageConsumer {
         if (l.endsWith(".h")) {
             l = l.substring(0, l.lastIndexOf("."));
         }
-        HashMap<String, Library> globalLibraries = Base.getLibraryCollection("global");
         HashMap<String, Library> coreLibraries = Base.getLibraryCollection(editor.core.getName());
         HashMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook");
 
@@ -624,10 +638,7 @@ public class Sketch implements MessageConsumer {
             return;
         }
 
-        Library lib = globalLibraries.get(l);
-        if (lib == null) {
-            lib = coreLibraries.get(l);
-        }
+        Library lib = coreLibraries.get(l);
         if (lib == null) {
             lib = contribLibraries.get(l);
         }
@@ -897,11 +908,60 @@ public class Sketch implements MessageConsumer {
 
     public ArrayList<String> getIncludePaths() {
         ArrayList<String> libFiles = new ArrayList<String>();
+
+        HashMap<String, String> all = mergeAllProperties();
       
         libFiles.add(buildFolder.getAbsolutePath());
         libFiles.add(editor.board.getFolder().getAbsolutePath());
-        libFiles.add(editor.core.getAPIFolder().getAbsolutePath());
-        libFiles.add(editor.core.getLibraryFolder().getAbsolutePath());
+        libFiles.add(editor.core.getLibrariesFolder().getAbsolutePath());
+
+        for (String key : all.keySet()) {
+            if (key.startsWith("compiler.library.")) {
+                String coreLibName = key.substring(17);
+                String libPaths = all.get(key);
+                if (libPaths != null && !(libPaths.trim().equals(""))) {
+                    String[] libPathsArray = libPaths.split("::");
+                    for (String p : libPathsArray) {
+                        File f = new File(editor.compiler.getFolder(), p);
+                        if (f.exists()) {
+                            libFiles.add(f.getAbsolutePath());
+                        }        
+                    }
+                }
+            }
+        }
+
+        for (String key : all.keySet()) {
+            if (key.startsWith("core.library.")) {
+                String coreLibName = key.substring(13);
+                String libPaths = all.get(key);
+                if (libPaths != null && !(libPaths.trim().equals(""))) {
+                    String[] libPathsArray = libPaths.split("::");
+                    for (String p : libPathsArray) {
+                        File f = new File(editor.core.getFolder(), p);
+                        if (f.exists()) {
+                            libFiles.add(f.getAbsolutePath());
+                        }        
+                    }
+                }
+            }
+        }
+
+        for (String key : all.keySet()) {
+            if (key.startsWith("board.library.")) {
+                String coreLibName = key.substring(14);
+                String libPaths = all.get(key);
+                if (libPaths != null && !(libPaths.trim().equals(""))) {
+                    String[] libPathsArray = libPaths.split("::");
+                    for (String p : libPathsArray) {
+                        File f = new File(editor.board.getFolder(), p);
+                        if (f.exists()) {
+                            libFiles.add(f.getAbsolutePath());
+                        }        
+                    }
+                }
+            }
+        }
 
         for (Library l : getOrderedLibraries()) {
             libFiles.add(l.getFolder().getAbsolutePath());
@@ -1170,6 +1230,7 @@ public class Sketch implements MessageConsumer {
 
     public void message(String m, int chan) {
         if (m.trim() != "") {
+            Debug.message(m);
             if (chan == 2) {
                 if (stderrRedirect == null) {
                     Pattern p = Pattern.compile(editor.compiler.getErrorRegex());
@@ -1249,6 +1310,29 @@ public class Sketch implements MessageConsumer {
 
         editor.statusNotice(Translate.e("comp.sketch"));
 
+        // Copy any specified files from the compiler, core or board folders
+        // into the build folder.  This is especially good if the compiler
+        // executable needs certain DLL files to be in the current working
+        // directory (which is the build folder).
+
+        String precopy = parseString(all.get("compile.precopy"));
+        if (precopy != null) {
+            String[] copyfiles = precopy.split("::");
+            for (String cf : copyfiles) {
+                File src = new File(editor.compiler.getFolder(), cf);
+                if (!src.exists()) {
+                    src = new File(editor.core.getFolder(), cf);
+                }
+                if (!src.exists()) {
+                    src = new File(editor.board.getFolder(), cf);
+                }
+                if (src.exists()) {
+                    File dest = new File(buildFolder, src.getName());
+                    Base.copyFile(src, dest);
+                }
+            }
+        }
+
         tobjs = compileSketch();
         if (tobjs == null) {
             editor.statusNotice(Translate.t("comp.sketch.error"));
@@ -1265,34 +1349,68 @@ public class Sketch implements MessageConsumer {
 
         setCompilingProgress(40);
 
-        editor.statusNotice(Translate.e("comp.core"));
-        if (!compileCore(editor.core.getAPIFolder(), "core")) {
-            editor.statusNotice(Translate.t("comp.core.error"));
-            return false;
-        }
-        String coreLibs = "";
-        setCompilingProgress(50);
+        ArrayList<String> coreLibraries = new ArrayList<String>();
 
-        String liboption = all.get("compile.liboption");
-        if (liboption == null) {
-            liboption = "-l${library}";
-        }
-
-        if (parameters.get("extension") != null) {
-            editor.statusNotice(Translate.e("comp.extension"));
-            File extension = new File(parameters.get("extension"));
-            if (extension.exists() && extension.isDirectory()) {
-                if (!compileCore(extension, extension.getName())) {
-                    editor.statusNotice(Translate.t("comp.extension.error"));
-                    return false;
+        for (String key : all.keySet()) {
+            if (key.startsWith("compiler.library.")) {
+                String coreLibName = key.substring(13);
+                String libPaths = all.get(key);
+                if (libPaths != null && !(libPaths.trim().equals(""))) {
+                    libPaths = parseString(libPaths);
+                    editor.statusNotice(Translate.t("comp.lib", coreLibName));
+                    String[] libPathsArray = libPaths.split("::");
+                    if (!compileCore(libPathsArray, coreLibName)) {
+                        editor.statusNotice(Translate.t("comp.lib.error", coreLibName));
+                        return false;
+                    }
+                    coreLibraries.add("-l" + coreLibName);
                 }
-                settings.put("library", extension.getName());
-                coreLibs += "::" + parseString(liboption);
             }
         }
 
-        settings.put("library", "core");
-        coreLibs += "::" + parseString(liboption);
+        for (String key : all.keySet()) {
+            if (key.startsWith("core.library.")) {
+                String coreLibName = key.substring(13);
+                String libPaths = all.get(key);
+                if (libPaths != null && !(libPaths.trim().equals(""))) {
+                    editor.statusNotice(Translate.t("comp.lib", coreLibName));
+                    libPaths = parseString(libPaths);
+                    String[] libPathsArray = libPaths.split("::");
+                    if (!compileCore(libPathsArray, coreLibName)) {
+                        editor.statusNotice(Translate.t("comp.lib.error", coreLibName));
+                        return false;
+                    }
+                    coreLibraries.add("-l" + coreLibName);
+                }
+            }
+        }
+
+        for (String key : all.keySet()) {
+            if (key.startsWith("board.library.")) {
+                String coreLibName = key.substring(13);
+                String libPaths = all.get(key);
+                if (libPaths != null && !(libPaths.trim().equals(""))) {
+                    libPaths = parseString(libPaths);
+                    editor.statusNotice(Translate.t("comp.lib", coreLibName));
+                    String[] libPathsArray = libPaths.split("::");
+                    if (!compileCore(libPathsArray, coreLibName)) {
+                        editor.statusNotice(Translate.t("comp.lib.error", coreLibName));
+                        return false;
+                    }
+                    coreLibraries.add("-l" + coreLibName);
+                }
+            }
+        }
+
+        String coreLibs = "";
+        for (String lib : coreLibraries) {
+            if (!coreLibs.equals("")) {
+                coreLibs += "::";
+            }
+            coreLibs += lib;
+        }
+
+        setCompilingProgress(50);
 
         editor.statusNotice(Translate.e("comp.link"));
         settings.put("filename", name);
@@ -1406,21 +1524,83 @@ public class Sketch implements MessageConsumer {
                 mid = editor.core.getFolder().getAbsolutePath();
             } else if (mid.equals("board.root")) {
                 mid = editor.board.getFolder().getAbsolutePath();
-            } else if ((mid.length() > 5) && (mid.substring(0,5).equals("find:"))) {
-                String f = mid.substring(5);
-
-                File found;
-                found = new File(editor.board.getFolder(), f);
-                if (!found.exists()) {
-                    found = new File(editor.core.getAPIFolder(), f);
-                }
-                if (!found.exists()) {
-                    found = new File(editor.compiler.getFolder(), f);
-                }
-                if (!found.exists()) {
-                    mid = f;
+            } else if ((mid.length() >8) && (mid.substring(0, 8).equals("replace:"))) {
+                // replace:string,find,replace
+                String[] bits = mid.substring(3).split(",");
+                if (bits.length != 3) {
+                    mid = "Syntax error in replace - bad arg count";
                 } else {
-                    mid = found.getAbsolutePath();
+                    mid = bits[0].replaceAll(bits[1], bits[2]);
+                }
+            } else if ((mid.length() >3) && (mid.substring(0, 3).equals("if:"))) {
+                String[] bits = mid.substring(3).split(",");
+                if (bits.length < 2 || bits.length > 3) {
+                    mid = "Syntax Error in if - bad arg count";
+                } else {
+                    String condition = bits[0];
+                    String trueVal = bits[1];
+                    String falseVal = bits.length == 3 ? bits[2] : "";
+
+                    String[] conditionBits = condition.split("=");
+                    if (conditionBits.length != 2) {
+                        mid = "Syntax Error in if - bad comparison";
+                    } else {
+                        String leftVal = conditionBits[0].trim();
+                        String rightVal = conditionBits[1].trim();
+                        if (leftVal.equals(rightVal)) {
+                            mid = trueVal;
+                        } else {
+                            mid = falseVal;
+                        }
+                    }
+                }
+            } else if ((mid.length() >8) && (mid.substring(0, 8).equals("foreach:"))) {
+                // ${foreach:${variable.name},pattern-to, replace with %0}
+                String content = mid.substring(8);
+                int commaPos = content.indexOf(',');
+                if (commaPos > 0) {
+                    String data = content.substring(0, commaPos);
+                    String format = content.substring(commaPos + 1);
+                    String[] each = data.split("::");
+                    String outString = "";
+                    for (String chunk : each) {
+                        String ns = format.replaceAll("%0", chunk);
+                        if (outString.equals("")) {
+                            outString = ns;
+                        } else {    
+                            outString = outString + "::" + ns;
+                        }
+                    }
+                    mid = outString;
+                } else {
+                    mid = "Syntax Error in foreach";
+                }
+            } else if ((mid.length() > 5) && (mid.substring(0,5).equals("find:"))) {
+                // ${find:${path.list},${file.name}}
+                String content = mid.substring(5);
+                int commaPos = content.indexOf(',');
+                if (commaPos > 0) {
+                    String data = content.substring(0, commaPos);
+                    String fname = content.substring(commaPos + 1);
+                    String[] each = data.split("::");
+
+                    System.err.println("Looking for: " + fname);
+
+                    String outString = "";
+                    for (String chunk : each) {
+                        System.err.println(chunk);
+                        File f = new File(chunk);
+                        if (f.exists() && f.isDirectory()) {
+                            File ff = new File(f, fname);
+                            System.err.println(ff.getAbsolutePath());
+                            if (ff.exists()) {
+                                mid = ff.getAbsolutePath();
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    mid = "Syntax Error in find";
                 }
             } else if (mid.equals("verbose")) {
                 if (Base.preferences.getBoolean("export.verbose")) 
@@ -1475,6 +1655,14 @@ public class Sketch implements MessageConsumer {
         HashMap<String, String> all = mergeAllProperties();
 
         if (fileName.endsWith(".cpp")) {
+            recipe = all.get("compile.cpp");
+        }
+    
+        if (fileName.endsWith(".cxx")) {
+            recipe = all.get("compile.cpp");
+        }
+    
+        if (fileName.endsWith(".cc")) {
             recipe = all.get("compile.cpp");
         }
     
@@ -1533,6 +1721,12 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean compileCore(File core, String name) {
+        String[] f = new String[1];
+        f[0] = core.getAbsolutePath();
+        return compileCore(f, name);
+    }
+
+    public boolean compileCore(String[] core, String name) {
         File archive = getCacheFile("lib" + name + ".a");
 
         HashMap<String, String> all = mergeAllProperties();
@@ -1547,22 +1741,14 @@ public class Sketch implements MessageConsumer {
 
         ArrayList<File> fileList = new ArrayList<File>();
 
-        fileList.addAll(findFilesInFolder(core, "S", true));
-        fileList.addAll(findFilesInFolder(core, "c", true));
-        fileList.addAll(findFilesInFolder(core, "cpp", true));
-
-        String boardFiles = all.get("build.files");
-        if (boardFiles != null) {
-            String[] bfl = boardFiles.split("::");
-            for (String bf : bfl) {
-                File f = new File(editor.board.getFolder(), bf);
-                if (f.exists()) {
-                    if (!f.isDirectory()) {
-                        if (f.getName().endsWith(".S") || f.getName().endsWith(".c") || f.getName().endsWith(".cpp")) {
-                            fileList.add(f);
-                        }
-                    }
-                }
+        for (String c : core) {
+            File f = new File(editor.core.getFolder(), c);
+            if (f.exists()) {
+                fileList.addAll(findFilesInFolder(f, "S", false));
+                fileList.addAll(findFilesInFolder(f, "c", false));
+                fileList.addAll(findFilesInFolder(f, "cpp", false));
+                fileList.addAll(findFilesInFolder(f, "cxx", false));
+                fileList.addAll(findFilesInFolder(f, "cc", false));
             }
         }
 
@@ -1621,6 +1807,45 @@ public class Sketch implements MessageConsumer {
         settings.put("includes", origIncs);
         return true;
     }
+
+    private List<File> convertFiles(File dest, List<File> sources) {
+        List<File> objectPaths = new ArrayList<File>();
+        HashMap<String, String> all = mergeAllProperties();
+
+        settings.put("build.path", dest.getAbsolutePath());
+
+        for (File file : sources) {
+            File objectFile = new File(dest, file.getName() + ".o");
+            objectPaths.add(objectFile);
+            if (objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
+                if (Base.preferences.getBoolean("compiler.verbose")) {
+                    message("Skipping " + file.getAbsolutePath() + " as not modified.\n", 1);
+                }
+                continue;
+            }
+            String sp = file.getAbsolutePath();
+            String sf = folder.getAbsolutePath();
+            sp = sp.substring(sf.length() + 1);
+
+            String spf = file.getParentFile().getAbsolutePath();
+            spf = spf.substring(sf.length() + 1);
+
+            File destObjects = new File(dest, spf);
+            destObjects.mkdirs();
+
+            File destFile = new File(destObjects, file.getName());
+            Base.copyFile(file, destFile);
+
+            settings.put("source.name", sp);
+            settings.put("object.name", objectFile.getAbsolutePath());
+
+            if(!execAsynchronously(parseString(all.get("compile.bin"))))
+                return null;
+            if (!objectFile.exists()) 
+                return null;
+        }
+        return objectPaths;
+    } 
 
     private List<File> compileFiles(File dest, List<File> sSources, List<File> cSources, List<File> cppSources) {
 
@@ -1709,11 +1934,64 @@ public class Sketch implements MessageConsumer {
     }
 
     private List<File> compileSketch() {
-        List<File> sf = compileFiles(
+        List<File> sf = new ArrayList<File>();
+
+        HashMap<String, String> all = mergeAllProperties();
+
+        // We can only do this if the core supports binary conversions
+        if (all.get("compile.bin") != null) {
+            File obj = new File(folder, "objects");
+            if (obj.exists()) {
+                File buf = new File(buildFolder, "objects");
+                buf.mkdirs();
+                List<File> uf = convertFiles(buildFolder, findFilesInFolder(obj, null, true));
+                if (uf != null) {
+                    sf.addAll(uf);
+                }
+            }
+        }
+
+        ArrayList<File> compiledFiles = (ArrayList<File>) compileFiles(
                 buildFolder,
                 findFilesInFolder(buildFolder, "S", false),
                 findFilesInFolder(buildFolder, "c", false),
-                findFilesInFolder(buildFolder, "cpp", false));
+                findFilesInFolder(buildFolder, "cpp", false)
+        );
+        if (compiledFiles != null) {
+            sf.addAll(compiledFiles);
+        }
+
+        
+        String boardFiles = all.get("build.files");
+        if (boardFiles != null) {
+            if (!boardFiles.equals("")) {
+                ArrayList<File> sFiles = new ArrayList<File>();
+                ArrayList<File> cFiles = new ArrayList<File>();
+                ArrayList<File> cppFiles = new ArrayList<File>();
+
+                String[] bfs = boardFiles.split("::");
+                for (String bf : bfs) {
+                    if (bf.endsWith(".c")) {
+                        File f = new File(editor.board.getFolder(), bf);
+                        if (f.exists()) {
+                            cFiles.add(f);
+                        }
+                    } else if (bf.endsWith(".cpp")) {
+                        File f = new File(editor.board.getFolder(), bf);
+                        if (f.exists()) {
+                            cppFiles.add(f);
+                        }
+                    } else 
+                    if (bf.endsWith(".S")) {
+                        File f = new File(editor.board.getFolder(), bf);
+                        if (f.exists()) {
+                            sFiles.add(f);
+                        }
+                    } 
+                }
+                sf.addAll(compileFiles(buildFolder, sFiles, cFiles, cppFiles));
+            }
+        }
 
         File suf = new File(folder, "utility");
         if (suf.exists()) {
@@ -1723,9 +2001,11 @@ public class Sketch implements MessageConsumer {
                 buf,
                 findFilesInFolder(suf, "S", true),
                 findFilesInFolder(suf, "c", true),
-                findFilesInFolder(suf, "cpp", true));
+                findFilesInFolder(suf, "cpp", true)
+            );
             sf.addAll(uf);
         }
+
         return sf;
     } 
 
@@ -1740,12 +2020,23 @@ public class Sketch implements MessageConsumer {
             if (file.getName().startsWith("."))
                 continue; // skip hidden files
 
-            if (file.getName().endsWith("." + extension))
-                files.add(file);
-
-            if (recurse && file.isDirectory()) {
-                files.addAll(findFilesInFolder(file, extension, true));
+            if (file.isDirectory()) {
+                if (recurse) {
+                    files.addAll(findFilesInFolder(file, extension, recurse));
+                }
+                continue;
             }
+
+            if (extension == null) {
+                files.add(file);
+                continue;
+            }
+
+            if (file.getName().endsWith("." + extension)) {
+                files.add(file);
+                continue;
+            }
+
         }
 
         return files;
@@ -1804,9 +2095,8 @@ public class Sketch implements MessageConsumer {
                 liblist += "::" + parseString(liboption);
             }
         }
-        liblist += "";
-
-        liblist += coreLibs;
+        
+        liblist += "::" + coreLibs;
 
         settings.put("libraries", liblist);
 
@@ -1887,11 +2177,16 @@ public class Sketch implements MessageConsumer {
             }
         }
 
+        StringBuilder sb = new StringBuilder();
+        for (String component : stringList) {
+            sb.append(component);
+            sb.append(" ");
+        }
+        Debug.message("Execute: " + sb.toString());
+
         if (Base.preferences.getBoolean("compiler.verbose")) {
-            for (String component : stringList) {
-                message(component + " ", 1);
-            }
             message("\n", 1);
+            message(sb.toString() + "\n", 1);
         }
 
         Process proc;
@@ -1899,6 +2194,7 @@ public class Sketch implements MessageConsumer {
             proc = process.start();
         } catch (Exception e) {
             message(e.toString(), 2);
+            Debug.message(" > " + e.toString());
             return false;
         }
 
@@ -1943,7 +2239,7 @@ public class Sketch implements MessageConsumer {
     public boolean isInternal() {
         String path = folder.getAbsolutePath();
         String basePath = Base.getContentFile(".").getAbsolutePath() + File.separator;
-        String libsPath = Base.getSketchbookLibrariesPath() + File.separator;
+        String libsPath = Base.getUserLibrariesFolder().getAbsolutePath() + File.separator;
         String cachePath = getCacheFolder().getAbsolutePath() + File.separator;
         String corePath = editor.core.getFolder().getAbsolutePath() + File.separator;
         String boardPath = editor.board.getFolder().getAbsolutePath() + File.separator;
@@ -1965,6 +2261,8 @@ public class Sketch implements MessageConsumer {
         if (f.endsWith(".ino")) return true;
         if (f.endsWith(".pde")) return true;
         if (f.endsWith(".cpp")) return true;
+        if (f.endsWith(".cxx")) return true;
+        if (f.endsWith(".cc")) return true;
         if (f.endsWith(".c")) return true;
         if (f.endsWith(".h")) return true;
         if (f.endsWith(".hh")) return true;
@@ -2088,6 +2386,10 @@ public class Sketch implements MessageConsumer {
         sf.setFile(newFile);
     }
 
+    public File getLibrariesFolder() {
+        return new File(folder, "libraries");
+    }
+
     public void programBootloader(String programmer) {
         String uploadCommand;
 
@@ -2097,9 +2399,6 @@ public class Sketch implements MessageConsumer {
         HashMap<String, String> all = mergeAllProperties();
         editor.statusNotice(Translate.e("comp.burn"));
         settings.put("filename", blName);
-        settings.put("filename.elf", blName + ".elf");
-        settings.put("filename.hex", blName + ".hex");
-        settings.put("filename.eep", blName + ".eep");
 
         boolean isJava = true;
         uploadCommand = editor.board.get("upload." + programmer + ".command.java");
@@ -2313,7 +2612,7 @@ public class Sketch implements MessageConsumer {
 
             String libList = "";
 
-            File sblp = Base.getSketchbookLibrariesFolder();
+            File sblp = Base.getUserLibrariesFolder();
 
             for (Library lib : getImportedLibraries()) {
                 File sbl = new File(sblp, lib.getFolder().getName());
@@ -2501,7 +2800,7 @@ public class Sketch implements MessageConsumer {
             for (String l : libarr) {
                 JCheckBox cb = new JCheckBox(l);
                 cb.setBorder(bdr);
-                File elib = new File(Base.getSketchbookLibrariesFolder(), l);
+                File elib = new File(Base.getUserLibrariesFolder(), l);
                 if (elib.exists() && elib.isDirectory()) {
                     cb.setSelected(false);
                 } else {
