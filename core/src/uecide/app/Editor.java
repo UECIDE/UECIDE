@@ -1140,6 +1140,14 @@ public class Editor extends JFrame implements RunnerListener {
     });
     helpMenu.add(item);
 
+    item = new JMenuItem(Translate.t("Rescan all internals"));
+    item.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            Base.cleanAndScanAllSettings();
+        }
+    });
+    helpMenu.add(item);
+
   }
 
     public void handleNewFile() {
@@ -1755,8 +1763,15 @@ public class Editor extends JFrame implements RunnerListener {
         });
         importMenu.add(item);
   
+        item = new JMenuItem(Translate.t("Show Library Folder"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Base.showLibraryFolder();
+            }
+        });
+        importMenu.add(item);
+  
         importMenu.addSeparator();
-
 
         ActionListener listener = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -1848,7 +1863,7 @@ public class Editor extends JFrame implements RunnerListener {
         JMenu contributedItem = new JMenu(Translate.t("Contributed"));
         examplesMenu.add(contributedItem);
 
-        File sbLibs = Base.getSketchbookLibrariesFolder();
+        File sbLibs = Base.getUserLibrariesFolder();
         if (sbLibs.isDirectory()) {
             addSketches(contributedItem, sbLibs);
         }
@@ -2691,7 +2706,7 @@ public class Editor extends JFrame implements RunnerListener {
         ArrayList<File> paths = new ArrayList<File>();
         
         paths.add(Base.getSystemLibrariesFolder());
-        paths.add(Base.getSketchbookLibrariesFolder());
+        paths.add(Base.getUserLibrariesFolder());
         paths.add(core.getLibrariesFolder());
         paths.add(board.getLibrariesFolder());
         paths.add(sketch.getLibrariesFolder());

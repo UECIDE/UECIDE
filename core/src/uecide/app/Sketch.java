@@ -2238,7 +2238,7 @@ public class Sketch implements MessageConsumer {
     public boolean isInternal() {
         String path = folder.getAbsolutePath();
         String basePath = Base.getContentFile(".").getAbsolutePath() + File.separator;
-        String libsPath = Base.getSketchbookLibrariesPath() + File.separator;
+        String libsPath = Base.getUserLibrariesFolder().getAbsolutePath() + File.separator;
         String cachePath = getCacheFolder().getAbsolutePath() + File.separator;
         String corePath = editor.core.getFolder().getAbsolutePath() + File.separator;
         String boardPath = editor.board.getFolder().getAbsolutePath() + File.separator;
@@ -2611,7 +2611,7 @@ public class Sketch implements MessageConsumer {
 
             String libList = "";
 
-            File sblp = Base.getSketchbookLibrariesFolder();
+            File sblp = Base.getUserLibrariesFolder();
 
             for (Library lib : getImportedLibraries()) {
                 File sbl = new File(sblp, lib.getFolder().getName());
@@ -2799,7 +2799,7 @@ public class Sketch implements MessageConsumer {
             for (String l : libarr) {
                 JCheckBox cb = new JCheckBox(l);
                 cb.setBorder(bdr);
-                File elib = new File(Base.getSketchbookLibrariesFolder(), l);
+                File elib = new File(Base.getUserLibrariesFolder(), l);
                 if (elib.exists() && elib.isDirectory()) {
                     cb.setSelected(false);
                 } else {

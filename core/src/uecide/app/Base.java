@@ -31,7 +31,7 @@ public class Base {
 	
     public static int REVISION = 23;
     /** This might be replaced by main() if there's a lib/version.txt file. */
-    public static String VERSION_NAME = "0023";
+    public static String VERSION_NAME = "UNKNOWN";
     /** Set true if this a proper release rather than a numbered revision. */
     public static boolean RELEASE = false;
     public static int BUILDNO = 0;
@@ -676,7 +676,7 @@ public class Base {
             libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder())); // Core libraries
         }
 
-        libraryCollections.put("sketchbook", loadLibrariesFromFolder(new File(getSketchbookFolder(), "libraries"))); // Contributed libraries
+        libraryCollections.put("sketchbook", loadLibrariesFromFolder(getUserLibrariesFolder())); // Contributed libraries
     }
 
     public static HashMap<String, Library> loadLibrariesFromFolder(File folder) {
@@ -938,12 +938,26 @@ public class Base {
 
 
     public static File getSketchbookLibrariesFolder() {
-        return new File(getSketchbookFolder(), "libraries");
+        return getUserLibrariesFolder();
+    }
+
+    public static File getUserLibrariesFolder() {
+        String psbl = preferences.get("location.libraries");
+        File libdir = null;
+        if (psbl == null) {
+            libdir = new File(getSketchbookFolder(), "libraries");
+        } else {
+            libdir = new File(psbl);
+        } 
+        if (!libdir.exists()) {
+            libdir.mkdirs();
+        }
+        return libdir;
     }
 
 
     public static String getSketchbookLibrariesPath() {
-        return getSketchbookLibrariesFolder().getAbsolutePath();
+        return getUserLibrariesFolder().getAbsolutePath();
     }
 
 
@@ -1645,7 +1659,7 @@ public class Base {
         }
 
 
-        new ZipExtractor(inputFile, getSketchbookLibrariesFolder()).execute();
+        new ZipExtractor(inputFile, getUserLibrariesFolder()).execute();
     }
 
     public static boolean testLibraryZipFormat(String inputFile)
@@ -2341,6 +2355,42 @@ public class Base {
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
         System.err.println(sw.toString());
+    }
+
+    public static void showLibraryFolder() {
+        File sbl = getUserLibrariesFolder();
+        if (!sbl.exists()) {
+            sbl.mkdirs();
+        }
+        openFolder(sbl);
+    }
+
+    // This handy little function will rebuild the whole of the internals of
+    // UECIDE - that is, all the boards, cores, compilers and libraries etc.
+    public static void cleanAndScanAllSettings() {
+        compilers = new HashMap<String, Compiler>();
+        cores = new HashMap<String, Core>();
+        boards = new HashMap<String, Board>();
+        plugins = new HashMap<String, Plugin>();
+        pluginInstances = new ArrayList<Plugin>();
+
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Updating serial ports..."));
+
+        Serial.updatePortList();
+        Serial.fillExtraPorts();
+
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning compilers..."));
+        loadCompilers();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning cores..."));
+        loadCores();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning boards..."));
+        loadBoards();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning plugins..."));
+        loadPlugins();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning libraries..."));
+        gatherLibraries();
+        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Update complete"));
+        rebuildSketchbookMenus();
     }
 }
 

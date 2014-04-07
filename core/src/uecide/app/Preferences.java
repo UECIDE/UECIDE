@@ -82,6 +82,7 @@ public class Preferences {
     JTextField boardsLocationField;
     JTextField coresLocationField;
     JTextField compilersLocationField;
+    JTextField libsLocationField;
 
     JList extraPortList;
     DefaultListModel extraPortListModel = new DefaultListModel();
@@ -581,6 +582,29 @@ public class Preferences {
         c.gridy++;
 
         c.gridx = 0;
+        c.gridwidth = 2;
+        lab = new JLabel(Translate.t("Libraries Location"));
+        p.add(lab, c);
+        c.gridy++;
+        c.gridwidth = 1;
+        libsLocationField = new JTextField(40);
+        libsLocationField.setEditable(false);
+        p.add(libsLocationField, c);
+        c.gridx = 1;
+        but = new JButton(Translate.t("Select Folder..."));
+        but.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                File dflt = new File(libsLocationField.getText());
+                File file = Base.selectFolder("Select new libraries location", dflt, dialog);
+                if (file != null) {
+                    libsLocationField.setText(file.getAbsolutePath());
+                }
+            }
+        });
+        p.add(but, c);
+        c.gridy++;
+
+        c.gridx = 0;
         c.gridwidth = 1;
         lab = new JLabel(Translate.t("Changing these settings will require a restart of the IDE."));
         p.add(lab, c);
@@ -598,6 +622,7 @@ public class Preferences {
                     boardsLocationField.setText(new File(file, "boards").getAbsolutePath());
                     coresLocationField.setText(new File(file, "cores").getAbsolutePath());
                     compilersLocationField.setText(new File(file, "compilers").getAbsolutePath());
+                    libsLocationField.setText(new File(file, "libraries").getAbsolutePath());
                 }
             }
         });
@@ -741,6 +766,7 @@ public class Preferences {
     Base.preferences.set("location.boards", boardsLocationField.getText());
     Base.preferences.set("location.cores", coresLocationField.getText());
     Base.preferences.set("location.compilers", compilersLocationField.getText());
+    Base.preferences.set("location.libraries", libsLocationField.getText());
 
     if (autoAssociateBox != null) {
       Base.preferences.setBoolean("platform.auto_file_type_associations", autoAssociateBox.isSelected());
@@ -779,6 +805,7 @@ public class Preferences {
 
     Base.applyPreferences();
     Base.preferences.save();
+    Base.cleanAndScanAllSettings();
   }
 
 
@@ -808,6 +835,7 @@ public class Preferences {
     boardsLocationField.setText(Base.getUserBoardsFolder().getAbsolutePath());
     coresLocationField.setText(Base.getUserCoresFolder().getAbsolutePath());
     compilersLocationField.setText(Base.getUserCompilersFolder().getAbsolutePath());
+    libsLocationField.setText(Base.getUserLibrariesFolder().getAbsolutePath());
 
     if (autoAssociateBox != null) {
       autoAssociateBox.  setSelected(Base.preferences.getBoolean("platform.auto_file_type_associations"));
