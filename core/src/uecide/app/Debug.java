@@ -98,7 +98,20 @@ public class Debug {
         });
         win.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         win.pack();
-        win.setMinimumSize(new Dimension(400, 400));
+        win.setMinimumSize(new Dimension(100, 100));
+        if (Base.preferences != null) {
+            win.setSize(new Dimension(
+                Base.preferences.getInteger("debug.window.width"),
+                Base.preferences.getInteger("debug.window.height")
+            ));
+            win.setLocation(new Point(
+                Base.preferences.getInteger("debug.window.x"),
+                Base.preferences.getInteger("debug.window.y")
+            ));
+        } else {
+            win.setSize(new Dimension(400, 400));
+            win.setLocation(new Point(0, 0));
+        }
         win.setVisible(true);
         shown = true;
     }
@@ -112,6 +125,15 @@ public class Debug {
 
     public static void handleClose() {
         shown = false;
+        if (Base.preferences != null) {
+            Dimension d = win.getSize();
+            Base.preferences.setInteger("debug.window.width", d.width);
+            Base.preferences.setInteger("debug.window.height", d.height);
+            Point p = win.getLocation();
+            Base.preferences.setInteger("debug.window.x", p.x);
+            Base.preferences.setInteger("debug.window.y", p.y);
+            Base.preferences.save();
+        }
         win.dispose();
     }
 

@@ -128,7 +128,14 @@ public class Base {
         }
 
         try {
-            JarFile myself = new JarFile("lib/uecide.jar");
+            File f;
+            if (isMacOS()) {
+                f = getContentFile("uecide.jar");
+            } else {
+                f = getContentFile("lib/uecide.jar");
+            }
+            Debug.message("Getting version information from " + f.getAbsolutePath());
+            JarFile myself = new JarFile(f);
             Manifest manifest = myself.getManifest();
             Attributes manifestContents = manifest.getMainAttributes();
 
@@ -138,6 +145,8 @@ public class Base {
             BUILDER = manifestContents.getValue("Built-By");
 
             RELEASE = true;
+
+            Debug.message("Version: "+ VERSION_NAME);
         } catch (Exception e) {
             error(e);
         }
@@ -703,16 +712,16 @@ public class Base {
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
         for (String core : corelist) {
-            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder())); // Core libraries
+            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder(), "core")); // Core libraries
         }
 
-        libraryCollections.put("sketchbook", loadLibrariesFromFolder(getUserLibrariesFolder())); // Contributed libraries
+        libraryCollections.put("sketchbook", loadLibrariesFromFolder(getUserLibrariesFolder(),"contributed")); // Contributed libraries
         for (String key : libraryCategoryPaths.keySet()) {
-            libraryCollections.put("cat." + key, loadLibrariesFromFolder(libraryCategoryPaths.get(key)));
+            libraryCollections.put("cat." + key, loadLibrariesFromFolder(libraryCategoryPaths.get(key),"contributed"));
         }
     }
 
-    public static HashMap<String, Library> loadLibrariesFromFolder(File folder) {
+    public static HashMap<String, Library> loadLibrariesFromFolder(File folder, String type) {
         HashMap theseLibraries = new HashMap<String, Library>();
         if (!folder.exists()) {
             return theseLibraries;
@@ -724,7 +733,7 @@ public class Base {
                 File files[] = f.listFiles();
                 for (File sf : files) {
                     if ((sf.getName().equals(f.getName() + ".h") || (sf.getName().startsWith(f.getName() + "_") && sf.getName().endsWith(".h")))) {
-                        Library newLibrary = new Library(sf);
+                        Library newLibrary = new Library(sf, type);
                         if (newLibrary.isValid()) {
                             theseLibraries.put(newLibrary.getName(), newLibrary);
                             Debug.message("    Adding new library " + newLibrary.getName() + " from " + f.getAbsolutePath());

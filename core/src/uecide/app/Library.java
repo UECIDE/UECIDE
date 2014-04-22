@@ -26,12 +26,14 @@ public class Library {
     public File mainInclude;
     public File utilityFolder;
     public HashMap<String, File>examples;
+    public String type;
 
     public boolean valid = false;
 
     public boolean buildLibrary = false;
 
-    public Library(File hdr) {
+    public Library(File hdr, String t) {
+        type = t;
         File root = hdr.getParentFile();
         name = hdr.getName().substring(0, hdr.getName().indexOf(".h"));;
         folder = root;
@@ -172,5 +174,18 @@ public class Library {
     public ArrayList<String> getRequiredLibraries() {
         return requiredLibraries;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public boolean isCore() {
+        return type.equals("core");
+    }
+
+    public boolean isContributed() {
+        return type.equals("contributed");
+    }
+
 }
 

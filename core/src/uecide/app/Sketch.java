@@ -2621,11 +2621,8 @@ public class Sketch implements MessageConsumer {
 
             String libList = "";
 
-            File sblp = Base.getUserLibrariesFolder();
-
             for (Library lib : getImportedLibraries()) {
-                File sbl = new File(sblp, lib.getFolder().getName());
-                if (lib.getFolder().equals(sbl)) {
+                if (lib.isContributed()) {
                     sar.putNextEntry(new ZipEntry("libraries" + "/" + lib.getFolder().getName() + "/"));
                     sar.closeEntry();
                     addTree(lib.getFolder(), "libraries/" + lib.getFolder().getName(), sar);
@@ -2668,6 +2665,11 @@ public class Sketch implements MessageConsumer {
         String files[] = dir.list();
         for (int i = 0; i < files.length; i++) {
             if (files[i].equals(".") || files[i].equals("..")) continue;
+            if (files[i].startsWith(".git")) continue;
+            if (files[i].startsWith(".svn")) continue;
+            if (files[i].startsWith(".csv")) continue;
+            if (files[i].startsWith(".SVN")) continue;
+            if (files[i].startsWith(".CSV")) continue;
 
             File sub = new File(dir, files[i]);
             String nowfar = (sofar == null) ?  files[i] : (sofar + "/" + files[i]);

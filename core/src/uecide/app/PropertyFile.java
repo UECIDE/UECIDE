@@ -63,6 +63,7 @@ public class PropertyFile {
         if (userFile != null) {
             try {
                 properties.store(new FileWriter(userFile), null);
+                Debug.message("Saved property file " + userFile.getAbsolutePath());
             } catch (Exception e) {
                 Base.error(e);
             }
