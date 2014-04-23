@@ -1719,7 +1719,7 @@ public class Editor extends JFrame implements RunnerListener {
 
     public void importLibrary(String name) {
         String[] bits = name.split("::");
-        HashMap<String, Library>libs = Base.getLibraryCollection(bits[0]);
+        HashMap<String, Library>libs = Base.getLibraryCollection(bits[0], core.getName());
         if (libs == null) {
             return;
         }
@@ -1780,7 +1780,7 @@ public class Editor extends JFrame implements RunnerListener {
         };
 
         if (core != null) {
-            HashMap<String, Library> coreLibraries = Base.getLibraryCollection(core.getName());
+            HashMap<String, Library> coreLibraries = Base.getLibraryCollection(core.getName(), core.getName());
             if (coreLibraries != null) {
                 if (coreLibraries.size() > 0) {
                     JMenu coreMenu = new JMenu(core.getName());
@@ -1796,7 +1796,7 @@ public class Editor extends JFrame implements RunnerListener {
             }
         }
 
-        HashMap<String, Library> contributedLibraries = Base.getLibraryCollection("sketchbook");
+        HashMap<String, Library> contributedLibraries = Base.getLibraryCollection("sketchbook", core.getName());
         if (contributedLibraries != null) {
             if (contributedLibraries.size() > 0) {
                 int menuSize = 0;
@@ -1821,10 +1821,12 @@ public class Editor extends JFrame implements RunnerListener {
             }
         }
 
-        for (String key : Base.libraryCollections.keySet()) {
+        String[] ck = Base.libraryCollections.keySet().toArray(new String[0]);
+        Arrays.sort(ck);
+        for (String key : ck) {
             if (key.startsWith("cat.")) {
                 String ksub = key.substring(4);
-                HashMap<String, Library> categorizedLibraries = Base.getLibraryCollection(key);
+                HashMap<String, Library> categorizedLibraries = Base.getLibraryCollection(key, core.getName());
                 if (categorizedLibraries != null) {
                     if (categorizedLibraries.size() > 0) {
                         int menuSize = 0;
@@ -1900,11 +1902,25 @@ public class Editor extends JFrame implements RunnerListener {
             addSketches(contributedItem, sbLibs);
         }
 
-        for (String key : Base.libraryCategoryNames.keySet()) {
+        String[] ck = Base.libraryCategoryNames.keySet().toArray(new String[0]);
+        Arrays.sort(ck);
+        for (String key : ck) {
             String cName = Base.libraryCategoryNames.get(key);
             File cPath = Base.libraryCategoryPaths.get(key);
             JMenu catItem = new JMenu(cName);
-            addSketches(catItem, cPath);
+
+            HashMap<String, Library> coll = Base.getLibraryCollection("cat." + key, core.getName());
+            String[] colnames = coll.keySet().toArray(new String[0]);
+            Arrays.sort(colnames);
+            for (String colname : colnames) {
+                Library l = coll.get(colname);
+                Debug.message("Looking for examples in " + l.getFolder());
+                JMenu libItem = new JMenu(l.getName());
+                addSketches(libItem, l.getFolder());
+                if (libItem.getItemCount() > 0) {
+                    catItem.add(libItem);
+                }
+            }
             examplesMenu.add(catItem);
         }
     }
@@ -2538,10 +2554,17 @@ public class Editor extends JFrame implements RunnerListener {
     public void createExtraTokens(SketchEditor se) {
         RSyntaxTextArea ta = se.textArea;
         HashMap<String, Library> allLibraries = new HashMap<String, Library>();
-        if (core != null) {
-            allLibraries.putAll(Base.getLibraryCollection(core.getName()));
+
+        ArrayList<String> colnames = Base.getLibraryCollectionNames();
+
+        for (String col : colnames) {
+            allLibraries.putAll(Base.getLibraryCollection(col, core.getName()));
         }
-        allLibraries.putAll(Base.getLibraryCollection("sketchbook"));
+
+//        if (core != null) {
+//            allLibraries.putAll(Base.getLibraryCollection(core.getName(), core.getName()));
+//        }
+//        allLibraries.putAll(Base.getLibraryCollection("sketchbook", core.getName()));
 
         ArduinoTokenMaker tm = (ArduinoTokenMaker)((RSyntaxDocument)ta.getDocument()).getSyntaxStyle();
 

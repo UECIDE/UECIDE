@@ -166,6 +166,16 @@ public class Sketch implements MessageConsumer {
         return null;
     }
 
+    public String[] getFileNames() {
+        String[] out = new String[sketchFiles.size()];
+        int i = 0;
+        for (SketchFile f : sketchFiles) {
+            out[i++] = f.file.getName();
+        }
+        Arrays.sort(out);
+        return out;
+    }
+
     public File createBuildFolder() {
         String name = "build-" + uuid;
         Debug.message("Creating build folder " + name);
@@ -362,7 +372,8 @@ public class Sketch implements MessageConsumer {
                 combinedMain.append(line + "\n");
             }
         }
-        for (SketchFile f : sketchFiles) {
+        for (String fn : getFileNames()) {
+            SketchFile f = getFileByName(fn);
             String lcn = f.file.getName().toLowerCase();
             if (
                 lcn.endsWith(".h") || 
@@ -2158,33 +2169,33 @@ public class Sketch implements MessageConsumer {
         if (buildFolder != null) {
             process.directory(buildFolder);
         }
-        Map<String, String> environment = process.environment();
-
-        String pathvar = "PATH";
-        if (Base.isWindows()) {
-            pathvar = "Path";
-        }
-
-        String paths = all.get("path");
-        if (paths != null) {
-            for (String p : paths.split("::")) {
-                String oPath = environment.get(pathvar);
-                if (oPath == null) {
-                    oPath = System.getenv(pathvar);
-                }
-                environment.put(pathvar, oPath + File.pathSeparator + parseString(p));
-            }
-        }
-
-        String env = all.get("environment");
-        if (env != null) {
-            for (String ev : env.split("::")) {
-                String[] bits = ev.split("=");
-                if (bits.length == 2) {
-                    environment.put(bits[0], parseString(bits[1]));
-                }
-            }
-        }
+//        Map<String, String> environment = process.environment();
+//
+//        String pathvar = "PATH";
+//        if (Base.isWindows()) {
+//            pathvar = "Path";
+//        }
+//
+//        String paths = all.get("path");
+//        if (paths != null) {
+//            for (String p : paths.split("::")) {
+//                String oPath = environment.get(pathvar);
+//                if (oPath == null) {
+//                    oPath = System.getenv(pathvar);
+//                }
+//                environment.put(pathvar, oPath + File.pathSeparator + parseString(p));
+//            }
+//        }
+//
+//        String env = all.get("environment");
+//        if (env != null) {
+//            for (String ev : env.split("::")) {
+//                String[] bits = ev.split("=");
+//                if (bits.length == 2) {
+//                    environment.put(bits[0], parseString(bits[1]));
+//                }
+//            }
+//        }
 
         StringBuilder sb = new StringBuilder();
         for (String component : stringList) {

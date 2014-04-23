@@ -685,8 +685,25 @@ public class Base {
         }
     }
 
-    public static HashMap<String, Library> getLibraryCollection(String name) {
-        return libraryCollections.get(name);
+    public static ArrayList<String> getLibraryCollectionNames() {
+        ArrayList<String> out = new ArrayList<String>();
+        for (String k : libraryCollections.keySet()) {
+            out.add(k);
+        }
+        return out;
+    }
+
+    public static HashMap<String, Library> getLibraryCollection(String name, String corename) {
+        HashMap<String, Library>out = new HashMap<String, Library>();
+        HashMap<String, Library>coll = libraryCollections.get(name);
+        for (String k : coll.keySet()) {
+            Library v = coll.get(k);
+            if (v.worksWith(corename)) {
+                out.put(k, v);
+            }
+        }
+        return out;
+        //return libraryCollections.get(name);
     }
 
     public static HashMap<String, HashMap<String, Library>> libraryCollections;
@@ -712,7 +729,7 @@ public class Base {
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
         for (String core : corelist) {
-            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder(), "core")); // Core libraries
+            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder(), "core", core)); // Core libraries
         }
 
         libraryCollections.put("sketchbook", loadLibrariesFromFolder(getUserLibrariesFolder(),"contributed")); // Contributed libraries
@@ -722,6 +739,10 @@ public class Base {
     }
 
     public static HashMap<String, Library> loadLibrariesFromFolder(File folder, String type) {
+        return loadLibrariesFromFolder(folder, type, "all");
+    }
+
+    public static HashMap<String, Library> loadLibrariesFromFolder(File folder, String type, String cr) {
         HashMap theseLibraries = new HashMap<String, Library>();
         if (!folder.exists()) {
             return theseLibraries;
@@ -730,10 +751,22 @@ public class Base {
         Debug.message("Loading libraries from " + folder.getAbsolutePath());
         for (File f : list) {
             if (f.isDirectory()) {
+                if (cr.equals("all")) {
+                    boolean sub = false;
+                    for (String c : cores.keySet()) {
+                        if (f.getName().equals(c)) {
+                            Debug.message("  Found sub-library core group " + f);
+                            theseLibraries.putAll(loadLibrariesFromFolder(f, type, c));
+                            sub = true;
+                            break;
+                        }
+                    }
+                    if (sub) continue;
+                }
                 File files[] = f.listFiles();
                 for (File sf : files) {
                     if ((sf.getName().equals(f.getName() + ".h") || (sf.getName().startsWith(f.getName() + "_") && sf.getName().endsWith(".h")))) {
-                        Library newLibrary = new Library(sf, type);
+                        Library newLibrary = new Library(sf, type, cr);
                         if (newLibrary.isValid()) {
                             theseLibraries.put(newLibrary.getName(), newLibrary);
                             Debug.message("    Adding new library " + newLibrary.getName() + " from " + f.getAbsolutePath());

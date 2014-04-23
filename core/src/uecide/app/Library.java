@@ -27,13 +27,15 @@ public class Library {
     public File utilityFolder;
     public HashMap<String, File>examples;
     public String type;
+    public String core;
 
     public boolean valid = false;
 
     public boolean buildLibrary = false;
 
-    public Library(File hdr, String t) {
+    public Library(File hdr, String t, String c) {
         type = t;
+        core = c;
         File root = hdr.getParentFile();
         name = hdr.getName().substring(0, hdr.getName().indexOf(".h"));;
         folder = root;
@@ -187,5 +189,15 @@ public class Library {
         return type.equals("contributed");
     }
 
+    public String getCore() {
+        return core;
+    }
+
+    public boolean worksWith(String c) {
+        if (core.equals("all")) {
+            return true;
+        }
+        return core.equals(c);
+    }
 }
 
