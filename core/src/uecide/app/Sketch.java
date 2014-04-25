@@ -640,8 +640,8 @@ public class Sketch implements MessageConsumer {
         if (l.endsWith(".h")) {
             l = l.substring(0, l.lastIndexOf("."));
         }
-        HashMap<String, Library> coreLibraries = Base.getLibraryCollection(editor.core.getName());
-        HashMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook");
+        HashMap<String, Library> coreLibraries = Base.getLibraryCollection(editor.core.getName(), editor.core.getName());
+        HashMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook", editor.core.getName());
 
         if (importedLibraries.get(l) != null) {
             // The library has already been imported.  Do nothing
@@ -655,7 +655,7 @@ public class Sketch implements MessageConsumer {
 
         if (lib == null) {
             for (String key : Base.libraryCategoryNames.keySet()) {
-                HashMap<String, Library> catLib = Base.getLibraryCollection("cat." + key);
+                HashMap<String, Library> catLib = Base.getLibraryCollection("cat." + key, editor.core.getName());
                 lib = catLib.get(l);
                 if (lib != null) {
                     break;
