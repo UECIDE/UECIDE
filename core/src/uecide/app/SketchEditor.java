@@ -61,18 +61,7 @@ class SketchEditor extends JPanel {
         super();
         setLayout(new BorderLayout());
         textArea = new RSyntaxTextArea();
-        if (file.getName().endsWith(".ino") || file.getName().endsWith(".pde")) {
-            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_ARDUINO);
-        }
-        if (file.getName().endsWith(".cpp") || file.getName().endsWith(".h")) {
-            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS);
-        }
-        if (file.getName().endsWith(".c")) {
-            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_C);
-        }
-        if (file.getName().endsWith(".S")) {
-            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_AVR);
-        }
+        textArea.setSyntaxEditingStyle(FileType.getSyntaxStyle(file));
 
         Document d = textArea.getDocument();
         d.addDocumentListener(new DocumentListener() {

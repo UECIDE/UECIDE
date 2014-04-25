@@ -1132,8 +1132,8 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        if (!(validSourceFile(sourceFile))) {
-            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h, .hh or .S files to a sketch", 40, "\n"), null);
+        if (!(FileType.canEdit(sourceFile))) {
+            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add " + FileType.editableList() + " files to a sketch", 40, "\n"), null);
             return false;
         }
 
@@ -2301,23 +2301,6 @@ public class Sketch implements MessageConsumer {
         return false;    
     }
 
-    public boolean validSourceFile(File f) {
-        return validSourceFile(f.getName());
-    }
-
-    public boolean validSourceFile(String f) {
-        if (f.endsWith(".ino")) return true;
-        if (f.endsWith(".pde")) return true;
-        if (f.endsWith(".cpp")) return true;
-        if (f.endsWith(".cxx")) return true;
-        if (f.endsWith(".cc")) return true;
-        if (f.endsWith(".c")) return true;
-        if (f.endsWith(".h")) return true;
-        if (f.endsWith(".hh")) return true;
-        if (f.endsWith(".S")) return true;
-        return false;
-    }
-
     public void cleanBuild() {
         System.gc();
         Base.removeDescendants(buildFolder);
@@ -2376,8 +2359,8 @@ public class Sketch implements MessageConsumer {
             return;
         }
         File newFile = new File(folder, filename);
-        if (!validSourceFile(newFile)) {
-            JOptionPane.showMessageDialog(null, "File is not a valid source file", "Error", JOptionPane.ERROR_MESSAGE);
+        if (!FileType.canEdit(newFile)) {
+            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add " + FileType.editableList() + " files to a sketch", 40, "\n"), null);
             return;
         }
         if (newFile.exists()) {
@@ -2410,8 +2393,8 @@ public class Sketch implements MessageConsumer {
             return;
         }
         File newFile = new File(folder, newName);
-        if (!validSourceFile(newFile)) {
-            JOptionPane.showMessageDialog(null, "File is not a valid source file", "Error", JOptionPane.ERROR_MESSAGE);
+        if (!FileType.canEdit(newFile)) {
+            Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add " + FileType.editableList() + " files to a sketch", 40, "\n"), null);
             return;
         }
         if (newFile.exists()) {

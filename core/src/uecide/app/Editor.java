@@ -2550,16 +2550,8 @@ public class Editor extends JFrame implements RunnerListener {
     public void handleStatusOk(int function, String data) {
         switch (function) {
             case ADD_NEW_FILE:
-                if (!(
-                    data.endsWith(".ino") || 
-                    data.endsWith(".pde") || 
-                    data.endsWith(".cpp") || 
-                    data.endsWith(".c") || 
-                    data.endsWith(".hh") || 
-                    data.endsWith(".h") || 
-                    data.endsWith(".S")
-                )) {
-                    Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add .ino, .pde, .c, .cpp, .h, .hh or .S files to a sketch", 40, "\n"), null);
+                if (!FileType.canEdit(data)) {
+                    Base.showWarning(Translate.t("Error Adding File"),Translate.w("Error: you can only add files ending in " + FileType.editableList() + " to a sketch", 40, "\n"), null);
                     return;
                 }
                 sketch.createBlankFile(data);
