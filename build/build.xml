@@ -16,7 +16,10 @@
     </condition>
 
     <sequential>
-        <property file="version.txt"/>
+        <!--property file="version.txt"/-->
+        <exec outputproperty="version" executable="git">
+            <arg value="tag" />
+        </exec>
         <property file="build.settings"/>
         <property name="aws.bucket" value="chipkit" />
 
