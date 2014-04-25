@@ -2,8 +2,13 @@
 <project name="Processing Core" default="build">
 
 
-    <property file="../build/build.settings"/>
-    <property file="../build/version.txt"/>
+    <sequential>
+        <property file="../build/build.settings"/>
+        <exec outputproperty="version" executable="git">
+            <arg value="tag" />
+        </exec>
+    </sequential>
+
     <tstamp>
         <format property="TODAY" pattern="yyyyMMdd" />
     </tstamp>
