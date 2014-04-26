@@ -7,6 +7,11 @@
         <exec outputproperty="version" executable="git">
             <arg value="tag" />
         </exec>
+        <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
+            <arg value="rev-list"/>
+            <arg value="${version}..."/>
+            <arg value="--count"/>
+        </exec>
     </sequential>
 
     <tstamp>
@@ -20,14 +25,6 @@
 
     <available file="../.git" type="dir" property="git.present" />
   
-    <target name="build.number" description="Get GIT commit number" if="git.present">
-        <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
-            <arg value="rev-list"/>
-            <arg value="HEAD"/>
-            <arg value="--count"/>
-        </exec>
-    </target>
-
     <target name="compile" description="Compile">
         <mkdir dir="bin" />
         <javac target="1.6" 
@@ -41,7 +38,7 @@
         </javac>
     </target>		
 
-    <target name="build" depends="compile,build.number" description="Build uecide">
+    <target name="build" depends="compile" description="Build uecide">
         <jar basedir="bin" destfile="uecide.jar">
             <manifest>
                 <attribute name="Built-By" value="${user.name}"/>

@@ -1698,7 +1698,7 @@ public class Base {
                 com = Translate.t("unknown");
             }
 
-            activeEditor.message("  " + entries[i] + " - " + ver + " " + Translate.t("compiled") + " " + com + "\n");
+            activeEditor.message("  " + entries[i] + " - " + ver + "\n");
         }
 
         activeEditor.message("\n" + Translate.t("Processes") + ":\n");

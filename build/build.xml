@@ -20,6 +20,11 @@
         <exec outputproperty="version" executable="git">
             <arg value="tag" />
         </exec>
+        <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
+            <arg value="rev-list"/>
+            <arg value="${version}..."/>
+            <arg value="--count"/>
+        </exec>
         <property file="build.settings"/>
         <property name="aws.bucket" value="chipkit" />
 
@@ -62,7 +67,7 @@
         <!--include name="core/lib/ant-launcher.jar" /-->
     </fileset>
 
-    <target name="build" depends="build.number" description="Build IDE.">
+    <target name="build" description="Build IDE.">
         <echo>
 Building for ${brand} version ${version}${suffix}, build ${build.number}
         </echo>
@@ -75,14 +80,6 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
 
     <target name="deb" description="Build IDE for distribution.">
         <antcall target="${platform}-deb" />
-    </target>
-
-    <target name="build.number" description="Get GIT commit number" if="git.present">
-        <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
-            <arg value="rev-list"/>
-            <arg value="HEAD"/>
-            <arg value="--count"/>
-        </exec>
     </target>
 
     <target name="subprojects-clean">
@@ -330,14 +327,14 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
   </target>
   
 
-    <target name="upgrade-dist" depends="upgrade-build,build.number"
+    <target name="upgrade-dist" depends="upgrade-build"
         description="Build distribution version">
         <zip destfile="upgrade/${product}-${version}${suffix}-upgrade.zip">
             <zipfileset dir="upgrade/work" prefix="${product}-${version}${suffix}" filemode="755"/>
         </zip>
     </target>
 
-    <target name="linux-dist" depends="linux-build,build.number" 
+    <target name="linux-dist" depends="linux-build" 
         description="Build .tar.gz of linux version">
 
         <zip destfile="linux/${product}-${version}${suffix}-linux.zip">
@@ -353,7 +350,7 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
         </echo>
     </target>
 
-	<target name="linux-generate-debian" depends="build,build.number" description="Build debian tree ready for packaging">
+	<target name="linux-generate-debian" depends="build" description="Build debian tree ready for packaging">
         <property name="proot" value="linux/${product}-${version}${suffix}-${arch}" />
         <mkdir dir="${proot}" />
         <mkdir dir="${proot}/usr" />
@@ -430,19 +427,19 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     </target>
 
 
-	<target name="linux-deb" depends="linux-build,build.number" description="Build .deb of linux version">
+	<target name="linux-deb" depends="linux-build" description="Build .deb of linux version">
         <property name="arch" value="i386"/>
         <property name="deps.extra" value="" />
         <antcall target="linux-generate-debian"/>
     </target>
 
-    <target name="linux64-deb" depends="linux-build,build.number" description="Build .deb of linux version">
+    <target name="linux64-deb" depends="linux-build" description="Build .deb of linux version">
         <property name="arch" value="amd64"/>
         <property name="deps.extra" value=", libc6-i386" />
         <antcall target="linux-generate-debian"/>
     </target>
 
-    <target name="linuxPi-deb" depends="linux-build,build.number" description="Build .deb of linux version">
+    <target name="linuxPi-deb" depends="linux-build" description="Build .deb of linux version">
         <property name="arch" value="armhf"/>
         <property name="deps.extra" value="" />
         <antcall target="linux-generate-debian"/>
@@ -525,7 +522,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         <delete file="windows/script.nsi" />
     </target>
 
-    <target name="windows-dist-lite" depends="windows-build,build.number" 
+    <target name="windows-dist-lite" depends="windows-build" 
         description="Create .zip files of windows version">
 
         <zip destfile="windows/${product}-${version}${suffix}-windows-lite.zip">
@@ -536,7 +533,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
         </antcall>
     </target>
   
-    <target name="windows-dist" depends="windows-build,build.number" 
+    <target name="windows-dist" depends="windows-build" 
         description="Create .zip files of windows version">
 
         <unzip dest="windows/work" src="windows/dist/jre7.zip" overwrite="false"/>
