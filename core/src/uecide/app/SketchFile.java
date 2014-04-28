@@ -81,5 +81,9 @@ public class SketchFile {
         file = f;
         textArea.setFile(f);
     }
+
+    public void reloadFile() {
+        textArea.loadFile(file);
+    }
 }
 

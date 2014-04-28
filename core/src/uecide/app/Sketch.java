@@ -909,7 +909,16 @@ public class Sketch implements MessageConsumer {
         System.gc();
     }
 
+    public void reloadAllFiles() {
+        for (SketchFile f : sketchFiles) {
+            f.reloadFile();
+        }
+    }
+
     public boolean build() {
+        if (Base.preferences.getBoolean("editor.external")) {
+            reloadAllFiles();
+        }
         if (editor.board == null) {
             Base.showWarning(Translate.t("No Board Selected"), Translate.w("The sketch cannot be compiled: You have no board selected. If you haven't yet installed any boards please do so through the Plugin Manager.", 40, "\n"), null);
             return false;

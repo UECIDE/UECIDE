@@ -85,6 +85,8 @@ class SketchEditor extends JPanel {
     }
 
     public void refreshSettings() {
+        boolean external = Base.preferences.getBoolean("editor.external");
+        textArea.setEditable(!external);
         textArea.setCodeFoldingEnabled(true);
         textArea.setAntiAliasingEnabled(true);
         textArea.setMarkOccurrences(true);
@@ -97,7 +99,11 @@ class SketchEditor extends JPanel {
         textArea.setPaintTabLines(Base.preferences.getBoolean("editor.showtabs"));
 
         scrollPane.setFoldIndicatorEnabled(true);
-        setBackground(Base.theme.getColor("editor.bgcolor"));
+        setBackground( external ?
+            Base.theme.getColor("editor.external.bgcolor") :
+            Base.theme.getColor("editor.bgcolor")
+        );
+
         textArea.setForeground(Base.theme.getColor("editor.fgcolor"));
         setFont(Base.preferences.getFont("editor.font"));
         Gutter g = scrollPane.getGutter();

@@ -27,6 +27,7 @@ linestatus.bgcolor = #666666
 
 editor.fgcolor = #000000
 editor.bgcolor = #ffffff
+editor.external.bgcolor = #ffeedd
 
 about.version.x = 365
 about.version.y = 215
