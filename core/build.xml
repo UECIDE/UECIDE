@@ -4,9 +4,12 @@
 
     <sequential>
         <property file="../build/build.settings"/>
-        <exec outputproperty="version" executable="git">
-            <arg value="tag" />
+        <exec outputproperty="version.tag" executable="git">
+            <arg value="describe" />
         </exec>
+        <propertyregex property="version" input="${version.tag}" regexp="^([^-]+)" select="\1" />
+
+
         <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${version}..."/>

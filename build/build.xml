@@ -17,9 +17,12 @@
 
     <sequential>
         <!--property file="version.txt"/-->
-        <exec outputproperty="version" executable="git">
-            <arg value="tag" />
+        <exec outputproperty="version.tag" executable="git">
+            <arg value="describe" />
         </exec>
+        <propertyregex property="version" input="${version.tag}" regexp="^([^-]+)" select="\1" />
+
+
         <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${version}..."/>
@@ -591,7 +594,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     </target>
 
     <target name="publish-all">
-        <foreach list="sarge,lucid,maverick,natty,oneiric,precise,quantal,raring,saucy" param="distro" target="publish">
+        <foreach list="sarge,lucid,maverick,natty,oneiric,precise,quantal,raring,saucy,trusty,wheezy,utopic" param="distro" target="publish">
             <param name="file" value="${file}"/>
         </foreach>
     </target>
