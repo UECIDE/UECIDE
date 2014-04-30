@@ -40,6 +40,9 @@ import java.util.zip.*;
 import java.util.jar.*;
 import uecide.plugin.*;
 
+import java.lang.reflect.Method;
+
+
 
 import javax.swing.*;
 import javax.imageio.*;
@@ -207,7 +210,28 @@ public class Base {
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
         try {
-            if (!headless) platform.setLookAndFeel();
+            if (!headless) {
+                String laf = Base.preferences.get("editor.laf");
+                if (laf == null) {
+                    laf = Base.preferences.getPlatformSpecific("editor.laf.default");
+                    if (laf != null) {
+                        Base.preferences.set("editor.laf", laf);
+                    }
+                }
+                if (laf != null) {
+                    UIManager.setLookAndFeel(laf);
+                    if (laf.startsWith("com.jtatoo.plaf.")) {
+                        Class<?> cls = Class.forName(laf);
+                        Class[] cArg = new Class[3];
+                        cArg[0] = String.class;
+                        cArg[1] = String.class;
+                        cArg[2] = String.class;
+                        Method mth = cls.getMethod("setTheme", cArg);
+                        mth.invoke(cls, "Default", "No License Key", "UECIDE");
+                    }
+                }
+            }
+
         } catch (Exception e) {
             String mess = e.getMessage();
             if (mess.indexOf("ch.randelshofer.quaqua.QuaquaLookAndFeel") == -1) {
@@ -216,9 +240,6 @@ public class Base {
                 System.err.println(mess);
             }
         }
-
-//        UIManager.getDefaults().put("TabbedPane.contentBorderInsets", new Insets(0,0,0,0));
-//        UIManager.getDefaults().put("TabbedPane.tabsOverlapBorder", true);
 
         // Create a location for untitled sketches
         untitledFolder = createTempFolder("untitled");
@@ -553,8 +574,107 @@ public class Base {
     /**
      * Prompt for a sketch to open, and open it in a new window.
      */
+
+    public static boolean isSketchFolder(File folder) {
+        if (folder.isDirectory()) {
+            File testFile = new File(folder, folder.getName() + ".ino");
+            if (testFile.exists()) {
+                return true;
+            }
+            testFile = new File(folder, folder.getName() + ".pde");
+            if (testFile.exists()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean pathContainsSketchSomewhere(File root) {
+        if (!root.isDirectory()) {
+            return false;
+        }
+        if (isSketchFolder(root)) {
+            return true;
+        }
+        File[] files = root.listFiles();
+        for (File f : files) {
+            if (f.isDirectory()) {
+                if (pathContainsSketchSomewhere(f)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static class SketchFolderFilter extends javax.swing.filechooser.FileFilter {
+        public boolean accept(File f) {
+            if (Base.isSketchFolder(f)) {
+                return true;
+            }
+            if (f.isDirectory()) {
+                return true;
+            } 
+            return false;
+        }
+
+        public String getDescription() {
+            return Translate.t("Sketch Folders");
+        }
+    }
+    public static class SketchFileView extends javax.swing.filechooser.FileView {
+        public String getTypeDescription(File f) {
+            if (Base.isSketchFolder(f)) {
+                return Translate.t("UECIDE Sketch Folder");
+            }
+            return Translate.t("Directory");
+        }
+
+        public Boolean isTraversable(File f) {
+            if (Base.isSketchFolder(f)) {
+                return false;
+            }
+            return true;
+        }
+
+        public Icon getIcon(File f) {
+            System.err.println("I AM HERE!!!");
+            if (Base.isSketchFolder(f)) {
+                File imageLocation = new File(getContentFile("lib/theme"), "icon16.png");
+                Image image = Toolkit.getDefaultToolkit().createImage(imageLocation.getAbsolutePath());
+                ImageIcon icon = new ImageIcon(image, Translate.t("UECIDE Sketch"));
+                System.err.println("Providing icon for " + f.getAbsolutePath());
+                return icon;
+            }
+            System.err.println("No icon for " + f.getAbsolutePath());
+            return null;
+        }
+    }
+
     public static void handleOpenPrompt() {
         // get the frontmost window frame for placing file dialog
+
+        JFileChooser fc = new JFileChooser();
+
+//        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        javax.swing.filechooser.FileFilter filter = new SketchFolderFilter();
+        fc.setFileFilter(filter);
+
+        javax.swing.filechooser.FileView view = new SketchFileView();
+        fc.setFileView(view);
+
+        fc.setCurrentDirectory(Base.getSketchbookFolder());
+
+        int rv = fc.showOpenDialog(activeEditor);
+
+        if (rv == JFileChooser.APPROVE_OPTION) {
+            createNewEditor(fc.getSelectedFile().getAbsolutePath());
+        }
+            
+        return;
+/*
+
         FileDialog fd = new FileDialog(activeEditor,
             Translate.t("Open %1 sketch...", theme.get("product.cap")),
             FileDialog.LOAD);
@@ -581,6 +701,7 @@ public class Base {
 
         File inputFile = new File(directory, filename);
         createNewEditor(inputFile.getAbsolutePath());
+*/
     }
 
 
@@ -2506,6 +2627,12 @@ public class Base {
             e.rebuildExamplesMenu();
             e.rebuildPluginsMenu();
             e.populateMenus();
+        }
+    }
+
+    public static void updateLookAndFeel() {
+        for (Editor e : editors) {
+            SwingUtilities.updateComponentTreeUI(e);
         }
     }
 }

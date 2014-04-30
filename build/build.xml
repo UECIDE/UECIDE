@@ -66,8 +66,8 @@
         <include name="core/uecide.jar" />
         <include name="core/lib/jna.jar" />
         <include name="core/lib/jssc.jar" />
-        <!--include name="core/lib/ant.jar" /-->
-        <!--include name="core/lib/ant-launcher.jar" /-->
+        <include name="core/lib/JTattoo-1.6.10.jar" />
+        <include name="core/lib/liquidlnf.jar" />
     </fileset>
 
     <target name="build" description="Build IDE.">

@@ -117,9 +117,13 @@ public class Preferences {
     JTextField compilersLocationField;
     JTextField libsLocationField;
 
+    JComboBox selectedTheme;
+
     JList extraPortList;
     DefaultListModel extraPortListModel = new DefaultListModel();
     JTextField portInput;
+
+    public static HashMap<String, String>themes;
 
     JTable libraryLocationTable;
     class LibraryDetail {
@@ -491,6 +495,72 @@ public class Preferences {
 
         JLabel label;
         JButton button;
+
+        c.gridwidth = 1;
+        label = new JLabel("Window theme:");
+        p.add(label, c);
+        c.gridx = 1;
+        c.gridwidth = 2;
+
+        themes = new HashMap<String, String>();
+        UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
+        for (UIManager.LookAndFeelInfo info : lafInfo) {
+            themes.put(info.getName(), info.getClassName());
+        }
+
+        themes.put("Acryl",     "com.jtattoo.plaf.acryl.AcrylLookAndFeel");
+        themes.put("Aero",      "com.jtattoo.plaf.aero.AeroLookAndFeel");
+        themes.put("Aluminium", "com.jtattoo.plaf.aluminium.AluminiumLookAndFeel");
+        themes.put("Bernstein", "com.jtattoo.plaf.bernstein.BernsteinLookAndFeel");
+        themes.put("Fast",      "com.jtattoo.plaf.fast.FastLookAndFeel");
+        themes.put("Graphite",  "com.jtattoo.plaf.graphite.GraphiteLookAndFeel");
+        themes.put("HiFi",      "com.jtattoo.plaf.hifi.HiFiLookAndFeel");
+        themes.put("Luna",      "com.jtattoo.plaf.luna.LunaLookAndFeel");
+        themes.put("McWin",     "com.jtattoo.plaf.mcwin.McWinLookAndFeel");
+        themes.put("Mint",      "com.jtattoo.plaf.mint.MintLookAndFeel");
+        themes.put("Noire",     "com.jtattoo.plaf.noire.NoireLookAndFeel");
+        themes.put("Smart",     "com.jtattoo.plaf.smart.SmartLookAndFeel");
+
+        themes.put("Liquid",    "com.birosoft.liquid.LiquidLookAndFeel");
+
+        String[] keys = themes.keySet().toArray(new String[0]);
+        Arrays.sort(keys);
+
+
+        selectedTheme = new JComboBox(keys);
+        selectedTheme.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String value = (String)selectedTheme.getSelectedItem();
+                String laf = themes.get(value);
+                try {
+                    if (laf.startsWith("com.jtatoo.plaf.")) {
+                        Class<?> cls = Class.forName(laf);
+                        Class[] cArg = new Class[3];
+                        cArg[0] = String.class;
+                        cArg[1] = String.class;
+                        cArg[2] = String.class;
+                        Method mth = cls.getMethod("setTheme", cArg);
+                        mth.invoke(cls, "Default", "No License Key", "UECIDE");
+                    }
+                    UIManager.setLookAndFeel(laf);
+                    SwingUtilities.updateComponentTreeUI(dialog);
+                    Base.updateLookAndFeel();
+                } catch (Exception ignored) {
+                }
+            }
+        });
+                
+        String currentLaf = Base.preferences.get("editor.laf");
+        for (String k : keys) {
+            if (themes.get(k).equals(currentLaf)) {
+                selectedTheme.setSelectedItem(k);
+            }
+        }
+        p.add(selectedTheme, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 3;
         label = new JLabel("Sketchbook location:");
         p.add(label, c);
         c.gridwidth = 2;
@@ -917,6 +987,10 @@ public class Preferences {
     Base.preferences.set("location.cores", coresLocationField.getText());
     Base.preferences.set("location.compilers", compilersLocationField.getText());
     Base.preferences.set("location.libraries", libsLocationField.getText());
+
+    String value = (String)selectedTheme.getSelectedItem();
+    String laf = themes.get(value);
+    Base.preferences.set("editor.laf", laf);
 
     if (autoAssociateBox != null) {
       Base.preferences.setBoolean("platform.auto_file_type_associations", autoAssociateBox.isSelected());
