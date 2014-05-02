@@ -118,6 +118,7 @@ public class Preferences {
     JTextField libsLocationField;
 
     JComboBox selectedTheme;
+    JCheckBox useSystemDecorator;
 
     JList extraPortList;
     DefaultListModel extraPortListModel = new DefaultListModel();
@@ -500,7 +501,8 @@ public class Preferences {
         label = new JLabel("Window theme:");
         p.add(label, c);
         c.gridx = 1;
-        c.gridwidth = 2;
+        c.gridwidth = 1;
+        
 
         themes = new HashMap<String, String>();
         UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
@@ -533,14 +535,18 @@ public class Preferences {
                 String value = (String)selectedTheme.getSelectedItem();
                 String laf = themes.get(value);
                 try {
-                    if (laf.startsWith("com.jtatoo.plaf.")) {
+                    if (laf.startsWith("com.jtattoo.plaf.")) {
+                        Properties props = new Properties();
+                        props.put("windowDecoration", useSystemDecorator.isSelected() ? "on" : "off");
+                        props.put("logoString", "UECIDE");
+                        props.put("textAntiAliasing", "on");
+                        
                         Class<?> cls = Class.forName(laf);
-                        Class[] cArg = new Class[3];
-                        cArg[0] = String.class;
-                        cArg[1] = String.class;
-                        cArg[2] = String.class;
-                        Method mth = cls.getMethod("setTheme", cArg);
-                        mth.invoke(cls, "Default", "No License Key", "UECIDE");
+                        Class[] cArg = new Class[1];
+                        cArg[0] = Properties.class;
+                        Method mth = cls.getMethod("setCurrentTheme", cArg);
+                        mth.invoke(cls, props);
+                    } else {
                     }
                     UIManager.setLookAndFeel(laf);
                     SwingUtilities.updateComponentTreeUI(dialog);
@@ -549,7 +555,7 @@ public class Preferences {
                 }
             }
         });
-                
+
         String currentLaf = Base.preferences.get("editor.laf");
         for (String k : keys) {
             if (themes.get(k).equals(currentLaf)) {
@@ -557,6 +563,39 @@ public class Preferences {
             }
         }
         p.add(selectedTheme, c);
+
+        c.gridx = 2;
+
+        useSystemDecorator = new JCheckBox(Translate.t("Use System Decorator"));
+        p.add(useSystemDecorator, c);
+        useSystemDecorator.setSelected(Base.preferences.getBoolean("editor.laf.decorator"));
+
+        useSystemDecorator.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String value = (String)selectedTheme.getSelectedItem();
+                String laf = themes.get(value);
+                try {
+                    if (laf.startsWith("com.jtattoo.plaf.")) {
+                        Properties props = new Properties();
+                        props.put("windowDecoration", useSystemDecorator.isSelected() ? "off" : "on");
+                        props.put("logoString", "UECIDE");
+                        props.put("textAntiAliasing", "on");
+
+                        System.err.println(props.toString());
+                        
+                        Class<?> cls = Class.forName(laf);
+                        Class[] cArg = new Class[1];
+                        cArg[0] = Properties.class;
+                        Method mth = cls.getMethod("setCurrentTheme", cArg);
+                        mth.invoke(cls, props);
+                    }
+                    UIManager.setLookAndFeel(laf);
+                    SwingUtilities.updateComponentTreeUI(dialog);
+                    Base.updateLookAndFeel();
+                } catch (Exception ignored) {
+                }
+            }
+        });
 
         c.gridx = 0;
         c.gridy++;
@@ -991,6 +1030,7 @@ public class Preferences {
     String value = (String)selectedTheme.getSelectedItem();
     String laf = themes.get(value);
     Base.preferences.set("editor.laf", laf);
+    Base.preferences.setBoolean("editor.laf.decorator", useSystemDecorator.isSelected());
 
     if (autoAssociateBox != null) {
       Base.preferences.setBoolean("platform.auto_file_type_associations", autoAssociateBox.isSelected());

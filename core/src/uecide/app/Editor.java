@@ -1775,6 +1775,9 @@ public class Editor extends JFrame implements RunnerListener {
     public void rebuildImportMenu() {
         if (importMenu == null) return;
         importMenu.removeAll();
+        if (core == null) {
+            return;
+        }
 
         JMenuItem item = new JMenuItem(Translate.t("Add Library..."));
         item.addActionListener(new ActionListener() {

@@ -74,6 +74,9 @@ editor.laf.default.linux=com.sun.java.swing.plaf.gtk.GTKLookAndFeel
 editor.laf.default.windows=com.sun.java.swing.plaf.windows.WindowsLookAndFeel
 editor.laf.default.macosx=apple.laf.AppleLookAndFeel
 
+// Things work better with the system decorator!
+editor.laf.decorator=true
+
 # default size for the main window
 editor.window.width.default = 500
 editor.window.height.default = 600

@@ -54,6 +54,8 @@ import uecide.app.debug.Compiler;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import com.jtattoo.plaf.*;
+
 /**
  * The base class for the main uecide.application.
  * Primary role of this class is for platform identification and
@@ -211,6 +213,14 @@ public class Base {
 
         try {
             if (!headless) {
+                if (isLinux()) {
+                    Toolkit xToolkit = Toolkit.getDefaultToolkit();
+                    java.lang.reflect.Field awtAppClassNameField =
+                        xToolkit.getClass().getDeclaredField("awtAppClassName");
+                    awtAppClassNameField.setAccessible(true);
+                    awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
+                }
+
                 String laf = Base.preferences.get("editor.laf");
                 if (laf == null) {
                     laf = Base.preferences.getPlatformSpecific("editor.laf.default");
@@ -219,16 +229,19 @@ public class Base {
                     }
                 }
                 if (laf != null) {
-                    UIManager.setLookAndFeel(laf);
-                    if (laf.startsWith("com.jtatoo.plaf.")) {
+                    if (laf.startsWith("com.jtattoo.plaf.")) {
+                        Properties props = new Properties();
+                        props.put("windowDecoration", Base.preferences.getBoolean("editor.laf.decorator") ? "off" : "on");
+                        props.put("logoString", "UECIDE");
+                        props.put("textAntiAliasing", "on");
+
                         Class<?> cls = Class.forName(laf);
-                        Class[] cArg = new Class[3];
-                        cArg[0] = String.class;
-                        cArg[1] = String.class;
-                        cArg[2] = String.class;
-                        Method mth = cls.getMethod("setTheme", cArg);
-                        mth.invoke(cls, "Default", "No License Key", "UECIDE");
+                        Class[] cArg = new Class[1];
+                        cArg[0] = Properties.class;
+                        Method mth = cls.getMethod("setCurrentTheme", cArg);
+                        mth.invoke(cls, props);
                     }
+                    UIManager.setLookAndFeel(laf);
                 }
             }
 
@@ -638,15 +651,12 @@ public class Base {
         }
 
         public Icon getIcon(File f) {
-            System.err.println("I AM HERE!!!");
             if (Base.isSketchFolder(f)) {
                 File imageLocation = new File(getContentFile("lib/theme"), "icon16.png");
                 Image image = Toolkit.getDefaultToolkit().createImage(imageLocation.getAbsolutePath());
                 ImageIcon icon = new ImageIcon(image, Translate.t("UECIDE Sketch"));
-                System.err.println("Providing icon for " + f.getAbsolutePath());
                 return icon;
             }
-            System.err.println("No icon for " + f.getAbsolutePath());
             return null;
         }
     }
