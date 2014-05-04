@@ -1111,18 +1111,27 @@ public class Sketch implements MessageConsumer {
 
         newFolder.mkdirs();
 
-        // We want to copy over any extra files to the new folder.  That includes, at the moment:
-        // objects (binary objects) libraries (sketch included libraries).
+        // We want to copy over any extra files to the new folder. 
+        // Copying files named after the old sketch isn't really wanted though,
+        // as they are probably going to be recreated with the new name, or
+        // are files generated as a result of compilation (.hex, .lss etc).
 
-        File objects = new File(folder, "objects");
-        File libraries = new File(folder, "libraries");
+        File[] files = folder.listFiles();
 
-        if (objects.exists() && objects.isDirectory()) {
-            Base.copyDir(objects, new File(newFolder, "objects"));
-        }
+        for (File from : files) {
+            String f = from.getName();
+            File to = new File(newFolder, f);
 
-        if (libraries.exists() && libraries.isDirectory()) {
-            Base.copyDir(libraries, new File(newFolder, "libraries"));
+            // Skip any files with the sketch as the first part of the name.
+            if (f.startsWith(name + ".")) {
+                continue;
+            }
+
+            if (from.isDirectory()) {
+                Base.copyDir(from, to);
+            } else {
+                Base.copyFile(from, to);
+            }
         }
 
         for (SketchFile f : sketchFiles) {
