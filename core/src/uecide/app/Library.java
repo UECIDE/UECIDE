@@ -219,6 +219,10 @@ public class Library {
         return type.equals("contributed");
     }
 
+    public boolean isSketch() {
+        return type.equals("sketch");
+    }
+
     public String getCore() {
         return core;
     }
@@ -228,6 +232,14 @@ public class Library {
             return true;
         }
         return core.equals(c);
+    }
+
+    public String getArchiveName() {
+        return "lib" + type + "_" + name + ".a";
+    }
+
+    public String getLinkName() {
+        return type + "_" + name;
     }
 }
 

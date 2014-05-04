@@ -668,6 +668,32 @@ public class Sketch implements MessageConsumer {
         if (l.endsWith(".h")) {
             l = l.substring(0, l.lastIndexOf("."));
         }
+
+        Library lib;
+
+        // First, let's look for libraries included in the sketch folder itself.  Those should take priority over
+        // every other library in the system.
+
+        File sketchLibFolder = new File(folder, "libraries");
+        if (sketchLibFolder.exists() && sketchLibFolder.isDirectory()) {
+            File libFolder = new File(sketchLibFolder, l);
+            if (libFolder.exists() && libFolder.isDirectory()) {
+                File libHeader = new File(libFolder, l + ".h");
+                if (libHeader.exists()) {
+                    lib = new Library(libHeader, "sketch", "all");
+                    importedLibraries.put(l, lib);
+                    orderedLibraries.add(lib);
+
+                    // And then work through all the required libraries and add them.
+                    ArrayList<String> requiredLibraries = lib.getRequiredLibraries();
+                    for (String req : requiredLibraries) {
+                        addLibraryToImportList(req);
+                    }
+                    return;
+                }
+            }
+        }
+
         HashMap<String, Library> coreLibraries = Base.getLibraryCollection(editor.core.getName(), editor.core.getName());
         HashMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook", editor.core.getName());
 
@@ -676,7 +702,7 @@ public class Sketch implements MessageConsumer {
             return;
         }
 
-        Library lib = coreLibraries.get(l);
+        lib = coreLibraries.get(l);
         if (lib == null) {
             lib = contribLibraries.get(l);
         }
@@ -1084,6 +1110,21 @@ public class Sketch implements MessageConsumer {
         }
 
         newFolder.mkdirs();
+
+        // We want to copy over any extra files to the new folder.  That includes, at the moment:
+        // objects (binary objects) libraries (sketch included libraries).
+
+        File objects = new File(folder, "objects");
+        File libraries = new File(folder, "libraries");
+
+        if (objects.exists() && objects.isDirectory()) {
+            Base.copyDir(objects, new File(newFolder, "objects"));
+        }
+
+        if (libraries.exists() && libraries.isDirectory()) {
+            Base.copyDir(libraries, new File(newFolder, "libraries"));
+        }
+
         for (SketchFile f : sketchFiles) {
             String n = f.file.getName();
             f.file = new File(newFolder, n);
@@ -1828,7 +1869,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean compileLibrary(Library lib) {
-        File archive = getCacheFile("lib" + lib.getName() + ".a");
+        File archive = getCacheFile(lib.getArchiveName());  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
         HashMap<String, String> all = mergeAllProperties();
 
@@ -1856,6 +1897,7 @@ public class Sketch implements MessageConsumer {
                 String command = parseString(recipe);
                 boolean ok = execAsynchronously(command);
                 if (!ok) {
+                    archive.delete();
                     return false;
                 }
                 out.delete();
@@ -2138,7 +2180,7 @@ public class Sketch implements MessageConsumer {
 
         String liblist = "";
         for (Library lib : getImportedLibraries()) {
-            File aFile = getCacheFile("lib" + lib.getName() + ".a");
+            File aFile = getCacheFile(lib.getArchiveName());
             String headerName = lib.getName() + ".h";
             boolean inc = true;
             for (String ni : neverIncludes) {
@@ -2148,7 +2190,7 @@ public class Sketch implements MessageConsumer {
             }
 
             if (aFile.exists() && inc) {
-                settings.put("library", lib.getName());
+                settings.put("library", lib.getLinkName());
                 liblist += "::" + parseString(liboption);
             }
         }
