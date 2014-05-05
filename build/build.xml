@@ -8,6 +8,11 @@
     </taskdef>
 
     <available file="../.git" type="dir" property="git.present" />
+    <condition property="git.notpresent" value="true">
+        <not>
+	    <isset property="git.present"/>
+        </not>
+    </condition>
 
     <condition property="brand" value="default">
         <not>
@@ -15,19 +20,25 @@
         </not>
     </condition>
 
-    <sequential>
-        <!--property file="version.txt"/-->
+    <target name="getGitVersion" if="git.present">
         <exec outputproperty="version.tag" executable="git">
             <arg value="describe" />
         </exec>
         <propertyregex property="version" input="${version.tag}" regexp="^([^-]+)" select="\1" />
-
-
         <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${version}..."/>
             <arg value="--count"/>
         </exec>
+	<propertyfile file="version.plist">
+		<entry key="version" value="${version}" />
+		<entry key="build.number" value="${build.number}" />
+	</propertyfile>
+    </target>
+
+    <sequential>
+
+	<property file="version.plist" />
         <property file="build.settings"/>
         <property name="aws.bucket" value="chipkit" />
 
@@ -128,7 +139,7 @@ Linux doesn't have an installation schema yet
         <!--subant buildpath="../plugins" target="clean"/-->
     </target>
 
-    <target name="subprojects-build">
+    <target name="subprojects-build" depends="getGitVersion">
         <subant buildpath="../core" target="build"/>
         <!--subant buildpath="../plugins" target="build"/-->
     </target>
