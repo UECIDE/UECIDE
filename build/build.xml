@@ -613,7 +613,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     <target name="windows-dist" depends="windows-build" 
         description="Create .zip files of windows version">
 
-        <unzip dest="windows/work" src="windows/dist/jre7.zip" overwrite="false"/>
+        <get src="http://uecide.org/support/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
+
+        <unzip dest="windows/work" src="tmp/jre-7-windows.zip" overwrite="false"/>
 
         <zip destfile="windows/${product}-${version}${suffix}-windows.zip">
             <zipfileset dir="windows/work" prefix="${product}-${version}${suffix}" filemode="755" />
