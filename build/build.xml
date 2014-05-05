@@ -45,7 +45,8 @@
 
     <condition property="macosx"><os family="mac" /></condition>
     <condition property="windows"><os family="windows" /></condition>
-    <condition property="linux"><os family="unix" /></condition>
+    <condition property="linux"><os name="Linux" /></condition>
+    <condition property="freebsd"><os name="FreeBSD" /></condition>
 
     <condition property="platform" value="macosx">
         <os family="mac" />
@@ -54,7 +55,10 @@
             <os family="windows" />
     </condition>
     <condition property="platform"  value="linux">
-        <os family="unix" />
+        <os name="Linux" />
+    </condition>
+    <condition property="platform"  value="freebsd">
+        <os name="FreeBSD" />
     </condition>
 
     <!-- set time propert -->  
@@ -75,6 +79,40 @@
 Building for ${brand} version ${version}${suffix}, build ${build.number}
         </echo>
         <antcall target="${platform}-build" />
+    </target>
+
+    <target name="install" description="Install IDE">
+        <echo>
+Installing for ${brand} version ${version}${suffix}, build ${build.number}
+        </echo>
+        <antcall target="${platform}-install" />
+    </target>
+
+    <target name="windows-install" depends="windows-build">
+        <echo>
+Windows doesn't have an installation schema yet
+        </echo>
+    </target>
+
+    <target name="macosx-install" depends="macosx-build">
+        <echo>
+Mac OS X doesn't have an installation schema yet
+        </echo>
+    </target>
+
+    <target name="linux-install" depends="linux-build">
+        <echo>
+Linux doesn't have an installation schema yet
+        </echo>
+    </target>
+
+    <target name="freebsd-install" depends="freebsd-build">
+        <mkdir dir="/usr/local/share/${product}" />
+        <copy todir="/usr/local/share/${product}">
+            <fileset dir="freebsd/work" includes="**/*" />
+        </copy>
+        <chmod file="/usr/local/share/${product}/${product}" perm="755" />
+        <symlink link="/usr/local/bin/${product}" resource="/usr/local/share/${product}/${product}" />
     </target>
 
     <target name="dist" description="Build IDE for distribution.">
@@ -277,6 +315,10 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
     <delete dir="linux/work" />
   </target>
   
+  <target name="freebsd-clean" depends="subprojects-clean" description="Clean FreeBSD version">
+    <delete dir="freebsd/work" />
+  </target>
+  
   <target name="upgrade-build" depends="subprojects-build" description="Build upgrade version">
     <mkdir dir="upgrade/work" />
     
@@ -294,6 +336,27 @@ Building for ${brand} version ${version}${suffix}, build ${build.number}
         <foreach list="${plugins}" param="plugin" target="install_plugin">
             <param name="target.path" value="upgrade/work"/>
         </foreach>
+  </target>
+
+  <target name="freebsd-build" depends="subprojects-build" description="Build FreeBSD version">
+    <mkdir dir="freebsd/work" />
+    
+    <copy todir="freebsd/work/lib">
+            <fileset file="shared/lib/preferences.txt"/>
+            <fileset file="shared/lib/keywords.txt"/>
+    </copy>
+    
+    <copy todir="freebsd/work/lib" flatten="true">
+      <fileset refid="runtime.jars" />
+    </copy>
+    
+    <antcall target="assemble">
+      <param name="target.path" value="freebsd/work" />
+      <param name="target.platform" value="freebsd" />
+    </antcall>
+
+    <copy tofile="freebsd/work/${product}" file="freebsd/dist/freebsdrunner" />
+    <chmod perm="755" file="freebsd/work/${product}" />
   </target>
 
   <target name="linux-build" depends="subprojects-build" description="Build linux version">
@@ -550,7 +613,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/${product}.png
     </target>
   
     <target name="clean" description="Perform a spring cleaning" 
-        depends="upgrade-clean, linux-clean, windows-clean, macosx-clean, subprojects-clean">
+        depends="upgrade-clean, linux-clean, freebsd-clean, windows-clean, macosx-clean, subprojects-clean">
     </target>
 
     <target name="update-avrdude-macosx" description="Update the avrdude configuration to latest version." depends="">

@@ -28,7 +28,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package uecide.app.linux;
+package uecide.app.unix;
 import uecide.app.Base;
 
 import java.io.File;
