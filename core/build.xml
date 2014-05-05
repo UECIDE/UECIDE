@@ -2,20 +2,25 @@
 <project name="Processing Core" default="build">
 
 
-    <sequential>
-        <property file="../build/build.settings"/>
+    <target name="getGitVersion" if="git.present">
         <exec outputproperty="version.tag" executable="git">
             <arg value="describe" />
         </exec>
         <propertyregex property="version" input="${version.tag}" regexp="^([^-]+)" select="\1" />
-
-
         <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
             <arg value="rev-list"/>
             <arg value="${version}..."/>
             <arg value="--count"/>
         </exec>
-    </sequential>
+        <propertyfile file="version.plist">
+                <entry key="version" value="${version}" />
+                <entry key="build.number" value="${build.number}" />
+        </propertyfile>
+
+    </target>
+
+<property file="../build/build.settings"/>
+<property file="../build/version.plist"/>
 
     <tstamp>
         <format property="TODAY" pattern="yyyyMMdd" />
@@ -28,7 +33,7 @@
 
     <available file="../.git" type="dir" property="git.present" />
   
-    <target name="compile" description="Compile">
+    <target name="compile" description="Compile" depends="getGitVersion">
         <mkdir dir="bin" />
         <javac target="1.6" 
                source="1.6"

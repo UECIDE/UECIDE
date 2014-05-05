@@ -366,7 +366,7 @@ public class Preferences {
     populateLocationSettings(locationSettings);
     populateLibrarySettings(librarySettings);
 
-    if (Base.isLinux() || Base.isMacOS()) {
+    if (Base.isPosix()) {
         JPanel serialSettings = new JPanel(new GridBagLayout());
         serialSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
         tabs.add(Translate.t("Serial"), serialSettings);
@@ -1049,7 +1049,7 @@ public class Preferences {
             }
         }
 
-    if (Base.isLinux() || Base.isMacOS()) {
+    if (Base.isPosix()) {
         int i = 0;
         String pref = Base.preferences.get("serial.ports." + Integer.toString(i));
         while (pref != null) {
@@ -1120,7 +1120,7 @@ public class Preferences {
       autoAssociateBox.  setSelected(Base.preferences.getBoolean("platform.auto_file_type_associations"));
     }
 
-    if (Base.isLinux() || Base.isMacOS()) {
+    if (Base.isPosix()) {
         ArrayList<String> pl = Serial.getExtraPorts();
 
         extraPortListModel.clear();

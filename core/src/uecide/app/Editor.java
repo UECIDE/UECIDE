@@ -1011,7 +1011,7 @@ public class Editor extends JFrame implements RunnerListener {
         ArrayList<String> portList = Serial.getPortList();
         for (String p : portList) {
             boolean exists = true;
-            if (Base.isLinux() || Base.isMacOS()) {
+            if (Base.isPosix()) {
                 File f = new File(p);
                 if (!f.exists()) {
                     exists = false;

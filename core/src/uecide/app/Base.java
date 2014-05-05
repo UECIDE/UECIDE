@@ -127,6 +127,8 @@ public class Base {
 
         boolean redirectExceptions = true;
 
+	System.err.println(System.getProperty("os.name"));
+
         headless = false;
 
         for (int i = 0; i < args.length; i++) {
@@ -156,7 +158,7 @@ public class Base {
 
 
 
-        if (isLinux()) {
+        if (isUnix()) {
             if ((System.getenv("DISPLAY") == null) || (System.getenv("DISPLAY").equals(""))) {
                 headless = true;
             }
@@ -213,7 +215,7 @@ public class Base {
 
         try {
             if (!headless) {
-                if (isLinux()) {
+                if (isUnix()) {
                     Toolkit xToolkit = Toolkit.getDefaultToolkit();
                     java.lang.reflect.Field awtAppClassNameField =
                         xToolkit.getClass().getDeclaredField("awtAppClassName");
@@ -376,8 +378,8 @@ public class Base {
                 platformClass = Class.forName("uecide.app.macosx.Platform");
             } else if (Base.isWindows()) {
                 platformClass = Class.forName("uecide.app.windows.Platform");
-            } else if (Base.isLinux()) {
-                platformClass = Class.forName("uecide.app.linux.Platform");
+            } else if (Base.isUnix()) {
+                platformClass = Class.forName("uecide.app.unix.Platform");
             }
             platform = (Platform) platformClass.newInstance();
         } catch (Exception e) {
@@ -1011,15 +1013,10 @@ public class Base {
 
         if (osname.indexOf("Mac") != -1) {
             return "macosx";
-
         } else if (osname.indexOf("Windows") != -1) {
             return "windows";
-
-        } else if (osname.equals("Linux")) {  // true for the ibm vm
-            return "linux";
-
         } else {
-            return "other";
+            return osname.toLowerCase();
         }
     }
 
@@ -1027,7 +1024,7 @@ public class Base {
     * returns true if Processing is running on a Mac OS X machine.
     */
     public static boolean isMacOS() {
-        return System.getProperty("os.name").indexOf("Mac") != -1;
+        return getOSName().equals("macosx");
     }
 
 
@@ -1035,7 +1032,7 @@ public class Base {
     * returns true if running on windows.
     */
     public static boolean isWindows() {
-        return System.getProperty("os.name").indexOf("Windows") != -1;
+        return getOSName().equals("windows");
     }
 
 
@@ -1043,12 +1040,22 @@ public class Base {
     * true if running on linux.
     */
     public static boolean isLinux() {
-        return System.getProperty("os.name").indexOf("Linux") != -1;
+        return getOSName().equals("linux");
     }
 
+    public static boolean isFreeBSD() {
+        return getOSName().equals("freebsd");
+    }
+
+    public static boolean isUnix() {
+        return isLinux() || isFreeBSD();
+    }
+
+    public static boolean isPosix() {
+        return isLinux() || isFreeBSD() || isMacOS();
+    }
 
     // .................................................................
-
 
     public static File getSettingsFolder() {
         File settingsFolder = null;
@@ -1160,15 +1167,6 @@ public class Base {
         return getHardwareFolder().getAbsolutePath();
     }
 
-
-    public static String getAvrBasePath() {
-        if(Base.isLinux()) {
-            return ""; // avr tools are installed system-wide and in the path
-        } else {
-            return getHardwarePath() + File.separator + "tools" +
-                File.separator + "avr" + File.separator + "bin" + File.separator;
-        }  
-    }
 
     public static File getSketchbookFolder() {
         return new File(preferences.get("sketchbook.path"));
@@ -2334,7 +2332,7 @@ public class Base {
     } else if (isMacOS()) {
       params = new String[] { "open" };
 
-    } else if (isLinux()) {
+    } else if (isUnix()) {
       if (openLauncher == null) {
         try {
           Process p = Runtime.getRuntime().exec(new String[] { "gnome-open" });
