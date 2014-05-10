@@ -103,7 +103,8 @@ public class Platform {
    * @return null if not overridden, which will cause a prompt to show instead. 
    */
   public File getDefaultSketchbookFolder() {
-    return null;
+    File docs = new File(System.getProperty("user.home"), "Documents");
+    return new File(docs, Base.theme.get("product.cap"));
   }
 
     public void setSettingsFolderEnvironmentVariable() {

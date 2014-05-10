@@ -274,28 +274,16 @@ public class Base {
 
 //        Translate.load("swedish");
 
-        // If a value is at least set, first check to see if the folder exists.
-        // If it doesn't, warn the user that the sketchbook folder is being reset.
-        if (sketchbookPath != null) {
-            File skechbookFolder = new File(sketchbookPath);
-            if (!skechbookFolder.exists()) {
-                Base.showWarning("Sketchbook folder disappeared",
-                         "The sketchbook folder no longer exists.\n" +
-                         theme.get("product.cap") + " will switch to the default sketchbook\n" +
-                         "location, and create a new sketchbook folder if\n" +
-                         "necessary. " + theme.get("product.cap") + " will then stop talking about\n" +
-                         "himself in the third person.", null);
-                sketchbookPath = null;
-            }
-        }
-
         // If no path is set, get the default sketchbook folder for this platform
         if (sketchbookPath == null) {
             File defaultFolder = getDefaultSketchbookFolder();
             preferences.set("sketchbook.path", defaultFolder.getAbsolutePath());
-            if (!defaultFolder.exists()) {
-                defaultFolder.mkdirs();
-            }
+            sketchbookPath = defaultFolder.getAbsolutePath();
+        }
+
+        File sketchbookFolder = new File(sketchbookPath);
+        if (!sketchbookFolder.exists()) {
+            sketchbookFolder.mkdirs();
         }
     
         compilers = new HashMap<String, Compiler>();
