@@ -749,7 +749,12 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
+
         HashMap<String, String> all = mergeAllProperties();
+        String mess = all.get("upload." + editor.programmer + ".message");
+        if (mess != null) {
+            editor.message(mess);
+        }
         editor.statusNotice(Translate.t("Uploading to Board..."));
         settings.put("filename", name);
         settings.put("filename.elf", name + ".elf");
@@ -2096,8 +2101,9 @@ public class Sketch implements MessageConsumer {
         );
         if (compiledFiles != null) {
             sf.addAll(compiledFiles);
+        } else {
+            return null;
         }
-
         
         String boardFiles = all.get("build.files");
         if (boardFiles != null) {
