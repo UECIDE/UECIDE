@@ -971,6 +971,35 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean save() {
+        if (Base.preferences.getBoolean("version.enabled")) {
+            int numToSave = Base.preferences.getInteger("version.keep");
+            File versionsFolder = new File(folder, "backup");
+            if (!versionsFolder.exists()) {
+                versionsFolder.mkdirs();
+            }
+            // Prune the oldest version if it exists
+            File last = new File(versionsFolder, name + "-" + numToSave);
+            if (last.exists()) {
+                Debug.message("Deleting " + last.getAbsolutePath());
+                last.delete();
+            }
+            for (int i = numToSave-1; i >= 1; i--) {
+                File low = new File(versionsFolder, name + "-" + i);
+                File high = new File(versionsFolder, name + "-" + (i+1));
+                if (low.exists()) {
+                    Debug.message("Shuffling " + low.getAbsolutePath() + " to " + high.getAbsolutePath());
+                    low.renameTo(high);
+                }
+            }
+            File bottom = new File(versionsFolder, name + "-1");
+            Debug.message("Backing up as " + bottom.getAbsolutePath());
+            bottom.mkdirs();
+            for (SketchFile f : sketchFiles) {
+                File to = new File(bottom, f.file.getName());
+                Debug.message("    Backing up " + f.file.getAbsolutePath() + " to " + to.getAbsolutePath());
+                Base.copyFile(f.file, to);
+            }
+        }
         for (SketchFile f : sketchFiles) {
             f.save();
         }

@@ -116,6 +116,8 @@ public class Preferences {
     JTextField coresLocationField;
     JTextField compilersLocationField;
     JTextField libsLocationField;
+    JCheckBox  createBackups;
+    JTextField backupNumber;
 
     JComboBox selectedTheme;
     JCheckBox useSystemDecorator;
@@ -715,6 +717,23 @@ public class Preferences {
         c.gridx++;
         tabSize = new JTextField(5);
         p.add(tabSize, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 3;
+        createBackups = new JCheckBox(Translate.t("Create backup copies of your sketch as you save"));
+        p.add(createBackups, c);
+        createBackups.setSelected(Base.preferences.getBoolean("version.enabled"));
+
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.gridy++;
+        label = new JLabel(Translate.t("Number of backup copies to keep:"));
+        p.add(label, c);
+        c.gridx++;
+        backupNumber = new JTextField(5);
+        backupNumber.setText(Integer.toString(Base.preferences.getInteger("version.keep")));
+        p.add(backupNumber, c);
     }
 
     public void populateLocationSettings(JPanel p) {
@@ -998,6 +1017,8 @@ public class Preferences {
     Base.preferences.setBoolean("compiler.combine_ino", combineIno.isSelected());
     Base.preferences.setBoolean("compiler.verbose", verboseCompile.isSelected());
     Base.preferences.setBoolean("export.verbose", verboseUpload.isSelected());
+    Base.preferences.setBoolean("version.enabled", createBackups.isSelected());
+    Base.preferences.set("version.keep", backupNumber.getText());
 
     Base.preferences.setBoolean("editor.expandtabs", useSpacesForTabs.isSelected());
     Base.preferences.setBoolean("editor.showtabs", visibleTabs.isSelected());
