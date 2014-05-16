@@ -45,6 +45,7 @@ package uecide.app.debug;
 public interface MessageConsumer {
 
   public void message(String s);
-  public void message(String s, int c);
+  public void warning(String s);
+  public void error(String s);
 
 }

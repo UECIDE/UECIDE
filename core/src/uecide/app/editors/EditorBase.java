@@ -1,0 +1,64 @@
+package uecide.app.editors;
+
+import uecide.app.*;
+import uecide.app.debug.*;
+import javax.swing.*;
+import java.awt.*;
+import java.io.*;
+
+public interface EditorBase {
+    public void refreshSettings();
+    public boolean loadFile(File file);
+    public boolean isModified();
+    public String getText();
+    public String getText(int s, int e);
+    public void setText(String text);
+    public void setCaretPosition(int position);
+    public void setEditable(boolean e);
+    public void setBackground(Color c);
+    public void setFont(Font f);
+    public boolean isSelectionActive();
+    public void cut();
+    public void copy();
+    public void selectAll();
+    public void paste();
+    public void beginAtomicEdit();
+    public void endAtomicEdit();
+    public void insert(String what, int caret);
+    public void insert(String what);
+    public int getCaretPosition();
+    public void setSelectedText(String what);
+    public String getSelectedText();
+    public int getDocumentLength();
+    public void select(int s, int e);
+    public int getSelectionStart();
+    public int getSelectionStop();
+    public String getLineText(int line);
+    public int getLineStartOffset(int line);
+    public int getLineEndOffset(int line);
+    public int getLineCount();
+    public int getSelectionStartLine();
+    public int getSelectionStopLine();
+    public void selectLines(int start, int end);
+    public void setModified(boolean m);
+    public void setFile(File f);
+    public void undo();
+    public void redo();
+    public void scrollTo(final int pos);
+    public File getFile();
+    public void setNumberOffset(int off);
+    public int getCaretLineNumber();
+    public void setCaretLineNumber(int lineNumber);
+    public void addLineHighlight(int lineNumber, Color c);
+    public void removeAllLineHighlights();
+    public void applyThemeFGColor(int index, String cs);
+    public void applyThemeBGColor(int index, String cs);
+    public void applyThemeFont(int index, String fs);
+    public void applyThemeUnderline(int index, String us);
+    public void applyThemeSettings();
+    public void createExtraTokens();
+
+    public void populateMenu(JMenu menu, int flags);
+    public boolean save();
+    public void reloadFile();
+}

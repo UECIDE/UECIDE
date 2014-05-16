@@ -35,24 +35,10 @@ import java.util.*;
 
 import uecide.app.*;
 
-public class Core extends UObject implements MessageConsumer {
+public class Core extends UObject {
 
     public Core(File folder) {
         super(folder);
-    }
-
-    public void message(String m) {
-        message(m, 1);
-    }
-
-    public void message(String m, int chan) {
-        if (m.trim() != "") {
-            if (chan == 2) {
-                System.err.print(m);
-            } else {
-                System.out.print(m);
-            }
-        }
     }
 
     static public String[] headerListFromIncludePath(String path) {

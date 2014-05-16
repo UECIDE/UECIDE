@@ -50,7 +50,7 @@ public class Library {
     public ArrayList<String> requiredLibraries;
     public File folder;
     public String name;
-    public File examplesFolder;
+    public File examplesFolder = null;
     public ArrayList<File> sourceFiles;
     public ArrayList<File> archiveFiles;
     public File mainInclude;
@@ -240,6 +240,10 @@ public class Library {
 
     public String getLinkName() {
         return type + "_" + name;
+    }
+
+    public File getExamplesFolder() {
+        return examplesFolder;
     }
 }
 

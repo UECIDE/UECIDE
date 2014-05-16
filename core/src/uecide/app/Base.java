@@ -119,17 +119,30 @@ public class Base {
     public static PropertyFile preferences;
     public static Theme theme;
 
+    public static Board getBoard(String name) { return boards.get(name); }
+    public static Core getCore(String name) { return cores.get(name); }
+    public static Compiler getCompiler(String name) { return compilers.get(name); }
+
     public static void main(String args[]) {
         new Base(args);
+    }
+
+    public static File getJarLocation() {
+        try {
+            return new File(Base.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (Exception e) {
+            Base.error(e);
+        }
+        return new File("/");
     }
 
     public Base(String[] args) {
 
         boolean redirectExceptions = true;
 
-	System.err.println(System.getProperty("os.name"));
-
         headless = false;
+        boolean loadLastSketch = false;
+
 
         for (int i = 0; i < args.length; i++) {
             String path = args[i];
@@ -145,6 +158,9 @@ public class Base {
             }
             if (path.startsWith("--datadir=")) {
                 overrideSettingsFolder = path.substring(10);
+            }
+            if (path.equals("--last-sketch")) {
+                loadLastSketch = true;
             }
         }
 
@@ -165,12 +181,8 @@ public class Base {
         }
 
         try {
-            File f;
-            if (isMacOS()) {
-                f = getContentFile("uecide.jar");
-            } else {
-                f = getContentFile("lib/uecide.jar");
-            }
+            File f = getJarLocation();
+
             Debug.message("Getting version information from " + f.getAbsolutePath());
             JarFile myself = new JarFile(f);
             Manifest manifest = myself.getManifest();
@@ -189,21 +201,51 @@ public class Base {
         }
 
         // Get the initial basic theme data
-        theme = new Theme(getContentFile("lib/theme/theme.txt"));
+        theme = new Theme("/uecide/app/config/theme.txt");
         theme.setPlatformAutoOverride(true);
 
         System.err.println("Loading " + theme.get("product") + "...");
 
         initPlatform();
-        preferences = new PropertyFile(getSettingsFile("preferences.txt"), getContentFile("lib/preferences.txt"));
+
+
+
+        preferences = new PropertyFile(getSettingsFile("preferences.txt"), "/uecide/app/config/preferences.txt");
         preferences.setPlatformAutoOverride(true);
 
         platform.setSettingsFolderEnvironmentVariable();
 
+        ArrayList<String> bundledPlugins = getResourcesFromJarFile(getJarLocation(), "uecide/app/bundles/plugins/", ".jar");
+        File upf = getUserPluginsFolder();
+        for (String s : bundledPlugins) {
+            String fn = s.substring(s.lastIndexOf("/") + 1);
+            File dest = new File(upf, fn);
+            if (!dest.exists()) {
+                System.err.println("Installing " + fn);
+                continue;
+            } 
+
+            try {
+                JarFile jf = new JarFile(dest);
+                Manifest manifest = jf.getManifest();
+                Attributes manifestContents = manifest.getMainAttributes();
+                Version oldVersion = new Version(manifestContents.getValue("Version"));
+                String bv = getBundleVersion("/" + s);
+                Version newVersion = new Version(bv);
+
+
+                if (newVersion.compareTo(oldVersion) > 0) {
+                    System.err.println("Upgrading your version of " + fn + " to " + bv);
+                    copyResourceToFile("/" + s, dest);
+                }
+            } catch (Exception e) {
+                error(e);
+            }
+        }
 
         // Now we reload the theme data with user overrides
         // (we didn't know where they were before) 
-        theme = new Theme(getSettingsFile("theme.txt"), getContentFile("lib/theme/theme.txt"));
+        theme = new Theme(getSettingsFile("theme.txt"), "/uecide/app/config/theme.txt");
         theme.setPlatformAutoOverride(true);
 
         if (!headless) {
@@ -337,6 +379,15 @@ public class Base {
             }
         }
 
+        if (loadLastSketch) {
+            File lastFile = MRUList.get(0);
+            if (lastFile != null) {
+                if (createNewEditor(lastFile.getAbsolutePath()) != null) {
+                    opened = true;
+                }
+            }
+        }
+
         // Create a new empty window (will be replaced with any files to be opened)
         if (!opened) {
             handleNew();
@@ -347,13 +398,13 @@ public class Base {
             if (boards.size() == 0) {
                 System.err.println(plugins.keySet());
                 showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                //activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } else if (cores.size() == 0) {
                 showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                //activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } else if (compilers.size() == 0) {
                 showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                //activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } 
         }
             
@@ -642,9 +693,7 @@ public class Base {
 
         public Icon getIcon(File f) {
             if (Base.isSketchFolder(f)) {
-                File imageLocation = new File(getContentFile("lib/theme"), "icon16.png");
-                Image image = Toolkit.getDefaultToolkit().createImage(imageLocation.getAbsolutePath());
-                ImageIcon icon = new ImageIcon(image, Translate.t("UECIDE Sketch"));
+                ImageIcon icon = loadIconFromResource("icon16.png");
                 return icon;
             }
             return null;
@@ -715,17 +764,41 @@ public class Base {
     public static Editor createNewEditor(String path) {
         if (activeEditor != null) {
             if (activeEditor.getSketch().isUntitled() && !activeEditor.getSketch().isModified()) {
-                activeEditor.openInternal(path);
+                //activeEditor.openInternal(path);
                 return activeEditor;
             }
         }
-        Editor editor = new Editor(path);
+
+        Sketch s;
+
+        if (path == null) {
+            s = new Sketch((File)null);
+        } else {
+            s = new Sketch(path);
+        }
+            
+        Editor editor = new Editor(s);
         editors.add(editor);
         editor.setVisible(true);
         if (path != null) {
             updateMRU(new File(path));
         }
         return editor;
+    }
+
+    public static void unregisterEditor(Editor e) {
+        editors.remove(e);
+    }
+
+    public static void closeAllEditors() {
+        ArrayList<Editor> snapshot = new ArrayList<Editor>();
+        snapshot.addAll(editors);
+        for (Editor e : snapshot) {
+            if (!e.askCloseWindow()) {
+                return;
+            }
+        }
+        System.exit(0);
     }
 
 
@@ -812,13 +885,13 @@ public class Base {
     protected static boolean handleQuitEach() {
         int index = 0;
         for (Editor editor : editors) {
-            if (editor.checkModified()) {
-                // Update to the new/final sketch path for this fella
-                index++;
-
-            } else {
-                return false;
-            }
+            //if (editor.checkModified()) {
+            //    // Update to the new/final sketch path for this fella
+            //    index++;
+//
+//            } else {
+//                return false;
+//            }
         }
         return true;
     }
@@ -834,7 +907,7 @@ public class Base {
 
     protected static void rebuildSketchbookMenus() {
         for (Editor e : editors) {
-            e.rebuildMRUMenu();
+            //e.rebuildMRUMenu();
         }
     }
 
@@ -849,6 +922,9 @@ public class Base {
     public static HashMap<String, Library> getLibraryCollection(String name, String corename) {
         HashMap<String, Library>out = new HashMap<String, Library>();
         HashMap<String, Library>coll = libraryCollections.get(name);
+        if (coll == null) {
+            return out;
+        }
         for (String k : coll.keySet()) {
             Library v = coll.get(k);
             if (v.worksWith(corename)) {
@@ -882,12 +958,12 @@ public class Base {
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
         for (String core : corelist) {
-            libraryCollections.put(core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder(), "core", core)); // Core libraries
+            libraryCollections.put("core:" + core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder(), "core", core)); // Core libraries
         }
 
-        libraryCollections.put("sketchbook", loadLibrariesFromFolder(getUserLibrariesFolder(),"contributed")); // Contributed libraries
+        libraryCollections.put("sketchbook:all", loadLibrariesFromFolder(getUserLibrariesFolder(),"contributed")); // Contributed libraries
         for (String key : libraryCategoryPaths.keySet()) {
-            libraryCollections.put("cat." + key, loadLibrariesFromFolder(libraryCategoryPaths.get(key),"contributed"));
+            libraryCollections.put("cat:" + key, loadLibrariesFromFolder(libraryCategoryPaths.get(key),"contributed"));
         }
     }
 
@@ -1873,12 +1949,12 @@ public class Base {
         }
 
         if (!inputFile.exists()) {
-            activeEditor.message(inputFile.getName() + ": " + Translate.t("not found") + "\n", 2);
+            activeEditor.error(inputFile.getName() + ": " + Translate.t("not found"));
             return;
         }
 
         if (!testLibraryZipFormat(inputFile.getAbsolutePath())) {
-            activeEditor.message(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()) + "\n", 2);
+            activeEditor.error(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()));
             return;
         }
 
@@ -2010,7 +2086,7 @@ public class Base {
                 zis.closeEntry();
                 zis.close();
             } catch (Exception e) {
-                activeEditor.status.progressNotice(Translate.t("Install failed"));
+                activeEditor.error(Translate.t("Install failed"));
                 error(e);
                 return null;
             }
@@ -2019,17 +2095,16 @@ public class Base {
 
         @Override
         protected void done() {
-            activeEditor.status.progressNotice(Translate.t("Installed."));
-            activeEditor.status.unprogress();
+            activeEditor.message(Translate.t("Installed."));
             loadCores();
             loadBoards();
             gatherLibraries();
             for (Editor e : editors) {
-                e.rebuildCoresMenu();
-                e.rebuildBoardsMenu();
-                e.rebuildImportMenu();
-                e.rebuildExamplesMenu();
-                e.rebuildPluginsMenu();
+                //e.rebuildCoresMenu();
+                //e.rebuildBoardsMenu();
+                //e.rebuildImportMenu();
+                //e.rebuildExamplesMenu();
+                //e.rebuildPluginsMenu();
             }
         }
 
@@ -2037,11 +2112,9 @@ public class Base {
         protected void process(java.util.List<Integer> pct) {
             int p = pct.get(pct.size() - 1);
             if (p == -1) {
-                activeEditor.status.progress(Translate.t("Examining..."));
-                activeEditor.status.progressIndeterminate(Translate.t("Examining..."));
+                activeEditor.message(Translate.t("Examining..."));
             } else {
-                activeEditor.status.progress(Translate.t("Installing..."));
-                activeEditor.status.progressUpdate(p);
+                activeEditor.message(Translate.t("Installing..."));
             }
         }
     };
@@ -2050,7 +2123,6 @@ public class Base {
     {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                activeEditor.status.progressUpdate(perc);
             }
         });
     }
@@ -2151,7 +2223,7 @@ public class Base {
         }
         loadPlugins();
         for (Editor e : editors) {
-            e.rebuildPluginsMenu();
+            //e.rebuildPluginsMenu();
         }
     }
 
@@ -2182,6 +2254,8 @@ public class Base {
         File[] contents = f.listFiles();
         if (contents == null) return;
 
+        Debug.message("Loading plugins from " + f.getAbsolutePath());
+
         for (int i = 0; i < contents.length; i++) {
             if (contents[i].isDirectory()) {
                 loadPluginsFromFolder(contents[i]);
@@ -2202,11 +2276,14 @@ public class Base {
 
             String className = null;
 
+            Debug.message("    Loading plugin " + jar.getAbsolutePath());
+
             JarFile jf = new JarFile(jar);
             Manifest manifest = jf.getManifest();
             Attributes manifestContents = manifest.getMainAttributes();
 
             className = manifestContents.getValue("Main-Class");
+            Debug.message("        Class: " + className);
             if (className == null) {
                 className = findClassInZipFile(jar);
 
@@ -2295,14 +2372,14 @@ public class Base {
 
     public static void applyPreferences() {
         for (Editor ed : editors) {
-            ed.applyPreferences();
+            //ed.applyPreferences();
         }
     }
 
     public static void reloadPlugins() {
         loadPlugins();
         for (Editor e : editors) {
-            e.rebuildPluginsMenu();
+            //e.rebuildPluginsMenu();
         }
     }
 
@@ -2547,7 +2624,7 @@ public class Base {
 
     public static void error(String e) {
         for (Editor ed : editors) {
-            ed.message(e + "\n", 2);
+            ed.message(e);
         }
         System.err.println(e);
         Debug.message(e);
@@ -2556,7 +2633,7 @@ public class Base {
     public static void error(Throwable e) {
 
         for (Editor ed : editors) {
-            ed.message(e.getMessage() + "\n", 2);
+            ed.message(e.getMessage());
         }
         try {
             Debug.message("");
@@ -2598,31 +2675,31 @@ public class Base {
         plugins = new HashMap<String, Plugin>();
         pluginInstances = new ArrayList<Plugin>();
 
-        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Updating serial ports..."));
+        if (activeEditor != null) activeEditor.message(Translate.t("Updating serial ports..."));
 
         Serial.updatePortList();
         Serial.fillExtraPorts();
 
-        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning compilers..."));
+        if (activeEditor != null) activeEditor.message(Translate.t("Scanning compilers..."));
         loadCompilers();
-        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning cores..."));
+        if (activeEditor != null) activeEditor.message(Translate.t("Scanning cores..."));
         loadCores();
-        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning boards..."));
+        if (activeEditor != null) activeEditor.message(Translate.t("Scanning boards..."));
         loadBoards();
-        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning plugins..."));
+        if (activeEditor != null) activeEditor.message(Translate.t("Scanning plugins..."));
         loadPlugins();
-        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Scanning libraries..."));
+        if (activeEditor != null) activeEditor.message(Translate.t("Scanning libraries..."));
         gatherLibraries();
-        if (activeEditor != null) activeEditor.status.progressNotice(Translate.t("Update complete"));
+        if (activeEditor != null) activeEditor.message(Translate.t("Update complete"));
         rebuildSketchbookMenus();
 
         for (Editor e : editors) {
-            e.rebuildCoresMenu();
-            e.rebuildBoardsMenu();
-            e.rebuildImportMenu();
-            e.rebuildExamplesMenu();
-            e.rebuildPluginsMenu();
-            e.populateMenus();
+            //e.rebuildCoresMenu();
+            //e.rebuildBoardsMenu();
+            //e.rebuildImportMenu();
+            //e.rebuildExamplesMenu();
+            //e.rebuildPluginsMenu();
+            //e.populateMenus();
         }
     }
 
@@ -2630,6 +2707,77 @@ public class Base {
         for (Editor e : editors) {
             SwingUtilities.updateComponentTreeUI(e);
         }
+    }
+
+    public static ImageIcon loadIconFromResource(String res) {
+        if (!res.startsWith("/")) {
+            res = "/uecide/app/icons/" + res;
+        }
+        URL loc = Base.class.getResource(res);
+
+        if (loc == null) {
+            loc = Base.class.getResource("/uecide/app/icons/unknown.png");
+        }
+        return new ImageIcon(loc);
+    }
+
+    public boolean copyResourceToFile(String res, File dest) {
+        System.err.println("RES: " + res);
+        try {
+            InputStream from = Base.class.getResourceAsStream(res);
+            OutputStream to =
+                new BufferedOutputStream(new FileOutputStream(dest));
+            byte[] buffer = new byte[16 * 1024];
+            int bytesRead;
+            while ((bytesRead = from.read(buffer)) != -1) {
+                to.write(buffer, 0, bytesRead);
+            }
+            to.flush();
+            from.close();
+            from = null;
+            to.close();
+            to = null;
+        } catch (Exception e) {
+            error(e);
+            return false;
+        }
+        return true;
+    }
+
+    private static ArrayList<String> getResourcesFromJarFile(File file, String root, String extension) {
+        ArrayList<String> retval = new ArrayList<String>();
+        ZipFile zf;
+        try{
+            zf = new ZipFile(file);
+            final Enumeration e = zf.entries();
+            while(e.hasMoreElements()){
+                final ZipEntry ze = (ZipEntry) e.nextElement();
+                final String fileName = ze.getName();
+                if (fileName.startsWith(root) && fileName.endsWith(extension)) {
+                    retval.add(fileName);
+                }
+            }
+            zf.close();
+        } catch(Exception e){
+            error(e);
+        }
+        return retval;
+    }
+
+    private String getBundleVersion(String path) {
+        try {
+            InputStream instr = Base.class.getResourceAsStream(path);
+            if (instr == null) {
+                return "0.0.0a";
+            }
+            JarInputStream jis = new JarInputStream(instr);
+            Manifest manifest = jis.getManifest();
+            Attributes manifestContents = manifest.getMainAttributes();
+            return manifestContents.getValue("Version");
+        } catch (Exception e) {
+            error(e);
+        }
+        return "unknown";
     }
 }
 

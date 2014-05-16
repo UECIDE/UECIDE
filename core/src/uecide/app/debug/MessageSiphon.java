@@ -68,14 +68,17 @@ public class MessageSiphon implements Runnable {
       //
       String currentLine;
       while ((currentLine = streamReader.readLine()) != null) {
-        // \n is added again because readLine() strips it out
-        //EditorConsole.systemOut.println("messaging in");
-        if (channel != -1) {
-            consumer.message(currentLine + "\n", channel);
-        } else {
-            consumer.message(currentLine + "\n");
-        }
-        //EditorConsole.systemOut.println("messaging out");
+            switch(channel) {
+                case 0:
+                    consumer.message(currentLine);
+                    break;
+                case 1:
+                    consumer.warning(currentLine);
+                    break;
+                case 2:
+                    consumer.error(currentLine);
+                    break;
+            }
       }
       //EditorConsole.systemOut.println("messaging thread done");
       thread = null;

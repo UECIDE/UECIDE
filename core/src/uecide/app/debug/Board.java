@@ -76,4 +76,11 @@ public class Board extends UObject {
         return mf;
     }
 
+    public Core getCore() {
+        String c = get("core");
+        if (c == null) {
+            return null;
+        }
+        return Base.cores.get(c);
+    }
 }

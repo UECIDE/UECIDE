@@ -1,26 +1,8 @@
 <?xml version="1.0"?>
-<project name="Processing Core" default="build">
+<project name="UECIDE Core" default="build">
 
 
-    <target name="getGitVersion" if="git.present">
-        <exec outputproperty="version.tag" executable="git">
-            <arg value="describe" />
-        </exec>
-        <propertyregex property="version" input="${version.tag}" regexp="^([^-]+)" select="\1" />
-        <exec executable="git" outputproperty="build.number" failifexecutionfails="false" errorproperty="">
-            <arg value="rev-list"/>
-            <arg value="${version}..."/>
-            <arg value="--count"/>
-        </exec>
-        <propertyfile file="version.plist">
-                <entry key="version" value="${version}" />
-                <entry key="build.number" value="${build.number}" />
-        </propertyfile>
-
-    </target>
-
-<property file="../build/build.settings"/>
-<property file="../build/version.plist"/>
+    <property file="version.plist"/>
 
     <tstamp>
         <format property="TODAY" pattern="yyyyMMdd" />
@@ -31,23 +13,26 @@
         <delete file="uecide.jar" />
     </target>
 
-    <available file="../.git" type="dir" property="git.present" />
-  
-    <target name="compile" description="Compile" depends="getGitVersion">
+    <target name="compile" description="Compile">
         <mkdir dir="bin" />
         <javac target="1.6" 
+                debug="true"
+                debuglevel="lines,vars,source"
                source="1.6"
                encoding="UTF-8"
                bootclasspath="${bootclass.path}"
                includeAntRuntime="false"
                srcdir="src" destdir="bin"
-               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/ant.jar; lib/ant-launcher.jar; lib/apple.jar; lib/jna.jar; lib/jssc.jar; lib/JTattoo-1.6.10.jar; lib/liquidlnf.jar">
+               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/jssc.jar; lib/JTattoo-1.6.10.jar; lib/liquidlnf.jar">
 
         </javac>
     </target>		
 
     <target name="build" depends="compile" description="Build uecide">
-        <jar basedir="bin" destfile="uecide.jar">
+        <zip destfile="uecide.jar">
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+        </zip>
+        <jar basedir="bin" destfile="uecide.jar" update="true">
             <manifest>
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Main-Class" value="uecide.app.Base"/>
@@ -58,6 +43,10 @@
             </manifest>
         </jar>
         <jar basedir="i18n" destfile="uecide.jar" update="true" />
+        <jar basedir="resources" destfile="uecide.jar" update="true" />
+
+        <chmod perm="0755" file="uecide.jar" />
+
     </target>
   
 </project>

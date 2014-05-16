@@ -68,12 +68,17 @@ public class Splash extends Window {
 
     public Splash() {
         super((Window) null);
-        image = Base.getLibBufferedImage("theme/about.png");
-        w = image.getWidth();
-        h = image.getHeight();
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screen.width-w)/2, (screen.height-h)/2, w, h);
-        setVisible(true);
+        try {
+            URL loc = Splash.class.getResource("/uecide/app/icons/about.png");
+            image = ImageIO.read(loc);
+            w = image.getWidth();
+            h = image.getHeight();
+            Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+            setBounds((screen.width-w)/2, (screen.height-h)/2, w, h);
+            setVisible(true);
+        } catch (Exception e) {
+            Base.error(e);
+        }
     }
 
     @Override

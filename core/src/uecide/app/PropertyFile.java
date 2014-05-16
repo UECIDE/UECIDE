@@ -36,6 +36,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.Method;
+import java.net.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -50,11 +51,47 @@ public class PropertyFile {
     boolean doPlatformOverride = false;
 
     public PropertyFile(File user) {
-        this(user, null);
+        this(user, (File)null);
     }
 
     public void setPlatformAutoOverride(boolean f) {
         doPlatformOverride = f;
+    }
+
+    public PropertyFile(String user) {
+        userFile = null;
+
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(user)));
+            properties = new Properties();
+            if (br != null) {
+                properties.load(br);
+            }
+            br.close();
+        } catch (Exception e) {
+            Base.error(e);
+        }
+    }
+
+    public PropertyFile(File user, String defaults) {
+        userFile = user;
+
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(defaults)));
+            defaultProperties = new Properties();
+            if (br != null) {
+                defaultProperties.load(br);
+            }
+            br.close();
+            properties = new Properties(defaultProperties);
+            if (user != null) {
+                if (user.exists()) {
+                    properties.load(new FileReader(user));
+                }
+            }
+        } catch (Exception e) {
+            Base.error(e);
+        }
     }
 
     public PropertyFile(File user, File defaults) {
@@ -150,6 +187,14 @@ public class PropertyFile {
 
     public void setBoolean(String attribute, boolean value) {
         set(attribute, value ? "true" : "false");
+    }
+
+    public int getInteger(String attribute, int def) {
+        try {
+            return Integer.parseInt(get(attribute));
+        } catch (Exception e) {
+            return def;
+        }
     }
 
     public int getInteger(String attribute) {

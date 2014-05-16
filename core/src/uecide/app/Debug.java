@@ -88,15 +88,7 @@ public class Debug {
 
         toolbar = new JToolBar();
 
-        File themeFolder = Base.getContentFile("lib/theme");
-        if (!themeFolder.exists()) {
-            System.err.println("PANIC: Theme folder doesn't exist! " + themeFolder.getAbsolutePath());
-            return;
-        }
-
-
-        File trashIconFile = new File(themeFolder, "trash.png");
-        ImageIcon trashIcon = new ImageIcon(trashIconFile.getAbsolutePath());
+        ImageIcon trashIcon = Base.loadIconFromResource("toolbar/trash.png");
         JButton trashButton = new JButton(trashIcon);
         trashButton.setToolTipText(Translate.t("Clear Debug Log"));
         trashButton.addActionListener(new ActionListener() {
@@ -108,14 +100,10 @@ public class Debug {
         });
         toolbar.add(trashButton);
 
-        File pauseIconFile = new File(themeFolder, "pause.png");
-        ImageIcon pauseIcon = new ImageIcon(pauseIconFile.getAbsolutePath());
+        ImageIcon pauseIcon = Base.loadIconFromResource("toolbar/pause.png");
         pauseButton = new JToggleButton(pauseIcon);
         pauseButton.setToolTipText(Translate.t("Pause Scrolling"));
         toolbar.add(pauseButton);
-
-
-
 
         contentPane.add(toolbar, BorderLayout.NORTH);
         contentPane.add(scrollPane, BorderLayout.CENTER);

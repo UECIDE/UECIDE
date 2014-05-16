@@ -42,17 +42,16 @@ public class Sizer implements MessageConsumer {
     private long text;
     private long data;
     private long bss;
+    private Sketch sketch;
 
-    private Editor editor;
-
-    public Sizer(Editor editor) {
-        this.editor = editor;
+    public Sizer(Sketch s) {
+        sketch = s;
     }
   
     public void computeSize() {
-        editor.sketch.settings.put("filename", editor.sketch.name);
-        HashMap<String, String> all = editor.sketch.mergeAllProperties();
-        String commandSize[] = editor.sketch.parseString(all.get("compile.size")).split("::");
+        sketch.settings.put("filename", sketch.getName());
+        HashMap<String, String> all = sketch.mergeAllProperties();
+        String commandSize[] = sketch.parseString(all.get("compile.size")).split("::");
 
         int r = 0;
         try {
@@ -103,26 +102,21 @@ public class Sizer implements MessageConsumer {
         return bss;
     }
 
-    public void message(String s, int c) {
-        if (c == 2) {
-            System.err.print(s);
+    public void warning(String s) { sketch.warning(s); }
+    public void error(String s) { sketch.error(s); }
+  
+    public void message(String s) {
+        if (firstLine == null) {
+            firstLine = s;
         } else {
-            message(s);
+            StringTokenizer st = new StringTokenizer(s, " ");
+            try {
+                text = (new Integer(st.nextToken().trim())).longValue();
+                data = (new Integer(st.nextToken().trim())).longValue();
+                bss += (new Integer(st.nextToken().trim())).longValue();
+            } catch (Exception e) {
+                Base.error(e);
+            }
         }
     }
-  
-  public void message(String s) {
-    if (firstLine == null)
-      firstLine = s;
-    else {
-      StringTokenizer st = new StringTokenizer(s, " ");
-      try {
-        text = (new Integer(st.nextToken().trim())).longValue();
-        data = (new Integer(st.nextToken().trim())).longValue();
-        bss += (new Integer(st.nextToken().trim())).longValue();
-      } catch (Exception e) {
-        Base.error(e);
-      }
-    }
-  }
 }

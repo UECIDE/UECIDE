@@ -46,8 +46,16 @@ public class Theme extends PropertyFile {
 
     public static HashMap<String, PropertyFile>themeList = new HashMap<String, PropertyFile>();
 
+    public Theme(String u) {
+        super(u);
+    }
+
     public Theme(File u) {
         super(u);
+    }
+
+    public Theme(File u, String d) {
+        super(u, d);
     }
 
     public Theme(File u, File d) {
@@ -56,9 +64,9 @@ public class Theme extends PropertyFile {
 
     public void loadNewTheme(File f) {
         loadNewUserFile(f);
-        for (Editor e : Base.editors) {
-            e.applyPreferences();
-        }
+//        for (Editor e : Base.editors) {
+//            e.applyPreferences();
+//        }
     }
 
     public static void loadThemeList() {
