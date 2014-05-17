@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<project name="UECIDE Core" default="build">
+
+    <property file="version.plist"/>
+    <property name="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar" />
+
+    <tstamp>
+        <format property="TODAY" pattern="yyyyMMdd" />
+    </tstamp>
+
+    <target name="clean" description="Clean out the build directories">
+        <delete dir="bin" />
+        <delete file="uecide.jar" />
+    </target>
+
+    <target name="compile" description="Compile" depends="thirdparty">
+        <mkdir dir="bin" />
+        <javac target="1.6" 
+                debug="true"
+                debuglevel="lines,vars,source"
+                deprecation="true"
+               source="1.6"
+               encoding="UTF-8"
+               bootclasspath="${bootclass.path}"
+               includeAntRuntime="false"
+               srcdir="src" destdir="bin"
+               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/jssc.jar; lib/JTattoo-1.6.10.jar; lib/liquidlnf.jar; lib/jna.jar; lib/apple.jar; lib/rsyntaxtextarea.jar; lib/jfontchooser-1.0.5.jar; lib/json-simple-1.1.1.jar">
+            <!--compilerarg value="-Xlint:unchecked"/-->
+
+        </javac>
+    </target>		
+
+    <target name="build" depends="compile" description="Build uecide">
+        <jar basedir="bin" destfile="uecide.jar">
+            <fileset dir="bin" />
+            <fileset dir="resources" />
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Main-Class" value="uecide.app.Base"/>
+                <attribute name="Class-Path" value="uecide.jar"/>
+                <attribute name="Version" value="${version}"/>
+                <attribute name="Build" value="${build.number}" />
+                <attribute name="Compiled" value="${TODAY}"/>
+            </manifest>
+        </jar>
+        <chmod perm="0755" file="uecide.jar" />
+    </target>
+
+    <target name="thirdparty" 
+            description="Compile third party java files" 
+            depends="present-rsyntaxtextarea"
+            unless="${exists.rsyntaxtextarea}">
+        <subant buildpath="thirdparty"/>
+    </target>
+
+    <target name="present-rsyntaxtextarea"><available file="lib/rsyntaxtextarea.jar" property="exists.rsyntaxtextarea" /></target>
+  
+</project>
