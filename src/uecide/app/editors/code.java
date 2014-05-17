@@ -72,6 +72,8 @@ public class code extends JPanel implements EditorBase {
     JButton replaceAllButton = new JButton("All");
     JButton findCloseButton;
 
+    JToolBar toolbar;
+
     public void openFindPanel() {
         if (findPanel == null) {
             ImageIcon closeIcon = Base.loadIconFromResource("tabs/close.png");
@@ -177,6 +179,43 @@ public class code extends JPanel implements EditorBase {
         });
 
         scrollPane = new RTextScrollPane(textArea);
+        toolbar = new JToolBar();
+        this.add(toolbar, BorderLayout.NORTH);
+
+        editor.addToolbarButton(toolbar, "toolbar/edit-copy.png", "Copy", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                textArea.copy();
+            }
+        });
+        editor.addToolbarButton(toolbar, "toolbar/edit-cut.png", "Cut", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                textArea.cut();
+            }
+        });
+
+        editor.addToolbarButton(toolbar, "toolbar/edit-paste.png", "Paste", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                textArea.paste();
+            }
+        });
+
+        toolbar.addSeparator();
+        editor.addToolbarButton(toolbar, "toolbar/edit-undo.png", "Undo", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                textArea.undoLastAction();
+            }
+        });
+
+        JButton redoButton = editor.addToolbarButton(toolbar, "toolbar/edit-redo.png", "Redo", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                textArea.redoLastAction();
+            }
+        });
+
+        toolbar.addSeparator();
+        JButton indentButton = editor.addToolbarButton(toolbar, "toolbar/format-indent-more.png", "Increase Indent");
+        JButton outdentButton = editor.addToolbarButton(toolbar, "toolbar/format-indent-less.png", "Decrease Indent");
+
         refreshSettings();
         this.add(scrollPane, BorderLayout.CENTER);
         if (f != null) {

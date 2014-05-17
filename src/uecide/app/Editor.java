@@ -235,39 +235,39 @@ public class Editor extends JFrame {
         treePanel.add(treeScroll, BorderLayout.CENTER);
 
         File themeFolder = Base.getContentFile("lib/theme");
-        JButton runButton = addToolbarButton(Base.loadIconFromResource("toolbar/run.png"), "Verify");
-        JButton uploadButton = addToolbarButton(Base.loadIconFromResource("toolbar/burn.png"), "Program");
-        toolbar.addSeparator();
-        JButton newButton = addToolbarButton(Base.loadIconFromResource("toolbar/new.png"), "New Sketch");
-        JButton openButton = addToolbarButton(Base.loadIconFromResource("toolbar/open.png"), "Open Sketch");
-        JButton saveButton = addToolbarButton(Base.loadIconFromResource("toolbar/save.png"), "Save Sketch");
-        toolbar.addSeparator();
-
-        newButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Base.handleNew();
-            }
-        });
-
-        openButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Base.handleOpenPrompt();
-            }
-        });
-
-        saveButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                saveAllTabs();
-            }
-        });
-
-        runButton.addActionListener(new ActionListener() {
+        addToolbarButton(toolbar, "toolbar/run.png", "Compile", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 clearConsole();
                 DefaultRunHandler runHandler = new DefaultRunHandler();
                 new Thread(runHandler, "Compiler").start();
             }
         });
+
+        addToolbarButton(toolbar, "toolbar/burn.png", "Program");
+        toolbar.addSeparator();
+
+        addToolbarButton(toolbar, "toolbar/new.png", "New Sketch", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Base.handleNew();
+            }
+        });
+
+
+
+        addToolbarButton(toolbar, "toolbar/open.png", "Open Sketch", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Base.handleOpenPrompt();
+            }
+        });
+
+        addToolbarButton(toolbar, "toolbar/save.png", "Save Sketch", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveAllTabs();
+            }
+        });
+
+        toolbar.addSeparator();
+
 
         menuBar = new JMenuBar();
 
@@ -631,10 +631,18 @@ public class Editor extends JFrame {
         }
     }
 
-    public JButton addToolbarButton(ImageIcon buttonIcon, String tooltip) {
+    public JButton addToolbarButton(JToolBar tb, String path, String tooltip) {
+        return addToolbarButton(tb, path, tooltip, null);
+    }
+
+    public JButton addToolbarButton(JToolBar tb, String path, String tooltip, ActionListener al) {
+        ImageIcon buttonIcon = Base.loadIconFromResource(path);
         JButton button = new JButton(buttonIcon);
         button.setToolTipText(tooltip);
-        toolbar.add(button);
+        if (al != null) {
+            button.addActionListener(al);
+        }
+        tb.add(button);
         return button;
     }
 
