@@ -6,3 +6,4 @@ Help menu
 Fix and port all plugins
 Tree popup menus
 Toolbar plugin icons
+Expand examples menu to include contributed and categorised libraries

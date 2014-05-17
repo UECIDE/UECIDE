@@ -423,7 +423,19 @@ public class Editor extends JFrame {
             node.setUserObject(file);
             treeOutput.add(node);
         };
-            
+
+        File bins = loadedSketch.getBinariesFolder();
+        if (bins.exists() && bins.isDirectory()) {
+            File[] files = bins.listFiles();
+            for (File binFile : files) {
+                if (binFile.getName().startsWith(".")) {
+                    continue;
+                }
+                node = new DefaultMutableTreeNode(binFile.getName());
+                node.setUserObject(binFile);
+                treeBinaries.add(node);
+            }
+        }
 
         treeScroll.setViewportView(sketchContentTree);
         MouseListener ml = new MouseAdapter() {
@@ -433,6 +445,7 @@ public class Editor extends JFrame {
                 sketchContentTree.setSelectionPath(selPath);
                 if (e.getButton() == 3) {
                     DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
+                    DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();
                     if (o.getUserObject().getClass().equals(String.class)) {
                         String s = (String)o.getUserObject();
                         if (s.equals("Source")) {
@@ -475,8 +488,9 @@ public class Editor extends JFrame {
                             JMenuItem item = new JMenuItem("Purge output files");
                             menu.add(item);
                             menu.show(sketchContentTree, e.getX(), e.getY());
-                        }
+                        } 
                     } else if (o.getUserObject().getClass().equals(File.class)) {
+                        File thisFile = (File)o.getUserObject();
                         JPopupMenu menu = new JPopupMenu();
                         JMenuItem item = new JMenuItem("Rename file");
                         item.setActionCommand("rename");
@@ -484,6 +498,28 @@ public class Editor extends JFrame {
                         item = new JMenuItem("Delete file");
                         item.setActionCommand("delete");
                         menu.add(item);
+
+
+                        if (p.getUserObject().getClass().equals(String.class)) {
+                            String ptext = (String)p.getUserObject();
+                            if (ptext.equals("Binaries")) {
+                                item = new JMenuItem("Insert reference");
+                                item.addActionListener(new ActionListener() {
+                                    public void actionPerformed(ActionEvent e) {
+                                        String filename = e.getActionCommand();
+                                        filename = filename.replaceAll("\\.","_");
+                                        int at = getActiveTab();
+                                        if (at > -1) {
+                                            EditorBase eb = getTab(at);
+                                            eb.insertAtCursor("extern char " + filename + "[] asm(\"_binary_objects_" + filename + "_start\");\n");
+                                        }
+                                    }
+                                });
+                                item.setActionCommand(thisFile.getName());
+                            }
+                            menu.add(item);
+                        }
+
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     }
                     return;
@@ -1047,6 +1083,31 @@ public class Editor extends JFrame {
         sketchMenu.addSeparator();
         addMenuChunk(sketchMenu, BasePlugin.MENU_SKETCH | BasePlugin.MENU_BOTTOM);
 
+        submenu = new JMenu("Boards");
+        populateBoardsMenu(submenu);
+        hardwareMenu.add(submenu);
+
+        submenu = new JMenu("Cores");
+        populateCoresMenu(submenu);
+        hardwareMenu.add(submenu);
+
+        submenu = new JMenu("Compilers");
+        populateCompilersMenu(submenu);
+        hardwareMenu.add(submenu);
+
+        submenu = new JMenu("Serial Port");
+        populateSerialMenu(submenu);
+        submenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Serial.updatePortList();
+            }
+        });
+        hardwareMenu.add(submenu);
+
+        submenu = new JMenu("Programmers");
+        populateProgrammersMenu(submenu);
+        hardwareMenu.add(submenu);
+
         addMenuChunk(hardwareMenu, BasePlugin.MENU_HARDWARE | BasePlugin.MENU_TOP);
         hardwareMenu.addSeparator();
         addMenuChunk(hardwareMenu, BasePlugin.MENU_HARDWARE | BasePlugin.MENU_MID);
@@ -1067,6 +1128,160 @@ public class Editor extends JFrame {
         helpMenu.addSeparator();
         addMenuChunk(helpMenu, BasePlugin.MENU_HELP | BasePlugin.MENU_BOTTOM);
 
+    }
+
+    public void populateSerialMenu(JMenu menu) {
+        ButtonGroup portGroup = new ButtonGroup();
+        ArrayList<String> ports = Serial.getPortList();
+        for (String port : ports) {
+            JMenuItem item = new JRadioButtonMenuItem(port);
+            portGroup.add(item);
+            item.setSelected(port.equals(loadedSketch.getSerialPort()));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    loadedSketch.setSerialPort(e.getActionCommand());
+                }
+            });
+            item.setActionCommand(port);
+            menu.add(item);
+        }
+    }
+
+    public String[] getBoardGroups() {
+        ArrayList<String> out = new ArrayList<String>();
+        for (Board board : Base.boards.values()) {
+            String group = board.get("group");
+            if (out.indexOf(group) == -1) {
+                out.add(group);
+            }
+        }
+
+        String[] groupList = out.toArray(new String[0]);
+        Arrays.sort(groupList);
+        return groupList;
+    }
+
+    ButtonGroup boardMenuButtonGroup;
+
+    public void populateProgrammersMenu(JMenu menu) {
+        HashMap<String, String> programmers = loadedSketch.getProgrammerList();
+        ButtonGroup programmerGroup = new ButtonGroup();
+
+        for (String pn : programmers.keySet()) {
+            JMenuItem item = new JRadioButtonMenuItem(programmers.get(pn));
+            programmerGroup.add(item);
+            item.setSelected(loadedSketch.getProgrammer().equals(pn));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    System.err.println("Selecting programmer " + e.getActionCommand());
+                    loadedSketch.setProgrammer(e.getActionCommand());
+                }
+            });
+            item.setActionCommand(pn);
+            menu.add(item);
+        }
+    }
+
+    public void populateBoardsMenu(JMenu menu) {
+        boardMenuButtonGroup = new ButtonGroup();
+        String[] groups = getBoardGroups();
+
+        for (String group : groups) {
+            JMenu groupmenu = new JMenu(group);
+            fillGroupMenu(groupmenu, group);
+            if (groupmenu.getItemCount() > 0) {
+                menu.add(groupmenu);
+            }
+        }
+    }
+
+
+    public void fillGroupMenu(JMenu menu, String group) {
+        ArrayList<Board> boards = new ArrayList<Board>();
+        for (Board board : Base.boards.values()) {
+            if (board.get("group").equals(group)) {
+                boards.add(board);
+            }
+        }
+
+        Board[] boardList = boards.toArray(new Board[0]);
+        Arrays.sort(boardList);
+
+        for (Board board : boardList) {
+            JMenuItem item = new JRadioButtonMenuItem(board.getDescription());
+            boardMenuButtonGroup.add(item);
+            if (loadedSketch.getBoard().equals(board)) {
+                item.setSelected(true);
+                System.err.println("    Board: " + board.getDescription() + " (" + board.get("group") + ")");
+            }
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    System.err.println("Selecting board " + e.getActionCommand());
+                    loadedSketch.setBoard(e.getActionCommand());
+                }
+            });
+            item.setActionCommand(board.getName());
+            menu.add(item);
+        }
+    }
+
+    public void populateCoresMenu(JMenu menu) {
+        ButtonGroup coreGroup = new ButtonGroup();
+        Board board = loadedSketch.getBoard();
+        ArrayList<Core> coreList = new ArrayList<Core>();
+
+        for (Core core : Base.cores.values()) {
+            if (core.worksWith(board)) {
+                coreList.add(core);
+                System.err.println(core.getName());                
+            }
+        }
+
+        Core[] cores = coreList.toArray(new Core[0]);
+        Arrays.sort(cores);
+        for (Core core : cores) {
+            JMenuItem item = new JRadioButtonMenuItem(core.getName());
+            coreGroup.add(item);
+            item.setSelected(loadedSketch.getCore().equals(core));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    System.err.println("Selecting core " + e.getActionCommand());
+                    loadedSketch.setCore(e.getActionCommand());
+                }
+            });
+            item.setActionCommand(core.getName());
+            menu.add(item);
+        }
+            
+    }
+
+    public void populateCompilersMenu(JMenu menu) {
+        ButtonGroup compilerGroup = new ButtonGroup();
+        Core core = loadedSketch.getCore();
+        ArrayList<Compiler> compilerList = new ArrayList<Compiler>();
+
+        for (Compiler compiler : Base.compilers.values()) {
+            if (compiler.worksWith(core)) {
+                compilerList.add(compiler);
+                System.err.println(compiler.getName());                
+            }
+        }
+
+        Compiler[] compilers = compilerList.toArray(new Compiler[0]);
+        Arrays.sort(compilers);
+        for (Compiler compiler : compilers) {
+            JMenuItem item = new JRadioButtonMenuItem(compiler.getName());
+            compilerGroup.add(item);
+            item.setSelected(loadedSketch.getCompiler().equals(compiler));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    System.err.println("Selecting compiler " + e.getActionCommand());
+                    loadedSketch.setCompiler(e.getActionCommand());
+                }
+            });
+            item.setActionCommand(compiler.getName());
+            menu.add(item);
+        }
     }
 
     public void addMenuChunk(JMenu menu, int filterFlags) {

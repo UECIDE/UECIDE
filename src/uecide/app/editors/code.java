@@ -715,4 +715,17 @@ public class code extends JPanel implements EditorBase {
         scrollTo(0);
         setModified(false);
     }
+
+    public void insertAtCursor(String text) {
+        textArea.insert(text, textArea.getCaretPosition());
+    }
+
+    public void insertAtStart(String text) {
+        textArea.insert(text, 0);
+    }
+
+    public void insertAtEnd(String text) {
+        textArea.append(text);
+    }
+
 }

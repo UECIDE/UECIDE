@@ -140,7 +140,11 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setBoard(Board board) {
+        if (board == null) {
+            return;
+        }
         selectedBoard = board;
+        Base.preferences.set("board", board.getName());
         Core core = Base.cores.get(Base.preferences.get("board." + selectedBoard.getName() + ".core"));
         if (core == null) {
             core = board.getCore();
@@ -160,7 +164,11 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setCore(Core core) {
+        if (core == null) {
+            return;
+        }
         selectedCore = core;
+        Base.preferences.set("board." + selectedBoard.getName() + ".core", core.getName());
         Compiler compiler = Base.compilers.get(Base.preferences.get("board." + selectedBoard.getName() + ".compiler"));
         if (compiler == null) {
             compiler = core.getCompiler();
@@ -168,7 +176,6 @@ public class Sketch implements MessageConsumer {
         if (compiler != null) {
             setCompiler(compiler);
         }
-        if (editor != null) editor.updateAll();
     }
 
     public Compiler getCompiler() {
@@ -181,15 +188,47 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setCompiler(Compiler compiler) {
+        if (compiler == null) {
+            return;
+        }
         selectedCompiler = compiler;
+        Base.preferences.set("board." + selectedBoard.getName() + ".compiler", compiler.getName());
+        String programmer = Base.preferences.get("board." + selectedBoard.getName() + ".programmer");
+        if (programmer == null) {
+            HashMap<String, String> pl = getProgrammerList();
+            for (String p : pl.keySet()) {
+                programmer = p;
+                break;
+            }
+        }
+        setProgrammer(programmer);
     }
 
     public String getProgrammer() {
         return selectedProgrammer;
     }
 
+    public HashMap<String, String> getProgrammerList() {
+        HashMap<String, String> all = mergeAllProperties();
+        HashMap<String, String> out = new HashMap<String, String>();
+
+        String[] spl = all.get("sketch.upload").split("::");
+        Arrays.sort(spl);
+        for (String pn : spl) {
+            String name = all.get("upload." + pn + ".name");
+            out.put(pn, name);
+        }
+        return out;
+    }
+
     public void setProgrammer(String programmer) {
+        if (programmer == null) {
+            return;
+        }
+        Base.preferences.set("board." + selectedBoard.getName() + ".programmer", programmer);
         selectedProgrammer = programmer;
+        Base.preferences.save();
+        if (editor != null) editor.updateAll();
     }
 
     public String getSerialPort() {
@@ -198,6 +237,7 @@ public class Sketch implements MessageConsumer {
 
     public void setSerialPort(String p) {
         selectedSerialPort = p;
+        if (editor != null) editor.updateAll();
     }
 
     void attachToEditor(Editor e) {
@@ -2542,28 +2582,28 @@ public class Sketch implements MessageConsumer {
         settings.put("filename", blName);
 
         boolean isJava = true;
-        uploadCommand = getBoard().get("upload." + getProgrammer() + ".command.java");
+        uploadCommand = getBoard().get("upload." + programmer + ".command.java");
         if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + getProgrammer() + ".command.java");
+            uploadCommand = getCore().get("upload." + programmer + ".command.java");
         }
         if (uploadCommand == null) {
             isJava = false;
-            uploadCommand = getBoard().get("upload." + getProgrammer() + ".command." + Base.getOSFullName());
+            uploadCommand = getBoard().get("upload." + programmer + ".command." + Base.getOSFullName());
         }
         if (uploadCommand == null) {
-            uploadCommand = getBoard().get("upload." + getProgrammer() + ".command." + Base.getOSName());
+            uploadCommand = getBoard().get("upload." + programmer + ".command." + Base.getOSName());
         }
         if (uploadCommand == null) {
-            uploadCommand = getBoard().get("upload." + getProgrammer() + ".command");
+            uploadCommand = getBoard().get("upload." + programmer + ".command");
         }
         if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + getProgrammer() + ".command." + Base.getOSFullName());
+            uploadCommand = getCore().get("upload." + programmer + ".command." + Base.getOSFullName());
         }
         if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + getProgrammer() + ".command." + Base.getOSName());
+            uploadCommand = getCore().get("upload." + programmer + ".command." + Base.getOSName());
         }
         if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + getProgrammer() + ".command");
+            uploadCommand = getCore().get("upload." + programmer + ".command");
         }
 
         if (uploadCommand == null) {
@@ -2835,6 +2875,10 @@ public class Sketch implements MessageConsumer {
             return getCompiler().getProperties().get(key);
         }
         return null;
+    }
+
+    public File getBinariesFolder() {
+        return new File(sketchFolder, "objects");
     }
 
 }

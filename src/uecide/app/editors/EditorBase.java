@@ -15,4 +15,7 @@ public interface EditorBase {
     public boolean save();
     public void reloadFile();
     public void requestFocus();
+    public void insertAtCursor(String text);
+    public void insertAtStart(String text);
+    public void insertAtEnd(String text);
 }
