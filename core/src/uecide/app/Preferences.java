@@ -646,7 +646,7 @@ public class Preferences {
         final Container parent = p;
         selectEditorFont.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFontChooser fc = new JFontChooser(false);
+                JFontChooser fc = new JFontChooser();
                 fc.setSelectedFont(stringToFont(editorFontField.getText()));
                 int res = fc.showDialog(parent);
                 if (res == JFontChooser.OK_OPTION) {
@@ -678,7 +678,7 @@ public class Preferences {
 
         selectConsoleFont.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JFontChooser fc = new JFontChooser(false);
+                JFontChooser fc = new JFontChooser();
                 fc.setSelectedFont(stringToFont(consoleFontField.getText()));
                 int res = fc.showDialog(parent);
                 if (res == JFontChooser.OK_OPTION) {

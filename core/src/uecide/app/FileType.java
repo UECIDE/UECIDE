@@ -61,8 +61,8 @@ public class FileType {
         fileTypeList.put("CPP", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
         fileTypeList.put("C",   new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
 
-        fileTypeList.put("S",   new FileTypeInfo(FileType.ASMSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_AVR, "files/text-x-c.png"));
-        fileTypeList.put("sx",  new FileTypeInfo(FileType.ASMSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_AVR, "files/text-x-c.png"));
+        fileTypeList.put("S",   new FileTypeInfo(FileType.ASMSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c.png"));
+        fileTypeList.put("sx",  new FileTypeInfo(FileType.ASMSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c.png"));
 
         fileTypeList.put("h",   new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
         fileTypeList.put("H",   new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
@@ -75,8 +75,8 @@ public class FileType {
         fileTypeList.put("tcc", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
 
 
-        fileTypeList.put("pde", new FileTypeInfo(FileType.SKETCH, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_ARDUINO, "files/text-x-c++.png"));
-        fileTypeList.put("ino", new FileTypeInfo(FileType.SKETCH, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_ARDUINO, "files/text-x-c++.png"));
+        fileTypeList.put("pde", new FileTypeInfo(FileType.SKETCH, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
+        fileTypeList.put("ino", new FileTypeInfo(FileType.SKETCH, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
 
         fileTypeList.put("lss", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png"));
         fileTypeList.put("hex", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png"));

@@ -129,37 +129,37 @@ public class code extends JPanel implements EditorBase {
 
         if (Base.theme.get("editor.caret.style.insert") != null) {
             if (Base.theme.get("editor.caret.style.insert").equals("box")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, ConfigurableCaret.BLOCK_BORDER_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_BORDER_STYLE);
             }
             if (Base.theme.get("editor.caret.style.insert").equals("block")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, ConfigurableCaret.BLOCK_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_STYLE);
             }
             if (Base.theme.get("editor.caret.style.insert").equals("line")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, ConfigurableCaret.VERTICAL_LINE_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.VERTICAL_LINE_STYLE);
             }
             if (Base.theme.get("editor.caret.style.insert").equals("thick")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, ConfigurableCaret.THICK_VERTICAL_LINE_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
             }
             if (Base.theme.get("editor.caret.style.insert").equals("underline")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, ConfigurableCaret.UNDERLINE_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.UNDERLINE_STYLE);
             }
         }
 
         if (Base.theme.get("editor.caret.style.replace") != null) {
             if (Base.theme.get("editor.caret.style.replace").equals("box")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, ConfigurableCaret.BLOCK_BORDER_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.BLOCK_BORDER_STYLE);
             }
             if (Base.theme.get("editor.caret.style.replace").equals("block")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, ConfigurableCaret.BLOCK_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.BLOCK_STYLE);
             }
             if (Base.theme.get("editor.caret.style.replace").equals("line")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, ConfigurableCaret.VERTICAL_LINE_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.VERTICAL_LINE_STYLE);
             }
             if (Base.theme.get("editor.caret.style.replace").equals("thick")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, ConfigurableCaret.THICK_VERTICAL_LINE_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
             }
             if (Base.theme.get("editor.caret.style.replace").equals("underline")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, ConfigurableCaret.UNDERLINE_STYLE);
+                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.UNDERLINE_STYLE);
             }
         }
 

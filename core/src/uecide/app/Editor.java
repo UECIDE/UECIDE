@@ -35,6 +35,7 @@ import uecide.app.debug.*;
 import uecide.app.editors.*;
 
 import java.awt.*;
+import java.awt.image.*;
 import java.awt.event.*;
 
 import java.util.*;
@@ -47,6 +48,8 @@ import javax.swing.tree.*;
 import javax.swing.text.*;
 import javax.swing.border.*;
 import java.lang.reflect.*;
+import javax.imageio.*;
+
 
 import uecide.app.debug.Compiler;
 
@@ -298,7 +301,7 @@ public class Editor extends JFrame {
 
 
         this.pack();
-        this.show();
+        this.setVisible(true);
 
         setSize(width, height);
         setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));

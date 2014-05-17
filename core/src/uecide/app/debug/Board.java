@@ -39,8 +39,8 @@ import uecide.plugin.*;
 import java.util.regex.*;
 
 import uecide.app.Serial;
-import uecide.app.SerialException;
-import uecide.app.SerialNotFoundException;
+//import uecide.app.SerialException;
+//import uecide.app.SerialNotFoundException;
 
 
 public class Board extends UObject {
