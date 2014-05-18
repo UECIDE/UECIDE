@@ -268,6 +268,7 @@ public class Editor extends JFrame {
 
         toolbar.addSeparator();
 
+        addPluginsToToolbar(toolbar, BasePlugin.TOOLBAR_MAIN, "", this);
 
         menuBar = new JMenuBar();
 
@@ -1342,6 +1343,19 @@ public class Editor extends JFrame {
             menu.add(menus.get(entry));
         }
 
+    }
+
+    public void addPluginsToToolbar(JToolBar tb, int filterFlags, String context, Object ob) {
+        for (final Plugin plugin : Base.plugins.values()) {
+            try {
+                JButton b = plugin.getToolbarButton(filterFlags, context, ob);
+                if (b != null) {
+                    tb.add(b);
+                }
+            } catch (Exception e) {
+                error(e);
+            }
+        }
     }
 
     public void launchPlugin(Plugin p) {

@@ -58,6 +58,9 @@ public class BasePlugin implements Plugin {
     public static final int MENU_EDIT_LOW = 6;
     public static final int MENU_EDIT_BOT = 7;
 
+    public static final int TOOLBAR_MAIN = 1;
+    public static final int TOOLBAR_EDITOR = 2;
+
     public Editor editor;
     public Map pluginInfo;
     public URLClassLoader loader;
@@ -165,6 +168,10 @@ public class BasePlugin implements Plugin {
 
     public File getJarFile() {
         return new File((String)pluginInfo.get("jarfile"));
+    }
+
+    public JButton getToolbarButton(int flags, String context, Object object) {
+        return null;
     }
 }
 

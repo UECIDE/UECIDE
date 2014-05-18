@@ -54,5 +54,6 @@ public interface Plugin extends Runnable {
   public int flags();
   public ImageIcon toolbarIcon();
   public File getJarFile();
+    public JButton getToolbarButton(int flags, String context, Object object);
 }
 
