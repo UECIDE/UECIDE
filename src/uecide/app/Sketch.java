@@ -557,7 +557,13 @@ public class Sketch implements MessageConsumer {
     // after the included file.  Second pass looks through all the
     // libraries for that include file.
     public Library findLibrary(String filename) {
-        String trimmedName = filename.substring(0, filename.lastIndexOf("."));
+        System.err.println("    -> " + filename);
+        int dot = filename.lastIndexOf(".");
+
+        String trimmedName = filename;
+        if (dot >= 0) {
+            trimmedName = filename.substring(0, dot);
+        }
 
         // If the include file is part of the sketch, then we're not
         // interested in it.
@@ -565,6 +571,8 @@ public class Sketch implements MessageConsumer {
         if (getFileByName(filename) != null) {
             return null;
         }
+
+        System.err.println("Looking for library: " + filename);
 
         // First look in the sketch libs folder if it exists
 
@@ -575,11 +583,14 @@ public class Sketch implements MessageConsumer {
                 if (f.getName().equals(trimmedName)) {
                     File testFile = new File(f, filename);
                     if (f.exists()) {
+                        System.err.println("    Found in sketch");
                         return new Library(testFile, trimmedName, "sketch");
                     }
                 }
             }
         }
+
+        System.err.println("    Not in sketch");
 
         // Now scan through all the collections, starting with the
         // board, then the core, then the compiler, and finally any
@@ -592,30 +603,42 @@ public class Sketch implements MessageConsumer {
         HashMap<String, Library> sketchbookLibraries = Base.getLibraryCollection("sketch:all", getCore().getName());
 
         if (boardLibraries.get(trimmedName) != null) {
+            System.err.println("    Found in board");
             return boardLibraries.get(trimmedName);
         }
+        System.err.println("    Not in board");
 
         if (coreLibraries.get(trimmedName) != null) {
+            System.err.println("    Found in core");
             return coreLibraries.get(trimmedName);
         }
+        System.err.println("    Not in core");
 
         if (compilerLibraries.get(trimmedName) != null) {
+            System.err.println("    Found in compiler");
             return compilerLibraries.get(trimmedName);
         }
+        System.err.println("    Not in compiler");
 
         for (String key : Base.libraryCategoryNames.keySet()) {
             HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
             Library lib = catLib.get(trimmedName);
             if (lib != null) {
+                System.err.println("    Found in " + key);
                 return lib;
             }
+            System.err.println("    Not in " + key);
         }
 
         if (sketchbookLibraries.get(trimmedName) != null) {
+            System.err.println("    Found in sketchbook");
             return sketchbookLibraries.get(trimmedName);
         }
+        System.err.println("    Not in sketchbook");
 
         // TODO: If we get to here then we have not found an exact match.  Let's do the long-winded scan of all the files then.
+
+        System.err.println("        Giving up!");
 
         return null;
     }
@@ -702,7 +725,7 @@ public class Sketch implements MessageConsumer {
         } while (processed != 0);
 
         if (editor != null) {
-            editor.updateTree();
+            editor.updateLibrariesTree();
         }
     }
 
@@ -837,7 +860,7 @@ public class Sketch implements MessageConsumer {
         }
 
         if (editor != null) {
-            editor.updateTree();
+            editor.updateOutputTree();
         }
         return true;
     }
@@ -1744,7 +1767,7 @@ public class Sketch implements MessageConsumer {
         message(Translate.t("Compiling Done"));
         setCompilingProgress(100);
         if (editor != null) {
-            editor.updateTree();
+            editor.updateOutputTree();
         }
         return true;
     }
@@ -1896,7 +1919,7 @@ public class Sketch implements MessageConsumer {
             } else {
                 String tmid = tokens.get(mid);
                 if (tmid == null) {
-                    warning("Warning: Unknown token in string: " + mid);
+                    tmid = "";
                 }
                 mid = tmid;
             }
@@ -1976,6 +1999,10 @@ public class Sketch implements MessageConsumer {
         }
         if (!dest.exists()) {
             return null;
+        }
+
+        if (editor != null) {
+            editor.updateOutputTree();
         }
 
         return dest;
@@ -2070,6 +2097,9 @@ public class Sketch implements MessageConsumer {
         String origIncs = settings.get("includes");
         settings.put("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
 
+        int fileCount = fileList.size();
+
+        int count = 0;
         for (File f : fileList) {
             if (f.lastModified() > archiveDate) {
                 File out = compileFile(f);
@@ -2083,8 +2113,16 @@ public class Sketch implements MessageConsumer {
                     archive.delete();
                     return false;
                 }
+                count++;
+                lib.setCompiledPercent(count * 100 / fileCount);
+                if (editor != null) { 
+                    editor.updateLibrariesTree();
+                }
                 out.delete();
             }
+        }
+        if (editor != null) { 
+            editor.updateOutputTree();
         }
         settings.put("includes", origIncs);
         return true;
@@ -2886,4 +2924,32 @@ public class Sketch implements MessageConsumer {
         return new File(sketchFolder, "objects");
     }
 
+    public boolean libraryIsCompiled(Library l) {
+        if (l == null) return false;
+        File arch = new File(getCacheFolder(), l.getArchiveName());
+        return arch.exists();
+    }
+
+    public void purgeLibrary(Library lib) {
+        File arch = new File(getCacheFolder(), lib.getArchiveName());
+        arch.delete();
+    }
+
+    public void precompileLibrary(Library lib) {
+        settings.put("includes", generateIncludes());
+        settings.put("filename", sketchName);
+
+        if (doPrePurge) {
+            doPrePurge = false;
+            Base.removeDir(getCacheFolder());
+        }
+
+        settings.put("option.flags", getFlags("flags"));
+        settings.put("option.cflags", getFlags("cflags"));
+        settings.put("option.cppflags", getFlags("cppflags"));
+        settings.put("option.ldflags", getFlags("ldflags"));
+
+
+        compileLibrary(lib);
+    }
 }

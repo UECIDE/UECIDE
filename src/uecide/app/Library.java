@@ -58,6 +58,7 @@ public class Library {
     public HashMap<String, File>examples;
     public String type;
     public String core;
+    public int compiledPercent = 0;
 
     public boolean valid = false;
 
@@ -244,6 +245,18 @@ public class Library {
 
     public File getExamplesFolder() {
         return examplesFolder;
+    }
+
+    public String toString() {
+        return getName();
+    }
+
+    public void setCompiledPercent(int p) {
+        compiledPercent = p;
+    }
+
+    public int getCompiledPercent() {
+        return compiledPercent;
     }
 }
 

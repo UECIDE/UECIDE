@@ -1165,7 +1165,7 @@ public class Preferences {
     private void populateLibrarySettings(JPanel p) {
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 2;
+        c.gridwidth = 3;
         c.gridheight = 1;
         c.gridx = 0;
         c.gridy = 0;
@@ -1212,15 +1212,63 @@ public class Preferences {
         c.gridx = 0;
         p.add(deleteSelectedLibraryEntry, c);
 
+        JButton addDir = new JButton(Translate.t("Add subfolders"));
+        addDir.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addLibrarySubFolders();
+            }
+        });
+        c.gridx = 1;
+        p.add(addDir, c);
         JButton addNewRow = new JButton(Translate.t("Add new entry"));
         addNewRow.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 libraryLocationModel.addNewRow("groupname", "Name Me", "Enter Path");
             }
         });
-        c.gridx = 1;
+        c.gridx = 2;
         p.add(addNewRow, c);
     }
-}
 
+    public void addLibrarySubFolders() {
+        JFileChooser fc = new JFileChooser();
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int r = fc.showOpenDialog(dialog);
+        if (r == JFileChooser.APPROVE_OPTION) {
+            File dir = fc.getSelectedFile();
+            if (!dir.isDirectory()) {
+                return;
+            }
+            File[] files = dir.listFiles();
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    String name = file.getName();
+                    String code = "";
+                    for (int i = 0; i < name.length(); i++) {
+                        char c = name.charAt(i);
+                        if (c >= 'a' && c <= 'z') {
+                            code += c;
+                        } else if (c >= 'A' && c <= 'Z') {
+                            code += Character.toLowerCase(c);
+                        } else if (c >= '0' && c <= '9') {
+                            code += c;
+                        }
+                    }
+                    if (code.equals("")) {
+                        Random rng = new Random();
+                        code += (char)(rng.nextInt(26) + 'a');
+                        code += (char)(rng.nextInt(26) + 'a');
+                        code += (char)(rng.nextInt(26) + 'a');
+                        code += (char)(rng.nextInt(26) + 'a');
+                        code += (char)(rng.nextInt(26) + 'a');
+                        code += (char)(rng.nextInt(26) + 'a');
+                        code += (char)(rng.nextInt(26) + 'a');
+                        code += (char)(rng.nextInt(26) + 'a');
+                    }
+                    libraryLocationModel.addNewRow(code, name, file.getAbsolutePath());
+                }
+            }
+        }
+    }
+}
 

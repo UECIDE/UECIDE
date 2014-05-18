@@ -103,8 +103,17 @@ public class Editor extends JFrame {
     JProgressBar statusProgress;
     JLabel statusLabel;
 
+    boolean compilerRunning = false;
+
+    JButton runButton;
+    JButton programButton;
+
     class DefaultRunHandler implements Runnable {
         public void run() {
+            if (compilerRunning) return;
+            compilerRunning = true;
+            runButton.setEnabled(false);
+            programButton.setEnabled(false);
             try {
                 if(loadedSketch.build()) {
             //        reportSize();
@@ -112,6 +121,30 @@ public class Editor extends JFrame {
             } catch (Exception e) {
                 error(e);
             }
+            compilerRunning = false;
+            runButton.setEnabled(true);
+            programButton.setEnabled(true);
+        }
+    }
+
+    class LibCompileRunHandler implements Runnable {
+        Library library;
+        public LibCompileRunHandler(Library lib) {
+            library = lib;
+        }
+        public void run() {
+            if (compilerRunning) return;
+            runButton.setEnabled(false);
+            programButton.setEnabled(false);
+            compilerRunning = true;
+            try {
+                loadedSketch.precompileLibrary(library);
+            } catch (Exception e) {
+                error(e);
+            }
+            compilerRunning = false;
+            runButton.setEnabled(true);
+            programButton.setEnabled(true);
         }
     }
 
@@ -133,6 +166,7 @@ public class Editor extends JFrame {
         statusBar.setLayout(new BorderLayout());
 
         editorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+
 
         editorTabs.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -235,17 +269,22 @@ public class Editor extends JFrame {
 
         treeScroll = new JScrollPane();
         treePanel.add(treeScroll, BorderLayout.CENTER);
+        initTreeStructure();
 
         File themeFolder = Base.getContentFile("lib/theme");
-        addToolbarButton(toolbar, "toolbar/run.png", "Compile", new ActionListener() {
+        runButton = addToolbarButton(toolbar, "toolbar/run.png", "Compile", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 clearConsole();
+                if (compilerRunning) {
+                    error("Sorry, there is already a compiler thread running for this sketch.");
+                    return;
+                }
                 DefaultRunHandler runHandler = new DefaultRunHandler();
                 new Thread(runHandler, "Compiler").start();
             }
         });
 
-        addToolbarButton(toolbar, "toolbar/burn.png", "Program");
+        programButton = addToolbarButton(toolbar, "toolbar/burn.png", "Program");
         toolbar.addSeparator();
 
         addToolbarButton(toolbar, "toolbar/new.png", "New Sketch", new ActionListener() {
@@ -316,28 +355,87 @@ public class Editor extends JFrame {
         DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             if ((value != null) && (value instanceof DefaultMutableTreeNode)) {
-                JLabel text = new JLabel("error");
                 JPanel container = new JPanel();
                 container.setLayout(new BorderLayout());
                 ImageIcon icon = null;
                 UIDefaults defaults = javax.swing.UIManager.getDefaults();
                 Color bg = defaults.getColor("List.selectionBackground");
                 Color fg = defaults.getColor("List.selectionForeground");
-                Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+                Object userObject = node.getUserObject();
+                Border noBorder = BorderFactory.createEmptyBorder(0,0,0,0);
+                Border paddingBorder = BorderFactory.createEmptyBorder(2,2,2,2);
+
                 if (userObject instanceof File) {
                     File file = (File)userObject;
-                    text.setText(file.getName());
+                    JLabel text = new JLabel(file.getName());
                     icon = Base.loadIconFromResource(FileType.getIcon(file));
-                } else {
-                    text.setText(userObject.toString());
-                    if (expanded) {
-                        icon = Base.loadIconFromResource("files/folder-open.png");
+                    text.setBorder(paddingBorder);
+                    if (selected) {
+                        text.setBackground(bg);
+                        text.setForeground(fg);
+                        text.setOpaque(true);
                     } else {
-                        icon = Base.loadIconFromResource("files/folder.png");
+                        text.setOpaque(false);
                     }
+                    container.setOpaque(false);
+                    container.setBorder(noBorder);
+                    if (icon != null) {
+                        JLabel i = new JLabel(icon);
+                        container.add(i, BorderLayout.WEST);
+                    }
+                    container.add(text, BorderLayout.CENTER);
+                    return container;
                 }
-                Border paddingBorder = BorderFactory.createEmptyBorder(2,2,2,2);
-                Border noBorder = BorderFactory.createEmptyBorder(0,0,0,0);
+
+                if (userObject instanceof Library) {
+                    Library lib = (Library)userObject;
+                    int pct = lib.getCompiledPercent();
+
+                    if (loadedSketch.libraryIsCompiled(lib) && (pct >= 100 || pct <= 0)) {
+                        icon = Base.loadIconFromResource("files/library-good.png");
+                    } else {
+                        icon = Base.loadIconFromResource("files/library-bad.png");
+                    }
+
+                    container.setOpaque(false);
+                    container.setBorder(noBorder);
+                    JLabel i = new JLabel(icon);
+                    container.add(i, BorderLayout.WEST);
+
+                    if (pct > 0 && pct < 100) {
+                        JProgressBar bar = new JProgressBar();
+                        bar.setString(lib.getName());
+                        Dimension d = bar.getSize();
+                        d.width = 80;
+                        bar.setSize(d);
+                        bar.setPreferredSize(d);
+                        bar.setMinimumSize(d);
+                        bar.setMaximumSize(d);
+                        bar.setBorderPainted(false);
+                        bar.setStringPainted(true);
+                        bar.setValue(pct);
+                        container.add(bar, BorderLayout.CENTER);
+                    } else {
+                        JLabel text = new JLabel(lib.getName());
+                        text.setBorder(paddingBorder);
+                        if (selected) {
+                            text.setBackground(bg);
+                            text.setForeground(fg);
+                            text.setOpaque(true);
+                        } else {
+                            text.setOpaque(false);
+                        }
+                        container.add(text, BorderLayout.CENTER);
+                    }
+                    return container;
+                }
+                JLabel text = new JLabel(userObject.toString());
+                if (expanded) {
+                    icon = Base.loadIconFromResource("files/folder-open.png");
+                } else {
+                    icon = Base.loadIconFromResource("files/folder.png");
+                }
                 text.setBorder(paddingBorder);
                 if (selected) {
                     text.setBackground(bg);
@@ -346,14 +444,14 @@ public class Editor extends JFrame {
                 } else {
                     text.setOpaque(false);
                 }
+
                 container.setOpaque(false);
                 container.setBorder(noBorder);
-                if (icon != null) {
-                    JLabel i = new JLabel(icon);
-                    container.add(i, BorderLayout.WEST);
-                }
+                JLabel i = new JLabel(icon);
+                container.add(i, BorderLayout.WEST);
                 container.add(text, BorderLayout.CENTER);
                 return container;
+
             }
             return defaultRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         }
@@ -375,22 +473,8 @@ public class Editor extends JFrame {
         };
     }
 
-    public void updateTree() {
-        boolean treeRootOpen = true;
-        boolean treeSourceOpen = true;
-        boolean treeHeadersOpen = false;
-        boolean treeLibrariesOpen = false;
-        boolean treeBinariesOpen = false;
-        boolean treeOutputOpen = false;
 
-        if (treeRoot != null) treeRootOpen = sketchContentTree.isExpanded(new TreePath(treeRoot.getPath()));
-        if (treeSource != null) treeSourceOpen = sketchContentTree.isExpanded(new TreePath(treeSource.getPath()));
-        if (treeHeaders != null) treeHeadersOpen = sketchContentTree.isExpanded(new TreePath(treeHeaders.getPath()));
-        if (treeLibraries != null) treeLibrariesOpen = sketchContentTree.isExpanded(new TreePath(treeLibraries.getPath()));
-        if (treeBinaries != null) treeBinariesOpen = sketchContentTree.isExpanded(new TreePath(treeBinaries.getPath()));
-        if (treeOutput != null) treeOutputOpen = sketchContentTree.isExpanded(new TreePath(treeOutput.getPath()));
-            
-
+    public void initTreeStructure() {
         treeRoot = new DefaultMutableTreeNode(loadedSketch.getName());
         treeModel = new DefaultTreeModel(treeRoot);
         sketchContentTree = new JTree(treeModel);
@@ -407,6 +491,18 @@ public class Editor extends JFrame {
         treeRoot.add(treeBinaries);
         treeRoot.add(treeOutput);
 
+        sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
+        sketchContentTree.expandPath(new TreePath(treeSource.getPath()));
+
+        treeScroll.setViewportView(sketchContentTree);
+        Font font        = Base.preferences.getFont("tree.font");
+        sketchContentTree.setFont(font);
+        sketchContentTree.addMouseListener(new TreeMouseListener());
+    }
+
+    public void updateSourceTree() {
+        boolean treeSourceOpen = sketchContentTree.isExpanded(new TreePath(treeSource.getPath()));
+        treeSource.removeAllChildren();
         DefaultMutableTreeNode node;
         for (File f : loadedSketch.sketchFiles) {
             int type = FileType.getType(f);
@@ -419,7 +515,19 @@ public class Editor extends JFrame {
                     node.setUserObject(f);
                     treeSource.add(node);
                     break;
+            }
+        }
+        treeModel.nodeStructureChanged(treeSource);
+        if (treeSourceOpen) sketchContentTree.expandPath(new TreePath(treeSource.getPath()));
+    }
 
+    public void updateHeadersTree() {
+        boolean treeHeadersOpen = sketchContentTree.isExpanded(new TreePath(treeHeaders.getPath()));
+        treeHeaders.removeAllChildren();
+        DefaultMutableTreeNode node;
+        for (File f : loadedSketch.sketchFiles) {
+            int type = FileType.getType(f);
+            switch (type) {
                 case FileType.HEADER:
                     node = new DefaultMutableTreeNode(f.getName());
                     node.setUserObject(f);
@@ -427,18 +535,31 @@ public class Editor extends JFrame {
                     break;
             }
         }
+        treeModel.nodeStructureChanged(treeHeaders);
+        if (treeHeadersOpen) sketchContentTree.expandPath(new TreePath(treeHeaders.getPath()));
+    }
 
+    public void updateLibrariesTree() {
+        boolean treeLibrariesOpen = sketchContentTree.isExpanded(new TreePath(treeLibraries.getPath()));
+        treeLibraries.removeAllChildren();
         HashMap<String, Library>libList = loadedSketch.getLibraries();
+        DefaultMutableTreeNode node;
         if (libList != null) {
             for (String libname : libList.keySet()) {
                 node = new DefaultMutableTreeNode(libname);
+                node.setUserObject(libList.get(libname));
                 treeLibraries.add(node);
             }
         }
+        treeModel.nodeStructureChanged(treeLibraries);
+        if (treeLibrariesOpen) sketchContentTree.expandPath(new TreePath(treeLibraries.getPath()));
+    }
 
-        addFileTreeToNode(treeOutput, loadedSketch.getBuildFolder());
-
+    public void updateBinariesTree() {
+        boolean treeBinariesOpen = sketchContentTree.isExpanded(new TreePath(treeBinaries.getPath()));
+        treeBinaries.removeAllChildren();
         File bins = loadedSketch.getBinariesFolder();
+        DefaultMutableTreeNode node;
         if (bins.exists() && bins.isDirectory()) {
             File[] files = bins.listFiles();
             for (File binFile : files) {
@@ -450,159 +571,197 @@ public class Editor extends JFrame {
                 treeBinaries.add(node);
             }
         }
+        treeModel.nodeStructureChanged(treeBinaries);
+        if (treeBinariesOpen) sketchContentTree.expandPath(new TreePath(treeBinaries.getPath()));
+    }
 
-        treeScroll.setViewportView(sketchContentTree);
-        MouseListener ml = new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                ActionListener createNewAction = new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        createNewSketchFile(e.getActionCommand());
-                    }
-                };
-                ActionListener importFileAction = new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        importFile(e.getActionCommand());
-                    }
-                };
+    public void updateOutputTree() {
+        boolean treeOutputOpen = sketchContentTree.isExpanded(new TreePath(treeOutput.getPath()));
+        treeOutput.removeAllChildren();
+        addFileTreeToNode(treeOutput, loadedSketch.getBuildFolder());
+        treeModel.nodeStructureChanged(treeOutput);
+        if (treeOutputOpen) sketchContentTree.expandPath(new TreePath(treeOutput.getPath()));
+    }
 
-                int selRow = sketchContentTree.getRowForLocation(e.getX(), e.getY());
-                TreePath selPath = sketchContentTree.getPathForLocation(e.getX(), e.getY());
-                sketchContentTree.setSelectionPath(selPath);
-                if (e.getButton() == 3) {
-                    DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
-                    DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();
-                    if (o.getUserObject().getClass().equals(String.class)) {
-                        String s = (String)o.getUserObject();
-                        if (s.equals("Source")) {
-                            JPopupMenu menu = new JPopupMenu();
-                            JMenuItem item = new JMenuItem("Create sketch file (.ino)");
-                            item.setActionCommand("ino");
-                            item.addActionListener(createNewAction);
-                            menu.add(item);
-                            item = new JMenuItem("Create C++ source file");
-                            item.setActionCommand("cpp");
-                            item.addActionListener(createNewAction);
-                            menu.add(item);
-                            item = new JMenuItem("Create C source file");
-                            item.setActionCommand("c");
-                            item.addActionListener(createNewAction);
-                            menu.add(item);
-                            item = new JMenuItem("Create assembly source file");
-                            item.setActionCommand("S");
-                            item.addActionListener(createNewAction);
-                            menu.add(item);
-                            item = new JMenuItem("Import source file");
-                            item.setActionCommand("source");
-                            item.addActionListener(importFileAction);
-                            menu.add(item);
-                            menu.show(sketchContentTree, e.getX(), e.getY());
-                        } else if (s.equals("Headers")) {
-                            JPopupMenu menu = new JPopupMenu();
-                            JMenuItem item = new JMenuItem("Create header file");
-                            item.setActionCommand("h");
-                            item.addActionListener(createNewAction);
-                            menu.add(item);
-                            item = new JMenuItem("Import header file");
-                            item.setActionCommand("header");
-                            item.addActionListener(importFileAction);
-                            menu.add(item);
-                            menu.show(sketchContentTree, e.getX(), e.getY());
-                        } else if (s.equals("Libraries")) {
-                            JPopupMenu menu = new JPopupMenu();
-                            JMenu item = new JMenu("Import library to sketch");
-                            menu.add(item);
-                            menu.show(sketchContentTree, e.getX(), e.getY());
-                        } else if (s.equals("Binaries")) {
-                            JPopupMenu menu = new JPopupMenu();
-                            JMenuItem item = new JMenuItem("Add binary file");
-                            item.setActionCommand("binary");
-                            item.addActionListener(importFileAction);
-                            menu.add(item);
-                            menu.show(sketchContentTree, e.getX(), e.getY());
-                        } else if (s.equals("Output")) {
-                            JPopupMenu menu = new JPopupMenu();
-                            JMenuItem item = new JMenuItem("Purge output files");
-                            menu.add(item);
-                            menu.show(sketchContentTree, e.getX(), e.getY());
-                        } 
-                    } else if (o.getUserObject().getClass().equals(File.class)) {
-                        File thisFile = (File)o.getUserObject();
-                        JPopupMenu menu = new JPopupMenu();
+    public void updateTree() {
+        boolean treeRootOpen = sketchContentTree.isExpanded(new TreePath(treeRoot.getPath()));
 
-                        JMenuItem renameItem = new JMenuItem("Rename file");
-                        renameItem.setActionCommand("rename");
-                        menu.add(renameItem);
+        updateSourceTree();
+        updateHeadersTree();
+        updateLibrariesTree();
+        updateBinariesTree();
+        updateOutputTree();
 
-                        JMenuItem deleteItem = new JMenuItem("Delete file");
-                        deleteItem.setActionCommand("delete");
-                        menu.add(deleteItem);
+        if (treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
+    }
 
-                        menu.addSeparator();
+    public class TreeMouseListener extends MouseAdapter {
 
-                        JMenu infoMenu = new JMenu("Info");
-                        JMenuItem filePath = new JMenuItem(thisFile.getAbsolutePath());
-                        filePath.addActionListener(new ActionListener() {
-                            public void actionPerformed(ActionEvent e) {
-                                StringSelection sel = new StringSelection(e.getActionCommand());
-                                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                                clipboard.setContents(sel, sel);
-                                message("Path copied to clipboard.");
-                            }
-                        });
-                        filePath.setActionCommand(thisFile.getAbsolutePath());
-                        infoMenu.add(filePath);
-                        JMenuItem fileSize = new JMenuItem(thisFile.length() + " bytes");
-                        infoMenu.add(fileSize);
-                        menu.add(infoMenu);
-
-
-                        if (p.getUserObject().getClass().equals(String.class)) {
-                            String ptext = (String)p.getUserObject();
-                            if (ptext.equals("Binaries")) {
-                                JMenuItem insertRef = new JMenuItem("Insert reference");
-                                insertRef.addActionListener(new ActionListener() {
-                                    public void actionPerformed(ActionEvent e) {
-                                        String filename = e.getActionCommand();
-                                        filename = filename.replaceAll("\\.","_");
-                                        int at = getActiveTab();
-                                        if (at > -1) {
-                                            EditorBase eb = getTab(at);
-                                            eb.insertAtCursor("extern char " + filename + "[] asm(\"_binary_objects_" + filename + "_start\");\n");
-                                        }
-                                    }
-                                });
-                                insertRef.setActionCommand(thisFile.getName());
-                                menu.add(insertRef);
-                            }
-                        }
-
-                        menu.show(sketchContentTree, e.getX(), e.getY());
-                    }
-                    return;
+        public void mousePressed(MouseEvent e) {
+            ActionListener createNewAction = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    createNewSketchFile(e.getActionCommand());
                 }
-                if(selRow != -1) {
-                    if(e.getClickCount() == 2) {
-                        DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
-                        if (o.getUserObject().getClass().equals(File.class)) {
-                            File sf = (File)o.getUserObject();
-                            openOrSelectFile(sf);
+            };
+            ActionListener importFileAction = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    importFile(e.getActionCommand());
+                }
+            };
+
+            int selRow = sketchContentTree.getRowForLocation(e.getX(), e.getY());
+            TreePath selPath = sketchContentTree.getPathForLocation(e.getX(), e.getY());
+            sketchContentTree.setSelectionPath(selPath);
+            if (e.getButton() == 3) {
+                DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
+                DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();
+                if (o.getUserObject().getClass().equals(String.class)) {
+                    String s = (String)o.getUserObject();
+                    if (s.equals("Source")) {
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenuItem item = new JMenuItem("Create sketch file (.ino)");
+                        item.setActionCommand("ino");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
+                        item = new JMenuItem("Create C++ source file");
+                        item.setActionCommand("cpp");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
+                        item = new JMenuItem("Create C source file");
+                        item.setActionCommand("c");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
+                        item = new JMenuItem("Create assembly source file");
+                        item.setActionCommand("S");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
+                        item = new JMenuItem("Import source file");
+                        item.setActionCommand("source");
+                        item.addActionListener(importFileAction);
+                        menu.add(item);
+                        menu.show(sketchContentTree, e.getX(), e.getY());
+                    } else if (s.equals("Headers")) {
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenuItem item = new JMenuItem("Create header file");
+                        item.setActionCommand("h");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
+                        item = new JMenuItem("Import header file");
+                        item.setActionCommand("header");
+                        item.addActionListener(importFileAction);
+                        menu.add(item);
+                        menu.show(sketchContentTree, e.getX(), e.getY());
+                    } else if (s.equals("Libraries")) {
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenu item = new JMenu("Import library to sketch");
+                        menu.add(item);
+                        menu.show(sketchContentTree, e.getX(), e.getY());
+                    } else if (s.equals("Binaries")) {
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenuItem item = new JMenuItem("Add binary file");
+                        item.setActionCommand("binary");
+                        item.addActionListener(importFileAction);
+                        menu.add(item);
+                        menu.show(sketchContentTree, e.getX(), e.getY());
+                    } else if (s.equals("Output")) {
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenuItem item = new JMenuItem("Purge output files");
+                        menu.add(item);
+                        menu.show(sketchContentTree, e.getX(), e.getY());
+                    } 
+                } else if (o.getUserObject().getClass().equals(File.class)) {
+                    File thisFile = (File)o.getUserObject();
+                    JPopupMenu menu = new JPopupMenu();
+
+                    JMenuItem renameItem = new JMenuItem("Rename file");
+                    renameItem.setActionCommand("rename");
+                    menu.add(renameItem);
+
+                    JMenuItem deleteItem = new JMenuItem("Delete file");
+                    deleteItem.setActionCommand("delete");
+                    menu.add(deleteItem);
+
+                    menu.addSeparator();
+
+                    JMenu infoMenu = new JMenu("Info");
+                    JMenuItem filePath = new JMenuItem(thisFile.getAbsolutePath());
+                    filePath.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            StringSelection sel = new StringSelection(e.getActionCommand());
+                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            clipboard.setContents(sel, sel);
+                            message("Path copied to clipboard.");
                         }
+                    });
+                    filePath.setActionCommand(thisFile.getAbsolutePath());
+                    infoMenu.add(filePath);
+                    JMenuItem fileSize = new JMenuItem(thisFile.length() + " bytes");
+                    infoMenu.add(fileSize);
+                    menu.add(infoMenu);
+
+
+                    if (p.getUserObject().getClass().equals(String.class)) {
+                        String ptext = (String)p.getUserObject();
+                        if (ptext.equals("Binaries")) {
+                            JMenuItem insertRef = new JMenuItem("Insert reference");
+                            insertRef.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    String filename = e.getActionCommand();
+                                    filename = filename.replaceAll("\\.","_");
+                                    int at = getActiveTab();
+                                    if (at > -1) {
+                                        EditorBase eb = getTab(at);
+                                        eb.insertAtCursor("extern char " + filename + "[] asm(\"_binary_objects_" + filename + "_start\");\n");
+                                    }
+                                }
+                            });
+                            insertRef.setActionCommand(thisFile.getName());
+                            menu.add(insertRef);
+                        }
+                    }
+
+                    menu.show(sketchContentTree, e.getX(), e.getY());
+                } else if (o.getUserObject().getClass().equals(Library.class)) {
+                    final Library lib = (Library)(o.getUserObject());
+                    JPopupMenu menu = new JPopupMenu();
+                    JMenuItem item = new JMenuItem("Delete cached archive");
+                    item.setEnabled(loadedSketch.libraryIsCompiled(lib));
+                    item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            loadedSketch.purgeLibrary(lib);
+                        }
+                    });
+                    menu.add(item);
+                    item = new JMenuItem("Recompile now");
+                    item.setEnabled(!compilerRunning);
+                    item.setActionCommand("yes");
+                    item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            loadedSketch.purgeLibrary(lib);
+                            clearConsole();
+                            if (compilerRunning) {
+                                error("Sorry, there is already a compiler thread running for this sketch.");
+                                return;
+                            }
+                            LibCompileRunHandler runHandler = new LibCompileRunHandler(lib);
+                            new Thread(runHandler, "Compiler").start();
+                        }
+                    });
+                    menu.add(item);
+                    menu.show(sketchContentTree, e.getX(), e.getY());
+                }
+                return;
+            }
+            if(selRow != -1) {
+                if(e.getClickCount() == 2) {
+                    DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
+                    if (o.getUserObject().getClass().equals(File.class)) {
+                        File sf = (File)o.getUserObject();
+                        openOrSelectFile(sf);
                     }
                 }
             }
-        };
-
-        Font font        = Base.preferences.getFont("tree.font");
-        sketchContentTree.setFont(font);
-
-        sketchContentTree.addMouseListener(ml);
-
-        if (treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
-        if (treeSourceOpen) sketchContentTree.expandPath(new TreePath(treeSource.getPath()));
-        if (treeHeadersOpen) sketchContentTree.expandPath(new TreePath(treeHeaders.getPath()));
-        if (treeLibrariesOpen) sketchContentTree.expandPath(new TreePath(treeLibraries.getPath()));
-        if (treeBinariesOpen) sketchContentTree.expandPath(new TreePath(treeBinaries.getPath()));
-        if (treeOutputOpen) sketchContentTree.expandPath(new TreePath(treeOutput.getPath()));
+        }
     }
 
     public Board getBoard() {
@@ -796,6 +955,10 @@ public class Editor extends JFrame {
     }
 
     public void openNewTab(File sf) {
+        if (sf.exists() == false) {
+            error("Sorry, I can't find " + sf.getName() + ".");
+            return;
+        }
         try {
             String className = FileType.getEditor(sf.getName());
             if (className == null) {
