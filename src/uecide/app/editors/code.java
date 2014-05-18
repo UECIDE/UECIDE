@@ -214,7 +214,17 @@ public class code extends JPanel implements EditorBase {
 
         toolbar.addSeparator();
         JButton indentButton = editor.addToolbarButton(toolbar, "toolbar/format-indent-more.png", "Increase Indent");
+        indentButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                increaseIndent(e);
+            }
+        });
         JButton outdentButton = editor.addToolbarButton(toolbar, "toolbar/format-indent-less.png", "Decrease Indent");
+        outdentButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                decreaseIndent(e);
+            }
+        });
 
         refreshSettings();
         this.add(scrollPane, BorderLayout.CENTER);
@@ -765,6 +775,28 @@ public class code extends JPanel implements EditorBase {
 
     public void insertAtEnd(String text) {
         textArea.append(text);
+    }
+
+    public void increaseIndent(ActionEvent e) {
+        boolean wasSelected = false;
+        ActionMap map = textArea.getActionMap();
+        Action act;
+        act = map.get(DefaultEditorKit.insertTabAction);
+        String selection = textArea.getSelectedText();
+        if (selection == null || selection.equals("")) {
+            int off = textArea.getCaretPosition();
+            textArea.setCaretPosition(textArea.getLineStartOffsetOfCurrentLine());
+            act.actionPerformed(e);
+            textArea.setCaretPosition(off+1); 
+        } else {
+            act.actionPerformed(e);
+        }
+    }
+
+    public void decreaseIndent(ActionEvent e) {
+        ActionMap map = textArea.getActionMap();
+        Action di = map.get(RSyntaxTextAreaEditorKit.rstaDecreaseIndentAction);
+        di.actionPerformed(e);
     }
 
 }
