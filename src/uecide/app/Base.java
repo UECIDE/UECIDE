@@ -904,7 +904,7 @@ public class Base {
         libraryCategoryNames = new HashMap<String, String>();
         libraryCategoryPaths = new HashMap<String, File>();
 
-        for (String k : preferences.children("library")) {
+        for (String k : preferences.childKeysOf("library")) {
             String cName = preferences.get("library." + k + ".name");
             String cPath = preferences.get("library." + k + ".path");
             if (cName != null && cPath != null) {

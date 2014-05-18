@@ -126,6 +126,38 @@ public class PropertyFile {
         properties = new Properties();
     }
 
+    public PropertyFile(HashMap<String, String>data) {
+        userFile = null;
+        defaultProperties = new Properties();
+        properties = new Properties();
+        mergeData(data);
+    }
+
+    public PropertyFile(PropertyFile pf) {
+        userFile = null;
+        defaultProperties = new Properties();
+        properties = new Properties();
+        mergeData(pf);
+    }
+
+    public void mergeData(HashMap<String, String>data) {
+        if (data == null) {
+            return;
+        }
+        for (String key : data.keySet()) {
+            set(key, data.get(key));
+        }
+    }
+
+    public void mergeData(PropertyFile pf) {
+        if (pf == null) {
+            return;
+        }
+        for (String key: pf.getProperties().stringPropertyNames()) {
+            set(key, pf.getProperties().getProperty(key));
+        }
+    }
+
     public void save() {
         if (userFile != null) {
             try {
@@ -151,6 +183,19 @@ public class PropertyFile {
             return t.trim();
         }
         return null;
+    }
+
+    public String[] getArray(String attribute) {
+        String rawData = null;
+        if (doPlatformOverride) {
+            rawData = getPlatformSpecific(attribute);
+        } else {
+            rawData = properties.getProperty(attribute);
+        }
+        if (rawData == null) {
+            return null;
+        }
+        return rawData.split("::");
     }
 
     public String get(String attribute) {
@@ -342,31 +387,45 @@ public class PropertyFile {
         }
     }
 
-    public ArrayList<String> children(String path) {
-        ArrayList<String> kids = new ArrayList<String>();
-        String root = path;
-
-        if (root.equals("")) {
-            for (String k : properties.stringPropertyNames()) {
-                String[] parts = k.split(".");
-                if (kids.indexOf(parts[0]) == -1) {
-                    kids.add(parts[0]);
-                }
-            }
-            return kids;
+    public PropertyFile getChildren(String path) {
+        if (path == null || path == "") {
+            return new PropertyFile(this);
         }
 
-        String[] rootParts = root.split("\\.");
-        root = root + ".";
+        PropertyFile subset = new PropertyFile();
+        if (!path.endsWith(".")) {
+            path += ".";
+        }
 
-        for (String k : properties.stringPropertyNames()) {
-            if (k.startsWith(root)) {
-                String[] keyParts = k.split("\\.");
-                if (kids.indexOf(keyParts[rootParts.length]) == -1) {
-                    kids.add(keyParts[rootParts.length]);
-                }
+        for (String key : properties.stringPropertyNames()) {
+            if (key.startsWith(path)) {
+                subset.set(key.substring(path.length()), properties.getProperty(key));
             }
         }
-        return kids;
+        return subset;
+    }
+
+    // Return the top level of directly descendant child keys.  That is,
+    // if the property file contains:
+    //      foo.bar
+    //      foo.baz
+    //      bar.foo
+    // it will return { "bar", "foo" }.
+    public String[] childKeys() {
+        ArrayList<String> keys = new ArrayList<String>();
+        for (String key : properties.stringPropertyNames()) {
+            String[] bits = key.split("\\.");
+            if (keys.indexOf(bits[0]) == -1) {
+                keys.add(bits[0]);
+            }
+        }
+        String[] keyArray = keys.toArray(new String[0]);
+        Arrays.sort(keyArray);
+        return keyArray;
+    }
+
+    public String[] childKeysOf(String path) {
+        PropertyFile pf = getChildren(path);
+        return pf.childKeys();
     }
 }

@@ -29,11 +29,13 @@ public class FileType {
         public String style;
         public String editor;
         public String icon;
-        public FileTypeInfo(int t, String e, String s, String i) {
+        public int group;
+        public FileTypeInfo(int t, String e, String s, String i, int g) {
             type = t;
             editor = e;
             style = s;
             icon = i;
+            group = g;
         }
     };
         
@@ -48,41 +50,46 @@ public class FileType {
     public static final int SKETCH = 7;
     public static final int TEXT = 8;
 
+    public static final int GROUP_OTHER = 0;
+    public static final int GROUP_SOURCE = 1;
+    public static final int GROUP_HEADER = 2;
+    public static final int GROUP_BINARY = 3;
+
     public static HashMap<String, FileTypeInfo> fileTypeList;
     static {
         fileTypeList = new HashMap<String, FileTypeInfo>();
-        fileTypeList.put("c",   new FileTypeInfo(FileType.CSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_C, "files/text-x-c.png"));
+        fileTypeList.put("c",   new FileTypeInfo(FileType.CSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_C, "files/text-x-c.png", GROUP_SOURCE));
 
-        fileTypeList.put("cpp", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("c++", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("cc",  new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("cp",  new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("cxx", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("CPP", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("C",   new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
+        fileTypeList.put("cpp", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("c++", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("cc",  new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("cp",  new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("cxx", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("CPP", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("C",   new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
 
-        fileTypeList.put("S",   new FileTypeInfo(FileType.ASMSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c.png"));
-        fileTypeList.put("sx",  new FileTypeInfo(FileType.ASMSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c.png"));
+        fileTypeList.put("S",   new FileTypeInfo(FileType.ASMSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c.png", GROUP_SOURCE));
+        fileTypeList.put("sx",  new FileTypeInfo(FileType.ASMSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c.png", GROUP_SOURCE));
 
-        fileTypeList.put("h",   new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("H",   new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("hh",  new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("hp",  new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("hxx", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("hpp", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("HPP", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("h++", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("tcc", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
+        fileTypeList.put("h",   new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
+        fileTypeList.put("H",   new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
+        fileTypeList.put("hh",  new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
+        fileTypeList.put("hp",  new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
+        fileTypeList.put("hxx", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
+        fileTypeList.put("hpp", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
+        fileTypeList.put("HPP", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
+        fileTypeList.put("h++", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
+        fileTypeList.put("tcc", new FileTypeInfo(FileType.HEADER, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
 
 
-        fileTypeList.put("pde", new FileTypeInfo(FileType.SKETCH, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
-        fileTypeList.put("ino", new FileTypeInfo(FileType.SKETCH, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png"));
+        fileTypeList.put("pde", new FileTypeInfo(FileType.SKETCH, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("ino", new FileTypeInfo(FileType.SKETCH, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
 
-        fileTypeList.put("lss", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png"));
-        fileTypeList.put("hex", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png"));
-        fileTypeList.put("o", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png"));
-        fileTypeList.put("a", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png"));
-        fileTypeList.put("elf", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png"));
+        fileTypeList.put("lss", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("hex", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("o", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
+        fileTypeList.put("a", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
+        fileTypeList.put("elf", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
 
     }
 
@@ -130,4 +137,16 @@ public class FileType {
         }
         return "unknown.png";
     }
+
+    public static int getGroup(File f) { return getGroup(f.getName()); }
+    public static int getGroup(String f) {
+        for (String extension : fileTypeList.keySet()) {
+            if (f.endsWith("." + extension)) {
+                return fileTypeList.get(extension).group;
+            }
+        }
+        return GROUP_OTHER;
+    }
+
+    
 };

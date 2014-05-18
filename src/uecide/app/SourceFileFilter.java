@@ -28,36 +28,35 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package uecide.app.editors;
-
-import uecide.app.*;
-import uecide.plugin.*;
-import uecide.app.debug.*;
+package uecide.app;
 
 import java.awt.*;
-import java.awt.datatransfer.*;
-import java.awt.event.*;
-import java.awt.print.*;
 import java.awt.image.*;
+import java.awt.event.*;
 import java.io.*;
-import java.net.*;
 import java.util.*;
+import java.net.*;
 import java.util.zip.*;
+import java.util.jar.*;
+import uecide.plugin.*;
+
+import java.lang.reflect.Method;
 
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.border.*;
-import javax.swing.text.*;
-import javax.swing.JToolBar;
+import javax.imageio.*;
 
-import org.fife.ui.rsyntaxtextarea.*;
-import org.fife.ui.rtextarea.*;
+public class SourceFileFilter extends javax.swing.filechooser.FileFilter {
+    public boolean accept(File f) {
+        if (FileType.getGroup(f) == FileType.GROUP_SOURCE) {
+            return true;
+        }
+        if (f.isDirectory()) {
+            return true;
+        } 
+        return false;
+    }
 
-public class text extends code {
-
-    public text(Sketch s, File f, Editor e) {
-        super(s, f, e);
-        textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+    public String getDescription() {
+        return Translate.t("Source Files");
     }
 }
-

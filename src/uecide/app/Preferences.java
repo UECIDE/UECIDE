@@ -1088,7 +1088,7 @@ public class Preferences {
         Serial.fillExtraPorts();
     }
 
-    for (String k : Base.preferences.children("library")) {
+    for (String k : Base.preferences.childKeysOf("library")) {
         Debug.message("Removing library entry " + k);
         Base.preferences.unset("library." + k + ".name");
         Base.preferences.unset("library." + k + ".path");
@@ -1151,7 +1151,7 @@ public class Preferences {
     }
 
     int i = 0;
-    for (String k : Base.preferences.children("library")) {
+    for (String k : Base.preferences.childKeysOf("library")) {
         libraryLocationModel.setValueAt(k, i, 0);
         libraryLocationModel.setValueAt(Base.preferences.get("library." + k + ".name"), i, 1);
         libraryLocationModel.setValueAt(Base.preferences.get("library." + k + ".path"), i, 2);

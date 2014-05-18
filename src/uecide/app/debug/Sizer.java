@@ -50,8 +50,8 @@ public class Sizer implements MessageConsumer {
   
     public void computeSize() {
         sketch.settings.put("filename", sketch.getName());
-        HashMap<String, String> all = sketch.mergeAllProperties();
-        String commandSize[] = sketch.parseString(all.get("compile.size")).split("::");
+        PropertyFile props = sketch.mergeAllProperties();
+        String commandSize[] = sketch.parseString(props.get("compile.size")).split("::");
 
         int r = 0;
         try {

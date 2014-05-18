@@ -1,7 +1,7 @@
 Things that need doing.
 
 Sketch menu
-Hardware Menu - options and bootloader burning (make the latter a plugin?)
+Hardware Menu - bootloader burning (make it a plugin?)
 Help menu
 Fix and port all plugins
 Tree popup menus (mostly links to other menus)
