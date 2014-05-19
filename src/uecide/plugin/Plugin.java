@@ -24,6 +24,8 @@
 package uecide.plugin;
 
 import uecide.app.*;
+import uecide.app.debug.*;
+import uecide.app.editors.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -40,20 +42,36 @@ import javax.swing.text.*;
 /**
  * Interface for items to be shown in the Tools menu.
  */
-public interface Plugin extends Runnable {
-  public void init(Editor editor);
-  public void run();
-  public String getMenuTitle();
-  public void setInfo(Map pluginInfo);
-  public String getVersion();
-  public String getCompiled();
-  public char getShortcut();
-  public int getModifier();
-  public void setLoader(URLClassLoader loader);
-  public URLClassLoader getLoader();
-  public int flags();
-  public ImageIcon toolbarIcon();
-  public File getJarFile();
-    public JButton getToolbarButton(int flags, String context, Object object);
-}
+public abstract class Plugin {
+    public static HashMap<String, String> pluginInfo = null;
+    public static URLClassLoader loader = null;
+    public Editor editor = null;
+    public EditorBase editorTab = null;
 
+    public static final int MENU_FILE = 1;
+    public static final int MENU_EDIT = 2;
+    public static final int MENU_SKETCH = 3;
+    public static final int MENU_HARDWARE = 4;
+    public static final int MENU_TOOLS = 5;
+    public static final int MENU_HELP = 6;
+
+    public static final int MENU_TOP = 256;
+    public static final int MENU_MID = 512;
+    public static final int MENU_BOTTOM = 768;
+
+    public static final int TOOLBAR_EDITOR = 1;
+    public static final int TOOLBAR_TAB = 2;
+
+    public Plugin() { }
+    public Plugin(Editor e) { editor = e; }
+    public Plugin(EditorBase eb) { editorTab = eb; }
+
+    public static void setLoader(URLClassLoader l) { loader = l; }
+    public static void setInfo(HashMap<String, String>info) { pluginInfo = info; }
+    public static String getInfo(String item) { return pluginInfo.get(item); }
+
+    public static boolean wantEditorInstance() { return false; }
+    public static boolean wantTabInstance() { return false; }
+    public abstract void addToolbarButtons(JToolBar toolbar, int flags);
+    public abstract void populateMenu(JMenu menu, int flags);
+}

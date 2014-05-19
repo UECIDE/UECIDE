@@ -258,5 +258,9 @@ public class Library {
     public int getCompiledPercent() {
         return compiledPercent;
     }
+
+    public boolean isHeaderOnly() {
+        return sourceFiles.size() == 0;
+    }
 }
 

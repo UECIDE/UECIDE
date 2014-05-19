@@ -108,6 +108,8 @@ public class Editor extends JFrame {
     JButton runButton;
     JButton programButton;
 
+    ArrayList<Plugin> plugins = new ArrayList<Plugin>();
+
     class DefaultRunHandler implements Runnable {
         public void run() {
             if (compilerRunning) return;
@@ -152,6 +154,16 @@ public class Editor extends JFrame {
         super();
         loadedSketch = s;
         s.attachToEditor(this);
+
+        for (Class<?> plugin : Base.plugins.values()) {
+            try {
+                Constructor<?> ctor = plugin.getConstructor(Editor.class);
+                Plugin p = (Plugin)(ctor.newInstance(new Object[] { this }));
+                plugins.add(p);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         this.setLayout(new BorderLayout());
 
@@ -309,7 +321,7 @@ public class Editor extends JFrame {
 
         toolbar.addSeparator();
 
-        addPluginsToToolbar(toolbar, BasePlugin.TOOLBAR_MAIN, "", this);
+        addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
 
         menuBar = new JMenuBar();
 
@@ -408,11 +420,10 @@ public class Editor extends JFrame {
                         bar.setString(lib.getName());
                         Dimension d = bar.getSize();
                         d.width = 80;
-                        bar.setSize(d);
+                        //bar.setSize(d);
                         bar.setPreferredSize(d);
-                        bar.setMinimumSize(d);
-                        bar.setMaximumSize(d);
-                        bar.setBorderPainted(false);
+                        //bar.setMinimumSize(d);
+                        //bar.setMaximumSize(d);
                         bar.setStringPainted(true);
                         bar.setValue(pct);
                         container.add(bar, BorderLayout.CENTER);
@@ -653,8 +664,7 @@ public class Editor extends JFrame {
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Libraries")) {
                         JPopupMenu menu = new JPopupMenu();
-                        JMenu item = new JMenu("Import library to sketch");
-                        menu.add(item);
+                        populateLibrariesMenu(menu);
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Binaries")) {
                         JPopupMenu menu = new JPopupMenu();
@@ -1177,7 +1187,7 @@ public class Editor extends JFrame {
         });
         fileMenu.add(item);
 
-        addMenuChunk(fileMenu, BasePlugin.MENU_FILE | BasePlugin.MENU_TOP);
+        addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_TOP);
 
         submenu = new JMenu(Translate.t("Recent Sketches"));
         fileMenu.add(submenu);
@@ -1250,7 +1260,7 @@ public class Editor extends JFrame {
         fileMenu.add(submenu);
 
         fileMenu.addSeparator();
-        addMenuChunk(fileMenu, BasePlugin.MENU_FILE | BasePlugin.MENU_MID);
+        addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_MID);
 
         item = new JMenuItem(Translate.t("Close"));
         item.setAccelerator(KeyStroke.getKeyStroke('W', modifiers));
@@ -1289,7 +1299,7 @@ public class Editor extends JFrame {
         });
         fileMenu.add(item);
 
-        addMenuChunk(fileMenu, BasePlugin.MENU_FILE | BasePlugin.MENU_BOTTOM);
+        addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_BOTTOM);
 
         item = new JMenuItem(Translate.t("Quit"));
         item.setAccelerator(KeyStroke.getKeyStroke("alt Q"));
@@ -1300,14 +1310,11 @@ public class Editor extends JFrame {
         });
         fileMenu.add(item);
 
-        addMenuChunk(editMenu, BasePlugin.MENU_EDIT | BasePlugin.MENU_TOP);
-        addMenuChunk(editMenu, BasePlugin.MENU_EDIT_TOP);
+        addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_TOP);
         editMenu.addSeparator();
-        addMenuChunk(editMenu, BasePlugin.MENU_EDIT | BasePlugin.MENU_MID);
-        addMenuChunk(editMenu, BasePlugin.MENU_EDIT_MID);
+        addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_MID);
         editMenu.addSeparator();
-        addMenuChunk(editMenu, BasePlugin.MENU_EDIT | BasePlugin.MENU_BOTTOM);
-        addMenuChunk(editMenu, BasePlugin.MENU_EDIT_LOW);
+        addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_BOTTOM);
 
         ActionListener createNewAction = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -1338,16 +1345,28 @@ public class Editor extends JFrame {
         submenu.add(item);
         sketchMenu.add(submenu);
 
-        item = new JMenuItem("Import source file");
-        sketchMenu.add(item);
-        item = new JMenuItem("Import binary file");
-        sketchMenu.add(item);
+        submenu = new JMenu("Import file");
+        item = new JMenuItem("Source file");
+        submenu.add(item);
+        item = new JMenuItem("Header file");
+        submenu.add(item);
+        item = new JMenuItem("Binary file");
+        submenu.add(item);
+        sketchMenu.add(submenu);
 
-        addMenuChunk(sketchMenu, BasePlugin.MENU_SKETCH | BasePlugin.MENU_TOP);
+        submenu = new JMenu("Libraries");
+        item = new JMenuItem("Install library archive...");
+        submenu.add(item);
+        submenu.addSeparator();
+        populateLibrariesMenu(submenu);
+        sketchMenu.add(submenu);
+        
+
+        addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_TOP);
         sketchMenu.addSeparator();
-        addMenuChunk(sketchMenu, BasePlugin.MENU_SKETCH | BasePlugin.MENU_MID);
+        addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_MID);
         sketchMenu.addSeparator();
-        addMenuChunk(sketchMenu, BasePlugin.MENU_SKETCH | BasePlugin.MENU_BOTTOM);
+        addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_BOTTOM);
 
         submenu = new JMenu("Boards");
         populateBoardsMenu(submenu);
@@ -1379,25 +1398,23 @@ public class Editor extends JFrame {
         populateProgrammersMenu(submenu);
         hardwareMenu.add(submenu);
 
-        addMenuChunk(hardwareMenu, BasePlugin.MENU_HARDWARE | BasePlugin.MENU_TOP);
+        addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_TOP);
         hardwareMenu.addSeparator();
-        addMenuChunk(hardwareMenu, BasePlugin.MENU_HARDWARE | BasePlugin.MENU_MID);
+        addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_MID);
         hardwareMenu.addSeparator();
-        addMenuChunk(hardwareMenu, BasePlugin.MENU_HARDWARE | BasePlugin.MENU_BOTTOM);
+        addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_BOTTOM);
 
-        addMenuChunk(toolsMenu, BasePlugin.MENU_TOOLS | BasePlugin.MENU_TOP);
-        addMenuChunk(toolsMenu, BasePlugin.MENU_PLUGIN_TOP);
+        addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_TOP);
         toolsMenu.addSeparator();
-        addMenuChunk(toolsMenu, BasePlugin.MENU_TOOLS | BasePlugin.MENU_MID);
-        addMenuChunk(toolsMenu, BasePlugin.MENU_PLUGIN_MAIN);
+        addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_MID);
         toolsMenu.addSeparator();
-        addMenuChunk(toolsMenu, BasePlugin.MENU_TOOLS | BasePlugin.MENU_BOTTOM);
+        addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_BOTTOM);
 
-        addMenuChunk(helpMenu, BasePlugin.MENU_HELP | BasePlugin.MENU_TOP);
+        addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
-        addMenuChunk(helpMenu, BasePlugin.MENU_HELP | BasePlugin.MENU_MID);
+        addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_MID);
         helpMenu.addSeparator();
-        addMenuChunk(helpMenu, BasePlugin.MENU_HELP | BasePlugin.MENU_BOTTOM);
+        addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
 
     }
 
@@ -1586,70 +1603,18 @@ public class Editor extends JFrame {
 
 
     public void addPluginsToMenu(JMenu menu, int filterFlags) {
-        JMenuItem item;
-        String[] entries = (String[]) Base.plugins.keySet().toArray(new String[0]);
-
-        HashMap<String, JMenuItem> menus = new HashMap<String, JMenuItem>();
-        for (int i=0; i<entries.length; i++) {
-            final Plugin t = Base.plugins.get(entries[i]);
-            int flags = 0;
-            try {
-                flags = t.flags();
-            } catch (Exception e) {
-                error(e);
-                flags = BasePlugin.MENU_TOOLS | BasePlugin.MENU_BOTTOM;
-            }
-            if (flags == filterFlags) {
-                item = new JMenuItem(t.getMenuTitle());
-                final Editor me = this;
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        launchPlugin(t);
-                    }
-                });
-                try {
-                    if (t.getShortcut() != 0) {
-                        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-                        modifiers |= t.getModifier();
-                        item.setAccelerator(KeyStroke.getKeyStroke(t.getShortcut(), modifiers));
-                    }
-                } catch (Exception ignored) {};
-
-                menus.put(t.getMenuTitle(), item);
-            }
-        }
-
-        entries = (String[]) menus.keySet().toArray(new String[0]);
-        Arrays.sort(entries);
-        for (String entry : entries) {
-            menu.add(menus.get(entry));
-        }
-
-    }
-
-    public void addPluginsToToolbar(JToolBar tb, int filterFlags, String context, Object ob) {
-        for (final Plugin plugin : Base.plugins.values()) {
-            try {
-                JButton b = plugin.getToolbarButton(filterFlags, context, ob);
-                if (b != null) {
-                    tb.add(b);
-                }
-            } catch (Exception e) {
-                error(e);
-            }
+        for (Plugin plugin : plugins) {
+            plugin.populateMenu(menu, filterFlags);
         }
     }
 
-    public void launchPlugin(Plugin p) {
-        try {
-            Plugin instance = p.getClass().newInstance();
-            Base.pluginInstances.add(instance);
-            System.gc();
-            instance.setLoader(p.getLoader());
-            instance.init(this);
-            SwingUtilities.invokeLater(instance);
-        } catch (Exception e) {
-            error(e);
+    public void addPluginsToToolbar(JToolBar tb, int filterFlags) {
+        for (final Plugin plugin : plugins) {
+            try {
+                plugin.addToolbarButtons(tb, filterFlags);
+            } catch (Exception e) {
+                error(e);
+            }
         }
     }
 
@@ -1791,6 +1756,77 @@ public class Editor extends JFrame {
                 loadedSketch.loadFile(dest);
             }
             updateTree();
+        }
+    }
+
+    ActionListener insertIncludeAction = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            String lib = e.getActionCommand();
+            openOrSelectFile(loadedSketch.getMainFile());
+            int tab = getTabByFile(loadedSketch.getMainFile());
+            if (tab == -1) { 
+                return;
+            }
+            EditorBase eb = getTab(tab);
+            eb.insertAtStart("#include <" + lib + ".h>\n");
+            loadedSketch.addLibraryToImportList(lib);
+            updateLibrariesTree();
+        }
+    };
+            
+
+    public void populateLibrariesMenu(JComponent menu) {
+        JMenuItem item;
+
+        JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
+        HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
+        for (String libName : compilerLibraries.keySet()) {
+            item = new JMenuItem(libName);
+            item.addActionListener(insertIncludeAction);
+            item.setActionCommand(libName);
+            compilerLibsMenu.add(item);
+        }
+        if (compilerLibsMenu.getItemCount() > 0) {
+            menu.add(compilerLibsMenu);
+        }
+
+        JMenu coreLibsMenu = new JMenu(loadedSketch.getCore().getName());
+        HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
+        for (String libName : coreLibraries.keySet()) {
+            item = new JMenuItem(libName);
+            item.addActionListener(insertIncludeAction);
+            item.setActionCommand(libName);
+            coreLibsMenu.add(item);
+        }
+        if (coreLibsMenu.getItemCount() > 0) {
+            menu.add(coreLibsMenu);
+        }
+
+        JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
+        HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
+        for (String libName : boardLibraries.keySet()) {
+            item = new JMenuItem(libName);
+            item.addActionListener(insertIncludeAction);
+            item.setActionCommand(libName);
+            boardLibsMenu.add(item);
+        }
+        if (boardLibsMenu.getItemCount() > 0) {
+            menu.add(boardLibsMenu);
+        }
+
+        for (String key : Base.libraryCategoryNames.keySet()) {
+            JMenu catLibsMenu = new JMenu(Base.libraryCategoryNames.get(key));
+            HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
+            for (Library lib : catLib.values()) {
+                item = new JMenuItem(lib.getName());
+                item.addActionListener(insertIncludeAction);
+                item.setActionCommand(lib.getName());
+                catLibsMenu.add(item);
+            }
+            if (catLibsMenu.getItemCount() > 0) {
+                menu.add(catLibsMenu);
+            }
+
         }
     }
 }

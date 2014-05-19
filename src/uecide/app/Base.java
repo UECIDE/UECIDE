@@ -104,7 +104,8 @@ public class Base {
     public static HashMap<String, Compiler> compilers;
     public static HashMap<String, Board> boards;
     public static HashMap<String, Core> cores;
-    public static HashMap<String, Plugin> plugins;
+//    public static HashMap<String, Plugin> plugins;
+    public static HashMap<String, Class<?>> plugins = new HashMap<String, Class<?>>();
     public static ArrayList<Plugin> pluginInstances;
     static Splash splashScreen;
 
@@ -333,7 +334,7 @@ public class Base {
         compilers = new HashMap<String, Compiler>();
         cores = new HashMap<String, Core>();
         boards = new HashMap<String, Board>();
-        plugins = new HashMap<String, Plugin>();
+        plugins = new HashMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
 
         Serial.updatePortList();
@@ -1831,30 +1832,15 @@ public class Base {
     }
 
     public static void handleSystemInfo() {
-	activeEditor.message(Translate.t("Version: ") + systemVersion + "\n");
-	activeEditor.message(Translate.t("Build Number: ") + BUILDNO + "\n");
-	activeEditor.message(Translate.t("Built By: ") + BUILDER + "\n");
+        activeEditor.message(Translate.t("Version: ") + systemVersion + "\n");
+        activeEditor.message(Translate.t("Build Number: ") + BUILDNO + "\n");
+        activeEditor.message(Translate.t("Built By: ") + BUILDER + "\n");
 
         activeEditor.message(Translate.t("Installed plugins") + ":\n");
-        String[] entries = (String[]) plugins.keySet().toArray(new String[0]);
 
-        for (int i = 0; i < entries.length; i++) {
-            Plugin t = plugins.get(entries[i]);
-
-            String ver = Translate.t("unknown");
-            String com = Translate.t("unknown");
-
-
-            // Older plugins may not have these methods - ignore them if they don't
-            try {
-                ver = t.getVersion();
-                com = t.getCompiled();
-            } catch (Exception e) {
-                ver = Translate.t("unknown");
-                com = Translate.t("unknown");
-            }
-
-            activeEditor.message("  " + entries[i] + " - " + ver + "\n");
+        for (String plugin : plugins.keySet()) {
+            Version v = getPluginVersion(plugin);
+            activeEditor.message("  " + plugin + " - " + v.toString() + "\n");
         }
 
         activeEditor.message("\n" + Translate.t("Processes") + ":\n");
@@ -2227,7 +2213,26 @@ public class Base {
             }
         }
     }
+
+    public static String getPluginInfo(String plugin, String item) {
+        try {
+            Class<?> pluginClass = plugins.get(plugin);
+            if (pluginClass == null) {
+                return null;
+            }
+
+            Method getInfo = pluginClass.getMethod("getInfo", String.class);
+            String val = (String)(getInfo.invoke(null, "version"));
+            return val;
+        } catch (Exception e) {
+            error(e);
+        }
+        return null;
+    }
     
+    public static Version getPluginVersion(String plugin) {
+        return new Version(getPluginInfo(plugin, "version"));
+    }
 
     public static void loadPlugin(File jar)
     {
@@ -2261,45 +2266,29 @@ public class Base {
                 }
             }
 
-            Map pluginInfo = new LinkedHashMap();
-            pluginInfo.put("version", manifestContents.getValue("Version"));
-            pluginInfo.put("compiled", manifestContents.getValue("Compiled"));
-            pluginInfo.put("jarfile", jar.getAbsolutePath());
-            pluginInfo.put("shortcut", manifestContents.getValue("Shortcut"));
-            pluginInfo.put("modifier", manifestContents.getValue("Modifier"));
-            Plugin op = plugins.get(className);
-            if (op != null) {
-                String oldVersion = op.getVersion();
-                String newVersion = manifestContents.getValue("Version");
-                int diff = oldVersion.compareTo(newVersion);
-                if (diff != -1) { // New version no newer than old version
-                    return;
-                }
-            }
-                
+            Version oldVersion = getPluginVersion(className);
+            Version newVersion = new Version(manifestContents.getValue("Version"));
+            int diff = oldVersion.compareTo(newVersion);
 
-            Class<?> pluginClass;
-            try {
-                pluginClass = Class.forName(className, true, loader);
-            } catch (Exception ex) {
-                error(ex);
-                return;
-            }
-            Plugin plugin = (Plugin) pluginClass.newInstance();
+            if (newVersion.compareTo(oldVersion) > 0) {
+                HashMap<String, String> pluginInfo = new HashMap<String, String>();
+                pluginInfo.put("version", manifestContents.getValue("Version"));
+                pluginInfo.put("compiled", manifestContents.getValue("Compiled"));
+                pluginInfo.put("jarfile", jar.getAbsolutePath());
+                pluginInfo.put("shortcut", manifestContents.getValue("Shortcut"));
+                pluginInfo.put("modifier", manifestContents.getValue("Modifier"));
 
-            // If the setInfo method doesn't exist we don't care.
-            try {
-                plugin.setInfo(pluginInfo);
-            } catch (Exception blah) {
+                Class<?> pluginClass = Class.forName(className, true, loader);
+                Method setLoader = pluginClass.getMethod("setLoader", URLClassLoader.class);
+                Method setInfo = pluginClass.getMethod("setInfo", HashMap.class);
+                setLoader.invoke(null, loader);
+                setInfo.invoke(null, pluginInfo);
+
+                plugins.put(className, pluginClass);
             }
 
-            try {
-                plugin.setLoader(loader);
-            } catch (Exception blah) {
-            }
-            plugins.put(className, plugin);
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            error(e);
         }
     }
 
@@ -2641,7 +2630,7 @@ public class Base {
         compilers = new HashMap<String, Compiler>();
         cores = new HashMap<String, Core>();
         boards = new HashMap<String, Board>();
-        plugins = new HashMap<String, Plugin>();
+        plugins = new HashMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
 
         if (activeEditor != null) activeEditor.message(Translate.t("Updating serial ports..."));
@@ -2678,6 +2667,14 @@ public class Base {
         }
     }
 
+    public static ImageIcon loadIconFromResource(String res, URLClassLoader loader) {
+        URL loc = loader.getResource(res);
+
+        if (loc == null) {
+            loc = Base.class.getResource("/uecide/app/icons/unknown.png");
+        }
+        return new ImageIcon(loc);
+    }
     public static ImageIcon loadIconFromResource(String res) {
         if (!res.startsWith("/")) {
             res = "/uecide/app/icons/" + res;

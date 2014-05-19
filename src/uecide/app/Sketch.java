@@ -352,15 +352,9 @@ public class Sketch implements MessageConsumer {
     }
 
     public File getMainFile() {
-        System.err.println("getMainFile() - look for " + sketchName + ".ino");
         File f = getFileByName(sketchName + ".ino");
         if (f == null) {
             f = getFileByName(sketchName + ".pde");
-        }
-        if (f == null) {
-            System.err.println("Unable to find file!!!");
-        } else {
-            System.err.println("Found: " + f.getAbsolutePath());
         }
         return f;
     }
@@ -479,9 +473,7 @@ public class Sketch implements MessageConsumer {
         }
 
         for (File f : sketchFiles) {
-            System.err.print("Save " + f.getAbsolutePath());
             int tab = editor.getTabByFile(f);
-            System.err.println(" tab " + tab);
             if (tab > -1) {
                 EditorBase eb = editor.getTab(tab);
                 if (eb.isModified()) {
@@ -557,7 +549,6 @@ public class Sketch implements MessageConsumer {
     // after the included file.  Second pass looks through all the
     // libraries for that include file.
     public Library findLibrary(String filename) {
-        System.err.println("    -> " + filename);
         int dot = filename.lastIndexOf(".");
 
         String trimmedName = filename;
@@ -572,7 +563,6 @@ public class Sketch implements MessageConsumer {
             return null;
         }
 
-        System.err.println("Looking for library: " + filename);
 
         // First look in the sketch libs folder if it exists
 
@@ -583,14 +573,12 @@ public class Sketch implements MessageConsumer {
                 if (f.getName().equals(trimmedName)) {
                     File testFile = new File(f, filename);
                     if (f.exists()) {
-                        System.err.println("    Found in sketch");
                         return new Library(testFile, trimmedName, "sketch");
                     }
                 }
             }
         }
 
-        System.err.println("    Not in sketch");
 
         // Now scan through all the collections, starting with the
         // board, then the core, then the compiler, and finally any
@@ -603,42 +591,31 @@ public class Sketch implements MessageConsumer {
         HashMap<String, Library> sketchbookLibraries = Base.getLibraryCollection("sketch:all", getCore().getName());
 
         if (boardLibraries.get(trimmedName) != null) {
-            System.err.println("    Found in board");
             return boardLibraries.get(trimmedName);
         }
-        System.err.println("    Not in board");
 
         if (coreLibraries.get(trimmedName) != null) {
-            System.err.println("    Found in core");
             return coreLibraries.get(trimmedName);
         }
-        System.err.println("    Not in core");
 
         if (compilerLibraries.get(trimmedName) != null) {
-            System.err.println("    Found in compiler");
             return compilerLibraries.get(trimmedName);
         }
-        System.err.println("    Not in compiler");
 
         for (String key : Base.libraryCategoryNames.keySet()) {
             HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
             Library lib = catLib.get(trimmedName);
             if (lib != null) {
-                System.err.println("    Found in " + key);
                 return lib;
             }
-            System.err.println("    Not in " + key);
         }
 
         if (sketchbookLibraries.get(trimmedName) != null) {
-            System.err.println("    Found in sketchbook");
             return sketchbookLibraries.get(trimmedName);
         }
-        System.err.println("    Not in sketchbook");
 
         // TODO: If we get to here then we have not found an exact match.  Let's do the long-winded scan of all the files then.
 
-        System.err.println("        Giving up!");
 
         return null;
     }
@@ -989,7 +966,7 @@ public class Sketch implements MessageConsumer {
         return includes.toArray(new String[includes.size()]);
     }
 
-    public void addLibraryToImportList(String l) {
+    public Library addLibraryToImportList(String l) {
         if (l.endsWith(".h")) {
             l = l.substring(0, l.lastIndexOf("."));
         }
@@ -1014,17 +991,20 @@ public class Sketch implements MessageConsumer {
                     for (String req : requiredLibraries) {
                         addLibraryToImportList(req);
                     }
-                    return;
+                    return lib;
                 }
             }
         }
 
-        HashMap<String, Library> coreLibraries = Base.getLibraryCollection(getCore().getName(), getCore().getName());
-        HashMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook", getCore().getName());
+        HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + getBoard().getName(), getCore().getName());
+        HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + getCore().getName(), getCore().getName());
+        HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + getCompiler().getName(), getCore().getName());
+        HashMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook:all", getCore().getName());
 
-        if (importedLibraries.get(l) != null) {
+        lib = importedLibraries.get(l);
+        if (lib != null) {
             // The library has already been imported.  Do nothing
-            return;
+            return lib;
         }
 
         lib = coreLibraries.get(l);
@@ -1034,7 +1014,7 @@ public class Sketch implements MessageConsumer {
 
         if (lib == null) {
             for (String key : Base.libraryCategoryNames.keySet()) {
-                HashMap<String, Library> catLib = Base.getLibraryCollection("cat." + key, getCore().getName());
+                HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
                 lib = catLib.get(l);
                 if (lib != null) {
                     break;
@@ -1044,7 +1024,7 @@ public class Sketch implements MessageConsumer {
 
         if (lib == null) {
             // The library doesn't exist - either it's a system header or a library that isn't installed.
-            return;
+            return null;
         }
 
         // At this point we have a valid library that hasn't yet been imported.  Now to recurse.
@@ -1057,6 +1037,7 @@ public class Sketch implements MessageConsumer {
         for (String req : requiredLibraries) {
             addLibraryToImportList(req);
         }
+        return lib;
     }
 
     public boolean upload() {
@@ -1324,8 +1305,6 @@ public class Sketch implements MessageConsumer {
         }
         sketchFiles = newSketchFiles;
 
-        System.err.println("saveAs() main file is supposedly " + getMainFile().getAbsolutePath());
-
         // Now we have reconstructed the sketch in a new location we can save any
         // changed files from the editor.
 
@@ -1335,7 +1314,6 @@ public class Sketch implements MessageConsumer {
 
         if (editor != null) {
             int mainTab = editor.getTabByFile(oldMainFile);
-            System.err.println("Renaming tab number " + mainTab);
             if (mainTab > -1) {
                 editor.setTabFile(mainTab, newMainFile);
             }
@@ -2926,6 +2904,9 @@ public class Sketch implements MessageConsumer {
 
     public boolean libraryIsCompiled(Library l) {
         if (l == null) return false;
+        if (l.isHeaderOnly()) {
+            return true;
+        }
         File arch = new File(getCacheFolder(), l.getArchiveName());
         return arch.exists();
     }
@@ -2949,6 +2930,7 @@ public class Sketch implements MessageConsumer {
         settings.put("option.cppflags", getFlags("cppflags"));
         settings.put("option.ldflags", getFlags("ldflags"));
 
+        System.err.println("Compiling " + lib + " from " + lib.getFolder().getAbsolutePath() + " to " + lib.getArchiveName());
 
         compileLibrary(lib);
     }

@@ -93,7 +93,6 @@ public class Serial {
 
         try {
             if(nsp.setParams(baudRate, 8, 1, 0)) {
-                System.err.println("Set to " + baudRate + ",8N1");
                 return nsp;
             }
         } catch (Exception e) {
@@ -109,17 +108,14 @@ public class Serial {
 
     public static boolean releasePort(SerialPort port) {
         String pn = port.getPortName();
-        System.err.println("Closing port " + pn);
         try {
             if (port.closePort()) {
                 allocatedPorts.remove(pn);
-                System.err.println("Port closed OK");
                 return true;
             }
         } catch (Exception e) {
             Base.error(e);
         }
-        System.err.println("Close port failed");
         return false;
     }
 
