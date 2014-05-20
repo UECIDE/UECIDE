@@ -1042,10 +1042,6 @@ public class Sketch implements MessageConsumer {
 
     public boolean upload() {
         String uploadCommand;
-        if (!build()) {
-            return false;
-        }
-
 
         PropertyFile props = mergeAllProperties();
         String mess = props.get("upload." + getProgrammer() + ".message");
@@ -1091,27 +1087,27 @@ public class Sketch implements MessageConsumer {
 
    
         if (isJava) {
-            Plugin uploader;
-            uploader = Base.plugins.get(uploadCommand);
-            if (uploader == null) {
-                error("Upload class " + uploadCommand + " not found.");
-                error(Translate.t("Upload Failed"));
-                return false;
-            }
-            try {
-                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
-                    error(uploadCommand + "is not a valid loader plugin.");
-                    error(Translate.t("Upload Failed"));
-                    return false;
-                }
-                uploader.run();
-            } catch (Exception e) {
-                error(Translate.t("Upload Failed"));
-                error(e);
-                return false;
-            }
-            message(Translate.t("Upload Complete"));
-            return true;
+//            Plugin uploader;
+//            uploader = Base.plugins.get(uploadCommand);
+//            if (uploader == null) {
+ //               error("Upload class " + uploadCommand + " not found.");
+//                error(Translate.t("Upload Failed"));
+//                return false;
+//            }
+//            try {
+//                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
+//                    error(uploadCommand + "is not a valid loader plugin.");
+//                    error(Translate.t("Upload Failed"));
+//                    return false;
+//                }
+//                uploader.run();
+//            } catch (Exception e) {
+//                error(Translate.t("Upload Failed"));
+//                error(e);
+//                return false;
+//            }
+//            message(Translate.t("Upload Complete"));
+            return false;
         }
 
         String[] spl;
@@ -2629,26 +2625,26 @@ public class Sketch implements MessageConsumer {
         }
    
         if (isJava) {
-            Plugin uploader;
-            uploader = Base.plugins.get(uploadCommand);
-            if (uploader == null) {
-                error("Upload class " + uploadCommand + " not found.");
-                error(Translate.t("Upload Failed"));
-                return;
-            }
-            try {
-                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
-                    error(uploadCommand + "is not a valid loader plugin.");
-                    error(Translate.t("Upload Failed"));
-                    return;
-                }
-                uploader.run();
-            } catch (Exception e) {
-                error(Translate.t("Upload Failed"));
-                error(e.toString());
-                return;
-            }
-            message(Translate.t("Upload Complete"));
+//            Plugin uploader;
+//            uploader = Base.plugins.get(uploadCommand);
+//            if (uploader == null) {
+//                error("Upload class " + uploadCommand + " not found.");
+//                error(Translate.t("Upload Failed"));
+//                return;
+//            }
+//            try {
+//                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
+//                    error(uploadCommand + "is not a valid loader plugin.");
+//                    error(Translate.t("Upload Failed"));
+//                    return;
+//                }
+//                uploader.run();
+//            } catch (Exception e) {
+//                error(Translate.t("Upload Failed"));
+//                error(e.toString());
+//                return;
+//            }
+//            message(Translate.t("Upload Complete"));
             return;
         }
 

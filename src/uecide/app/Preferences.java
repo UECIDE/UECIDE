@@ -402,21 +402,23 @@ public class Preferences {
 //        }
 //      });
 
-        String[] entries = Base.plugins.keySet().toArray(new String[0]);
-        for (String entry : entries) {
-            Plugin p = Base.plugins.get(entry);
-            Method m = null;
+        for (Class<?> pluginClass : Base.plugins.values()) {
             try {
-                Class[] cArg = new Class[1];
-                cArg[0] = new JPanel().getClass();
-                m = p.getClass().getMethod("populatePreferences", cArg);
-                if (m != null) {
+                Method populatePreferences = pluginClass.getMethod("populatePreferences", JPanel.class);
+                Method getPreferencesTitle = pluginClass.getMethod("getPreferencesTitle");
+                if (getPreferencesTitle == null || populatePreferences == null) {
+                    continue;
+                }
+                String title = (String)(getPreferencesTitle.invoke(null));
+                if (title != null) {
                     JPanel pluginSettings = new JPanel(new GridBagLayout());
                     pluginSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-                    m.invoke(p, pluginSettings);
-                    tabs.add(p.getMenuTitle(), pluginSettings);
+                    populatePreferences.invoke(null, pluginSettings);
+                    tabs.add(title, pluginSettings);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
+                //Base.error(e);
             }
         }
         dialog.pack();
@@ -1057,16 +1059,15 @@ public class Preferences {
       Base.preferences.setBoolean("platform.auto_file_type_associations", autoAssociateBox.isSelected());
     }
 
-        String[] entries = Base.plugins.keySet().toArray(new String[0]);
-        for (String entry : entries) {
-            Plugin p = Base.plugins.get(entry);
-            Method m = null;
+        for (Class<?> pluginClass : Base.plugins.values()) {
             try {
-                m = p.getClass().getMethod("savePreferences");
-                if (m != null) {
-                    m.invoke(p);
+                Method savePreferences = pluginClass.getMethod("savePreferences");
+                if (savePreferences == null) {
+                    continue;
                 }
+                savePreferences.invoke(null);
             } catch (Exception e) {
+                Base.error(e);
             }
         }
 

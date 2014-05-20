@@ -43,8 +43,6 @@ import javax.swing.text.*;
  * Interface for items to be shown in the Tools menu.
  */
 public abstract class Plugin {
-    public static HashMap<String, String> pluginInfo = null;
-    public static URLClassLoader loader = null;
     public Editor editor = null;
     public EditorBase editorTab = null;
 
@@ -66,12 +64,17 @@ public abstract class Plugin {
     public Plugin(Editor e) { editor = e; }
     public Plugin(EditorBase eb) { editorTab = eb; }
 
-    public static void setLoader(URLClassLoader l) { loader = l; }
-    public static void setInfo(HashMap<String, String>info) { pluginInfo = info; }
-    public static String getInfo(String item) { return pluginInfo.get(item); }
+    public static void setLoader(URLClassLoader l) { };
+    public static void setInfo(HashMap<String, String>info) { };
+    public static String getInfo(String item) { return null; };
+
+    public static void populatePreferences(JPanel panel) { }
+    public static String getPreferencesTitle() { return null; }
+    public static void savePreferences() { }
 
     public static boolean wantEditorInstance() { return false; }
     public static boolean wantTabInstance() { return false; }
     public abstract void addToolbarButtons(JToolBar toolbar, int flags);
     public abstract void populateMenu(JMenu menu, int flags);
+
 }

@@ -111,6 +111,10 @@ public class Editor extends JFrame {
     ArrayList<Plugin> plugins = new ArrayList<Plugin>();
 
     class DefaultRunHandler implements Runnable {
+        boolean upload = false;
+        public DefaultRunHandler(boolean doUpload) {
+            upload = doUpload;
+        }
         public void run() {
             if (compilerRunning) return;
             compilerRunning = true;
@@ -119,6 +123,9 @@ public class Editor extends JFrame {
             try {
                 if(loadedSketch.build()) {
             //        reportSize();
+                    if (upload) {
+                        loadedSketch.upload();
+                    }
                 }
             } catch (Exception e) {
                 error(e);
@@ -291,12 +298,23 @@ public class Editor extends JFrame {
                     error("Sorry, there is already a compiler thread running for this sketch.");
                     return;
                 }
-                DefaultRunHandler runHandler = new DefaultRunHandler();
+                DefaultRunHandler runHandler = new DefaultRunHandler(false);
                 new Thread(runHandler, "Compiler").start();
             }
         });
 
-        programButton = addToolbarButton(toolbar, "toolbar/burn.png", "Program");
+        programButton = addToolbarButton(toolbar, "toolbar/burn.png", "Program", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                clearConsole();
+                if (compilerRunning) {
+                    error("Sorry, there is already a compiler thread running for this sketch.");
+                    return;
+                }
+                DefaultRunHandler runHandler = new DefaultRunHandler(true);
+                new Thread(runHandler, "Compiler").start();
+            }
+        });
+                    
         toolbar.addSeparator();
 
         addToolbarButton(toolbar, "toolbar/new.png", "New Sketch", new ActionListener() {
@@ -1211,17 +1229,19 @@ public class Editor extends JFrame {
 
         submenu = new JMenu(Translate.t("Examples"));
         if (loadedSketch.getCore() != null) {
+            addSketchesFromFolder(submenu, loadedSketch.getCompiler().getExamplesFolder());
             addSketchesFromFolder(submenu, loadedSketch.getCore().getExamplesFolder());
             addSketchesFromFolder(submenu, loadedSketch.getBoard().getExamplesFolder());
-            addSketchesFromFolder(submenu, loadedSketch.getCompiler().getExamplesFolder());
 
-            JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
-            HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
-            for (String libName : boardLibraries.keySet()) {
+            submenu.addSeparator();
+
+            JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
+            HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
+            for (String libName : compilerLibraries.keySet()) {
                 JMenu libMenu = new JMenu(libName);
-                addSketchesFromFolder(libMenu, boardLibraries.get(libName).getExamplesFolder());
+                addSketchesFromFolder(libMenu, compilerLibraries.get(libName).getExamplesFolder());
                 if (libMenu.getItemCount() > 0) {
-                    boardLibsMenu.add(libMenu);
+                    compilerLibsMenu.add(libMenu);
                 }
             }
 
@@ -1235,27 +1255,44 @@ public class Editor extends JFrame {
                 }
             }
 
-            JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
-            HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
-            for (String libName : compilerLibraries.keySet()) {
+            JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
+            HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
+            for (String libName : boardLibraries.keySet()) {
                 JMenu libMenu = new JMenu(libName);
-                addSketchesFromFolder(libMenu, compilerLibraries.get(libName).getExamplesFolder());
+                addSketchesFromFolder(libMenu, boardLibraries.get(libName).getExamplesFolder());
                 if (libMenu.getItemCount() > 0) {
-                    compilerLibsMenu.add(libMenu);
+                    boardLibsMenu.add(libMenu);
                 }
             }
 
-            if (boardLibsMenu.getItemCount() > 0) {
-                submenu.add(boardLibsMenu);
+            if (compilerLibsMenu.getItemCount() > 0) {
+                submenu.add(compilerLibsMenu);
             }
 
             if (coreLibsMenu.getItemCount() > 0) {
                 submenu.add(coreLibsMenu);
             }
 
-            if (compilerLibsMenu.getItemCount() > 0) {
-                submenu.add(compilerLibsMenu);
+            if (boardLibsMenu.getItemCount() > 0) {
+                submenu.add(boardLibsMenu);
             }
+
+
+            for (String key : Base.libraryCategoryNames.keySet()) {
+                HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
+                JMenu catLibsMenu = new JMenu(Base.libraryCategoryNames.get(key));
+                for (Library lib : catLib.values()) {
+                    JMenu libMenu = new JMenu(lib.getName());
+                    addSketchesFromFolder(libMenu, lib.getExamplesFolder());
+                    if (libMenu.getItemCount() > 0) {
+                        catLibsMenu.add(libMenu);
+                    }
+                }
+                if (catLibsMenu.getItemCount() > 0) {
+                    submenu.add(catLibsMenu);
+                }
+            }
+
         }
         fileMenu.add(submenu);
 
@@ -1826,7 +1863,6 @@ public class Editor extends JFrame {
             if (catLibsMenu.getItemCount() > 0) {
                 menu.add(catLibsMenu);
             }
-
         }
     }
 }

@@ -663,7 +663,7 @@ public class code extends JPanel implements EditorBase {
 
 
         switch (flags) {
-            case (BasePlugin.MENU_FILE | BasePlugin.MENU_MID):
+            case (Plugin.MENU_FILE | Plugin.MENU_MID):
                 item = new JMenuItem(Translate.t("Revert File"));
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
@@ -673,7 +673,7 @@ public class code extends JPanel implements EditorBase {
                 menu.add(item);
                 break;
 
-            case (BasePlugin.MENU_EDIT | BasePlugin.MENU_TOP):
+            case (Plugin.MENU_EDIT | Plugin.MENU_TOP):
                 item = new JMenuItem(Translate.t("Copy"));
                 item.setAccelerator(KeyStroke.getKeyStroke('C', modifiers));
                 item.addActionListener(new ActionListener() {
@@ -700,7 +700,7 @@ public class code extends JPanel implements EditorBase {
                 menu.add(item);
                 break;
 
-            case (BasePlugin.MENU_EDIT | BasePlugin.MENU_MID):
+            case (Plugin.MENU_EDIT | Plugin.MENU_MID):
                 item = new JMenuItem(Translate.t("Select All"));
                 item.setAccelerator(KeyStroke.getKeyStroke('A', modifiers));
                 item.addActionListener(new ActionListener() {
@@ -711,7 +711,7 @@ public class code extends JPanel implements EditorBase {
                 menu.add(item);
                 break;
 
-            case (BasePlugin.MENU_EDIT | BasePlugin.MENU_BOTTOM):
+            case (Plugin.MENU_EDIT | Plugin.MENU_BOTTOM):
                 item = new JMenuItem(Translate.t("Find & Replace"));
                 item.setAccelerator(KeyStroke.getKeyStroke('F', modifiers));
                 item.addActionListener(new ActionListener() {
