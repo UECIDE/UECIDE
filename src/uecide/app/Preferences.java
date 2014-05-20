@@ -108,6 +108,8 @@ public class Preferences {
     JCheckBox visibleTabs;
     JTextField tabSize;
 
+    JCheckBox keepFindOpen;
+
     JTabbedPane tabs;
 
     JTextField pluginsLocationField;
@@ -723,6 +725,13 @@ public class Preferences {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 3;
+        keepFindOpen = new JCheckBox(Translate.t("Keep Find & Replace permanantly open"));
+        p.add(keepFindOpen, c);
+        keepFindOpen.setSelected(Base.preferences.getBoolean("editor.keepfindopen"));
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 3;
         createBackups = new JCheckBox(Translate.t("Create backup copies of your sketch as you save"));
         p.add(createBackups, c);
         createBackups.setSelected(Base.preferences.getBoolean("version.enabled"));
@@ -1020,6 +1029,7 @@ public class Preferences {
     Base.preferences.setBoolean("compiler.verbose", verboseCompile.isSelected());
     Base.preferences.setBoolean("export.verbose", verboseUpload.isSelected());
     Base.preferences.setBoolean("version.enabled", createBackups.isSelected());
+    Base.preferences.setBoolean("editor.keepfindopen", keepFindOpen.isSelected());
     Base.preferences.set("version.keep", backupNumber.getText());
 
     Base.preferences.setBoolean("editor.expandtabs", useSpacesForTabs.isSelected());

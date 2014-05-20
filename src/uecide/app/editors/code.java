@@ -82,7 +82,9 @@ public class code extends JPanel implements EditorBase {
             findCloseButton.setContentAreaFilled(false);
             findPanel = new JPanel();
             findPanel.setLayout(new BoxLayout(findPanel, BoxLayout.LINE_AXIS));
-            findPanel.add(findCloseButton);
+            if (Base.preferences.getBoolean("editor.keepfindopen") == false) {
+                findPanel.add(findCloseButton);
+            }
             findPanel.add(searchTerm);
             findPanel.add(findButton);
             findPanel.add(matchCase);
@@ -230,6 +232,9 @@ public class code extends JPanel implements EditorBase {
         this.add(scrollPane, BorderLayout.CENTER);
         if (f != null) {
             loadFile(f);
+        }
+        if (Base.preferences.getBoolean("editor.keepfindopen")) {
+            openFindPanel();
         }
     }
 
