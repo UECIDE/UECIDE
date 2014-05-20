@@ -40,6 +40,9 @@ import java.util.*;
 
 import java.lang.reflect.Method;
 
+import java.awt.*;
+import javax.swing.*;
+
 public class Serial {
     static ArrayList<String> extraPorts = new ArrayList<String>();
     static String[] portList;
@@ -58,6 +61,12 @@ public class Serial {
                 }
                 nsp.openPort();
                 return nsp;
+            }
+        } catch (SerialPortException se) {
+            if (se.getExceptionType().equals(SerialPortException.TYPE_PORT_NOT_FOUND)) {
+
+                JOptionPane.showMessageDialog(new Frame(), "The port could not be found.\nCheck you have the right port\nselected in the Hardware menu.", "Port not found", JOptionPane.ERROR_MESSAGE);
+
             }
         } catch (Exception e) {
             Base.error(e);
