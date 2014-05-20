@@ -213,10 +213,12 @@ public class Sketch implements MessageConsumer {
         HashMap<String, String> out = new HashMap<String, String>();
 
         String[] spl = props.getArray("sketch.upload");
-        Arrays.sort(spl);
-        for (String pn : spl) {
-            String name = props.get("upload." + pn + ".name");
-            out.put(pn, name);
+        if (spl != null) {
+            Arrays.sort(spl);
+            for (String pn : spl) {
+                String name = props.get("upload." + pn + ".name");
+                out.put(pn, name);
+            }
         }
         return out;
     }
@@ -2544,21 +2546,15 @@ System.err.println(command);
     public PropertyFile mergeAllProperties() {
         PropertyFile total = new PropertyFile();
 
-        if (getCompiler() == null) {
-            error("==> No compiler selected, skipping.");
-        } else {
+        if (getCompiler() != null) {
             total.mergeData(getCompiler().getProperties());
         }
 
-        if (getCore() == null) { 
-            error("==> No core");
-        } else {
+        if (getCore() != null) { 
             total.mergeData(getCore().getProperties());
         }
 
-        if (getBoard() == null) {
-            error("==> No board");
-        } else {
+        if (getBoard() != null) {
             total.mergeData(getBoard().getProperties());
         }
 

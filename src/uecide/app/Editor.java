@@ -1666,6 +1666,16 @@ public class Editor extends JFrame {
     public void updateStatus() {
         StringBuilder statusInfo = new StringBuilder();
 
+        if (loadedSketch.getBoard() == null) {
+            setStatus("No board selected!");
+            return;
+        }            
+
+        if (loadedSketch.getSerialPort() == null) {
+            setStatus("No port selected!");
+            return;
+        }            
+
         statusInfo.append(loadedSketch.getBoard().getDescription());
         statusInfo.append(" on ");
         statusInfo.append(loadedSketch.getSerialPort());
@@ -1823,40 +1833,46 @@ public class Editor extends JFrame {
     public void populateLibrariesMenu(JComponent menu) {
         JMenuItem item;
 
-        JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
-        HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
-        for (String libName : compilerLibraries.keySet()) {
-            item = new JMenuItem(libName);
-            item.addActionListener(insertIncludeAction);
-            item.setActionCommand(libName);
-            compilerLibsMenu.add(item);
-        }
-        if (compilerLibsMenu.getItemCount() > 0) {
-            menu.add(compilerLibsMenu);
-        }
-
-        JMenu coreLibsMenu = new JMenu(loadedSketch.getCore().getName());
-        HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
-        for (String libName : coreLibraries.keySet()) {
-            item = new JMenuItem(libName);
-            item.addActionListener(insertIncludeAction);
-            item.setActionCommand(libName);
-            coreLibsMenu.add(item);
-        }
-        if (coreLibsMenu.getItemCount() > 0) {
-            menu.add(coreLibsMenu);
+        if (loadedSketch.getCompiler() != null) {
+            JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
+            HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
+            for (String libName : compilerLibraries.keySet()) {
+                item = new JMenuItem(libName);
+                item.addActionListener(insertIncludeAction);
+                item.setActionCommand(libName);
+                compilerLibsMenu.add(item);
+            }
+            if (compilerLibsMenu.getItemCount() > 0) {
+                menu.add(compilerLibsMenu);
+            }
         }
 
-        JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
-        HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
-        for (String libName : boardLibraries.keySet()) {
-            item = new JMenuItem(libName);
-            item.addActionListener(insertIncludeAction);
-            item.setActionCommand(libName);
-            boardLibsMenu.add(item);
+        if (loadedSketch.getCore() != null) {
+            JMenu coreLibsMenu = new JMenu(loadedSketch.getCore().getName());
+            HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
+            for (String libName : coreLibraries.keySet()) {
+                item = new JMenuItem(libName);
+                item.addActionListener(insertIncludeAction);
+                item.setActionCommand(libName);
+                coreLibsMenu.add(item);
+            }
+            if (coreLibsMenu.getItemCount() > 0) {
+                menu.add(coreLibsMenu);
+            }
         }
-        if (boardLibsMenu.getItemCount() > 0) {
-            menu.add(boardLibsMenu);
+
+        if (loadedSketch.getBoard() != null) {
+            JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
+            HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
+            for (String libName : boardLibraries.keySet()) {
+                item = new JMenuItem(libName);
+                item.addActionListener(insertIncludeAction);
+                item.setActionCommand(libName);
+                boardLibsMenu.add(item);
+            }
+            if (boardLibsMenu.getItemCount() > 0) {
+                menu.add(boardLibsMenu);
+            }
         }
 
         for (String key : Base.libraryCategoryNames.keySet()) {
@@ -1877,6 +1893,14 @@ public class Editor extends JFrame {
     public void releasePort(String portName) {
         for (Plugin plugin : plugins) {
             plugin.releasePort(portName);
+        }
+    }
+
+    public void launchPlugin(Class<?> pluginClass) {
+        for (Plugin plugin : plugins) {
+            if (plugin.getClass() == pluginClass) {
+                plugin.launch();
+            }
         }
     }
 }

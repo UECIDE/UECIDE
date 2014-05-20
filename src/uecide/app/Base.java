@@ -401,13 +401,13 @@ public class Base {
             if (boards.size() == 0) {
                 System.err.println(plugins.keySet());
                 showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                //activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                editors.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } else if (cores.size() == 0) {
                 showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                //activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                editors.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } else if (compilers.size() == 0) {
                 showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                //activeEditor.launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                editors.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } 
         }
             
