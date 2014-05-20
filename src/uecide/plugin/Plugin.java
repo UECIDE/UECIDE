@@ -77,4 +77,5 @@ public abstract class Plugin {
     public abstract void addToolbarButtons(JToolBar toolbar, int flags);
     public abstract void populateMenu(JMenu menu, int flags);
 
+    public void releasePort(String port) { };
 }

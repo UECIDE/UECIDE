@@ -42,51 +42,31 @@ import java.lang.reflect.Method;
 
 public class Serial {
     static ArrayList<String> extraPorts = new ArrayList<String>();
-    static HashMap<String, Object> allocatedPorts = new HashMap<String, Object>();
     static String[] portList;
 
-    public static SerialPort requestPort(String name, Object ob) {
-        Class[] cArg = new Class[1];
-        cArg[0] = new String().getClass();
-
-        boolean validPort = false;
-
-        if (allocatedPorts.get(name) != null) {
-            try {
-                Boolean released = false;
-                Method m = null;
-                try {
-                    m = ob.getClass().getMethod("releasePort", cArg);
-                } catch (Exception ee) {
-                }
-                if (m != null) {
-                    released = (Boolean)m.invoke(ob, name);
-                }
-                if (released == true) {
-                    allocatedPorts.remove(name);
-                    Thread.sleep(10);
-                    System.gc();
-                }
-            } catch (Exception ex) {
-                Base.error(ex);
-            }
+    public static SerialPort requestPort(String name) {
+        for (Editor e : Base.editors) {
+            e.releasePort(name);
         }
 
         try {
             SerialPort nsp = new SerialPort(name);
             if (nsp != null) {
-                allocatedPorts.put(name, ob); 
+                if (nsp.isOpened()) {
+                    Base.error("For some reason the port " + name + " never got released properly.");
+                    return null;
+                }
                 nsp.openPort();
                 return nsp;
             }
         } catch (Exception e) {
-            //Base.error(e);
+            Base.error(e);
         }
         return null;
     }
 
-    public static SerialPort requestPort(String name, Object ob, int baudRate) {
-        SerialPort nsp = requestPort(name, ob);
+    public static SerialPort requestPort(String name, int baudRate) {
+        SerialPort nsp = requestPort(name);
         if (nsp == null) {
             return null;
         }
@@ -104,19 +84,6 @@ public class Serial {
     public static void updatePortList() {
         SerialPortList spl = new SerialPortList();
         portList = spl.getPortNames();
-    }
-
-    public static boolean releasePort(SerialPort port) {
-        String pn = port.getPortName();
-        try {
-            if (port.closePort()) {
-                allocatedPorts.remove(pn);
-                return true;
-            }
-        } catch (Exception e) {
-            Base.error(e);
-        }
-        return false;
     }
 
     static public ArrayList<String> getPortList() {

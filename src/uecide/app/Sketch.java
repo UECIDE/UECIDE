@@ -1184,13 +1184,13 @@ public class Sketch implements MessageConsumer {
                 if (baud != null) {
                     int b = Integer.parseInt(baud);
                     
-                    SerialPort serialPort = Serial.requestPort(getSerialPort(), this, b);
+                    SerialPort serialPort = Serial.requestPort(getSerialPort(), b);
                     if (serialPort == null) {
                         error("Unable to lock serial port");
                         return false;
                     }
                     Thread.sleep(1000);
-                    Serial.releasePort(serialPort);
+                    serialPort.closePort();
                     serialPort = null;
                     System.gc();
                     Thread.sleep(1500);
@@ -1217,13 +1217,13 @@ public class Sketch implements MessageConsumer {
 
     public void assertDTRRTS(boolean dtr, boolean rts) {
         try {
-            SerialPort serialPort = Serial.requestPort(getSerialPort(), this);
+            SerialPort serialPort = Serial.requestPort(getSerialPort());
             if (serialPort == null) {
                 error("Unable to lock serial port for board reset");
             }
             serialPort.setDTR(dtr);
             serialPort.setRTS(rts);
-            Serial.releasePort(serialPort);
+            serialPort.closePort();
         } catch (Exception e) {
             error(e);
         }
@@ -2409,6 +2409,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean execAsynchronously(String command) {
+System.err.println(command);
         PropertyFile props = mergeAllProperties();
         if (command == null) {
             return true;
@@ -2424,6 +2425,8 @@ public class Sketch implements MessageConsumer {
         }
 
         stringList.set(0, stringList.get(0).replace("//", "/"));
+
+        System.err.println(stringList);
 
         ProcessBuilder process = new ProcessBuilder(stringList);
 //        process.redirectOutput(ProcessBuilder.Redirect.PIPE);
@@ -2722,13 +2725,13 @@ public class Sketch implements MessageConsumer {
                 if (baud != null) {
                     int b = Integer.parseInt(baud);
                     
-                    SerialPort serialPort = Serial.requestPort(getSerialPort(), this, b);
+                    SerialPort serialPort = Serial.requestPort(getSerialPort(), b);
                     if (serialPort == null) {
                         error("Unable to lock serial port");
                         return;
                     }
                     Thread.sleep(1000);
-                    Serial.releasePort(serialPort);
+                    serialPort.closePort();
                     serialPort = null;
                     System.gc();
                     Thread.sleep(1500);

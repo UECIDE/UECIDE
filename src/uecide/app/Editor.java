@@ -73,6 +73,7 @@ public class Editor extends JFrame {
     JMenu hardwareMenu;
     JMenu toolsMenu;
     JMenu helpMenu;
+    JMenu serialPortsMenu;
 
     JToolBar toolbar;
 
@@ -1422,14 +1423,19 @@ public class Editor extends JFrame {
         submenu.setEnabled(submenu.getItemCount() > 0);
         hardwareMenu.add(submenu);
 
-        submenu = new JMenu("Serial Port");
-        populateSerialMenu(submenu);
-        submenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Serial.updatePortList();
+        serialPortsMenu = new JMenu("Serial Port");
+        populateSerialMenu(serialPortsMenu);
+        serialPortsMenu.addMenuListener(new MenuListener() {
+            public void menuSelected(MenuEvent e) {
+                System.err.println(e.toString());
+                populateSerialMenu(serialPortsMenu);
+            }
+            public void menuCanceled(MenuEvent e) {
+            }
+            public void menuDeselected(MenuEvent e) {
             }
         });
-        hardwareMenu.add(submenu);
+        hardwareMenu.add(serialPortsMenu);
 
         submenu = new JMenu("Programmers");
         populateProgrammersMenu(submenu);
@@ -1483,7 +1489,9 @@ public class Editor extends JFrame {
     }
 
     public void populateSerialMenu(JMenu menu) {
+        menu.removeAll();
         ButtonGroup portGroup = new ButtonGroup();
+        Serial.updatePortList();
         ArrayList<String> ports = Serial.getPortList();
         for (String port : ports) {
             JMenuItem item = new JRadioButtonMenuItem(port);
@@ -1863,6 +1871,12 @@ public class Editor extends JFrame {
             if (catLibsMenu.getItemCount() > 0) {
                 menu.add(catLibsMenu);
             }
+        }
+    }
+
+    public void releasePort(String portName) {
+        for (Plugin plugin : plugins) {
+            plugin.releasePort(portName);
         }
     }
 }

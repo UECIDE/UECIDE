@@ -1061,13 +1061,15 @@ public class Preferences {
 
         for (Class<?> pluginClass : Base.plugins.values()) {
             try {
+                System.err.println("Class: " + pluginClass);
                 Method savePreferences = pluginClass.getMethod("savePreferences");
                 if (savePreferences == null) {
                     continue;
                 }
                 savePreferences.invoke(null);
             } catch (Exception e) {
-                Base.error(e);
+                e.printStackTrace();
+//                Base.error(e);
             }
         }
 

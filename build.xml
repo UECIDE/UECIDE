@@ -2,7 +2,24 @@
 <project name="UECIDE Core" default="build">
 
     <property file="version.plist"/>
-    <property name="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar" />
+    <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar">
+        <and>
+            <os family="unix"/>
+            <not>
+                <os family="mac"/>
+            </not>
+            <os arch="i386"/>
+        </and>
+    </condition>
+    <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/rt.jar">
+        <and>
+            <os family="unix"/>
+            <not>
+                <os family="mac"/>
+            </not>
+            <os arch="amd64"/>
+        </and>
+    </condition>
 
     <tstamp>
         <format property="TODAY" pattern="yyyyMMdd" />
