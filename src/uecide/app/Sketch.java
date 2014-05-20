@@ -757,6 +757,7 @@ public class Sketch implements MessageConsumer {
         // file and placing the prototypes directly before that.
 
         Pattern pragma = Pattern.compile("^#pragma\\s+parameter\\s+([^=]+)\\s*=\\s*(.*)\\s*$");
+        Pattern paramsplit = Pattern.compile("(?:\"[^\"]*\"|[^\\s\"])+");
         parameters = new HashMap<String, String>();
         for (File f : cleanedFiles.keySet()) {
             if (FileType.getType(f) == FileType.SKETCH) {
@@ -779,7 +780,16 @@ public class Sketch implements MessageConsumer {
                     Matcher mtch = pragma.matcher(l.trim());
                     if (mtch.find()) {
                         l = "// " + l;
-                        parameters.put(mtch.group(1), mtch.group(2));
+                        Matcher part = paramsplit.matcher(mtch.group(2).trim());
+                        String parms = "";
+                        while (part.find()) {
+                            if (parms.equals("") == false) {    
+                                parms += "::";
+                            }
+                            parms += part.group(0);
+                        }
+                        
+                        parameters.put(mtch.group(1), parms);
                     }
                     munged.append(l + "\n");
                     if (!l.startsWith("#line 1 ")) {
@@ -2411,7 +2421,6 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean execAsynchronously(String command) {
-System.err.println(command);
         PropertyFile props = mergeAllProperties();
         if (command == null) {
             return true;
@@ -2427,8 +2436,6 @@ System.err.println(command);
         }
 
         stringList.set(0, stringList.get(0).replace("//", "/"));
-
-        System.err.println(stringList);
 
         ProcessBuilder process = new ProcessBuilder(stringList);
 //        process.redirectOutput(ProcessBuilder.Redirect.PIPE);
