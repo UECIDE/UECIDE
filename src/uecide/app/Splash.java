@@ -44,9 +44,6 @@ import uecide.plugin.*;
 import javax.swing.*;
 import javax.imageio.*;
 
-import uecide.app.debug.Board;
-import uecide.app.debug.Core;
-
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -134,5 +131,22 @@ public class Splash extends Window {
     public void setPercent(int p) {
         percent = p;
         repaint();
+    }
+
+    public void enableCloseOnClick() {
+        final Splash me = this;
+        this.addMouseListener(new MouseListener() {
+            public void mouseClicked(MouseEvent e) {
+                me.dispose();
+            }
+            public void mouseExited(MouseEvent e) {
+            }
+            public void mousePressed(MouseEvent e) {
+            }
+            public void mouseReleased(MouseEvent e) {
+            }
+            public void mouseEntered(MouseEvent e) {
+            }
+        });
     }
 }

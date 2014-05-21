@@ -41,9 +41,6 @@ import uecide.plugin.*;
 
 import javax.swing.*;
 
-import uecide.app.debug.Board;
-import uecide.app.debug.Core;
-
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 

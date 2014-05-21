@@ -28,32 +28,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package uecide.app.debug;
+package uecide.app;
 
 import java.io.*;
 import java.util.*;
 
 import uecide.app.*;
+import uecide.plugin.*;
 
-public class Core extends UObject {
+import java.util.regex.*;
 
-    public Core(File folder) {
+import uecide.app.Serial;
+//import uecide.app.SerialException;
+//import uecide.app.SerialNotFoundException;
+
+
+public class Board extends UObject {
+    public Board(File folder) {
         super(folder);
     }
 
-    static public String[] headerListFromIncludePath(String path) {
-        FilenameFilter onlyHFiles = new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".h");
-            }
-        };
+    public File getBootloader() {
+        String bl = get("bootloader");
+        if (bl == null) {
+            return null;
+        }
+        File bootloader = new File(getFolder(), bl);
+        if (!bootloader.exists()) {
+            return null;
+        }
+        return bootloader;
+    }
 
-        return (new File(path)).list(onlyHFiles);
+    public String getGroup() {
+        return get("group");
     }
 
     public File getManual() {
         String m = get("manual");
-        if (m == null) {
+        if (m == null) {    
             return null;
         }
         File mf = new File(getFolder(), m);
@@ -63,12 +76,11 @@ public class Core extends UObject {
         return mf;
     }
 
-    public Compiler getCompiler() {
-        String c = get("compiler");
+    public Core getCore() {
+        String c = get("core");
         if (c == null) {
             return null;
         }
-        return Base.compilers.get(c);
+        return Base.cores.get(c);
     }
-
 }

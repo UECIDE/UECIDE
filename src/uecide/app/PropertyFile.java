@@ -43,6 +43,8 @@ import javax.swing.border.*;
 
 import say.swing.*;
 
+import java.util.Timer;
+
 public class PropertyFile {
 
     Properties defaultProperties;
@@ -167,6 +169,21 @@ public class PropertyFile {
                 Base.error(e);
             }
         }
+    }
+
+    Timer saveTimer = null;
+
+    public void saveDelay() {
+        if (saveTimer != null) {    
+            saveTimer.cancel();
+            saveTimer.purge();
+        }
+        saveTimer = new Timer();
+        saveTimer.schedule(new TimerTask() {
+            public void run() {
+                save();
+            }
+        }, 1000);
     }
 
     public String getPlatformSpecific(String attribute) {

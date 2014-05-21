@@ -52,7 +52,7 @@ import java.text.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import uecide.app.debug.Compiler;
+import uecide.app.Compiler;
 
 /**
  * Stores information about files in the current sketch
@@ -229,7 +229,7 @@ public class Sketch implements MessageConsumer {
         }
         Base.preferences.set("board." + selectedBoard.getName() + ".programmer", programmer);
         selectedProgrammer = programmer;
-        Base.preferences.save();
+        Base.preferences.saveDelay();
         if (editor != null) editor.updateAll();
     }
 
@@ -239,6 +239,8 @@ public class Sketch implements MessageConsumer {
 
     public void setSerialPort(String p) {
         selectedSerialPort = p;
+        Base.preferences.set("board." + selectedBoard.getName() + ".port", selectedSerialPort);
+        Base.preferences.saveDelay();
         if (editor != null) editor.updateAll();
     }
 
@@ -298,6 +300,7 @@ public class Sketch implements MessageConsumer {
 
         setBoard(Base.preferences.get("board"));
         setSerialPort(Base.preferences.get("serial.port"));
+        setSerialPort(Base.preferences.get("board." + selectedBoard.getName() + ".port"));
         updateLibraryList();
     }
 

@@ -14,9 +14,7 @@ import uecide.plugin.*;
 import javax.swing.*;
 import javax.imageio.*;
 
-import uecide.app.debug.Board;
-import uecide.app.debug.Core;
-import uecide.app.debug.Compiler;
+import uecide.app.Compiler;
 
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.*;

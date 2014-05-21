@@ -1,10 +1,12 @@
 Things that need doing.
 
-Sketch menu
 Hardware Menu - bootloader burning (make it a plugin?)
 Help menu
 Fix and port all plugins
-Tree popup menus (mostly links to other menus)
-Toolbar plugin icons
-Expand examples menu to include contributed and categorised libraries
-Add toolbar to code editor and make it plugin sensitive
+Rewrite "upload" facility to take a filename as a parameter (i.e., make it a general upload function).
+Install library / library manager
+Cache purge
+Rewrite plugin manager
+Local install board/core/plugin files
+Internals rebuild function
+Save / restore window sizes

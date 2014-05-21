@@ -52,7 +52,9 @@ import javax.imageio.*;
 
 import java.awt.datatransfer.*;
 
-import uecide.app.debug.Compiler;
+import uecide.app.Compiler;
+
+import java.beans.*;
 
 public class Editor extends JFrame {
     
@@ -109,6 +111,8 @@ public class Editor extends JFrame {
     JButton runButton;
     JButton programButton;
 
+    public static ArrayList<Editor>editorList = new ArrayList<Editor>();
+
     ArrayList<Plugin> plugins = new ArrayList<Plugin>();
 
     class DefaultRunHandler implements Runnable {
@@ -122,7 +126,7 @@ public class Editor extends JFrame {
             runButton.setEnabled(false);
             programButton.setEnabled(false);
             try {
-                if(loadedSketch.build()) {
+               if(loadedSketch.build()) {
             //        reportSize();
                     if (upload) {
                         loadedSketch.upload();
@@ -160,6 +164,7 @@ public class Editor extends JFrame {
 
     public Editor(Sketch s) {
         super();
+        Editor.registerEditor(this);
         loadedSketch = s;
         s.attachToEditor(this);
 
@@ -224,6 +229,30 @@ public class Editor extends JFrame {
         leftRightSplit.setDividerLocation(dividerSize);
 
         this.add(topBottomSplit, BorderLayout.CENTER);
+
+        final Editor me = this;
+
+        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    Dimension size = me.getSize();
+                    int pos = (Integer)(e.getNewValue());
+                    Base.preferences.setInteger("editor.tree.split", pos);
+                    Base.preferences.saveDelay();
+                }
+            }
+        );
+
+        topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    Dimension size = me.getSize();
+                    int pos = size.height - (Integer)(e.getNewValue());
+                    Base.preferences.setInteger("editor.divider.split", pos);
+                    Base.preferences.saveDelay();
+                }
+            }
+        );
 
         consoleScroll = new JScrollPane();
         int maxLineCount = Base.preferences.getInteger("console.length");
@@ -328,7 +357,7 @@ public class Editor extends JFrame {
 
         addToolbarButton(toolbar, "toolbar/open.png", "Open Sketch", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.handleOpenPrompt();
+                handleOpenPrompt();
             }
         });
 
@@ -379,6 +408,26 @@ public class Editor extends JFrame {
         setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));
         setProgress(0);
         updateAll();
+
+        addComponentListener(new ComponentListener() {
+            public void componentMoved(ComponentEvent e) {
+                Point windowPos = e.getComponent().getLocation(null);
+                Base.preferences.setInteger("editor.window.x", windowPos.x);
+                Base.preferences.setInteger("editor.window.y", windowPos.y);
+                Base.preferences.saveDelay();
+            }
+            public void componentResized(ComponentEvent e) {
+                Dimension windowSize = e.getComponent().getSize(null);
+                Base.preferences.setInteger("editor.window.width", windowSize.width);
+                Base.preferences.setInteger("editor.window.height", windowSize.height);
+                Base.preferences.saveDelay();
+            }
+            public void componentHidden(ComponentEvent e) {
+            }
+            public void componentShown(ComponentEvent e) {
+            }
+        });
+
         openOrSelectFile(loadedSketch.getMainFile());
     }
 
@@ -1119,6 +1168,37 @@ public class Editor extends JFrame {
     }
 
     public boolean askCloseWindow() {
+
+        Base.preferences.save();
+
+        if (editorList.size() == 1) {
+            if (Base.isMacOS()) {
+                Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
+                String prompt =
+                    "<html> " +
+                    "<head> <style type=\"text/css\">"+
+                    "b { font: 13pt \"Lucida Grande\" }"+
+                    "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
+                    "</style> </head>" +
+                    "<b>" + Translate.t("Are you sure you want to Quit?") + "</b>" +
+                    "<p>" + Translate.t("Closing the last open sketch will quit %1.", Base.theme.get("product.cap"));
+
+                int result = JOptionPane.showOptionDialog(this,
+                    prompt,
+                    Translate.t("Quit"),
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]);
+                if (result == JOptionPane.NO_OPTION ||
+                    result == JOptionPane.CLOSED_OPTION
+                ) {
+                    return false;
+                }
+            }
+        }
+
         if (isModified()) {
             int option = threeOptionBox(
                 JOptionPane.WARNING_MESSAGE,
@@ -1135,8 +1215,12 @@ public class Editor extends JFrame {
                 return false;
             }
         }
-        Base.unregisterEditor(this);
+
+        Editor.unregisterEditor(this);
         this.dispose();
+        if (Editor.shouldQuit()) {
+            System.exit(0);
+        }
         return true;
     }
 
@@ -1201,7 +1285,7 @@ public class Editor extends JFrame {
         item.setAccelerator(KeyStroke.getKeyStroke('O', modifiers));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.handleOpenPrompt();
+                handleOpenPrompt();
             }
         });
         fileMenu.add(item);
@@ -1332,7 +1416,8 @@ public class Editor extends JFrame {
         item.setAccelerator(KeyStroke.getKeyStroke("ctrl-,"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.handlePrefs();
+                Preferences prefs = new Preferences();
+                prefs.showFrame();
             }
         });
         fileMenu.add(item);
@@ -1343,7 +1428,9 @@ public class Editor extends JFrame {
         item.setAccelerator(KeyStroke.getKeyStroke("alt Q"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.closeAllEditors();
+                if (Editor.closeAllEditors()) {
+                    System.exit(0);
+                }
             }
         });
         fileMenu.add(item);
@@ -1453,11 +1540,34 @@ public class Editor extends JFrame {
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_BOTTOM);
 
+        item = new JMenuItem("About " + Base.theme.get("product.cap"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleAbout();
+            }
+        });
+        helpMenu.add(item);
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_MID);
         helpMenu.addSeparator();
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
+        submenu = new JMenu("Debug");
+        item = new JMenuItem("Debug Console");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Debug.show();
+            }
+        });
+        submenu.add(item);
+        item = new JMenuItem("Rebuild internal structures");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Base.cleanAndScanAllSettings();
+            }
+        });
+        submenu.add(item);
+        helpMenu.add(submenu);
 
     }
 
@@ -1903,4 +2013,81 @@ public class Editor extends JFrame {
             }
         }
     }
+
+    public static void registerEditor(Editor e) {
+        editorList.remove(e); // Just in case...?
+        editorList.add(e);
+    }
+
+    public static void unregisterEditor(Editor e) {
+        editorList.remove(e);
+    }
+
+    public static boolean shouldQuit() {
+        return (editorList.size() == 0);
+    }
+
+    public static void broadcast(String msg) {
+        for (Editor e : editorList) {
+            e.message(msg);
+        }
+    }
+
+    public static void updateAllEditors() {
+        for (Editor e : editorList) {
+            e.updateAll();
+        }
+    }
+
+    public static boolean closeAllEditors() {
+        for (Editor e : editorList) {
+            if (e.askCloseWindow() == false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void handleOpenPrompt() {
+        // get the frontmost window frame for placing file dialog
+
+        JFileChooser fc = new JFileChooser();
+
+        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+        javax.swing.filechooser.FileFilter filter = new SketchFolderFilter();
+        fc.setFileFilter(filter);
+
+        javax.swing.filechooser.FileView view = new SketchFileView();
+        fc.setFileView(view);
+
+        fc.setCurrentDirectory(Base.getSketchbookFolder());
+
+        int rv = fc.showOpenDialog(this);
+
+        if (rv == JFileChooser.APPROVE_OPTION) {
+            Base.createNewEditor(fc.getSelectedFile().getAbsolutePath());
+        }
+
+        return;
+    }
+
+    public static void updateLookAndFeel() {
+        for (Editor e : editorList) {
+            SwingUtilities.updateComponentTreeUI(e);
+        }
+    }
+
+    public static void releasePorts(String n) {
+        for (Editor e : editorList) {
+            e.releasePort(n);
+        }
+    }
+
+    public void handleAbout() {
+        Splash splash = new Splash();
+        splash.enableCloseOnClick();
+
+    }
+
 }

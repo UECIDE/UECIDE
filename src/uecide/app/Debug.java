@@ -132,6 +132,25 @@ public class Debug {
         }
         win.setVisible(true);
         shown = true;
+        win.addComponentListener(new ComponentListener() {
+            public void componentMoved(ComponentEvent e) {
+                Point windowPos = e.getComponent().getLocation(null);
+                Base.preferences.setInteger("debug.window.x", windowPos.x);
+                Base.preferences.setInteger("debug.window.y", windowPos.y);
+                Base.preferences.saveDelay();
+            }
+            public void componentResized(ComponentEvent e) {
+                Dimension windowSize = e.getComponent().getSize(null);
+                Base.preferences.setInteger("debug.window.width", windowSize.width);
+                Base.preferences.setInteger("debug.window.height", windowSize.height);
+                Base.preferences.saveDelay();
+            }
+            public void componentHidden(ComponentEvent e) {
+            }
+            public void componentShown(ComponentEvent e) {
+            }
+        });
+
     }
 
     public static void hide() {
@@ -173,4 +192,17 @@ public class Debug {
             }
         }
     }
+
+    public static void setSize(Dimension d) {
+        if (shown) {
+            win.setSize(d);
+        }
+    }
+
+    public static void setLocation(Point p) {
+        if (shown) {
+            win.setLocation(p);
+        }
+    }
+
 }

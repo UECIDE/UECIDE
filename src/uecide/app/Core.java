@@ -28,32 +28,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package uecide.app.debug;
+package uecide.app;
 
 import java.io.*;
 import java.util.*;
 
 import uecide.app.*;
 
-public class Compiler extends UObject {
-    public Compiler(File folder) {
+public class Core extends UObject {
+
+    public Core(File folder) {
         super(folder);
     }
 
-    public String getErrorRegex() {
-        String r = get("compiler.error");
-        if (r == null) {
-            r = "^([^:]+):(\\d+): error: (.*)";
-        }
-        return r;
+    static public String[] headerListFromIncludePath(String path) {
+        FilenameFilter onlyHFiles = new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".h");
+            }
+        };
+
+        return (new File(path)).list(onlyHFiles);
     }
 
-    public String getWarningRegex() {
-        String r = get("compiler.warning");
-        if (r == null) {
-            r = "^([^:]+):(\\d+): warning: (.*)";
+    public File getManual() {
+        String m = get("manual");
+        if (m == null) {
+            return null;
         }
-        return r;
+        File mf = new File(getFolder(), m);
+        if (!mf.exists()) {
+            return null;
+        }
+        return mf;
     }
+
+    public Compiler getCompiler() {
+        String c = get("compiler");
+        if (c == null) {
+            return null;
+        }
+        return Base.compilers.get(c);
+    }
+
 }
-

@@ -30,7 +30,7 @@
 
 package uecide.app.macosx;
 
-import uecide.app.Base;
+import uecide.app.*;
 
 import com.apple.eawt.*;
 
@@ -80,7 +80,7 @@ public class ThinkDifferent implements ApplicationListener {
   public void handleAbout(ApplicationEvent ae) {
     if (base != null) {
       ae.setHandled(true);
-      base.handleAbout();
+//      base.handleAbout();
     } else {
       System.err.println("handleAbout: Base instance detached from listener");
     }
@@ -123,7 +123,7 @@ public class ThinkDifferent implements ApplicationListener {
       / on all platforms.  This example simply cancels the AppleEvent-based quit and
       / defers to that universal method.
       */
-      boolean result = base.handleQuit();
+      boolean result = Editor.closeAllEditors();
       ae.setHandled(result);
     } else {
       System.err.println("handleQuit: Base instance detached from listener");

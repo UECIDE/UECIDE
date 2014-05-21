@@ -28,59 +28,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package uecide.app.debug;
+package uecide.app;
 
 import java.io.*;
 import java.util.*;
 
 import uecide.app.*;
-import uecide.plugin.*;
 
-import java.util.regex.*;
-
-import uecide.app.Serial;
-//import uecide.app.SerialException;
-//import uecide.app.SerialNotFoundException;
-
-
-public class Board extends UObject {
-    public Board(File folder) {
+public class Compiler extends UObject {
+    public Compiler(File folder) {
         super(folder);
     }
 
-    public File getBootloader() {
-        String bl = get("bootloader");
-        if (bl == null) {
-            return null;
+    public String getErrorRegex() {
+        String r = get("compiler.error");
+        if (r == null) {
+            r = "^([^:]+):(\\d+): error: (.*)";
         }
-        File bootloader = new File(getFolder(), bl);
-        if (!bootloader.exists()) {
-            return null;
-        }
-        return bootloader;
+        return r;
     }
 
-    public String getGroup() {
-        return get("group");
-    }
-
-    public File getManual() {
-        String m = get("manual");
-        if (m == null) {    
-            return null;
+    public String getWarningRegex() {
+        String r = get("compiler.warning");
+        if (r == null) {
+            r = "^([^:]+):(\\d+): warning: (.*)";
         }
-        File mf = new File(getFolder(), m);
-        if (!mf.exists()) {
-            return null;
-        }
-        return mf;
-    }
-
-    public Core getCore() {
-        String c = get("core");
-        if (c == null) {
-            return null;
-        }
-        return Base.cores.get(c);
+        return r;
     }
 }
+

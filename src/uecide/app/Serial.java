@@ -48,9 +48,7 @@ public class Serial {
     static String[] portList;
 
     public static SerialPort requestPort(String name) {
-        for (Editor e : Base.editors) {
-            e.releasePort(name);
-        }
+        Editor.releasePorts(name);
 
         try {
             SerialPort nsp = new SerialPort(name);

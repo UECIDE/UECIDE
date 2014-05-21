@@ -245,9 +245,6 @@ public class Preferences {
     private JButton deleteSelectedLibraryEntry;
   // the calling editor, so updates can be applied
 
-//  Editor editor;
-
-
   // data model
 
     static PropertyFile properties;
@@ -317,7 +314,6 @@ public class Preferences {
 
     // setup dialog for the prefs
 
-    //dialog = new JDialog(editor, "Preferences", true);
     dialog = new JFrame("Preferences");
     dialog.setResizable(false);
 
@@ -1122,8 +1118,7 @@ public class Preferences {
   }
 
 
-  protected void showFrame(Editor editor) {
-//    this.editor = editor;
+  protected void showFrame() {
 
     // set all settings entry boxes to their actual status
     deletePreviousBox.setSelected(Base.preferences.getBoolean("export.delete_target_folder"));

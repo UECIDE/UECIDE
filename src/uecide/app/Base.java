@@ -47,9 +47,7 @@ import java.lang.reflect.Method;
 import javax.swing.*;
 import javax.imageio.*;
 
-import uecide.app.debug.Board;
-import uecide.app.debug.Core;
-import uecide.app.debug.Compiler;
+import uecide.app.Compiler;
 
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -115,9 +113,6 @@ public class Base {
     // Location for untitled items
     static File untitledFolder;
 
-    public static ArrayList<Editor> editors = new ArrayList<Editor>();
-    public static Editor activeEditor;
-
     public static PropertyFile preferences;
     public static Theme theme;
 
@@ -144,7 +139,6 @@ public class Base {
 
         headless = false;
         boolean loadLastSketch = false;
-
 
         for (int i = 0; i < args.length; i++) {
             String path = args[i];
@@ -216,6 +210,9 @@ public class Base {
         preferences.setPlatformAutoOverride(true);
 
         platform.setSettingsFolderEnvironmentVariable();
+
+        Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
+        Debug.setSize(new Dimension(preferences.getInteger("debug.window.width"), preferences.getInteger("debug.window.height")));
 
         ArrayList<String> bundledPlugins = getResourcesFromJarFile(getJarLocation(), "uecide/app/bundles/plugins/", ".jar");
         File upf = getUserPluginsFolder();
@@ -401,13 +398,13 @@ public class Base {
             if (boards.size() == 0) {
                 System.err.println(plugins.keySet());
                 showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                editors.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                Editor.editorList.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } else if (cores.size() == 0) {
                 showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                editors.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                Editor.editorList.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } else if (compilers.size() == 0) {
                 showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                editors.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
+                Editor.editorList.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } 
         }
             
@@ -478,7 +475,6 @@ public class Base {
             }
         }
         preferences.save();
-        rebuildSketchbookMenus();
     }
 
     public static Board getDefaultBoard() {
@@ -610,10 +606,6 @@ public class Base {
         }
     }
 
-    protected static void handleActivated(Editor whichEditor) {
-        activeEditor = whichEditor;
-    }
-
     boolean breakTime = false;
     String[] months = {
         "jan", "feb", "mar", "apr", "may", "jun",
@@ -664,60 +656,6 @@ public class Base {
         return false;
     }
 
-    public static void handleOpenPrompt() {
-        // get the frontmost window frame for placing file dialog
-
-        JFileChooser fc = new JFileChooser();
-
-//        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-        javax.swing.filechooser.FileFilter filter = new SketchFolderFilter();
-        fc.setFileFilter(filter);
-
-        javax.swing.filechooser.FileView view = new SketchFileView();
-        fc.setFileView(view);
-
-        fc.setCurrentDirectory(Base.getSketchbookFolder());
-
-        int rv = fc.showOpenDialog(activeEditor);
-
-        if (rv == JFileChooser.APPROVE_OPTION) {
-            createNewEditor(fc.getSelectedFile().getAbsolutePath());
-        }
-            
-        return;
-/*
-
-        FileDialog fd = new FileDialog(activeEditor,
-            Translate.t("Open %1 sketch...", theme.get("product.cap")),
-            FileDialog.LOAD);
-
-        fd.setDirectory(Base.getSketchbookFolder().getAbsolutePath());
-
-        // Only show .pde files as eligible bachelors
-        fd.setFilenameFilter(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                // TODO this doesn't seem to ever be used. AWESOME.
-                //System.out.println("check filter on " + dir + " " + name);
-                return name.toLowerCase().endsWith(".ino")
-                    || name.toLowerCase().endsWith(".pde");
-            }
-        });
-
-        fd.setVisible(true);
-
-        String directory = fd.getDirectory();
-        String filename = fd.getFile();
-
-        // User canceled selection
-        if (filename == null) return;
-
-        File inputFile = new File(directory, filename);
-        createNewEditor(inputFile.getAbsolutePath());
-*/
-    }
-
-
     /**
      * Open a sketch in a new window.
      * @param path Path to the pde file for the sketch in question
@@ -726,13 +664,6 @@ public class Base {
      */
 
     public static Editor createNewEditor(String path) {
-        if (activeEditor != null) {
-            if (activeEditor.getSketch().isUntitled() && !activeEditor.getSketch().isModified()) {
-                //activeEditor.openInternal(path);
-                return activeEditor;
-            }
-        }
-
         Sketch s;
 
         if (path == null) {
@@ -742,124 +673,12 @@ public class Base {
         }
             
         Editor editor = new Editor(s);
-        editors.add(editor);
         editor.setVisible(true);
         if (path != null) {
             updateMRU(new File(path));
         }
         return editor;
     }
-
-    public static void unregisterEditor(Editor e) {
-        editors.remove(e);
-    }
-
-    public static void closeAllEditors() {
-        ArrayList<Editor> snapshot = new ArrayList<Editor>();
-        snapshot.addAll(editors);
-        for (Editor e : snapshot) {
-            if (!e.askCloseWindow()) {
-                return;
-            }
-        }
-        System.exit(0);
-    }
-
-
-    /**
-    * Close a sketch as specified by its editor window.
-    * @param editor Editor object of the sketch to be closed.
-    * @return true if succeeded in closing, false if canceled.
-    */
-    public static boolean handleClose(Editor editor) {
-        if (editors.size() == 1) {
-            if (Base.isMacOS()) {
-                Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
-                String prompt =
-                    "<html> " +
-                    "<head> <style type=\"text/css\">"+
-                    "b { font: 13pt \"Lucida Grande\" }"+
-                    "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
-                    "</style> </head>" +
-                    "<b>" + Translate.t("Are you sure you want to Quit?") + "</b>" +
-                    "<p>" + Translate.t("Closing the last open sketch will quit %1.", theme.get("product.cap"));
-
-                int result = JOptionPane.showOptionDialog(editor,
-                    prompt,
-                    Translate.t("Quit"),
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    options,
-                    options[0]);
-                if (result == JOptionPane.NO_OPTION ||
-                    result == JOptionPane.CLOSED_OPTION
-                ) {
-                    return false;
-                }
-            }
-
-            // This will store the sketch count as zero
-            editors.remove(editor);
-
-            // Save out the current prefs state
-            preferences.save();
-
-            // Since this wasn't an actual Quit event, call System.exit()
-            System.exit(0);
-
-        } else {
-            // More than one editor window open,
-            // proceed with closing the current window.
-            editor.setVisible(false);
-            editor.dispose();
-            editors.remove(editor);
-        }
-        return true;
-    }
-
-
-    /**
-    * Handler for File &rarr; Quit.
-    * @return false if canceled, true otherwise.
-    */
-    public static boolean handleQuit() {
-        // If quit is canceled, this will be replaced anyway
-        // by a later handleQuit() that is not canceled.
-
-        if (handleQuitEach()) {
-            // Save out the current prefs state
-            preferences.save();
-
-            if (!Base.isMacOS()) {
-                // If this was fired from the menu or an AppleEvent (the Finder),
-                // then Mac OS X will send the terminate signal itself.
-                System.exit(0);
-            }
-            return true;
-        }
-        return false;
-    }
-
-
-    /**
-    * Attempt to close each open sketch in preparation for quitting.
-    * @return false if canceled along the way
-    */
-    protected static boolean handleQuitEach() {
-        int index = 0;
-        for (Editor editor : editors) {
-            //if (editor.checkModified()) {
-            //    // Update to the new/final sketch path for this fella
-            //    index++;
-//
-//            } else {
-//                return false;
-//            }
-        }
-        return true;
-    }
-
 
 // .................................................................
 
@@ -868,12 +687,6 @@ public class Base {
     * Asynchronous version of menu rebuild to be used on save and rename
     * to prevent the interface from locking up until the menus are done.
     */
-
-    protected static void rebuildSketchbookMenus() {
-        for (Editor e : editors) {
-            //e.rebuildMRUMenu();
-        }
-    }
 
     public static ArrayList<String> getLibraryCollectionNames() {
         ArrayList<String> out = new ArrayList<String>();
@@ -974,52 +787,11 @@ public class Base {
     }
 
     /**
-     * Show the About box.
-     */
-    public static void handleAbout() {
-        final Image image = Base.getLibImage("theme/about.png", activeEditor);
-        final Window window = new Window(activeEditor) {
-            public void paint(Graphics g) {
-                int x = Integer.parseInt(theme.get("about.version.x"));
-                int y = Integer.parseInt(theme.get("about.version.y"));
-
-                if (x < 0) {
-                    x = image.getWidth(activeEditor) + x;
-                }
-
-                if (y < 0) {
-                    y = image.getHeight(activeEditor) + y;
-                }
-
-                g.drawImage(image, 0, 0, null);
-
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-
-                g.setFont(theme.getFont("about.version.font"));
-                g.setColor(theme.getColor("about.version.color"));
-                g.drawString("v" + Base.systemVersion, x, y);
-            }
-        };
-        window.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                window.dispose();
-            }
-        });
-        int w = image.getWidth(activeEditor);
-        int h = image.getHeight(activeEditor);
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        window.setBounds((screen.width-w)/2, (screen.height-h)/2, w, h);
-        window.setVisible(true);
-    }
-
-    /**
     * Show the Preferences window.
     */
     public static void handlePrefs() {
         if (preferencesFrame == null) preferencesFrame = new Preferences();
-        preferencesFrame.showFrame(activeEditor);
+        preferencesFrame.showFrame();
     }
 
 
@@ -1180,11 +952,6 @@ public class Base {
         // the boards.txt and programmers.txt preferences files (which happens
         // before the other folders / paths get cached).
         return getContentFile("hardware");
-    }
-
-    public static Editor getActiveEditor()
-    {
-        return activeEditor;
     }
 
     public static File getSystemLibrariesFolder() {
@@ -1832,63 +1599,32 @@ public class Base {
     }
 
     public static void handleSystemInfo() {
-        activeEditor.message(Translate.t("Version: ") + systemVersion + "\n");
-        activeEditor.message(Translate.t("Build Number: ") + BUILDNO + "\n");
-        activeEditor.message(Translate.t("Built By: ") + BUILDER + "\n");
+        Editor.broadcast(Translate.t("Version: ") + systemVersion + "\n");
+        Editor.broadcast(Translate.t("Build Number: ") + BUILDNO + "\n");
+        Editor.broadcast(Translate.t("Built By: ") + BUILDER + "\n");
 
-        activeEditor.message(Translate.t("Installed plugins") + ":\n");
+        Editor.broadcast(Translate.t("Installed plugins") + ":\n");
 
         for (String plugin : plugins.keySet()) {
             Version v = getPluginVersion(plugin);
-            activeEditor.message("  " + plugin + " - " + v.toString() + "\n");
+            Editor.broadcast("  " + plugin + " - " + v.toString() + "\n");
         }
 
-        activeEditor.message("\n" + Translate.t("Processes") + ":\n");
+        Editor.broadcast("\n" + Translate.t("Processes") + ":\n");
         for (Process p : processes) {
-            activeEditor.message("  " + p + "\n");
+            Editor.broadcast("  " + p + "\n");
         }
 
-        activeEditor.message("\n" + Translate.t("Threads") + ":\n");
+        Editor.broadcast("\n" + Translate.t("Threads") + ":\n");
         Thread[] threads = new Thread[Thread.activeCount()];
         Thread.enumerate(threads);
         for (Thread t : threads) {
-            activeEditor.message("  " + t.getName() + "\n");
+            Editor.broadcast("  " + t.getName() + "\n");
         }
     }
 
 
-    public static File openFileDialog(String title, final String type)
-    {
-        // get the frontmost window frame for placing file dialog
-        FileDialog fd = new FileDialog(activeEditor,
-            title,
-            FileDialog.LOAD);
-
-        final String types[] = type.split(",");
-
-        fd.setFilenameFilter(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                for (int i = 0; i < types.length; i++) {
-                    if (name.toLowerCase().endsWith("." + types[i])) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
-
-        fd.setVisible(true);
-
-        String directory = fd.getDirectory();
-        String filename = fd.getFile();
-
-        // User canceled selection
-        if (filename == null) return null;
-
-        File inputFile = new File(directory, filename);
-        return inputFile;
-    }
-
+/*
     public static void handleAddLibrary()
     {
         File inputFile = openFileDialog(Translate.t("Add Library..."), "zip");
@@ -1898,12 +1634,12 @@ public class Base {
         }
 
         if (!inputFile.exists()) {
-            activeEditor.error(inputFile.getName() + ": " + Translate.t("not found"));
+            Editor.broadcast(inputFile.getName() + ": " + Translate.t("not found"));
             return;
         }
 
         if (!testLibraryZipFormat(inputFile.getAbsolutePath())) {
-            activeEditor.error(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()));
+            Editor.broadcast(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()));
             return;
         }
 
@@ -1911,6 +1647,7 @@ public class Base {
         new ZipExtractor(inputFile, getUserLibrariesFolder()).execute();
     }
 
+*/
     public static boolean testLibraryZipFormat(String inputFile)
     {
         ArrayList<String> fileList = new ArrayList<String>();
@@ -2035,7 +1772,7 @@ public class Base {
                 zis.closeEntry();
                 zis.close();
             } catch (Exception e) {
-                activeEditor.error(Translate.t("Install failed"));
+                Editor.broadcast(Translate.t("Install failed"));
                 error(e);
                 return null;
             }
@@ -2044,26 +1781,20 @@ public class Base {
 
         @Override
         protected void done() {
-            activeEditor.message(Translate.t("Installed."));
+            Editor.broadcast(Translate.t("Installed."));
             loadCores();
             loadBoards();
             gatherLibraries();
-            for (Editor e : editors) {
-                //e.rebuildCoresMenu();
-                //e.rebuildBoardsMenu();
-                //e.rebuildImportMenu();
-                //e.rebuildExamplesMenu();
-                //e.rebuildPluginsMenu();
-            }
+            Editor.updateAllEditors();
         }
 
         @Override
         protected void process(java.util.List<Integer> pct) {
             int p = pct.get(pct.size() - 1);
             if (p == -1) {
-                activeEditor.message(Translate.t("Examining..."));
+                Editor.broadcast(Translate.t("Examining..."));
             } else {
-                activeEditor.message(Translate.t("Installing..."));
+                Editor.broadcast(Translate.t("Installing..."));
             }
         }
     };
@@ -2074,106 +1805,6 @@ public class Base {
             public void run() {
             }
         });
-    }
-
-    public static void handleAddBoards() 
-    {
-        File inputFile = openFileDialog(Translate.t("Add Boards..."), "zip");
-
-        if (inputFile == null) {
-            return;
-        }
-
-        if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
-            return;
-        }
-
-        final File bf = getUserBoardsFolder();
-        new ZipExtractor(inputFile, bf).execute();
-    }
-
-    public static void handleAddCore()
-    {
-        File inputFile = openFileDialog(Translate.t("Add Core..."), "jar");
-
-        if (inputFile == null) {
-            return;
-        }
-
-        if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
-            return;
-        }
-
-        final File bf = getUserCoresFolder();
-        if (!bf.exists()) {
-            bf.mkdirs();
-        }
-
-        try {
-            JarFile jf = new JarFile(inputFile);
-            Manifest manifest = jf.getManifest();
-            Attributes manifestContents = manifest.getMainAttributes();
-
-            String plat = manifestContents.getValue("Platform");
-            System.err.println("Core is for " + plat);
-
-            if (!(
-                plat.equals(getOSFullName()) ||
-                plat.equals(getOSName()) ||
-                plat.equals("any")
-            )) {
-                Base.showWarning(Translate.t("Incompatible Core"), Translate.w("The core you selected is for %1.  You are running on %2.", 40, "\n", plat, getOSFullName()), null);
-                return;
-            }
-
-            new ZipExtractor(inputFile, bf).execute();
-        } catch (Exception e) {
-            error(e);
-        }
-    }
-
-    public static void handleInstallPlugin() {
-        handleInstallPlugin((File)null);
-    }
-
-    public static void handleInstallPlugin(File inputFile)
-    {
-        if (inputFile == null) {
-            inputFile = openFileDialog(Translate.t("Add Plugin..."), "zip,jar");
-        }
-
-        if (inputFile == null) {
-            return;
-        }
-
-        if (!inputFile.exists()) {
-            System.err.println(inputFile.getName() + ": " + Translate.t("not found"));
-            return;
-        }
-        File bf = getUserPluginsFolder();
-        if (!bf.exists()) {
-            bf.mkdirs();
-        }
-        if (bf.getName().toLowerCase().endsWith(".zip")) {
-            new ZipExtractor(inputFile, bf).execute();
-        } else {
-            File d = getUserPluginsFolder();
-            if (!d.exists()) {
-                d.mkdirs();
-            }
-            File dst = new File(d, inputFile.getName());
-            try {
-                copyFile(inputFile, dst);
-            } catch (Exception e) {
-                System.err.println(e);
-            }
-        }
-        loadPlugins();
-        for (Editor e : editors) {
-            //e.rebuildPluginsMenu();
-        }
     }
 
     public static void loadPlugins()
@@ -2329,16 +1960,11 @@ public class Base {
     }
 
     public static void applyPreferences() {
-        for (Editor ed : editors) {
-            //ed.applyPreferences();
-        }
     }
 
     public static void reloadPlugins() {
         loadPlugins();
-        for (Editor e : editors) {
-            //e.rebuildPluginsMenu();
-        }
+        Editor.updateAllEditors();
     }
 
   static String openLauncher;
@@ -2581,18 +2207,14 @@ public class Base {
 
 
     public static void error(String e) {
-        for (Editor ed : editors) {
-            ed.message(e);
-        }
+        Editor.broadcast(e);
         System.err.println(e);
         Debug.message(e);
     }
 
     public static void error(Throwable e) {
 
-        for (Editor ed : editors) {
-            ed.message(e.getMessage());
-        }
+        Editor.broadcast(e.getMessage());
         try {
             Debug.message("");
             Debug.message("******************** EXCEPTION ********************");
@@ -2633,38 +2255,27 @@ public class Base {
         plugins = new HashMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
 
-        if (activeEditor != null) activeEditor.message(Translate.t("Updating serial ports..."));
+        Editor.broadcast(Translate.t("Updating serial ports..."));
 
         Serial.updatePortList();
         Serial.fillExtraPorts();
 
-        if (activeEditor != null) activeEditor.message(Translate.t("Scanning compilers..."));
+        Editor.broadcast(Translate.t("Scanning compilers..."));
         loadCompilers();
-        if (activeEditor != null) activeEditor.message(Translate.t("Scanning cores..."));
+        Editor.broadcast(Translate.t("Scanning cores..."));
         loadCores();
-        if (activeEditor != null) activeEditor.message(Translate.t("Scanning boards..."));
+        Editor.broadcast(Translate.t("Scanning boards..."));
         loadBoards();
-        if (activeEditor != null) activeEditor.message(Translate.t("Scanning plugins..."));
+        Editor.broadcast(Translate.t("Scanning plugins..."));
         loadPlugins();
-        if (activeEditor != null) activeEditor.message(Translate.t("Scanning libraries..."));
+        Editor.broadcast(Translate.t("Scanning libraries..."));
         gatherLibraries();
-        if (activeEditor != null) activeEditor.message(Translate.t("Update complete"));
-        rebuildSketchbookMenus();
-
-        for (Editor e : editors) {
-            //e.rebuildCoresMenu();
-            //e.rebuildBoardsMenu();
-            //e.rebuildImportMenu();
-            //e.rebuildExamplesMenu();
-            //e.rebuildPluginsMenu();
-            //e.populateMenus();
-        }
+        Editor.broadcast(Translate.t("Update complete"));
+        Editor.updateAllEditors();
     }
 
     public static void updateLookAndFeel() {
-        for (Editor e : editors) {
-            SwingUtilities.updateComponentTreeUI(e);
-        }
+        Editor.updateLookAndFeel();
     }
 
     public static ImageIcon loadIconFromResource(String res, URLClassLoader loader) {
