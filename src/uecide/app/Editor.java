@@ -2085,7 +2085,9 @@ public class Editor extends JFrame {
     }
 
     public void handleAbout() {
-        Splash splash = new Splash();
+        Dimension ss = getSize();
+        Point sl = getLocation();
+        Splash splash = new Splash(sl.x, sl.y, ss.width, ss.height);
         splash.enableCloseOnClick();
 
     }

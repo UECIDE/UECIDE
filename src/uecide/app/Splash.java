@@ -63,15 +63,34 @@ public class Splash extends Window {
     int w;
     int h;
 
+    public Splash(int x, int y, int sw, int sh) {
+        super((Window) null);
+        init(x, y, sw, sh);
+    }
+
     public Splash() {
         super((Window) null);
+        init(0, 0, 0, 0);
+    }
+
+    public void init(int sx, int sy, int sw, int sh) {
         try {
             URL loc = Splash.class.getResource("/uecide/app/icons/about.png");
             image = ImageIO.read(loc);
             w = image.getWidth();
             h = image.getHeight();
+            int x = 0;
+            int y = 0;
             Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-            setBounds((screen.width-w)/2, (screen.height-h)/2, w, h);
+            if (sw == 0) {
+                sw = screen.width;
+            }
+            if (sh == 0) {
+                sh = screen.height;
+            }
+            x = sx + (sw - w) / 2;
+            y = sy + (sh - h) / 2;
+            setBounds(x, y, w, h);
             setVisible(true);
         } catch (Exception e) {
             Base.error(e);
@@ -148,5 +167,8 @@ public class Splash extends Window {
             public void mouseEntered(MouseEvent e) {
             }
         });
+    }
+
+    public void enableScrollContributors(int x, int y) {
     }
 }

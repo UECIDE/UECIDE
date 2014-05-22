@@ -163,7 +163,14 @@ public class PropertyFile {
     public void save() {
         if (userFile != null) {
             try {
-                properties.store(new FileWriter(userFile), null);
+                Properties saveProps = new Properties() {
+                    @Override
+                    public synchronized Enumeration<Object> keys() {
+                        return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+                    }
+                };
+                saveProps.putAll(properties);
+                saveProps.store(new FileWriter(userFile), null);
                 Debug.message("Saved property file " + userFile.getAbsolutePath());
             } catch (Exception e) {
                 Base.error(e);

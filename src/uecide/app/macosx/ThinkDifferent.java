@@ -80,7 +80,8 @@ public class ThinkDifferent implements ApplicationListener {
   public void handleAbout(ApplicationEvent ae) {
     if (base != null) {
       ae.setHandled(true);
-//      base.handleAbout();
+        Splash splash = new Splash();
+        splash.enableCloseOnClick();
     } else {
       System.err.println("handleAbout: Base instance detached from listener");
     }

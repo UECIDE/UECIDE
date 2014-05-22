@@ -299,7 +299,6 @@ public class Sketch implements MessageConsumer {
         }
 
         setBoard(Base.preferences.get("board"));
-        setSerialPort(Base.preferences.get("serial.port"));
         setSerialPort(Base.preferences.get("board." + selectedBoard.getName() + ".port"));
         updateLibraryList();
     }

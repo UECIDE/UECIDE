@@ -749,7 +749,7 @@ public class Base {
     }
 
     public static HashMap<String, Library> loadLibrariesFromFolder(File folder, String type, String cr) {
-        HashMap theseLibraries = new HashMap<String, Library>();
+        HashMap<String, Library> theseLibraries = new HashMap<String, Library>();
         if (!folder.exists()) {
             return theseLibraries;
         }
