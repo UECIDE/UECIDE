@@ -1219,6 +1219,7 @@ public class Editor extends JFrame {
         Editor.unregisterEditor(this);
         this.dispose();
         if (Editor.shouldQuit()) {
+            Base.preferences.save();
             System.exit(0);
         }
         return true;
@@ -1429,6 +1430,7 @@ public class Editor extends JFrame {
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (Editor.closeAllEditors()) {
+                    Base.preferences.save();
                     System.exit(0);
                 }
             }
