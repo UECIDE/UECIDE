@@ -598,7 +598,6 @@ public class Sketch implements MessageConsumer {
         HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + getBoard().getName(), getCore().getName());
         HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + getCore().getName(), getCore().getName());
         HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + getCompiler().getName(), getCore().getName());
-        HashMap<String, Library> sketchbookLibraries = Base.getLibraryCollection("sketch:all", getCore().getName());
 
         if (boardLibraries.get(trimmedName) != null) {
             return boardLibraries.get(trimmedName);
@@ -618,10 +617,6 @@ public class Sketch implements MessageConsumer {
             if (lib != null) {
                 return lib;
             }
-        }
-
-        if (sketchbookLibraries.get(trimmedName) != null) {
-            return sketchbookLibraries.get(trimmedName);
         }
 
         // TODO: If we get to here then we have not found an exact match.  Let's do the long-winded scan of all the files then.
@@ -1061,193 +1056,25 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean upload() {
-        String uploadCommand;
-
-        PropertyFile props = mergeAllProperties();
-        String mess = props.get("upload." + getProgrammer() + ".message");
-        if (mess != null) {
-            message(mess);
-        }
-        message(Translate.t("Uploading to Board..."));
-        settings.put("filename", sketchName);
-        settings.put("filename.elf", sketchName + ".elf");
-        settings.put("filename.hex", sketchName + ".hex");
-        settings.put("filename.eep", sketchName + ".eep");
-
-        boolean isJava = true;
-        uploadCommand = getBoard().get("upload." + getProgrammer() + ".command.java");
-        if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + getProgrammer() + ".command.java");
-        }
-        if (uploadCommand == null) {
-            isJava = false;
-            uploadCommand = getBoard().get("upload." + getProgrammer() + ".command." + Base.getOSFullName());
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getBoard().get("upload." + getProgrammer() + ".command." + Base.getOSName());
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getBoard().get("upload." + getProgrammer() + ".command");
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + getProgrammer() + ".command." + Base.getOSFullName());
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + getProgrammer() + ".command." + Base.getOSName());
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + getProgrammer() + ".command");
-        }
-
-        if (uploadCommand == null) {
-            error("No upload command defined for board");
-            error(Translate.t("Upload Failed"));
-            return false;
-        }
-
-   
-        if (isJava) {
-//            Plugin uploader;
-//            uploader = Base.plugins.get(uploadCommand);
-//            if (uploader == null) {
- //               error("Upload class " + uploadCommand + " not found.");
-//                error(Translate.t("Upload Failed"));
-//                return false;
-//            }
-//            try {
-//                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
-//                    error(uploadCommand + "is not a valid loader plugin.");
-//                    error(Translate.t("Upload Failed"));
-//                    return false;
-//                }
-//                uploader.run();
-//            } catch (Exception e) {
-//                error(Translate.t("Upload Failed"));
-//                error(e);
-//                return false;
-//            }
-//            message(Translate.t("Upload Complete"));
-            return false;
-        }
-
-        String[] spl;
-        spl = parseString(uploadCommand).split("::");
-
-        String executable = spl[0];
-        if (Base.isWindows()) {
-            executable = executable + ".exe";
-        }
-
-        File exeFile = new File(sketchFolder, executable);
-        File tools;
-        if (!exeFile.exists()) {
-            tools = new File(sketchFolder, "tools");
-            exeFile = new File(tools, executable);
-        }
-        if (!exeFile.exists()) {
-            exeFile = new File(getCore().getFolder(), executable);
-        }
-        if (!exeFile.exists()) {
-            tools = new File(getCore().getFolder(), "tools");
-            exeFile = new File(tools, executable);
-        }
-        if (!exeFile.exists()) {
-            exeFile = new File(executable);
-        }
-        if (exeFile.exists()) {
-            executable = exeFile.getAbsolutePath();
-        }
-
-        spl[0] = executable;
-
-        // Parse each word, doing String replacement as needed, trimming it, and
-        // generally getting it ready for executing.
-
-        String commandString = executable;
-        for (int i = 1; i < spl.length; i++) {
-            String tmp = spl[i];
-            tmp = tmp.trim();
-            if (tmp.length() > 0) {
-                commandString += "::" + tmp;
-            }
-        }
-
-        boolean dtr = false;
-        boolean rts = false;
-
-
-        String ulu = props.get("upload." + getProgrammer() + ".using");
-        if (ulu == null) ulu = "serial";
-
-        String doDtr = props.get("upload." + getProgrammer() + ".dtr");
-        if (doDtr != null) {
-            if (doDtr.equals("yes")) {
-                dtr = true;
-            }
-        }
-        String doRts = props.get("upload." + getProgrammer() + ".rts");
-        if (doRts != null) {
-            if (doRts.equals("yes")) {
-                rts = true;
-            }
-        }
-
-        if (ulu.equals("serial") || ulu.equals("usbcdc"))
-        {
-            if (dtr || rts) {
-                assertDTRRTS(dtr, rts);
-            }
-        }
-        if (ulu.equals("usbcdc")) {
-            try {
-                String baud = props.get("upload." + getProgrammer() + ".reset.baud");
-                if (baud != null) {
-                    int b = Integer.parseInt(baud);
-                    
-                    SerialPort serialPort = Serial.requestPort(getSerialPort(), b);
-                    if (serialPort == null) {
-                        error("Unable to lock serial port");
-                        return false;
-                    }
-                    Thread.sleep(1000);
-                    serialPort.closePort();
-                    serialPort = null;
-                    System.gc();
-                    Thread.sleep(1500);
-                }
-            } catch (Exception e) {
-                error(e);
-            }
-        }
-
-        boolean res = execAsynchronously(commandString);
-        if (ulu.equals("serial") || ulu.equals("usbcdc"))
-        {
-            if (dtr || rts) {
-                assertDTRRTS(false, false);
-            }
-        }
-        if (res) {
-            message(Translate.t("Upload Complete"));
-        } else {
-            error(Translate.t("Upload Failed"));
-        }
-        return res;
+        return programFile(getProgrammer(), sketchName);
     }
 
-    public void assertDTRRTS(boolean dtr, boolean rts) {
+    public boolean assertDTRRTS(boolean dtr, boolean rts) {
         try {
             SerialPort serialPort = Serial.requestPort(getSerialPort());
             if (serialPort == null) {
                 error("Unable to lock serial port for board reset");
+                return false;
             }
             serialPort.setDTR(dtr);
             serialPort.setRTS(rts);
             serialPort.closePort();
         } catch (Exception e) {
             error(e);
+            return false;
         }
         System.gc();
+        return true;
     }
 
     public boolean build() {
@@ -2535,13 +2362,11 @@ public class Sketch implements MessageConsumer {
     public boolean isInternal() {
         String path = sketchFolder.getAbsolutePath();
         String basePath = Base.getContentFile(".").getAbsolutePath() + File.separator;
-        String libsPath = Base.getUserLibrariesFolder().getAbsolutePath() + File.separator;
         String cachePath = getCacheFolder().getAbsolutePath() + File.separator;
         String corePath = getCore().getFolder().getAbsolutePath() + File.separator;
         String boardPath = getBoard().getFolder().getAbsolutePath() + File.separator;
 
         if (path.startsWith(basePath)) return true;
-        if (path.startsWith(libsPath)) return true;
         if (path.startsWith(cachePath)) return true;
         if (path.startsWith(corePath)) return true;
         if (path.startsWith(boardPath)) return true;
@@ -2597,71 +2422,24 @@ public class Sketch implements MessageConsumer {
         return importedLibraries;
     }
 
-    public void programBootloader(String programmer) {
-        String uploadCommand;
-
-        File bootloader = getBoard().getBootloader();
-        String blName = bootloader.getAbsolutePath();
-
+    public boolean programFile(String programmer, String file) {
         PropertyFile props = mergeAllProperties();
-        message(Translate.t("Burning Bootloader..."));
-        settings.put("filename", blName);
+        message(Translate.t("Uploading firmware..."));
+        settings.put("filename", file);
 
-        boolean isJava = true;
-        uploadCommand = getBoard().get("upload." + programmer + ".command.java");
-        if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + programmer + ".command.java");
+        String mess = props.get("upload." + getProgrammer() + ".message");
+        if (mess != null) {
+            message(mess);
         }
-        if (uploadCommand == null) {
-            isJava = false;
-            uploadCommand = getBoard().get("upload." + programmer + ".command." + Base.getOSFullName());
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getBoard().get("upload." + programmer + ".command." + Base.getOSName());
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getBoard().get("upload." + programmer + ".command");
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + programmer + ".command." + Base.getOSFullName());
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + programmer + ".command." + Base.getOSName());
-        }
-        if (uploadCommand == null) {
-            uploadCommand = getCore().get("upload." + programmer + ".command");
-        }
+
+        String uploadCommand = props.getPlatformSpecific("upload." + programmer + ".command");
 
         if (uploadCommand == null) {
             error("No upload command defined for board");
             error(Translate.t("Upload Failed"));
-            return;
+            return false;
         }
    
-        if (isJava) {
-//            Plugin uploader;
-//            uploader = Base.plugins.get(uploadCommand);
-//            if (uploader == null) {
-//                error("Upload class " + uploadCommand + " not found.");
-//                error(Translate.t("Upload Failed"));
-//                return;
-//            }
-//            try {
-//                if ((uploader.flags() & BasePlugin.LOADER) == 0) {
-//                    error(uploadCommand + "is not a valid loader plugin.");
-//                    error(Translate.t("Upload Failed"));
-//                    return;
-//                }
-//                uploader.run();
-//            } catch (Exception e) {
-//                error(Translate.t("Upload Failed"));
-//                error(e.toString());
-//                return;
-//            }
-//            message(Translate.t("Upload Complete"));
-            return;
-        }
-
         String[] spl;
         spl = parseString(uploadCommand).split("::");
 
@@ -2704,30 +2482,18 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        boolean dtr = false;
-        boolean rts = false;
-
 
         String ulu = props.get("upload." + programmer + ".using");
         if (ulu == null) ulu = "serial";
 
-        String doDtr = props.get("upload." + programmer + ".dtr");
-        if (doDtr != null) {
-            if (doDtr.equals("yes")) {
-                dtr = true;
-            }
-        }
-        String doRts = props.get("upload." + programmer + ".rts");
-        if (doRts != null) {
-            if (doRts.equals("yes")) {
-                rts = true;
-            }
-        }
+        boolean dtr = props.getBoolean("upload." + programmer + ".dtr");
+        boolean rts = props.getBoolean("upload." + programmer + ".rts");
 
-        if (ulu.equals("serial") || ulu.equals("usbcdc"))
-        {
+        if (ulu.equals("serial") || ulu.equals("usbcdc")) {
             if (dtr || rts) {
-                assertDTRRTS(dtr, rts);
+                if (!assertDTRRTS(dtr, rts)) {
+                    return false;
+                }
             }
         }
         if (ulu.equals("usbcdc")) {
@@ -2739,7 +2505,7 @@ public class Sketch implements MessageConsumer {
                     SerialPort serialPort = Serial.requestPort(getSerialPort(), b);
                     if (serialPort == null) {
                         error("Unable to lock serial port");
-                        return;
+                        return false;
                     }
                     Thread.sleep(1000);
                     serialPort.closePort();
@@ -2749,6 +2515,7 @@ public class Sketch implements MessageConsumer {
                 }
             } catch (Exception e) {
                 error(e);
+                return false;
             }
         }
 
@@ -2756,13 +2523,17 @@ public class Sketch implements MessageConsumer {
         if (ulu.equals("serial") || ulu.equals("usbcdc"))
         {
             if (dtr || rts) {
-                assertDTRRTS(false, false);
+                if(!assertDTRRTS(false, false)) {
+                    return false;
+                }
             }
         }
         if (res) {
             message(Translate.t("Upload Complete"));
+            return true;
         } else {
             error(Translate.t("Upload Failed"));
+            return false;
         }
     }
 
@@ -2926,6 +2697,10 @@ public class Sketch implements MessageConsumer {
         arch.delete();
     }
 
+    public void purgeCache() {
+        Base.removeDir(getCacheFolder());
+    }
+
     public void precompileLibrary(Library lib) {
         settings.put("includes", generateIncludes());
         settings.put("filename", sketchName);
@@ -2960,5 +2735,9 @@ public class Sketch implements MessageConsumer {
     public void rescanFileTree() {
         sketchFiles = new ArrayList<File>();
         loadSketchFromFolder(sketchFolder);
+    }
+
+    public void purgeBuildFiles() {
+        Base.removeDescendants(buildFolder);
     }
 }

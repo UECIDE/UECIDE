@@ -1067,6 +1067,12 @@ public class Editor extends JFrame {
                     } else if (s.equals("Output")) {
                         JPopupMenu menu = new JPopupMenu();
                         JMenuItem item = new JMenuItem("Purge output files");
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                loadedSketch.purgeBuildFiles();
+                                updateOutputTree();
+                            }
+                        });
                         menu.add(item);
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } 
@@ -1176,6 +1182,7 @@ public class Editor extends JFrame {
                     item.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             loadedSketch.purgeLibrary(lib);
+                            updateLibrariesTree();
                         }
                     });
                     menu.add(item);
@@ -2111,6 +2118,24 @@ public class Editor extends JFrame {
             });
             helpMenu.add(item);
         }
+
+        links = loadedSketch.mergeAllProperties().getChildren("links");
+
+        for (String link : links.childKeys()) {
+            String iname = links.get(link + ".name");
+            if (iname != null) {
+                item = new JMenuItem(iname);
+                item.setActionCommand(links.get(link + ".url"));
+                item.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        String link = e.getActionCommand();
+                        Base.openURL(link);
+                    }
+                });
+                helpMenu.add(item);
+            }
+        }
+
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_MID);
         helpMenu.addSeparator();
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
@@ -2126,6 +2151,13 @@ public class Editor extends JFrame {
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.cleanAndScanAllSettings();
+            }
+        });
+        submenu.add(item);
+        item = new JMenuItem("Purge cache files");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                loadedSketch.purgeCache();
             }
         });
         submenu.add(item);
@@ -2689,7 +2721,7 @@ public class Editor extends JFrame {
             // their libraries up properly are just clueless.  Still, we have to handle all
             // sorts of idiocy here, so this is going to be quite a complex operation.
 
-            ArrayList<String> foundLibs = new ArrayList<String>();
+            HashMap<String, String> foundLibs = new HashMap<String, String>();
 
             // First we'll do a quick check to see if it's a properly packaged archive.
             // We expect to have at least one header file (xxx.h) in one folder (xxx/)
@@ -2702,24 +2734,123 @@ public class Editor extends JFrame {
                         String name = parts[parts.length-1];
                         String parent = parts[parts.length-2];
 
-                        if (name.equals(parent + ".h")) {
+                        String possibleLibraryName = name.substring(0, name.lastIndexOf("."));
+                        String folder = "";
+                        for (int i = 0; i < parts.length-1; i++) {
+                            if (folder.equals("") == false) {
+                                folder += "/";
+                            }
+                            folder += parts[i];
+                        }
+
+                        if (parent.equals(possibleLibraryName) || parent.equals(possibleLibraryName + "-master")) {
                             // this looks like a valid archive at this point.
-                            message("Found library " + parent);
-                            foundLibs.add(entry);
+                            message("Found library " + possibleLibraryName + " at " + folder);
+                            foundLibs.put(possibleLibraryName, folder);
                         }
                     }
                 }
             }
+
+            if (foundLibs.size() > 0) {
+                ArrayList<LibCatObject> cats = new ArrayList<LibCatObject>();
+
+                for (String key : Base.libraryCategoryNames.keySet()) {
+                    LibCatObject ob = new LibCatObject(key, Base.libraryCategoryNames.get(key));
+                    cats.add(ob);
+                }
+                LibCatObject[] catarr = cats.toArray(new LibCatObject[cats.size()]);
+                
+                LibCatObject loc = (LibCatObject)JOptionPane.showInputDialog(this, "Select location to store this library:", "Select Destination", JOptionPane.PLAIN_MESSAGE,
+                    null, catarr, null);
+
+                if (loc != null) {
+                    File installPath = Base.libraryCategoryPaths.get(loc.getKey());
+                    message("Installing to " + installPath.getAbsolutePath());
+
+                    for (String lib : foundLibs.keySet()) {
+                        message("Installing " + lib + "...");
+                        // First make a list of remapped files...
+                        HashMap<String, File> translatedFiles = new HashMap<String, File>();
+
+                        File libDir = new File(installPath, lib);
+
+                        String prefix = foundLibs.get(lib) + "/";
+                        for (String entry : entries) {
+                            if (entry.startsWith(prefix)) {
+                                String filePart = entry.substring(prefix.length());
+                                File destFile = new File(libDir, filePart);
+                                translatedFiles.put(entry, destFile);
+                                message(entry + " -> " + destFile.getAbsolutePath());
+                            }
+                        }
+
+                        extractZipMapped(fc.getSelectedFile(), translatedFiles);
+
+                    }
+                    message("Updating library list...");
+                    Base.gatherLibraries();
+                    Editor.updateAllEditors();
+                    message("Installation finished.");
+                }
+            }
         }
     }
-    
+
+    public void extractZipMapped(File zipFile, HashMap<String, File>mapping) {
+        try {
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
+            ZipEntry ze = zis.getNextEntry();
+            while (ze != null) {
+                File outputFile = mapping.get(ze.getName());
+                if (outputFile != null) {
+                    File p = outputFile.getParentFile();
+                    if (!p.exists()) {
+                        p.mkdirs();
+                    }
+                    byte[] buffer = new byte[1024];
+                    FileOutputStream fos = new FileOutputStream(outputFile);
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                    fos.close();
+                    outputFile.setExecutable(true, false);
+                }
+                ze = zis.getNextEntry();
+            }
+            zis.closeEntry();
+            zis.close();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return;
+        }
+    }
+
+    public class LibCatObject {
+        public String key = null;
+        public String name = null;
+        public LibCatObject(String k, String n) {
+            key = k;
+            name = n;
+        }
+        public String toString() {
+            return name;
+        }
+        public String getKey() {
+            return key;
+        }
+    }
+
     public String[] getZipEntries(File zipFile) {
         ArrayList<String> files = new ArrayList<String>();
         try {
             ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
             ZipEntry ze = zis.getNextEntry();
             while (ze != null) {
-                files.add(ze.getName());
+                if (!ze.isDirectory()) {
+                    files.add(ze.getName());
+                }
                 ze = zis.getNextEntry();
             }
             zis.closeEntry();

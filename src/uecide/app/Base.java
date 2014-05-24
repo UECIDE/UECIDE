@@ -725,6 +725,17 @@ public class Base {
             }
         }
 
+        // No library locations defined at the moment - let's define
+        // a default one that is like the old Arduino one.
+
+        if(libraryCategoryPaths.size() == 0) {
+            File cdir = new File(getSketchbookFolder(), "libraries");
+            libraryCategoryPaths.put("contributed", cdir);
+            libraryCategoryNames.put("contributed", "Contributed");
+            preferences.set("library.contributed.name", "Contributed");
+            preferences.setFile("library.contributed.path", cdir);
+        }
+
         libraryCollections = new HashMap<String, HashMap<String, Library>>();
 
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
@@ -733,7 +744,6 @@ public class Base {
             libraryCollections.put("core:" + core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder(), "core", core)); // Core libraries
         }
 
-        libraryCollections.put("sketchbook:all", loadLibrariesFromFolder(getUserLibrariesFolder(),"contributed")); // Contributed libraries
         for (String key : libraryCategoryPaths.keySet()) {
             libraryCollections.put("cat:" + key, loadLibrariesFromFolder(libraryCategoryPaths.get(key),"contributed"));
         }
@@ -957,40 +967,13 @@ public class Base {
         return getHardwareFolder().getAbsolutePath();
     }
 
-
     public static File getSketchbookFolder() {
         return new File(preferences.get("sketchbook.path"));
     }
 
-
-    public static File getSketchbookLibrariesFolder() {
-        return getUserLibrariesFolder();
-    }
-
-    public static File getUserLibrariesFolder() {
-        String psbl = preferences.get("location.libraries");
-        File libdir = null;
-        if (psbl == null) {
-            libdir = new File(getSketchbookFolder(), "libraries");
-        } else {
-            libdir = new File(psbl);
-        } 
-        if (!libdir.exists()) {
-            libdir.mkdirs();
-        }
-        return libdir;
-    }
-
-
-    public static String getSketchbookLibrariesPath() {
-        return getUserLibrariesFolder().getAbsolutePath();
-    }
-
-
     public static File getSketchbookHardwareFolder() {
         return new File(getSketchbookFolder(), "hardware");
     }
-
 
     protected File getDefaultSketchbookFolder() {
         File sketchbookFolder = null;
@@ -1618,190 +1601,6 @@ public class Base {
         }
     }
 
-
-/*
-    public static void handleAddLibrary()
-    {
-        File inputFile = openFileDialog(Translate.t("Add Library..."), "zip");
-
-        if (inputFile == null) {
-            return;
-        }
-
-        if (!inputFile.exists()) {
-            Editor.broadcast(inputFile.getName() + ": " + Translate.t("not found"));
-            return;
-        }
-
-        if (!testLibraryZipFormat(inputFile.getAbsolutePath())) {
-            Editor.broadcast(Translate.t("Error: %1 is not correctly packaged.", inputFile.getName()));
-            return;
-        }
-
-
-        new ZipExtractor(inputFile, getUserLibrariesFolder()).execute();
-    }
-
-*/
-    public static boolean testLibraryZipFormat(String inputFile)
-    {
-        ArrayList<String> fileList = new ArrayList<String>();
-        try {
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
-            ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
-                String fileName = ze.getName();
-                fileList.add(fileName);
-                ze = zis.getNextEntry();
-            }
-            zis.closeEntry();
-            zis.close();
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            return false;
-        }
-
-        // Now look through fileList for an entry of X/X.cpp and X/X.h where X==X
-        boolean foundHeader = false;
-
-        for (int i=0; i<fileList.size(); i++) {
-            String entry = fileList.get(i);
-            if (entry.endsWith(".h")) {
-                String[] bits = entry.split("/");
-                String dn = bits[0];
-                if (dn.endsWith("-master")) { // It is a github zip
-                    dn = dn.substring(0, dn.indexOf("-master"));
-                }
-                if (bits[1].equals(dn + ".h")) {
-                    foundHeader = true;
-                }
-            }
-        }
-        return (foundHeader);
-    }
-
-    public static int countZipEntries(File inputFile)
-    {
-        int count = 0;
-        try {
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
-            ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
-                count++;
-                ze = zis.getNextEntry();
-            }
-            zis.closeEntry();
-            zis.close();
-        } catch (Exception e) {
-            return -1;
-        }
-        return count;
-    }
-
-    public static class ZipExtractor extends SwingWorker<Void, Integer>
-    {
-        File inputFile;
-        File destination;
-
-        public ZipExtractor(File in, File out) {
-            this.inputFile = in;
-            this.destination = out;
-        }
-
-        public ZipExtractor(String in, String out) {
-            this.inputFile = new File(in);
-            this.destination = new File(out);
-        }
-
-        @Override
-        protected Void doInBackground() {
-            byte[] buffer = new byte[1024];
-            ArrayList<String> fileList = new ArrayList<String>();
-            publish(-1);
-            int files = countZipEntries(inputFile);
-            if (files == -1) {
-                System.err.println("Zip file empty");
-                return null;
-            }
-            int done = 0;
-            try {
-                ZipInputStream zis = new ZipInputStream(new FileInputStream(inputFile));
-                ZipEntry ze = zis.getNextEntry();
-                while (ze != null) {
-                    String fileName = ze.getName();
-                    String[] bits = fileName.split("/");
-                    String dn = bits[0];
-                    if (dn.endsWith("-master")) { // It is a github zip
-                        dn = dn.substring(0, dn.indexOf("-master"));
-                    }
-                    
-                    bits[0] = dn;
-                    fileName = "";
-                    for (int i = 0; i < bits.length-1; i++) {
-                        fileName += bits[i] + "/";
-                    }
-                    fileName += bits[bits.length-1];
-                    System.err.println(fileName);
-
-                    File newFile = new File(destination, fileName);
-
-                    new File(newFile.getParent()).mkdirs();
-
-                    if (ze.isDirectory()) {
-                        newFile.mkdirs();
-                    } else {
-
-                        FileOutputStream fos = new FileOutputStream(newFile);
-                        int len;
-                        while ((len = zis.read(buffer)) > 0) {
-                            fos.write(buffer, 0, len);
-                        }
-                        fos.close();
-                        newFile.setExecutable(true, false);
-                    }
-                    done++;
-                    publish((done * 100) / files);
-                    ze = zis.getNextEntry();
-                    Thread.yield();
-                }
-                zis.closeEntry();
-                zis.close();
-            } catch (Exception e) {
-                Editor.broadcast(Translate.t("Install failed"));
-                error(e);
-                return null;
-            }
-            return null;
-        }
-
-        @Override
-        protected void done() {
-            Editor.broadcast(Translate.t("Installed."));
-            loadCores();
-            loadBoards();
-            gatherLibraries();
-            Editor.updateAllEditors();
-        }
-
-        @Override
-        protected void process(java.util.List<Integer> pct) {
-            int p = pct.get(pct.size() - 1);
-            if (p == -1) {
-                Editor.broadcast(Translate.t("Examining..."));
-            } else {
-                Editor.broadcast(Translate.t("Installing..."));
-            }
-        }
-    };
-
-    public void updateProgress(final int perc)
-    {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-            }
-        });
-    }
-
     public static void loadPlugins()
     {
         plugins.clear();
@@ -2231,14 +2030,6 @@ public class Base {
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
         System.err.println(sw.toString());
-    }
-
-    public static void showLibraryFolder() {
-        File sbl = getUserLibrariesFolder();
-        if (!sbl.exists()) {
-            sbl.mkdirs();
-        }
-        openFolder(sbl);
     }
 
     // This handy little function will rebuild the whole of the internals of
