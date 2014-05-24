@@ -1203,11 +1203,47 @@ public class Preferences {
         JButton addNewRow = new JButton(Translate.t("Add new entry"));
         addNewRow.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                libraryLocationModel.addNewRow("groupname", "Name Me", "Enter Path");
+                addLibraryEntry();
             }
         });
         c.gridx = 2;
         p.add(addNewRow, c);
+    }
+
+    public void addLibraryEntry() {
+        JFileChooser fc = new JFileChooser();
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int r = fc.showOpenDialog(dialog);
+        if (r == JFileChooser.APPROVE_OPTION) {
+            File dir = fc.getSelectedFile();
+            if (!dir.isDirectory()) {
+                return;
+            }
+            String name = dir.getName();
+            String code = "";
+            for (int i = 0; i < name.length(); i++) {
+                char c = name.charAt(i);
+                if (c >= 'a' && c <= 'z') {
+                    code += c;
+                } else if (c >= 'A' && c <= 'Z') {
+                    code += Character.toLowerCase(c);
+                } else if (c >= '0' && c <= '9') {
+                    code += c;
+                }
+            }
+            if (code.equals("")) {
+                Random rng = new Random();
+                code += (char)(rng.nextInt(26) + 'a');
+                code += (char)(rng.nextInt(26) + 'a');
+                code += (char)(rng.nextInt(26) + 'a');
+                code += (char)(rng.nextInt(26) + 'a');
+                code += (char)(rng.nextInt(26) + 'a');
+                code += (char)(rng.nextInt(26) + 'a');
+                code += (char)(rng.nextInt(26) + 'a');
+                code += (char)(rng.nextInt(26) + 'a');
+            }
+            libraryLocationModel.addNewRow(code, name, dir.getAbsolutePath());
+        }
     }
 
     public void addLibrarySubFolders() {
