@@ -40,9 +40,9 @@ product=uecide
 product.cap=UECIDE
 publisher=Majenko Technologies
 
-links.homepage.name=Visit uecide.org
+links.homepage.name=Visit UECIDE website
 links.homepage.url=http://uecide.org
-links.forums.name=Visit forums
+links.forums.name=Visit UECIDE forums
 links.forums.url=http://uecide.org/forum
 
 plugins.url=http://uecide.org/plugins-new.php

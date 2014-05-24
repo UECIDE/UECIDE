@@ -27,7 +27,7 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleIconFile</key>
-    <string>processing.icns</string>
+    <string>uecide.icns</string>
     <key>CFBundleIdentifier</key> 
     <string>org.uecide.UECIDE</string>
     <key>CFBundleDocumentTypes</key>
@@ -36,12 +36,12 @@
         <key>CFBundleTypeExtensions</key>
         <array>
           <string>pde</string>
-          <string>java</string>
+          <string>ino</string>
         </array>
         <key>CFBundleTypeIconFile</key>
-        <string>pde.icns</string>
+        <string>doc.icns</string>
       	<key>CFBundleTypeName</key>
-        <string>Processing Source File</string>
+        <string>UECIDE Sketch</string>
         <key>CFBundleTypeMIMETypes</key>
         <array>
           <string>text/plain</string>
@@ -69,15 +69,12 @@
       <string>1.5*</string>
 
       <key>ClassPath</key>
-      <!-- In 0149, removed /System/Library/Java from the CLASSPATH because
-           it can cause problems if users have installed weird files there.
-           http://dev.processing.org/bugs/show_bug.cgi?id=1045 -->
-      <string>$JAVAROOT/uecide.jar:$JAVAROOT/antlr.jar:$JAVAROOT/ecj.jar:$JAVAROOT/registry.jar:$JAVAROOT/quaqua.jar:$JAVAROOT/jssc.jar:$JAVAROOT/log4j-1.2.16.jar:$JAVAROOT/log4j.properties</string>
+      <string>$JAVAROOT/uecide.jar</string>
 
       <key>JVMArchs</key>  
       <array>  
-	<!--<string>x86_64</string>--> <!-- currently no 64 bit support -->
-	<string>i386</string>  
+        <string>x86_64</string>
+        <string>i386</string>  
         <string>ppc</string>  
       </array>
 

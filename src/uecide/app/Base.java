@@ -290,12 +290,7 @@ public class Base {
             }
 
         } catch (Exception e) {
-            String mess = e.getMessage();
-            if (mess.indexOf("ch.randelshofer.quaqua.QuaquaLookAndFeel") == -1) {
-                System.err.println("Non-fatal error while setting the Look & Feel.");
-                System.err.println("The error message follows, however " + theme.get("product.cap") + " should run fine.");
-                System.err.println(mess);
-            }
+            error(e);
         }
 
         // Create a location for untitled sketches

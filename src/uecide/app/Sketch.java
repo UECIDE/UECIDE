@@ -239,8 +239,10 @@ public class Sketch implements MessageConsumer {
 
     public void setSerialPort(String p) {
         selectedSerialPort = p;
-        Base.preferences.set("board." + selectedBoard.getName() + ".port", selectedSerialPort);
-        Base.preferences.saveDelay();
+        if (selectedBoard != null) {
+            Base.preferences.set("board." + selectedBoard.getName() + ".port", selectedSerialPort);
+            Base.preferences.saveDelay();
+        }
         if (editor != null) editor.updateAll();
     }
 
@@ -299,7 +301,11 @@ public class Sketch implements MessageConsumer {
         }
 
         setBoard(Base.preferences.get("board"));
-        setSerialPort(Base.preferences.get("board." + selectedBoard.getName() + ".port"));
+        if (selectedBoard != null) {
+            setSerialPort(Base.preferences.get("board." + selectedBoard.getName() + ".port"));
+        } else {
+            setSerialPort(null);
+        }
         updateLibraryList();
     }
 
@@ -577,7 +583,7 @@ public class Sketch implements MessageConsumer {
                 if (f.getName().equals(trimmedName)) {
                     File testFile = new File(f, filename);
                     if (f.exists()) {
-                        return new Library(testFile, trimmedName, "sketch");
+                        return new Library(testFile, sketchName, "all");
                     }
                 }
             }
@@ -2937,5 +2943,22 @@ public class Sketch implements MessageConsumer {
         System.err.println("Compiling " + lib + " from " + lib.getFolder().getAbsolutePath() + " to " + lib.getArchiveName());
 
         compileLibrary(lib);
+    }
+    public void renameFile(File old, File newFile) {
+        if (sketchFiles.indexOf(old) >= 0) {
+            sketchFiles.remove(old);
+            sketchFiles.add(newFile);
+        }
+    }
+
+    public void deleteFile(File f) {
+        if (sketchFiles.indexOf(f) >= 0) {
+            sketchFiles.remove(f);
+        }
+    }
+
+    public void rescanFileTree() {
+        sketchFiles = new ArrayList<File>();
+        loadSketchFromFolder(sketchFolder);
     }
 }

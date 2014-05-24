@@ -242,6 +242,12 @@ public class PropertyFile {
     }
 
     public void set(String attribute, String value) {
+        if (value == null) {
+            return;
+        }
+        if (attribute == null) {
+            return;
+        }
         properties.setProperty(attribute, value);
     }
 

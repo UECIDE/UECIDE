@@ -1,0 +1,14 @@
+#!/bin/sh
+ 
+APPDIR="$(dirname -- $(readlink -f -- "${0}") )"
+
+cd $APPDIR
+ 
+MEM=512m
+CPU=`uname -m`
+if [ "x${CPU}" = "xarmv6l" ]
+then
+    MEM=64m
+fi
+
+java -Xms${MEM} -Xmx${MEM} -jar ${APPDIR}/uecide.jar

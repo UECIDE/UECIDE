@@ -60,6 +60,7 @@ public abstract class Plugin {
     public static final int TOOLBAR_EDITOR = 1;
     public static final int TOOLBAR_TAB = 2;
 
+
     public Plugin() { }
     public Plugin(Editor e) { editor = e; }
     public Plugin(EditorBase eb) { editorTab = eb; }

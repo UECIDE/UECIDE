@@ -9,4 +9,3 @@ Cache purge
 Rewrite plugin manager
 Local install board/core/plugin files
 Internals rebuild function
-Save / restore window sizes

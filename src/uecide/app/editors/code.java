@@ -184,44 +184,44 @@ public class code extends JPanel implements EditorBase {
         toolbar = new JToolBar();
         this.add(toolbar, BorderLayout.NORTH);
 
-        editor.addToolbarButton(toolbar, "toolbar/edit-copy.png", "Copy", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "toolbar/edit-copy.png", "Copy", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.copy();
             }
         });
-        editor.addToolbarButton(toolbar, "toolbar/edit-cut.png", "Cut", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "toolbar/edit-cut.png", "Cut", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.cut();
             }
         });
 
-        editor.addToolbarButton(toolbar, "toolbar/edit-paste.png", "Paste", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "toolbar/edit-paste.png", "Paste", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.paste();
             }
         });
 
         toolbar.addSeparator();
-        editor.addToolbarButton(toolbar, "toolbar/edit-undo.png", "Undo", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "toolbar/edit-undo.png", "Undo", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.undoLastAction();
             }
         });
 
-        JButton redoButton = editor.addToolbarButton(toolbar, "toolbar/edit-redo.png", "Redo", new ActionListener() {
+        JButton redoButton = Editor.addToolbarButton(toolbar, "toolbar/edit-redo.png", "Redo", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.redoLastAction();
             }
         });
 
         toolbar.addSeparator();
-        JButton indentButton = editor.addToolbarButton(toolbar, "toolbar/format-indent-more.png", "Increase Indent");
+        JButton indentButton = Editor.addToolbarButton(toolbar, "toolbar/format-indent-more.png", "Increase Indent");
         indentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 increaseIndent(e);
             }
         });
-        JButton outdentButton = editor.addToolbarButton(toolbar, "toolbar/format-indent-less.png", "Decrease Indent");
+        JButton outdentButton = Editor.addToolbarButton(toolbar, "toolbar/format-indent-less.png", "Decrease Indent");
         outdentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 decreaseIndent(e);

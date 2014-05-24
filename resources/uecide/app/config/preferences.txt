@@ -73,7 +73,7 @@ platform.auto_file_type_associations = true
 editor.laf.default.linux=com.sun.java.swing.plaf.gtk.GTKLookAndFeel
 editor.laf.default.freebsd=com.sun.java.swing.plaf.gtk.GTKLookAndFeel
 editor.laf.default.windows=com.sun.java.swing.plaf.windows.WindowsLookAndFeel
-editor.laf.default.macosx=apple.laf.AppleLookAndFeel
+editor.laf.default.macosx=apple.laf.AquaLookAndFeel
 
 // Things work better with the system decorator!
 editor.laf.decorator=true
