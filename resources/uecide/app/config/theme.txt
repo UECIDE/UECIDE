@@ -45,7 +45,7 @@ links.homepage.url=http://uecide.org
 links.forums.name=Visit UECIDE forums
 links.forums.url=http://uecide.org/forum
 
-plugins.url=http://uecide.org/plugins-new.php
+plugins.url=http://uecide.org/plugins-61a.php
 
 editor.line.enabled=true
 editor.line.fade=true

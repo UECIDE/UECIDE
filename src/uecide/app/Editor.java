@@ -2308,7 +2308,9 @@ public class Editor extends JFrame {
         for (Core core : cores) {
             JMenuItem item = new JRadioButtonMenuItem(core.getName());
             coreGroup.add(item);
-            item.setSelected(loadedSketch.getCore().equals(core));
+            if (loadedSketch.getCore() != null) {
+                item.setSelected(loadedSketch.getCore().equals(core));
+            }
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setCore(e.getActionCommand());
@@ -2569,7 +2571,7 @@ public class Editor extends JFrame {
             }
         }
 
-        if (loadedSketch.getBoard() != null) {
+        if (loadedSketch.getBoard() != null && loadedSketch.getCore() != null) {
             JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
             HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
             for (String libName : boardLibraries.keySet()) {
@@ -2583,17 +2585,19 @@ public class Editor extends JFrame {
             }
         }
 
-        for (String key : Base.libraryCategoryNames.keySet()) {
-            JMenu catLibsMenu = new JMenu(Base.libraryCategoryNames.get(key));
-            HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
-            for (Library lib : catLib.values()) {
-                item = new JMenuItem(lib.getName());
-                item.addActionListener(insertIncludeAction);
-                item.setActionCommand(lib.getName());
-                catLibsMenu.add(item);
-            }
-            if (catLibsMenu.getItemCount() > 0) {
-                menu.add(catLibsMenu);
+        if (loadedSketch.getBoard() != null && loadedSketch.getCore() != null) {
+            for (String key : Base.libraryCategoryNames.keySet()) {
+                JMenu catLibsMenu = new JMenu(Base.libraryCategoryNames.get(key));
+                HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
+                for (Library lib : catLib.values()) {
+                    item = new JMenuItem(lib.getName());
+                    item.addActionListener(insertIncludeAction);
+                    item.setActionCommand(lib.getName());
+                    catLibsMenu.add(item);
+                }
+                if (catLibsMenu.getItemCount() > 0) {
+                    menu.add(catLibsMenu);
+                }
             }
         }
     }
@@ -2635,6 +2639,17 @@ public class Editor extends JFrame {
         for (Editor e : editorList) {
             e.updateAll();
         }
+    }
+
+    public static void selectAllEditorBoards() {
+        for (Editor e : editorList) {
+            e.reselectEditorBoard();
+        }
+    }
+
+    public void reselectEditorBoard() {
+        String eb = loadedSketch.getBoardName();
+        loadedSketch.setBoard(eb);
     }
 
     public static boolean closeAllEditors() {
@@ -2980,12 +2995,23 @@ public class Editor extends JFrame {
         TreePath[] allPaths = getPaths(tree);
         for (TreePath path : savedState) {
             DefaultMutableTreeNode oldnode = (DefaultMutableTreeNode)path.getLastPathComponent();
-            File oldFile = (File)oldnode.getUserObject();
-            for (TreePath np : allPaths) {
-                DefaultMutableTreeNode newnode = (DefaultMutableTreeNode)np.getLastPathComponent();
-                File newFile = (File)newnode.getUserObject();
-                if (newFile.equals(oldFile)) {
-                    tree.expandPath(np);
+            if (oldnode.getUserObject() instanceof File) {
+                File oldFile = (File)oldnode.getUserObject();
+                for (TreePath np : allPaths) {
+                    DefaultMutableTreeNode newnode = (DefaultMutableTreeNode)np.getLastPathComponent();
+                    File newFile = (File)newnode.getUserObject();
+                    if (newFile.equals(oldFile)) {
+                        tree.expandPath(np);
+                    }
+                }
+            } else if (oldnode.getUserObject() instanceof String) {
+                String oldFile = oldnode.getUserObject().toString();
+                for (TreePath np : allPaths) {
+                    DefaultMutableTreeNode newnode = (DefaultMutableTreeNode)np.getLastPathComponent();
+                    String newFile = newnode.getUserObject().toString();
+                    if (newFile.equals(oldFile)) {
+                        tree.expandPath(np);
+                    }
                 }
             }
         }

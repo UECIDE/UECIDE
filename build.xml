@@ -304,6 +304,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <arg value="bundle/windows/script.nsi"/>
         </exec>
         <copy file="bundle/windows/uecide-${version}-lite.exe" todir="." />
+        <delete file="bundle/windows/uecide-${version}-lite.exe"/>
         <delete file="bundle/windows/script.nsi" />
         <delete dir="bundle/windows" />
         <delete dir="windows" />
@@ -335,8 +336,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <arg value="bundle/windows/script.nsi"/>
         </exec>
         <copy file="bundle/windows/uecide-${version}-full.exe" todir="." />
+        <delete file="bundle/windows/uecide-${version}-full.exe"/>
         <delete file="bundle/windows/script.nsi" />
-        <delete file="bundle/windows" />
+        <delete dir="bundle/windows" />
         <delete dir="windows" />
     </target>
 

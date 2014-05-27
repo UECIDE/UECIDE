@@ -71,6 +71,7 @@ public class Sketch implements MessageConsumer {
 
     Core selectedCore = null;
     Board selectedBoard = null;
+    String selectedBoardName = null;
     Compiler selectedCompiler = null;
     String selectedProgrammer = null;
     String selectedSerialPort = null;
@@ -130,6 +131,10 @@ public class Sketch implements MessageConsumer {
      * another.                                                               *
      **************************************************************************/
 
+    public String getBoardName() {
+        return selectedBoardName;
+    }
+
     public Board getBoard() {
         return selectedBoard;
     }
@@ -144,6 +149,7 @@ public class Sketch implements MessageConsumer {
             return;
         }
         selectedBoard = board;
+        selectedBoardName = selectedBoard.getName();
         Base.preferences.set("board", board.getName());
         Core core = Base.cores.get(Base.preferences.get("board." + selectedBoard.getName() + ".core"));
         if (core == null) {
@@ -1419,6 +1425,7 @@ public class Sketch implements MessageConsumer {
             ArrayList<File> files = new ArrayList<File>();
             String libPaths = props.get("compiler.library."+coreLibName);
             if (libPaths != null && !(libPaths.trim().equals(""))) {
+                libPaths = parseString(libPaths);
                 String[] libPathsArray = libPaths.split("::");
                 for (String p : libPathsArray) {
                     File f = new File(getCompiler().getFolder(), p);
@@ -1434,6 +1441,7 @@ public class Sketch implements MessageConsumer {
             ArrayList<File> files = new ArrayList<File>();
             String libPaths = props.get("core.library."+coreLibName);
             if (libPaths != null && !(libPaths.trim().equals(""))) {
+                libPaths = parseString(libPaths);
                 String[] libPathsArray = libPaths.split("::");
                 for (String p : libPathsArray) {
                     File f = new File(getCore().getFolder(), p);
@@ -1449,6 +1457,7 @@ public class Sketch implements MessageConsumer {
             ArrayList<File> files = new ArrayList<File>();
             String libPaths = props.get("board.library."+coreLibName);
             if (libPaths != null && !(libPaths.trim().equals(""))) {
+                libPaths = parseString(libPaths);
                 String[] libPathsArray = libPaths.split("::");
                 for (String p : libPathsArray) {
                     File f = new File(getBoard().getFolder(), p);
@@ -1849,6 +1858,7 @@ public class Sketch implements MessageConsumer {
         HashMap<String, ArrayList<File>> coreLibs = getCoreLibs();
 
         for (String lib : coreLibs.keySet()) {
+            message("..." + lib);
             if (!compileCore(coreLibs.get(lib), "Core_" + lib)) {
                 return false;
             }
@@ -1872,6 +1882,7 @@ public class Sketch implements MessageConsumer {
         ArrayList<File> fileList = new ArrayList<File>();
 
         for (File f : core) {
+            message("   " + f.getAbsolutePath());
             if (f.exists() && f.isDirectory()) {
                 fileList.addAll(findFilesInFolder(f, "S", false));
                 fileList.addAll(findFilesInFolder(f, "c", false));

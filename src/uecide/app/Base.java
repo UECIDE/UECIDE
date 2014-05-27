@@ -2058,6 +2058,7 @@ public class Base {
         gatherLibraries();
         Editor.broadcast(Translate.t("Update complete"));
         Editor.updateAllEditors();
+        Editor.selectAllEditorBoards();
     }
 
     public static void updateLookAndFeel() {
