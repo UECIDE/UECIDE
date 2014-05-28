@@ -257,7 +257,25 @@ public class PropertyFile {
 
     public boolean getBoolean(String attribute) {
         String value = get(attribute);
-        return (new Boolean(value)).booleanValue();
+        if (value == null) {
+            return false;
+        }
+        if (value.toLowerCase().equals("true")) {
+            return true;
+        }
+        if (value.toLowerCase().equals("yes")) {
+            return true;
+        }
+        if (value.toLowerCase().equals("y")) {
+            return true;
+        }
+        if (value.toLowerCase().equals("on")) {
+            return true;
+        }
+        if (value.toLowerCase().equals("1")) {
+            return true;
+        }
+        return false;
     }
 
     public void setBoolean(String attribute, boolean value) {

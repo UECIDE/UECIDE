@@ -194,6 +194,8 @@ public class Editor extends JFrame {
 
         this.setLayout(new BorderLayout());
 
+        Base.setIcon(this);
+
         treePanel = new JPanel();
         projectPanel = new JPanel();
         filesPanel = new JPanel();

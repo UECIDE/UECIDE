@@ -1121,9 +1121,11 @@ public class Base {
     * Give this Frame a Processing icon.
     */
     public static void setIcon(Frame frame) {
-        File imageLocation = new File(getContentFile("lib/theme"), "icon.png");
-        Image image = Toolkit.getDefaultToolkit().createImage(imageLocation.getAbsolutePath());
-        frame.setIconImage(image);
+        try {
+            frame.setIconImage(loadImageFromResource("icons/icon.png"));
+        } catch (Exception e) {
+            error(e);
+        }
     }
 
 
@@ -2076,6 +2078,25 @@ public class Base {
         }
         return new ImageIcon(loc);
     }
+
+    public static BufferedImage loadImageFromResource(String res) {
+        if (!res.startsWith("/")) {
+            res = "/uecide/app/" + res;
+        }
+        URL loc = Base.class.getResource(res);
+
+        if (loc == null) {
+            loc = Base.class.getResource("/uecide/app/icons/unknown.png");
+        }
+        try {
+            BufferedImage im = ImageIO.read(loc);
+            return im;
+        } catch (Exception e) {
+            error(e);
+        }
+        return null;
+    }
+
     public static ImageIcon loadIconFromResource(String res) {
         if (!res.startsWith("/")) {
             res = "/uecide/app/icons/" + res;

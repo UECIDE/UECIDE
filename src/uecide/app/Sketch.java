@@ -1074,16 +1074,18 @@ public class Sketch implements MessageConsumer {
         return programFile(getProgrammer(), sketchName);
     }
 
-    public boolean assertDTRRTS(boolean dtr, boolean rts) {
+    public boolean assertDTRRTS(boolean dtr, boolean rts, int speed) {
         try {
-            SerialPort serialPort = Serial.requestPort(getSerialPort());
+            SerialPort serialPort = Serial.requestPort(getSerialPort(), speed);
             if (serialPort == null) {
                 error("Unable to lock serial port for board reset");
                 return false;
             }
-            serialPort.setDTR(dtr);
-            serialPort.setRTS(rts);
+            message("Resetting board...");
+            Thread.sleep(100);
             serialPort.closePort();
+            serialPort = null;
+            System.gc();
         } catch (Exception e) {
             error(e);
             return false;
@@ -1112,13 +1114,17 @@ public class Sketch implements MessageConsumer {
         try {
             if (!prepare()) {
                 error(Translate.t("Compile Failed"));
+                setCompilingProgress(0);
                 return false;
             }
         } catch (Exception e) {
             error(e);
+            setCompilingProgress(0);
             return false;
         }
-        return compile();
+        boolean done = compile();
+        setCompilingProgress(0);
+        return done;
     }
 
     public boolean saveAs(File newPath) {
@@ -1891,7 +1897,6 @@ public class Sketch implements MessageConsumer {
         ArrayList<File> fileList = new ArrayList<File>();
 
         for (File f : core) {
-            message("   " + f.getAbsolutePath());
             if (f.exists() && f.isDirectory()) {
                 fileList.addAll(findFilesInFolder(f, "S", false));
                 fileList.addAll(findFilesInFolder(f, "c", false));
@@ -2509,9 +2514,20 @@ public class Sketch implements MessageConsumer {
         boolean dtr = props.getBoolean("upload." + programmer + ".dtr");
         boolean rts = props.getBoolean("upload." + programmer + ".rts");
 
+        int progbaud = 9600;
+        String br = props.get("upload.speed");
+        if (br != null) {
+            try {
+                progbaud = props.getInteger("upload.speed");
+            } catch (Exception e) {
+                error(e);
+            }
+        }
+
         if (ulu.equals("serial") || ulu.equals("usbcdc")) {
+
             if (dtr || rts) {
-                if (!assertDTRRTS(dtr, rts)) {
+                if (!assertDTRRTS(dtr, rts, progbaud)) {
                     return false;
                 }
             }
@@ -2540,14 +2556,22 @@ public class Sketch implements MessageConsumer {
         }
 
         boolean res = execAsynchronously(commandString);
-        if (ulu.equals("serial") || ulu.equals("usbcdc"))
-        {
+        if (ulu.equals("serial") || ulu.equals("usbcdc")) {
+
             if (dtr || rts) {
-                if(!assertDTRRTS(false, false)) {
+                if (!assertDTRRTS(dtr, rts, progbaud)) {
                     return false;
                 }
             }
         }
+//        if (ulu.equals("serial") || ulu.equals("usbcdc"))
+//        {
+//            if (dtr || rts) {
+//                if(!assertDTRRTS(false, false)) {
+//                    return false;
+//                }
+//            }
+//        }
         if (res) {
             message(Translate.t("Upload Complete"));
             return true;
