@@ -127,7 +127,7 @@ public class Preferences {
     DefaultListModel extraPortListModel = new DefaultListModel();
     JTextField portInput;
 
-    public static HashMap<String, String>themes;
+    public static TreeMap<String, String>themes;
 
     JTable libraryLocationTable;
     class LibraryDetail {
@@ -505,7 +505,7 @@ public class Preferences {
         c.gridwidth = 1;
         
 
-        themes = new HashMap<String, String>();
+        themes = new TreeMap<String, String>();
         UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
         for (UIManager.LookAndFeelInfo info : lafInfo) {
             themes.put(info.getName(), info.getClassName());

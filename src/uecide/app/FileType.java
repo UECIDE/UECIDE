@@ -53,9 +53,9 @@ public class FileType {
     public static final int GROUP_HEADER = 2;
     public static final int GROUP_BINARY = 3;
 
-    public static HashMap<String, FileTypeInfo> fileTypeList;
+    public static TreeMap<String, FileTypeInfo> fileTypeList;
     static {
-        fileTypeList = new HashMap<String, FileTypeInfo>();
+        fileTypeList = new TreeMap<String, FileTypeInfo>();
         fileTypeList.put("c",   new FileTypeInfo(FileType.CSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_C, "files/text-x-c.png", GROUP_SOURCE));
 
         fileTypeList.put("cpp", new FileTypeInfo(FileType.CPPSOURCE, "uecide.app.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));

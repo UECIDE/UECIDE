@@ -321,6 +321,45 @@ public class Editor extends JFrame {
 
         toolbar = new JToolBar();
 
+        toolbar.addHierarchyListener(new HierarchyListener() {
+            public void hierarchyChanged(HierarchyEvent e) {
+                Window window = SwingUtilities.getWindowAncestor(toolbar);
+                if (window == Editor.this) {
+                    if (e.getChangeFlags() == HierarchyEvent.PARENT_CHANGED) {
+
+                        JPanel pan = (JPanel)e.getChangedParent();
+
+                        BorderLayout layout = (BorderLayout)pan.getLayout();
+
+                        if (toolbar == layout.getLayoutComponent(BorderLayout.NORTH)) {
+                            Base.preferences.set("editor.toolbar.position", "n");
+                            Base.preferences.saveDelay();
+                        }
+
+                        if (toolbar == layout.getLayoutComponent(BorderLayout.SOUTH)) {
+                            Base.preferences.set("editor.toolbar.position", "s");
+                            Base.preferences.saveDelay();
+                        }
+
+                        if (toolbar == layout.getLayoutComponent(BorderLayout.EAST)) {
+                            Base.preferences.set("editor.toolbar.position", "e");
+                            Base.preferences.saveDelay();
+                        }
+
+                        if (toolbar == layout.getLayoutComponent(BorderLayout.WEST)) {
+                            Base.preferences.set("editor.toolbar.position", "w");
+                            Base.preferences.saveDelay();
+                        }
+                    }
+                } else {
+                    if (e.getChangeFlags() == HierarchyEvent.PARENT_CHANGED) {
+                        Base.preferences.set("editor.toolbar.position", "f");
+                        Base.preferences.saveDelay();
+                    }
+                }
+            }
+        });
+
         statusLabel = new JLabel("");
         statusProgress = new JProgressBar();
 
@@ -330,7 +369,24 @@ public class Editor extends JFrame {
         Font labelFont = statusLabel.getFont();
         statusLabel.setFont(new Font(labelFont.getName(), Font.PLAIN, 12));
 
-        this.add(toolbar, BorderLayout.NORTH);
+        String tbPos = Base.preferences.get("editor.toolbar.position");
+        if ((tbPos == null) || tbPos.equals("f") || tbPos.equals("n")) {
+            this.add(toolbar, BorderLayout.NORTH);
+            toolbar.setOrientation(JToolBar.HORIZONTAL);
+        } else if (tbPos.equals("s")) {
+            this.add(toolbar, BorderLayout.SOUTH);
+            toolbar.setOrientation(JToolBar.HORIZONTAL);
+        } else if (tbPos.equals("e")) {
+            this.add(toolbar, BorderLayout.EAST);
+            toolbar.setOrientation(JToolBar.VERTICAL);
+        } else if (tbPos.equals("w")) {
+            this.add(toolbar, BorderLayout.WEST);
+            toolbar.setOrientation(JToolBar.VERTICAL);
+        } else {
+            this.add(toolbar, BorderLayout.NORTH);
+            toolbar.setOrientation(JToolBar.HORIZONTAL);
+        }
+
         this.add(statusBar, BorderLayout.SOUTH);
 
         treeScroll = new JScrollPane();
@@ -935,7 +991,7 @@ public class Editor extends JFrame {
     public void updateLibrariesTree() {
         boolean treeLibrariesOpen = sketchContentTree.isExpanded(new TreePath(treeLibraries.getPath()));
         treeLibraries.removeAllChildren();
-        HashMap<String, Library>libList = loadedSketch.getLibraries();
+        TreeMap<String, Library>libList = loadedSketch.getLibraries();
         DefaultMutableTreeNode node;
         if (libList != null) {
             for (String libname : libList.keySet()) {
@@ -986,6 +1042,8 @@ public class Editor extends JFrame {
 
     public void updateTree() {
         boolean treeRootOpen = sketchContentTree.isExpanded(new TreePath(treeRoot.getPath()));
+
+        treeRoot.setUserObject(loadedSketch.getName());
 
         updateSourceTree();
         updateHeadersTree();
@@ -1400,6 +1458,7 @@ public class Editor extends JFrame {
     }
 
     public void message(String msg) {
+        Debug.message(msg);
         if (msg == null) { return; }
         if (!msg.endsWith("\n")) { msg += "\n"; }
         consoleDoc.appendString(msg, stdStyle);
@@ -1408,6 +1467,7 @@ public class Editor extends JFrame {
     }
 
     public void warning(String msg) {
+        Debug.message(msg);
         if (!msg.endsWith("\n")) { msg += "\n"; }
         consoleDoc.appendString(msg, warnStyle);
         consoleDoc.insertAll();
@@ -1415,6 +1475,7 @@ public class Editor extends JFrame {
     }
 
     public void error(String msg) {
+        Debug.message(msg);
         if (!msg.endsWith("\n")) { msg += "\n"; }
         consoleDoc.appendString(msg, errStyle);
         consoleDoc.insertAll();
@@ -1482,8 +1543,8 @@ public class Editor extends JFrame {
         return button;
     }
 
-    public void closeTab(int tab) {
-        if (tab == -1) return;
+    public boolean closeTab(int tab) {
+        if (tab == -1) return false;
         EditorBase eb = (EditorBase)editorTabs.getComponentAt(tab);
         if (eb.isModified()) {
             int option = threeOptionBox(
@@ -1495,10 +1556,11 @@ public class Editor extends JFrame {
                 "Cancel"
             );
 
-            if (option == 2) return;
+            if (option == 2) return false;
             if (option == 0) eb.save();
         }
         editorTabs.remove(tab);
+        return true;
     }
 
     public class TabLabel extends JPanel {
@@ -1702,6 +1764,14 @@ public class Editor extends JFrame {
         }
     }
 
+    public void closeAllTabs() {
+        while (editorTabs.getTabCount() > 0) {
+            if (!closeTab(0)) {
+                return;
+            }
+        }
+    }
+
     public void alert(String message) {
         JOptionPane.showMessageDialog(this, message, "Alert", JOptionPane.WARNING_MESSAGE);
     }
@@ -1790,7 +1860,7 @@ public class Editor extends JFrame {
                         public void actionPerformed(ActionEvent e) {
                             String path = e.getActionCommand();
                             if (new File(path).exists()) {
-                                Base.createNewEditor(path);
+                                loadSketch(path);
                             } else {
                                 error("Unable to find file " + path);
                             }
@@ -1851,7 +1921,7 @@ public class Editor extends JFrame {
                 public void actionPerformed(ActionEvent e) {
                     String path = e.getActionCommand();
                     if (new File(path).exists()) {
-                        Base.createNewEditor(path);
+                        loadSketch(path);
                     } else {
                         error("Unable to find file " + path);
                     }
@@ -1871,7 +1941,7 @@ public class Editor extends JFrame {
             submenu.addSeparator();
 
             JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
-            HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
+            TreeMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
             for (String libName : compilerLibraries.keySet()) {
                 JMenu libMenu = new JMenu(libName);
                 addSketchesFromFolder(libMenu, compilerLibraries.get(libName).getExamplesFolder());
@@ -1881,7 +1951,7 @@ public class Editor extends JFrame {
             }
 
             JMenu coreLibsMenu = new JMenu(loadedSketch.getCore().getName());
-            HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
+            TreeMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
             for (String libName : coreLibraries.keySet()) {
                 JMenu libMenu = new JMenu(libName);
                 addSketchesFromFolder(libMenu, coreLibraries.get(libName).getExamplesFolder());
@@ -1891,7 +1961,7 @@ public class Editor extends JFrame {
             }
 
             JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
-            HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
+            TreeMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
             for (String libName : boardLibraries.keySet()) {
                 JMenu libMenu = new JMenu(libName);
                 addSketchesFromFolder(libMenu, boardLibraries.get(libName).getExamplesFolder());
@@ -1914,7 +1984,7 @@ public class Editor extends JFrame {
 
 
             for (String key : Base.libraryCategoryNames.keySet()) {
-                HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
+                TreeMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
                 JMenu catLibsMenu = new JMenu(Base.libraryCategoryNames.get(key));
                 for (Library lib : catLib.values()) {
                     JMenu libMenu = new JMenu(lib.getName());
@@ -2166,10 +2236,10 @@ public class Editor extends JFrame {
     }
 
     public void populateOptionsMenu(JMenu menu) {
-        HashMap<String, String> opts = loadedSketch.getOptionGroups();
+        TreeMap<String, String> opts = loadedSketch.getOptionGroups();
         for (String opt : opts.keySet()) {
             JMenu submenu = new JMenu(opts.get(opt));
-            HashMap<String, String>optvals = loadedSketch.getOptionNames(opt);
+            TreeMap<String, String>optvals = loadedSketch.getOptionNames(opt);
             ButtonGroup thisGroup = new ButtonGroup();
             for (String key : optvals.keySet()) {
                 JMenuItem item = new JRadioButtonMenuItem(optvals.get(key));
@@ -2228,7 +2298,7 @@ public class Editor extends JFrame {
     ButtonGroup boardMenuButtonGroup;
 
     public void populateProgrammersMenu(JMenu menu) {
-        HashMap<String, String> programmers = loadedSketch.getProgrammerList();
+        TreeMap<String, String> programmers = loadedSketch.getProgrammerList();
         ButtonGroup programmerGroup = new ButtonGroup();
 
         for (String pn : programmers.keySet()) {
@@ -2545,7 +2615,7 @@ public class Editor extends JFrame {
 
         if (loadedSketch.getCompiler() != null) {
             JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
-            HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
+            TreeMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
             for (String libName : compilerLibraries.keySet()) {
                 item = new JMenuItem(libName);
                 item.addActionListener(insertIncludeAction);
@@ -2559,7 +2629,7 @@ public class Editor extends JFrame {
 
         if (loadedSketch.getCore() != null) {
             JMenu coreLibsMenu = new JMenu(loadedSketch.getCore().getName());
-            HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
+            TreeMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
             for (String libName : coreLibraries.keySet()) {
                 item = new JMenuItem(libName);
                 item.addActionListener(insertIncludeAction);
@@ -2573,7 +2643,7 @@ public class Editor extends JFrame {
 
         if (loadedSketch.getBoard() != null && loadedSketch.getCore() != null) {
             JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
-            HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
+            TreeMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
             for (String libName : boardLibraries.keySet()) {
                 item = new JMenuItem(libName);
                 item.addActionListener(insertIncludeAction);
@@ -2588,7 +2658,7 @@ public class Editor extends JFrame {
         if (loadedSketch.getBoard() != null && loadedSketch.getCore() != null) {
             for (String key : Base.libraryCategoryNames.keySet()) {
                 JMenu catLibsMenu = new JMenu(Base.libraryCategoryNames.get(key));
-                HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
+                TreeMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
                 for (Library lib : catLib.values()) {
                     item = new JMenuItem(lib.getName());
                     item.addActionListener(insertIncludeAction);
@@ -2679,10 +2749,26 @@ public class Editor extends JFrame {
         int rv = fc.showOpenDialog(this);
 
         if (rv == JFileChooser.APPROVE_OPTION) {
-            Base.createNewEditor(fc.getSelectedFile().getAbsolutePath());
+            loadSketch(fc.getSelectedFile());
         }
+    }
 
-        return;
+    public void loadSketch(String f) {
+        loadSketch(new File(f));
+    }
+
+    public void loadSketch(File f) {
+        if (loadedSketch.isUntitled() && !isModified()) {
+            closeAllTabs();
+            loadedSketch = new Sketch(f);
+            loadedSketch.attachToEditor(this);
+            filesTreeRoot.setUserObject(loadedSketch.getFolder());
+            updateAll();
+            treeModel.nodeStructureChanged(treeRoot);
+            openOrSelectFile(loadedSketch.getMainFile());
+        } else {
+            Base.createNewEditor(f.getPath());
+        }
     }
 
     public static void updateLookAndFeel() {
@@ -2736,7 +2822,7 @@ public class Editor extends JFrame {
             // their libraries up properly are just clueless.  Still, we have to handle all
             // sorts of idiocy here, so this is going to be quite a complex operation.
 
-            HashMap<String, String> foundLibs = new HashMap<String, String>();
+            TreeMap<String, String> foundLibs = new TreeMap<String, String>();
 
             // First we'll do a quick check to see if it's a properly packaged archive.
             // We expect to have at least one header file (xxx.h) in one folder (xxx/)
@@ -2786,7 +2872,7 @@ public class Editor extends JFrame {
                     for (String lib : foundLibs.keySet()) {
                         message("Installing " + lib + "...");
                         // First make a list of remapped files...
-                        HashMap<String, File> translatedFiles = new HashMap<String, File>();
+                        TreeMap<String, File> translatedFiles = new TreeMap<String, File>();
 
                         File libDir = new File(installPath, lib);
 
@@ -2812,7 +2898,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public void extractZipMapped(File zipFile, HashMap<String, File>mapping) {
+    public void extractZipMapped(File zipFile, TreeMap<String, File>mapping) {
         try {
             ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
             ZipEntry ze = zis.getNextEntry();

@@ -67,6 +67,11 @@ public class Debug {
     public static JToolBar toolbar;
     public static boolean pause = false;
     public static JToggleButton pauseButton;
+    public static boolean verbose = false;
+
+    public static void setVerbose(boolean b) {
+        verbose = b;
+    }
 
     public static void show() {
         if (shown) {
@@ -176,8 +181,10 @@ public class Debug {
 
     public static void message(String s) {
         debugText.append(s);
+        if (verbose) System.out.print(s);
         if (!s.endsWith("\n")) {
             debugText.append("\n");
+            if (verbose) System.out.print("\n");
         }
         if (shown) {
             textArea.append(s);

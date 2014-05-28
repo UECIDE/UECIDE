@@ -54,7 +54,7 @@ import java.nio.charset.*;
  * files and images, etc) that comes from that.
  */
 public class Translate {
-    public static HashMap<String, String> translations = new HashMap<String, String>();
+    public static TreeMap<String, String> translations = new TreeMap<String, String>();
 
     public static void load(String language)
     {
@@ -64,7 +64,7 @@ public class Translate {
         File lib = Base.getContentFile("lib");
         File lang = new File(lib, language + ".po");
     
-        translations = new HashMap<String, String>();
+        translations = new TreeMap<String, String>();
         if (!lang.exists()) {
             return;
         }

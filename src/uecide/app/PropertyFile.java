@@ -128,7 +128,7 @@ public class PropertyFile {
         properties = new Properties();
     }
 
-    public PropertyFile(HashMap<String, String>data) {
+    public PropertyFile(TreeMap<String, String>data) {
         userFile = null;
         defaultProperties = new Properties();
         properties = new Properties();
@@ -142,7 +142,7 @@ public class PropertyFile {
         mergeData(pf);
     }
 
-    public void mergeData(HashMap<String, String>data) {
+    public void mergeData(TreeMap<String, String>data) {
         if (data == null) {
             return;
         }
@@ -377,12 +377,12 @@ public class PropertyFile {
         return properties;
     }
 
-    public HashMap<String, String> toHashMap() {
-        return toHashMap(false);
+    public TreeMap<String, String> toTreeMap() {
+        return toTreeMap(false);
     }
 
-    public HashMap<String, String> toHashMap(boolean ps) {
-        HashMap<String, String> map = new HashMap<String, String>();
+    public TreeMap<String, String> toTreeMap(boolean ps) {
+        TreeMap<String, String> map = new TreeMap<String, String>();
         for (String name: properties.stringPropertyNames()) {
             if (ps) {
                 if (name.endsWith("." + Base.getOSFullName())) {

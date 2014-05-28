@@ -90,7 +90,7 @@ public class Base {
     static HashSet<File> libraries;
   
     // maps imported packages to their library folder
-    public static HashMap<String, File> importToLibraryTable;
+    public static TreeMap<String, File> importToLibraryTable;
 
     // classpath for all known libraries for p5
     // (both those in the p5/libs folder and those with lib subfolders
@@ -99,16 +99,16 @@ public class Base {
 
     public static Version systemVersion;
   
-    public static HashMap<String, Compiler> compilers;
-    public static HashMap<String, Board> boards;
-    public static HashMap<String, Core> cores;
-//    public static HashMap<String, Plugin> plugins;
-    public static HashMap<String, Class<?>> plugins = new HashMap<String, Class<?>>();
+    public static TreeMap<String, Compiler> compilers;
+    public static TreeMap<String, Board> boards;
+    public static TreeMap<String, Core> cores;
+//    public static TreeMap<String, Plugin> plugins;
+    public static TreeMap<String, Class<?>> plugins = new TreeMap<String, Class<?>>();
     public static ArrayList<Plugin> pluginInstances;
     static Splash splashScreen;
 
-    public static HashMap<String, String>libraryCategoryNames;
-    public static HashMap<String, File>libraryCategoryPaths;
+    public static TreeMap<String, String>libraryCategoryNames;
+    public static TreeMap<String, File>libraryCategoryPaths;
 
     // Location for untitled items
     static File untitledFolder;
@@ -142,6 +142,9 @@ public class Base {
 
         for (int i = 0; i < args.length; i++) {
             String path = args[i];
+            if (path.equals("--verbose")) {
+                Debug.setVerbose(true);
+            }
             if (path.equals("--debug")) {
                 Debug.show();
                 break;
@@ -323,10 +326,10 @@ public class Base {
             sketchbookFolder.mkdirs();
         }
     
-        compilers = new HashMap<String, Compiler>();
-        cores = new HashMap<String, Core>();
-        boards = new HashMap<String, Board>();
-        plugins = new HashMap<String, Class<?>>();
+        compilers = new TreeMap<String, Compiler>();
+        cores = new TreeMap<String, Core>();
+        boards = new TreeMap<String, Board>();
+        plugins = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
 
         Serial.updatePortList();
@@ -691,9 +694,9 @@ public class Base {
         return out;
     }
 
-    public static HashMap<String, Library> getLibraryCollection(String name, String corename) {
-        HashMap<String, Library>out = new HashMap<String, Library>();
-        HashMap<String, Library>coll = libraryCollections.get(name);
+    public static TreeMap<String, Library> getLibraryCollection(String name, String corename) {
+        TreeMap<String, Library>out = new TreeMap<String, Library>();
+        TreeMap<String, Library>coll = libraryCollections.get(name);
         if (coll == null) {
             return out;
         }
@@ -707,11 +710,11 @@ public class Base {
         //return libraryCollections.get(name);
     }
 
-    public static HashMap<String, HashMap<String, Library>> libraryCollections;
+    public static TreeMap<String, TreeMap<String, Library>> libraryCollections;
 
     public static void gatherLibraries() {
-        libraryCategoryNames = new HashMap<String, String>();
-        libraryCategoryPaths = new HashMap<String, File>();
+        libraryCategoryNames = new TreeMap<String, String>();
+        libraryCategoryPaths = new TreeMap<String, File>();
 
         for (String k : preferences.childKeysOf("library")) {
             String cName = preferences.get("library." + k + ".name");
@@ -736,7 +739,7 @@ public class Base {
             preferences.setFile("library.contributed.path", cdir);
         }
 
-        libraryCollections = new HashMap<String, HashMap<String, Library>>();
+        libraryCollections = new TreeMap<String, TreeMap<String, Library>>();
 
         String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
 
@@ -749,12 +752,12 @@ public class Base {
         }
     }
 
-    public static HashMap<String, Library> loadLibrariesFromFolder(File folder, String type) {
+    public static TreeMap<String, Library> loadLibrariesFromFolder(File folder, String type) {
         return loadLibrariesFromFolder(folder, type, "all");
     }
 
-    public static HashMap<String, Library> loadLibrariesFromFolder(File folder, String type, String cr) {
-        HashMap<String, Library> theseLibraries = new HashMap<String, Library>();
+    public static TreeMap<String, Library> loadLibrariesFromFolder(File folder, String type, String cr) {
+        TreeMap<String, Library> theseLibraries = new TreeMap<String, Library>();
         if (!folder.exists()) {
             return theseLibraries;
         }
@@ -2035,10 +2038,10 @@ public class Base {
     // This handy little function will rebuild the whole of the internals of
     // UECIDE - that is, all the boards, cores, compilers and libraries etc.
     public static void cleanAndScanAllSettings() {
-        compilers = new HashMap<String, Compiler>();
-        cores = new HashMap<String, Core>();
-        boards = new HashMap<String, Board>();
-        plugins = new HashMap<String, Class<?>>();
+        compilers = new TreeMap<String, Compiler>();
+        cores = new TreeMap<String, Core>();
+        boards = new TreeMap<String, Board>();
+        plugins = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
 
         Editor.broadcast(Translate.t("Updating serial ports..."));

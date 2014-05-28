@@ -44,7 +44,7 @@ import say.swing.*;
 
 public class Theme extends PropertyFile {
 
-    public static HashMap<String, PropertyFile>themeList = new HashMap<String, PropertyFile>();
+    public static TreeMap<String, PropertyFile>themeList = new TreeMap<String, PropertyFile>();
 
     public Theme(String u) {
         super(u);

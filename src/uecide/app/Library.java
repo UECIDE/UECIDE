@@ -55,7 +55,7 @@ public class Library {
     public ArrayList<File> archiveFiles;
     public File mainInclude;
     public File utilityFolder;
-    public HashMap<String, File>examples;
+    public TreeMap<String, File>examples;
     public String type;
     public String core;
     public int compiledPercent = 0;
@@ -84,7 +84,7 @@ public class Library {
         requiredLibraries = new ArrayList<String>();
         sourceFiles = new ArrayList<File>();
         archiveFiles = new ArrayList<File>();
-        examples = new HashMap<String, File>();
+        examples = new TreeMap<String, File>();
 
         sourceFiles.addAll(Sketch.findFilesInFolder(folder, "cpp", false));
         sourceFiles.addAll(Sketch.findFilesInFolder(folder, "c", false));

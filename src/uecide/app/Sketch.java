@@ -78,13 +78,13 @@ public class Sketch implements MessageConsumer {
 
     public ArrayList<File> sketchFiles = new ArrayList<File>();
 
-    public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
+    public TreeMap<String, Library> importedLibraries = new TreeMap<String, Library>();
     public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
 
-    public HashMap<String, String> settings = new HashMap<String, String>();
-    public HashMap<String, String> parameters = new HashMap<String, String>();
+    public TreeMap<String, String> settings = new TreeMap<String, String>();
+    public TreeMap<String, String> parameters = new TreeMap<String, String>();
 
-    HashMap<String, String> selectedOptions = new HashMap<String, String>();
+    TreeMap<String, String> selectedOptions = new TreeMap<String, String>();
 
     public boolean doPrePurge = false;
 
@@ -151,7 +151,11 @@ public class Sketch implements MessageConsumer {
         selectedBoard = board;
         selectedBoardName = selectedBoard.getName();
         Base.preferences.set("board", board.getName());
-        Core core = Base.cores.get(Base.preferences.get("board." + selectedBoard.getName() + ".core"));
+        String boardsCore = Base.preferences.get("board." + selectedBoard.getName() + ".core");
+        Core core = null;
+        if (boardsCore != null) {
+            core = Base.cores.get(boardsCore);
+        }
         if (core == null) {
             core = board.getCore();
         }
@@ -175,7 +179,12 @@ public class Sketch implements MessageConsumer {
         }
         selectedCore = core;
         Base.preferences.set("board." + selectedBoard.getName() + ".core", core.getName());
-        Compiler compiler = Base.compilers.get(Base.preferences.get("board." + selectedBoard.getName() + ".compiler"));
+        String boardsCompiler = Base.preferences.get("board." + selectedBoard.getName() + ".compiler");
+
+        Compiler compiler = null;
+        if (boardsCompiler != null) {
+            compiler = Base.compilers.get(boardsCompiler);
+        }
         if (compiler == null) {
             compiler = core.getCompiler();
         }
@@ -201,7 +210,7 @@ public class Sketch implements MessageConsumer {
         Base.preferences.set("board." + selectedBoard.getName() + ".compiler", compiler.getName());
         String programmer = Base.preferences.get("board." + selectedBoard.getName() + ".programmer");
         if (programmer == null) {
-            HashMap<String, String> pl = getProgrammerList();
+            TreeMap<String, String> pl = getProgrammerList();
             for (String p : pl.keySet()) {
                 programmer = p;
                 break;
@@ -214,9 +223,9 @@ public class Sketch implements MessageConsumer {
         return selectedProgrammer;
     }
 
-    public HashMap<String, String> getProgrammerList() {
+    public TreeMap<String, String> getProgrammerList() {
         PropertyFile props = mergeAllProperties();
-        HashMap<String, String> out = new HashMap<String, String>();
+        TreeMap<String, String> out = new TreeMap<String, String>();
 
         String[] spl = props.getArray("sketch.upload");
         if (spl != null) {
@@ -510,10 +519,10 @@ public class Sketch implements MessageConsumer {
      * compile, link, and archive it all.                                     *
      **************************************************************************/
 
-    HashMap<File, String> cleanedFiles;
+    TreeMap<File, String> cleanedFiles;
 
     public boolean cleanFiles() {
-        cleanedFiles = new HashMap<File, String>();
+        cleanedFiles = new TreeMap<File, String>();
         for (File f : sketchFiles) {
             if (FileType.getType(f) == FileType.SKETCH) {
                 String data = getFileContent(f);
@@ -601,9 +610,9 @@ public class Sketch implements MessageConsumer {
         // third party libraries.
 
 
-        HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + getBoard().getName(), getCore().getName());
-        HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + getCore().getName(), getCore().getName());
-        HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + getCompiler().getName(), getCore().getName());
+        TreeMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + getBoard().getName(), getCore().getName());
+        TreeMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + getCore().getName(), getCore().getName());
+        TreeMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + getCompiler().getName(), getCore().getName());
 
         if (boardLibraries.get(trimmedName) != null) {
             return boardLibraries.get(trimmedName);
@@ -618,7 +627,7 @@ public class Sketch implements MessageConsumer {
         }
 
         for (String key : Base.libraryCategoryNames.keySet()) {
-            HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
+            TreeMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
             Library lib = catLib.get(trimmedName);
             if (lib != null) {
                 return lib;
@@ -653,7 +662,7 @@ public class Sketch implements MessageConsumer {
             if (line.indexOf("(") == -1) {
                 continue;
             }
-            Pattern p = Pattern.compile("[a-zA-Z0-9_]+\\s+[a-zA-Z0-9_]+\\s*\\(");
+            Pattern p = Pattern.compile("[a-zA-Z0-9_\\*]+\\s+[a-zA-Z0-9_\\*]+\\s*\\(");
             Matcher m = p.matcher(line);
             if (m.find()) {
                 decimated.append(line + "\n");
@@ -664,7 +673,7 @@ public class Sketch implements MessageConsumer {
 
     public void updateLibraryList() {
         cleanFiles();
-        HashMap<String, Integer> inclist = new HashMap<String, Integer>();
+        TreeMap<String, Integer> inclist = new TreeMap<String, Integer>();
         Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
         for (File f : cleanedFiles.keySet()) {
             String data = cleanedFiles.get(f);
@@ -677,11 +686,11 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        importedLibraries = new HashMap<String, Library>();
+        importedLibraries = new TreeMap<String, Library>();
 
         int processed = 0;
         do {
-            HashMap<String, Integer> newinclist = new HashMap<String, Integer>();
+            TreeMap<String, Integer> newinclist = new TreeMap<String, Integer>();
             processed = 0;
             for (String incfile : inclist.keySet()) {
                 if (inclist.get(incfile) == 1) {
@@ -767,7 +776,7 @@ public class Sketch implements MessageConsumer {
 
         Pattern pragma = Pattern.compile("^#pragma\\s+parameter\\s+([^=]+)\\s*=\\s*(.*)\\s*$");
         Pattern paramsplit = Pattern.compile("(?:\"[^\"]*\"|[^\\s\"])+");
-        parameters = new HashMap<String, String>();
+        parameters = new TreeMap<String, String>();
         for (File f : cleanedFiles.keySet()) {
             if (FileType.getType(f) == FileType.SKETCH) {
                 String functions = findFunctions(cleanedFiles.get(f));
@@ -1017,10 +1026,10 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        HashMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + getBoard().getName(), getCore().getName());
-        HashMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + getCore().getName(), getCore().getName());
-        HashMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + getCompiler().getName(), getCore().getName());
-        HashMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook:all", getCore().getName());
+        TreeMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + getBoard().getName(), getCore().getName());
+        TreeMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + getCore().getName(), getCore().getName());
+        TreeMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + getCompiler().getName(), getCore().getName());
+        TreeMap<String, Library> contribLibraries = Base.getLibraryCollection("sketchbook:all", getCore().getName());
 
         lib = importedLibraries.get(l);
         if (lib != null) {
@@ -1035,7 +1044,7 @@ public class Sketch implements MessageConsumer {
 
         if (lib == null) {
             for (String key : Base.libraryCategoryNames.keySet()) {
-                HashMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
+                TreeMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
                 lib = catLib.get(l);
                 if (lib != null) {
                     break;
@@ -1392,7 +1401,7 @@ public class Sketch implements MessageConsumer {
     public String generateIncludes() {
         ArrayList<File> includes = new ArrayList<File>();
 
-        HashMap<String, ArrayList<File>> coreLibs = getCoreLibs();
+        TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
         for (String lib : coreLibs.keySet()) {
             ArrayList<File> libfiles = coreLibs.get(lib);
             includes.addAll(libfiles);
@@ -1417,9 +1426,9 @@ public class Sketch implements MessageConsumer {
         return includeList;
     }
 
-    public HashMap<String, ArrayList<File>> getCoreLibs() {
+    public TreeMap<String, ArrayList<File>> getCoreLibs() {
         PropertyFile props = mergeAllProperties();
-        HashMap<String, ArrayList<File>> libs = new HashMap<String, ArrayList<File>>();
+        TreeMap<String, ArrayList<File>> libs = new TreeMap<String, ArrayList<File>>();
 
         for (String coreLibName : props.childKeysOf("compiler.library")) {
             ArrayList<File> files = new ArrayList<File>();
@@ -1855,7 +1864,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean compileCore() {
-        HashMap<String, ArrayList<File>> coreLibs = getCoreLibs();
+        TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
 
         for (String lib : coreLibs.keySet()) {
             message("..." + lib);
@@ -2195,7 +2204,7 @@ public class Sketch implements MessageConsumer {
 
     private boolean compileLink(List<File> objectFiles) {
         PropertyFile props = mergeAllProperties();
-        HashMap<String, ArrayList<File>> coreLibs = getCoreLibs();
+        TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
         
         String baseCommandString = props.get("compile.link");
         String commandString = "";
@@ -2429,7 +2438,7 @@ public class Sketch implements MessageConsumer {
         return new File(sketchFolder, "libraries");
     }
 
-    public HashMap<String, Library> getLibraries() {
+    public TreeMap<String, Library> getLibraries() {
         return importedLibraries;
     }
 
@@ -2644,11 +2653,11 @@ public class Sketch implements MessageConsumer {
         }
     }
 
-    public HashMap<String, String> getOptionGroups() {
+    public TreeMap<String, String> getOptionGroups() {
         PropertyFile props = mergeAllProperties();
 
         String[] options = props.childKeysOf("options");
-        HashMap<String, String> out = new HashMap<String, String>();
+        TreeMap<String, String> out = new TreeMap<String, String>();
 
         for (String opt : options) {
             String optName = props.get("options." + opt + ".name");
@@ -2657,8 +2666,8 @@ public class Sketch implements MessageConsumer {
         return out;
     }
 
-    public HashMap<String, String> getOptionNames(String group) {
-        HashMap<String, String> out = new HashMap<String, String>();
+    public TreeMap<String, String> getOptionNames(String group) {
+        TreeMap<String, String> out = new TreeMap<String, String>();
         PropertyFile props = mergeAllProperties();
         PropertyFile opts = props.getChildren("options." + group);
 
@@ -2677,7 +2686,7 @@ public class Sketch implements MessageConsumer {
     public String getFlags(String type) {
         PropertyFile props = mergeAllProperties();
         PropertyFile opts = Base.preferences.getChildren("board." + selectedBoard.getName() + ".options");
-        HashMap<String, String> options = getOptionGroups();
+        TreeMap<String, String> options = getOptionGroups();
 
         String flags = "";
         for (String opt : options.keySet()) {
