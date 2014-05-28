@@ -52,6 +52,7 @@ import javax.imageio.*;
 
 import java.awt.datatransfer.*;
 
+import java.util.Timer;
 import uecide.app.Compiler;
 
 import java.beans.*;
@@ -1183,6 +1184,8 @@ public class Editor extends JFrame {
                                     f.delete();
                                 }
                                 if (tab >= 0) {
+                                    TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
+                                    tl.cancelFileWatcher();
                                     editorTabs.remove(tab);
                                 }
                                 updateTree();
@@ -1383,6 +1386,8 @@ public class Editor extends JFrame {
                                     f.delete();
                                 }
                                 if (tab >= 0) {
+                                    TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
+                                    tl.cancelFileWatcher();
                                     editorTabs.remove(tab);
                                 }
                                 updateTree();
@@ -1559,6 +1564,8 @@ public class Editor extends JFrame {
             if (option == 2) return false;
             if (option == 0) eb.save();
         }
+        TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
+        tl.cancelFileWatcher();
         editorTabs.remove(tab);
         return true;
     }
@@ -1570,6 +1577,8 @@ public class Editor extends JFrame {
         String name;
         long expectedFileTime;
         boolean modified = false;
+        Timer fileWatchTimer;
+        boolean fileWatchMutex = false;
         
         public TabLabel(File sf) {
             sketchFile = sf;
@@ -1601,6 +1610,17 @@ public class Editor extends JFrame {
             this.add(blab, BorderLayout.EAST);
             expectedFileTime = sf.lastModified();
             update();
+            fileWatchTimer = new Timer();
+            fileWatchTimer.scheduleAtFixedRate(new TimerTask() {
+                public void run() {
+                    if (TabLabel.this.needsReload()) {
+                        if (fileWatchMutex) return;
+                        fileWatchMutex = true;
+                        TabLabel.this.askReload();
+                        fileWatchMutex = false;
+                    }
+                }
+            }, 1000, 1000);
         }
 
         public void update() {
@@ -1622,6 +1642,26 @@ public class Editor extends JFrame {
             expectedFileTime = sketchFile.lastModified();
         }
 
+        public void askReload() {
+            int n = twoOptionBox(
+                JOptionPane.WARNING_MESSAGE,
+                "Reload File?",
+                Translate.w("The file %1 has been modified outside UECIDE.  Do you want to reload it??", 40, "\n", sketchFile.getName()),
+                "Yes", "No");
+            if (n == 0) {
+                reloadFile();
+            } else {
+                setReloaded();
+            }
+        }
+
+        public void reloadFile() {
+            int myTabNumber = editorTabs.indexOfTabComponent(this);
+            EditorBase eb = getTab(myTabNumber);
+            eb.reloadFile();
+            setReloaded();
+        }
+
         public void setModified(boolean m) {
             if (modified != m) {
                 modified = m;
@@ -1636,6 +1676,10 @@ public class Editor extends JFrame {
 
         public File getFile() {
             return sketchFile;
+        }
+
+        public void cancelFileWatcher() {
+            fileWatchTimer.cancel();
         }
     }
 
@@ -1728,15 +1772,6 @@ public class Editor extends JFrame {
         TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
         if (tl == null) {
             return;
-        }
-        if (tl.needsReload()) {
-            try {
-                EditorBase eb = (EditorBase)editorTabs.getComponentAt(tab);
-                eb.reloadFile();
-                tl.setReloaded();
-            } catch (Exception e) {
-                error(e);
-            }
         }
         editorTabs.setSelectedIndex(tab);
     }

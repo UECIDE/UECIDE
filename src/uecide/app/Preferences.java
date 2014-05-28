@@ -91,7 +91,6 @@ public class Preferences {
     JTextField sketchbookLocationField;
     JCheckBox exportSeparateBox;
     JCheckBox deletePreviousBox;
-    JCheckBox externalEditorBox;
     JCheckBox memoryOverrideBox;
     JTextField memoryField;
     JTextField editorFontField;
@@ -687,10 +686,6 @@ public class Preferences {
             }
         });
         c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        externalEditorBox = new JCheckBox(Translate.t("Use external editor"));
-        p.add(externalEditorBox, c);
 
         if (Base.isWindows()) {
           c.gridy++;
@@ -1019,8 +1014,6 @@ public class Preferences {
     //setBoolean("sketchbook.prompt", sketchPromptBox.isSelected());
     //setBoolean("sketchbook.auto_clean", sketchCleanBox.isSelected());
 
-    Base.preferences.setBoolean("editor.external", externalEditorBox.isSelected());
-
     Base.preferences.set("editor.font", editorFontField.getText());
     Base.preferences.set("console.font", consoleFontField.getText());
 
@@ -1109,7 +1102,6 @@ public class Preferences {
     tabSize.setText(Base.preferences.get("editor.tabsize") == null ? "4" : Base.preferences.get("editor.tabsize"));
 
     sketchbookLocationField.setText(Base.preferences.get("sketchbook.path"));
-    externalEditorBox.setSelected(Base.preferences.getBoolean("editor.external"));
 
     pluginsLocationField.setText(Base.getUserPluginsFolder().getAbsolutePath());
     cacheLocationField.setText(Base.getUserCacheFolder().getAbsolutePath());
