@@ -107,10 +107,10 @@ public class Library {
         archiveFiles.addAll(Sketch.findFilesInFolder(folder, "a", false));
 
         if (utilityFolder.exists() && utilityFolder.isDirectory()) {
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", false));
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "c", false));
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "S", false));
-            archiveFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "a", false));
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", utilRecurse));
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "c", utilRecurse));
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "S", utilRecurse));
+            archiveFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "a", utilRecurse));
         }
 
         if (examplesFolder.exists() && examplesFolder.isDirectory()) {
