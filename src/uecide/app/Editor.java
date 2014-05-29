@@ -1026,6 +1026,7 @@ public class Editor extends JFrame {
     public void updateFilesTree() {
         TreePath[] saved = saveTreeState(sketchFilesTree);
         filesTreeRoot.removeAllChildren();
+        filesTreeRoot.setUserObject(loadedSketch.getFolder());
         addFileTreeToNode(filesTreeRoot, loadedSketch.getFolder());
         filesTreeModel.nodeStructureChanged(filesTreeRoot);
         restoreTreeState(sketchFilesTree, saved);
@@ -1654,6 +1655,9 @@ public class Editor extends JFrame {
 
         public void setModified(boolean m) {
             if (modified != m) {
+                if (!m) {
+                    expectedFileTime = sketchFile.lastModified();
+                }
                 modified = m;
                 update();
             }
@@ -1661,6 +1665,7 @@ public class Editor extends JFrame {
 
         public void setFile(File f) {
             sketchFile = f;
+            expectedFileTime = sketchFile.lastModified();
             update();
         }
 

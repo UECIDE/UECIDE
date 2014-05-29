@@ -1771,6 +1771,13 @@ public class Sketch implements MessageConsumer {
                 } else {
                     mid = "Syntax Error in find";
                 }
+            } else if ((mid.length() > 5) && (mid.substring(0,5).equals("java:"))) {
+                String content = mid.substring(5);
+                mid = System.getProperty(content);
+            } else if ((mid.length() > 5) && (mid.substring(0,5).equals("env:"))) {
+                String content = mid.substring(4);
+                Map<String, String>env = System.getenv();
+                mid = env.get(content);
             } else if (mid.equals("verbose")) {
                 if (Base.preferences.getBoolean("export.verbose")) 
                     mid = tokens.get("upload." + getProgrammer() + ".verbose");
