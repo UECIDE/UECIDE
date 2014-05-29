@@ -222,6 +222,14 @@ public class PropertyFile {
         return rawData.split("::");
     }
 
+    public String get(String attribute, String defaultValue) {
+        String val = get(attribute);
+        if (val == null) {
+            return defaultValue;
+        }
+        return val;
+    }
+
     public String get(String attribute) {
         if (doPlatformOverride) {
             return getPlatformSpecific(attribute);

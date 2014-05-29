@@ -405,25 +405,13 @@ public class Editor extends JFrame {
         File themeFolder = Base.getContentFile("lib/theme");
         runButton = Editor.addToolbarButton(toolbar, "toolbar/run.png", "Compile", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                clearConsole();
-                if (compilerRunning) {
-                    error("Sorry, there is already a compiler thread running for this sketch.");
-                    return;
-                }
-                DefaultRunHandler runHandler = new DefaultRunHandler(false);
-                new Thread(runHandler, "Compiler").start();
+                compile();
             }
         });
 
         programButton = Editor.addToolbarButton(toolbar, "toolbar/burn.png", "Program", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                clearConsole();
-                if (compilerRunning) {
-                    error("Sorry, there is already a compiler thread running for this sketch.");
-                    return;
-                }
-                DefaultRunHandler runHandler = new DefaultRunHandler(true);
-                new Thread(runHandler, "Compiler").start();
+                program();
             }
         });
                     
@@ -994,7 +982,7 @@ public class Editor extends JFrame {
     public void updateLibrariesTree() {
         boolean treeLibrariesOpen = sketchContentTree.isExpanded(new TreePath(treeLibraries.getPath()));
         treeLibraries.removeAllChildren();
-        TreeMap<String, Library>libList = loadedSketch.getLibraries();
+        HashMap<String, Library>libList = loadedSketch.getLibraries();
         DefaultMutableTreeNode node;
         if (libList != null) {
             for (String libname : libList.keySet()) {
@@ -3138,6 +3126,26 @@ public class Editor extends JFrame {
                 }
             }
         }
+    }
+
+    public void compile() {
+        clearConsole();
+        if (compilerRunning) {
+            error("Sorry, there is already a compiler thread running for this sketch.");
+            return;
+        }
+        DefaultRunHandler runHandler = new DefaultRunHandler(false);
+        new Thread(runHandler, "Compiler").start();
+    }
+
+    public void program() {
+        clearConsole();
+        if (compilerRunning) {
+            error("Sorry, there is already a compiler thread running for this sketch.");
+            return;
+        }
+        DefaultRunHandler runHandler = new DefaultRunHandler(true);
+        new Thread(runHandler, "Compiler").start();
     }
 }
 

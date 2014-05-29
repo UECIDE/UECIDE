@@ -11,4 +11,4 @@ then
     MEM=64m
 fi
 
-java -Xms${MEM} -Xmx${MEM} -jar ${APPDIR}/uecide.jar
+java -Xms${MEM} -Xmx${MEM} -jar ${APPDIR}/uecide.jar $*

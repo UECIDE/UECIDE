@@ -133,12 +133,21 @@ public class Base {
         return new File("/");
     }
 
+    public static boolean autoCompile = false;
+    public static boolean autoProgram = false;
+    public static String presetPort = null;
+    public static String presetBoard = null;
+    public static String presetCompiler = null;
+    public static String presetCore = null;
+    public static String presetProgrammer = null;
+
     public Base(String[] args) {
 
         boolean redirectExceptions = true;
 
         headless = false;
         boolean loadLastSketch = false;
+
 
         for (int i = 0; i < args.length; i++) {
             String path = args[i];
@@ -160,6 +169,27 @@ public class Base {
             }
             if (path.equals("--last-sketch")) {
                 loadLastSketch = true;
+            }
+            if (path.equals("--compile")) {
+                autoCompile = true;
+            }
+            if (path.equals("--upload")) {
+                autoProgram = true;
+            }
+            if (path.startsWith("--port=")) {
+                presetPort = path.substring(7);
+            }
+            if (path.startsWith("--board=")) {
+                presetBoard = path.substring(8);
+            }
+            if (path.startsWith("--core=")) {
+                presetCore = path.substring(7);
+            }
+            if (path.startsWith("--compiler=")) {
+                presetCompiler = path.substring(11);
+            }
+            if (path.startsWith("--programmer=")) {
+                presetProgrammer = path.substring(13);
             }
         }
 
@@ -206,8 +236,6 @@ public class Base {
         System.err.println("Loading " + theme.get("product") + "...");
 
         initPlatform();
-
-
 
         preferences = new PropertyFile(getSettingsFile("preferences.txt"), "/uecide/app/config/preferences.txt");
         preferences.setPlatformAutoOverride(true);
@@ -347,11 +375,6 @@ public class Base {
         gatherLibraries();
         initMRU();
 
-        if (headless) {
-            error("Unable to open editor window - no graphics environment found.");
-            System.exit(10);
-        }
-
         if (!headless) splashScreen.setMessage("Opening Editor...", 80);
         boolean opened = false;
         // Check if any files were passed in on the command line
@@ -372,17 +395,13 @@ public class Base {
                     error(e);
                 }
             }
-            if (createNewEditor(path) != null) {
-                opened = true;
-            }
+            opened = doOpenThings(new File(path));
         }
 
         if (loadLastSketch) {
             File lastFile = MRUList.get(0);
             if (lastFile != null) {
-                if (createNewEditor(lastFile.getAbsolutePath()) != null) {
-                    opened = true;
-                }
+                opened = doOpenThings(lastFile);
             }
         }
 
@@ -405,7 +424,56 @@ public class Base {
                 Editor.editorList.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } 
         }
+        if (headless) {
+            System.exit(0);
+        }
             
+    }
+
+    static boolean doOpenThings(File sketch) {
+        Sketch s = null;
+        Editor e = null;
+        if (!headless) {
+            e = createNewEditor(sketch.getAbsolutePath());
+            if (e == null) {
+                return false;
+            }
+            s = e.getSketch();
+        } else {
+            s = new Sketch(sketch);
+        }
+        if (presetPort != null) {
+            s.setSerialPort(presetPort);
+        }
+        if (presetBoard != null) {
+            s.setBoard(presetBoard);
+        }
+        if (presetCore != null) {
+            s.setCore(presetCore);
+        }
+        if (presetCompiler != null) {
+            s.setCompiler(presetCompiler);
+        }
+        if (presetProgrammer != null) {
+            s.setProgrammer(presetProgrammer);
+        }
+
+        if (e == null) {
+            if (autoProgram) {
+                if (s.build()) {
+                    s.upload();
+                }
+            } else if (autoCompile) {
+                s.build();
+            }
+        } else {
+            if (autoProgram) {
+                e.program();
+            } else if (autoCompile) {
+                e.compile();
+            }
+        }
+        return true;
     }
 
     static protected void initPlatform() {

@@ -64,6 +64,11 @@ public class Library {
 
     public boolean buildLibrary = false;
 
+    PropertyFile properties = null;
+    File propertyFile = null;
+    
+    boolean utilRecurse = false;
+
     public Library(File hdr, String t, String c) {
         type = t;
         core = c;
@@ -74,8 +79,18 @@ public class Library {
         if (!mainInclude.exists()) {
             return;
         }
-        utilityFolder = new File(root, "utility");
-        examplesFolder = new File(root, "examples");
+
+        propertyFile = new File(folder, "library.txt");
+        if (propertyFile.exists()) {
+            properties = new PropertyFile(propertyFile);
+            utilityFolder = new File(root, properties.get("utility", "utility"));
+            utilRecurse = properties.getBoolean("utility.recurse");
+            examplesFolder = new File(root, properties.get("examples", "examples"));
+            core = properties.get("core", "all");
+        } else {
+            utilityFolder = new File(root, "utility");
+            examplesFolder = new File(root, "examples");
+        }
         rescan();
         valid = true;
     }
@@ -92,10 +107,10 @@ public class Library {
         archiveFiles.addAll(Sketch.findFilesInFolder(folder, "a", false));
 
         if (utilityFolder.exists() && utilityFolder.isDirectory()) {
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", true));
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "c", true));
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "S", true));
-            archiveFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "a", true));
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", false));
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "c", false));
+            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "S", false));
+            archiveFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "a", false));
         }
 
         if (examplesFolder.exists() && examplesFolder.isDirectory()) {

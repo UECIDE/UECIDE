@@ -78,7 +78,7 @@ public class Sketch implements MessageConsumer {
 
     public ArrayList<File> sketchFiles = new ArrayList<File>();
 
-    public TreeMap<String, Library> importedLibraries = new TreeMap<String, Library>();
+    public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
     public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
 
     public TreeMap<String, String> settings = new TreeMap<String, String>();
@@ -671,9 +671,16 @@ public class Sketch implements MessageConsumer {
         return decimated.toString();
     }
 
+    public static final int LIB_PENDING = 0;
+    public static final int LIB_PROCESSED = 1;
+    public static final int LIB_SYSTEM = 2;
+
+    ArrayList<String> includeOrder = new ArrayList<String>();
+
     public void updateLibraryList() {
         cleanFiles();
-        TreeMap<String, Integer> inclist = new TreeMap<String, Integer>();
+        includeOrder = new ArrayList<String>();
+        HashMap<String, Integer> inclist = new HashMap<String, Integer>();
         Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
         for (File f : cleanedFiles.keySet()) {
             String data = cleanedFiles.get(f);
@@ -681,43 +688,53 @@ public class Sketch implements MessageConsumer {
             for (String line : lines) {
                 Matcher match = inc.matcher(line.trim());
                 if (match.find()) {
-                    inclist.put(match.group(1), 0);
+                    inclist.put(match.group(1), LIB_PENDING);
+                    if (includeOrder.indexOf(match.group(1)) == -1) {
+                        includeOrder.add(match.group(1));
+                    }
                 }
             }
         }
 
-        importedLibraries = new TreeMap<String, Library>();
+        importedLibraries = new HashMap<String, Library>();
 
         int processed = 0;
         do {
-            TreeMap<String, Integer> newinclist = new TreeMap<String, Integer>();
+            HashMap<String, Integer> newinclist = new HashMap<String, Integer>();
             processed = 0;
             for (String incfile : inclist.keySet()) {
-                if (inclist.get(incfile) == 1) {
-                    newinclist.put(incfile, 1);
+                if (inclist.get(incfile) == LIB_PROCESSED) {
+                    newinclist.put(incfile, LIB_PROCESSED);
                     continue;
                 }
-                inclist.put(incfile, 1);
+                inclist.put(incfile, LIB_PROCESSED);
                 Library lib = findLibrary(incfile);
                 if (lib == null) {
-                    newinclist.put(incfile, 2);
+                    newinclist.put(incfile, LIB_SYSTEM);
                     continue;
                 }
                 importedLibraries.put(lib.getName(), lib);
-                newinclist.put(incfile, 1);
+                newinclist.put(incfile, LIB_PROCESSED);
                 ArrayList<String> req = lib.getRequiredLibraries();
                 for (String r : req) {
                     if (inclist.get(r) == null) {
-                        newinclist.put(r, 0);
+                        if (includeOrder.indexOf(r) == -1) {
+                            includeOrder.add(r);
+                        }
+                            newinclist.put(r, LIB_PENDING);
                     } else {
-                        newinclist.put(r, 1);
+                        newinclist.put(r, LIB_PROCESSED);
                     }
                 }
                 processed++;
             }
             inclist.clear();
-            inclist.putAll(newinclist);
-            for (String i : newinclist.keySet()) {
+            for (String i : includeOrder) {
+                Integer state = newinclist.get(i);
+                if (state == null) {
+                    continue;
+                }
+                inclist.put(i, state);
             }
         } while (processed != 0);
 
@@ -1082,7 +1099,11 @@ public class Sketch implements MessageConsumer {
                 return false;
             }
             message("Resetting board...");
-            Thread.sleep(100);
+            serialPort.setDTR(dtr);
+            serialPort.setRTS(dtr);
+            Thread.sleep(1000);
+            serialPort.setDTR(false);
+            serialPort.setRTS(false);
             serialPort.closePort();
             serialPort = null;
             System.gc();
@@ -1405,6 +1426,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public String generateIncludes() {
+        updateLibraryList();
         ArrayList<File> includes = new ArrayList<File>();
 
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
@@ -1413,8 +1435,14 @@ public class Sketch implements MessageConsumer {
             includes.addAll(libfiles);
         }
 
-        for (String libname : importedLibraries.keySet()) {
-            includes.add(importedLibraries.get(libname).getFolder());
+        for (String lib : includeOrder) {
+            String libname = lib;
+            if (lib.lastIndexOf(".") > -1) {
+                libname = lib.substring(0, lib.lastIndexOf("."));
+            }
+            if (importedLibraries.get(libname) != null) {
+                includes.add(importedLibraries.get(libname).getFolder());
+            }
         }
 
         includes.add(getBoard().getFolder());
@@ -2443,7 +2471,7 @@ public class Sketch implements MessageConsumer {
         return new File(sketchFolder, "libraries");
     }
 
-    public TreeMap<String, Library> getLibraries() {
+    public HashMap<String, Library> getLibraries() {
         return importedLibraries;
     }
 
@@ -2555,6 +2583,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
+        message("Uploading...");
         boolean res = execAsynchronously(commandString);
         if (ulu.equals("serial") || ulu.equals("usbcdc")) {
 
@@ -2604,7 +2633,7 @@ public class Sketch implements MessageConsumer {
         if (editor != null) {
             editor.message(s);
         } else {
-            System.out.println(s);
+            System.out.print(s);
         }
     }
 
@@ -2622,7 +2651,7 @@ public class Sketch implements MessageConsumer {
         if (editor != null) {
             editor.warning(s);
         } else {
-            System.out.println(s);
+            System.out.print(s);
         }
     }
 
@@ -2640,7 +2669,7 @@ public class Sketch implements MessageConsumer {
         if (editor != null) {
             editor.error(s);
         } else {
-            System.err.println(s);
+            System.err.print(s);
         }
     }
 
