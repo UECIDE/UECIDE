@@ -47,11 +47,13 @@ public class FileType {
     public static final int LIBRARY = 6;
     public static final int SKETCH = 7;
     public static final int TEXT = 8;
+    public static final int GRAPHIC = 9;
 
     public static final int GROUP_OTHER = 0;
     public static final int GROUP_SOURCE = 1;
     public static final int GROUP_HEADER = 2;
     public static final int GROUP_BINARY = 3;
+    public static final int GROUP_GRAPHIC = 4;
 
     public static TreeMap<String, FileTypeInfo> fileTypeList;
     static {
@@ -88,6 +90,8 @@ public class FileType {
         fileTypeList.put("o", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
         fileTypeList.put("a", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
         fileTypeList.put("elf", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
+
+        fileTypeList.put("bmp", new FileTypeInfo(FileType.GRAPHIC, "uecide.app.editors.bitmap", null, "files/image-x-generic.png", GROUP_GRAPHIC));
 
     }
 

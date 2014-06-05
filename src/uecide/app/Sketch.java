@@ -1642,7 +1642,17 @@ public class Sketch implements MessageConsumer {
         if (editor != null) {
             editor.updateOutputTree();
         }
+
+        compileSize();
+
         return true;
+    }
+
+    public void compileSize() {
+        PropertyFile props = mergeAllProperties();
+        String recipe = props.get("compile.size");
+        String out = parseString(recipe);
+        execAsynchronously(out);
     }
 
     public boolean compileLibraries() {
