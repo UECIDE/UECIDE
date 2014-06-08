@@ -62,6 +62,7 @@ public class bitmap extends JPanel implements EditorBase {
     ImageIcon image;
     JLabel label;
     BufferedImage bImage;
+    double zoom = 1.0;
 
     public bitmap(Sketch s, File f, Editor e) {
         editor = e;
@@ -69,7 +70,42 @@ public class bitmap extends JPanel implements EditorBase {
         this.setLayout(new BorderLayout());
         scrollPane = new JScrollPane();
         this.add(scrollPane, BorderLayout.CENTER);
+        scrollPane.addMouseWheelListener(new MouseWheelListener() {
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                int notches = e.getWheelRotation();
+                if (notches < 0) {
+                    zoomIn(1.1 * (double)(-notches));
+                } else {
+                    zoomOut(1.1 * (double)notches);
+                }
+            }
+        });
         loadFile(f);
+    }
+
+    public void zoomIn(double factor) {
+        zoom *= factor;
+        int newImageWidth = (int)((double)bImage.getWidth() * zoom);
+        int newImageHeight = (int)((double)bImage.getHeight() * zoom);
+        System.err.println(newImageWidth + " x " + newImageHeight);
+        BufferedImage resizedImage = new BufferedImage(newImageWidth, newImageHeight, bImage.getType());
+        Graphics2D g = resizedImage.createGraphics();
+        g.drawImage(bImage, 0, 0, newImageWidth, newImageHeight, null);
+        g.dispose();
+        image = new ImageIcon(resizedImage);
+        label.setIcon(image);
+    }
+
+    public void zoomOut(double factor) {
+        zoom /= factor;
+        int newImageWidth = (int)((double)bImage.getWidth() * zoom);
+        int newImageHeight = (int)((double)bImage.getHeight() * zoom);
+        BufferedImage resizedImage = new BufferedImage(newImageWidth, newImageHeight, bImage.getType());
+        Graphics2D g = resizedImage.createGraphics();
+        g.drawImage(bImage, 0, 0, newImageWidth, newImageHeight, null);
+        g.dispose();
+        image = new ImageIcon(resizedImage);
+        label.setIcon(image);
     }
 
     public boolean loadFile(File f) {
@@ -79,6 +115,7 @@ public class bitmap extends JPanel implements EditorBase {
             image = new ImageIcon(bImage);
             label = new JLabel(image);
             scrollPane.setViewportView(label);
+            zoom = 1.0;
         } catch (Exception e) {
             sketch.error(e);
         }

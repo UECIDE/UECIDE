@@ -1784,6 +1784,12 @@ public class Sketch implements MessageConsumer {
             } else if ((mid.length() > 5) && (mid.substring(0,5).equals("java:"))) {
                 String content = mid.substring(5);
                 mid = System.getProperty(content);
+            } else if ((mid.length() > 6) && (mid.substring(0,6).equals("prefs:"))) {
+                String content = mid.substring(6);
+                mid = Base.preferences.get(content);
+            } else if ((mid.length() > 6) && (mid.substring(0,6).equals("theme:"))) {
+                String content = mid.substring(6);
+                mid = Base.theme.get(content);
             } else if ((mid.length() > 5) && (mid.substring(0,5).equals("env:"))) {
                 String content = mid.substring(4);
                 Map<String, String>env = System.getenv();
