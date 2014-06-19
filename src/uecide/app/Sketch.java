@@ -55,20 +55,26 @@ import javax.swing.border.TitledBorder;
 import uecide.app.Compiler;
 
 /**
- * Stores information about files in the current sketch
+ * The sketch class is the heart of the IDE.  It manages not only what files a
+ * sketch consists of, but also deals with compilation of the sketch and uploading
+ * the sketch to a target board.
  */
 public class Sketch implements MessageConsumer {
-    public String sketchName;     // The name of the sketch
-    public File sketchFolder;
-    public Editor editor = null;
-    public File buildFolder;
-    public String uuid; // used for temporary folders etc
+    public String sketchName;       // The name of the sketch
+    public File sketchFolder;       // Where the sketch is
+    public Editor editor = null;    // The editor window the sketch is loaded in
+    public File buildFolder;        // Where to build the sketch
+    public String uuid;             // A globally unique ID for temporary folders etc
 
-    boolean isUntitled;
+    boolean isUntitled;             // Whether or not the sketch has been named
 
+    // These are used to redirect stdout and stderr from commands
+    // so that they can be processed and displayed appropriately.
     Writer stdoutRedirect = null;
     Writer stderrRedirect = null;
 
+    // These are all the plugins selected for this sketch in order to compile
+    // the sketch and upload it.
     Core selectedCore = null;
     Board selectedBoard = null;
     String selectedBoardName = null;
@@ -76,6 +82,7 @@ public class Sketch implements MessageConsumer {
     String selectedProgrammer = null;
     String selectedSerialPort = null;
 
+    // This lot is what the sketch consists of - the list of files, libraries, settings, parameters etc.
     public ArrayList<File> sketchFiles = new ArrayList<File>();
 
     public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
@@ -86,6 +93,8 @@ public class Sketch implements MessageConsumer {
 
     TreeMap<String, String> selectedOptions = new TreeMap<String, String>();
 
+    // Do we want to purge the cache files before building?  This is set by the
+    // options system.
     public boolean doPrePurge = false;
 
     /**************************************************************************
@@ -131,19 +140,24 @@ public class Sketch implements MessageConsumer {
      * another.                                                               *
      **************************************************************************/
 
+    // Get the board as a string
     public String getBoardName() {
         return selectedBoardName;
     }
 
+    // Get the board as a Board object
     public Board getBoard() {
         return selectedBoard;
     }
 
+    // Look up a board in the global boards map and set the board appropriately
     public void setBoard(String board) {
         Board b = Base.getBoard(board);
         setBoard(b);
     }
 
+    // Set the current board.  Also looks up the last settings used for that board
+    // and propogates them onwards (core, compiler, etc).
     public void setBoard(Board board) {
         if (board == null) {
             return;
