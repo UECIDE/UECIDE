@@ -2170,6 +2170,7 @@ public class Editor extends JFrame {
         populateSerialMenu(serialPortsMenu);
         serialPortsMenu.addMenuListener(new MenuListener() {
             public void menuSelected(MenuEvent e) {
+                Serial.updatePortList();
                 populateSerialMenu(serialPortsMenu);
             }
             public void menuCanceled(MenuEvent e) {
@@ -2295,7 +2296,6 @@ public class Editor extends JFrame {
     public void populateSerialMenu(JMenu menu) {
         menu.removeAll();
         ButtonGroup portGroup = new ButtonGroup();
-        Serial.updatePortList();
         ArrayList<String> ports = Serial.getPortList();
         for (String port : ports) {
             JMenuItem item = new JRadioButtonMenuItem(port);
