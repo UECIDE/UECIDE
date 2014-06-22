@@ -182,6 +182,7 @@ public class code extends JPanel implements EditorBase {
 
         scrollPane = new RTextScrollPane(textArea);
         toolbar = new JToolBar();
+        toolbar.setVisible(!Base.preferences.getBoolean("editor.subtoolbar.hidden"));
         this.add(toolbar, BorderLayout.NORTH);
 
         Editor.addToolbarButton(toolbar, "toolbar/edit-copy.png", "Copy", new ActionListener() {
