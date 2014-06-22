@@ -171,4 +171,8 @@ public class bitmap extends JPanel implements EditorBase {
 
     public void insertAtEnd(String text) {
     }
+
+    public boolean saveTo(File f) {
+        return true;
+    }
 }
