@@ -1561,123 +1561,6 @@ public class Editor extends JFrame {
         return true;
     }
 
-    public class TabLabel extends JPanel {
-        ImageIcon fileIcon = null;
-        JLabel nameLabel;
-        File sketchFile;
-        String name;
-        long expectedFileTime;
-        boolean modified = false;
-        Timer fileWatchTimer;
-        boolean fileWatchMutex = false;
-        
-        public TabLabel(File sf) {
-            sketchFile = sf;
-            name = sketchFile.getName();
-            this.setLayout(new BorderLayout());
-            nameLabel = new JLabel(name);
-            fileIcon = Base.loadIconFromResource(FileType.getIcon(sketchFile));
-            if (fileIcon != null) {
-                nameLabel.setIcon(fileIcon);
-            }
-            JLabel blab = new JLabel();
-            nameLabel.setOpaque(false);
-            blab.setIcon(Base.loadIconFromResource("tabs/close.png"));
-
-            blab.addMouseListener(new MouseListener() {
-                public void mouseClicked(MouseEvent e) {
-                    int tab = getTabByFile(sketchFile);
-                    closeTab(tab);
-                }
-                public void mousePressed(MouseEvent e) {}
-                public void mouseReleased(MouseEvent e) {}
-                public void mouseEntered(MouseEvent e) {}
-                public void mouseExited(MouseEvent e) {}
-            });
-
-            blab.setOpaque(false);
-            this.setOpaque(false);
-            this.add(nameLabel, BorderLayout.CENTER);
-            this.add(blab, BorderLayout.EAST);
-            expectedFileTime = sf.lastModified();
-            update();
-            fileWatchTimer = new Timer();
-            fileWatchTimer.scheduleAtFixedRate(new TimerTask() {
-                public void run() {
-                    if (TabLabel.this.needsReload()) {
-                        if (fileWatchMutex) return;
-                        fileWatchMutex = true;
-                        TabLabel.this.askReload();
-                        fileWatchMutex = false;
-                    }
-                }
-            }, 1000, 1000);
-        }
-
-        public void update() {
-            Font labelFont = nameLabel.getFont();
-            if (modified) {
-                nameLabel.setFont(new Font(labelFont.getName(), Font.BOLD, labelFont.getSize()));
-                nameLabel.setText(sketchFile.getName() + " * ");
-            } else {
-                nameLabel.setFont(new Font(labelFont.getName(), Font.PLAIN, labelFont.getSize()));
-                nameLabel.setText(sketchFile.getName());
-            }
-        }
-    
-        public boolean needsReload() {
-            return (sketchFile.lastModified() > expectedFileTime);
-        }
-
-        public void setReloaded() {
-            expectedFileTime = sketchFile.lastModified();
-        }
-
-        public void askReload() {
-            int n = twoOptionBox(
-                JOptionPane.WARNING_MESSAGE,
-                "Reload File?",
-                Translate.w("The file %1 has been modified outside UECIDE.  Do you want to reload it??", 40, "\n", sketchFile.getName()),
-                "Yes", "No");
-            if (n == 0) {
-                reloadFile();
-            } else {
-                setReloaded();
-            }
-        }
-
-        public void reloadFile() {
-            int myTabNumber = editorTabs.indexOfTabComponent(this);
-            EditorBase eb = getTab(myTabNumber);
-            eb.reloadFile();
-            setReloaded();
-        }
-
-        public void setModified(boolean m) {
-            if (modified != m) {
-                if (!m) {
-                    expectedFileTime = sketchFile.lastModified();
-                }
-                modified = m;
-                update();
-            }
-        }
-
-        public void setFile(File f) {
-            sketchFile = f;
-            expectedFileTime = sketchFile.lastModified();
-            update();
-        }
-
-        public File getFile() {
-            return sketchFile;
-        }
-
-        public void cancelFileWatcher() {
-            fileWatchTimer.cancel();
-        }
-    }
-
     public void openNewTab(File sf) {
         if (sf.exists() == false) {
             error("Sorry, I can't find " + sf.getName() + ".");
@@ -1698,7 +1581,7 @@ public class Editor extends JFrame {
             editorTabs.addTab(sf.getName(), (JPanel) ed);
             int tabno = editorTabs.getTabCount() - 1;
 
-            TabLabel lab = new TabLabel(sf);
+            TabLabel lab = new TabLabel(this, sf);
             editorTabs.setTabComponentAt(tabno, lab);
             
             selectTab(tabno);

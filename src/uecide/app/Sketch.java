@@ -1185,6 +1185,7 @@ public class Sketch implements MessageConsumer {
             }
             Base.copyFile(f, dest);
         }
+        String oldPrefix = sketchFolder.getAbsolutePath();
         sketchFolder = newPath;
         sketchName = newPath.getName();
         isUntitled = false;
@@ -1207,15 +1208,33 @@ public class Sketch implements MessageConsumer {
         // Now we have reconstructed the sketch in a new location we can save any
         // changed files from the editor.
 
-
-        // One last thing we need to do is to rename the main file in the editor, if
-        // it happens to be open.
-
         if (editor != null) {
             int mainTab = editor.getTabByFile(oldMainFile);
             if (mainTab > -1) {
                 editor.setTabFile(mainTab, newMainFile);
             }
+
+            // Now step through the files looking for any that are open, change the tab's file pointer
+            // and save the data.
+            String newPrefix = sketchFolder.getAbsolutePath();
+
+            for (int tab = 0; tab < editor.getTabCount(); tab++) {
+                TabLabel tl = editor.getTabLabel(tab);
+                String oldPath = tl.getFile().getAbsolutePath();
+                Debug.message("Retargetting file " + oldPath);
+                if (oldPath.startsWith(oldPrefix)) {
+                    String relPath = oldPath.substring(oldPrefix.length() + 1);
+                    Debug.message("  Relative path is " + relPath);
+                    File movedTo = new File(sketchFolder, relPath);
+                    Debug.message("  New path is " + movedTo.getAbsolutePath());
+                    if (!movedTo.exists()) {
+                        Debug.message("  !!! DOES NOT EXIST === BAD !!!");
+                    }
+                    tl.setFile(movedTo);
+                    tl.save();
+                }
+            }
+
             editor.updateTree();
             editor.setTitle(Base.theme.get("product.cap") + " | " + sketchName);
         }

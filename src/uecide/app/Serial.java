@@ -51,6 +51,12 @@ public class Serial {
         Editor.releasePorts(name);
 
         try {
+            Thread.sleep(100); // Arduino has this, so I guess we should too.
+        } catch (Exception e) {
+            Base.error(e);
+        }
+
+        try {
             SerialPort nsp = new SerialPort(name);
             if (nsp != null) {
                 if (nsp.isOpened()) {
@@ -65,10 +71,15 @@ public class Serial {
 
                 JOptionPane.showMessageDialog(new Frame(), "The port could not be found.\nCheck you have the right port\nselected in the Hardware menu.", "Port not found", JOptionPane.ERROR_MESSAGE);
 
+            } else {
+                Base.error(se);
+                return null;
             }
         } catch (Exception e) {
             Base.error(e);
+            return null;
         }
+        Base.error("Something went wrong with the port opening.  There was no exception, but I still didn't open the port.");
         return null;
     }
 
@@ -88,7 +99,41 @@ public class Serial {
         return null;
     }
 
+    public static void updatePortListLinux() {
+        ArrayList<String> names = new ArrayList<String>();
+        File dev = new File("/dev");
+        File[] devs = dev.listFiles();
+        for (File devfile : devs) {
+            if (devfile.getName().startsWith("ttyACM")) { names.add(devfile.getAbsolutePath()); continue; }
+            if (devfile.getName().startsWith("ttyUSB")) { names.add(devfile.getAbsolutePath()); continue; }
+            if (devfile.getName().startsWith("ttyAMA")) { names.add(devfile.getAbsolutePath()); continue; }
+            if (devfile.getName().startsWith("rfcomm")) { names.add(devfile.getAbsolutePath()); continue; }
+        }
+        portList = names.toArray(new String[names.size()]);
+    }
+
+    public static void updatePortListOSX() {
+        ArrayList<String> names = new ArrayList<String>();
+        File dev = new File("/dev");
+        File[] devs = dev.listFiles();
+        for (File devfile : devs) {
+            if (devfile.getName().startsWith("tty.serial")) { names.add(devfile.getAbsolutePath()); continue; }
+            if (devfile.getName().startsWith("tty.usbserial")) { names.add(devfile.getAbsolutePath()); continue; }
+            if (devfile.getName().startsWith("tty.usbmodem")) { names.add(devfile.getAbsolutePath()); continue; }
+        }
+        portList = names.toArray(new String[names.size()]);
+    }
+
     public static void updatePortList() {
+
+        if (Base.isLinux()) {
+            updatePortListLinux();
+            return;
+        }
+        if (Base.isMacOS()) {
+            updatePortListOSX();
+            return;
+        }
         SerialPortList spl = new SerialPortList();
         portList = spl.getPortNames();
     }

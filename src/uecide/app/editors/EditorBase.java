@@ -13,6 +13,7 @@ public interface EditorBase {
     public File getFile();
     public void populateMenu(JMenu menu, int flags);
     public boolean save();
+    public boolean saveTo(File file);
     public void reloadFile();
     public void requestFocus();
     public void insertAtCursor(String text);

@@ -762,6 +762,11 @@ public class code extends JPanel implements EditorBase {
         }
         return false;
     }
+
+    public boolean saveTo(File f) {
+        file = f;
+        return save();
+    }
     
     public void reloadFile() {
         textArea.setText(sketch.getFileContent(file, true));
