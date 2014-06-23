@@ -58,20 +58,16 @@ public class Serial {
         }
         try {
 
+            Debug.message("Request for port " + name);
             if (port.isOpened()) {
                 port.purgePort(1);
                 port.purgePort(2);
                 port.closePort();
+                Debug.message("Purged and closed " + name);
             }
                 
-            SerialPort nsp = new SerialPort(name);
-            if (port.isOpened ()) {
-                port.purgePort (1);
-                port.purgePort (2);
-                port.closePort ();
-            }
-
             Editor.releasePorts(name);
+            Debug.message("Released " + name + " in all plugins");
 
             try {
                 Thread.sleep(100); // Arduino has this, so I guess we should too.
@@ -80,6 +76,7 @@ public class Serial {
             }
 
             port.openPort();
+            Debug.message("Re-opened port");
             if (!port.isOpened()) {
                 JOptionPane.showMessageDialog(new Frame(), "The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.", "Port didn't open", JOptionPane.ERROR_MESSAGE);
                 return null;
@@ -91,6 +88,25 @@ public class Serial {
             Base.error(e);
         }
         return null;
+    }
+
+    public static void closePort(SerialPort p) {
+        Debug.message("Request to close port");
+        if (p == null)
+            return;
+        if (!p.isOpened())
+            return;
+
+        try {
+            Debug.message("Purged port");
+            p.purgePort(1);
+            p.purgePort(2);
+            p.closePort();
+            Debug.message("Port closed OK");
+        } catch (Exception e) {
+            Base.error(e);
+        }
+
     }
 
     public static SerialPort requestPort(String name, int baudRate) {

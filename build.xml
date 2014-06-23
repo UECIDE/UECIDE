@@ -67,6 +67,7 @@
             </manifest>
         </jar>
         <chmod perm="0755" file="uecide.jar" />
+        <copy file="uecide.jar" tofile="uecide-${build.number}.jar" />
     </target>
 
     <target name="thirdparty" 
