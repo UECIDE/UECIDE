@@ -1211,7 +1211,9 @@ public class Sketch implements MessageConsumer {
         if (editor != null) {
             int mainTab = editor.getTabByFile(oldMainFile);
             if (mainTab > -1) {
-                editor.setTabFile(mainTab, newMainFile);
+                TabLabel tl = editor.getTabLabel(mainTab);
+                tl.setFile(newMainFile);
+                tl.save();
             }
 
             // Now step through the files looking for any that are open, change the tab's file pointer

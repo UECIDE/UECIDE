@@ -2587,7 +2587,11 @@ public class Editor extends JFrame {
 
     public void releasePort(String portName) {
         for (Plugin plugin : plugins) {
-            plugin.releasePort(portName);
+            try {
+                plugin.releasePort(portName);
+            } catch (Exception e) {
+                Base.error(e);
+            }
         }
     }
 

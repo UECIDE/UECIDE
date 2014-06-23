@@ -46,40 +46,50 @@ import javax.swing.*;
 public class Serial {
     static ArrayList<String> extraPorts = new ArrayList<String>();
     static String[] portList;
+    static HashMap<String, SerialPort> serialPorts = new HashMap<String, SerialPort>();
 
     public static SerialPort requestPort(String name) {
-        Editor.releasePorts(name);
 
-        try {
-            Thread.sleep(100); // Arduino has this, so I guess we should too.
-        } catch (Exception e) {
-            Base.error(e);
-        }
+        SerialPort port = serialPorts.get(name);
 
-        try {
-            SerialPort nsp = new SerialPort(name);
-            if (nsp != null) {
-                if (nsp.isOpened()) {
-                    Base.error("For some reason the port " + name + " never got released properly.");
-                    return null;
-                }
-                nsp.openPort();
-                return nsp;
-            }
-        } catch (SerialPortException se) {
-            if (se.getExceptionType().equals(SerialPortException.TYPE_PORT_NOT_FOUND)) {
-
-                JOptionPane.showMessageDialog(new Frame(), "The port could not be found.\nCheck you have the right port\nselected in the Hardware menu.", "Port not found", JOptionPane.ERROR_MESSAGE);
-
-            } else {
-                Base.error(se);
-                return null;
-            }
-        } catch (Exception e) {
-            Base.error(e);
+        if (port == null) {
+            JOptionPane.showMessageDialog(new Frame(), "The port could not be found.\nCheck you have the right port\nselected in the Hardware menu.", "Port not found", JOptionPane.ERROR_MESSAGE);
             return null;
         }
-        Base.error("Something went wrong with the port opening.  There was no exception, but I still didn't open the port.");
+        try {
+
+            if (port.isOpened()) {
+                port.purgePort(1);
+                port.purgePort(2);
+                port.closePort();
+            }
+                
+            SerialPort nsp = new SerialPort(name);
+            if (port.isOpened ()) {
+                port.purgePort (1);
+                port.purgePort (2);
+                port.closePort ();
+            }
+
+            Editor.releasePorts(name);
+
+            try {
+                Thread.sleep(100); // Arduino has this, so I guess we should too.
+            } catch (Exception e) {
+                Base.error(e);
+            }
+
+            port.openPort();
+            if (!port.isOpened()) {
+                JOptionPane.showMessageDialog(new Frame(), "The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.", "Port didn't open", JOptionPane.ERROR_MESSAGE);
+                return null;
+            }
+
+            return port;
+
+        } catch (Exception e) {
+            Base.error(e);
+        }
         return null;
     }
 
@@ -99,7 +109,7 @@ public class Serial {
         return null;
     }
 
-    public static void updatePortListLinux() {
+    public static ArrayList<String> getPortListLinux() {
         ArrayList<String> names = new ArrayList<String>();
         File dev = new File("/dev");
         File[] devs = dev.listFiles();
@@ -109,10 +119,10 @@ public class Serial {
             if (devfile.getName().startsWith("ttyAMA")) { names.add(devfile.getAbsolutePath()); continue; }
             if (devfile.getName().startsWith("rfcomm")) { names.add(devfile.getAbsolutePath()); continue; }
         }
-        portList = names.toArray(new String[names.size()]);
+        return names;
     }
 
-    public static void updatePortListOSX() {
+    public static ArrayList<String> getPortListOSX() {
         ArrayList<String> names = new ArrayList<String>();
         File dev = new File("/dev");
         File[] devs = dev.listFiles();
@@ -121,21 +131,51 @@ public class Serial {
             if (devfile.getName().startsWith("tty.usbserial")) { names.add(devfile.getAbsolutePath()); continue; }
             if (devfile.getName().startsWith("tty.usbmodem")) { names.add(devfile.getAbsolutePath()); continue; }
         }
-        portList = names.toArray(new String[names.size()]);
+        return names;
+    }
+
+    public static ArrayList<String> getPortListDefault() {
+        ArrayList<String> names = new ArrayList<String>();
+        SerialPortList spl = new SerialPortList();
+        String[] nlist = spl.getPortNames();
+        for (String n : nlist) {
+            names.add(n);
+        }
+        return names;
     }
 
     public static void updatePortList() {
-
+        ArrayList<String>names = null;
         if (Base.isLinux()) {
-            updatePortListLinux();
-            return;
+            names = getPortListLinux();
+        } else if (Base.isMacOS()) {
+            names = getPortListOSX();
+        } else {
+            names = getPortListDefault();
         }
-        if (Base.isMacOS()) {
-            updatePortListOSX();
-            return;
+
+        for (String p : extraPorts) {
+            if (names.indexOf(p) == -1) {
+                names.add(p);
+            }
         }
-        SerialPortList spl = new SerialPortList();
-        portList = spl.getPortNames();
+
+        portList = names.toArray(new String[0]);
+
+        for (String port : names) {
+            if (serialPorts.get(port) == null) {
+                try {
+                    serialPorts.put(port, new SerialPort(port));
+                } catch (Exception e) {
+                }
+            }
+        }
+
+        for (String port : serialPorts.keySet()) {
+            if (names.indexOf(port) == -1) {
+                serialPorts.remove(port);
+            }
+        }
     }
 
     static public ArrayList<String> getPortList() {
@@ -145,11 +185,6 @@ public class Serial {
             pl.add(p);
         }
 
-        for (String p : extraPorts) {
-            if (pl.indexOf(p) == -1) {
-                pl.add(p);
-            }
-        }
         Collections.sort(pl);
         return pl;
     }
