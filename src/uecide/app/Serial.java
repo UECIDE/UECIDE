@@ -53,6 +53,11 @@ public class Serial {
         SerialPort port = serialPorts.get(name);
 
         if (port == null) {
+            updatePortList();
+            port = serialPorts.get(name);
+        }
+        
+        if (port == null) {
             JOptionPane.showMessageDialog(new Frame(), "The port could not be found.\nCheck you have the right port\nselected in the Hardware menu.", "Port not found", JOptionPane.ERROR_MESSAGE);
             return null;
         }
@@ -226,5 +231,78 @@ public class Serial {
             pnum++;
             pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
         }
+    }
+
+    static String getNameLinux(SerialPort port) {
+        try {
+            String pn = port.getPortName();
+            pn = pn.substring(pn.lastIndexOf("/") + 1);
+
+            File classFolder = new File("/sys/class/tty", pn);
+            if (classFolder == null || !classFolder.exists()) {
+                return "";
+            }
+
+            File dev = new File(classFolder.getCanonicalPath());
+            if (dev.getAbsolutePath().indexOf("/usb") == -1) {
+                return "";
+            }
+
+            File root = dev;
+            File prodFile = new File(root, "product");
+
+            while (!root.getName().startsWith("usb") && !prodFile.exists()) {
+                root = root.getParentFile();
+                prodFile = new File(root, "product");
+            }
+
+            if (!prodFile.exists()) {
+                return "";
+            }
+
+            File mfgFile = new File(root, "manufacturer");
+            if (!mfgFile.exists()) {
+                return "";
+            }
+
+            BufferedReader reader = new BufferedReader( new FileReader (prodFile));
+            String product = reader.readLine();
+            reader = new BufferedReader( new FileReader (mfgFile));
+            String manufacturer = reader.readLine();
+
+            return manufacturer + " " + product;
+    /*
+
+            File deviceFolder = new File(classFolder, "device");
+            if (deviceFolder == null || !deviceFolder.exists()) {
+                return "";
+            }
+
+            File uevent = new File(deviceFolder, "uevent");
+            if (uevent == null || !uevent.exists()) {
+                return "";
+            }
+
+            PropertyFile ueventData = new PropertyFile(uevent);
+            return ueventData.get("PRODUCT");
+    */
+        } catch (Exception e) {
+            Base.error(e);
+            return "";
+        }
+    }
+   
+    static String getName(SerialPort port) {
+        if (port == null) {
+            return "";
+        }
+        if (Base.isLinux()) {
+            return getNameLinux(port);
+        }
+        return "";
+    }
+
+    static String getName(String port) {
+        return getName(serialPorts.get(port));
     }
 }

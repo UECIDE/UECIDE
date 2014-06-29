@@ -19,4 +19,5 @@ public interface EditorBase {
     public void insertAtCursor(String text);
     public void insertAtStart(String text);
     public void insertAtEnd(String text);
+    public void refreshSettings();
 }

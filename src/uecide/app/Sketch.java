@@ -1118,8 +1118,7 @@ public class Sketch implements MessageConsumer {
             Thread.sleep(1000);
             serialPort.setDTR(false);
             serialPort.setRTS(false);
-            serialPort.closePort();
-            serialPort = null;
+            Serial.closePort(serialPort);
             System.gc();
         } catch (Exception e) {
             error(e);
@@ -2630,8 +2629,7 @@ public class Sketch implements MessageConsumer {
                         return false;
                     }
                     Thread.sleep(1000);
-                    serialPort.closePort();
-                    serialPort = null;
+                    Serial.closePort(serialPort);
                     System.gc();
                     Thread.sleep(1500);
                 }

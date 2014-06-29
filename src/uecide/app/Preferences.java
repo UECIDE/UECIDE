@@ -1049,8 +1049,6 @@ public class Preferences {
                 }
                 savePreferences.invoke(null);
             } catch (Exception e) {
-                e.printStackTrace();
-//                Base.error(e);
             }
         }
 
@@ -1090,6 +1088,7 @@ public class Preferences {
     Base.applyPreferences();
     Base.preferences.save();
     Base.cleanAndScanAllSettings();
+    Editor.refreshAllEditors();
   }
 
 

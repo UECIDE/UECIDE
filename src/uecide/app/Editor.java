@@ -2181,7 +2181,13 @@ public class Editor extends JFrame {
         ButtonGroup portGroup = new ButtonGroup();
         ArrayList<String> ports = Serial.getPortList();
         for (String port : ports) {
-            JMenuItem item = new JRadioButtonMenuItem(port);
+            String pn = Serial.getName(port);
+            JMenuItem item = null;
+            if (pn != null & !pn.equals("")) {
+                item = new JRadioButtonMenuItem(port + ": " + pn);
+            } else {
+                item = new JRadioButtonMenuItem(port);
+            }
             portGroup.add(item);
             item.setSelected(port.equals(loadedSketch.getSerialPort()));
             item.addActionListener(new ActionListener() {
@@ -2700,6 +2706,20 @@ public class Editor extends JFrame {
         }
     }
 
+    public static void refreshAllEditors() {
+        for (Editor e : editorList) {
+            e.refreshEditors();
+        }
+    }
+
+    public void refreshEditors() {
+        int ntabs = editorTabs.getTabCount();
+        for (int i = 0; i < ntabs; i++) {
+            EditorBase eb = getTab(i);
+            eb.refreshSettings();
+        }
+    }
+
     public void handleAbout() {
         Dimension ss = getSize();
         Point sl = getLocation();
@@ -3039,5 +3059,6 @@ public class Editor extends JFrame {
         DefaultRunHandler runHandler = new DefaultRunHandler(true);
         new Thread(runHandler, "Compiler").start();
     }
+
 }
 

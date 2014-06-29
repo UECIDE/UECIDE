@@ -264,7 +264,7 @@ public class code extends JPanel implements EditorBase {
         );
 
         textArea.setForeground(Base.theme.getColor("editor.fgcolor"));
-        setFont(Base.preferences.getFont("editor.font"));
+        textArea.setFont(Base.preferences.getFont("editor.font"));
         Gutter g = scrollPane.getGutter();
         if (Base.theme.get("editor.gutter.bgcolor") != null) {
             g.setBackground(Base.theme.getColor("editor.gutter.bgcolor"));
