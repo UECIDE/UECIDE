@@ -2939,4 +2939,94 @@ public class Sketch implements MessageConsumer {
     public void requestTermination() {
         terminateExecution = true;
     }
+
+    public boolean generateSarFile(File archiveFile) {
+        try {
+            if (archiveFile.exists()) {
+                archiveFile.delete();
+            }
+            FileOutputStream outfile = new FileOutputStream(archiveFile);
+            ZipOutputStream sar = new ZipOutputStream(outfile);
+            sar.putNextEntry(new ZipEntry(sketchFolder.getName() + "/"));
+            sar.closeEntry();
+            addTree(sketchFolder, sketchFolder.getName(), sar);
+
+            sar.putNextEntry(new ZipEntry("libraries" + "/"));
+            sar.closeEntry();
+
+            prepare();
+
+            String libList = "";
+
+            for (Library lib : getImportedLibraries()) {
+                if (lib.isContributed()) {
+                    sar.putNextEntry(new ZipEntry("libraries" + "/" + lib.getFolder().getName() + "/"));
+                    sar.closeEntry();
+                    addTree(lib.getFolder(), "libraries/" + lib.getFolder().getName(), sar);
+                    if (libList.equals("")) {
+                        libList = lib.getFolder().getName();
+                    } else {
+                        libList = libList + " " + lib.getFolder().getName();
+                    }
+                }
+            }
+
+            sar.putNextEntry(new ZipEntry("META-INF/"));
+            sar.closeEntry();
+            sar.putNextEntry(new ZipEntry("META-INF/MANIFEST.MF"));
+
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+
+            StringBuilder mf = new StringBuilder();
+            mf.append("SAR-Version: 1.0\n");
+            mf.append("Author: " + System.getProperty("user.name") + "\n");
+            mf.append("Sketch-Name: " + sketchFolder.getName() + "\n");
+            mf.append("Libraries: " + libList + "\n");
+            mf.append("Board: " + getBoard().getName() + "\n");
+            mf.append("Core: " + getCore().getName() + "\n");
+            mf.append("Archived: " + timeStamp + "\n");
+
+            String mfData = mf.toString();
+            byte[] bytes = mfData.getBytes();
+            sar.write(bytes, 0, bytes.length);
+            sar.closeEntry();
+            sar.flush();
+            sar.close();
+        } catch (Exception e) {
+            Base.error(e);
+            return false;
+        }
+        return true;
+    }
+
+    public void addTree(File dir, String sofar, ZipOutputStream zos) throws IOException {
+        String files[] = dir.list();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].equals(".") || files[i].equals("..")) continue;
+            if (files[i].startsWith(".git")) continue;
+            if (files[i].startsWith(".svn")) continue;
+            if (files[i].startsWith(".csv")) continue;
+            if (files[i].startsWith(".SVN")) continue;
+            if (files[i].startsWith(".CSV")) continue;
+
+            File sub = new File(dir, files[i]);
+            String nowfar = (sofar == null) ?  files[i] : (sofar + "/" + files[i]);
+
+            if (sub.isDirectory()) {
+                // directories are empty entries and have / at the end
+                ZipEntry entry = new ZipEntry(nowfar + "/");
+                //System.out.println(entry);
+                zos.putNextEntry(entry);
+                zos.closeEntry();
+                addTree(sub, nowfar, zos);
+            } else {
+                ZipEntry entry = new ZipEntry(nowfar);
+                entry.setTime(sub.lastModified());
+                zos.putNextEntry(entry);
+                zos.write(Base.loadBytesRaw(sub));
+                zos.closeEntry();
+            }
+        }
+    }
+
 }

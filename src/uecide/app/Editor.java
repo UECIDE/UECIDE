@@ -1965,6 +1965,16 @@ public class Editor extends JFrame {
         });
         fileMenu.add(item);
 
+        item = new JMenuItem(Translate.t("Export as SAR..."));
+//        item.setAccelerator(KeyStroke.getKeyStroke('S', modifiers | ActionEvent.SHIFT_MASK));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                exportSar();
+            }
+        });
+        fileMenu.add(item);
+
+
         fileMenu.addSeparator();
         item = new JMenuItem(Translate.t("Preferences"));
         item.setAccelerator(KeyStroke.getKeyStroke("ctrl-,"));
@@ -2421,6 +2431,22 @@ public class Editor extends JFrame {
             error(s);
         } else {
             message(s);
+        }
+    }
+
+    public void exportSar() {
+
+        File newFile = new File(Base.getSketchbookFolder(), loadedSketch.getName() + ".sar");
+        JFileChooser fc = new JFileChooser();
+        fc.setSelectedFile(newFile);
+        javax.swing.filechooser.FileFilter filter = new SarFileFilter();
+        fc.setFileFilter(filter);
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        int rv = fc.showSaveDialog(this);
+        if (rv == JFileChooser.APPROVE_OPTION) {
+            newFile = fc.getSelectedFile();
+            loadedSketch.generateSarFile(newFile);
         }
     }
 
