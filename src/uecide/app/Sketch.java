@@ -1249,6 +1249,10 @@ public class Sketch implements MessageConsumer {
         if (isUntitled()) {
             return false;
         }
+        // Same if it's an example in a protected area:
+        if (parentIsProtected()) {
+            return false;
+        }
         if (Base.preferences.getBoolean("version.enabled")) {
             int numToSave = Base.preferences.getInteger("version.keep");
             File versionsFolder = new File(sketchFolder, "backup");
@@ -2868,5 +2872,46 @@ public class Sketch implements MessageConsumer {
 
     public void purgeBuildFiles() {
         Base.removeDescendants(buildFolder);
+    }
+
+    public boolean isChildOf(File dir) {
+        File parent = sketchFolder.getParentFile();
+
+        while (parent != null && parent.exists()) {
+            if (parent.equals(dir)) {
+                return true;
+            }
+            parent = parent.getParentFile();
+        }
+        return false;
+    }
+
+    public boolean parentIsLibrary() {
+        for (File path : Base.libraryCategoryPaths.values()) {
+            if (isChildOf(path)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean parentIsBoard() {
+        return isChildOf(Base.getUserBoardsFolder());
+    }
+
+    public boolean parentIsCore() {
+        return isChildOf(Base.getUserCoresFolder());
+    }
+
+    public boolean parentIsCompiler() {
+        return isChildOf(Base.getUserCompilersFolder());
+    }
+
+    public boolean parentIsProtected() {
+        return
+            parentIsCore() ||
+            parentIsBoard() ||
+            parentIsCompiler() ||
+            parentIsLibrary();
     }
 }

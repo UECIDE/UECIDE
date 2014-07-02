@@ -1257,6 +1257,10 @@ public class Editor extends JFrame {
                     item = new JMenuItem("Localize library");
                     item.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
+                            if (loadedSketch.parentIsProtected()) {
+                                error("You cannot localize a library in an example. Use Save As first.");
+                                return;
+                            }
                             File libs = new File(loadedSketch.getFolder(), "libraries");
                             libs.mkdirs();
                             File newLibDir = new File(libs, lib.getName());
@@ -1669,6 +1673,12 @@ public class Editor extends JFrame {
             saveAs();
             return; 
         }
+
+        if (loadedSketch.parentIsProtected()) {
+            saveAs();
+            return;
+        }
+
         for (int i = 0; i < editorTabs.getTabCount(); i++) {
             EditorBase eb = (EditorBase)editorTabs.getComponentAt(i);
             if (eb.isModified()) {
