@@ -82,6 +82,8 @@ public class Sketch implements MessageConsumer {
     String selectedProgrammer = null;
     String selectedSerialPort = null;
 
+    boolean terminateExecution = false;
+
     // This lot is what the sketch consists of - the list of files, libraries, settings, parameters etc.
     public ArrayList<File> sketchFiles = new ArrayList<File>();
 
@@ -1886,6 +1888,12 @@ public class Sketch implements MessageConsumer {
         String fileName = src.getName();
         String recipe = null;
 
+        if (terminateExecution) {
+            terminateExecution = false;
+            message("Compilation terminated");
+            return null;
+        }
+
         PropertyFile props = mergeAllProperties();
 
         if (fileName.endsWith(".cpp")) {
@@ -2039,13 +2047,22 @@ public class Sketch implements MessageConsumer {
             if (f.lastModified() > archiveDate) {
                 File out = compileFile(f);
                 if (out == null) {
+                    purgeLibrary(lib);
+                    lib.setCompiledPercent(0);
+                    if (editor != null) { 
+                        editor.updateLibrariesTree();
+                    }
                     return false;
                 }
                 settings.put("object.name", out.getAbsolutePath());
                 String command = parseString(recipe);
                 boolean ok = execAsynchronously(command);
                 if (!ok) {
-                    archive.delete();
+                    purgeLibrary(lib);
+                    lib.setCompiledPercent(0);
+                    if (editor != null) { 
+                        editor.updateLibrariesTree();
+                    }
                     return false;
                 }
                 count++;
@@ -2060,6 +2077,10 @@ public class Sketch implements MessageConsumer {
             editor.updateOutputTree();
         }
         settings.put("includes", origIncs);
+        lib.setCompiledPercent(100);
+        if (editor != null) { 
+            editor.updateLibrariesTree();
+        }
         return true;
     }
 
@@ -2913,5 +2934,9 @@ public class Sketch implements MessageConsumer {
             parentIsBoard() ||
             parentIsCompiler() ||
             parentIsLibrary();
+    }
+
+    public void requestTermination() {
+        terminateExecution = true;
     }
 }

@@ -120,8 +120,7 @@ public class Editor extends JFrame {
     JProgressBar statusProgress;
     JLabel statusLabel;
 
-    boolean compilerRunning = false;
-
+    JButton abortButton;
     JButton runButton;
     JButton programButton;
 
@@ -129,16 +128,18 @@ public class Editor extends JFrame {
 
     ArrayList<Plugin> plugins = new ArrayList<Plugin>();
 
+    Thread compilationThread = null;
+
     class DefaultRunHandler implements Runnable {
         boolean upload = false;
         public DefaultRunHandler(boolean doUpload) {
             upload = doUpload;
         }
         public void run() {
-            if (compilerRunning) return;
-            compilerRunning = true;
             runButton.setEnabled(false);
             programButton.setEnabled(false);
+            runButton.setVisible(false);
+            abortButton.setVisible(true);
             try {
                if(loadedSketch.build()) {
             //        reportSize();
@@ -149,9 +150,10 @@ public class Editor extends JFrame {
             } catch (Exception e) {
                 error(e);
             }
-            compilerRunning = false;
             runButton.setEnabled(true);
             programButton.setEnabled(true);
+            runButton.setVisible(true);
+            abortButton.setVisible(false);
         }
     }
 
@@ -161,18 +163,19 @@ public class Editor extends JFrame {
             library = lib;
         }
         public void run() {
-            if (compilerRunning) return;
             runButton.setEnabled(false);
             programButton.setEnabled(false);
-            compilerRunning = true;
+            runButton.setVisible(false);
+            abortButton.setVisible(true);
             try {
                 loadedSketch.precompileLibrary(library);
             } catch (Exception e) {
                 error(e);
             }
-            compilerRunning = false;
             runButton.setEnabled(true);
             programButton.setEnabled(true);
+            runButton.setVisible(true);
+            abortButton.setVisible(false);
         }
     }
 
@@ -403,6 +406,13 @@ public class Editor extends JFrame {
         projectTabs.add(filesPanel, "Files");
 
         File themeFolder = Base.getContentFile("lib/theme");
+
+        abortButton = Editor.addToolbarButton(toolbar, "toolbar/stop.png", "Abort", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                abortCompilation();
+            }
+        });
+        abortButton.setVisible(false);
         runButton = Editor.addToolbarButton(toolbar, "toolbar/run.png", "Compile", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 compile();
@@ -1239,18 +1249,19 @@ public class Editor extends JFrame {
                     });
                     menu.add(item);
                     item = new JMenuItem("Recompile now");
-                    item.setEnabled(!compilerRunning);
+                    item.setEnabled(!compilerRunning());
                     item.setActionCommand("yes");
                     item.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             loadedSketch.purgeLibrary(lib);
                             clearConsole();
-                            if (compilerRunning) {
+                            if (compilerRunning()) {
                                 error("Sorry, there is already a compiler thread running for this sketch.");
                                 return;
                             }
                             LibCompileRunHandler runHandler = new LibCompileRunHandler(lib);
-                            new Thread(runHandler, "Compiler").start();
+                            compilationThread = new Thread(runHandler, "Compiler");
+                            compilationThread.start();
                         }
                     });
                     menu.add(item);
@@ -3052,23 +3063,45 @@ public class Editor extends JFrame {
 
     public void compile() {
         clearConsole();
-        if (compilerRunning) {
+        if (compilerRunning()) {
             error("Sorry, there is already a compiler thread running for this sketch.");
             return;
         }
         DefaultRunHandler runHandler = new DefaultRunHandler(false);
-        new Thread(runHandler, "Compiler").start();
+        compilationThread = new Thread(runHandler, "Compiler");
+        compilationThread.start();
     }
 
     public void program() {
         clearConsole();
-        if (compilerRunning) {
+        if (compilerRunning()) {
             error("Sorry, there is already a compiler thread running for this sketch.");
             return;
         }
         DefaultRunHandler runHandler = new DefaultRunHandler(true);
-        new Thread(runHandler, "Compiler").start();
+        compilationThread = new Thread(runHandler, "Compiler");
+        compilationThread.start();
     }
 
+    public boolean compilerRunning() {
+        if (compilationThread == null) {
+            return false;
+        }
+        return compilationThread.isAlive();
+    }
+
+    public void abortCompilation() {
+        if (!compilerRunning()) {
+            return;
+        }
+        loadedSketch.requestTermination();
+        while (compilerRunning()) {
+            continue;
+        }
+        runButton.setEnabled(true);
+        programButton.setEnabled(true);
+        runButton.setVisible(true);
+        abortButton.setVisible(false);
+    }
 }
 
