@@ -57,8 +57,9 @@ import uecide.app.Compiler;
 
 import java.beans.*;
 
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.jar.*;
+import java.util.zip.*;
+
 
 
 public class Editor extends JFrame {
@@ -1966,10 +1967,17 @@ public class Editor extends JFrame {
         fileMenu.add(item);
 
         item = new JMenuItem(Translate.t("Export as SAR..."));
-//        item.setAccelerator(KeyStroke.getKeyStroke('S', modifiers | ActionEvent.SHIFT_MASK));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 exportSar();
+            }
+        });
+        fileMenu.add(item);
+
+        item = new JMenuItem(Translate.t("Import SAR..."));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                importSar();
             }
         });
         fileMenu.add(item);
@@ -2431,6 +2439,297 @@ public class Editor extends JFrame {
             error(s);
         } else {
             message(s);
+        }
+    }
+
+    public boolean willDoImport;
+
+    public void importSar() {
+        JFileChooser fc = new JFileChooser();
+
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        javax.swing.filechooser.FileFilter filter = new SarFileFilter();
+        fc.setFileFilter(filter);
+
+        fc.setCurrentDirectory(Base.getSketchbookFolder());
+
+        int rv = fc.showOpenDialog(this);
+
+        if (rv == JFileChooser.APPROVE_OPTION) {
+            try {
+                File sarFile = fc.getSelectedFile();
+                JarFile sarfile = new JarFile(sarFile);
+                Manifest manifest = sarfile.getManifest();
+                Attributes manifestContents = manifest.getMainAttributes();
+
+                String sketchName = manifestContents.getValue("Sketch-Name");
+                String author = manifestContents.getValue("Author");
+                String libs = manifestContents.getValue("Libraries");
+                String brd = manifestContents.getValue("Board");
+                String cr = manifestContents.getValue("Core");
+                String archived = manifestContents.getValue("Archived");
+
+                final JDialog dialog = new JDialog(this, "Import SAR", true);
+
+                EmptyBorder bdr = new EmptyBorder(4, 4, 4, 4);
+                JPanel panel = new JPanel(new GridBagLayout());
+                panel.setBorder(bdr);
+
+                JTextField sketchNameBox = new JTextField(sketchName);
+
+                GridBagConstraints c = new GridBagConstraints();
+                c.fill = GridBagConstraints.HORIZONTAL;
+                c.gridwidth = 1;
+                c.gridheight = 1;
+                c.gridx = 0;
+                c.gridy = 0;
+                c.weightx = 1.0;
+
+                JLabel label = new JLabel("Sketch Name:");
+                label.setBorder(bdr);
+                panel.add(label, c);
+                c.gridx = 1;
+                panel.add(sketchNameBox, c);
+                c.gridx = 0;
+                c.gridy++;
+
+                label = new JLabel("Author:");
+                label.setBorder(bdr);
+                panel.add(label, c);
+                c.gridx = 1;
+                label = new JLabel(author);
+                label.setBorder(bdr);
+                panel.add(label, c);
+                c.gridx = 0;
+                c.gridy++;
+
+                label = new JLabel("Board:");
+                label.setBorder(bdr);
+                panel.add(label, c);
+                c.gridx = 1;
+                label = new JLabel(brd);
+                label.setBorder(bdr);
+                panel.add(label, c);
+                c.gridx = 0;
+                c.gridy++;
+                label = new JLabel("Core:");
+                label.setBorder(bdr);
+                panel.add(label, c);
+                c.gridx = 1;
+                label = new JLabel(cr);
+                label.setBorder(bdr);
+                panel.add(label, c);
+                c.gridx = 0;
+                c.gridy++;
+
+                c.gridwidth = 2;
+                label = new JLabel("Libraries:");
+                label.setBorder(bdr);
+                panel.add(label, c);
+                c.gridwidth = 1;
+                c.gridy++;
+
+                HashMap<String, JComboBox> libcheck = new HashMap<String, JComboBox>();
+                String[] libarr = libs.split(" ");
+                c.gridx = 1;
+                c.gridwidth = 2;
+
+                ArrayList<String> dests = new ArrayList<String>();
+                dests.add("Do not import");
+                dests.add("Import to sketch folder");
+                dests.addAll(Base.libraryCategoryNames.values());
+
+                for (String l : libarr) {
+                    label = new JLabel(l + ":");
+                    c.gridx = 0;
+                    panel.add(label, c);
+
+                
+                    JComboBox cb = new JComboBox(dests.toArray(new String[0]));
+                    c.gridx = 1;
+                    panel.add(cb, c);
+                    libcheck.put(l, cb);
+
+                    c.gridy++;
+                }
+                c.gridx = 0;
+                c.gridwidth = 1;
+                final Editor me = this;
+
+                JButton cancel = new JButton(Translate.t("Cancel"));
+                cancel.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        me.willDoImport = false;
+                        dialog.dispose();
+                    }
+                });
+                JButton impt = new JButton(Translate.t("Import"));
+                impt.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        me.willDoImport = true;
+                        dialog.dispose();
+                    }
+                });
+
+                panel.add(cancel, c);
+                c.gridx = 1;
+                panel.add(impt, c);
+
+                dialog.setContentPane(panel);
+                dialog.pack();
+                dialog.setLocationRelativeTo(this);
+                dialog.setVisible(true);
+
+                if (willDoImport) {
+                    String oldSketchName = sketchName;
+                    sketchName = sketchNameBox.getText();
+                    File targetDir = new File(Base.getSketchbookFolder(), sketchName);
+                    message("Importing to " + targetDir.getAbsolutePath());
+                    int n = 0;
+                    if (targetDir.exists()) {
+                        Object[] options = { "Yes", "No" };
+                        n = JOptionPane.showOptionDialog(this,
+                            "The sketch " + sketchName + " already exists.\n" +
+                            "Do you want to overwrite it?",
+                            "Sketch Exists",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE,
+                            null,
+                            options,
+                            options[1]);
+                        if (n == 0) {
+                            Base.removeDir(targetDir);
+                        }
+                    }
+
+                    if (n == 0) {
+                        message("Starting import...");
+                        byte[] buffer = new byte[1024];
+                        ZipInputStream zis = new ZipInputStream(new FileInputStream(sarFile));
+                        ZipEntry ze = zis.getNextEntry();
+                        while (ze != null) {
+                            String fileName = ze.getName();
+                            message("  " + fileName + " ->");
+                            String spl[] = fileName.split("/");
+
+                            File newFile = null;
+
+                            if (spl[0].equals("META-INF")) {
+                                ze = zis.getNextEntry();
+                                continue;
+                            }
+
+                            if (spl[0].equals(oldSketchName)) {
+                                spl[0] = sketchName;
+                            }
+
+                            if (fileName.startsWith(".")) {
+                                ze = zis.getNextEntry();
+                                continue;
+                            }
+
+                            if (spl[0].equals("libraries")) {
+                                if (spl.length > 1) {
+                                    if (libcheck.get(spl[1]) == null) {
+                                        // This is a library we don't know about - ignore it
+                                        ze = zis.getNextEntry();
+                                        warning("    (ignore)");
+                                        continue;
+                                    }
+
+                                    JComboBox cb = libcheck.get(spl[1]);
+                                    if (cb.getSelectedIndex() == 0) {
+                                        // The library isn't selected for import
+                                        ze = zis.getNextEntry();
+                                        message("    (skip)");
+                                        continue;
+                                    }
+
+                                    // We now need to re-hash the file name.  Remove the
+                                    // "libraries" from the front, and replace it with the
+                                    // path of the selected target.
+
+                                    File libTarget = null;
+                                    if (cb.getSelectedIndex() == 1) {
+                                        // Sketch folder
+                                        File sf = new File(Base.getSketchbookFolder(), sketchName);
+                                        libTarget = new File(sf, "libraries");
+                                    } else {
+                                        String dname = (String)cb.getSelectedItem();
+                                        String cat = null;
+                                        for (String k : Base.libraryCategoryNames.keySet()) {
+                                            if (Base.libraryCategoryNames.get(k).equals(dname)) {
+                                                cat = k;
+                                            }
+                                        }
+                                        libTarget = Base.libraryCategoryPaths.get(cat);
+                                    }
+
+                                    if (libTarget != null) {
+                                        newFile = libTarget;
+                                        for (int i = 1; i < spl.length; i++) {
+                                            newFile = new File(newFile, spl[i]);
+                                        }
+                                    }
+                                } else {
+                                    ze = zis.getNextEntry();
+                                    continue;
+                                }
+                            } else {
+                                newFile = Base.getSketchbookFolder();
+                                for (int i = 0; i < spl.length; i++) {
+                                    if (spl[i].equals(oldSketchName)) {
+                                        spl[i] = sketchName;
+                                    }
+                                    int di = spl[i].lastIndexOf(".");
+                                    if (di >= 0) {
+                                        String s = spl[i].substring(0, di);
+                                        String e = spl[i].substring(di + 1);
+                                        warning(s);
+                                        warning(e);
+                                        if (s.equals(oldSketchName)) {
+                                            spl[i] = sketchName + "." + e;
+                                        }
+                                    }
+                                    newFile = new File(newFile, spl[i]);
+                                }
+                            }
+
+                            if (newFile == null) {
+                                ze = zis.getNextEntry();
+                                error("    (broken)");
+                                continue;
+                            }
+                            message("    " + newFile.getAbsolutePath());
+
+                            newFile.getParentFile().mkdirs();
+
+                            if (ze.isDirectory()) {
+                                newFile.mkdirs();
+                            } else {
+                                FileOutputStream fos = new FileOutputStream(newFile);
+                                int len;
+                                while ((len = zis.read(buffer)) > 0) {
+                                    fos.write(buffer, 0, len);
+                                }
+                                fos.close();
+                                if (!newFile.exists()) {    
+                                    error("FAILED MAKING FILE");
+                                }
+                            }
+                            ze = zis.getNextEntry();
+                        }
+                        zis.closeEntry();
+                        zis.close();
+                        Base.gatherLibraries();
+                        //editor.rebuildImportMenu();
+                        Base.createNewEditor(new File(Base.getSketchbookFolder(), sketchName).getAbsolutePath());
+                    }
+                }
+            } catch (Exception e) {
+                Base.error(e);
+            }
         }
     }
 
