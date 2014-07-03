@@ -2108,30 +2108,35 @@ public class Base {
     // This handy little function will rebuild the whole of the internals of
     // UECIDE - that is, all the boards, cores, compilers and libraries etc.
     public static void cleanAndScanAllSettings() {
-        compilers = new TreeMap<String, Compiler>();
-        cores = new TreeMap<String, Core>();
-        boards = new TreeMap<String, Board>();
-        plugins = new TreeMap<String, Class<?>>();
-        pluginInstances = new ArrayList<Plugin>();
+        Thread thr = new Thread() {
+            public void run() {
+                compilers = new TreeMap<String, Compiler>();
+                cores = new TreeMap<String, Core>();
+                boards = new TreeMap<String, Board>();
+                plugins = new TreeMap<String, Class<?>>();
+                pluginInstances = new ArrayList<Plugin>();
 
-        Editor.broadcast(Translate.t("Updating serial ports..."));
+                Editor.broadcast(Translate.t("Updating serial ports..."));
 
-        Serial.updatePortList();
-        Serial.fillExtraPorts();
+                Serial.updatePortList();
+                Serial.fillExtraPorts();
 
-        Editor.broadcast(Translate.t("Scanning compilers..."));
-        loadCompilers();
-        Editor.broadcast(Translate.t("Scanning cores..."));
-        loadCores();
-        Editor.broadcast(Translate.t("Scanning boards..."));
-        loadBoards();
-        Editor.broadcast(Translate.t("Scanning plugins..."));
-        loadPlugins();
-        Editor.broadcast(Translate.t("Scanning libraries..."));
-        gatherLibraries();
-        Editor.broadcast(Translate.t("Update complete"));
-        Editor.updateAllEditors();
-        Editor.selectAllEditorBoards();
+                Editor.broadcast(Translate.t("Scanning compilers..."));
+                loadCompilers();
+                Editor.broadcast(Translate.t("Scanning cores..."));
+                loadCores();
+                Editor.broadcast(Translate.t("Scanning boards..."));
+                loadBoards();
+                Editor.broadcast(Translate.t("Scanning plugins..."));
+                loadPlugins();
+                Editor.broadcast(Translate.t("Scanning libraries..."));
+                gatherLibraries();
+                Editor.broadcast(Translate.t("Update complete"));
+                Editor.updateAllEditors();
+                Editor.selectAllEditorBoards();
+            }
+        };
+        thr.start();
     }
 
     public static void updateLookAndFeel() {
