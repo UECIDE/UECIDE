@@ -97,12 +97,20 @@ public class code extends JPanel implements EditorBase {
             repaint();
             findButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected());
+                    if (findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
+                        searchTerm.setBackground(new Color(255, 255, 255));
+                    } else {
+                        searchTerm.setBackground(new Color(255, 128, 128));
+                    }
                 }
             });
             searchTerm.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected());
+                    if (findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
+                        searchTerm.setBackground(new Color(255, 255, 255));
+                    } else {
+                        searchTerm.setBackground(new Color(255, 128, 128));
+                    }
                 }
             });
             replaceWith.addActionListener(new ActionListener() {
@@ -137,11 +145,21 @@ public class code extends JPanel implements EditorBase {
         repaint();
     }
 
-    public void findNext(String text, boolean mc, boolean back) {
+    public boolean findNext(String text, boolean mc, boolean back) {
         search.setSearchFor(text);
         search.setMatchCase(mc);
         search.setSearchForward(!back);
-        SearchEngine.find(textArea, search);
+        SearchResult res = SearchEngine.find(textArea, search);
+        if (!res.wasFound()) {
+            textArea.setCaretPosition(0);
+            int cp = textArea.getCaretPosition();
+            res = SearchEngine.find(textArea, search);
+            if (!res.wasFound()) {
+                textArea.setCaretPosition(cp);
+                return false;
+            }
+        }
+        return true;
     }
 
     public void replaceNext(String text, String rep, boolean mc, boolean back) {
