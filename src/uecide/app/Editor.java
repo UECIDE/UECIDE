@@ -1266,22 +1266,32 @@ public class Editor extends JFrame {
                         }
                     });
                     menu.add(item);
-                    item = new JMenuItem("Localize library");
-                    item.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            if (loadedSketch.parentIsProtected()) {
-                                error("You cannot localize a library in an example. Use Save As first.");
-                                return;
+                    if (lib.isLocal(loadedSketch.getFolder())) {
+                        item = new JMenuItem("Export library");
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                exportLocalLibrary(lib);
                             }
-                            File libs = new File(loadedSketch.getFolder(), "libraries");
-                            libs.mkdirs();
-                            File newLibDir = new File(libs, lib.getName());
-                            Base.copyDir(lib.getFolder(), newLibDir);
-                            loadedSketch.purgeLibrary(lib);
-                            updateTree();
-                        }
-                    });
-                    menu.add(item);
+                        });
+                        menu.add(item);
+                    } else {
+                        item = new JMenuItem("Localize library");
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                if (loadedSketch.parentIsProtected()) {
+                                    error("You cannot localize a library in an example. Use Save As first.");
+                                    return;
+                                }
+                                File libs = new File(loadedSketch.getFolder(), "libraries");
+                                libs.mkdirs();
+                                File newLibDir = new File(libs, lib.getName());
+                                Base.copyDir(lib.getFolder(), newLibDir);
+                                loadedSketch.purgeLibrary(lib);
+                                updateTree();
+                            }
+                        });
+                        menu.add(item);
+                    }
                     menu.show(sketchContentTree, e.getX(), e.getY());
                 }
                 return;
@@ -2041,7 +2051,12 @@ public class Editor extends JFrame {
         item.setActionCommand("S");
         item.addActionListener(createNewAction);
         submenu.add(item);
+        item = new JMenuItem("Library");
+        item.setActionCommand("lib");
+        item.addActionListener(createNewAction);
+        submenu.add(item);
         sketchMenu.add(submenu);
+        
 
         submenu = new JMenu("Import file");
         item = new JMenuItem("Source file");
@@ -2862,18 +2877,21 @@ public class Editor extends JFrame {
     ActionListener insertIncludeAction = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             String lib = e.getActionCommand();
-            openOrSelectFile(loadedSketch.getMainFile());
-            int tab = getTabByFile(loadedSketch.getMainFile());
-            if (tab == -1) { 
-                return;
-            }
-            EditorBase eb = getTab(tab);
-            eb.insertAtStart("#include <" + lib + ".h>\n");
+            insertStringAtStart(loadedSketch.getMainFile(), "#include <" + lib + ".h>\n");
             loadedSketch.addLibraryToImportList(lib);
             updateLibrariesTree();
         }
     };
-            
+
+    void insertStringAtStart(File f, String s) {
+        openOrSelectFile(f);
+        int tab = getTabByFile(f);
+        if (tab == -1) {
+            return;
+        }
+        EditorBase eb = getTab(tab);
+        eb.insertAtStart(s);
+    }
 
     public void populateLibrariesMenu(JComponent menu) {
         JMenuItem item;
@@ -3127,7 +3145,7 @@ public class Editor extends JFrame {
                             folder += parts[i];
                         }
 
-                        if (parent.equals(possibleLibraryName) || parent.equals(possibleLibraryName + "-master")) {
+                        if (parent.equals(possibleLibraryName) || parent.contains(possibleLibraryName)) {
                             // this looks like a valid archive at this point.
                             message("Found library " + possibleLibraryName + " at " + folder);
                             foundLibs.put(possibleLibraryName, folder);
@@ -3177,6 +3195,9 @@ public class Editor extends JFrame {
                     Editor.updateAllEditors();
                     message("Installation finished.");
                 }
+            } else {
+                error("Unable to detect any valid libraries in the archive.");
+                warning("You may need to manually install it or re-package it properly.");
             }
         }
     }
@@ -3427,6 +3448,9 @@ public class Editor extends JFrame {
         programButton.setEnabled(true);
         runButton.setVisible(true);
         abortButton.setVisible(false);
+    }
+
+    public void exportLocalLibrary(Library lib) {
     }
 }
 

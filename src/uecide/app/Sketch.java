@@ -291,7 +291,66 @@ public class Sketch implements MessageConsumer {
      * copying, etc.                                                          *
      **************************************************************************/
 
+    public void createNewLibrary(String libname) {
+        try {
+            libname = libname.replaceAll(" ", "_");
+            File libs = new File(sketchFolder, "libraries");
+            libs.mkdirs();
+            File lib = new File(libs, libname);
+            lib.mkdirs();
+            File header = new File(lib, libname + ".h");
+            File code = new File(lib, libname + ".cpp");
+
+            PrintWriter out = new PrintWriter(header);
+            String capname = libname.toUpperCase();
+            out.println("#ifndef _" + capname + "_H");
+            out.println("#define _" + capname + "_H");
+            out.println("");
+            out.println("#if (ARDUINO >= 100)");
+            out.println("# include <Arduino.h>");
+            out.println("#else");
+            out.println("# include <WProgram.h>");
+            out.println("#endif");
+            out.println("");
+            out.println("class " + libname + " {");
+            out.println("\tprivate:");
+            out.println("\t\t// Private functions and variables here");
+            out.println("\tpublic:");
+            out.println("\t\t" + libname + "();");
+            out.println("\t\tvoid begin();");
+            out.println("};");
+            out.println("");
+            out.println("#endif");
+            out.close();
+
+            out = new PrintWriter(code);
+            out.println("#include <" + libname + ".h>");
+            out.println("");
+            out.println(libname + "::" + libname + "() {");
+            out.println("\t// Constructor code here");
+            out.println("}");
+            out.println("");
+            out.println("void " + libname + "::begin() {");
+            out.println("\t// Initialization code here");
+            out.println("}");
+            out.close();
+            
+            addLibraryToImportList(libname);
+
+            if (editor != null) {
+                editor.insertStringAtStart(getMainFile(), "#include <" + libname + ".h>\n");
+                editor.updateTree();
+            }
+        } catch (Exception e) {
+            Base.error(e);
+        }
+    }
+
     public void createNewFile(String filename) {
+        if (filename.endsWith(".lib")) {
+            createNewLibrary(filename.substring(0, filename.lastIndexOf(".")));
+            return;
+        }
         File f = createBlankFile(filename);
         sketchFiles.add(f);
         if (editor != null) {

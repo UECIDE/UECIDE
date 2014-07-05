@@ -277,5 +277,14 @@ public class Library {
     public boolean isHeaderOnly() {
         return sourceFiles.size() == 0;
     }
+
+    public boolean isLocal(File sketchFolder) {
+        File wouldBeLocalLibs = new File(sketchFolder, "libraries");
+        File wouldBeLocal = new File(wouldBeLocalLibs, folder.getName());
+        if (wouldBeLocal.equals(folder)) {
+            return true;
+        }
+        return false;
+    }
 }
 
