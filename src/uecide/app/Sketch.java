@@ -340,6 +340,8 @@ public class Sketch implements MessageConsumer {
             if (editor != null) {
                 editor.insertStringAtStart(getMainFile(), "#include <" + libname + ".h>\n");
                 editor.updateTree();
+                editor.openOrSelectFile(header);
+                editor.openOrSelectFile(code);
             }
         } catch (Exception e) {
             Base.error(e);

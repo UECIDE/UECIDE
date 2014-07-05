@@ -57,6 +57,6 @@ public class SarFileFilter extends javax.swing.filechooser.FileFilter {
     }
 
     public String getDescription() {
-        return Translate.t("Sketch Folders");
+        return Translate.t("Sketch Archives");
     }
 }

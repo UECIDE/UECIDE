@@ -1267,7 +1267,7 @@ public class Editor extends JFrame {
                     });
                     menu.add(item);
                     if (lib.isLocal(loadedSketch.getFolder())) {
-                        item = new JMenuItem("Export library");
+                        item = new JMenuItem("Export library...");
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
                                 exportLocalLibrary(lib);
@@ -3451,6 +3451,36 @@ public class Editor extends JFrame {
     }
 
     public void exportLocalLibrary(Library lib) {
+        try {
+            File newFile = new File(Base.getSketchbookFolder(), lib.getName() + ".zip");
+            JFileChooser fc = new JFileChooser();
+            fc.setSelectedFile(newFile);
+            javax.swing.filechooser.FileFilter filter = new ZipFileFilter();
+            fc.setFileFilter(filter);
+            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+            int rv = fc.showSaveDialog(this);
+            if (rv == JFileChooser.APPROVE_OPTION) {
+                File archiveFile = fc.getSelectedFile();
+                if (archiveFile.exists()) {
+                    archiveFile.delete(); // Confirm!!!
+                }
+
+                FileOutputStream outfile = new FileOutputStream(archiveFile);
+                ZipOutputStream zip = new ZipOutputStream(outfile);
+                zip.putNextEntry(new ZipEntry(lib.getName() + "/"));
+                zip.closeEntry();
+
+                File libsFolder = new File(loadedSketch.getFolder(), "libraries");
+                File libFolder = new File(libsFolder, lib.getName());
+
+                loadedSketch.addTree(libFolder, lib.getName(), zip);
+                zip.flush();
+                zip.close();
+            }
+        } catch (Exception e) {
+            Base.error(e);
+        }
     }
 }
 
