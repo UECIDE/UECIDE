@@ -38,6 +38,7 @@ public class PluginManager extends Plugin implements PropertyChangeListener
     JButton installButton;
     JButton uninstallButton;
     JButton upgradeButton;
+    boolean terminateEverything = false;
 
     HashMap<String, String> familyNames = new HashMap<String, String>();
 
@@ -65,6 +66,8 @@ public class PluginManager extends Plugin implements PropertyChangeListener
         mainContainer = new JPanel();
         mainContainer.setLayout(new BorderLayout());
         frame.add(mainContainer);
+
+        terminateEverything = false;
 
         upper = new JPanel();
         lower = new JPanel();
@@ -99,21 +102,24 @@ public class PluginManager extends Plugin implements PropertyChangeListener
         installButton.setToolTipText("Install Plugin");
         installButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
-                if (node == null) {
-                    return;
-                }
-                if (node.getUserObject() instanceof PluginEntry) {
-                    startDownload((PluginEntry)node.getUserObject());
-                } else if (node.getUserObject() instanceof String) {
+                for (TreePath path : tree.getSelectionPaths()) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+                    if (node != null) {
+                        if (node.getUserObject() instanceof PluginEntry) {
+                            checkPrerequisites((PluginEntry)node.getUserObject());
+                            startDownload((PluginEntry)node.getUserObject());
+                        } else if (node.getUserObject() instanceof String) {
 
-                    int kids = node.getChildCount();
-                    for (int i = 0; i < kids; i++) {
-                        DefaultMutableTreeNode kid = (DefaultMutableTreeNode)node.getChildAt(i);
-                        if (kid.getUserObject() instanceof PluginEntry) {
-                            PluginEntry pe = (PluginEntry)kid.getUserObject();
-                            if (pe.canInstall() || pe.canUpgrade()) {
-                                startDownload(pe);
+                            int kids = node.getChildCount();
+                            for (int i = 0; i < kids; i++) {
+                                DefaultMutableTreeNode kid = (DefaultMutableTreeNode)node.getChildAt(i);
+                                if (kid.getUserObject() instanceof PluginEntry) {
+                                    PluginEntry pe = (PluginEntry)kid.getUserObject();
+                                    if (pe.canInstall() || pe.canUpgrade()) {
+                                        checkPrerequisites(pe);
+                                        startDownload(pe);
+                                    }
+                                }
                             }
                         }
                     }
@@ -127,12 +133,13 @@ public class PluginManager extends Plugin implements PropertyChangeListener
         uninstallButton.setToolTipText("Uninstall Plugin");
         uninstallButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
-                if (node == null) {
-                    return;
-                }
-                if (node.getUserObject() instanceof PluginEntry) {
-                    uninstallDir((PluginEntry)node.getUserObject());
+                for (TreePath path : tree.getSelectionPaths()) {
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+                    if (node != null) {
+                        if (node.getUserObject() instanceof PluginEntry) {
+                            uninstallDir((PluginEntry)node.getUserObject());
+                        }
+                    }
                 }
             }
         });
@@ -164,9 +171,36 @@ public class PluginManager extends Plugin implements PropertyChangeListener
             ePos.y + (eSize.height / 2) - 250
         ));
 
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                askCloseWindow();
+            }
+        });
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
         frame.pack();
         frame.setVisible(true);
         downloadPluginList();
+    }
+
+    public void askCloseWindow() {
+        if (queue.getQueueSize() > 0) {
+            Object[] options = {"Yes", "No"};
+            int n = JOptionPane.showOptionDialog(
+                frame, 
+                "You have downloads in progress.\nAre you sure you want to close this window?\nClosing the window will terminate any downloads.",
+                "Close window?",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
+            if (n != 0) {
+                return;
+            }
+        }
+        masterPluginList = new ArrayList<PluginEntry>();
+        frame.dispose();
     }
 
     public void populateMenu(JMenu menu, int flags) {
@@ -563,6 +597,11 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                     int n;
                     int t = 0;
                     while ((n = in.read(buffer)) > 0) {
+                        if (terminateEverything) {
+                            in.close();
+                            out.close();
+                            return null;
+                        }
                         out.write(buffer, 0, n);
                         t += n;
                         long pl = (long)t * 100;
@@ -631,6 +670,9 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                     zis = new ZipInputStream(new FileInputStream(zipFile));
                     ze = zis.getNextEntry();
                     while (ze != null) {
+                        if (terminateEverything) {
+                            return null;
+                        }
                         File outputFile = new File(destFolder, ze.getName());
                         if (outputFile != null) {
                             File p = outputFile.getParentFile();
@@ -728,6 +770,9 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                     }
                     long fc = 0;
                     for (File f : fulllist) {
+                        if (terminateEverything) {
+                            return null;
+                        }
                         String pth = f.getAbsolutePath();
                         String pfx = pe.getUnpackFolder().getAbsolutePath() + "/";
                         String df = pth.substring(pfx.length());
@@ -927,7 +972,11 @@ public class PluginManager extends Plugin implements PropertyChangeListener
     public ArrayList<PluginEntry> masterPluginList = new ArrayList<PluginEntry>();
 
     public PluginEntry getUnique(String key, HashMap<String, JSONObject>map, int type) {
-        PluginEntry peTest = new PluginEntry(map.get(key), type);
+        JSONObject ob = map.get(key);
+        if (ob == null) {
+            return null;
+        }
+        PluginEntry peTest = new PluginEntry(ob, type);
         for (PluginEntry e : masterPluginList) {
             if (e.equals(peTest)) {
                 return e;
@@ -948,6 +997,64 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                     if (pe.canUpgrade()) {
                         startDownload(pe);
                     }
+                }
+            }
+        }
+    }
+
+    public void checkPrerequisites(PluginEntry pe) {
+        if (pe.getType() == PluginEntry.PLUGIN) {
+            return;
+        }
+        if (pe.getType() == PluginEntry.COMPILER) {
+            return;
+        }
+        if (pe.getType() == PluginEntry.BOARD) {
+            // Find recommended core
+            String recCore = pe.get("Core");
+            PluginEntry core = getUnique(recCore + ".jar", availableCores, PluginEntry.CORE);
+            if (core.canInstall()) {
+                Object[] options = {"Yes", "No"};
+                int n = JOptionPane.showOptionDialog(
+                    frame, 
+                    "The board " + pe.getDescription() + " recommends the " + core.getDescription() + " core.\nDo you want to install this core?",
+                    "Install core?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]);
+                if (n == 0) {
+                    checkPrerequisites(core);
+                    startDownload(core);
+                }
+            }
+        }
+        if (pe.getType() == PluginEntry.CORE) {
+            // Find recommended compiler
+            String recComp = pe.get("Compiler");
+            PluginEntry compiler = null;
+            for (String k : availableCompilers.keySet()) {
+                PluginEntry te = getUnique(k, availableCompilers, PluginEntry.COMPILER);
+                if (te.getName().equals(recComp)) {
+                    compiler = te;
+                    break;
+                }
+            }
+            if (compiler.canInstall()) {
+                Object[] options = {"Yes", "No"};
+                int n = JOptionPane.showOptionDialog(
+                    frame, 
+                    "The core " + pe.getDescription() + " recommends the " + compiler.getDescription() + " compiler.\nDo you want to install this compiler?",
+                    "Install compiler?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[0]);
+                if (n == 0) {
+                    checkPrerequisites(compiler);
+                    startDownload(compiler);
                 }
             }
         }

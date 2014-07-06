@@ -145,4 +145,10 @@ public class TaskQueue extends JPanel implements PropertyChangeListener {
         }
         dataModel.fireTableDataChanged();
     }
+
+    public int getQueueSize() {
+        int n = workerList.size();
+        n += finishedList.size();
+        return n;
+    }
 }
