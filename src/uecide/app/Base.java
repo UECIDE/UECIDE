@@ -2110,33 +2110,53 @@ public class Base {
     public static void cleanAndScanAllSettings() {
         Thread thr = new Thread() {
             public void run() {
-                compilers = new TreeMap<String, Compiler>();
-                cores = new TreeMap<String, Core>();
-                boards = new TreeMap<String, Board>();
-                plugins = new TreeMap<String, Class<?>>();
-                pluginInstances = new ArrayList<Plugin>();
 
                 Editor.broadcast(Translate.t("Updating serial ports..."));
 
                 Serial.updatePortList();
                 Serial.fillExtraPorts();
 
-                Editor.broadcast(Translate.t("Scanning compilers..."));
-                loadCompilers();
-                Editor.broadcast(Translate.t("Scanning cores..."));
-                loadCores();
-                Editor.broadcast(Translate.t("Scanning boards..."));
-                loadBoards();
-                Editor.broadcast(Translate.t("Scanning plugins..."));
-                loadPlugins();
-                Editor.broadcast(Translate.t("Scanning libraries..."));
-                gatherLibraries();
+                rescanCompilers();
+                rescanCores();
+                rescanBoards();
+                rescanPlugins();
+                rescanLibraries();
                 Editor.broadcast(Translate.t("Update complete"));
                 Editor.updateAllEditors();
                 Editor.selectAllEditorBoards();
             }
         };
         thr.start();
+    }
+
+    public static void rescanPlugins() {
+        plugins = new TreeMap<String, Class<?>>();
+        pluginInstances = new ArrayList<Plugin>();
+        Editor.broadcast(Translate.t("Scanning plugins..."));
+        loadPlugins();
+    }
+
+    public static void rescanCompilers() {
+        compilers = new TreeMap<String, Compiler>();
+        Editor.broadcast(Translate.t("Scanning compilers..."));
+        loadCompilers();
+    }
+
+    public static void rescanCores() {
+        cores = new TreeMap<String, Core>();
+        Editor.broadcast(Translate.t("Scanning cores..."));
+        loadCores();
+    }
+
+    public static void rescanBoards() {
+        boards = new TreeMap<String, Board>();
+        Editor.broadcast(Translate.t("Scanning boards..."));
+        loadBoards();
+    }
+
+    public static void rescanLibraries() {
+        Editor.broadcast(Translate.t("Scanning libraries..."));
+        gatherLibraries();
     }
 
     public static void updateLookAndFeel() {

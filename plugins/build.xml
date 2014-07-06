@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<project name="Plugins" default="build">
+    <target name="build">
+        <subant buildpath="SerialTerminal" target="build"/>
+        <subant buildpath="PluginManager" target="build"/>
+    </target>
+    <target name="clean">
+        <subant buildpath="SerialTerminal" target="clean"/>
+        <subant buildpath="PluginManager" target="clean"/>
+    </target>
+    <target name="install">
+        <subant buildpath="SerialTerminal" target="install"/>
+        <subant buildpath="PluginManager" target="install"/>
+    </target>
+    <target name="bundle">
+        <subant buildpath="SerialTerminal" target="bundle"/>
+        <subant buildpath="PluginManager" target="bundle"/>
+    </target>
+</project>

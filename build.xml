@@ -52,6 +52,10 @@
         </javac>
     </target>		
 
+    <target name="plugins" depends="compile" description="Build and bundle plugins">
+        <subant target="bundle" buildpath="plugins" />
+    </target>
+
     <target name="build" depends="compile" description="Build uecide">
         <jar basedir="bin" destfile="uecide.jar">
             <fileset dir="bin" />
