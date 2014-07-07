@@ -1091,4 +1091,8 @@ public class PluginManager extends Plugin implements PropertyChangeListener
             }
         }
     }
+
+    public void launch() {
+        openWindow();
+    }
 }

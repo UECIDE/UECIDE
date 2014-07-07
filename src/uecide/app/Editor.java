@@ -2968,6 +2968,7 @@ public class Editor extends JFrame {
     public void launchPlugin(Class<?> pluginClass) {
         for (Plugin plugin : plugins) {
             if (plugin.getClass() == pluginClass) {
+                Debug.message("Launching plugin " + plugin.getClass());
                 plugin.launch();
             }
         }
