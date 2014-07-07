@@ -907,6 +907,9 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                     PluginEntry pe = (PluginEntry)userObject;
                     File dir = pe.getInstallFolder();
                     if (dir != null) {
+                        setProgress(50);
+                        Base.removeDir(dir);
+/*
                         LinkedList<File> filelist = new LinkedList<File>();
                         ArrayList<File> fulllist = new ArrayList<File>();
                         addFilesToList(dir, filelist);
@@ -920,10 +923,17 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                             files++;
                         }
 
+                        for (File f : fulllist) {
+                            Debug.message("  Want to delete " + f.getAbsolutePath());
+                        }
+
                         long fc = 0;
                         for (File thisFile : fulllist) {
                             if (thisFile.isDirectory() == false) {
-                                thisFile.delete();
+                                Debug.message("    Deleting file " + thisFile.getAbsolutePath());
+                                if (!thisFile.delete()) {
+                                    Debug.message("    Deleting failed!");
+                                }
                                 fc++;
                             }
                             long pct = (fc * 100) / files;
@@ -931,13 +941,18 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                         }
                         for (File thisFile : fulllist) {
                             if (thisFile.isDirectory() == true) {
-                                thisFile.delete();
+                                Debug.message("    Deleting folder " + thisFile.getAbsolutePath());
+                                if (!thisFile.delete()) {
+                                    Debug.message("    Deleting failed!");
+                                }
                                 fc++;
                             }
                             long pct = (fc * 100) / files;
                             setProgress((int)pct);
                         }
                         dir.delete();
+*/
+                        setProgress(100);
                     }
                 } catch (Exception ex) {
                     Base.error(ex);

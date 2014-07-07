@@ -88,7 +88,9 @@ public class PropertyFile {
             properties = new Properties(defaultProperties);
             if (user != null) {
                 if (user.exists()) {
-                    properties.load(new FileReader(user));
+                    FileReader r = new FileReader(user);
+                    properties.load(r);
+                    r.close();
                 }
             }
         } catch (Exception e) {
@@ -104,7 +106,9 @@ public class PropertyFile {
         if (defaults != null) {
             if (defaults.exists()) {
                 try {
-                    defaultProperties.load(new FileReader(defaults));
+                    FileReader r = new FileReader(defaults);
+                    defaultProperties.load(r);
+                    r.close();
                 } catch (Exception e) {
                     Base.error(e);
                 }
@@ -114,7 +118,9 @@ public class PropertyFile {
         if (user != null) {
             if (user.exists()) {
                 try {
-                    properties.load(new FileReader(user));
+                    FileReader r = new FileReader(user);
+                    properties.load(r);
+                    r.close();
                 } catch (Exception e) {
                     Base.error(e);
                 }
@@ -170,7 +176,9 @@ public class PropertyFile {
                     }
                 };
                 saveProps.putAll(properties);
-                saveProps.store(new FileWriter(userFile), null);
+                FileWriter w = new FileWriter(userFile);
+                saveProps.store(w, null);
+                w.close();
                 Debug.message("Saved property file " + userFile.getAbsolutePath());
             } catch (Exception e) {
                 Base.error(e);
@@ -434,7 +442,9 @@ public class PropertyFile {
                     // properties object and only replace the old ones with the new if it
                     // is all successful.
                     Properties newProperties = new Properties(defaultProperties);
-                    newProperties.load(new FileReader(user));
+                    FileReader r = new FileReader(user);
+                    newProperties.load(r);
+                    r.close();
                     properties = newProperties;
                 } catch (Exception e) {
                     Base.error(e);
