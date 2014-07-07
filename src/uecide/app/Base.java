@@ -2149,11 +2149,15 @@ public class Base {
     }
 
     public static void rescanBoards() {
-        boards = new TreeMap<String, Board>();
-        Editor.broadcast(Translate.t("Scanning boards..."));
-        loadBoards();
-        Editor.updateAllEditors();
-        Editor.selectAllEditorBoards();
+        try {
+            boards = new TreeMap<String, Board>();
+            Editor.broadcast(Translate.t("Scanning boards..."));
+            loadBoards();
+            Editor.updateAllEditors();
+            Editor.selectAllEditorBoards();
+        } catch (Exception e) {
+            error(e);
+        }
     }
 
     public static void rescanLibraries() {

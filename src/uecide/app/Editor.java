@@ -3006,7 +3006,9 @@ public class Editor extends JFrame {
 
     public void reselectEditorBoard() {
         String eb = loadedSketch.getBoardName();
-        loadedSketch.setBoard(eb);
+        if (eb != null) {
+            loadedSketch.setBoard(eb);
+        }
     }
 
     public static boolean closeAllEditors() {

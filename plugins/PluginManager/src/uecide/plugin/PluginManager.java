@@ -551,14 +551,22 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                         if (pe.getType() == PluginEntry.PLUGIN) {
                             installPluginJar(pe);
                         } else {
+                            Debug.message("Starting startUnpack of " + pe.toString());
                             startUnpack(pe);
+                            Debug.message("    Done startUnpack of " + pe.toString());
                         }
                     } else if (command.equals("unpack")) {
+                        Debug.message("Starting startInstall of " + pe.toString());
                         startInstall(pe);
+                        Debug.message("    Done startInstall of " + pe.toString());
                     } else if (command.equals("install")) {
+                        Debug.message("Starting finishInstall of " + pe.toString());
                         finishInstall(pe);
+                        Debug.message("    Done finishInstall of " + pe.toString());
                     } else if (command.equals("uninstall")) {
+                        Debug.message("Starting finishUninstall of " + pe.toString());
                         finishUninstall(pe); 
+                        Debug.message("    Done finishUninstall of " + pe.toString());
                     }
                 }
             }
@@ -840,6 +848,7 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                 Base.rescanCompilers();
                 break;
         }
+        Debug.message("Did it finish?");
     }
 
     public void finishUninstall(PluginEntry e) {
@@ -977,16 +986,19 @@ public class PluginManager extends Plugin implements PropertyChangeListener
     }
 
     public void refreshTree() {
+        Debug.message("Refreshing tree");
         TreePath[] nodes = editor.getPaths(tree);
         for (TreePath path : nodes) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
             Object uo = node.getUserObject();
             if (uo instanceof PluginEntry) {
                 PluginEntry pe = (PluginEntry)uo;
+                Debug.message("Refreshing " + pe.toString());
                 pe.initData();
                 treeModel.nodeStructureChanged(node);
             }
         }
+        Debug.message("Refresh done");
     }
 
     public ArrayList<PluginEntry> masterPluginList = new ArrayList<PluginEntry>();
