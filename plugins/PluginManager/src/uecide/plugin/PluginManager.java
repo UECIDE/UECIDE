@@ -85,6 +85,7 @@ public class PluginManager extends Plugin implements PropertyChangeListener
         treeRoot = new DefaultMutableTreeNode("Plugins");
         treeModel = new DefaultTreeModel(treeRoot);
         tree = new JTree(treeModel);
+        ToolTipManager.sharedInstance().registerComponent(tree);
         toolbar = new JToolBar();
 
         tree.setCellRenderer(new PluginTreeCellRenderer());
@@ -435,6 +436,8 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                         installButton.setEnabled(pe.canInstall() || pe.canUpgrade());
                         uninstallButton.setEnabled(pe.canUninstall());
                     }
+
+                    container.setToolTipText(pe.getDescription());
 
                     return container;
                 }
