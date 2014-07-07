@@ -202,6 +202,7 @@ public class PluginManager extends Plugin implements PropertyChangeListener
         }
         masterPluginList = new ArrayList<PluginEntry>();
         frame.dispose();
+        Base.cleanAndScanAllSettings();
     }
 
     public void populateMenu(JMenu menu, int flags) {
@@ -872,6 +873,7 @@ public class PluginManager extends Plugin implements PropertyChangeListener
 
     public void uninstallDir(PluginEntry e) {
         if (!e.isIdle()) {
+            System.err.println("Uninstall failed: plugin busy");
             return;
         }
         e.setState(PluginEntry.UNINSTALLING);

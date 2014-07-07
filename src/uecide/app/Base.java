@@ -2152,6 +2152,8 @@ public class Base {
         boards = new TreeMap<String, Board>();
         Editor.broadcast(Translate.t("Scanning boards..."));
         loadBoards();
+        Editor.updateAllEditors();
+        Editor.selectAllEditorBoards();
     }
 
     public static void rescanLibraries() {
