@@ -424,6 +424,20 @@ public class Base {
                 Editor.editorList.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } 
         }
+
+        if (isNewVersionAvailable()) {
+            if (headless) {
+                System.err.println("A new version is available!");
+                System.err.println("Download it from: " + Base.theme.get("version.download"));
+            } else {
+                String[] options = {"Yes", "No"};
+                int n = JOptionPane.showOptionDialog(null, "A newer version is available.\nWould you like to download it now?", "Newer version available", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                if (n == 0) {
+                    openURL(Base.theme.get("version.download"));
+                }
+            }
+        }
+
         if (headless) {
             System.exit(0);
         }
@@ -2268,6 +2282,36 @@ public class Base {
             error(e);
         }
         return "unknown";
+    }
+
+    public Version getLatestVersion() {
+        try {
+            URL url = new URL(Base.theme.get("version.url"));
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+            String data = in.readLine();
+            in.close();
+            return new Version(data);
+        } catch (Exception e) {
+            error(e);
+        }
+        return null;
+    }
+
+    public boolean isNewVersionAvailable() {
+        if (Base.preferences.getBoolean("version.check")) {
+            System.err.println("Testing for newer version.");
+            System.err.println("My version: " + systemVersion);
+            Version newVersion = getLatestVersion();
+            if (newVersion == null) {
+                return false;
+            }
+            System.err.println("Current version: " + newVersion);
+            if (newVersion.compareTo(systemVersion) > 0) {
+                return true;
+            }
+            return false;
+        }
+        return false;
     }
 }
 

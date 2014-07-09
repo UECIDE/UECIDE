@@ -260,3 +260,5 @@ editor.correct_numbers=false
 compiler.combine_ino=true
 compiler.disable_prototypes=false
 compiler.generate_lss=false
+
+version.check=true
