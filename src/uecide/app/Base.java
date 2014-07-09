@@ -852,6 +852,9 @@ public class Base {
                         if (newLibrary.isValid()) {
                             theseLibraries.put(newLibrary.getName(), newLibrary);
                             Debug.message("    Adding new library " + newLibrary.getName() + " from " + f.getAbsolutePath());
+                            if (newLibrary.getLibrariesFolder().exists()) {
+                                theseLibraries.putAll(loadLibrariesFromFolder(newLibrary.getLibrariesFolder(), type, cr));
+                            }
                         } else {
                             Debug.message("    Skipping invalid library " + f.getAbsolutePath());
                         }

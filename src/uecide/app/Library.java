@@ -55,6 +55,7 @@ public class Library {
     public ArrayList<File> archiveFiles;
     public File mainInclude;
     public File utilityFolder;
+    public File librariesFolder;
     public TreeMap<String, File>examples;
     public String type;
     public String core;
@@ -86,10 +87,12 @@ public class Library {
             utilityFolder = new File(root, properties.get("utility", "utility"));
             utilRecurse = properties.getBoolean("utility.recurse");
             examplesFolder = new File(root, properties.get("examples", "examples"));
+            librariesFolder = new File(root, properties.get("libraries", "libraries"));
             core = properties.get("core", "all");
         } else {
             utilityFolder = new File(root, "utility");
             examplesFolder = new File(root, "examples");
+            librariesFolder = new File(root, "libraries");
         }
         rescan();
         valid = true;
@@ -209,6 +212,10 @@ public class Library {
 
     public File getUtilityFolder() {
         return utilityFolder;
+    }
+
+    public File getLibrariesFolder() {
+        return librariesFolder;
     }
 
     public String getInclude() {
