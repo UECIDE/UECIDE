@@ -105,6 +105,7 @@ public class Preferences {
     JCheckBox verboseUpload;
     JCheckBox useSpacesForTabs;
     JCheckBox visibleTabs;
+    JCheckBox checkNewVersion;
     JTextField tabSize;
     JCheckBox hideSecondaryToolbar;
 
@@ -743,6 +744,13 @@ public class Preferences {
         hideSecondaryToolbar = new JCheckBox(Translate.t("Hide the secondary editor toolbar"));
         p.add(hideSecondaryToolbar, c);
         hideSecondaryToolbar.setSelected(Base.preferences.getBoolean("editor.subtoolbar.hidden"));
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 3;
+        checkNewVersion = new JCheckBox(Translate.t("Check for new version on startup"));
+        p.add(checkNewVersion, c);
+        checkNewVersion.setSelected(Base.preferences.getBoolean("version.check"));
     }
 
     public void populateLocationSettings(JPanel p) {
@@ -1006,6 +1014,7 @@ public class Preferences {
     Base.preferences.setBoolean("editor.keepfindopen", keepFindOpen.isSelected());
     Base.preferences.set("version.keep", backupNumber.getText());
     Base.preferences.setBoolean("editor.subtoolbar.hidden", hideSecondaryToolbar.isSelected());
+    Base.preferences.setBoolean("version.check", checkNewVersion.isSelected());
 
     Base.preferences.setBoolean("editor.expandtabs", useSpacesForTabs.isSelected());
     Base.preferences.setBoolean("editor.showtabs", visibleTabs.isSelected());

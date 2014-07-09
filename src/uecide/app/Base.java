@@ -425,15 +425,17 @@ public class Base {
             } 
         }
 
-        if (isNewVersionAvailable()) {
-            if (headless) {
-                System.err.println("A new version is available!");
-                System.err.println("Download it from: " + Base.theme.get("version.download"));
-            } else {
-                String[] options = {"Yes", "No"};
-                int n = JOptionPane.showOptionDialog(null, "A newer version is available.\nWould you like to download it now?", "Newer version available", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-                if (n == 0) {
-                    openURL(Base.theme.get("version.download"));
+        if (isTimeToCheckVersion()) {
+            if (isNewVersionAvailable()) {
+                if (headless) {
+                    System.err.println("A new version is available!");
+                    System.err.println("Download it from: " + Base.theme.get("version.download"));
+                } else {
+                    String[] options = {"Yes", "No"};
+                    int n = JOptionPane.showOptionDialog(null, "A newer version is available.\nWould you like to download it now?", "Newer version available", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                    if (n == 0) {
+                        openURL(Base.theme.get("version.download"));
+                    }
                 }
             }
         }
@@ -2298,6 +2300,8 @@ public class Base {
     }
 
     public boolean isNewVersionAvailable() {
+        int time = (int)(System.currentTimeMillis() / 1000L);
+        Base.preferences.setInteger("version.lastcheck", time);
         if (Base.preferences.getBoolean("version.check")) {
             System.err.println("Testing for newer version.");
             System.err.println("My version: " + systemVersion);
@@ -2310,6 +2314,17 @@ public class Base {
                 return true;
             }
             return false;
+        }
+        return false;
+    }
+
+    // Is it time to check the version?  Was the last version check
+    // more than 3 hours ago?
+    public boolean isTimeToCheckVersion() {
+        int lastCheck = Base.preferences.getInteger("version.lastcheck");
+        int time = (int)(System.currentTimeMillis() / 1000L);
+        if (time > (lastCheck + (3*60*60))) {
+            return true;
         }
         return false;
     }
