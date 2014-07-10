@@ -46,12 +46,13 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-public class Library {
+public class Library implements Comparable {
     public ArrayList<String> requiredLibraries;
     public File folder;
     public String name;
     public File examplesFolder = null;
     public ArrayList<File> sourceFiles;
+    public ArrayList<File> headerFiles;
     public ArrayList<File> archiveFiles;
     public File mainInclude;
     public File utilityFolder;
@@ -102,18 +103,21 @@ public class Library {
         requiredLibraries = new ArrayList<String>();
         sourceFiles = new ArrayList<File>();
         archiveFiles = new ArrayList<File>();
+        headerFiles = new ArrayList<File>();
         examples = new TreeMap<String, File>();
 
         sourceFiles.addAll(Sketch.findFilesInFolder(folder, "cpp", false));
         sourceFiles.addAll(Sketch.findFilesInFolder(folder, "c", false));
         sourceFiles.addAll(Sketch.findFilesInFolder(folder, "S", false));
         archiveFiles.addAll(Sketch.findFilesInFolder(folder, "a", false));
+        headerFiles.addAll(Sketch.findFilesInFolder(folder, "h", false));
 
         if (utilityFolder.exists() && utilityFolder.isDirectory()) {
             sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", utilRecurse));
             sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "c", utilRecurse));
             sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "S", utilRecurse));
             archiveFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "a", utilRecurse));
+            headerFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "h", utilRecurse));
         }
 
         if (examplesFolder.exists() && examplesFolder.isDirectory()) {
@@ -144,6 +148,15 @@ public class Library {
     }
 
     ArrayList<String> probedFiles;
+
+    public boolean hasHeader(String header) {
+        for (File f : headerFiles) {
+            if (f.getName().equals(header)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public void gatherIncludes(File f) {
         String[] data;
@@ -292,6 +305,259 @@ public class Library {
             return true;
         }
         return false;
+    }
+
+    public int compareTo(Object o) {
+        if (o instanceof Library) {
+            Library ol = (Library)o;
+            return this.toString().compareTo(ol.toString());
+        }
+        if (o instanceof String) {
+            String os = (String)o;
+            return this.toString().compareTo(os);
+        }
+        return 0;
+    }
+
+
+    // =================================================================
+    // Static library management portion
+    // =================================================================
+    
+    public static TreeMap<String, TreeSet<Library>> libraryList = new TreeMap<String, TreeSet<Library>>();
+    public static TreeMap<String, String> categoryNames = new TreeMap<String, String>();
+
+    // A "group" consists of a type and a subtype separated by a colon.  Valid types are:
+    // core, compiler, board, cat.  Subtypes are dependant on the type.
+    //   core:<core name>
+    //   compiler:<compiler name>
+    //   board:<board name>
+    //   cat:<category name>
+
+    public static void addLibrary(String group, Library lib) {
+        TreeSet<Library> setData = libraryList.get(group);
+        if (setData == null) {
+            setData = new TreeSet<Library>();
+        }
+        setData.add(lib);
+        libraryList.put(group, setData);
+    }
+
+    public static TreeSet<Library> getLibraries(String group) {
+        TreeSet<Library> outList = new TreeSet<Library>();
+
+        TreeSet<Library> dataSet = libraryList.get(group);
+        if (dataSet == null) {
+            return null;
+        }
+        for (Library lib : dataSet) {
+            outList.add(lib);
+        }
+        return outList;
+    }
+
+    public static TreeSet<Library> getLibraries(String group, String core) {
+        TreeSet<Library> outList = new TreeSet<Library>();
+
+        TreeSet<Library> dataSet = libraryList.get(group);
+        if (dataSet == null) {
+            return null;
+        }
+        for (Library lib : dataSet) {
+            if (lib.worksWith(core)) {
+                outList.add(lib);
+            }
+        }
+        return outList;
+    }
+
+    public static TreeMap<String, TreeSet<Library>> getFilteredLibraries(String core) {
+        TreeMap<String, TreeSet<Library>> outList = new TreeMap<String, TreeSet<Library>>();
+        for (String cat : libraryList.keySet()) {
+            TreeSet <Library> group = getLibraries(cat, core);
+            if (group != null && group.size() > 0) {
+                outList.put(cat, group);
+            }
+        }
+        return outList;
+    }
+
+    public static void setCategoryName(String cat, String name) {
+        categoryNames.put(cat, name);
+    }
+
+    public static String getCategoryName(String cat) {
+        return categoryNames.get(cat);
+    }
+
+    public static void loadLibrariesFromFolder(File folder, String group) {
+        loadLibrariesFromFolder(folder, group, "all");
+    }
+
+    public static void loadLibrariesFromFolder(File folder, String group, String core) {
+        File[] list = folder.listFiles();
+        if (list == null) {
+            return;
+        }
+        Debug.message("Loading libraries from " + folder.getAbsolutePath());
+        for (File f : list) {
+            if (f.isDirectory()) {
+                if (core.equals("all")) {
+                    boolean sub = false;
+                    for (String c : Base.cores.keySet()) {
+                        if (f.getName().equals(c)) {
+                            Debug.message("  Found sub-library core group " + f);
+                            loadLibrariesFromFolder(f, group, f.getName());
+                            sub = true;
+                        }
+                    }
+                    if (sub) continue;
+                }
+
+                File files[] = f.listFiles();
+                for (File sf : files) {
+                    if ((sf.getName().equals(f.getName() + ".h") || (sf.getName().startsWith(f.getName() + "_") && sf.getName().endsWith(".h")))) {
+                        Library newLibrary = new Library(sf, group, core);
+                        if (newLibrary.isValid()) {
+                            addLibrary(group, newLibrary);
+                            Debug.message("    Adding new library " + newLibrary.getName() + " from " + f.getAbsolutePath());
+                            if (newLibrary.getLibrariesFolder().exists()) {
+                                loadLibrariesFromFolder(newLibrary.getLibrariesFolder(), group, core);
+                            }
+                        } else {
+                            Debug.message("    Skipping invalid library " + f.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Load all the libraries from everywhere.
+
+    public static void loadLibraries() {
+        libraryList = new TreeMap<String, TreeSet<Library>>();
+        categoryNames = new TreeMap<String, String>();
+        // Start with the compiler.  It's rare that there would be any here.
+        for (Compiler c : Base.compilers.values()) {
+            setCategoryName("compiler:" + c.getName(), c.getDescription());
+            loadLibrariesFromFolder(c.getLibrariesFolder(), "compiler:" + c.getName());
+        }
+
+        // Now we'll do the cores.  This is almost guaranteed to have libraries.
+        for (Core c : Base.cores.values()) {
+            setCategoryName("core:" + c.getName(), c.getDescription());
+            loadLibrariesFromFolder(c.getLibrariesFolder(), "core:" + c.getName(), c.getName());
+        }
+
+        // And now boards.
+        for (Board c : Base.boards.values()) {
+            setCategoryName("board:" + c.getName(), c.getDescription());
+            loadLibrariesFromFolder(c.getLibrariesFolder(), "core:" + c.getName());
+        }
+
+        // And finally let's work through the categories.
+        for (String k : Base.preferences.childKeysOf("library")) {
+            String cName = Base.preferences.get("library." + k + ".name");
+            String cPath = Base.preferences.get("library." + k + ".path");
+            if (cName != null && cPath != null) {
+                File f = new File(cPath);
+                if (f.exists() && f.isDirectory()) {
+                    setCategoryName("cat:" + k, cName);
+                    loadLibrariesFromFolder(f, "cat:" + k);
+                }
+            }
+        }
+    }
+
+    public static Library getLibraryByName(String name, String core, String group) {
+        TreeSet<Library> dataSet = libraryList.get(group);
+        if (dataSet == null) {
+            return null;
+        }
+        for (Library l : dataSet) {
+            if (l.toString().equals(name)) {
+                if (l.worksWith(core)) {
+                    return l;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static Library getLibraryByName(String name, String core) {
+        for (String group : libraryList.keySet()) {
+            Library l = getLibraryByName(name, core, group);
+            if  (l != null) {
+                return l;
+            }
+        }
+        return null;
+    }
+
+    public static Library getLibraryByInclude(String include, String core) {
+        if (!include.endsWith(".h")) {
+            return null;
+        }
+
+        // Exact match?
+        String name = include.substring(0, include.lastIndexOf("."));
+        Library lib = getLibraryByName(name, core);
+        if (lib != null) {
+            return lib;
+        }
+
+        for (TreeSet<Library> dataSet : libraryList.values()) {
+            for (Library l : dataSet) {
+                if (l.worksWith(core)) {
+                    if (l.hasHeader(include)) {
+                        return l;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static TreeSet<String> getLibraryCategories() {
+        TreeSet<String> cats = new TreeSet<String>();
+        for (String cat : libraryList.keySet()) {
+            cats.add(cat);
+        }
+        return cats;
+    }
+
+    public static File getCategoryLocation(String group) {
+        String[] bits = group.split(":");
+
+        if (bits[0] == "cat") {
+            return Base.preferences.getFile("library." + bits[1] + ".path");
+        }
+
+        if (bits[0] == "core") {
+            Core c = Base.cores.get(bits[1]);
+            if (c == null) {
+                return null;
+            }
+            return c.getLibrariesFolder();
+        }
+
+        if (bits[0] == "compiler") {
+            Compiler c = Base.compilers.get(bits[1]);
+            if (c == null) {
+                return null;
+            }
+            return c.getLibrariesFolder();
+        }
+
+        if (bits[0] == "board") {
+            Board c = Base.boards.get(bits[1]);
+            if (c == null) {
+                return null;
+            }
+            return c.getLibrariesFolder();
+        }
+        return null;
     }
 }
 

@@ -1885,64 +1885,23 @@ public class Editor extends JFrame {
 
             submenu.addSeparator();
 
-            JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
-            TreeMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
-            for (String libName : compilerLibraries.keySet()) {
-                JMenu libMenu = new JMenu(libName);
-                addSketchesFromFolder(libMenu, compilerLibraries.get(libName).getExamplesFolder());
-                if (libMenu.getItemCount() > 0) {
-                    compilerLibsMenu.add(libMenu);
-                }
-            }
 
-            JMenu coreLibsMenu = new JMenu(loadedSketch.getCore().getName());
-            TreeMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
-            for (String libName : coreLibraries.keySet()) {
-                JMenu libMenu = new JMenu(libName);
-                addSketchesFromFolder(libMenu, coreLibraries.get(libName).getExamplesFolder());
-                if (libMenu.getItemCount() > 0) {
-                    coreLibsMenu.add(libMenu);
-                }
-            }
+            TreeSet<String> catNames = Library.getLibraryCategories();
 
-            JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
-            TreeMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
-            for (String libName : boardLibraries.keySet()) {
-                JMenu libMenu = new JMenu(libName);
-                addSketchesFromFolder(libMenu, boardLibraries.get(libName).getExamplesFolder());
-                if (libMenu.getItemCount() > 0) {
-                    boardLibsMenu.add(libMenu);
-                }
-            }
-
-            if (compilerLibsMenu.getItemCount() > 0) {
-                submenu.add(compilerLibsMenu);
-            }
-
-            if (coreLibsMenu.getItemCount() > 0) {
-                submenu.add(coreLibsMenu);
-            }
-
-            if (boardLibsMenu.getItemCount() > 0) {
-                submenu.add(boardLibsMenu);
-            }
-
-
-            for (String key : Base.libraryCategoryNames.keySet()) {
-                TreeMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
-                JMenu catLibsMenu = new JMenu(Base.libraryCategoryNames.get(key));
-                for (Library lib : catLib.values()) {
-                    JMenu libMenu = new JMenu(lib.getName());
-                    addSketchesFromFolder(libMenu, lib.getExamplesFolder());
-                    if (libMenu.getItemCount() > 0) {
-                        catLibsMenu.add(libMenu);
+            for (String group : catNames) {
+                TreeSet<Library>libs = Library.getLibraries(group, loadedSketch.getCore().getName());
+                if (libs != null && libs.size() > 0) {
+                    JMenu top = new JMenu(Library.getCategoryName(group));
+                    for (Library lib : libs) {
+                        JMenu libMenu = new JMenu(lib.getName());
+                        addSketchesFromFolder(libMenu, lib.getExamplesFolder());
+                        if (libMenu.getItemCount() > 0) {
+                            top.add(libMenu);
+                        }
                     }
-                }
-                if (catLibsMenu.getItemCount() > 0) {
-                    submenu.add(catLibsMenu);
+                    submenu.add(top);
                 }
             }
-
         }
         fileMenu.add(submenu);
 
@@ -2553,7 +2512,11 @@ public class Editor extends JFrame {
                 ArrayList<String> dests = new ArrayList<String>();
                 dests.add("Do not import");
                 dests.add("Import to sketch folder");
-                dests.addAll(Base.libraryCategoryNames.values());
+                for (String group : Library.getLibraryCategories()) {
+                    if (group.startsWith("cat:")) {
+                        dests.add(Library.getCategoryName(group));
+                    }
+                }
 
                 for (String l : libarr) {
                     label = new JLabel(l + ":");
@@ -2673,12 +2636,12 @@ public class Editor extends JFrame {
                                     } else {
                                         String dname = (String)cb.getSelectedItem();
                                         String cat = null;
-                                        for (String k : Base.libraryCategoryNames.keySet()) {
-                                            if (Base.libraryCategoryNames.get(k).equals(dname)) {
+                                        for (String k : Library.getLibraryCategories()) {
+                                            if (Library.getCategoryName(k).equals(dname)) {
                                                 cat = k;
                                             }
                                         }
-                                        libTarget = Base.libraryCategoryPaths.get(cat);
+                                        libTarget = Library.getCategoryLocation(cat);
                                     }
 
                                     if (libTarget != null) {
@@ -2896,62 +2859,18 @@ public class Editor extends JFrame {
     public void populateLibrariesMenu(JComponent menu) {
         JMenuItem item;
 
-        if (loadedSketch.getCompiler() != null) {
-            JMenu compilerLibsMenu = new JMenu(loadedSketch.getCompiler().getName());
-            TreeMap<String, Library> compilerLibraries = Base.getLibraryCollection("compiler:" + loadedSketch.getCompiler().getName(), loadedSketch.getCore().getName());
-            for (String libName : compilerLibraries.keySet()) {
-                item = new JMenuItem(libName);
-                item.addActionListener(insertIncludeAction);
-                item.setActionCommand(libName);
-                compilerLibsMenu.add(item);
-            }
-            if (compilerLibsMenu.getItemCount() > 0) {
-                menu.add(compilerLibsMenu);
-            }
-        }
+        TreeMap<String, TreeSet<Library>> libs = Library.getFilteredLibraries(loadedSketch.getCore().getName());
 
-        if (loadedSketch.getCore() != null) {
-            JMenu coreLibsMenu = new JMenu(loadedSketch.getCore().getName());
-            TreeMap<String, Library> coreLibraries = Base.getLibraryCollection("core:" + loadedSketch.getCore().getName(), loadedSketch.getCore().getName());
-            for (String libName : coreLibraries.keySet()) {
-                item = new JMenuItem(libName);
+        for (String group : libs.keySet()) {
+            String groupName = Library.getCategoryName(group);
+            JMenu libsMenu = new JMenu(groupName);
+            for (Library lib : libs.get(group)) {
+                item = new JMenuItem(lib.getName());
                 item.addActionListener(insertIncludeAction);
-                item.setActionCommand(libName);
-                coreLibsMenu.add(item);
+                item.setActionCommand(lib.getName());
+                libsMenu.add(item);
             }
-            if (coreLibsMenu.getItemCount() > 0) {
-                menu.add(coreLibsMenu);
-            }
-        }
-
-        if (loadedSketch.getBoard() != null && loadedSketch.getCore() != null) {
-            JMenu boardLibsMenu = new JMenu(loadedSketch.getBoard().getName());
-            TreeMap<String, Library> boardLibraries = Base.getLibraryCollection("board:" + loadedSketch.getBoard().getName(), loadedSketch.getCore().getName());
-            for (String libName : boardLibraries.keySet()) {
-                item = new JMenuItem(libName);
-                item.addActionListener(insertIncludeAction);
-                item.setActionCommand(libName);
-                boardLibsMenu.add(item);
-            }
-            if (boardLibsMenu.getItemCount() > 0) {
-                menu.add(boardLibsMenu);
-            }
-        }
-
-        if (loadedSketch.getBoard() != null && loadedSketch.getCore() != null) {
-            for (String key : Base.libraryCategoryNames.keySet()) {
-                JMenu catLibsMenu = new JMenu(Base.libraryCategoryNames.get(key));
-                TreeMap<String, Library> catLib = Base.getLibraryCollection("cat:" + key, getCore().getName());
-                for (Library lib : catLib.values()) {
-                    item = new JMenuItem(lib.getName());
-                    item.addActionListener(insertIncludeAction);
-                    item.setActionCommand(lib.getName());
-                    catLibsMenu.add(item);
-                }
-                if (catLibsMenu.getItemCount() > 0) {
-                    menu.add(catLibsMenu);
-                }
-            }
+            menu.add(libsMenu);
         }
     }
 
@@ -3160,9 +3079,11 @@ public class Editor extends JFrame {
             if (foundLibs.size() > 0) {
                 ArrayList<LibCatObject> cats = new ArrayList<LibCatObject>();
 
-                for (String key : Base.libraryCategoryNames.keySet()) {
-                    LibCatObject ob = new LibCatObject(key, Base.libraryCategoryNames.get(key));
-                    cats.add(ob);
+                for (String group : Library.getLibraryCategories()) {
+                    if (group.startsWith("cat:")) {
+                        LibCatObject ob = new LibCatObject(group, Library.getCategoryName(group));
+                        cats.add(ob);
+                    }
                 }
                 LibCatObject[] catarr = cats.toArray(new LibCatObject[cats.size()]);
                 
@@ -3170,7 +3091,7 @@ public class Editor extends JFrame {
                     null, catarr, null);
 
                 if (loc != null) {
-                    File installPath = Base.libraryCategoryPaths.get(loc.getKey());
+                    File installPath = Library.getCategoryLocation(loc.getKey());
                     message("Installing to " + installPath.getAbsolutePath());
 
                     for (String lib : foundLibs.keySet()) {
@@ -3230,7 +3151,7 @@ public class Editor extends JFrame {
             zis.closeEntry();
             zis.close();
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            Base.error(e);
             return;
         }
     }
@@ -3264,7 +3185,7 @@ public class Editor extends JFrame {
             zis.closeEntry();
             zis.close();
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            Base.error(e);
             return null;
         }
 
@@ -3344,7 +3265,7 @@ public class Editor extends JFrame {
                 zis.closeEntry();
                 zis.close();
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                Base.error(e);
             }
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }

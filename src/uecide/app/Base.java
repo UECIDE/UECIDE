@@ -107,9 +107,6 @@ public class Base {
     public static ArrayList<Plugin> pluginInstances;
     static Splash splashScreen;
 
-    public static TreeMap<String, String>libraryCategoryNames;
-    public static TreeMap<String, File>libraryCategoryPaths;
-
     // Location for untitled items
     static File untitledFolder;
 
@@ -413,7 +410,6 @@ public class Base {
             splashScreen.setMessage("Complete", 100);
             splashScreen.dispose();
             if (boards.size() == 0) {
-                System.err.println(plugins.keySet());
                 showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
                 Editor.editorList.get(0).launchPlugin(plugins.get("uecide.plugin.PluginManager"));
             } else if (cores.size() == 0) {
@@ -770,115 +766,8 @@ public class Base {
     * to prevent the interface from locking up until the menus are done.
     */
 
-    public static ArrayList<String> getLibraryCollectionNames() {
-        ArrayList<String> out = new ArrayList<String>();
-        for (String k : libraryCollections.keySet()) {
-            out.add(k);
-        }
-        return out;
-    }
-
-    public static TreeMap<String, Library> getLibraryCollection(String name, String corename) {
-        TreeMap<String, Library>out = new TreeMap<String, Library>();
-        TreeMap<String, Library>coll = libraryCollections.get(name);
-        if (coll == null) {
-            return out;
-        }
-        for (String k : coll.keySet()) {
-            Library v = coll.get(k);
-            if (v.worksWith(corename)) {
-                out.put(k, v);
-            }
-        }
-        return out;
-        //return libraryCollections.get(name);
-    }
-
-    public static TreeMap<String, TreeMap<String, Library>> libraryCollections;
-
     public static void gatherLibraries() {
-        libraryCategoryNames = new TreeMap<String, String>();
-        libraryCategoryPaths = new TreeMap<String, File>();
-
-        for (String k : preferences.childKeysOf("library")) {
-            String cName = preferences.get("library." + k + ".name");
-            String cPath = preferences.get("library." + k + ".path");
-            if (cName != null && cPath != null) {
-                File f = new File(cPath);
-                if (f.exists() && f.isDirectory()) {    
-                    libraryCategoryNames.put(k, cName);
-                    libraryCategoryPaths.put(k, f);
-                }
-            }
-        }
-
-        // No library locations defined at the moment - let's define
-        // a default one that is like the old Arduino one.
-
-        if(libraryCategoryPaths.size() == 0) {
-            File cdir = new File(getSketchbookFolder(), "libraries");
-            libraryCategoryPaths.put("contributed", cdir);
-            libraryCategoryNames.put("contributed", "Contributed");
-            preferences.set("library.contributed.name", "Contributed");
-            preferences.setFile("library.contributed.path", cdir);
-        }
-
-        libraryCollections = new TreeMap<String, TreeMap<String, Library>>();
-
-        String[] corelist = (String[]) cores.keySet().toArray(new String[0]);
-
-        for (String core : corelist) {
-            libraryCollections.put("core:" + core, loadLibrariesFromFolder(cores.get(core).getLibrariesFolder(), "core", core)); // Core libraries
-        }
-
-        for (String key : libraryCategoryPaths.keySet()) {
-            libraryCollections.put("cat:" + key, loadLibrariesFromFolder(libraryCategoryPaths.get(key),"contributed"));
-        }
-    }
-
-    public static TreeMap<String, Library> loadLibrariesFromFolder(File folder, String type) {
-        return loadLibrariesFromFolder(folder, type, "all");
-    }
-
-    public static TreeMap<String, Library> loadLibrariesFromFolder(File folder, String type, String cr) {
-        TreeMap<String, Library> theseLibraries = new TreeMap<String, Library>();
-        if (!folder.exists()) {
-            return theseLibraries;
-        }
-        File[] list = folder.listFiles();
-        Debug.message("Loading libraries from " + folder.getAbsolutePath());
-        for (File f : list) {
-            if (f.isDirectory()) {
-                if (cr.equals("all")) {
-                    boolean sub = false;
-                    for (String c : cores.keySet()) {
-                        if (f.getName().equals(c)) {
-                            Debug.message("  Found sub-library core group " + f);
-                            theseLibraries.putAll(loadLibrariesFromFolder(f, type, c));
-                            sub = true;
-                            break;
-                        }
-                    }
-                    if (sub) continue;
-                }
-                File files[] = f.listFiles();
-                for (File sf : files) {
-                    if ((sf.getName().equals(f.getName() + ".h") || (sf.getName().startsWith(f.getName() + "_") && sf.getName().endsWith(".h")))) {
-                        Library newLibrary = new Library(sf, type, cr);
-                        if (newLibrary.isValid()) {
-                            theseLibraries.put(newLibrary.getName(), newLibrary);
-                            Debug.message("    Adding new library " + newLibrary.getName() + " from " + f.getAbsolutePath());
-                            if (newLibrary.getLibrariesFolder().exists()) {
-                                theseLibraries.putAll(loadLibrariesFromFolder(newLibrary.getLibrariesFolder(), type, cr));
-                            }
-                        } else {
-                            Debug.message("    Skipping invalid library " + f.getAbsolutePath());
-                        }
-                    }
-                }
-            }
-        }
-        return theseLibraries;
+        Library.loadLibraries();
     }
 
     /**
@@ -1572,7 +1461,7 @@ public class Base {
             Debug.message("Deleting folder " + dir.getAbsolutePath());
             removeDescendants(dir);
             if (!dir.delete()) {
-                System.err.println(Translate.t("Could not delete %1", dir.getName()));
+                error(Translate.t("Could not delete %1", dir.getName()));
             }
         }
     }
@@ -1595,7 +1484,7 @@ public class Base {
                 if (!preferences.getBoolean("compiler.save_build_files")) {
                     if (!dead.delete()) {
                         // temporarily disabled
-                        System.err.println(Translate.t("Could not delete %1", dead.getName()));
+                        error(Translate.t("Could not delete %1", dead.getName()));
                     }
                 }
             } else {

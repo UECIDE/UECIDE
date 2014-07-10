@@ -105,7 +105,11 @@ public class TabLabel extends JPanel {
                 if (TabLabel.this.needsReload()) {
                     if (fileWatchMutex) return;
                     fileWatchMutex = true;
-                    TabLabel.this.askReload();
+                    if (modified) {
+                        TabLabel.this.askReload();
+                    } else {
+                        reloadFile();
+                    }
                     fileWatchMutex = false;
                 }
             }

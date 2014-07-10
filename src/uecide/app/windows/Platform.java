@@ -223,17 +223,12 @@ public class Platform extends uecide.app.Platform {
         File localDataFolder = new File(localAppDataPath, Base.theme.get("product.cap"));
         File roamingDataFolder = new File(roamingAppDataPath, Base.theme.get("product.cap"));
 
-        System.err.println("Roaming: " + roamingDataFolder.getAbsolutePath());
-        System.err.println("Local: " + localDataFolder.getAbsolutePath());
-
         // We don't want old installations to suddenly lose all their data, so stick with the roaming if it
         // already exists.  A user can delete it or move it if they want.
         if (roamingDataFolder.exists() && roamingDataFolder.isDirectory()) {
-            System.err.println("Returning roaming");
             return roamingDataFolder;
         }
 
-        System.err.println("Returning local");
         return localDataFolder;
     } catch (Exception e) {
         Base.error(e);
