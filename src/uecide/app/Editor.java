@@ -2859,7 +2859,12 @@ public class Editor extends JFrame {
     public void populateLibrariesMenu(JComponent menu) {
         JMenuItem item;
 
-        TreeMap<String, TreeSet<Library>> libs = Library.getFilteredLibraries(loadedSketch.getCore().getName());
+        Core thisCore = loadedSketch.getCore();
+        if (thisCore == null) {
+            return;
+        }
+
+        TreeMap<String, TreeSet<Library>> libs = Library.getFilteredLibraries(thisCore.getName());
 
         for (String group : libs.keySet()) {
             String groupName = Library.getCategoryName(group);
