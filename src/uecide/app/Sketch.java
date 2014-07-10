@@ -2520,7 +2520,7 @@ public class Sketch implements MessageConsumer {
                     err.thread.join();
                 result = proc.waitFor();
                 running = false;
-            } catch (Exception ignored) { }
+            } catch (Exception ignored) { Base.error(ignored); }
         }
         Base.processes.remove(proc);
         if (result == 0) {

@@ -788,9 +788,10 @@ public class code extends JPanel implements EditorBase {
     }
     
     public void reloadFile() {
+        int cp = textArea.getCaretPosition();
         textArea.setText(sketch.getFileContent(file, true));
-        textArea.setCaretPosition(0);
-        scrollTo(0);
+        textArea.setCaretPosition(cp);
+     //   scrollTo(0);
         setModified(false);
     }
 

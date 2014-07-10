@@ -53,7 +53,7 @@ public class MessageSiphon implements Runnable {
     //thread.setPriority(Thread.MIN_PRIORITY);
     thread.setPriority(Thread.MAX_PRIORITY-1);
     thread.start();
-    channel = -1;
+    channel = 0;
   }
 
   public void setChannel(int c) {
@@ -69,6 +69,7 @@ public class MessageSiphon implements Runnable {
       String currentLine;
       while ((currentLine = streamReader.readLine()) != null) {
             switch(channel) {
+                default:
                 case 0:
                     consumer.message(currentLine);
                     break;
