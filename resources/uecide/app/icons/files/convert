@@ -1,0 +1,9 @@
+#!/bin/sh
+
+SIZE=16
+
+for FILE in *.svg
+do
+    BASE=`basename $FILE .svg`
+    convert -background transparent $FILE -resize $SIZE $BASE.png
+done

@@ -1,0 +1,4 @@
+#!/bin/sh
+ 
+APPDIR="$(dirname -- $(readlink -f -- "${0}") )"
+java -jar ${APPDIR}/uecide.jar $*

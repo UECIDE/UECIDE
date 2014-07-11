@@ -1,0 +1,352 @@
+<?xml version="1.0"?>
+<project name="UECIDE Core" default="build">
+
+    <property name="launch4j.dir" value="dist/windows/launcher/launch4j/" />
+    <taskdef name="launch4j"
+        classname="net.sf.launch4j.ant.Launch4jTask"
+        classpath="${launch4j.dir}/launch4j.jar; ${launch4j.dir}/lib/xstream.jar; " />
+
+    <property file="version.plist"/>
+    <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar">
+        <and>
+            <os family="unix"/>
+            <not>
+                <os family="mac"/>
+            </not>
+            <os arch="i386"/>
+        </and>
+    </condition>
+    <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/rt.jar">
+        <and>
+            <os family="unix"/>
+            <not>
+                <os family="mac"/>
+            </not>
+            <os arch="amd64"/>
+        </and>
+    </condition>
+
+    <tstamp>
+        <format property="TODAY" pattern="yyyyMMdd" />
+    </tstamp>
+
+    <target name="clean" description="Clean out the build directories">
+        <delete dir="bin" />
+        <delete file="uecide.jar" />
+    </target>
+
+    <target name="compile" description="Compile" depends="build_number, git_contributors, thirdparty">
+        <mkdir dir="bin" />
+        <javac target="1.6" 
+                debug="true"
+                debuglevel="lines,vars,source"
+                deprecation="true"
+               source="1.6"
+               encoding="UTF-8"
+               bootclasspath="${bootclass.path}"
+               includeAntRuntime="false"
+               srcdir="src" destdir="bin"
+               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/jssc.jar; lib/JTattoo-1.6.10.jar; lib/liquidlnf.jar; lib/jna.jar; lib/apple.jar; lib/rsyntaxtextarea.jar; lib/jfontchooser-1.0.5.jar; lib/json-simple-1.1.1.jar">
+            <compilerarg value="-Xlint:unchecked"/>
+
+        </javac>
+    </target>		
+
+    <target name="plugins" depends="compile" description="Build and bundle plugins">
+        <subant target="bundle" buildpath="plugins" />
+    </target>
+
+    <target name="build" depends="compile" description="Build uecide">
+        <jar basedir="bin" destfile="uecide.jar">
+            <fileset dir="bin" />
+            <fileset dir="resources" />
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Main-Class" value="uecide.app.Base"/>
+                <attribute name="Class-Path" value="uecide.jar"/>
+                <attribute name="Version" value="${version}"/>
+                <attribute name="Build" value="${build.number}" />
+                <attribute name="Compiled" value="${TODAY}"/>
+            </manifest>
+        </jar>
+        <chmod perm="0755" file="uecide.jar" />
+        <copy file="uecide.jar" tofile="uecide-${build.number}.jar" />
+    </target>
+
+    <target name="thirdparty" 
+            description="Compile third party java files" 
+            depends="present-rsyntaxtextarea"
+            unless="${exists.rsyntaxtextarea}">
+        <subant buildpath="thirdparty"/>
+    </target>
+
+    <target name="present-rsyntaxtextarea"><available file="lib/rsyntaxtextarea.jar" property="exists.rsyntaxtextarea" /></target>
+
+    <target name="test_git"><available file=".git" property="git.available" /></target>
+
+    <target name="saved_build_number" unless="git.available">
+        <propertycopy property="build.number" from="saved.build.number" />
+    </target>
+
+    <target name="build_number" depends="test_git, git_build_number, saved_build_number">
+        <echo>UECIDE build number ${build.number}</echo>
+    </target>
+
+    <target name="git_build_number" depends="test_git" if="git.available">
+        <exec outputproperty="build.number" executable="git">
+            <arg value="rev-list" />
+            <arg value="HEAD" />
+            <arg value="--count" />
+        </exec>
+        <propertyfile file="version.plist">
+            <entry key="saved.build.number" value="${build.number}" />
+        </propertyfile>
+    </target>
+    
+    <target name="git_contributors" depends="test_git" if="git.available">
+        <exec output="resources/uecide/app/contributors.txt" executable="git">
+            <arg value="shortlog" />
+            <arg value="-sn" />
+            <arg value="HEAD" />
+        </exec>
+    </target>
+
+
+    <target name="linux-zip" depends="build">
+        <mkdir dir="bundle/linux/uecide-${version}" />
+        <copy file="uecide.jar" todir="bundle/linux/uecide-${version}" />
+        <copy file="dist/linux/loader" tofile="bundle/linux/uecide-${version}/uecide" />
+        <chmod perm="0755" file="bundle/linux/uecide-${version}/uecide" />
+        <zip file="uecide-${version}-linux.zip" basedir="bundle/linux/" />
+        <delete dir="bundle/linux" />
+    </target>
+
+    <target name="linux64-deb">
+        <antcall target="linux-build-deb">
+            <param name="arch" value="amd64" />
+            <param name="deps.extra" value=", libc6-i386" />
+        </antcall>
+    </target>
+
+    <target name="linux32-deb">
+        <antcall target="linux-build-deb">
+            <param name="arch" value="i386" />
+            <param name="deps.extra" value="" />
+        </antcall>
+    </target>
+
+    <target name="linuxarmhf-deb">
+        <antcall target="linux-build-deb">
+            <param name="arch" value="armhf" />
+            <param name="deps.extra" value="" />
+        </antcall>
+    </target>
+
+    <target name="linux-deb" depends="linux32-deb, linux64-deb, linuxarmhf-deb" />
+
+    <target name="linux-build-deb" depends="build">
+
+        <property name="proot" value="bundle/linux/uecide-${version}-${arch}"/>
+        <mkdir dir="${proot}/usr/bin" />
+        <mkdir dir="${proot}/usr/share/icons" />
+        <mkdir dir="${proot}/usr/share/uecide" />
+        <mkdir dir="${proot}/usr/share/applications" />
+
+        <copy file="uecide.jar" todir="${proot}/usr/share/uecide" />
+        <copy file="dist/linux/loader" tofile="${proot}/usr/share/uecide/uecide" />
+        <chmod perm="0755" file="${proot}/usr/share/uecide/uecide" />
+        <symlink link="${proot}/usr/bin/uecide" resource="../share/uecide/uecide" overwrite="true" />
+        <copy file="dist/linux/icon.png" tofile="${proot}/usr/share/icons/uecide.png" />
+        <copy file="dist/linux/doc_icon.png" tofile="${proot}/usr/share/icons/uecide_sketch.png" />
+
+        <echo file="${proot}/usr/share/applications/uecide.desktop">[Desktop Entry]
+Name=UECIDE
+Comment=Universal Embedded Computing IDE
+Exec=/usr/bin/uecide
+Icon=uecide.png
+Terminal=false
+Type=Application
+Categories=Application;Development;Programming;
+StartupNotify=false
+MimeType=application/x-uecide
+</echo>
+
+        <echo file="${proot}/usr/share/uecide/uecide-mime.xml">&lt;?xml version="1.0"?&gt;
+&lt;mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'&gt;
+    &lt;mime-type type="application/x-uecide"&gt;
+        &lt;comment&gt;UECIDE Sketch&lt;/comment&gt;
+        &lt;glob pattern="*.pde"/&gt;
+        &lt;glob pattern="*.ino"/&gt;
+    &lt;/mime-type&gt;
+&lt;/mime-info&gt;
+</echo>
+
+        <mkdir dir="${proot}/DEBIAN" />
+        <echo file="${proot}/DEBIAN/control">Package: uecide
+Version: ${version}
+Maintainer: matt@majenko.co.uk
+Architecture: ${arch}
+Section: Programming
+Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java${deps.extra}
+Description: UECIDE Development environment
+
+</echo>
+        <echo file="${proot}/DEBIAN/postinst">#!/bin/bash
+xdg-mime install --novendor /usr/share/uecide/uecide-mime.xml
+xdg-icon-resource install --context mimetypes --novendor --size 128 /usr/share/icons/uecide_sketch.png application-x-uecide
+xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
+</echo>
+        <chmod perm="755">
+            <fileset dir="${proot}/DEBIAN" includes="postinst" />
+        </chmod>
+        <exec executable="fakeroot" dir="bundle/linux">
+            <arg value="dpkg-deb"/>
+            <arg value="-b"/>
+            <arg value="uecide-${version}-${arch}"/>
+            <arg value="../../uecide-${version}-${arch}.deb" />
+        </exec>
+
+        <delete dir="bundle/linux" />
+
+    </target>
+  
+    <target name="macosx-dmg" depends="build">
+        <mkdir dir="bundle/macosx/UECIDE.app" />
+
+        <copy todir="bundle/macosx/UECIDE.app">
+            <fileset dir="dist/macosx/template.app" includes="*/**"/>
+        </copy>
+
+        <replace file="bundle/macosx/UECIDE.app/Contents/Info.plist" token="{product.cap}" value="UECIDE" />
+        <replace file="bundle/macosx/UECIDE.app/Contents/Info.plist" token="{version}" value="${version}" />
+
+        <copy file="dist/macosx/icon.icns" tofile="bundle/macosx/UECIDE.app/Contents/Resources/uecide.icns" overwrite="true" />
+        <copy file="dist/macosx/doc.icns" tofile="bundle/macosx/UECIDE.app/Contents/Resources/doc.icns" overwrite="true" />
+
+        <chmod file="bundle/macosx/UECIDE.app/Contents/MacOS/JavaApplicationStub" perm="755" />
+
+        <copy file="uecide.jar" todir="bundle/macosx/UECIDE.app/Contents/Resources/Java" />
+
+        <symlink link="bundle/macosx/Applications" resource="/Applications" overwrite="true" />
+
+        <exec executable="genisoimage">
+            <arg value="-D" />
+            <arg value="-V" />
+            <arg value="UECIDE" />
+            <arg value="-no-pad" />
+            <arg value="-r" />
+            <arg value="-apple" />
+            <arg value="-o" />
+            <arg value="uecide-${version}-macosx.dmg" />
+            <arg value="bundle/macosx" />
+        </exec>
+
+        <delete dir="bundle/macosx" />
+
+    </target>
+
+    <target name="windows-zip-lite" depends="build">
+        <mkdir dir="bundle/windows/uecide-${version}/lib" />
+        <mkdir dir="windows" /> 
+        <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
+        <copy file="dist/windows/config.xml" todir="bundle/windows" />
+        <copy file="dist/windows/about.bmp" todir="bundle/windows" />
+        <copy file="dist/windows/application.ico" todir="bundle/windows" />
+        <launch4j configFile="bundle/windows/config.xml" />
+        <copy file="bundle/windows/uecide.exe" todir="bundle/windows/uecide-${version}" />
+        <delete file="bundle/windows/config.xml" />
+        <delete file="bundle/windows/about.bmp" />
+        <delete file="bundle/windows/uecide.exe" />
+        <delete file="bundle/windows/application.ico" />
+        <zip file="uecide-${version}-windows-lite.zip" basedir="bundle/windows/" />
+        <delete dir="windows" />
+        <delete dir="bundle/windows" />
+    </target>
+
+    <target name="windows-zip-full" depends="build">
+        <mkdir dir="bundle/windows/uecide-${version}/lib" />
+        <mkdir dir="tmp" />
+        <mkdir dir="windows" /> 
+        <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
+        <unzip dest="bundle/windows/uecide-${version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
+        <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
+        <copy file="dist/windows/config.xml" todir="bundle/windows" />
+        <copy file="dist/windows/about.bmp" todir="bundle/windows" />
+        <copy file="dist/windows/application.ico" todir="bundle/windows" />
+        <launch4j configFile="bundle/windows/config.xml" />
+        <copy file="bundle/windows/uecide.exe" todir="bundle/windows/uecide-${version}" />
+        <delete file="bundle/windows/config.xml" />
+        <delete file="bundle/windows/about.bmp" />
+        <delete file="bundle/windows/uecide.exe" />
+        <delete file="bundle/windows/application.ico" />
+        <zip file="uecide-${version}-windows-full.zip" basedir="bundle/windows/" />
+        <delete dir="windows" />
+        <delete dir="bundle/windows" />
+    </target>
+
+    <target name="windows-exe-lite" depends="build">
+        <mkdir dir="bundle/windows/uecide-${version}/lib" />
+        <mkdir dir="windows" /> 
+        <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
+        <copy file="dist/windows/config.xml" todir="bundle/windows" />
+        <copy file="dist/windows/about.bmp" todir="bundle/windows" />
+        <copy file="dist/windows/application.ico" todir="bundle/windows" />
+        <launch4j configFile="bundle/windows/config.xml" />
+        <copy file="bundle/windows/uecide.exe" todir="bundle/windows/uecide-${version}" />
+        <delete file="bundle/windows/config.xml" />
+        <delete file="bundle/windows/about.bmp" />
+        <delete file="bundle/windows/uecide.exe" />
+        <delete file="bundle/windows/application.ico" />
+        <copy todir="bundle/windows" file="dist/windows/script.nsi" />
+        <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${version}" />
+        <replace file="bundle/windows/script.nsi" token="%TYPE%" value="lite" />
+        <replace file="bundle/windows/script.nsi" token="%PRODUCT%" value="uecide" />
+        <replace file="bundle/windows/script.nsi" token="%PRODUCTCAP%" value="UECIDE" />
+        <replace file="bundle/windows/script.nsi" token="%PUBLISHER%" value="Majenko Technologies" />
+        <replace file="bundle/windows/script.nsi" token="%THEME%" value="uecide" />
+        <exec executable="makensis">
+            <arg value="bundle/windows/script.nsi"/>
+        </exec>
+        <copy file="bundle/windows/uecide-${version}-lite.exe" todir="." />
+        <delete file="bundle/windows/uecide-${version}-lite.exe"/>
+        <delete file="bundle/windows/script.nsi" />
+        <delete dir="bundle/windows" />
+        <delete dir="windows" />
+    </target>
+
+    <target name="windows-exe-full" depends="build">
+        <mkdir dir="bundle/windows/uecide-${version}/lib" />
+        <mkdir dir="windows" /> 
+        <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
+        <unzip dest="bundle/windows/uecide-${version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
+        <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
+        <copy file="dist/windows/config.xml" todir="bundle/windows" />
+        <copy file="dist/windows/about.bmp" todir="bundle/windows" />
+        <copy file="dist/windows/application.ico" todir="bundle/windows" />
+        <launch4j configFile="bundle/windows/config.xml" />
+        <copy file="bundle/windows/uecide.exe" todir="bundle/windows/uecide-${version}" />
+        <delete file="bundle/windows/config.xml" />
+        <delete file="bundle/windows/about.bmp" />
+        <delete file="bundle/windows/uecide.exe" />
+        <delete file="bundle/windows/application.ico" />
+        <copy todir="bundle/windows" file="dist/windows/script.nsi" />
+        <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${version}" />
+        <replace file="bundle/windows/script.nsi" token="%TYPE%" value="full" />
+        <replace file="bundle/windows/script.nsi" token="%PRODUCT%" value="uecide" />
+        <replace file="bundle/windows/script.nsi" token="%PRODUCTCAP%" value="UECIDE" />
+        <replace file="bundle/windows/script.nsi" token="%PUBLISHER%" value="Majenko Technologies" />
+        <replace file="bundle/windows/script.nsi" token="%THEME%" value="uecide" />
+        <exec executable="makensis">
+            <arg value="bundle/windows/script.nsi"/>
+        </exec>
+        <copy file="bundle/windows/uecide-${version}-full.exe" todir="." />
+        <delete file="bundle/windows/uecide-${version}-full.exe"/>
+        <delete file="bundle/windows/script.nsi" />
+        <delete dir="bundle/windows" />
+        <delete dir="windows" />
+    </target>
+
+    <target name="all-dist" depends="linux-zip, linux-deb, windows-zip-lite, windows-exe-lite, windows-zip-full, windows-exe-full, macosx-dmg" />
+
+</project>
