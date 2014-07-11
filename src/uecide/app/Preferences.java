@@ -93,6 +93,7 @@ public class Preferences {
     JCheckBox deletePreviousBox;
     JCheckBox memoryOverrideBox;
     JTextField memoryField;
+    JTextField externalEditorField;
     JTextField editorFontField;
     JTextField consoleFontField;
     JCheckBox autoAssociateBox;
@@ -627,6 +628,18 @@ public class Preferences {
         c.gridx = 0;
         c.gridy++;
         c.gridwidth = 3;
+        label = new JLabel("External editor command: ");
+        p.add(label, c);
+
+        c.gridy++;
+        c.gridwidth = 2;
+        externalEditorField = new JTextField(40);
+        externalEditorField.setText(Base.preferences.get("editor.external.command"));
+        p.add(externalEditorField, c);
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 3;
         label = new JLabel("Editor font: ");
         p.add(label, c);
 
@@ -1033,6 +1046,7 @@ public class Preferences {
     //setBoolean("sketchbook.auto_clean", sketchCleanBox.isSelected());
 
     Base.preferences.set("editor.font", editorFontField.getText());
+    Base.preferences.set("editor.external.command", externalEditorField.getText());
     Base.preferences.set("console.font", consoleFontField.getText());
 
     Base.preferences.set("location.plugins", pluginsLocationField.getText());

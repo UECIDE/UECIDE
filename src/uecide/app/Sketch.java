@@ -1670,9 +1670,12 @@ public class Sketch implements MessageConsumer {
                     error("Failed generating listing");
                     return false;
                 }
-                if (Base.preferences.getBoolean("export.save_lss")) {
+                if (Base.preferences.getBoolean("export.save_lss") && !parentIsProtected()) {
                     try {
                         Base.copyFile(new File(buildFolder, sketchName + ".lss"), new File(sketchFolder, sketchName + ".lss"));
+                        if (editor != null) {
+                            editor.updateFilesTree();
+                        }
                     } catch (Exception e) {
                         error(e);
                     }
@@ -1684,6 +1687,16 @@ public class Sketch implements MessageConsumer {
         if (!compileHEX()) {
             error("Failed converting to HEX filee");
             return false;
+        }
+        if (Base.preferences.getBoolean("export.save_hex") && !parentIsProtected()) {
+            try {
+                Base.copyFile(new File(buildFolder, sketchName + ".hex"), new File(sketchFolder, sketchName + ".hex"));
+                if (editor != null) {
+                    editor.updateFilesTree();
+                }
+            } catch (Exception e) {
+                error(e);
+            }
         }
 
 

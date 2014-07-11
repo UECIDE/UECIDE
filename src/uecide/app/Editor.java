@@ -1076,12 +1076,21 @@ public class Editor extends JFrame {
             TreePath selPath = sketchContentTree.getPathForLocation(e.getX(), e.getY());
             sketchContentTree.setSelectionPath(selPath);
             if (e.getButton() == 3) {
+                JPopupMenu menu = new JPopupMenu();
                 DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
                 DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();
                 if (o.getUserObject().getClass().equals(String.class)) {
                     String s = (String)o.getUserObject();
-                    if (s.equals("Source")) {
-                        JPopupMenu menu = new JPopupMenu();
+                    if (s.equals(loadedSketch.getName())) {
+                        JMenuItem openInOS = new JMenuItem("Open in OS");
+                        openInOS.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                Base.open(loadedSketch.getFolder().getAbsolutePath());
+                            }
+                        });
+                        menu.add(openInOS);
+                        menu.show(sketchContentTree, e.getX(), e.getY());
+                    } else if (s.equals("Source")) {
                         JMenuItem item = new JMenuItem("Create sketch file (.ino)");
                         item.setActionCommand("ino");
                         item.addActionListener(createNewAction);
@@ -1104,7 +1113,6 @@ public class Editor extends JFrame {
                         menu.add(item);
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Headers")) {
-                        JPopupMenu menu = new JPopupMenu();
                         JMenuItem item = new JMenuItem("Create header file");
                         item.setActionCommand("h");
                         item.addActionListener(createNewAction);
@@ -1115,18 +1123,15 @@ public class Editor extends JFrame {
                         menu.add(item);
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Libraries")) {
-                        JPopupMenu menu = new JPopupMenu();
                         populateLibrariesMenu(menu);
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Binaries")) {
-                        JPopupMenu menu = new JPopupMenu();
                         JMenuItem item = new JMenuItem("Add binary file");
                         item.setActionCommand("binary");
                         item.addActionListener(importFileAction);
                         menu.add(item);
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Output")) {
-                        JPopupMenu menu = new JPopupMenu();
                         JMenuItem item = new JMenuItem("Purge output files");
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
@@ -1139,7 +1144,22 @@ public class Editor extends JFrame {
                     } 
                 } else if (o.getUserObject().getClass().equals(File.class)) {
                     File thisFile = (File)o.getUserObject();
-                    JPopupMenu menu = new JPopupMenu();
+
+                    String ee = Base.preferences.get("editor.external.command");
+                    if (ee != null && !ee.equals("")) {
+                        JMenuItem openExternal = new JMenuItem("Open in external editor");
+                        openExternal.setActionCommand(thisFile.getAbsolutePath());
+                        openExternal.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                String cmd = Base.preferences.get("editor.external.command");
+                                String fn = e.getActionCommand();
+                                loadedSketch.settings.put("filename", fn);
+                                String c = loadedSketch.parseString(cmd);
+                                Base.exec(c.split("::"));
+                            }
+                        });
+                        menu.add(openExternal);
+                    }
 
                     JMenuItem renameItem = new JMenuItem("Rename file");
                     renameItem.addActionListener(new ActionListener() {
@@ -1239,7 +1259,6 @@ public class Editor extends JFrame {
                     menu.show(sketchContentTree, e.getX(), e.getY());
                 } else if (o.getUserObject().getClass().equals(Library.class)) {
                     final Library lib = (Library)(o.getUserObject());
-                    JPopupMenu menu = new JPopupMenu();
                     JMenuItem item = new JMenuItem("Delete cached archive");
                     item.setEnabled(loadedSketch.libraryIsCompiled(lib));
                     item.addActionListener(new ActionListener() {
@@ -1333,6 +1352,15 @@ public class Editor extends JFrame {
                     JPopupMenu menu = new JPopupMenu();
 
                     if (thisFile.isDirectory()) {
+                        JMenuItem openInOS = new JMenuItem("Open in OS");
+                        openInOS.setActionCommand(thisFile.getAbsolutePath());
+                        openInOS.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                Base.open(e.getActionCommand());
+                            }
+                        });
+                        menu.add(openInOS);
+
                         JMenuItem mkdirItem = new JMenuItem("Create directory");
                         mkdirItem.setActionCommand(thisFile.getAbsolutePath());
                         mkdirItem.addActionListener(new ActionListener() {
@@ -1356,6 +1384,22 @@ public class Editor extends JFrame {
                             }
                         });
                         menu.add(unzipItem);
+                    } else {
+                        String ee = Base.preferences.get("editor.external.command");
+                        if (ee != null && !ee.equals("")) {
+                            JMenuItem openExternal = new JMenuItem("Open in external editor");
+                            openExternal.setActionCommand(thisFile.getAbsolutePath());
+                            openExternal.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    String cmd = Base.preferences.get("editor.external.command");
+                                    String fn = e.getActionCommand();
+                                    loadedSketch.settings.put("filename", fn);
+                                    String c = loadedSketch.parseString(cmd);
+                                    Base.exec(c.split("::"));
+                                }
+                            });
+                            menu.add(openExternal);
+                        }
                     }
 
                     JMenuItem renameItem = new JMenuItem("Rename file");
