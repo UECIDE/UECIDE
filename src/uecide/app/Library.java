@@ -248,11 +248,11 @@ public class Library implements Comparable {
     }
 
     public boolean isCore() {
-        return type.equals("core");
+        return type.startsWith("core:");
     }
 
     public boolean isContributed() {
-        return type.equals("contributed");
+        return type.startsWith("cat");
     }
 
     public boolean isSketch() {
@@ -271,11 +271,13 @@ public class Library implements Comparable {
     }
 
     public String getArchiveName() {
-        return "lib" + type + "_" + name + ".a";
+        String[] bits = type.split(":");
+        return "lib" + bits[0] + "_" + name + ".a";
     }
 
     public String getLinkName() {
-        return type + "_" + name;
+        String[] bits = type.split(":");
+        return bits[0] + "_" + name;
     }
 
     public File getExamplesFolder() {
