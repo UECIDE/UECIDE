@@ -1085,7 +1085,7 @@ public class Editor extends JFrame {
                         JMenuItem openInOS = new JMenuItem("Open in OS");
                         openInOS.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
-                                Base.open(loadedSketch.getFolder().getAbsolutePath());
+                                Base.openURL(loadedSketch.getFolder().getAbsolutePath());
                             }
                         });
                         menu.add(openInOS);
@@ -1356,7 +1356,7 @@ public class Editor extends JFrame {
                         openInOS.setActionCommand(thisFile.getAbsolutePath());
                         openInOS.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
-                                Base.open(e.getActionCommand());
+                                Base.openURL(e.getActionCommand());
                             }
                         });
                         menu.add(openInOS);
