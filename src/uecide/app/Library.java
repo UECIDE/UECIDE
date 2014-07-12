@@ -158,6 +158,15 @@ public class Library implements Comparable {
         return false;
     }
 
+    public File getHeader(String header) {
+        for (File f : headerFiles) {
+            if (f.getName().equals(header)) {
+                return f;
+            }
+        }
+        return null;
+    }
+
     public void gatherIncludes(File f) {
         String[] data;
         try {
@@ -196,12 +205,13 @@ public class Library implements Comparable {
                 // If the file is not local to the library then go ahead and add it.
                 // Local files override other libraries.
                 File localFile = new File(folder, i);
-                if (!localFile.exists()) {
+                if (!hasHeader(localFile.getName())) {
                     if (requiredLibraries.indexOf(i) == -1) {
                         requiredLibraries.add(i);
                     }
                 } else {
                     // This is a local header.  We should check it for libraries.
+                    localFile = getHeader(localFile.getName());
                     if (probedFiles.indexOf(localFile.getAbsolutePath()) == -1) {
                         probedFiles.add(localFile.getAbsolutePath());
                         gatherIncludes(localFile);
