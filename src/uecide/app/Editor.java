@@ -246,8 +246,8 @@ public class Editor extends JFrame {
         leftRightSplit.setResizeWeight(0D);
         topBottomSplit.setResizeWeight(1D);
 
-        int dividerSize = Base.preferences.getInteger("editor.divider.split", 250);
-        topBottomSplit.setDividerLocation(height - dividerSize);
+        int dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
+        topBottomSplit.setDividerLocation(dividerSize);
 
         dividerSize = Base.preferences.getInteger("editor.tree.split", 150);
         leftRightSplit.setDividerLocation(dividerSize);
@@ -259,7 +259,6 @@ public class Editor extends JFrame {
         leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
             new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent e) {
-                    Dimension size = me.getSize();
                     int pos = (Integer)(e.getNewValue());
                     Base.preferences.setInteger("editor.tree.split", pos);
                     Base.preferences.saveDelay();
@@ -270,8 +269,7 @@ public class Editor extends JFrame {
         topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
             new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent e) {
-                    Dimension size = me.getSize();
-                    int pos = size.height - (Integer)(e.getNewValue());
+                    int pos = (Integer)(e.getNewValue());
                     Base.preferences.setInteger("editor.divider.split", pos);
                     Base.preferences.saveDelay();
                 }
