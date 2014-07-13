@@ -87,6 +87,13 @@ public class FileType {
 
         fileTypeList.put("lss", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
         fileTypeList.put("hex", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("cfg", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("ini", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("txt", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("dat", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("plist", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("properties", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+
         fileTypeList.put("o", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
         fileTypeList.put("a", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
         fileTypeList.put("elf", new FileTypeInfo(FileType.OBJECT, "uecide.app.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));

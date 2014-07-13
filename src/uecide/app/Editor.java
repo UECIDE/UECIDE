@@ -247,6 +247,7 @@ public class Editor extends JFrame {
         topBottomSplit.setResizeWeight(1D);
 
         int dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
+        System.err.println("Initial split position: " + dividerSize);
         topBottomSplit.setDividerLocation(dividerSize);
 
         dividerSize = Base.preferences.getInteger("editor.tree.split", 150);
@@ -255,26 +256,6 @@ public class Editor extends JFrame {
         this.add(topBottomSplit, BorderLayout.CENTER);
 
         final Editor me = this;
-
-        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    int pos = (Integer)(e.getNewValue());
-                    Base.preferences.setInteger("editor.tree.split", pos);
-                    Base.preferences.saveDelay();
-                }
-            }
-        );
-
-        topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    int pos = (Integer)(e.getNewValue());
-                    Base.preferences.setInteger("editor.divider.split", pos);
-                    Base.preferences.saveDelay();
-                }
-            }
-        );
 
         consoleScroll = new JScrollPane();
         int maxLineCount = Base.preferences.getInteger("console.length");
@@ -508,6 +489,36 @@ public class Editor extends JFrame {
         });
 
         openOrSelectFile(loadedSketch.getMainFile());
+        dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
+        System.err.println("Secondary split position: " + dividerSize);
+        topBottomSplit.setDividerLocation(dividerSize);
+
+        dividerSize = Base.preferences.getInteger("editor.tree.split", 150);
+        leftRightSplit.setDividerLocation(dividerSize);
+
+        // We want to do this last as the previous SETs trigger this change listener.
+
+        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    int pos = (Integer)(e.getNewValue());
+                    Base.preferences.setInteger("editor.tree.split", pos);
+                    Base.preferences.saveDelay();
+                }
+            }
+        );
+
+        topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    int pos = (Integer)(e.getNewValue());
+                    Base.preferences.setInteger("editor.divider.split", pos);
+                    System.err.println("Set split position: " + pos);
+                    Base.preferences.saveDelay();
+                }
+            }
+        );
+
     }
 
     class FileCellRenderer implements TreeCellRenderer {
@@ -2087,6 +2098,14 @@ public class Editor extends JFrame {
         sketchMenu.addSeparator();
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_BOTTOM);
 
+        item = new JMenuItem("Sketch properties...");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new SketchProperties(Editor.this, loadedSketch);
+            }
+        });
+        sketchMenu.add(item);
+
         submenu = new JMenu("Boards");
         populateBoardsMenu(submenu);
         hardwareMenu.add(submenu);
@@ -2427,15 +2446,15 @@ public class Editor extends JFrame {
             return;
         }            
 
-        if (loadedSketch.getSerialPort() == null) {
-            setStatus("No port selected!");
-            return;
-        }            
 
         statusInfo.append(loadedSketch.getBoard().getDescription());
-        statusInfo.append(" on ");
-        statusInfo.append(loadedSketch.getSerialPort());
 
+        if (loadedSketch.getSerialPort() == null) {
+            statusInfo.append(" - No port selected!");
+        } else {
+            statusInfo.append(" on ");
+            statusInfo.append(loadedSketch.getSerialPort());
+        }
 
         setStatus(statusInfo.toString());
     }

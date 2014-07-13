@@ -494,4 +494,8 @@ public class PropertyFile {
         PropertyFile pf = getChildren(path);
         return pf.childKeys();
     }
+
+    public int size() {
+        return properties.size();
+    }
 }

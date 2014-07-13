@@ -65,6 +65,7 @@ public class Sketch implements MessageConsumer {
     public Editor editor = null;    // The editor window the sketch is loaded in
     public File buildFolder;        // Where to build the sketch
     public String uuid;             // A globally unique ID for temporary folders etc
+    public PropertyFile configFile = null;  // File containing sketch configuration
 
     boolean isUntitled;             // Whether or not the sketch has been named
 
@@ -154,6 +155,7 @@ public class Sketch implements MessageConsumer {
 
     // Look up a board in the global boards map and set the board appropriately
     public void setBoard(String board) {
+        if (board == null || board.equals("")) return;
         Board b = Base.getBoard(board);
         setBoard(b);
     }
@@ -185,6 +187,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setCore(String core) {
+        if (core == null || core.equals("")) return;
         Core c = Base.getCore(core);
         setCore(c);
     }
@@ -214,6 +217,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setCompiler(String compiler) {
+        if (compiler == null || compiler.equals("")) return;
         Compiler c = Base.getCompiler(compiler);
         setCompiler(c);
     }
@@ -255,9 +259,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setProgrammer(String programmer) {
-        if (programmer == null) {
-            return;
-        }
+        if (programmer == null || programmer.equals("")) return;
         Base.preferences.set("board." + selectedBoard.getName() + ".programmer", programmer);
         selectedProgrammer = programmer;
         Base.preferences.saveDelay();
@@ -269,6 +271,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setSerialPort(String p) {
+        if (p == null || p.equals("")) return;
         selectedSerialPort = p;
         if (selectedBoard != null) {
             Base.preferences.set("board." + selectedBoard.getName() + ".port", selectedSerialPort);
@@ -398,6 +401,10 @@ public class Sketch implements MessageConsumer {
         } else {
             setSerialPort(null);
         }
+
+        configFile = new PropertyFile(new File(folder, "sketch.cfg"));
+        loadConfig();
+
         updateLibraryList();
     }
 
@@ -1290,6 +1297,9 @@ public class Sketch implements MessageConsumer {
             }
         }
         saveAllFiles();
+        if (configFile.size() > 0) {
+            configFile.save();
+        }
         return true;
     }
 
@@ -3090,6 +3100,30 @@ public class Sketch implements MessageConsumer {
                 zos.closeEntry();
             }
         }
+    }
+
+    public void loadConfig() {
+    
+        if (configFile.get("board") != null) {
+            setBoard(configFile.get("board"));
+        }
+
+        if (configFile.get("core") != null) {
+            setCore(configFile.get("core"));
+        }
+
+        if (configFile.get("compiler") != null) {
+            setCompiler(configFile.get("compiler"));
+        }
+
+        if (configFile.get("port") != null) {
+            setSerialPort(configFile.get("port"));
+        }
+
+        if (configFile.get("programmer") != null) {
+            setProgrammer(configFile.get("programmer"));
+        }
+
     }
 
 }
