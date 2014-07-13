@@ -163,6 +163,7 @@ public class Sketch implements MessageConsumer {
     // Set the current board.  Also looks up the last settings used for that board
     // and propogates them onwards (core, compiler, etc).
     public void setBoard(Board board) {
+        Debug.message("Selecting board " + board);
         if (board == null) {
             return;
         }
@@ -699,24 +700,43 @@ public class Sketch implements MessageConsumer {
         out = stripBlock(out, "{", "}");
         String[] s = out.split("\n");
         StringBuilder decimated = new StringBuilder();
+        boolean continuation = false;
         for (String line : s) {
             line = line.trim();
-            if (line.endsWith(";")) {
-                continue;
-            }
+
             if (line.equals("")) {
                 continue;
             }
+
             if (line.startsWith("#")) {
                 continue;
             }
+
+            if (continuation) {
+                decimated.append(line);
+                if (line.endsWith(")")) {
+                    continuation = false;
+                    decimated.append("\n");
+                }
+                continue;
+            }
+
+            if (line.endsWith(";")) {
+                continue;
+            }
+
             if (line.indexOf("(") == -1) {
                 continue;
             }
             Pattern p = Pattern.compile("[a-zA-Z0-9_\\*]+\\s+[a-zA-Z0-9_\\*]+\\s*\\(");
             Matcher m = p.matcher(line);
             if (m.find()) {
-                decimated.append(line + "\n");
+                decimated.append(line);
+                if (!line.endsWith(")")) {
+                    continuation = true;
+                } else {
+                    decimated.append("\n");
+                }
             }
         }
         return decimated.toString();
@@ -857,11 +877,14 @@ public class Sketch implements MessageConsumer {
                 int line = 1;
                 StringBuilder munged = new StringBuilder();
                 for (String l : cleanedFiles.get(f).split("\n")) {
-                    if (l.trim().startsWith(firstFunction)) {
-                        for (String func : s) {
-                            munged.append(func + ";\n");
+                    if (!Base.preferences.getBoolean("compiler.disable_prototypes")) {
+                        if (l.trim().startsWith(firstFunction)) {
+                            for (String func : s) {
+                                func = func.replaceAll("=[^,)]+", "");
+                                munged.append(func + ";\n");
+                            }
+                            munged.append("#line " + line + " \"" + f.getName() + "\"\n");
                         }
-                        munged.append("#line " + line + " \"" + f.getName() + "\"\n");
                     }
                     Matcher mtch = pragma.matcher(l.trim());
                     if (mtch.find()) {

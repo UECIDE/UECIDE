@@ -204,7 +204,11 @@ public class UObject implements Comparable {
     }
 
     public boolean worksWith(UObject c) {
-        String[] myFamilies = get("family").split("::");
+        String fam = get("family");
+        if (fam == null) {
+            return false;
+        }
+        String[] myFamilies = fam.split("::");
         if (c == null) { System.err.println("No other object"); return false; }
         String[] otherFamilies = c.get("family").split("::");
 

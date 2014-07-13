@@ -2390,7 +2390,11 @@ public class Editor extends JFrame {
         Core core = loadedSketch.getCore();
         ArrayList<Compiler> compilerList = new ArrayList<Compiler>();
 
+        if (core == null) {
+            return;
+        }
         for (Compiler compiler : Base.compilers.values()) {
+            System.err.println("Compiler: " + compiler.getName());
             if (compiler.worksWith(core)) {
                 compilerList.add(compiler);
             }
