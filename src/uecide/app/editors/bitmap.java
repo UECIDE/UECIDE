@@ -179,4 +179,23 @@ public class bitmap extends JPanel implements EditorBase {
     public void refreshSettings() {
         // Nothing to do
     }
+
+   public void setSelection(int start, int end) {
+    }
+
+    public int getSelectionStart() {
+        return 0;
+    }
+
+    public int getSelectionEnd() {
+        return 0;
+    }
+
+    public void setSelectedText(String text) {
+    }
+
+    public String getSelectedText() {
+        return "";
+    }
+
 }

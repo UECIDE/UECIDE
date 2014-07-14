@@ -9,6 +9,7 @@ import java.io.*;
 public interface EditorBase {
     public boolean isModified();
     public String getText();
+    public void setText(String text);
     public void setModified(boolean m);
     public File getFile();
     public void populateMenu(JMenu menu, int flags);
@@ -20,4 +21,9 @@ public interface EditorBase {
     public void insertAtStart(String text);
     public void insertAtEnd(String text);
     public void refreshSettings();
+    public String getSelectedText();
+    public void setSelectedText(String text);
+    public int getSelectionStart();
+    public int getSelectionEnd();
+    public void setSelection(int start, int end);
 }

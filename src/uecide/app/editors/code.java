@@ -246,6 +246,8 @@ public class code extends JPanel implements EditorBase {
                 decreaseIndent(e);
             }
         });
+        toolbar.addSeparator();
+        editor.addPluginsToToolbar(toolbar, Plugin.TOOLBAR_TAB);
 
         refreshSettings();
         this.add(scrollPane, BorderLayout.CENTER);
@@ -829,4 +831,25 @@ public class code extends JPanel implements EditorBase {
         di.actionPerformed(e);
     }
 
+
+    public void setSelection(int start, int end) {
+        textArea.setSelectionStart(start);
+        textArea.setSelectionEnd(end);
+    }
+
+    public int getSelectionStart() {
+        return textArea.getSelectionStart();
+    }
+
+    public int getSelectionEnd() {
+        return textArea.getSelectionEnd();
+    }
+
+    public void setSelectedText(String text) {
+        textArea.replaceSelection(text);
+    }
+
+    public String getSelectedText() {
+        return textArea.getSelectedText();
+    }
 }
