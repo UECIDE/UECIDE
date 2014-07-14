@@ -23,7 +23,7 @@ import java.beans.*;
 public class PluginManager extends Plugin implements PropertyChangeListener
 {
 
-    JFrame frame;
+    JDialog frame;
     JPanel mainContainer;
     JSplitPane split;
     JPanel upper;
@@ -62,7 +62,7 @@ public class PluginManager extends Plugin implements PropertyChangeListener
     public PluginManager(EditorBase e) { editorTab = e; }
 
     public void openWindow() {
-        frame = new JFrame("Plugin Manager");
+        frame = new JDialog(editor, JDialog.ModalityType.APPLICATION_MODAL);
         mainContainer = new JPanel();
         mainContainer.setLayout(new BorderLayout());
         frame.add(mainContainer);
@@ -156,6 +156,15 @@ public class PluginManager extends Plugin implements PropertyChangeListener
         });
         toolbar.add(upgradeButton);
 
+        toolbar.add(Box.createHorizontalGlue());
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                askCloseWindow();
+            }
+        });
+        toolbar.add(closeButton);
+
         treeScroll = new JScrollPane();
         treeScroll.setViewportView(tree);
 
@@ -179,9 +188,9 @@ public class PluginManager extends Plugin implements PropertyChangeListener
         });
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
+        downloadPluginList();
         frame.pack();
         frame.setVisible(true);
-        downloadPluginList();
     }
 
     public void askCloseWindow() {
@@ -371,20 +380,24 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                     if (selected) {
                         if (userObject instanceof String) {
                             DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
-                            Object puo = parent.getUserObject();
-                            if (puo != null) {
-                                if (puo instanceof String) {
-                                    String pname = (String)puo;
-                                    String uname = (String)userObject;
-                                    if (pname.equals("Boards")) {
-                                        // Can install all boards
-                                        installButton.setEnabled(true);
-                                    } else if (uname.equals("Cores")) {
-                                        // Can install all cores
-                                        installButton.setEnabled(true);
-                                    } else if (uname.equals("Compilers")) {
-                                        // Can install all compilers
-                                        installButton.setEnabled(true);
+                            if (parent != null) {
+                                Object puo = parent.getUserObject();
+                                if (puo != null) {
+                                    if (puo instanceof String) {
+                                        String pname = (String)puo;
+                                        String uname = (String)userObject;
+                                        if (pname.equals("Boards")) {
+                                            // Can install all boards
+                                            installButton.setEnabled(true);
+                                        } else if (uname.equals("Cores")) {
+                                            // Can install all cores
+                                            installButton.setEnabled(true);
+                                        } else if (uname.equals("Compilers")) {
+                                            // Can install all compilers
+                                            installButton.setEnabled(true);
+                                        } else {
+                                            installButton.setEnabled(false);
+                                        }
                                     } else {
                                         installButton.setEnabled(false);
                                     }
@@ -538,6 +551,7 @@ public class PluginManager extends Plugin implements PropertyChangeListener
 
         treeModel.nodeStructureChanged(treeRoot);
         editor.restoreTreeState(tree, paths);
+        frame.pack();
     }
 
     public void propertyChange(PropertyChangeEvent e) {
