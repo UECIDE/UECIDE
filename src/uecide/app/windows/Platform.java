@@ -256,7 +256,7 @@ public class Platform extends uecide.app.Platform {
         if (url.startsWith("http://")) {
           Runtime.getRuntime().exec("cmd /c start " + url);
         } else {
-          Runtime.getRuntime().exec("cmd /c \"" + url + "\"");
+          Runtime.getRuntime().exec("explorer \"" + url + "\""); //if not a URL, open with explorer.exe - I have test built this and it cures the problem in Windows.
         }
     } catch (Exception e) {
         Base.error(e);
@@ -271,7 +271,7 @@ public class Platform extends uecide.app.Platform {
 
   public void openFolder(File file) {
     try {
-        String folder = file.getAbsolutePath();
+        String folder = file.getAbsolutePath(); //There seems to be a weird discrepency here, in the older code when this function was called, loadedSketch.getFolder().getAbsolutePath() was passed here - A 'String' is not a 'File' which is presumably why it failed to work.
 
         Runtime.getRuntime().exec("explorer \"" + folder + "\"");
     } catch (Exception e) {
