@@ -53,5 +53,5 @@ editor.line.fade=true
 editor.compile.error.bgcolor=#FFaaaa
 editor.compile.warning.bgcolor=#FFFFaa
 
-version.url=http://uecide.org/beta/version.txt
+version.url=http://uecide.org/betadl/version.txt
 version.download=http://uecide.org/download
