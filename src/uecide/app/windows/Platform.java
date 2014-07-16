@@ -253,7 +253,7 @@ public class Platform extends uecide.app.Platform {
 
   public void openURL(String url) {
     try {
-        if (url.startsWith("http://")) {
+        if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("ftp://") || ) {
           Runtime.getRuntime().exec("cmd /c start " + url);
         } else {
           Runtime.getRuntime().exec("explorer \"" + url + "\""); //if not a URL, open with explorer.exe - I have test built this and it cures the problem in Windows.

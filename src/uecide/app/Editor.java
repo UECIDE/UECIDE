@@ -2864,6 +2864,8 @@ public class Editor extends JFrame {
         loadedSketch.createNewFile(name + "." + extension);
     }
 
+    File importFileDefaultDir = null;
+
     public void importFile(String type) {
         JFileChooser fc = new JFileChooser();
         javax.swing.filechooser.FileFilter filter;
@@ -2874,10 +2876,17 @@ public class Editor extends JFrame {
             filter = new HeaderFileFilter();
             fc.setFileFilter(filter);
         }
+        if (importFileDefaultDir == null) {
+            importFileDefaultDir = new File(System.getProperty("user.dir"));
+        }
+
+        fc.setCurrentDirectory(importFileDefaultDir);
+
         int r = fc.showOpenDialog(this);
 
         if (r == JFileChooser.APPROVE_OPTION) {
             File src = fc.getSelectedFile();
+            importFileDefaultDir = src.getParentFile();
             if (!src.exists()) {
                 JOptionPane.showMessageDialog(this, "Cannot find file", "Unable to find the file " + src.getName(), JOptionPane.ERROR_MESSAGE);
                 return;

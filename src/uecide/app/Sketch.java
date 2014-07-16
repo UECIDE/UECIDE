@@ -85,6 +85,8 @@ public class Sketch implements MessageConsumer {
 
     boolean terminateExecution = false;
 
+    Process runningProcess = null;
+
     // This lot is what the sketch consists of - the list of files, libraries, settings, parameters etc.
     public ArrayList<File> sketchFiles = new ArrayList<File>();
 
@@ -2542,18 +2544,17 @@ public class Sketch implements MessageConsumer {
             message(sb.toString());
         }
 
-        Process proc;
         try {
-            proc = process.start();
+            runningProcess = process.start();
         } catch (Exception e) {
             error(e);
             return false;
         }
 
-        Base.processes.add(proc);
+        Base.processes.add(runningProcess);
 
-        MessageSiphon in = new MessageSiphon(proc.getInputStream(), this);
-        MessageSiphon err = new MessageSiphon(proc.getErrorStream(), this);
+        MessageSiphon in = new MessageSiphon(runningProcess.getInputStream(), this);
+        MessageSiphon err = new MessageSiphon(runningProcess.getErrorStream(), this);
         in.setChannel(0);
         err.setChannel(2);
         boolean running = true;
@@ -2564,11 +2565,11 @@ public class Sketch implements MessageConsumer {
                     in.thread.join();
                 if (err.thread != null)
                     err.thread.join();
-                result = proc.waitFor();
+                result = runningProcess.waitFor();
                 running = false;
             } catch (Exception ignored) { Base.error(ignored); }
         }
-        Base.processes.remove(proc);
+        Base.processes.remove(runningProcess);
         if (result == 0) {
             return true;
         }
@@ -2706,7 +2707,6 @@ public class Sketch implements MessageConsumer {
                 commandString += "::" + tmp;
             }
         }
-
 
         String ulu = props.get("upload." + programmer + ".using");
         if (ulu == null) ulu = "serial";
@@ -3034,6 +3034,10 @@ public class Sketch implements MessageConsumer {
 
     public void requestTermination() {
         terminateExecution = true;
+        if (runningProcess != null) {
+            runningProcess.destroy();
+            Base.processes.remove(runningProcess);
+        }
     }
 
     public boolean generateSarFile(File archiveFile) {
