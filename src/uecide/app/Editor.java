@@ -2219,6 +2219,13 @@ public class Editor extends JFrame {
             }
         });
         submenu.add(item);
+        item = new JMenuItem("Open data folder");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Base.openURL(Base.getSettingsFolder().getAbsolutePath());
+            }
+        });
+        submenu.add(item);
         helpMenu.add(submenu);
 
     }
