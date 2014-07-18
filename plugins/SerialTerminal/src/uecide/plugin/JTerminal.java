@@ -214,6 +214,7 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
         fontDescent = fm.getMaxDescent();
         int width = fm.charWidth('W');
 
+        scrollback = new int[scrollbackSize][textSize.width];
 
         characterSize = new Dimension(
             width,
