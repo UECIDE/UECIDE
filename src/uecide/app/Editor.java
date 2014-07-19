@@ -247,7 +247,6 @@ public class Editor extends JFrame {
         topBottomSplit.setResizeWeight(1D);
 
         int dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
-        System.err.println("Initial split position: " + dividerSize);
         topBottomSplit.setDividerLocation(dividerSize);
 
         dividerSize = Base.preferences.getInteger("editor.tree.split", 150);
@@ -490,7 +489,6 @@ public class Editor extends JFrame {
 
         openOrSelectFile(loadedSketch.getMainFile());
         dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
-        System.err.println("Secondary split position: " + dividerSize);
         topBottomSplit.setDividerLocation(dividerSize);
 
         dividerSize = Base.preferences.getInteger("editor.tree.split", 150);
@@ -513,7 +511,6 @@ public class Editor extends JFrame {
                 public void propertyChange(PropertyChangeEvent e) {
                     int pos = (Integer)(e.getNewValue());
                     Base.preferences.setInteger("editor.divider.split", pos);
-                    System.err.println("Set split position: " + pos);
                     Base.preferences.saveDelay();
                 }
             }
@@ -2401,7 +2398,6 @@ public class Editor extends JFrame {
             return;
         }
         for (Compiler compiler : Base.compilers.values()) {
-            System.err.println("Compiler: " + compiler.getName());
             if (compiler.worksWith(core)) {
                 compilerList.add(compiler);
             }
@@ -3093,10 +3089,11 @@ public class Editor extends JFrame {
     }
 
     public void handleAbout() {
-        Dimension ss = getSize();
-        Point sl = getLocation();
-        Splash splash = new Splash(sl.x, sl.y, ss.width, ss.height);
-        splash.enableCloseOnClick();
+        About a = new About(this);
+//        Dimension ss = getSize();
+//        Point sl = getLocation();
+//        Splash splash = new Splash(sl.x, sl.y, ss.width, ss.height);
+//        splash.enableCloseOnClick();
 
     }
 

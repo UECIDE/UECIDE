@@ -2117,7 +2117,6 @@ public class Base {
     }
 
     public boolean copyResourceToFile(String res, File dest) {
-        System.err.println("RES: " + res);
         try {
             InputStream from = Base.class.getResourceAsStream(res);
             OutputStream to =
