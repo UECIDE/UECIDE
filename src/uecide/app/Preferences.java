@@ -91,6 +91,8 @@ public class Preferences {
     JTextField sketchbookLocationField;
     JCheckBox exportSeparateBox;
     JCheckBox deletePreviousBox;
+    JCheckBox compileInSketchFolder;
+    JCheckBox disableLineNumbers;
     JCheckBox memoryOverrideBox;
     JTextField memoryField;
     JTextField externalEditorField;
@@ -107,6 +109,7 @@ public class Preferences {
     JCheckBox useSpacesForTabs;
     JCheckBox visibleTabs;
     JCheckBox checkNewVersion;
+    JCheckBox autoSave;
     JTextField tabSize;
     JCheckBox hideSecondaryToolbar;
 
@@ -764,6 +767,13 @@ public class Preferences {
         checkNewVersion = new JCheckBox(Translate.t("Check for new version on startup"));
         p.add(checkNewVersion, c);
         checkNewVersion.setSelected(Base.preferences.getBoolean("version.check"));
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 3;
+        autoSave = new JCheckBox(Translate.t("Automatically save sketch before compile"));
+        p.add(autoSave, c);
+        autoSave.setSelected(Base.preferences.getBoolean("editor.autosave"));
     }
 
     public void populateLocationSettings(JPanel p) {
@@ -931,6 +941,20 @@ public class Preferences {
         c.gridx = 0;
         c.gridy = 0;
 
+        compileInSketchFolder =
+          new JCheckBox(Translate.t("Compile the sketch in the sketch folder"));
+        compileInSketchFolder.setSelected(Base.preferences.getBoolean("compiler.buildinsketch"));
+        p.add(compileInSketchFolder, c);
+
+        c.gridy++;
+
+        disableLineNumbers =
+          new JCheckBox(Translate.t("Disable insertion of #line numbering (useful for debugging)"));
+        disableLineNumbers.setSelected(Base.preferences.getBoolean("compiler.disableline"));
+        p.add(disableLineNumbers, c);
+
+        c.gridy++;
+
         deletePreviousBox =
           new JCheckBox(Translate.t("Remove old build folder before each build"));
         p.add(deletePreviousBox, c);
@@ -1015,6 +1039,8 @@ public class Preferences {
   protected void applyFrame() {
     // put each of the settings into the table
 
+    Base.preferences.setBoolean("compiler.buildinsketch", compileInSketchFolder.isSelected());
+    Base.preferences.setBoolean("compiler.disableline", disableLineNumbers.isSelected());
     Base.preferences.setBoolean("export.delete_target_folder", deletePreviousBox.isSelected());
     Base.preferences.setBoolean("compiler.generate_lss", createLss.isSelected());
     Base.preferences.setBoolean("export.save_lss", saveLss.isSelected());
@@ -1028,6 +1054,7 @@ public class Preferences {
     Base.preferences.set("version.keep", backupNumber.getText());
     Base.preferences.setBoolean("editor.subtoolbar.hidden", hideSecondaryToolbar.isSelected());
     Base.preferences.setBoolean("version.check", checkNewVersion.isSelected());
+    Base.preferences.setBoolean("editor.autosave", autoSave.isSelected());
 
     Base.preferences.setBoolean("editor.expandtabs", useSpacesForTabs.isSelected());
     Base.preferences.setBoolean("editor.showtabs", visibleTabs.isSelected());

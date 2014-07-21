@@ -3420,6 +3420,11 @@ public class Editor extends JFrame {
             error("Sorry, there is already a compiler thread running for this sketch.");
             return;
         }
+        if (Base.preferences.getBoolean("editor.autosave")) {
+            if (!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
+                saveAllTabs();
+            }
+        }
         DefaultRunHandler runHandler = new DefaultRunHandler(false);
         compilationThread = new Thread(runHandler, "Compiler");
         compilationThread.start();
@@ -3430,6 +3435,11 @@ public class Editor extends JFrame {
         if (compilerRunning()) {
             error("Sorry, there is already a compiler thread running for this sketch.");
             return;
+        }
+        if (Base.preferences.getBoolean("editor.autosave")) {
+            if (!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
+                saveAllTabs();
+            }
         }
         DefaultRunHandler runHandler = new DefaultRunHandler(true);
         compilationThread = new Thread(runHandler, "Compiler");
