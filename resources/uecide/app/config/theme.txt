@@ -29,10 +29,10 @@ editor.fgcolor = #000000
 editor.bgcolor = #ffffff
 editor.external.bgcolor = #ffeedd
 
-about.version.x = 365
-about.version.y = 215
-about.version.color = #656565
-about.version.font = SansSerif,normal,14
+about.version.x = 350
+about.version.y = 150
+about.version.color = #b2bebe
+about.version.font = SansSerif,bold,16
 splash.message.x = 170
 splash.message.y = 170
 
@@ -45,7 +45,7 @@ links.homepage.url=http://uecide.org
 links.forums.name=Visit UECIDE forums
 links.forums.url=http://uecide.org/forum
 
-plugins.url=http://uecide.org/plugins-61a.php
+plugins.url=http://uecide.org/plugins-087.php
 
 editor.line.enabled=true
 editor.line.fade=true
@@ -53,5 +53,5 @@ editor.line.fade=true
 editor.compile.error.bgcolor=#FFaaaa
 editor.compile.warning.bgcolor=#FFFFaa
 
-version.url=http://uecide.org/betadl/version.txt
+version.url=http://uecide.org/downloads/version.txt
 version.download=http://uecide.org/download

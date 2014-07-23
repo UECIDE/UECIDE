@@ -81,7 +81,15 @@ public class Splash extends Window {
             h = image.getHeight();
             int x = 0;
             int y = 0;
-            Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+
+            GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice[] devices = g.getScreenDevices();
+
+            Dimension screen = new Dimension(
+                devices[0].getDisplayMode().getWidth(),
+                devices[0].getDisplayMode().getHeight()
+            );
+
             if (sw == 0) {
                 sw = screen.width;
             }
