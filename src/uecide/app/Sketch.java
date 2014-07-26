@@ -850,7 +850,7 @@ public class Sketch implements MessageConsumer {
             File mainFile = getMainFile();
             StringBuilder out = new StringBuilder();
 
-            if (!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + mainFile.getAbsolutePath() + "\"\n");
+            if (!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + mainFile.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
             out.append(cleanedFiles.get(mainFile));
 
             for (String fn : getFileNames()) {
@@ -858,7 +858,7 @@ public class Sketch implements MessageConsumer {
                 if (FileType.getType(f) == FileType.SKETCH) {
                     if (f != mainFile) {
                         String data = cleanedFiles.get(f);
-                        if (!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + f.getAbsolutePath() + "\"\n");
+                        if (!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
                         out.append(data);
                         cleanedFiles.remove(f);
                     }
@@ -895,7 +895,7 @@ public class Sketch implements MessageConsumer {
                                 func = func.replaceAll("=[^,)]+", "");
                                 munged.append(func + ";\n");
                             }
-                            if (!Base.preferences.getBoolean("compiler.disableline")) munged.append("#line " + line + " \"" + f.getAbsolutePath() + "\"\n");
+                            if (!Base.preferences.getBoolean("compiler.disableline")) munged.append("#line " + line + " \"" + f.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
                         }
                     }
                     Matcher mtch = pragma.matcher(l.trim());
@@ -946,7 +946,7 @@ public class Sketch implements MessageConsumer {
                         pw.write("#include <" + props.get("core.header") + ">\n");
                     }
                     if (!Base.preferences.getBoolean("compiler.combine_ino")) {
-                        if (!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath() + "\"\n");
+                        if (!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
                     }
                     pw.write(cleanedFiles.get(f));
                     pw.close();
@@ -960,7 +960,7 @@ public class Sketch implements MessageConsumer {
                     pw.write(" * NOT BE DIRECTLY EDITED. INSTEAD EDIT THE SOURCE *\n");
                     pw.write(" * FILE THIS FILE IS GENERATED FROM!!!             *\n");
                     pw.write(" ***************************************************/\n");
-                    if (!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath() + "\"\n");
+                    if (!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
                     pw.write(cleanedFiles.get(f));
                     pw.close();
                 }

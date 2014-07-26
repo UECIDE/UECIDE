@@ -85,6 +85,7 @@ public class Editor extends JFrame {
     JMenu serialPortsMenu;
 
     JToolBar toolbar;
+    JToolBar treeToolBar;
 
     JPanel consolePanel;
     JPanel treePanel;
@@ -305,6 +306,7 @@ public class Editor extends JFrame {
         consolePanel.add(consoleScroll);
 
         toolbar = new JToolBar();
+        treeToolBar = new JToolBar();
 
         toolbar.addHierarchyListener(new HierarchyListener() {
             public void hierarchyChanged(HierarchyEvent e) {
@@ -373,8 +375,24 @@ public class Editor extends JFrame {
         }
 
         this.add(statusBar, BorderLayout.SOUTH);
+    
+        JButton refreshButton = Editor.addToolbarButton(treeToolBar, "toolbar/refresh.png", "Refresh Project Tree", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                loadedSketch.rescanFileTree();
+                updateTree();
+            }
+        });
+        treeToolBar.add(refreshButton);
+
+        JButton projectSearchButton = Editor.addToolbarButton(treeToolBar, "toolbar/edit-find-project.png", "Search entire project", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new ProjectSearch(Editor.this);
+            }
+        });
+        treeToolBar.add(projectSearchButton);
 
         treeScroll = new JScrollPane();
+        treePanel.add(treeToolBar, BorderLayout.NORTH);
         treePanel.add(treeScroll, BorderLayout.CENTER);
         filesTreeScroll = new JScrollPane();
         filesPanel.add(filesTreeScroll, BorderLayout.CENTER);
@@ -1626,12 +1644,13 @@ public class Editor extends JFrame {
         statusLabel.setText(s);
     }
 
-    public void openOrSelectFile(File sf) {
+    public int openOrSelectFile(File sf) {
         int existing = getTabByFile(sf);
         if (existing == -1) {
-            openNewTab(sf);
+            return openNewTab(sf);
         } else {
             selectTab(existing);
+            return existing;
         }
     }
 
@@ -1666,36 +1685,38 @@ public class Editor extends JFrame {
 
     public boolean closeTab(int tab) {
         if (tab == -1) return false;
-        EditorBase eb = (EditorBase)editorTabs.getComponentAt(tab);
-        if (eb.isModified()) {
-            int option = threeOptionBox(
-                JOptionPane.WARNING_MESSAGE,
-                Translate.t("Unsaved File"),
-                Translate.w("This file has been modified.  Do you want to save your work before you close this tab?", 40, "\n"), 
-                "Save", 
-                "Don't Save", 
-                "Cancel"
-            );
+        if (editorTabs.getComponentAt(tab) instanceof EditorBase) {
+            EditorBase eb = (EditorBase)editorTabs.getComponentAt(tab);
+            if (eb.isModified()) {
+                int option = threeOptionBox(
+                    JOptionPane.WARNING_MESSAGE,
+                    Translate.t("Unsaved File"),
+                    Translate.w("This file has been modified.  Do you want to save your work before you close this tab?", 40, "\n"), 
+                    "Save", 
+                    "Don't Save", 
+                    "Cancel"
+                );
 
-            if (option == 2) return false;
-            if (option == 0) eb.save();
+                if (option == 2) return false;
+                if (option == 0) eb.save();
+            }
+            TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
+            tl.cancelFileWatcher();
         }
-        TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
-        tl.cancelFileWatcher();
         editorTabs.remove(tab);
         return true;
     }
 
-    public void openNewTab(File sf) {
+    public int openNewTab(File sf) {
         if (sf.exists() == false) {
             error("Sorry, I can't find " + sf.getName() + ".");
-            return;
+            return -1;
         }
         try {
             String className = FileType.getEditor(sf.getName());
             if (className == null) {
                 error("File type for " + sf.getName() + " unknown");
-                return;
+                return -1;
             }
             setCursor(new Cursor(Cursor.WAIT_CURSOR));
             Class<?> edClass = Class.forName(className);
@@ -1712,13 +1733,27 @@ public class Editor extends JFrame {
             selectTab(tabno);
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             ed.requestFocus();
+            return tabno;
         } catch (Exception e) {
             Base.error(e);
         }
+        return -1;
+    }
+
+    public void attachPanelAsTab(String name, JPanel panel) {
+        TabLabel lab = new TabLabel(this, name);
+        editorTabs.addTab(name, panel);
+        int tabno = editorTabs.getTabCount() - 1;
+        editorTabs.setTabComponentAt(tabno, lab);
+        selectTab(tabno);
     }
 
     public EditorBase getTab(int i) {
-        return (EditorBase)editorTabs.getComponentAt(i);
+        if (editorTabs.getComponentAt(i) instanceof EditorBase) {
+            return (EditorBase)editorTabs.getComponentAt(i);
+        } else {
+            return null;
+        }
     }
 
     public TabLabel getTabLabel(int i) {
@@ -1756,7 +1791,18 @@ public class Editor extends JFrame {
     public int getTabByFile(File f) {
         for (int i = 0; i < editorTabs.getTabCount(); i++) {
             TabLabel l = (TabLabel)editorTabs.getTabComponentAt(i);
-            if (l.getFile().equals(f)) {
+            File cf = l.getFile();
+            if (cf != null && cf.equals(f)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public int getTabByLabel(TabLabel lab) {
+        for (int i = 0; i < editorTabs.getTabCount(); i++) {
+            TabLabel l = (TabLabel)editorTabs.getTabComponentAt(i);
+            if (l == lab) {
                 return i;
             }
         }
@@ -1781,9 +1827,11 @@ public class Editor extends JFrame {
 
     public boolean isModified() {
         for (int i = 0; i < editorTabs.getTabCount(); i++) {
-            EditorBase eb = (EditorBase)editorTabs.getComponentAt(i);
-            if (eb.isModified()) {
-                return true;
+            if (editorTabs.getComponentAt(i) instanceof EditorBase) {
+                EditorBase eb = (EditorBase)editorTabs.getComponentAt(i);
+                if (eb.isModified()) {
+                    return true;
+                }
             }
         }
         return false;
@@ -1801,9 +1849,11 @@ public class Editor extends JFrame {
         }
 
         for (int i = 0; i < editorTabs.getTabCount(); i++) {
-            EditorBase eb = (EditorBase)editorTabs.getComponentAt(i);
-            if (eb.isModified()) {
-                eb.save();
+            if (editorTabs.getComponentAt(i) instanceof EditorBase) {
+                EditorBase eb = (EditorBase)editorTabs.getComponentAt(i);
+                if (eb.isModified()) {
+                    eb.save();
+                }
             }
         }
     }
@@ -2472,7 +2522,9 @@ public class Editor extends JFrame {
         int tab = getActiveTab();
         if (tab > -1) {
             EditorBase eb = getTab(tab);
-            eb.populateMenu(menu, filterFlags);
+            if (eb != null) {
+                eb.populateMenu(menu, filterFlags);
+            }
         }
         addPluginsToMenu(menu, filterFlags);
     }

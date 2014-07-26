@@ -116,6 +116,33 @@ public class TabLabel extends JPanel {
         }, 1000, 1000);
     }
 
+    public TabLabel(Editor e, String tabname) {
+        editor = e;
+        sketchFile = null;
+        name = tabname;
+        this.setLayout(new BorderLayout());
+        nameLabel = new JLabel(name);
+        JLabel blab = new JLabel();
+        nameLabel.setOpaque(false);
+        blab.setIcon(Base.loadIconFromResource("tabs/close.png"));
+
+        blab.addMouseListener(new MouseListener() {
+            public void mouseClicked(MouseEvent e) {
+                int tab = editor.getTabByLabel(TabLabel.this);
+                editor.closeTab(tab);
+            }
+            public void mousePressed(MouseEvent e) {}
+            public void mouseReleased(MouseEvent e) {}
+            public void mouseEntered(MouseEvent e) {}
+            public void mouseExited(MouseEvent e) {}
+        });
+
+        blab.setOpaque(false);
+        this.setOpaque(false);
+        this.add(nameLabel, BorderLayout.CENTER);
+        this.add(blab, BorderLayout.EAST);
+    }
+
     public void update() {
         Font labelFont = nameLabel.getFont();
         if (modified) {

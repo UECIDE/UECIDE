@@ -13,6 +13,8 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.swing.tree.*;
+
 
 
 public class BasePlugin extends Plugin {
@@ -20,6 +22,9 @@ public class BasePlugin extends Plugin {
     }
 
     public void addToolbarButtons(JToolBar toolbar, int flags) {
+    }
+
+    public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {
     }
 
 }

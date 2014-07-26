@@ -852,4 +852,16 @@ public class code extends JPanel implements EditorBase {
     public String getSelectedText() {
         return textArea.getSelectedText();
     }
+
+    public void highlightLine(int line, Color color) {
+        try {
+            textArea.addLineHighlight(line, color);
+        } catch (Exception e) {
+            Base.error(e);
+        }
+    }
+
+    public void clearHighlights() {
+        textArea.removeAllLineHighlights();
+    }
 }
