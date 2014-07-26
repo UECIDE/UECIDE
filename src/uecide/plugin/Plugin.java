@@ -36,6 +36,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.swing.tree.*;
 
 
 
@@ -46,16 +47,31 @@ public abstract class Plugin {
     public Editor editor = null;
     public EditorBase editorTab = null;
 
-    public static final int MENU_FILE = 1;
-    public static final int MENU_EDIT = 2;
-    public static final int MENU_SKETCH = 3;
-    public static final int MENU_HARDWARE = 4;
-    public static final int MENU_TOOLS = 5;
-    public static final int MENU_HELP = 6;
+    // Main system menu entries
+    public static final int MENU_FILE       = 0x0001;
+    public static final int MENU_EDIT       = 0x0002;
+    public static final int MENU_SKETCH     = 0x0003;
+    public static final int MENU_HARDWARE   = 0x0004;
+    public static final int MENU_TOOLS      = 0x0005;
+    public static final int MENU_HELP       = 0x0006;
 
-    public static final int MENU_TOP = 256;
-    public static final int MENU_MID = 512;
-    public static final int MENU_BOTTOM = 768;
+    // Project tree folder entries
+    public static final int MENU_TREE_SKETCH    = 0x0010; // Root level sketch folder
+    public static final int MENU_TREE_SOURCE    = 0x0011; // Source files
+    public static final int MENU_TREE_HEADERS   = 0x0012; // Header files
+    public static final int MENU_TREE_LIBRARIES = 0x0013; // Imported libraries
+    public static final int MENU_TREE_BINARIES  = 0x0014; // Imported libraries
+    public static final int MENU_TREE_OUTPUT    = 0x0015; // Output files
+    public static final int MENU_TREE_FILE      = 0x0016; // Any file in the tree
+
+    // File tree entries
+    public static final int MENU_FILE_FOLDER    = 0x0021; // A folder in the file tree
+    public static final int MENU_FILE_FILE      = 0x0022; // A file in the file tree
+
+    // Menus are split into three regions - top middle and bottom.
+    public static final int MENU_TOP    = 0x0100;
+    public static final int MENU_MID    = 0x0200;
+    public static final int MENU_BOTTOM = 0x0300;
 
     public static final int TOOLBAR_EDITOR = 1;
     public static final int TOOLBAR_TAB = 2;
@@ -77,6 +93,7 @@ public abstract class Plugin {
     public static boolean wantTabInstance() { return false; }
     public abstract void addToolbarButtons(JToolBar toolbar, int flags);
     public abstract void populateMenu(JMenu menu, int flags);
+    public abstract void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node);
 
     public void releasePort(String port) { }
 

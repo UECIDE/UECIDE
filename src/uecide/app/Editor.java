@@ -1064,6 +1064,9 @@ public class Editor extends JFrame {
         if (treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
     }
 
+    // This is the main routine for generating the context menus for the Project tree view.  For the
+    // Files tree view see below.
+
     public class TreeMouseListener extends MouseAdapter {
 
         public void mousePressed(MouseEvent e) {
@@ -1078,13 +1081,20 @@ public class Editor extends JFrame {
                 }
             };
 
+            // Any click of any button will select whatever node is under the mouse at the time.
             int selRow = sketchContentTree.getRowForLocation(e.getX(), e.getY());
             TreePath selPath = sketchContentTree.getPathForLocation(e.getX(), e.getY());
             sketchContentTree.setSelectionPath(selPath);
+
+            // Now handle just the right mouse button.
             if (e.getButton() == 3) {
                 JPopupMenu menu = new JPopupMenu();
                 DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
                 DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();
+
+                // If the user object is a string then it must be one of the logical groups.  Work out
+                // which one by what the string says.
+
                 if (o.getUserObject().getClass().equals(String.class)) {
                     String s = (String)o.getUserObject();
                     if (s.equals(loadedSketch.getName())) {
@@ -1095,6 +1105,11 @@ public class Editor extends JFrame {
                             }
                         });
                         menu.add(openInOS);
+
+                        populateContextMenu(menu, Plugin.MENU_TREE_SKETCH | Plugin.MENU_TOP, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_SKETCH | Plugin.MENU_MID, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_SKETCH | Plugin.MENU_BOTTOM, o);
+
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Source")) {
                         JMenuItem item = new JMenuItem("Create sketch file (.ino)");
@@ -1117,6 +1132,11 @@ public class Editor extends JFrame {
                         item.setActionCommand("source");
                         item.addActionListener(importFileAction);
                         menu.add(item);
+
+                        populateContextMenu(menu, Plugin.MENU_TREE_SOURCE | Plugin.MENU_TOP, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_SOURCE | Plugin.MENU_MID, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_SOURCE | Plugin.MENU_BOTTOM, o);
+
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Headers")) {
                         JMenuItem item = new JMenuItem("Create header file");
@@ -1127,15 +1147,31 @@ public class Editor extends JFrame {
                         item.setActionCommand("header");
                         item.addActionListener(importFileAction);
                         menu.add(item);
+
+                        populateContextMenu(menu, Plugin.MENU_TREE_HEADERS | Plugin.MENU_TOP, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_HEADERS | Plugin.MENU_MID, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_HEADERS | Plugin.MENU_BOTTOM, o);
+
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Libraries")) {
+                        populateContextMenu(menu, Plugin.MENU_TREE_LIBRARIES | Plugin.MENU_TOP, o);
+
                         populateLibrariesMenu(menu);
+
+                        populateContextMenu(menu, Plugin.MENU_TREE_LIBRARIES | Plugin.MENU_MID, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_LIBRARIES | Plugin.MENU_BOTTOM, o);
+
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Binaries")) {
                         JMenuItem item = new JMenuItem("Add binary file");
                         item.setActionCommand("binary");
                         item.addActionListener(importFileAction);
                         menu.add(item);
+
+                        populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_TOP, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_MID, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_BOTTOM, o);
+
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } else if (s.equals("Output")) {
                         JMenuItem item = new JMenuItem("Purge output files");
@@ -1146,8 +1182,14 @@ public class Editor extends JFrame {
                             }
                         });
                         menu.add(item);
+                        populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_TOP, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_BOTTOM, o);
                         menu.show(sketchContentTree, e.getX(), e.getY());
                     } 
+
+                // Otherwise, if the user object is a File, then it must be one of the entries in one
+                // of the groups, except the libraries group. 
                 } else if (o.getUserObject().getClass().equals(File.class)) {
                     File thisFile = (File)o.getUserObject();
 
@@ -1223,6 +1265,7 @@ public class Editor extends JFrame {
                     deleteItem.setActionCommand(thisFile.getAbsolutePath());
                     menu.add(deleteItem);
 
+                    populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_TOP, o);
                     menu.addSeparator();
 
                     JMenu infoMenu = new JMenu("Info");
@@ -1241,6 +1284,7 @@ public class Editor extends JFrame {
                     infoMenu.add(fileSize);
                     menu.add(infoMenu);
 
+                    populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_MID, o);
 
                     if (p.getUserObject().getClass().equals(String.class)) {
                         String ptext = (String)p.getUserObject();
@@ -1261,8 +1305,13 @@ public class Editor extends JFrame {
                             menu.add(insertRef);
                         }
                     }
+                    populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_BOTTOM, o);
 
                     menu.show(sketchContentTree, e.getX(), e.getY());
+
+                // Otherwise it might be a library.  This generates the menu entries for a
+                // library object.
+
                 } else if (o.getUserObject().getClass().equals(Library.class)) {
                     final Library lib = (Library)(o.getUserObject());
                     JMenuItem item = new JMenuItem("Delete cached archive");
@@ -2429,9 +2478,25 @@ public class Editor extends JFrame {
     }
 
 
+    public void populateContextMenu(JPopupMenu menu, int filterFlags, DefaultMutableTreeNode node) {
+        for (Plugin plugin : plugins) {
+            try {
+                plugin.populateContextMenu(menu, filterFlags, node);
+            } catch (AbstractMethodError e) {
+            } catch (Exception e) {
+                error(e);
+            }
+        }
+    }
+
     public void addPluginsToMenu(JMenu menu, int filterFlags) {
         for (Plugin plugin : plugins) {
-            plugin.populateMenu(menu, filterFlags);
+            try {
+                plugin.populateMenu(menu, filterFlags);
+            } catch (AbstractMethodError e) {
+            } catch (Exception e) {
+                error(e);
+            }
         }
     }
 
@@ -2439,6 +2504,7 @@ public class Editor extends JFrame {
         for (final Plugin plugin : plugins) {
             try {
                 plugin.addToolbarButtons(tb, filterFlags);
+            } catch (AbstractMethodError e) {
             } catch (Exception e) {
                 error(e);
             }
