@@ -110,6 +110,33 @@ public class Sketch implements MessageConsumer {
      * or the folder the provided file resides in.                            *
      **************************************************************************/
 
+    HashMap<File, HashMap<Integer, String>>lineComments = new HashMap<File, HashMap<Integer, String>>();
+
+    public void setLineComment(File file, int line, String comment) {
+        HashMap<Integer, String> comments = lineComments.get(file);
+        if (comments == null) {
+            comments = new HashMap<Integer, String>();
+        }
+        comments.put(line, comment);
+        lineComments.put(file, comments);
+    }
+
+    public String getLineComment(File file, int line) {
+        HashMap<Integer, String> comments = lineComments.get(file);
+        if (comments == null) {
+            return null;
+        }
+        return comments.get(line);
+    }
+
+    public HashMap<Integer, String> getLineComments(File file) {
+        return lineComments.get(file);
+    }
+
+    public void clearLineComments() {
+        lineComments = new HashMap<File, HashMap<Integer, String>>();
+    }
+
     public Sketch(String path) {
         this(new File(path));
     }
@@ -850,7 +877,7 @@ public class Sketch implements MessageConsumer {
             File mainFile = getMainFile();
             StringBuilder out = new StringBuilder();
 
-            if (!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + mainFile.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
+            if (!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + mainFile.getAbsolutePath().replaceAll("\\\\", "\\\\") + "\"\n");
             out.append(cleanedFiles.get(mainFile));
 
             for (String fn : getFileNames()) {
@@ -858,7 +885,7 @@ public class Sketch implements MessageConsumer {
                 if (FileType.getType(f) == FileType.SKETCH) {
                     if (f != mainFile) {
                         String data = cleanedFiles.get(f);
-                        if (!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
+                        if (!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\") + "\"\n");
                         out.append(data);
                         cleanedFiles.remove(f);
                     }
@@ -895,7 +922,7 @@ public class Sketch implements MessageConsumer {
                                 func = func.replaceAll("=[^,)]+", "");
                                 munged.append(func + ";\n");
                             }
-                            if (!Base.preferences.getBoolean("compiler.disableline")) munged.append("#line " + line + " \"" + f.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
+                            if (!Base.preferences.getBoolean("compiler.disableline")) munged.append("#line " + line + " \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\") + "\"\n");
                         }
                     }
                     Matcher mtch = pragma.matcher(l.trim());
@@ -946,7 +973,7 @@ public class Sketch implements MessageConsumer {
                         pw.write("#include <" + props.get("core.header") + ">\n");
                     }
                     if (!Base.preferences.getBoolean("compiler.combine_ino")) {
-                        if (!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
+                        if (!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\") + "\"\n");
                     }
                     pw.write(cleanedFiles.get(f));
                     pw.close();
@@ -960,7 +987,7 @@ public class Sketch implements MessageConsumer {
                     pw.write(" * NOT BE DIRECTLY EDITED. INSTEAD EDIT THE SOURCE *\n");
                     pw.write(" * FILE THIS FILE IS GENERATED FROM!!!             *\n");
                     pw.write(" ***************************************************/\n");
-                    if (!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "/") + "\"\n");
+                    if (!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\") + "\"\n");
                     pw.write(cleanedFiles.get(f));
                     pw.close();
                 }
@@ -1609,6 +1636,15 @@ public class Sketch implements MessageConsumer {
     public boolean compile() {
 
         PropertyFile props = mergeAllProperties();
+        clearLineComments();
+        if (editor != null) {
+            for (int i = 0; i < editor.getTabCount(); i++) {
+                EditorBase eb = editor.getTab(i);
+                if (eb != null) {
+                    eb.clearHighlights();
+                }
+            }
+        }
 
         // Rewritten compilation system from the ground up.
 
@@ -2805,7 +2841,69 @@ public class Sketch implements MessageConsumer {
      * it goes to stdout / stderr.                                            *
      **************************************************************************/
 
+    public void flagError(String s) {
+        if (editor == null) {
+            return;
+        }
+        PropertyFile props = mergeAllProperties();
+
+        String eRec = props.get("compiler.error");
+        int eFilename = props.getInteger("compiler.error.filename", 1);
+        int eLine = props.getInteger("compiler.error.line", 2);
+        int eMessage = props.getInteger("compiler.error.message", 3);
+
+        String wRec = props.get("compiler.warning");
+        int wFilename = props.getInteger("compiler.warning.filename", 1);
+        int wLine = props.getInteger("compiler.warning.line", 2);
+        int wMessage = props.getInteger("compiler.warning.message", 3);
+
+        if (eRec != null) {
+            Pattern ePat = Pattern.compile(eRec);
+            Matcher eMat = ePat.matcher(s);
+            if (eMat.find()) {
+                try {
+                    int errorLineNumber = Integer.parseInt(eMat.group(eLine));
+
+                    File errorFile = new File(eMat.group(eFilename));
+                    if (errorFile != null) {
+                        int tabNumber = editor.getTabByFile(errorFile);
+                        if (tabNumber > -1) {
+                            EditorBase eb = editor.getTab(tabNumber);
+                            eb.highlightLine(errorLineNumber-1, Base.theme.getColor("editor.compile.error.bgcolor"));
+                        }
+                        setLineComment(errorFile, errorLineNumber, eMat.group(eMessage));
+                    }
+                } catch (Exception e) {
+                    Base.error(e);
+                }
+            }
+        }
+
+        if (wRec != null) {
+            Pattern wPat = Pattern.compile(wRec);
+            Matcher wMat = wPat.matcher(s);
+            if (wMat.find()) {
+                try {
+                    int warningLineNumber = Integer.parseInt(wMat.group(wLine));
+
+                    File warningFile = new File(wMat.group(wFilename));
+                    if (warningFile != null) {
+                        int tabNumber = editor.getTabByFile(warningFile);
+                        if (tabNumber > -1) {
+                            EditorBase eb = editor.getTab(tabNumber);
+                            eb.highlightLine(warningLineNumber-1, Base.theme.getColor("editor.compile.warning.bgcolor"));
+                        }
+                        setLineComment(warningFile, warningLineNumber, wMat.group(wMessage));
+                    }
+                } catch (Exception e) {
+                    Base.error(e);
+                }
+            }
+        }
+    }
+
     public void message(String s) {
+        flagError(s);
         if (!s.endsWith("\n")) {
             s += "\n";
         }
@@ -2825,6 +2923,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void warning(String s) {
+        flagError(s);
         if (!s.endsWith("\n")) {
             s += "\n";
         }
@@ -2843,6 +2942,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void error(String s) {
+        flagError(s);
         if (!s.endsWith("\n")) {
             s += "\n";
         }

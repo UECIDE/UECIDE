@@ -349,4 +349,34 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
 
     <target name="all-dist" depends="linux-zip, linux-deb, windows-zip-lite, windows-exe-lite, windows-zip-full, windows-exe-full, macosx-dmg" />
 
+    <target name="dist-release" depends="all-dist" if="isRelease">
+        <move todir="/var/www/uecide/downloads">
+            <fileset dir="." includes="uecide-*" />
+        </move>
+        <exec dir="/var/www/uecide" executable="/bin/bash">
+            <arg value="update" />
+        </exec>
+    </target>
+
+    <target name="dist-beta" depends="all-dist" if="isBeta">
+        <move todir="/var/www/uecide/betadl">
+            <fileset dir="." includes="uecide-*" />
+        </move>
+        <exec dir="/var/www/uecide" executable="/bin/bash">
+            <arg value="updatebeta" />
+        </exec>
+    </target>
+
+    <target name="testMode">
+        <condition property="isRelease">
+            <equals arg1="${mode}" arg2="release" casesensitive="false" />
+        </condition>
+        <condition property="isBeta">
+            <equals arg1="${mode}" arg2="beta" casesensitive="false" />
+        </condition>
+    </target>
+
+    <target name="dist" depends="testMode, dist-release, dist-beta">
+    </target>
+
 </project>

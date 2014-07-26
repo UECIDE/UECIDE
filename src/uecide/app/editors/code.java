@@ -57,6 +57,7 @@ public class code extends JPanel implements EditorBase {
     File file = null;
     boolean modified = false;
     RSyntaxTextArea textArea;
+    RSyntaxDocument rDocument;
     RTextScrollPane scrollPane;
     SyntaxScheme scheme;
     Sketch sketch;
@@ -182,8 +183,33 @@ public class code extends JPanel implements EditorBase {
         editor = e;
         sketch = s;
         this.setLayout(new BorderLayout());
-        textArea = new RSyntaxTextArea();
-        textArea.setSyntaxEditingStyle(FileType.getSyntaxStyle(f.getName()));
+
+        rDocument = new RSyntaxDocument(FileType.getSyntaxStyle(f.getName()));
+
+        textArea = new RSyntaxTextArea(rDocument) {
+            public String getToolTipText(MouseEvent e) {
+                try {
+                    HashMap<Integer, String> comments = sketch.getLineComments(file);
+                    if (comments == null) {
+                        return null;
+                    }
+                    for (int line : comments.keySet()) {
+                        int y = textArea.yForLine(line-1);
+                        if (y == -1) {
+                            continue;
+                        }
+                        int z = y + textArea.getLineHeight();
+                        if (e.getY() > y && e.getY() < z) {
+                            return comments.get(line);
+                        }
+                    }
+                } catch (Exception ex) {
+                }
+                return null;
+            }
+        };
+
+//        textArea.setSyntaxEditingStyle(FileType.getSyntaxStyle(f.getName()));
 
         Document d = textArea.getDocument();
         d.addDocumentListener(new DocumentListener() {
