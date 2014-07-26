@@ -185,7 +185,7 @@ MimeType=application/x-uecide
         <mkdir dir="${proot}/DEBIAN" />
         <echo file="${proot}/DEBIAN/control">Package: uecide
 Version: ${version}
-Maintainer: matt@majenko.co.uk
+Maintainer: Matt Jenkins &lt;matt@majenko.co.uk&gt;
 Architecture: ${arch}
 Section: Programming
 Depends: default-jre, extra-xdg-menus, libftdi1, libjna-java${deps.extra}
