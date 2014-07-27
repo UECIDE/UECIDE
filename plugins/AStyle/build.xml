@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<project name="AStyle" default="build">
+
+    <property file="../build.settings"/>
+    <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar">
+        <and>
+            <os family="unix"/>
+            <not>
+                <os family="mac"/>
+            </not>
+            <os arch="i386"/>
+        </and>
+    </condition>
+    <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/rt.jar">
+        <and>
+            <os family="unix"/>
+            <not>
+                <os family="mac"/>
+            </not>
+            <os arch="amd64"/>
+        </and>
+    </condition>
+
+    <property file="build.settings"/>
+
+    <tstamp>
+        <format property="TODAY" pattern="yyyyMMdd" />
+    </tstamp>
+
+    <target name="clean" description="Clean the build directories">
+        <delete dir="bin" />
+        <delete file="${ant.project.name}.jar" />
+    </target>
+
+    <target name="compile" description="Compile sources">
+        <mkdir dir="bin" />
+
+        <property environment="env" />
+        <property name="java_home" value="${env.JAVA_HOME}" />
+
+        <condition property="linux">
+            <os family="unix" />
+        </condition>
+        <fail if="linux" unless="java_home" 
+              message="The JAVA_HOME variable must be set to the location of a full JDK. For instance, on Ubuntu Linux, this might be /usr/lib/jvm/java-6-sun." />
+
+        <condition property="windows"><os family="windows" /></condition>
+        <fail if="windows" unless="java_home" 
+            message="The JAVA_HOME variable must be set to the location of a full JDK. For instance, on Windows, this might be c:\jdk1.6.0_18." />
+
+        <javac srcdir="src" 
+            source="1.6"
+            target="1.6"
+	        destdir="bin" 
+                debug="true"
+                debuglevel="lines,vars,source"
+                deprecation="true"
+            bootclasspath="${bootclass.path}"
+	        includeAntRuntime="false"
+            classpath="${uecide.path}/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar">
+            <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>
+
+    <target name="build" depends="compile" description="Build the plugin jars">
+        <jar destfile="${ant.project.name}.jar">
+            <fileset dir="bin" />
+            <fileset dir="resources" />
+            <manifest>
+                <attribute name="Version" value="${version}" />
+                <attribute name="Minimum-Version" value="0.8.6a" />
+                <attribute name="Compiled" value="${TODAY}" />
+                <attribute name="Author" value="Majenko Technologies" />
+                <attribute name="Main-Class" value="uecide.plugin.${ant.project.name}"/>
+                <attribute name="Shortcut" value="-" />
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="install" depends="build">
+        <copy file="${ant.project.name}.jar" todir="${install.path}" />
+    </target>
+
+    <target name="bundle" depends="build">
+        <copy file="${ant.project.name}.jar" todir="${uecide.path}/resources/uecide/app/bundles/plugins/" />
+    </target>
+
+    <target name="test" depends="install">
+        <exec executable="${uecide.path}/uecide.jar">
+            <arg value="--exceptions" />
+        </exec>
+    </target>
+</project>
