@@ -132,6 +132,34 @@ public class Editor extends JFrame {
 
     Thread compilationThread = null;
 
+    class FunctionBookmark {
+        File file;
+        int line;
+        String proto;
+    
+        public FunctionBookmark(File f, int l, String p) {
+            file = f;
+            line = l;
+            proto = p;
+        }
+
+        public String toString() {
+            return proto;
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        public int getLine() {
+            return line;
+        }
+
+        public String getFunction() {
+            return proto;
+        }
+    }
+
     class DefaultRunHandler implements Runnable {
         boolean upload = false;
         public DefaultRunHandler(boolean doUpload) {
@@ -551,6 +579,29 @@ public class Editor extends JFrame {
                 Border noBorder = BorderFactory.createEmptyBorder(0,0,0,0);
                 Border paddingBorder = BorderFactory.createEmptyBorder(2,2,2,2);
 
+                if (userObject instanceof FunctionBookmark) {
+                    FunctionBookmark bm = (FunctionBookmark)userObject;
+                    JLabel text = new JLabel(bm.getFunction());
+                    icon = Base.loadIconFromResource("files/function.png");
+                    text.setBorder(paddingBorder);
+                    if (selected) {
+                        text.setBackground(bg);
+                        text.setForeground(fg);
+                        text.setOpaque(true);
+                    } else {
+                        text.setOpaque(false);
+                    }
+                    container.setOpaque(false);
+                    container.setBorder(noBorder);
+                    if (icon != null) {
+                        JLabel i = new JLabel(icon);
+                        container.add(i, BorderLayout.WEST);
+                    }
+                    Font f = text.getFont();
+                    text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize()-2));
+                    container.add(text, BorderLayout.CENTER);
+                    return container;
+                }
                 if (userObject instanceof File) {
                     File file = (File)userObject;
                     JLabel text = new JLabel(file.getName());
@@ -976,6 +1027,7 @@ public class Editor extends JFrame {
     }
 
     public void updateSourceTree() {
+        loadedSketch.findAllFunctions();
         boolean treeSourceOpen = sketchContentTree.isExpanded(new TreePath(treeSource.getPath()));
         treeSource.removeAllChildren();
         DefaultMutableTreeNode node;
@@ -991,6 +1043,14 @@ public class Editor extends JFrame {
                     node = new DefaultMutableTreeNode(f.getName());
                     node.setUserObject(f);
                     treeSource.add(node);
+                    HashMap<Integer, String> funcs = loadedSketch.getFunctionsForFile(f);
+                    if (funcs != null) {
+                        for (int line : funcs.keySet()) {
+                            FunctionBookmark b = new FunctionBookmark(f, line, funcs.get(line));
+                            DefaultMutableTreeNode fe = new DefaultMutableTreeNode(b);
+                            node.add(fe);
+                        }
+                    }
                     break;
             }
         }
@@ -1106,8 +1166,21 @@ public class Editor extends JFrame {
             TreePath selPath = sketchContentTree.getPathForLocation(e.getX(), e.getY());
             sketchContentTree.setSelectionPath(selPath);
 
+            DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)selPath.getLastPathComponent();
+            Object userObject = selectedNode.getUserObject();
+
+            if (e.getButton() == 1) {
+                if (e.getClickCount() == 2) {
+                    if (userObject instanceof FunctionBookmark) {
+                        FunctionBookmark bm = (FunctionBookmark)userObject;
+                        int tab = openOrSelectFile(bm.getFile());
+                        EditorBase eb = getTab(tab);
+                        eb.gotoLine(bm.getLine());
+                    }
+                }
+
+            } else if (e.getButton() == 3) {
             // Now handle just the right mouse button.
-            if (e.getButton() == 3) {
                 JPopupMenu menu = new JPopupMenu();
                 DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
                 DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();

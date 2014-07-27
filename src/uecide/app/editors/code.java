@@ -892,4 +892,12 @@ public class code extends JPanel implements EditorBase {
     public void clearHighlights() {
         textArea.removeAllLineHighlights();
     }
+
+    public void gotoLine(int line) {
+        try {
+            textArea.setCaretPosition(textArea.getLineStartOffset(line));
+        } catch (Exception e) {
+            Base.error(e);
+        } 
+    }
 }

@@ -28,4 +28,5 @@ public interface EditorBase {
     public void setSelection(int start, int end);
     public void highlightLine(int line, Color color);
     public void clearHighlights();
+    public void gotoLine(int line);
 }

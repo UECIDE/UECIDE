@@ -203,4 +203,7 @@ public class bitmap extends JPanel implements EditorBase {
 
     public void clearHighlights() {
     }
+
+    public void gotoLine(int line) {
+    }
 }

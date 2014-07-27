@@ -98,6 +98,8 @@ public class Sketch implements MessageConsumer {
 
     TreeMap<String, String> selectedOptions = new TreeMap<String, String>();
 
+    HashMap<File, HashMap<Integer, String>> functionList = new HashMap<File, HashMap<Integer, String>>();
+
     // Do we want to purge the cache files before building?  This is set by the
     // options system.
     public boolean doPrePurge = false;
@@ -666,6 +668,10 @@ public class Sketch implements MessageConsumer {
         return true;
     }
 
+    public int linesInString(String l) {
+        return l.split("\n").length;
+    }
+
     public String stripBlock(String in, String start, String end) {
         String regexp;
         String mid;
@@ -682,7 +688,18 @@ public class Sketch implements MessageConsumer {
         String out = in;
         int pass = 1;
         while (!done) {
-            String rep = out.replaceAll(regexp, "");
+            String rep = out.replaceFirst(regexp, "");
+            int lines = linesInString(out);
+            int newLines = linesInString(rep);
+            int rets = lines - newLines;
+            String retStr = "";
+            for (int i = 0; i < rets; i++) {
+                retStr += "\n";
+            }
+            rep = out.replaceFirst(regexp, retStr);
+
+            String[] left = out.split("\n");
+            String[] right = out.split("\n");
             if (rep.equals(out)) {
                 done = true;
             } else {
@@ -731,7 +748,34 @@ public class Sketch implements MessageConsumer {
         return Library.getLibraryByInclude(filename, getCore().getName());
     }
 
-    public String findFunctions(String in) {
+    public HashMap<Integer, String> getFunctionsForFile(File f) {
+        return functionList.get(f);
+    }
+
+    public void findAllFunctions() {
+        if (editor == null) {
+            return;
+        }
+
+        functionList = new HashMap<File, HashMap<Integer, String>>();
+
+        for (File f : sketchFiles) {
+            switch(FileType.getType(f)) {
+                case FileType.SKETCH:
+                case FileType.CSOURCE:
+                case FileType.CPPSOURCE:
+                    String data = getFileContent(f);
+                    data = stripComments(data);
+                    HashMap<Integer, String>funcs = findFunctions(data);
+                    functionList.put(f, funcs);
+                    break;
+            }
+        }
+    }
+
+    public HashMap<Integer, String> findFunctions(String in) {
+        HashMap<Integer, String> funcs = new HashMap<Integer, String>();
+
         String out = in.replaceAll("\\\\.", "");
 
         out = out.replaceAll("'[^'\\n\\r]*'", "");
@@ -740,8 +784,10 @@ public class Sketch implements MessageConsumer {
         String[] s = out.split("\n");
         StringBuilder decimated = new StringBuilder();
         boolean continuation = false;
+        int lineno = 0;
         for (String line : s) {
             line = line.trim();
+            lineno++;
 
             if (line.equals("")) {
                 continue;
@@ -755,7 +801,9 @@ public class Sketch implements MessageConsumer {
                 decimated.append(line);
                 if (line.endsWith(")")) {
                     continuation = false;
-                    decimated.append("\n");
+                    Base.debug("Found function " + decimated.toString() + " at line " + lineno);
+                    funcs.put(lineno-1, decimated.toString());
+                    decimated = new StringBuilder();
                 }
                 continue;
             }
@@ -774,11 +822,13 @@ public class Sketch implements MessageConsumer {
                 if (!line.endsWith(")")) {
                     continuation = true;
                 } else {
-                    decimated.append("\n");
+                    Base.debug("Found function " + decimated.toString() + " at line " + lineno);
+                    funcs.put(lineno-1, decimated.toString());
+                    decimated = new StringBuilder();
                 }
             }
         }
-        return decimated.toString();
+        return funcs;
     }
 
     public static final int LIB_PENDING = 0;
@@ -906,19 +956,23 @@ public class Sketch implements MessageConsumer {
         parameters = new TreeMap<String, String>();
         for (File f : cleanedFiles.keySet()) {
             if (FileType.getType(f) == FileType.SKETCH) {
-                String functions = findFunctions(cleanedFiles.get(f));
-        
-                String[] s = functions.split("\n");
-                String firstFunction = s[0];
-                if (firstFunction.trim().equals("")) {
-                    continue;
+                HashMap<Integer, String> funcs = findFunctions(cleanedFiles.get(f));
+
+                Integer ffLineNo = Integer.MAX_VALUE;
+                String firstFunction = "";
+                for (Integer i : funcs.keySet()) {
+                    if (i < ffLineNo) {
+                        ffLineNo = i;
+                        firstFunction = funcs.get(i);
+                    }
                 }
+        
                 int line = 1;
                 StringBuilder munged = new StringBuilder();
                 for (String l : cleanedFiles.get(f).split("\n")) {
                     if (!Base.preferences.getBoolean("compiler.disable_prototypes")) {
                         if (l.trim().startsWith(firstFunction)) {
-                            for (String func : s) {
+                            for (String func : funcs.values()) {
                                 func = func.replaceAll("=[^,)]+", "");
                                 munged.append(func + ";\n");
                             }
