@@ -59,9 +59,12 @@ public class AStyle extends Plugin {
             command.add(Base.preferences.get("astyle.path", "/usr/bin/astyle"));
             command.add("--style=" + baseStyle);
 
-            if (Base.preferences.getBoolean("astyle.pad.blocks")) command.add("--break-blocks=all");
+            if (Base.preferences.getBoolean("astyle.pad.blocks")) command.add("--break-blocks");
             if (Base.preferences.getBoolean("astyle.pad.operators")) command.add("--pad-oper");
             if (Base.preferences.getBoolean("astyle.pad.header")) command.add("--pad-header");
+            if (Base.preferences.getBoolean("astyle.add.brackets")) command.add("--add-brackets");
+            if (Base.preferences.getBoolean("astyle.add.onelinebrackets")) command.add("--add-one-line-brackets");
+
             if (Base.preferences.getBoolean("astyle.pad.parenthesis")) {
                 command.add("--pad-paren");
             } else {
@@ -171,12 +174,14 @@ public class AStyle extends Plugin {
 
     static String[] alignOptions = { "type", "middle", "name" };
 
-    /* Padding options */
+    /* Formatting options */
 
     static JCheckBox padBlocks;
     static JCheckBox padOper;
     static JCheckBox padParen;
     static JCheckBox padHeader;
+    static JCheckBox addBrackets;
+    static JCheckBox addOneLineBrackets;
     static JComboBox alignPointer;
 
     public static void populatePreferences(JPanel p) {
@@ -278,6 +283,34 @@ public class AStyle extends Plugin {
 
         c.gridy++;
 
+
+        padParen = new JCheckBox("Pad Parenthesis");
+        padParen.setSelected(Base.preferences.getBoolean("astyle.pad.parenthesis"));
+        c.gridx = 0;
+        p.add(padParen, c);
+
+        padHeader = new JCheckBox("Pad Header");
+        padHeader.setSelected(Base.preferences.getBoolean("astyle.pad.header"));
+        c.gridx = 1;
+        p.add(padHeader, c);
+
+        c.gridy++;
+
+        addBrackets = new JCheckBox("Add Brackets");
+        addBrackets.setSelected(Base.preferences.getBoolean("astyle.add.brackets"));
+        c.gridx = 0;
+        p.add(addBrackets, c);
+
+        addOneLineBrackets = new JCheckBox("Add One-Line Brackets");
+        addOneLineBrackets.setSelected(Base.preferences.getBoolean("astyle.add.onelinebrackets"));
+        c.gridx = 1;
+        p.add(addOneLineBrackets, c);
+
+        c.gridy++;
+
+
+
+
         label = new JLabel("Align pointer to:");
         c.gridx = 0;
         c.gridwidth = 1;
@@ -307,6 +340,8 @@ public class AStyle extends Plugin {
         Base.preferences.setBoolean("astyle.pad.operators", padOper.isSelected());
         Base.preferences.setBoolean("astyle.pad.parenthesis", padParen.isSelected());
         Base.preferences.setBoolean("astyle.pad.header", padHeader.isSelected());
+        Base.preferences.setBoolean("astyle.add.brackets", addBrackets.isSelected());
+        Base.preferences.setBoolean("astyle.add.onelinebrackets", addOneLineBrackets.isSelected());
         Base.preferences.set("astyle.align.pointer", alignOptions[alignPointer.getSelectedIndex()]);
     }
 }
