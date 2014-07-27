@@ -476,7 +476,6 @@ public class Library implements Comparable {
             if (cName != null && cPath != null) {
                 File f = new File(cPath);
                 if (f.exists() && f.isDirectory()) {
-                    Base.debug(k + " = " + cName);
                     setCategoryName("cat:" + k, cName);
                     loadLibrariesFromFolder(f, "cat:" + k);
                     foundCats++;
@@ -485,7 +484,6 @@ public class Library implements Comparable {
         }
 
         if (foundCats == 0) {
-            Base.debug("No categories found");
             File f = new File(Base.getSketchbookFolder(), "libraries");
             Base.preferences.set("library.contrib.name", "Contributed");
             Base.preferences.setFile("library.contrib.path", f);
@@ -550,7 +548,6 @@ public class Library implements Comparable {
     public static TreeSet<String> getLibraryCategories() {
         TreeSet<String> cats = new TreeSet<String>();
         for (String cat : categoryNames.keySet()) {
-            Base.debug(cat);
             cats.add(cat);
         }
         return cats;
@@ -559,7 +556,6 @@ public class Library implements Comparable {
     public static File getCategoryLocation(String group) {
         String[] bits = group.split(":");
 
-        Base.debug(group);
         if (bits[0].equals("cat")) {
             return Base.preferences.getFile("library." + bits[1] + ".path");
         }

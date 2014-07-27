@@ -980,6 +980,8 @@ public class Editor extends JFrame {
         treeSource.removeAllChildren();
         DefaultMutableTreeNode node;
         for (File f : loadedSketch.sketchFiles) {
+            Base.debug("Loading file " + f.getAbsolutePath());
+            Base.debug("File is class " + f.getClass().getName());
             int type = FileType.getType(f);
             switch (type) {
                 case FileType.CSOURCE:
@@ -1112,6 +1114,8 @@ public class Editor extends JFrame {
 
                 // If the user object is a string then it must be one of the logical groups.  Work out
                 // which one by what the string says.
+
+                Base.debug("Tree node class: " + o.getUserObject().getClass().getName());
 
                 if (o.getUserObject().getClass().equals(String.class)) {
                     String s = (String)o.getUserObject();
@@ -3158,7 +3162,11 @@ public class Editor extends JFrame {
         int rv = fc.showOpenDialog(this);
 
         if (rv == JFileChooser.APPROVE_OPTION) {
-            loadSketch(fc.getSelectedFile());
+            // Convert the DefaultShellFolder into a File object via a string representation
+            // of the path
+            File f = new File(fc.getSelectedFile().getAbsolutePath());
+            Base.debug("File chooser return class = " + f.getClass().getName());
+            loadSketch(f);
         }
     }
 
@@ -3168,6 +3176,7 @@ public class Editor extends JFrame {
 
     public void loadSketch(File f) {
         if (loadedSketch.isUntitled() && !isModified()) {
+            Base.debug("Replacing existing blank editor session");
             closeAllTabs();
             loadedSketch = new Sketch(f);
             loadedSketch.attachToEditor(this);
@@ -3176,6 +3185,7 @@ public class Editor extends JFrame {
             treeModel.nodeStructureChanged(treeRoot);
             openOrSelectFile(loadedSketch.getMainFile());
         } else {
+            Base.debug("Creating new editor instance");
             Base.createNewEditor(f.getPath());
         }
     }
