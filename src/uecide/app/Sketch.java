@@ -1005,35 +1005,27 @@ public class Sketch implements MessageConsumer {
     public String stripComments(String data) {
         StringBuilder b = new StringBuilder();
 
-        // Single line comments, both styles
-
-        String[] lines = data.split("\n");
-        for (String line : lines) {
-            int comment = line.indexOf("//");
-            if (comment > -1) {
-                line = line.substring(0, comment);
-            }
-            comment = line.indexOf("/*");
-            int end = line.indexOf("*/");
-            if (comment > -1 && end > comment) {
-                line = line.substring(0, comment);
-            }
-            b.append(line);
-            b.append("\n");
-        }
-
-        String out = b.toString();
-
         // Removing multi-line comments has to be done carefully.  We need to
         // preserve the right number of lines from the comment.
 
-        lines = out.split("\n");
+        String[] lines = data.split("\n");
 
         b = new StringBuilder();
         
         boolean inComment = false;
         for (String line : lines) {
             if (!inComment) {
+
+                int comment = line.indexOf("//");
+                if (comment > -1) {
+                    line = line.substring(0, comment);
+                }
+                comment = line.indexOf("/*");
+                int end = line.indexOf("*/");
+                if (comment > -1 && end > comment) {
+                    line = line.substring(0, comment);
+                }
+
                 int commentStart = line.indexOf("/*");
                 if (commentStart > -1) {
                     line = line.substring(0, commentStart);
@@ -1041,6 +1033,7 @@ public class Sketch implements MessageConsumer {
                     b.append(line + "\n");
                     continue;
                 }
+            
                 b.append(line + "\n");
                 continue;
             }
@@ -1054,8 +1047,7 @@ public class Sketch implements MessageConsumer {
             b.append("\n");
         }
 
-        out = b.toString();
-
+        String out = b.toString();
         return out;
     }
 

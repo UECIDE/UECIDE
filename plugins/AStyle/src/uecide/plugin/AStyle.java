@@ -284,18 +284,6 @@ public class AStyle extends Plugin {
         c.gridy++;
 
 
-        padParen = new JCheckBox("Pad Parenthesis");
-        padParen.setSelected(Base.preferences.getBoolean("astyle.pad.parenthesis"));
-        c.gridx = 0;
-        p.add(padParen, c);
-
-        padHeader = new JCheckBox("Pad Header");
-        padHeader.setSelected(Base.preferences.getBoolean("astyle.pad.header"));
-        c.gridx = 1;
-        p.add(padHeader, c);
-
-        c.gridy++;
-
         addBrackets = new JCheckBox("Add Brackets");
         addBrackets.setSelected(Base.preferences.getBoolean("astyle.add.brackets"));
         c.gridx = 0;
