@@ -3281,6 +3281,7 @@ public class Editor extends JFrame {
                 ArrayList<LibCatObject> cats = new ArrayList<LibCatObject>();
 
                 for (String group : Library.getLibraryCategories()) {
+                    Base.debug(group);
                     if (group.startsWith("cat:")) {
                         LibCatObject ob = new LibCatObject(group, Library.getCategoryName(group));
                         cats.add(ob);
@@ -3293,6 +3294,7 @@ public class Editor extends JFrame {
 
                 if (loc != null) {
                     File installPath = Library.getCategoryLocation(loc.getKey());
+                    Base.debug(loc.getKey());
                     message("Installing to " + installPath.getAbsolutePath());
 
                     for (String lib : foundLibs.keySet()) {

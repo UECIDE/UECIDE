@@ -468,6 +468,7 @@ public class Library implements Comparable {
             loadLibrariesFromFolder(c.getLibrariesFolder(), "core:" + c.getName());
         }
 
+        int foundCats = 0;
         // And finally let's work through the categories.
         for (String k : Base.preferences.childKeysOf("library")) {
             String cName = Base.preferences.get("library." + k + ".name");
@@ -475,10 +476,25 @@ public class Library implements Comparable {
             if (cName != null && cPath != null) {
                 File f = new File(cPath);
                 if (f.exists() && f.isDirectory()) {
+                    Base.debug(k + " = " + cName);
                     setCategoryName("cat:" + k, cName);
                     loadLibrariesFromFolder(f, "cat:" + k);
+                    foundCats++;
                 }
             }
+        }
+
+        if (foundCats == 0) {
+            Base.debug("No categories found");
+            File f = new File(Base.getSketchbookFolder(), "libraries");
+            Base.preferences.set("library.contrib.name", "Contributed");
+            Base.preferences.setFile("library.contrib.path", f);
+            Base.preferences.saveDelay();
+            if (!f.exists()) {
+                f.mkdirs();
+            }
+            setCategoryName("cat:contrib", "Contributed");
+            loadLibrariesFromFolder(f, "cat:contrib");
         }
     }
 
@@ -533,7 +549,8 @@ public class Library implements Comparable {
 
     public static TreeSet<String> getLibraryCategories() {
         TreeSet<String> cats = new TreeSet<String>();
-        for (String cat : libraryList.keySet()) {
+        for (String cat : categoryNames.keySet()) {
+            Base.debug(cat);
             cats.add(cat);
         }
         return cats;
@@ -542,11 +559,12 @@ public class Library implements Comparable {
     public static File getCategoryLocation(String group) {
         String[] bits = group.split(":");
 
-        if (bits[0] == "cat") {
+        Base.debug(group);
+        if (bits[0].equals("cat")) {
             return Base.preferences.getFile("library." + bits[1] + ".path");
         }
 
-        if (bits[0] == "core") {
+        if (bits[0].equals("core")) {
             Core c = Base.cores.get(bits[1]);
             if (c == null) {
                 return null;
@@ -554,7 +572,7 @@ public class Library implements Comparable {
             return c.getLibrariesFolder();
         }
 
-        if (bits[0] == "compiler") {
+        if (bits[0].equals("compiler")) {
             Compiler c = Base.compilers.get(bits[1]);
             if (c == null) {
                 return null;
@@ -562,7 +580,7 @@ public class Library implements Comparable {
             return c.getLibrariesFolder();
         }
 
-        if (bits[0] == "board") {
+        if (bits[0].equals("board")) {
             Board c = Base.boards.get(bits[1]);
             if (c == null) {
                 return null;

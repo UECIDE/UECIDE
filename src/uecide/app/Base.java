@@ -138,6 +138,8 @@ public class Base {
     public static String presetCore = null;
     public static String presetProgrammer = null;
 
+    public static boolean extraDebug = false;
+
     public Base(String[] args) {
 
         boolean redirectExceptions = true;
@@ -152,6 +154,7 @@ public class Base {
                 Debug.setVerbose(true);
             }
             if (path.equals("--debug")) {
+                extraDebug = true;
                 Debug.show();
                 break;
             }
@@ -2215,6 +2218,20 @@ public class Base {
             return true;
         }
         return false;
+    }
+
+    public static void debug(String msg) {
+        if (!extraDebug) return;
+        if (msg == null) {
+            msg = "(null)";
+        }
+        if (!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+        Thread t = Thread.currentThread();
+        StackTraceElement[] st = t.getStackTrace();
+        StackTraceElement caller = st[2];
+        System.err.print(caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): " + msg);
     }
 }
 
