@@ -358,6 +358,8 @@ public class Library implements Comparable {
     public static TreeSet<Library> getLibraries(String group) {
         TreeSet<Library> outList = new TreeSet<Library>();
 
+        Base.debug("Group = " + group);
+
         TreeSet<Library> dataSet = libraryList.get(group);
         if (dataSet == null) {
             return null;

@@ -1241,6 +1241,7 @@ public class Sketch implements MessageConsumer {
         if (newPath.exists()) {
             return false;
         }
+        Base.debug("Save as " + newPath.getAbsolutePath());
         newPath.mkdirs();
         File newMainFile = new File(newPath, newPath.getName() + ".ino");
         File oldMainFile = getMainFile();
@@ -1250,19 +1251,24 @@ public class Sketch implements MessageConsumer {
         File[] files = sketchFolder.listFiles();
         for (File f : files) {
             if (f.equals(oldMainFile)) {
+                Base.debug("Copy main file " + f.getAbsolutePath() + " to " + newMainFile.getAbsolutePath());
                 Base.copyFile(f, newMainFile);
                 continue;
             }
             File dest = new File(newPath, f.getName());
             if (f.isDirectory()) {
                 Base.copyDir(f, dest);
+                Base.debug("Copy dir " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
                 continue;
             }
+            Base.debug("Copy file " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
             Base.copyFile(f, dest);
         }
         String oldPrefix = sketchFolder.getAbsolutePath();
+        Base.debug("Old prefix: " + oldPrefix);
         sketchFolder = newPath;
         sketchName = newPath.getName();
+        Base.debug("Sketch name: " + sketchName);
         isUntitled = false;
         // Now we can shuffle the files around in the sketchFiles array.
         // We want to try and keep the indexes in the same order if that
@@ -1273,9 +1279,24 @@ public class Sketch implements MessageConsumer {
             File sf = sketchFiles.get(i);
             if (sf.equals(oldMainFile)) {
                 newSketchFiles.add(i, newMainFile);
+                if (editor != null) {
+                    int tab = editor.getTabByFile(oldMainFile);
+                    if (tab > -1) {
+                        TabLabel tl = editor.getTabLabel(tab);
+                        tl.setFile(newMainFile);
+                    }
+                }
             } else {
                 File newFile = new File(newPath, sf.getName());
+                Base.debug("New file name " + newFile.getAbsolutePath());
                 newSketchFiles.add(i, newFile);
+                if (editor != null) {
+                    int tab = editor.getTabByFile(sf);
+                    if (tab > -1) {
+                        TabLabel tl = editor.getTabLabel(tab);
+                        tl.setFile(newFile);
+                    }
+                }
             }
         }
         sketchFiles = newSketchFiles;
@@ -1286,32 +1307,11 @@ public class Sketch implements MessageConsumer {
         // changed files from the editor.
 
         if (editor != null) {
-            int mainTab = editor.getTabByFile(oldMainFile);
-            if (mainTab > -1) {
-                TabLabel tl = editor.getTabLabel(mainTab);
-                tl.setFile(newMainFile);
-                tl.save();
-            }
-
             // Now step through the files looking for any that are open, change the tab's file pointer
             // and save the data.
-            String newPrefix = sketchFolder.getAbsolutePath();
-
             for (int tab = 0; tab < editor.getTabCount(); tab++) {
                 TabLabel tl = editor.getTabLabel(tab);
-                String oldPath = tl.getFile().getAbsolutePath();
-                Debug.message("Retargetting file " + oldPath);
-                if (oldPath.startsWith(oldPrefix)) {
-                    String relPath = oldPath.substring(oldPrefix.length() + 1);
-                    Debug.message("  Relative path is " + relPath);
-                    File movedTo = new File(sketchFolder, relPath);
-                    Debug.message("  New path is " + movedTo.getAbsolutePath());
-                    if (!movedTo.exists()) {
-                        Debug.message("  !!! DOES NOT EXIST === BAD !!!");
-                    }
-                    tl.setFile(movedTo);
-                    tl.save();
-                }
+                tl.save();
             }
 
             editor.updateTree();
@@ -3115,6 +3115,9 @@ public class Sketch implements MessageConsumer {
         TreeSet<String> groups = Library.getLibraryCategories();
         for (String group : groups) {
             TreeSet<Library> libs = Library.getLibraries(group);
+            if (libs == null) {
+                continue;
+            }
             for (Library lib : libs) {
                 if (isChildOf(lib.getFolder())) {
                     return true;

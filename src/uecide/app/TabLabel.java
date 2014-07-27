@@ -194,6 +194,7 @@ public class TabLabel extends JPanel {
 
     public void setFile(File f) {
         sketchFile = f;
+        Base.debug("Set file to " + f.getAbsolutePath());
         expectedFileTime = sketchFile.lastModified();
         update();
     }
@@ -209,6 +210,7 @@ public class TabLabel extends JPanel {
     public void save() {
         int myTabNumber = editor.editorTabs.indexOfTabComponent(this);
         EditorBase eb = editor.getTab(myTabNumber);
+        Base.debug("Savibg tab " + name + " to " + sketchFile.getAbsolutePath());
         eb.saveTo(sketchFile);
         expectedFileTime = sketchFile.lastModified();
         update();
