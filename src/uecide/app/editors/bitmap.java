@@ -206,4 +206,7 @@ public class bitmap extends JPanel implements EditorBase {
 
     public void gotoLine(int line) {
     }
+
+    public void requestFocus() {
+    }
 }

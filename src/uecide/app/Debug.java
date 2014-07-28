@@ -180,13 +180,21 @@ public class Debug {
     }
 
     public static void message(String s) {
+
+        Thread t = Thread.currentThread();
+        StackTraceElement[] st = t.getStackTrace();
+        StackTraceElement caller = st[2];
+        String tag = caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): ";
+
+        debugText.append(tag);
         debugText.append(s);
-        if (verbose) System.out.print(s);
+        if (verbose) System.out.print(tag + s);
         if (!s.endsWith("\n")) {
             debugText.append("\n");
             if (verbose) System.out.print("\n");
         }
         if (shown) {
+            textArea.append(tag);
             textArea.append(s);
             if (!s.endsWith("\n")) {
                 textArea.append("\n");

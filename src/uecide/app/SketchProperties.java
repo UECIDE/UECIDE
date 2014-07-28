@@ -210,11 +210,20 @@ public class SketchProperties extends JDialog {
             JComponent comp = fields.get(key);
             if (comp instanceof JTextField) {
                 JTextField c = (JTextField)comp;
-                sketch.configFile.set(key, c.getText());
+                if (c.getText().trim().equals("")) {
+                    sketch.configFile.unset(key);
+                } else {
+                    sketch.configFile.set(key, c.getText());
+                }
             } else if (comp instanceof JTextArea) {
                 JTextArea c = (JTextArea)comp;
-                sketch.configFile.set(key, c.getText());
+                if (c.getText().trim().equals("")) {
+                    sketch.configFile.unset(key);
+                } else {
+                    sketch.configFile.set(key, c.getText());
+                }
             } 
         }
+        sketch.saveConfig();
     }
 }

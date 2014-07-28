@@ -1032,13 +1032,12 @@ public class Editor extends JFrame {
         treeSource.removeAllChildren();
         DefaultMutableTreeNode node;
         for (File f : loadedSketch.sketchFiles) {
-            Base.debug("Loading file " + f.getAbsolutePath());
-            Base.debug("File is class " + f.getClass().getName());
+            Debug.message("Loading file " + f.getAbsolutePath());
+            Debug.message("File is class " + f.getClass().getName());
             int type = FileType.getType(f);
             switch (type) {
                 case FileType.CSOURCE:
                 case FileType.CPPSOURCE:
-                case FileType.ASMSOURCE:
                 case FileType.SKETCH:
                     node = new DefaultMutableTreeNode(f.getName());
                     node.setUserObject(f);
@@ -1176,6 +1175,7 @@ public class Editor extends JFrame {
                         int tab = openOrSelectFile(bm.getFile());
                         EditorBase eb = getTab(tab);
                         eb.gotoLine(bm.getLine());
+                        eb.requestFocus();
                     }
                 }
 
@@ -1188,7 +1188,7 @@ public class Editor extends JFrame {
                 // If the user object is a string then it must be one of the logical groups.  Work out
                 // which one by what the string says.
 
-                Base.debug("Tree node class: " + o.getUserObject().getClass().getName());
+                Debug.message("Tree node class: " + o.getUserObject().getClass().getName());
 
                 if (o.getUserObject().getClass().equals(String.class)) {
                     String s = (String)o.getUserObject();
@@ -1933,6 +1933,8 @@ public class Editor extends JFrame {
                 }
             }
         }
+
+        loadedSketch.saveConfig();
     }
 
     public void closeAllTabs() {
@@ -3238,7 +3240,7 @@ public class Editor extends JFrame {
             // Convert the DefaultShellFolder into a File object via a string representation
             // of the path
             File f = new File(fc.getSelectedFile().getAbsolutePath());
-            Base.debug("File chooser return class = " + f.getClass().getName());
+            Debug.message("File chooser return class = " + f.getClass().getName());
             loadSketch(f);
         }
     }
@@ -3249,7 +3251,7 @@ public class Editor extends JFrame {
 
     public void loadSketch(File f) {
         if (loadedSketch.isUntitled() && !isModified()) {
-            Base.debug("Replacing existing blank editor session");
+            Debug.message("Replacing existing blank editor session");
             closeAllTabs();
             loadedSketch = new Sketch(f);
             loadedSketch.attachToEditor(this);
@@ -3258,7 +3260,7 @@ public class Editor extends JFrame {
             treeModel.nodeStructureChanged(treeRoot);
             openOrSelectFile(loadedSketch.getMainFile());
         } else {
-            Base.debug("Creating new editor instance");
+            Debug.message("Creating new editor instance");
             Base.createNewEditor(f.getPath());
         }
     }
@@ -3364,7 +3366,7 @@ public class Editor extends JFrame {
                 ArrayList<LibCatObject> cats = new ArrayList<LibCatObject>();
 
                 for (String group : Library.getLibraryCategories()) {
-                    Base.debug(group);
+                    Debug.message(group);
                     if (group.startsWith("cat:")) {
                         LibCatObject ob = new LibCatObject(group, Library.getCategoryName(group));
                         cats.add(ob);
@@ -3377,7 +3379,7 @@ public class Editor extends JFrame {
 
                 if (loc != null) {
                     File installPath = Library.getCategoryLocation(loc.getKey());
-                    Base.debug(loc.getKey());
+                    Debug.message(loc.getKey());
                     message("Installing to " + installPath.getAbsolutePath());
 
                     for (String lib : foundLibs.keySet()) {

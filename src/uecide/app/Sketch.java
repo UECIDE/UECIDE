@@ -801,7 +801,7 @@ public class Sketch implements MessageConsumer {
                 decimated.append(line);
                 if (line.endsWith(")")) {
                     continuation = false;
-                    Base.debug("Found function " + decimated.toString() + " at line " + lineno);
+                    Debug.message("Found function " + decimated.toString() + " at line " + lineno);
                     funcs.put(lineno-1, decimated.toString());
                     decimated = new StringBuilder();
                 }
@@ -822,7 +822,7 @@ public class Sketch implements MessageConsumer {
                 if (!line.endsWith(")")) {
                     continuation = true;
                 } else {
-                    Base.debug("Found function " + decimated.toString() + " at line " + lineno);
+                    Debug.message("Found function " + decimated.toString() + " at line " + lineno);
                     funcs.put(lineno-1, decimated.toString());
                     decimated = new StringBuilder();
                 }
@@ -1287,7 +1287,7 @@ public class Sketch implements MessageConsumer {
         if (newPath.exists()) {
             return false;
         }
-        Base.debug("Save as " + newPath.getAbsolutePath());
+        Debug.message("Save as " + newPath.getAbsolutePath());
         newPath.mkdirs();
         File newMainFile = new File(newPath, newPath.getName() + ".ino");
         File oldMainFile = getMainFile();
@@ -1297,24 +1297,24 @@ public class Sketch implements MessageConsumer {
         File[] files = sketchFolder.listFiles();
         for (File f : files) {
             if (f.equals(oldMainFile)) {
-                Base.debug("Copy main file " + f.getAbsolutePath() + " to " + newMainFile.getAbsolutePath());
+                Debug.message("Copy main file " + f.getAbsolutePath() + " to " + newMainFile.getAbsolutePath());
                 Base.copyFile(f, newMainFile);
                 continue;
             }
             File dest = new File(newPath, f.getName());
             if (f.isDirectory()) {
                 Base.copyDir(f, dest);
-                Base.debug("Copy dir " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
+                Debug.message("Copy dir " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
                 continue;
             }
-            Base.debug("Copy file " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
+            Debug.message("Copy file " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
             Base.copyFile(f, dest);
         }
         String oldPrefix = sketchFolder.getAbsolutePath();
-        Base.debug("Old prefix: " + oldPrefix);
+        Debug.message("Old prefix: " + oldPrefix);
         sketchFolder = newPath;
         sketchName = newPath.getName();
-        Base.debug("Sketch name: " + sketchName);
+        Debug.message("Sketch name: " + sketchName);
         isUntitled = false;
         // Now we can shuffle the files around in the sketchFiles array.
         // We want to try and keep the indexes in the same order if that
@@ -1334,7 +1334,7 @@ public class Sketch implements MessageConsumer {
                 }
             } else {
                 File newFile = new File(newPath, sf.getName());
-                Base.debug("New file name " + newFile.getAbsolutePath());
+                Debug.message("New file name " + newFile.getAbsolutePath());
                 newSketchFiles.add(i, newFile);
                 if (editor != null) {
                     int tab = editor.getTabByFile(sf);
@@ -1407,10 +1407,22 @@ public class Sketch implements MessageConsumer {
             }
         }
         saveAllFiles();
+        Debug.message("All saved");
+        saveConfig();
+        return true;
+    }
+
+    public void saveConfig() {
+        if (isUntitled()) {
+            return;
+        }
+        if (parentIsProtected()) {
+            return;
+        }
         if (configFile.size() > 0) {
+            Debug.message("Saving config");
             configFile.save();
         }
-        return true;
     }
 
     public String getName() {
@@ -3291,24 +3303,30 @@ public class Sketch implements MessageConsumer {
     }
 
     public void loadConfig() {
+        Debug.message("Loading config");
     
         if (configFile.get("board") != null) {
+            Debug.message("Board: " + configFile.get("board"));
             setBoard(configFile.get("board"));
         }
 
         if (configFile.get("core") != null) {
+            Debug.message("Core: " + configFile.get("core"));
             setCore(configFile.get("core"));
         }
 
         if (configFile.get("compiler") != null) {
+            Debug.message("Compiler: " + configFile.get("compiler"));
             setCompiler(configFile.get("compiler"));
         }
 
         if (configFile.get("port") != null) {
+            Debug.message("Port: " + configFile.get("port"));
             setSerialPort(configFile.get("port"));
         }
 
         if (configFile.get("programmer") != null) {
+            Debug.message("Programmer: " + configFile.get("programmer"));
             setProgrammer(configFile.get("programmer"));
         }
 

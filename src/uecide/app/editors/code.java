@@ -798,7 +798,7 @@ public class code extends JPanel implements EditorBase {
             return false;
         }
 
-        Base.debug("I think I am saving to " + file.getAbsolutePath());
+        Debug.message("I think I am saving to " + file.getAbsolutePath());
 
         try {
             PrintWriter pw = new PrintWriter(file);
