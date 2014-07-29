@@ -1109,4 +1109,8 @@ public class PluginManager extends Plugin implements PropertyChangeListener
     public void launch() {
         openWindow();
     }
+
+    public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {
+    }
+
 }

@@ -418,6 +418,9 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
 
     public void message(String m)
     {
+        if (m == null) {
+            return;
+        }
         char[] chars = m.toCharArray();
         for (char c : chars) {
             switch (c) {

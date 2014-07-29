@@ -73,4 +73,7 @@ public class CopyForForum extends Plugin {
             menu.add(item);
         }
     }
+    public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {
+    }
+
 }

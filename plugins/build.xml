@@ -1,19 +1,26 @@
 <?xml version="1.0"?>
 <project name="Plugins" default="build">
     <target name="build">
-        <subant buildpath="SerialTerminal" target="build"/>
-        <subant buildpath="PluginManager" target="build"/>
+        <subant target="build">
+            <dirset dir="." includes="*"/>
+        </subant>
     </target>
+
     <target name="clean">
-        <subant buildpath="SerialTerminal" target="clean"/>
-        <subant buildpath="PluginManager" target="clean"/>
+        <subant target="clean">
+            <dirset dir="." includes="*"/>
+        </subant>
     </target>
+
     <target name="install">
-        <subant buildpath="SerialTerminal" target="install"/>
-        <subant buildpath="PluginManager" target="install"/>
+        <subant target="install">
+            <dirset dir="." includes="*"/>
+        </subant>
     </target>
+
     <target name="bundle">
-        <subant buildpath="SerialTerminal" target="bundle"/>
-        <subant buildpath="PluginManager" target="bundle"/>
+        <subant target="bundle">
+            <dirset dir="." includes="*"/>
+        </subant>
     </target>
 </project>

@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -458,6 +459,9 @@ public class SerialTerminal extends Plugin implements SerialPortEventListener,Me
     public void serialEvent(SerialPortEvent e) {
         if (e.isRXCHAR()) {
             try {
+                if (port == null) {
+                    return;
+                }
                 term.message(port.readString());
             } catch (Exception ex) {
                 editor.error(ex);
@@ -479,6 +483,9 @@ public class SerialTerminal extends Plugin implements SerialPortEventListener,Me
 
     public static String getPreferencesTitle() {
         return "Serial Terminal";
+    }
+
+    public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {
     }
 }
 

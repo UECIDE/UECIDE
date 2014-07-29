@@ -1038,6 +1038,7 @@ public class Editor extends JFrame {
             switch (type) {
                 case FileType.CSOURCE:
                 case FileType.CPPSOURCE:
+                case FileType.ASMSOURCE:
                 case FileType.SKETCH:
                     node = new DefaultMutableTreeNode(f.getName());
                     node.setUserObject(f);
@@ -1164,6 +1165,10 @@ public class Editor extends JFrame {
             int selRow = sketchContentTree.getRowForLocation(e.getX(), e.getY());
             TreePath selPath = sketchContentTree.getPathForLocation(e.getX(), e.getY());
             sketchContentTree.setSelectionPath(selPath);
+
+            if (selPath == null) {
+                return;
+            }
 
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)selPath.getLastPathComponent();
             Object userObject = selectedNode.getUserObject();

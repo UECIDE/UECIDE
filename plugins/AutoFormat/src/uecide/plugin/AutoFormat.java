@@ -917,4 +917,8 @@ public class AutoFormat extends Plugin {
             toolbar.add(b);
         }
     }
+
+    public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {
+    }
+
 }
