@@ -752,21 +752,63 @@ public class Sketch implements MessageConsumer {
         return functionList.get(f);
     }
 
+    public HashMap<Integer, String> findLabels(String data) {
+        HashMap<Integer, String>labels = new HashMap<Integer, String>();
+        if (data == null) return labels;
+        if (data.equals("")) return labels;
+
+        String[] lines = data.split("\n");
+        ArrayList<String>ents = new ArrayList<String>();
+
+        // First find any entries.
+        Pattern epat = Pattern.compile("\\.ent\\s+([^\\s]+)");
+        for (String line : lines) {
+            Matcher m = epat.matcher(line);
+            if (m.find()) {
+                ents.add(m.group(1));
+            }
+        }
+
+        // Now match them to labels.
+        int lineno = 0;
+        for (String line : lines) {
+            lineno++;
+            line = line.trim();
+
+            if (!line.contains(":")) {
+                continue;
+            }
+            line = line.substring(0, line.indexOf(":"));
+            if (ents.indexOf(line) > -1) {
+                labels.put(lineno - 1, line);
+            }
+        }
+        
+        return labels;
+    }   
+
     public void findAllFunctions() {
         if (editor == null) {
             return;
         }
 
         functionList = new HashMap<File, HashMap<Integer, String>>();
+        String data;
+        HashMap<Integer, String>funcs = null;
 
         for (File f : sketchFiles) {
             switch(FileType.getType(f)) {
                 case FileType.SKETCH:
                 case FileType.CSOURCE:
                 case FileType.CPPSOURCE:
-                    String data = getFileContent(f);
+                    data = getFileContent(f);
                     data = stripComments(data);
-                    HashMap<Integer, String>funcs = findFunctions(data);
+                    funcs = findFunctions(data);
+                    functionList.put(f, funcs);
+                    break;
+                case FileType.ASMSOURCE:
+                    data = getFileContent(f);
+                    funcs = findLabels(data);
                     functionList.put(f, funcs);
                     break;
             }
