@@ -1589,11 +1589,8 @@ public class Base {
     {
         plugins.clear();
 
-        File pf = getSystemPluginsFolder();;
-
-        if (pf != null) loadPluginsFromFolder(pf);
-
         String[] entries = (String[]) cores.keySet().toArray(new String[0]);
+        File pf = null;
 
         for (int i = 0; i < entries.length; i++) {
             Core c = cores.get(entries[i]);
@@ -1602,9 +1599,7 @@ public class Base {
         }
 
         pf = getUserPluginsFolder();
-        if (pf != getSystemPluginsFolder()) {
-            if (pf != null) loadPluginsFromFolder(pf);
-        }
+        if (pf != null) loadPluginsFromFolder(pf);
     }
 
     public static void loadPluginsFromFolder(File f)
