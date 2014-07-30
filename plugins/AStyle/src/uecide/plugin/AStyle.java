@@ -56,7 +56,12 @@ public class AStyle extends Plugin {
 
             ArrayList<String> command = new ArrayList<String>();
 
-            command.add(Base.preferences.get("astyle.path", "/usr/bin/astyle"));
+            String exeFilename = extractProgram();
+            if (exeFilename == null) {
+                return;
+            }
+
+            command.add(exeFilename); //Base.preferences.get("astyle.path", "/usr/bin/astyle"));
             command.add("--style=" + baseStyle);
 
             if (Base.preferences.getBoolean("astyle.pad.blocks")) command.add("--break-blocks");
@@ -331,5 +336,56 @@ public class AStyle extends Plugin {
         Base.preferences.setBoolean("astyle.add.brackets", addBrackets.isSelected());
         Base.preferences.setBoolean("astyle.add.onelinebrackets", addOneLineBrackets.isSelected());
         Base.preferences.set("astyle.align.pointer", alignOptions[alignPointer.getSelectedIndex()]);
+    }
+
+    public String extractProgram() {
+        String res = null;
+        String dest = null;
+        if (Base.isWindows()) {
+            res = "/uecide/plugin/AStyle/command/windows/astyle.exe";
+            dest = "astyle.exe";
+        } else if (Base.isMacOS()) {
+            res = "/uecide/plugin/AStyle/command/macosx/astyle";
+            dest = "astyle";
+        } else if (Base.isLinux()) {
+            if (Base.getOSArch().equals("armhf")) {
+                res = "/uecide/plugin/AStyle/command/linux_armhf/astyle";
+                dest = "astyle";
+        } else {
+                res = "/uecide/plugin/AStyle/command/linux/astyle";
+                dest = "astyle";
+            }
+        } else {
+            return null;
+        }
+
+        File dfile = new File(Base.getTmpDir(), dest);
+        dfile.deleteOnExit();
+        if (dfile.exists()) {
+            return dfile.getAbsolutePath();
+        }
+
+        try {
+            InputStream from = AStyle.class.getResourceAsStream(res);
+            System.err.println(from);
+            OutputStream to = new BufferedOutputStream(new FileOutputStream(dfile));
+            byte[] buffer = new byte[16 * 1024];
+            int bytesRead;
+            while ((bytesRead = from.read(buffer)) != -1) {
+                to.write(buffer, 0, bytesRead);
+            }
+            to.flush();
+            from.close();
+            from = null;
+            to.close();
+            to = null;
+
+            dfile.setExecutable(true);
+        } catch (Exception e) {
+            Base.error(e);
+        }
+
+
+        return dfile.getAbsolutePath();
     }
 }
