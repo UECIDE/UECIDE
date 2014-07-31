@@ -34,6 +34,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.transport.RefSpec;
+
+
 
 public class GitLink extends Plugin {
 
@@ -66,9 +69,10 @@ public class GitLink extends Plugin {
     public void openRepo() {
         try {
             dotGit = new File(editor.getSketch().getFolder(), ".git");
-            localRepo = new FileRepository(new File(editor.getSketch().getFolder(), ".git"));
+            localRepo = new FileRepository(dotGit);
             git = new Git(localRepo);
             if (!dotGit.exists() || !dotGit.isDirectory()) {
+                hasRepo = false;
                 return;
             }
             hasRepo = true;
@@ -97,6 +101,14 @@ public class GitLink extends Plugin {
                     addFile(f);
                 }
                 commitRepo("Initial repository creation");
+
+        
+                StoredConfig config = git.getRepository().getConfig();
+                config.setString("branch", "master", "remote", "origin");
+                config.setString("branch", "master", "merge", "refs/heads/master");
+
+
+
                 return true;
             }
         } catch (Exception e) {
@@ -202,9 +214,11 @@ public class GitLink extends Plugin {
                 if (remote == null) {   
                     remote = "origin";
                 }
+                System.err.println("Pulling from " + remote);
+                StoredConfig config = git.getRepository().getConfig();
                 git.pull().setRemote(remote).call();
                 updateIconCache();
-                editor.refreshTreeModel();
+                editor.updateTree();
                 return true;
             }
         } catch (Exception e) {
@@ -224,7 +238,9 @@ public class GitLink extends Plugin {
             if (hasRepo) {
                 StoredConfig config = git.getRepository().getConfig();
                 config.setString("remote", type, "url", url);
+                config.setString("remote", type, "fetch", "+refs/heads/*:refs/remotes/" + type + "/*");
                 config.save();
+        
                 updateIconCache();
                 editor.refreshTreeModel();
                 return true;
