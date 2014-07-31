@@ -1,6 +1,14 @@
 <?xml version="1.0"?>
 <project name="SerialTerminal" default="build">
 
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="/usr/share/ant/lib/ant-contrib.jar"/>
+        </classpath>
+    </taskdef>
+
+    <var name="classpath" value="" />
     <sequential>
         <basename file="${basedir}" property="project" />
     </sequential>
@@ -36,7 +44,20 @@
         <delete file="${project}.jar" />
     </target>
 
-    <target name="compile" description="Compile sources">
+    <target name="thirdparty" if="thirdparty.jars">
+        <echo>Getting third party JAR files...</echo>
+        <for list="${thirdparty.jars}" delimiter="," param="url">
+            <sequential>
+                <local name="ubn" />
+                <get src="@{url}" dest="thirdparty" usetimestamp="true" />
+                <basename file="@{url}" property="ubn" />
+                <var name="classpath.tmp" value="${classpath}; thirdparty/${ubn}" />
+                <var name="classpath" value="${classpath.tmp}" />
+            </sequential>
+        </for>
+    </target>
+
+    <target name="compile" depends="thirdparty" description="Compile sources">
         <mkdir dir="bin" />
 
         <property environment="env" />
@@ -52,6 +73,7 @@
         <fail if="windows" unless="java_home" 
             message="The JAVA_HOME variable must be set to the location of a full JDK. For instance, on Windows, this might be c:\jdk1.6.0_18." />
 
+        <echo>Classpath is ${classpath}</echo>
         <javac srcdir="src" 
                 debug="true"
                 debuglevel="lines,vars,source"
@@ -60,13 +82,31 @@
 	        destdir="bin" 
             bootclasspath="${bootclass.path}"
 	        includeAntRuntime="false"
-	        classpath="${uecide.path}/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar" />
+	        classpath="${uecide.path}/uecide.jar; ${env.JAVA_HOME}/lib/tools.jar${classpath}" />
+    </target>
+   
+    <target name="zipfix" if="thirdparty.jars">
+        <mkdir dir="zipfix/extract" />
+        <for list="${thirdparty.jars}" delimiter="," param="url">
+            <sequential>
+                <local name="tbn" />
+                <echo>@{url}</echo>
+                <basename file="@{url}" property="tbn" />
+                <echo>${tbn}</echo>
+                <unzip dest="zipfix/extract" src="thirdparty/${tbn}" overwrite="true"/>
+            </sequential>
+        </for>
+
+        <delete dir="zipfix/extract/META-INF" />
+        <zip basedir="zipfix/extract" file="zipfix/all.jar" />
     </target>
 
-    <target name="build" depends="compile" description="Build the plugin jars">
+    <target name="build" depends="compile,zipfix" description="Build the plugin jars">
+        <mkdir dir="zipfix" />
         <jar destfile="${project}.jar">
             <fileset dir="bin" />
             <fileset dir="resources" />
+            <zipgroupfileset dir="zipfix" includes="*.jar" />
             <manifest>
                 <attribute name="Version" value="${version}" />
                 <attribute name="Minimum-Version" value="0.8.6a" />

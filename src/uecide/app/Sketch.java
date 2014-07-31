@@ -438,6 +438,10 @@ public class Sketch implements MessageConsumer {
         loadConfig();
 
         updateLibraryList();
+        if (editor != null) {
+            System.err.println("Triggering event SKETCH_OPEN");
+            editor.fireEvent(UEvent.SKETCH_OPEN);
+        }
     }
 
     public boolean loadFile(File f) {

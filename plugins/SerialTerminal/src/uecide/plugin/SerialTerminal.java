@@ -487,5 +487,8 @@ public class SerialTerminal extends Plugin implements SerialPortEventListener,Me
 
     public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {
     }
+
+    public ImageIcon getFileIconOverlay(File f) { return null; }
+
 }
 

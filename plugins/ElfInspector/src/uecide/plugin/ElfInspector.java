@@ -626,4 +626,7 @@ public class ElfInspector extends Plugin {
 
     public void addToolbarButtons(JToolBar toolbar, int flags) {
     }
+
+    public ImageIcon getFileIconOverlay(File f) { return null; }
+
 }

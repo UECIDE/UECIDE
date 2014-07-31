@@ -1113,4 +1113,6 @@ public class PluginManager extends Plugin implements PropertyChangeListener
     public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {
     }
 
+    public ImageIcon getFileIconOverlay(File f) { return null; }
+
 }

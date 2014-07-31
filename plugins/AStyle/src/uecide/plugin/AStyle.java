@@ -375,4 +375,6 @@ public class AStyle extends Plugin {
 
         return dfile.getAbsolutePath();
     }
+
+    public ImageIcon getFileIconOverlay(File f) { return null; }
 }

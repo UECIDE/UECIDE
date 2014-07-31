@@ -94,8 +94,11 @@ public abstract class Plugin {
     public abstract void addToolbarButtons(JToolBar toolbar, int flags);
     public abstract void populateMenu(JMenu menu, int flags);
     public abstract void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node);
+    public abstract ImageIcon getFileIconOverlay(File f);
 
     public void releasePort(String port) { }
 
     public void launch() { System.err.println("Not overridden"); }
+
+    public void catchEvent(int event) { };
 }

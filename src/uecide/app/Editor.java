@@ -612,7 +612,19 @@ public class Editor extends JFrame {
                             icon = Base.loadIconFromResource("files/folder.png");
                         }
                     } else {
-                        icon = Base.loadIconFromResource(FileType.getIcon(file));
+                        OverlayIcon oicon = new OverlayIcon(Base.loadIconFromResource(FileType.getIcon(file)));
+                        for (Plugin plugin : plugins) {
+                            try {
+                                ImageIcon fi = plugin.getFileIconOverlay(file);
+                                if (fi != null) {
+                                    oicon.add(fi);
+                                }
+                            } catch (AbstractMethodError e) {
+                            } catch (Exception e) {
+                                error(e);
+                            }
+                        }
+                        icon = (ImageIcon)oicon;
                     }
                     text.setBorder(paddingBorder);
                     if (selected) {
@@ -1056,6 +1068,10 @@ public class Editor extends JFrame {
         }
         treeModel.nodeStructureChanged(treeSource);
         if (treeSourceOpen) sketchContentTree.expandPath(new TreePath(treeSource.getPath()));
+    }
+
+    public void refreshTreeModel() {
+        treeModel.nodeStructureChanged(treeSource);
     }
 
     public void updateHeadersTree() {
@@ -1557,6 +1573,8 @@ public class Editor extends JFrame {
                         }
                     }
 
+                    populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_TOP, o);
+
                     JMenuItem renameItem = new JMenuItem("Rename file");
                     renameItem.setActionCommand(thisFile.getAbsolutePath());
                     renameItem.addActionListener(new ActionListener() {
@@ -1615,6 +1633,7 @@ public class Editor extends JFrame {
                     menu.add(deleteItem);
 
                     menu.addSeparator();
+                    populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_MID, o);
 
                     JMenu infoMenu = new JMenu("Info");
                     JMenuItem filePath = new JMenuItem(thisFile.getAbsolutePath());
@@ -1631,6 +1650,8 @@ public class Editor extends JFrame {
                     JMenuItem fileSize = new JMenuItem(thisFile.length() + " bytes");
                     infoMenu.add(fileSize);
                     menu.add(infoMenu);
+                    menu.addSeparator();
+                    populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_BOTTOM, o);
                     menu.show(sketchFilesTree, e.getX(), e.getY());
                 }
                 return;
@@ -1940,6 +1961,7 @@ public class Editor extends JFrame {
         }
 
         loadedSketch.saveConfig();
+        refreshTreeModel();
     }
 
     public void closeAllTabs() {
@@ -3268,6 +3290,7 @@ public class Editor extends JFrame {
             Debug.message("Creating new editor instance");
             Base.createNewEditor(f.getPath());
         }
+        fireEvent(UEvent.SKETCH_OPEN);
     }
 
     public static void updateLookAndFeel() {
@@ -3707,6 +3730,17 @@ public class Editor extends JFrame {
             }
         } catch (Exception e) {
             Base.error(e);
+        }
+    }
+
+    public void fireEvent(int event) {
+        for (Plugin plugin : plugins) {
+            try {
+                plugin.catchEvent(event);
+            } catch (AbstractMethodError e) {
+            } catch (Exception e) {
+                error(e);
+            }
         }
     }
 }
