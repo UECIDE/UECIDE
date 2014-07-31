@@ -138,7 +138,6 @@ public class AStyle extends Plugin {
     }
 
     public static JComboBox astyleStyle;
-    public static JTextField pathToAStyle;
 
     public static String[] styles = {
         "Allman / BSD / ANSI", "Java", "Kernighan  &  Ritchie",
@@ -199,7 +198,7 @@ public class AStyle extends Plugin {
 
         c.gridwidth = 2;
         JTextArea info = new JTextArea();
-        info.setText("Note: To use this plugin you need the Artistic Style program installed.  This may be in your package manager system, or is available from http://astyle.sourceforge.net\n");
+        info.setText("This plugin uses Artistic Style by Jim Pattee and Tal Davidson. http://astyle.sourceforge.net\n");
         info.setLineWrap(true);
         info.setWrapStyleWord(true);
         info.setOpaque(false);
@@ -248,17 +247,6 @@ public class AStyle extends Plugin {
                 }
             }
         });
-
-        label = new JLabel("Path to astyle executable:");
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 1;
-        p.add(label, c);
-
-        pathToAStyle = new JTextField();
-        pathToAStyle.setText(Base.preferences.get("astyle.path", "/usr/bin/astyle"));
-        c.gridx = 1;
-        p.add(pathToAStyle, c);
 
         c.gridx = 0;
         c.gridwidth = 1;
@@ -327,7 +315,6 @@ public class AStyle extends Plugin {
         if (idx >= codes.length) return;
         String code = codes[idx];
         Base.preferences.set("astyle.style", code);
-        Base.preferences.set("astyle.path", pathToAStyle.getText());
 
         Base.preferences.setBoolean("astyle.pad.blocks", padBlocks.isSelected());
         Base.preferences.setBoolean("astyle.pad.operators", padOper.isSelected());

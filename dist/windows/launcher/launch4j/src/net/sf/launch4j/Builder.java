@@ -98,8 +98,8 @@ public class Builder {
 
 			Cmd ldCmd = new Cmd(_basedir);
 
+					//.add("-mi386pe")
 			ldCmd.addExe("/usr/bin/i586-mingw32msvc-gcc")
-					.add("-mi386pe")
 					.add("-Wl,--oformat,pei-i386")
 					.add((c.getHeaderType().equals(Config.GUI_HEADER))
 							? "-Wl,--subsystem windows" : "-Wl,--subsystem console")
