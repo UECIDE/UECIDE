@@ -126,6 +126,27 @@ public class GitLink extends Plugin {
         return false;
     }
 
+    public boolean checkoutFile(File f) {
+        try {
+            if (localRepo == null) {
+                openRepo();
+            }
+            if (!hasRepo) {
+                openRepo();
+            }
+            if (hasRepo) {
+                String fn = relative(f);
+                git.checkout().addPath(fn).call();
+                updateIconCache();
+                editor.refreshTreeModel();
+                return true;
+            }
+        } catch (Exception e) {
+            Base.error(e);
+        }
+        return false;
+    }
+
     public boolean commitRepo(String message) {
         try {
             if (localRepo == null) {
@@ -327,6 +348,15 @@ public class GitLink extends Plugin {
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
                                addFile(new File(e.getActionCommand()));
+                            }
+                        });
+                        item.setActionCommand(f.getAbsolutePath());
+                        menu.add(item);
+                    } else {
+                        JMenuItem item = new JMenuItem("Revert to last commit");
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                               checkoutFile(new File(e.getActionCommand()));
                             }
                         });
                         item.setActionCommand(f.getAbsolutePath());
