@@ -105,6 +105,7 @@ public class Editor extends JFrame {
     DefaultMutableTreeNode treeHeaders;
     DefaultMutableTreeNode treeLibraries;
     DefaultMutableTreeNode treeOutput;
+    DefaultMutableTreeNode treeDocs;
     DefaultMutableTreeNode treeBinaries;
     DefaultTreeModel treeModel;
 
@@ -737,6 +738,7 @@ public class Editor extends JFrame {
         treeLibraries = new DefaultMutableTreeNode("Libraries");
         treeBinaries = new DefaultMutableTreeNode("Binaries");
         treeOutput = new DefaultMutableTreeNode("Output");
+        treeDocs = new DefaultMutableTreeNode("Documentation");
         TreeCellRenderer renderer = new FileCellRenderer();
         sketchContentTree.setCellRenderer(renderer);
         treeRoot.add(treeSource);
@@ -744,6 +746,7 @@ public class Editor extends JFrame {
         treeRoot.add(treeLibraries);
         treeRoot.add(treeBinaries);
         treeRoot.add(treeOutput);
+        treeRoot.add(treeDocs);
 
         sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
         sketchContentTree.expandPath(new TreePath(treeSource.getPath()));
@@ -764,6 +767,8 @@ public class Editor extends JFrame {
         sketchFilesTree.setDropMode(DropMode.ON_OR_INSERT);
         sketchFilesTree.setTransferHandler(new TreeTransferHandler());
         sketchFilesTree.getSelectionModel().setSelectionMode(TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
+
+        enableSourceWatchTimer();
     }
 
     class TreeTransferHandler extends TransferHandler {
@@ -1038,9 +1043,22 @@ public class Editor extends JFrame {
         }
     }
 
+    Timer sourceWatchTimer;
+
+    public void enableSourceWatchTimer() {
+        sourceWatchTimer = new Timer();
+        sourceWatchTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                updateSourceTree();
+            }
+        }, 5000, 5000);
+    }
+
     public void updateSourceTree() {
         loadedSketch.findAllFunctions();
-        boolean treeSourceOpen = sketchContentTree.isExpanded(new TreePath(treeSource.getPath()));
+
+        TreePath[] saved = saveTreeState(sketchContentTree);
+
         treeSource.removeAllChildren();
         DefaultMutableTreeNode node;
         for (File f : loadedSketch.sketchFiles) {
@@ -1067,15 +1085,40 @@ public class Editor extends JFrame {
             }
         }
         treeModel.nodeStructureChanged(treeSource);
-        if (treeSourceOpen) sketchContentTree.expandPath(new TreePath(treeSource.getPath()));
+        restoreTreeState(sketchContentTree, saved);
+    }
+
+    public void updateDocsTree() {
+        TreePath[] saved = saveTreeState(sketchContentTree);
+        treeDocs.removeAllChildren();
+        DefaultMutableTreeNode node;
+        for (File f : loadedSketch.getFolder().listFiles()) {
+            int type = FileType.getType(f);
+            switch (type) {
+                case FileType.DOCUMENT:
+                    node = new DefaultMutableTreeNode(f.getName());
+                    node.setUserObject(f);
+                    treeDocs.add(node);
+                    break;
+            }
+        }
+        treeModel.nodeStructureChanged(treeDocs);
+        restoreTreeState(sketchContentTree, saved);
     }
 
     public void refreshTreeModel() {
+        TreePath[] saved = saveTreeState(sketchContentTree);
         treeModel.nodeStructureChanged(treeSource);
+        treeModel.nodeStructureChanged(treeHeaders);
+        treeModel.nodeStructureChanged(treeLibraries);
+        treeModel.nodeStructureChanged(treeOutput);
+        treeModel.nodeStructureChanged(treeDocs);
+        treeModel.nodeStructureChanged(treeBinaries);
+        restoreTreeState(sketchContentTree, saved);
     }
 
     public void updateHeadersTree() {
-        boolean treeHeadersOpen = sketchContentTree.isExpanded(new TreePath(treeHeaders.getPath()));
+        TreePath[] saved = saveTreeState(sketchContentTree);
         treeHeaders.removeAllChildren();
         DefaultMutableTreeNode node;
         for (File f : loadedSketch.sketchFiles) {
@@ -1089,11 +1132,11 @@ public class Editor extends JFrame {
             }
         }
         treeModel.nodeStructureChanged(treeHeaders);
-        if (treeHeadersOpen) sketchContentTree.expandPath(new TreePath(treeHeaders.getPath()));
+        restoreTreeState(sketchContentTree, saved);
     }
 
     public void updateLibrariesTree() {
-        boolean treeLibrariesOpen = sketchContentTree.isExpanded(new TreePath(treeLibraries.getPath()));
+        TreePath[] saved = saveTreeState(sketchContentTree);
         treeLibraries.removeAllChildren();
         HashMap<String, Library>libList = loadedSketch.getLibraries();
         DefaultMutableTreeNode node;
@@ -1105,11 +1148,11 @@ public class Editor extends JFrame {
             }
         }
         treeModel.nodeStructureChanged(treeLibraries);
-        if (treeLibrariesOpen) sketchContentTree.expandPath(new TreePath(treeLibraries.getPath()));
+        restoreTreeState(sketchContentTree, saved);
     }
 
     public void updateBinariesTree() {
-        boolean treeBinariesOpen = sketchContentTree.isExpanded(new TreePath(treeBinaries.getPath()));
+        TreePath[] saved = saveTreeState(sketchContentTree);
         treeBinaries.removeAllChildren();
         File bins = loadedSketch.getBinariesFolder();
         DefaultMutableTreeNode node;
@@ -1125,15 +1168,17 @@ public class Editor extends JFrame {
             }
         }
         treeModel.nodeStructureChanged(treeBinaries);
-        if (treeBinariesOpen) sketchContentTree.expandPath(new TreePath(treeBinaries.getPath()));
+        restoreTreeState(sketchContentTree, saved);
     }
 
     public void updateOutputTree() {
+        TreePath[] saved = saveTreeState(sketchContentTree);
         boolean treeOutputOpen = sketchContentTree.isExpanded(new TreePath(treeOutput.getPath()));
         treeOutput.removeAllChildren();
         addFileTreeToNode(treeOutput, loadedSketch.getBuildFolder());
         treeModel.nodeStructureChanged(treeOutput);
         if (treeOutputOpen) sketchContentTree.expandPath(new TreePath(treeOutput.getPath()));
+        restoreTreeState(sketchContentTree, saved);
     }
 
     public void updateFilesTree() {
@@ -1155,6 +1200,7 @@ public class Editor extends JFrame {
         updateLibrariesTree();
         updateBinariesTree();
         updateOutputTree();
+        updateDocsTree();
         updateFilesTree();
 
         if (treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
@@ -1297,6 +1343,15 @@ public class Editor extends JFrame {
                                 updateOutputTree();
                             }
                         });
+                        menu.add(item);
+                        populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_TOP, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
+                        populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_BOTTOM, o);
+                        menu.show(sketchContentTree, e.getX(), e.getY());
+                    } else if (s.equals("Documentation")) {
+                        JMenuItem item = new JMenuItem("Create Markdown file");
+                        item.setActionCommand("md");
+                        item.addActionListener(createNewAction);
                         menu.add(item);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_TOP, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
@@ -3621,9 +3676,39 @@ public class Editor extends JFrame {
         return (TreePath[]) openPaths.toArray(new TreePath[openPaths.size()]);
     }
 
+    public TreePath findPathByStrings(JTree tree, TreePath path) {
+        Object[] pathComponents = path.getPath();
+        TreePath[] allPaths = getPaths(tree);
+        for (TreePath testPath : allPaths) {
+            Object[] testComponents = testPath.getPath();
+            if (testComponents.length != pathComponents.length) {
+                continue;
+            }
+            boolean match = true;
+            for (int i = 0; i < pathComponents.length; i++) {
+                Object po = pathComponents[i];
+                Object to = testComponents[i];
+                if (!po.toString().equals(to.toString())) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                return testPath;
+            }
+        }
+        return null;
+    }
+
     public void restoreTreeState(JTree tree, TreePath[] savedState) {
         TreePath[] allPaths = getPaths(tree);
         for (TreePath path : savedState) {
+            TreePath foundPath = findPathByStrings(tree, path);
+            if (foundPath != null) {
+                tree.expandPath(foundPath);
+            }
+        }
+/*
             DefaultMutableTreeNode oldnode = (DefaultMutableTreeNode)path.getLastPathComponent();
             if (oldnode.getUserObject() instanceof File) {
                 File oldFile = (File)oldnode.getUserObject();
@@ -3645,6 +3730,7 @@ public class Editor extends JFrame {
                 }
             }
         }
+*/
     }
 
     public void compile() {

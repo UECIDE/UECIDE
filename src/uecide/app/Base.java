@@ -156,7 +156,6 @@ public class Base {
             if (path.equals("--debug")) {
                 extraDebug = true;
                 Debug.show();
-                break;
             }
             if (path.equals("--exceptions")) {
                 redirectExceptions = false;

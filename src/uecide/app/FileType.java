@@ -48,12 +48,14 @@ public class FileType {
     public static final int SKETCH = 7;
     public static final int TEXT = 8;
     public static final int GRAPHIC = 9;
+    public static final int DOCUMENT = 10;
 
     public static final int GROUP_OTHER = 0;
     public static final int GROUP_SOURCE = 1;
     public static final int GROUP_HEADER = 2;
     public static final int GROUP_BINARY = 3;
     public static final int GROUP_GRAPHIC = 4;
+    public static final int GROUP_DOCS = 5;
 
     public static TreeMap<String, FileTypeInfo> fileTypeList;
     static {
@@ -91,6 +93,7 @@ public class FileType {
         fileTypeList.put("ini", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
         fileTypeList.put("txt", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
         fileTypeList.put("dat", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("md", new FileTypeInfo(FileType.DOCUMENT, "uecide.app.editors.text", null, "files/text-x-markdown.png", GROUP_DOCS));
         fileTypeList.put("plist", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
         fileTypeList.put("properties", new FileTypeInfo(FileType.TEXT, "uecide.app.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
 
