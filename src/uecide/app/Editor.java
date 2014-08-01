@@ -1054,12 +1054,58 @@ public class Editor extends JFrame {
         }, 5000, 5000);
     }
 
+    public void mergeTrees(DefaultMutableTreeNode dst, DefaultMutableTreeNode src) {
+        // First go through and remove any nodes in dst that aren't in src.
+        boolean removedNodes = false;
+        int currentNode = 0;
+        while (currentNode < dst.getChildCount()) {
+            boolean found = false;
+            DefaultMutableTreeNode foundNode = null;
+            for (int i = 0; i < src.getChildCount(); i++) {
+                if (src.getChildAt(i).toString().equals(dst.getChildAt(currentNode).toString())) {
+                    foundNode = (DefaultMutableTreeNode)src.getChildAt(i);
+                    src.remove(i);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                removedNodes = true;
+                dst.remove(currentNode);
+                continue;
+            }
+
+            // Copy across the user object.
+            DefaultMutableTreeNode dnode = (DefaultMutableTreeNode)dst.getChildAt(currentNode);
+            Object sob = foundNode.getUserObject();
+            Object dob = dnode.getUserObject();
+            if (sob != dob) {
+                dnode.setUserObject(sob);
+                treeModel.nodeStructureChanged(dnode);
+            }
+
+            mergeTrees(dnode, foundNode);
+            currentNode++;
+        }
+
+        // Now copy across any new objects.
+
+        boolean addedNodes = false;
+        while (src.getChildCount() > 0) {
+            dst.add((DefaultMutableTreeNode)src.getChildAt(0));  
+            addedNodes = true;
+        }
+        if (addedNodes || removedNodes) {
+            treeModel.nodeStructureChanged(dst);
+        }
+    }
+
     public void updateSourceTree() {
         loadedSketch.findAllFunctions();
 
         TreePath[] saved = saveTreeState(sketchContentTree);
 
-        treeSource.removeAllChildren();
+        DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
         DefaultMutableTreeNode node;
         for (File f : loadedSketch.sketchFiles) {
             Debug.message("Loading file " + f.getAbsolutePath());
@@ -1072,7 +1118,7 @@ public class Editor extends JFrame {
                 case FileType.SKETCH:
                     node = new DefaultMutableTreeNode(f.getName());
                     node.setUserObject(f);
-                    treeSource.add(node);
+                    ntc.add(node);
                     HashMap<Integer, String> funcs = loadedSketch.getFunctionsForFile(f);
                     if (funcs != null) {
                         for (int line : funcs.keySet()) {
@@ -1084,7 +1130,9 @@ public class Editor extends JFrame {
                     break;
             }
         }
-        treeModel.nodeStructureChanged(treeSource);
+
+        mergeTrees(treeSource, ntc);
+//        treeModel.nodeStructureChanged(treeSource);
         restoreTreeState(sketchContentTree, saved);
     }
 
