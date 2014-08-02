@@ -34,6 +34,10 @@
         <delete dir="bin" />
         <delete file="uecide.jar" />
         <delete>
+            <fileset dir="." includes="uecide-*.zip" />
+            <fileset dir="." includes="uecide-*.exe" />
+            <fileset dir="." includes="uecide-*.deb" />
+            <fileset dir="." includes="uecide-*.dmg" />
             <fileset dir="." includes="uecide-*.jar" />
         </delete>
     </target>
@@ -63,14 +67,15 @@
         <jar basedir="bin" destfile="uecide.jar">
             <fileset dir="bin" />
             <fileset dir="resources" />
-            <zipgroupfileset dir="lib" includes="*.jar"/>
+            <zipgroupfileset dir="lib" includes="*.jar" />
             <manifest>
-                <attribute name="Built-By" value="${user.name}"/>
-                <attribute name="Main-Class" value="uecide.app.Base"/>
-                <attribute name="Class-Path" value="uecide.jar"/>
-                <attribute name="Version" value="${version}"/>
+                <attribute name="Built-By" value="${user.name}" />
+                <attribute name="Main-Class" value="uecide.app.Base" />
+                <attribute name="Class-Path" value="uecide.jar" />
+                <attribute name="Version" value="${version}" />
                 <attribute name="Build" value="${build.number}" />
-                <attribute name="Compiled" value="${TODAY}"/>
+                <attribute name="Compiled" value="${TODAY}" />
+                <attribute name="Release" value="${mode}" />
             </manifest>
         </jar>
         <chmod perm="0755" file="uecide.jar" />

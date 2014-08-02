@@ -90,7 +90,7 @@ public class ProjectSearch
                         }
                         EditorBase eb = editor.getTab(tab);
                         for (int i : finds) {
-                            eb.highlightLine(i, Base.theme.getColor("editor.searchall.color"));
+                            eb.highlightLine(i, Base.theme.getColor("editor.searchall.bgcolor"));
                         }
                     }
                 }
@@ -147,7 +147,7 @@ public class ProjectSearch
                         }
                     });
                     try {
-                        text.addLineHighlight(focusLine, Base.theme.getColor("editor.searchall.color"));
+                        text.addLineHighlight(focusLine, Base.theme.getColor("editor.searchall.bgcolor"));
                         text.setHighlightCurrentLine(false);
                     } catch (Exception e) {
                         Base.error(e);

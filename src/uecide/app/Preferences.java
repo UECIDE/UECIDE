@@ -126,6 +126,7 @@ public class Preferences {
     JTextField backupNumber;
 
     JComboBox selectedTheme;
+    JComboBox selectedEditorTheme;
     JCheckBox useSystemDecorator;
 
     JList extraPortList;
@@ -140,6 +141,28 @@ public class Preferences {
         public String description;
         public String path;
     };
+
+    class KVPair {
+        String key;
+        String value;
+
+        public KVPair(String k, String v) {
+            key = k;
+            value = v;
+        }
+
+        public String toString() {
+            return value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
 
     class LibraryTableModel extends AbstractTableModel {
         private String[] columnNames = {"Key",
@@ -605,6 +628,32 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridy++;
+        c.gridwidth = 1;
+        label = new JLabel("Editor Theme:");
+        p.add(label, c);
+        c.gridwidth = 1;
+        c.gridx = 1;
+
+
+        ArrayList<KVPair> tlist = new ArrayList<KVPair>();
+        HashMap<String, String> themes = Base.getThemeList();
+        KVPair selectedPair = null;
+        for (String t : themes.keySet()) {
+            KVPair kv = new KVPair(t, themes.get(t));
+            if (t.equals(Base.preferences.get("theme.selected", "default"))) {
+                selectedPair = kv;
+            }
+            tlist.add(kv);
+        }
+
+        KVPair[] tarr = tlist.toArray(new KVPair[tlist.size()]);
+        selectedEditorTheme = new JComboBox(tarr);
+        selectedEditorTheme.setSelectedItem(selectedPair);
+
+        p.add(selectedEditorTheme, c);
+
+        c.gridx = 0;
+        c.gridy++;
         c.gridwidth = 3;
         label = new JLabel("Sketchbook location:");
         p.add(label, c);
@@ -1059,6 +1108,7 @@ public class Preferences {
     Base.preferences.setBoolean("editor.expandtabs", useSpacesForTabs.isSelected());
     Base.preferences.setBoolean("editor.showtabs", visibleTabs.isSelected());
     Base.preferences.set("editor.tabsize", tabSize.getText());
+    Base.preferences.set("theme.selected", ((KVPair)selectedEditorTheme.getSelectedItem()).getKey());
 
     File f = new File(sketchbookLocationField.getText());
     if (!f.exists()) {

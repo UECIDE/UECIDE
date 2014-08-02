@@ -4,37 +4,26 @@ window.laf.windows = com.sun.java.swing.plaf.windows.WindowsLookAndFeel
 
 editor.font = SansSerif,plain,24
 
-status.notice.fgcolor = #ffff88
-status.notice.bgcolor = #666666
-status.error.fgcolor = #ffffff
-status.error.bgcolor = #666666
-status.edit.fgcolor = #ffff88
-status.edit.bgcolor = #2d649f
-status.font = SansSerif,bold,12
-
 console.font = Monospaced,plain,10
 console.color = #000000
 console.output.color = #00cc00
 console.error.color = #ff0000
 console.warning.color = #cccc00
 
-buttons.bgcolor = #e7e6e4
-#buttons.status.font = SansSerif,plain,12
-#buttons.status.color = #f
-
-linestatus.color = #ffffff
-linestatus.bgcolor = #666666
-
 editor.fgcolor = #000000
 editor.bgcolor = #ffffff
 editor.external.bgcolor = #ffeedd
 
-about.version.x = 350
-about.version.y = 150
-about.version.color = #b2bebe
-about.version.font = SansSerif,bold,16
+splash.version.x = 350
+splash.version.y = 150
+splash.version.color = #b2bebe
+splash.version.font = SansSerif,bold,16
 splash.message.x = 170
 splash.message.y = 170
+
+splash.beta.x = -1
+splash.beta.y = 240
+splash.beta.color = #a00000
 
 product=uecide
 product.cap=UECIDE
@@ -44,6 +33,8 @@ links.homepage.name=Visit UECIDE website
 links.homepage.url=http://uecide.org
 links.forums.name=Visit UECIDE forums
 links.forums.url=http://uecide.org/forum
+links.blog.name=UECIDE Blog
+links.blog.url=http://uecide.org/blog
 
 plugins.url=http://uecide.org/plugins-087.php
 
@@ -52,7 +43,95 @@ editor.line.fade=true
 
 editor.compile.error.bgcolor=#FFaaaa
 editor.compile.warning.bgcolor=#FFFFaa
-editor.searchall.color=#aaffaa
+editor.searchall.bgcolor=#aaffaa
 
-version.url=http://uecide.org/downloads/version.txt
-version.download=http://uecide.org/download
+version.release.url=http://uecide.org/downloads/version.txt
+version.release.download=http://uecide.org/download
+
+version.beta.url=http://uecide.org/betadl/version.txt
+version.beta.download=http://uecide.org/beta
+
+theme.default.name=Default Theme
+theme.default.editor.fgcolor = #000000
+theme.default.editor.bgcolor = #ffffff
+theme.default.editor.font = SansSerif,plain,24
+theme.default.editor.gutter.bgcolor = #FFFFFF
+theme.default.editor.gutter.fgcolor = #000000
+theme.default.editor.line.bgcolor = #FFFFAA
+theme.default.editor.caret.fgcolor = #000000
+theme.default.editor.caret.style.insert = line
+theme.default.editor.caret.style.replace = block
+theme.default.editor.markall.bgcolor = #88aacc
+theme.default.editor.markall.border = false
+theme.default.editor.bracket.bgcolor = #aabbcc
+theme.default.editor.bracket.bordercolor = #ccbbaa
+theme.default.editor.bracket.pair = true
+theme.default.editor.select.bgcolor = #aaccff
+theme.default.editor.select.rounded = false
+theme.default.editor.annotation.fgcolor = #ff0000
+theme.default.editor.comment.fgcolor = #00bb00
+theme.default.editor.datatype.fgcolor = #00aa88
+theme.default.editor.error.fgcolor = #Ff0000
+theme.default.editor.function.fgcolor = #0000FF
+theme.default.editor.identifier.fgcolor = #000000
+theme.default.editor.literal.fgcolor = #000000
+theme.default.editor.operator.fgcolor = #888888
+theme.default.editor.preprocessor.fgcolor = #aaaaaa
+theme.default.editor.regex.fgcolor = #ff66ff
+theme.default.editor.reserved.fgcolor = #0000FF
+theme.default.editor.variable.fgcolor = #000000
+theme.default.editor.brackets.fgcolor = #ff0000
+theme.default.console.font = Monospaced,plain,10
+theme.default.console.color = #000000
+theme.default.console.output.color = #00cc00
+theme.default.console.error.color = #ff0000
+theme.default.console.warning.color = #cccc00
+theme.default.editor.line.enabled=true
+theme.default.editor.line.fade=true
+theme.default.editor.compile.error.bgcolor=#FFaaaa
+theme.default.editor.compile.warning.bgcolor=#FFFFaa
+theme.default.editor.searchall.bgcolor=#aaffaa
+
+
+theme.terminal.name=Terminal
+theme.terminal.editor.fgcolor = #00cc00
+theme.terminal.editor.bgcolor = #000000
+theme.terminal.editor.font = SansSerif,plain,24
+theme.terminal.editor.gutter.bgcolor = #000000
+theme.terminal.editor.gutter.fgcolor = #00bb00
+theme.terminal.editor.line.bgcolor = #003300
+theme.terminal.editor.caret.fgcolor = #00FF00
+theme.terminal.editor.caret.style.insert = block
+theme.terminal.editor.caret.style.replace = box
+theme.terminal.editor.markall.bgcolor = #004400
+theme.terminal.editor.markall.border = false
+theme.terminal.editor.bracket.bgcolor = #000000
+theme.terminal.editor.bracket.bordercolor = #000000
+theme.terminal.editor.bracket.pair = true
+theme.terminal.editor.select.bgcolor = #006600
+theme.terminal.editor.select.rounded = false
+theme.terminal.editor.annotation.fgcolor = #ff0000
+theme.terminal.editor.comment.fgcolor = #00bb00
+theme.terminal.editor.datatype.fgcolor = #00aa88
+theme.terminal.editor.error.fgcolor = #Ff0000
+theme.terminal.editor.function.fgcolor = #00FF00
+theme.terminal.editor.identifier.fgcolor = #00bb00
+theme.terminal.editor.literal.fgcolor = #00bb00
+theme.terminal.editor.operator.fgcolor = #00bb00
+theme.terminal.editor.preprocessor.fgcolor = #008800
+theme.terminal.editor.regex.fgcolor = #00bb00
+theme.terminal.editor.reserved.fgcolor = #00FF00
+theme.terminal.editor.variable.fgcolor = #00bb00
+theme.terminal.editor.brackets.fgcolor = #00FF00
+theme.terminal.console.font = Monospaced,plain,10
+theme.terminal.console.color = #000000
+theme.terminal.console.output.color = #00cc00
+theme.terminal.console.error.color = #ff0000
+theme.terminal.console.warning.color = #cccc00
+theme.terminal.editor.line.enabled=true
+theme.terminal.editor.line.fade=true
+theme.terminal.editor.compile.error.bgcolor=#FFaaaa
+theme.terminal.editor.compile.warning.bgcolor=#FFFFaa
+theme.terminal.editor.searchall.bgcolor=#aaffaa
+
+

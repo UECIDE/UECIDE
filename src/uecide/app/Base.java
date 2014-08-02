@@ -63,9 +63,7 @@ import com.jtattoo.plaf.*;
 public class Base {
 	
     public static int REVISION = 23;
-    /** This might be replaced by main() if there's a lib/version.txt file. */
-    /** Set true if this a proper release rather than a numbered revision. */
-    public static boolean RELEASE = false;
+    public static String RELEASE = "release";
     public static int BUILDNO = 0;
     public static String BUILDER = "";
 
@@ -221,7 +219,7 @@ public class Base {
             BUILDNO = Integer.parseInt(manifestContents.getValue("Build"));
             BUILDER = manifestContents.getValue("Built-By");
 
-            RELEASE = true;
+            RELEASE = manifestContents.getValue("Release");;
 
             Debug.message("Version: "+ systemVersion);
         } catch (Exception e) {
@@ -280,6 +278,9 @@ public class Base {
 
         if (!headless) {
             splashScreen = new Splash();
+            if (RELEASE.equals("beta")) {
+                splashScreen.setBetaMessage("** BETA VERSION **");
+            }
             splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
         }
 
@@ -362,6 +363,8 @@ public class Base {
         Serial.updatePortList();
         Serial.fillExtraPorts();
 
+        if (!headless) splashScreen.setMessage("Loading Themes...", 25);
+        loadThemes();
         if (!headless) splashScreen.setMessage("Loading Compilers...", 30);
         loadCompilers();
         if (!headless) splashScreen.setMessage("Loading Cores...", 40);
@@ -427,12 +430,12 @@ public class Base {
             if (isNewVersionAvailable()) {
                 if (headless) {
                     System.err.println("A new version is available!");
-                    System.err.println("Download it from: " + Base.theme.get("version.download"));
+                    System.err.println("Download it from: " + Base.theme.get("version." + RELEASE + ".download"));
                 } else {
                     String[] options = {"Yes", "No"};
                     int n = JOptionPane.showOptionDialog(null, "A newer version is available.\nWould you like to download it now?", "Newer version available", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
                     if (n == 0) {
-                        openURL(Base.theme.get("version.download"));
+                        openURL(Base.theme.get("version." + RELEASE + ".download"));
                     }
                 }
             }
@@ -2021,6 +2024,7 @@ public class Base {
                 Serial.updatePortList();
                 Serial.fillExtraPorts();
 
+                rescanThemes();
                 rescanCompilers();
                 rescanCores();
                 rescanBoards();
@@ -2041,6 +2045,10 @@ public class Base {
         loadPlugins();
     }
 
+    public static void rescanThemes() {
+        Editor.broadcast(Translate.t("Scanning themes..."));
+        loadThemes();
+    }
     public static void rescanCompilers() {
         compilers = new TreeMap<String, Compiler>();
         Editor.broadcast(Translate.t("Scanning compilers..."));
@@ -2173,7 +2181,7 @@ public class Base {
 
     public Version getLatestVersion() {
         try {
-            URL url = new URL(Base.theme.get("version.url"));
+            URL url = new URL(Base.theme.get("version." + RELEASE + ".url"));
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
             String data = in.readLine();
             in.close();
@@ -2227,6 +2235,30 @@ public class Base {
         StackTraceElement caller = st[2];
         System.err.print(caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): " + msg);
     }
+
+    public static void loadThemes() {
+        File tf = getUserThemesFolder();
+        File[] files = tf.listFiles();
+        for (File f : files) {
+            if (f.getName().endsWith(".theme")) {
+                PropertyFile newTheme = new PropertyFile(f);
+                String name = f.getName();
+                name = name.substring(0, name.lastIndexOf("."));
+                theme.mergeData(newTheme, "theme." + name);
+            }
+        }
+    }
+
+    public static HashMap<String, String> getThemeList() {
+        HashMap<String, String> themeList = new HashMap<String, String>();
+        String[] themeKeys = theme.childKeysOf("theme");
+        for (String key : themeKeys) {
+            themeList.put(key, theme.get("theme." + key + ".name"));
+        }
+        return themeList;
+    }
+
+
 }
 
 

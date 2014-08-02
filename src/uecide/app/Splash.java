@@ -58,6 +58,7 @@ public class Splash extends Window {
     BufferedImage image;
 
     String message = "";
+    String betaMessage = "";
 
     int percent = 0;
     int w;
@@ -109,14 +110,19 @@ public class Splash extends Window {
     public void paint(Graphics g) {
         int x = 0;
         int y = 0;
+        int bx = 0;
+        int by = 0;
         int mx = 0;
         int my = 0;
         try {
-            x = Integer.parseInt(Base.theme.get("about.version.x"));
-            y = Integer.parseInt(Base.theme.get("about.version.y"));
+            x = Base.theme.getInteger("splash.version.x");
+            y = Base.theme.getInteger("splash.version.y");
 
-            mx = Integer.parseInt(Base.theme.get("splash.message.x"));
-            my = Integer.parseInt(Base.theme.get("splash.message.y"));
+            mx = Base.theme.getInteger("splash.message.x");
+            my = Base.theme.getInteger("splash.message.y");
+
+            bx = Base.theme.getInteger("splash.beta.x");
+            by = Base.theme.getInteger("splash.beta.y");
         } catch (Exception e) {
         }
 
@@ -132,13 +138,24 @@ public class Splash extends Window {
             y = h + y;
         }
 
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2.setFont(Base.theme.getFont("about.version.font"));
-        g2.setColor(Base.theme.getColor("about.version.color"));
+        g2.setFont(Base.theme.getFont("splash.version.font"));
+        g2.setColor(Base.theme.getColor("splash.version.color"));
         g2.drawString("v" + Base.systemVersion, x, y);
+
+        if (Base.theme.get("splash.message.font") != null) { g2.setFont(Base.theme.getFont("splash.message.font")); }
+        if (Base.theme.get("splash.message.color") != null) { g2.setColor(Base.theme.getColor("splash.message.color")); }
         g2.drawString(message, mx, my);
+
+        if (bx == -1) {
+            FontMetrics fm = g2.getFontMetrics();
+            int sw = fm.stringWidth(betaMessage);
+            bx = w / 2 - sw / 2;
+        }
+        if (Base.theme.get("splash.beta.font") != null) { g2.setFont(Base.theme.getFont("splash.beta.font")); }
+        if (Base.theme.get("splash.beta.color") != null) { g2.setColor(Base.theme.getColor("splash.beta.color")); }
+        g2.drawString(betaMessage, bx, by);
 
         g2.setColor(new Color(200,0,00));
         g2.fillRect(0, h-4, (int) (((float)percent / 100.0) * (float)w) , h - 1); 
@@ -153,6 +170,11 @@ public class Splash extends Window {
     public void setMessage(String m, int p) {
         setMessage(m);
         setPercent(p);
+    }
+
+    public void setBetaMessage(String m) {
+        betaMessage = m;
+        repaint();
     }
 
     public void setPercent(int p) {

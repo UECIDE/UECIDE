@@ -166,6 +166,18 @@ public class PropertyFile {
         }
     }
 
+    public void mergeData(PropertyFile pf, String prefix) {
+        if (pf == null) {
+            return;
+        }
+        if (!prefix.endsWith(".")) {
+            prefix += ".";
+        }
+        for (String key: pf.getProperties().stringPropertyNames()) {
+            set(prefix + key, pf.getProperties().getProperty(key));
+        }
+    }
+
     public void save() {
         if (userFile != null) {
             try {
