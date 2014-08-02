@@ -79,7 +79,7 @@ editor.laf.default.macosx=apple.laf.AquaLookAndFeel
 editor.laf.decorator=true
 
 # default size for the main window
-editor.window.width.default = 500
+editor.window.width.default = 800
 editor.window.height.default = 600
 
 editor.window.width.min = 400

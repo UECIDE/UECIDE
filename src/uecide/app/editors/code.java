@@ -99,18 +99,18 @@ public class code extends JPanel implements EditorBase {
             findButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if (findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
-                        searchTerm.setBackground(new Color(255, 255, 255));
+                        searchTerm.setBackground(UIManager.getColor("TextField.background"));
                     } else {
-                        searchTerm.setBackground(new Color(255, 128, 128));
+                        searchTerm.setBackground(textArea.getSyntaxScheme().getStyle(SyntaxScheme.ERROR_IDENTIFIER).background);
                     }
                 }
             });
             searchTerm.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if (findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
-                        searchTerm.setBackground(new Color(255, 255, 255));
+                        searchTerm.setBackground(UIManager.getColor("TextField.background"));
                     } else {
-                        searchTerm.setBackground(new Color(255, 128, 128));
+                        searchTerm.setBackground(textArea.getSyntaxScheme().getStyle(SyntaxScheme.ERROR_IDENTIFIER).background);
                     }
                 }
             });
@@ -311,6 +311,7 @@ public class code extends JPanel implements EditorBase {
 
         textArea.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
         textArea.setFont(Base.preferences.getFont("editor.font"));
+
         Gutter g = scrollPane.getGutter();
         if (Base.theme.get(theme + "editor.gutter.bgcolor") != null) {
             g.setBackground(Base.theme.getColor(theme + "editor.gutter.bgcolor"));
@@ -318,6 +319,16 @@ public class code extends JPanel implements EditorBase {
         if (Base.theme.get(theme + "editor.gutter.fgcolor") != null) {
             g.setLineNumberColor(Base.theme.getColor(theme + "editor.gutter.fgcolor"));
         }
+        if (Base.theme.get(theme + "editor.gutter.bordercolor") != null) {
+            g.setBorderColor(Base.theme.getColor(theme + "editor.gutter.bordercolor"));
+        }
+        if (Base.theme.get(theme + "editor.fold.bgcolor") != null) {
+            g.setFoldBackground(Base.theme.getColor(theme + "editor.fold.bgcolor"));
+        }
+        if (Base.theme.get(theme + "editor.fold.fgcolor") != null) {
+            g.setFoldIndicatorForeground(Base.theme.getColor(theme + "editor.fold.fgcolor"));
+        }
+
         if (Base.theme.get(theme + "editor.line.bgcolor") != null) {
             textArea.setCurrentLineHighlightColor(Base.theme.getColor(theme + "editor.line.bgcolor"));
         }
@@ -366,6 +377,7 @@ public class code extends JPanel implements EditorBase {
 
         if (Base.theme.get(theme + "editor.markall.bgcolor") != null) {
             textArea.setMarkOccurrencesColor(Base.theme.getColor(theme + "editor.markall.bgcolor"));
+            textArea.setMarkAllHighlightColor(Base.theme.getColor(theme + "editor.markall.bgcolor"));
         }
         textArea.setPaintMarkOccurrencesBorder(Base.theme.getBoolean(theme + "editor.markall.border"));
         if (Base.theme.get(theme + "editor.bracket.bgcolor") != null) {

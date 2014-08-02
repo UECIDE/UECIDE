@@ -36,6 +36,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.Method;
+import java.net.URI;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -44,6 +45,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import say.swing.*;
+
+import de.muntjak.tinylookandfeel.*;
 
 public class Preferences {
 
@@ -539,6 +542,7 @@ public class Preferences {
             themes.put(info.getName(), info.getClassName());
         }
 
+        // JTattoo collection
         themes.put("Acryl",     "com.jtattoo.plaf.acryl.AcrylLookAndFeel");
         themes.put("Aero",      "com.jtattoo.plaf.aero.AeroLookAndFeel");
         themes.put("Aluminium", "com.jtattoo.plaf.aluminium.AluminiumLookAndFeel");
@@ -551,8 +555,26 @@ public class Preferences {
         themes.put("Mint",      "com.jtattoo.plaf.mint.MintLookAndFeel");
         themes.put("Noire",     "com.jtattoo.plaf.noire.NoireLookAndFeel");
         themes.put("Smart",     "com.jtattoo.plaf.smart.SmartLookAndFeel");
+    
+        // The fifesoft Windows LaF collection is only available on Windows.
+        if (Base.isWindows()) {
+            themes.put("Office 2003", "org.fife.plaf.Office2003.Office2003LookAndFeel");
+            themes.put("Office XP", "org.fife.plaf.OfficeXP.OfficeXPLookAndFeel");
+            themes.put("Visual Studio 2005", "org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel");
+        }
 
         themes.put("Liquid",    "com.birosoft.liquid.LiquidLookAndFeel");
+
+        // TinyLAF collection
+
+        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+        for (de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+            String themeName = td.getName();
+            if (themeName.equals("")) {
+                continue;
+            }
+            themes.put("Tiny: " + themeName, "de.muntjak.tinylookandfeel.TinyLookAndFeel;" + themeName);
+        }
 
         String[] keys = themes.keySet().toArray(new String[0]);
         Arrays.sort(keys);
@@ -563,7 +585,23 @@ public class Preferences {
             public void actionPerformed(ActionEvent e) {
                 String value = (String)selectedTheme.getSelectedItem();
                 String laf = themes.get(value);
+                String lafTheme = "";
+                if (laf.indexOf(";") > -1) {
+                    lafTheme = laf.substring(laf.lastIndexOf(";")+1);
+                    laf = laf.substring(0, laf.lastIndexOf(";"));
+                }
                 try {
+                    if (laf.startsWith("de.muntjak.tinylookandfeel.")) {
+
+                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+                        URI themeURI = null;
+                        for (de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+                            if (td.getName().equals(lafTheme)) {
+                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
+                                break;
+                            }
+                        }
+                    }
                     if (laf.startsWith("com.jtattoo.plaf.")) {
                         Properties props = new Properties();
                         props.put("windowDecoration", useSystemDecorator.isSelected() ? "on" : "off");
@@ -603,7 +641,22 @@ public class Preferences {
             public void actionPerformed(ActionEvent e) {
                 String value = (String)selectedTheme.getSelectedItem();
                 String laf = themes.get(value);
+                String lafTheme = "";
+                if (laf.indexOf(";") > -1) {
+                    lafTheme = laf.substring(laf.lastIndexOf(";")+1);
+                    laf = laf.substring(0, laf.lastIndexOf(";"));
+                }
                 try {
+                    if (laf.startsWith("de.muntjak.tinylookandfeel.")) {
+                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+                        URI themeURI = null;
+                        for (de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+                            if (td.getName().equals(lafTheme)) {
+                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
+                                break;
+                            }
+                        }
+                    }
                     if (laf.startsWith("com.jtattoo.plaf.")) {
                         Properties props = new Properties();
                         props.put("windowDecoration", useSystemDecorator.isSelected() ? "off" : "on");

@@ -304,6 +304,23 @@ public class Base {
                     }
                 }
                 if (laf != null) {
+                    String lafTheme = "";
+                    if (laf.indexOf(";") > -1) {
+                        lafTheme = laf.substring(laf.lastIndexOf(";")+1);
+                        laf = laf.substring(0, laf.lastIndexOf(";"));
+                    }
+
+                    if (laf.startsWith("de.muntjak.tinylookandfeel.")) {
+                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+                        URI themeURI = null;
+                        for (de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+                            if (td.getName().equals(lafTheme)) {
+                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
+                                break;
+                            }
+                        }
+                    }
+
                     if (laf.startsWith("com.jtattoo.plaf.")) {
                         Properties props = new Properties();
                         props.put("windowDecoration", Base.preferences.getBoolean("editor.laf.decorator") ? "off" : "on");
