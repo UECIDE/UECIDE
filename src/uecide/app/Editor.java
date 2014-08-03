@@ -506,7 +506,23 @@ public class Editor extends JFrame {
         });
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
+        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        manager.addKeyEventDispatcher(new KeyEventDispatcher() {
+            public boolean dispatchKeyEvent(KeyEvent e) { 
+                if (e.getKeyCode() == KeyEvent.VK_F11) {
+                    toggleFullScreen();
+                    return true;
+                }
+                return false; 
+            }
+        });
 
+        if (Base.preferences.getBoolean("editor.fullscreen")) {
+            isFullScreen = true;
+            this.dispose();
+            setUndecorated(true);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+        }
         this.pack();
         this.setVisible(true);
 
@@ -3879,5 +3895,34 @@ public class Editor extends JFrame {
             }
         }
     }
+
+    public boolean isFullScreen = false;
+    public Dimension storedSize = null;
+    public Point storedLocation = null;
+    public void toggleFullScreen() {
+        if (!isFullScreen) {
+            storedSize = getSize();
+            storedLocation = getLocation();
+            this.dispose();
+            setUndecorated(true);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+            this.pack();
+            this.setVisible(true);
+            isFullScreen = true;
+            Base.preferences.setBoolean("editor.fullscreen", true);
+            Base.preferences.saveDelay();
+        } else {
+            this.dispose();
+            setUndecorated(false);
+            setLocation(storedLocation);
+            setSize(storedSize);
+            this.pack();
+            this.setVisible(true);
+            isFullScreen = false;
+            Base.preferences.setBoolean("editor.fullscreen", false);
+            Base.preferences.saveDelay();
+        }
+    }
+
 }
 
