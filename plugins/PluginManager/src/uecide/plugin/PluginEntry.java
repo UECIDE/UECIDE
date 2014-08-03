@@ -103,6 +103,9 @@ public class PluginEntry implements Comparable {
         if (installedVersion == null) {
             return false;
         }
+        if (installedVersion.toString().equals("0.0.0a")) {
+            return false;
+        }
         if (installedVersion.compareTo(availableVersion) > 0) {
             return true;
         }
@@ -113,6 +116,9 @@ public class PluginEntry implements Comparable {
         if (installedVersion == null) {
             return false;
         }
+        if (installedVersion.toString().equals("0.0.0a")) {
+            return false;
+        }
         if (installedVersion.compareTo(availableVersion) < 0) {
             return true;
         }
@@ -121,6 +127,9 @@ public class PluginEntry implements Comparable {
 
     public boolean isInstalled() {
         if (installedVersion == null) {
+            return false;
+        }
+        if (installedVersion.toString().equals("0.0.0a")) {
             return false;
         }
         if (installedVersion.compareTo(availableVersion) == 0) {

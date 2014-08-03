@@ -52,6 +52,7 @@ import javax.swing.JToolBar;
 
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.*;
+import org.fife.ui.autocomplete.*;
 
 public class code extends JPanel implements EditorBase {
     File file = null;
