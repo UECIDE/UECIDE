@@ -83,6 +83,7 @@ public class ProjectSearch
                 public void actionPerformed(ActionEvent e) {
                     ArrayList<Integer>finds = matches.get(e.getActionCommand());
                     if (finds != null) {
+                        String theme = "theme." + Base.preferences.get("theme.selected", "default") + ".";
                         File f = new File(e.getActionCommand());
                         int tab = editor.openOrSelectFile(f);
                         if (tab == -1) {
@@ -90,7 +91,7 @@ public class ProjectSearch
                         }
                         EditorBase eb = editor.getTab(tab);
                         for (int i : finds) {
-                            eb.highlightLine(i, Base.theme.getColor("editor.searchall.bgcolor"));
+                            eb.highlightLine(i, Base.theme.getColor(theme + "editor.searchall.bgcolor"));
                         }
                     }
                 }

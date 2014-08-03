@@ -506,16 +506,21 @@ public class Editor extends JFrame {
         });
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
+/*
         KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         manager.addKeyEventDispatcher(new KeyEventDispatcher() {
             public boolean dispatchKeyEvent(KeyEvent e) { 
-                if (e.getKeyCode() == KeyEvent.VK_F11) {
-                    toggleFullScreen();
-                    return true;
+                if (e.getID() == KeyEvent.KEY_PRESSED) {
+                    if (e.getKeyCode() == KeyEvent.VK_F11) {
+                        System.err.println("Toggle");
+                        toggleFullScreen();
+                        return true;
+                    }
                 }
                 return false; 
             }
         });
+*/
 
         if (Base.preferences.getBoolean("editor.fullscreen")) {
             isFullScreen = true;
@@ -2357,6 +2362,16 @@ public class Editor extends JFrame {
         editMenu.addSeparator();
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_MID);
         editMenu.addSeparator();
+        item = new JMenuItem("Toggle Full Screen");
+        item.setAccelerator(KeyStroke.getKeyStroke("F11"));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                toggleFullScreen();
+            }
+        });
+
+        editMenu.add(item);
+
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_BOTTOM);
 
         ActionListener createNewAction = new ActionListener() {
@@ -3897,12 +3912,8 @@ public class Editor extends JFrame {
     }
 
     public boolean isFullScreen = false;
-    public Dimension storedSize = null;
-    public Point storedLocation = null;
     public void toggleFullScreen() {
         if (!isFullScreen) {
-            storedSize = getSize();
-            storedLocation = getLocation();
             this.dispose();
             setUndecorated(true);
             setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -3912,10 +3923,20 @@ public class Editor extends JFrame {
             Base.preferences.setBoolean("editor.fullscreen", true);
             Base.preferences.saveDelay();
         } else {
+            int width = Base.preferences.getInteger("editor.window.width");
+            if (width < Base.preferences.getInteger("editor.window.width.min")) {
+                width = Base.preferences.getInteger("editor.window.width.min");
+            }
+            int height = Base.preferences.getInteger("editor.window.height");
+            if (height < Base.preferences.getInteger("editor.window.height.min")) {
+                height = Base.preferences.getInteger("editor.window.height.min");
+            }
+
             this.dispose();
             setUndecorated(false);
-            setLocation(storedLocation);
-            setSize(storedSize);
+            setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));
+            setSize(new Dimension(width, height));
+            setExtendedState(JFrame.NORMAL);
             this.pack();
             this.setVisible(true);
             isFullScreen = false;

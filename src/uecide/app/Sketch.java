@@ -2949,6 +2949,9 @@ public class Sketch implements MessageConsumer {
         if (editor == null) {
             return;
         }
+
+        String theme = Base.preferences.get("theme.selected", "default");
+        theme = "theme." + theme + ".";
         PropertyFile props = mergeAllProperties();
 
         String eRec = props.get("compiler.error");
@@ -2973,7 +2976,7 @@ public class Sketch implements MessageConsumer {
                         int tabNumber = editor.getTabByFile(errorFile);
                         if (tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(errorLineNumber-1, Base.theme.getColor("editor.compile.error.bgcolor"));
+                            eb.highlightLine(errorLineNumber-1, Base.theme.getColor(theme + "editor.compile.error.bgcolor"));
                         }
                         setLineComment(errorFile, errorLineNumber, eMat.group(eMessage));
                     }
@@ -2995,7 +2998,7 @@ public class Sketch implements MessageConsumer {
                         int tabNumber = editor.getTabByFile(warningFile);
                         if (tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(warningLineNumber-1, Base.theme.getColor("editor.compile.warning.bgcolor"));
+                            eb.highlightLine(warningLineNumber-1, Base.theme.getColor(theme + "editor.compile.warning.bgcolor"));
                         }
                         setLineComment(warningFile, warningLineNumber, wMat.group(wMessage));
                     }

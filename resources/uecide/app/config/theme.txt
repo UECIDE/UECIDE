@@ -133,8 +133,8 @@ theme.terminal.console.error.color = #ff0000
 theme.terminal.console.warning.color = #cccc00
 theme.terminal.editor.line.enabled=true
 theme.terminal.editor.line.fade=true
-theme.terminal.editor.compile.error.bgcolor=#FFaaaa
-theme.terminal.editor.compile.warning.bgcolor=#FFFFaa
-theme.terminal.editor.searchall.bgcolor=#aaffaa
+theme.terminal.editor.compile.error.bgcolor=#880000
+theme.terminal.editor.compile.warning.bgcolor=#888800
+theme.terminal.editor.searchall.bgcolor=#008800
 
 
