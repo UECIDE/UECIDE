@@ -1871,7 +1871,8 @@ public class Editor extends JFrame {
         if (al != null) {
             button.addActionListener(al);
         }
-        button.setBorderPainted(false);
+//        button.setBorderPainted(false);
+/*
         button.addMouseListener(new MouseListener() {
             public void mouseEntered(MouseEvent e) {
                 ((JButton)(e.getComponent())).setBackground(UIManager.getColor("control").brighter());
@@ -1885,6 +1886,7 @@ public class Editor extends JFrame {
             public void mouseReleased(MouseEvent e) {}
             public void mouseClicked(MouseEvent e) {}
         });
+*/
         tb.add(button);
         return button;
     }
