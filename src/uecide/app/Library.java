@@ -558,9 +558,7 @@ public class Library implements Comparable {
     }
 
     public static Library getLibraryByInclude(String include, String core) {
-        System.err.println("Looking for a library with header file " + include);
         if (!include.endsWith(".h")) {
-            System.err.println("Not a header file");
             return null;
         }
 
@@ -568,7 +566,6 @@ public class Library implements Comparable {
         String name = include.substring(0, include.lastIndexOf("."));
         Library lib = getLibraryByName(name, core);
         if (lib != null) {
-            System.err.println("Found library " + lib);
             return lib;
         }
 
@@ -576,7 +573,6 @@ public class Library implements Comparable {
             for (Library l : dataSet) {
                 if (l.worksWith(core)) {
                     if (l.hasHeader(include)) {
-                        System.err.println("  >>>>>>>>>>>>>>>> Found library match " + l);
                         return l;
                     }
                 }

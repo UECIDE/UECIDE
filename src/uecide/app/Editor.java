@@ -716,7 +716,6 @@ public class Editor extends JFrame {
 
                 if (userObject instanceof Sketch) {
                     Sketch so = (Sketch)userObject;
-                    System.err.println("Found sketch object " + so.getName());
                     JLabel text = new JLabel(so.getName());
                     icon = so.getIcon(16);
                     if (icon == null) {

@@ -205,7 +205,6 @@ public class Sketch implements MessageConsumer {
         selectedBoardName = selectedBoard.getName();
         Base.preferences.set("board", board.getName());
         String boardsCore = Base.preferences.get("board." + selectedBoard.getName() + ".core");
-        System.err.println("boardsCore: " + boardsCore);
         Core core = null;
         if (boardsCore != null) {
             core = Base.cores.get(boardsCore);
@@ -508,7 +507,6 @@ public class Sketch implements MessageConsumer {
 
         updateLibraryList();
         if (editor != null) {
-            System.err.println("Triggering event SKETCH_OPEN");
             editor.fireEvent(UEvent.SKETCH_OPEN);
         }
     }
@@ -1288,7 +1286,6 @@ public class Sketch implements MessageConsumer {
     }
 
     public Library addLibraryToImportList(String filename) {
-        System.err.println("\n\n\nALTIL " + filename + "\n\n");
         String l = filename;
         if (filename.endsWith(".h")) {
             l = filename.substring(0, filename.lastIndexOf("."));
@@ -1319,7 +1316,6 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        System.err.println("Looking for special library >>> " + filename);
         lib = Library.getLibraryByInclude(filename, getCore().getName());
 
         if (lib == null) {
@@ -1748,7 +1744,6 @@ public class Sketch implements MessageConsumer {
             }
             includeList += "-I" + path;
         }
-        System.err.println("Include list: " + includeList);
         return includeList;
     }
 
@@ -2928,12 +2923,9 @@ public class Sketch implements MessageConsumer {
             line = parseString(line);
             line = line.trim();
             boolean res = false;
-            System.err.println("SCRIPT: " + line);
             if (line.startsWith("__builtin_")) {
-                System.err.println("Builtin command!");
                 res = runBuiltinCommand(line);
             } else {
-                System.err.println("System command!");
                 res = execAsynchronously(line);
             }
             if (!res) {
@@ -3536,7 +3528,6 @@ public class Sketch implements MessageConsumer {
     }
 
     public ImageIcon getIcon(int size) {
-        System.err.println("Getting icon of size " + size);
         ImageIcon i = null;
 
         if (selectedBoard != null) {
