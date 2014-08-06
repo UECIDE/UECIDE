@@ -43,11 +43,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 import java.util.List;
 import java.util.jar.*;
 import java.util.zip.*;
 import java.text.*;
+import java.lang.reflect.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -82,6 +84,7 @@ public class Sketch implements MessageConsumer {
     Compiler selectedCompiler = null;
     String selectedProgrammer = null;
     String selectedSerialPort = null;
+    InetAddress selectedNetworkPort = null;
 
     boolean terminateExecution = false;
 
@@ -202,6 +205,7 @@ public class Sketch implements MessageConsumer {
         selectedBoardName = selectedBoard.getName();
         Base.preferences.set("board", board.getName());
         String boardsCore = Base.preferences.get("board." + selectedBoard.getName() + ".core");
+        System.err.println("boardsCore: " + boardsCore);
         Core core = null;
         if (boardsCore != null) {
             core = Base.cores.get(boardsCore);
@@ -241,6 +245,10 @@ public class Sketch implements MessageConsumer {
         }
         if (compiler != null) {
             setCompiler(compiler);
+        }
+
+        if (editor != null) {
+            editor.updateTree();
         }
     }
 
@@ -297,9 +305,69 @@ public class Sketch implements MessageConsumer {
         Base.preferences.saveDelay();
         if (editor != null) editor.updateAll();
     }
+    
+    public InetAddress getNetworkPort() {
+        return selectedNetworkPort;
+    }
+
+    public String getNetworkPortIP() {
+        if (selectedNetworkPort == null) {
+            return null;
+        }
+        byte[] ip = selectedNetworkPort.getAddress();
+        return String.format("%d.%d.%d.%d", 
+            (int)ip[0] & 0xFF,
+            (int)ip[1] & 0xFF,
+            (int)ip[2] & 0xFF,
+            (int)ip[3] & 0xFF);
+    }
 
     public String getSerialPort() {
         return selectedSerialPort;
+    }
+
+    public void setPort(Object port) {
+        if (port instanceof SerialPort) {
+            SerialPort sp = (SerialPort)port;
+            setSerialPort(sp.getPortName());
+            return;
+        }
+
+        if (port instanceof InetAddress) {
+            InetAddress ip = (InetAddress)port;
+            setNetworkPort(ip);
+            return;
+        }
+    }
+
+    public void setNetworkPort(String ip) {
+        if (ip == null) {
+            setNetworkPort((InetAddress)null);
+        } else {
+            try {
+                if (ip.startsWith("/")) {
+                    ip = ip.substring(1);
+                }
+                InetAddress nip = InetAddress.getByName(ip);
+                setNetworkPort(nip);
+            } catch (Exception e) {
+                Base.error(e);
+                setNetworkPort((InetAddress)null);
+            }
+        }
+    }
+
+    public void setNetworkPort(InetAddress ip) {
+        selectedNetworkPort = ip;
+        if (selectedBoard != null) {
+            if (selectedNetworkPort == null) {
+                Base.preferences.unset("board." + selectedBoard.getName() + ".ip");
+            } else {
+                Base.preferences.set("board." + selectedBoard.getName() + ".ip", selectedNetworkPort.toString());
+            }
+            Base.preferences.saveDelay();
+        }
+        if (editor != null) editor.updateAll();
     }
 
     public void setSerialPort(String p) {
@@ -430,6 +498,7 @@ public class Sketch implements MessageConsumer {
         setBoard(Base.preferences.get("board"));
         if (selectedBoard != null) {
             setSerialPort(Base.preferences.get("board." + selectedBoard.getName() + ".port"));
+            setNetworkPort(Base.preferences.get("board." + selectedBoard.getName() + ".ip"));
         } else {
             setSerialPort(null);
         }
@@ -1219,6 +1288,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public Library addLibraryToImportList(String filename) {
+        System.err.println("\n\n\nALTIL " + filename + "\n\n");
         String l = filename;
         if (filename.endsWith(".h")) {
             l = filename.substring(0, filename.lastIndexOf("."));
@@ -1249,6 +1319,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
+        System.err.println("Looking for special library >>> " + filename);
         lib = Library.getLibraryByInclude(filename, getCore().getName());
 
         if (lib == null) {
@@ -1659,12 +1730,9 @@ public class Sketch implements MessageConsumer {
         }
 
         for (String lib : includeOrder) {
-            String libname = lib;
-            if (lib.lastIndexOf(".") > -1) {
-                libname = lib.substring(0, lib.lastIndexOf("."));
-            }
-            if (importedLibraries.get(libname) != null) {
-                includes.add(importedLibraries.get(libname).getFolder());
+            Library l = Library.getLibraryByInclude(lib, getCore().getName());
+            if (l != null) {
+                includes.add(l.getIncludeFolder());
             }
         }
 
@@ -1680,6 +1748,7 @@ public class Sketch implements MessageConsumer {
             }
             includeList += "-I" + path;
         }
+        System.err.println("Include list: " + includeList);
         return includeList;
     }
 
@@ -2069,6 +2138,8 @@ public class Sketch implements MessageConsumer {
                 } else {
                     mid = getSerialPort();
                 }
+            } else if (mid.equals("ip")) {
+                mid = getNetworkPortIP();
             } else {
                 String tmid = tokens.get(mid);
                 if (tmid == null) {
@@ -2246,6 +2317,14 @@ public class Sketch implements MessageConsumer {
             }
         }
         return true;
+    }
+
+    public void put(String k, String v) {
+        settings.put(k, v);
+    }
+
+    public String get(String k) {
+        return settings.get(k);
     }
 
     public boolean compileLibrary(Library lib) {
@@ -2799,6 +2878,72 @@ public class Sketch implements MessageConsumer {
         return importedLibraries;
     }
 
+    public boolean runBuiltinCommand(String commandline) {
+        try {
+            String[] split = commandline.split("::");
+            int argc = split.length - 1;
+
+            String cmdName = split[0];
+
+            String[] arg = new String[argc];
+            for (int i = 0; i < argc; i++) {
+                arg[i] = split[i+1];
+            }
+
+            if (!cmdName.startsWith("__builtin_")) {
+                return false;
+            }
+            cmdName = cmdName.substring(10);
+            Class<?> c = Class.forName("uecide.app.builtin." + cmdName);
+            if (c == null) {
+                return false;
+            }
+
+            Class<?>[] param_types = new Class<?>[2];
+            param_types[0] = Editor.class;
+            param_types[1] = String[].class;
+            Method m = c.getMethod("main", param_types);
+
+            Object[] args = new Object[2];
+            args[0] = editor;
+            args[1] = arg;
+
+            return (Boolean)m.invoke(c, args);
+            
+            
+        } catch (Exception e) {
+            Base.error(e);
+        }
+        
+        return false;
+    }
+
+    public boolean executeScript(String key) {
+        PropertyFile props = mergeAllProperties();
+        PropertyFile script = props.getChildren(key);
+        Set<Object>lines = script.keySet();
+        int lineno = 0;
+        String line;
+        while ((line = script.get(Integer.toString(lineno))) != null)  {
+            line = parseString(line);
+            line = line.trim();
+            boolean res = false;
+            System.err.println("SCRIPT: " + line);
+            if (line.startsWith("__builtin_")) {
+                System.err.println("Builtin command!");
+                res = runBuiltinCommand(line);
+            } else {
+                System.err.println("System command!");
+                res = execAsynchronously(line);
+            }
+            if (!res) {
+                return false;
+            }
+            lineno++;
+        }
+        return true;
+    }
+
     public boolean programFile(String programmer, String file) {
         PropertyFile props = mergeAllProperties();
         message(Translate.t("Uploading firmware..."));
@@ -2808,6 +2953,11 @@ public class Sketch implements MessageConsumer {
         if (mess != null) {
             message(mess);
         }
+
+        if (props.get("upload." + programmer + ".using").equals("script")) {
+            return executeScript("upload." + programmer + ".script");
+        }
+       
 
         String uploadCommand = props.getPlatformSpecific("upload." + programmer + ".command");
         String environment = props.getPlatformSpecific("upload." + programmer + ".command.environment");
@@ -3379,6 +3529,26 @@ public class Sketch implements MessageConsumer {
             setProgrammer(configFile.get("programmer"));
         }
 
+    }
+
+    public String toString() {
+        return sketchName;
+    }
+
+    public ImageIcon getIcon(int size) {
+        System.err.println("Getting icon of size " + size);
+        ImageIcon i = null;
+
+        if (selectedBoard != null) {
+            i = selectedBoard.getIcon(size);
+            if (i != null) return i;
+        }
+
+        if (selectedCore != null) {
+            i = selectedCore.getIcon(size);
+            if (i != null) return i;
+        }
+        return null;
     }
 
 }

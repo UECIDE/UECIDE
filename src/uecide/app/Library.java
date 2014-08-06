@@ -61,6 +61,7 @@ public class Library implements Comparable {
     public String type;
     public String core;
     public int compiledPercent = 0;
+    public File sourceFolder;
 
     public boolean valid = false;
 
@@ -71,32 +72,56 @@ public class Library implements Comparable {
     
     boolean utilRecurse = false;
 
-    public Library(File hdr, String t, String c) {
+    public Library(File loc, String t, String c) {
         type = t;
         core = c;
-        File root = hdr.getParentFile();
-        name = hdr.getName().substring(0, hdr.getName().indexOf(".h"));;
-        folder = root;
-        mainInclude = hdr;
-        if (!mainInclude.exists()) {
-            return;
-        }
 
-        propertyFile = new File(folder, "library.txt");
-        if (propertyFile.exists()) {
-            properties = new PropertyFile(propertyFile);
-            utilityFolder = new File(root, properties.get("utility", "utility"));
-            utilRecurse = properties.getBoolean("utility.recurse");
-            examplesFolder = new File(root, properties.get("examples", "examples"));
-            librariesFolder = new File(root, properties.get("libraries", "libraries"));
-            core = properties.get("core", "all");
+        File root = loc;
+
+        // Identify library type.
+
+        // 1. Is it an old style library?
+        name = loc.getName();
+
+        File hdr = new File(root, name + ".h");
+        Debug.message("Looking for header file " + hdr.getAbsolutePath());
+        if (hdr.exists()) {
+            // Yes.
+            mainInclude = hdr;
+
+            propertyFile = new File(folder, "library.txt");
+            
+            if (propertyFile.exists()) {
+                properties = new PropertyFile(propertyFile);
+                utilityFolder = new File(root, properties.get("utility", "utility"));
+                utilRecurse = properties.getBoolean("utility.recurse");
+                examplesFolder = new File(root, properties.get("examples", "examples"));
+                librariesFolder = new File(root, properties.get("libraries", "libraries"));
+                core = properties.get("core", "all");
+            } else {
+                utilityFolder = new File(root, "utility");
+                examplesFolder = new File(root, "examples");
+                librariesFolder = new File(root, "libraries");
+                sourceFolder = root;
+            } 
+            valid = true;
+            rescan();
+            return;
         } else {
-            utilityFolder = new File(root, "utility");
-            examplesFolder = new File(root, "examples");
-            librariesFolder = new File(root, "libraries");
+            // Is it a new 1.5.x style library?
+            File pf = new File(root, "library.properties");
+            if (pf.exists()) {
+                examplesFolder = new File(root, "examples");
+                librariesFolder = new File(root, "libraries");
+                sourceFolder = new File(root, "src");
+                utilityFolder = new File(sourceFolder, "utility");
+                mainInclude = new File(sourceFolder, name + ".h");
+                valid = true;
+                rescan();
+                return;
+            }
         }
-        rescan();
-        valid = true;
+        valid = false;
     }
 
     public void rescan() {
@@ -106,11 +131,11 @@ public class Library implements Comparable {
         headerFiles = new ArrayList<File>();
         examples = new TreeMap<String, File>();
 
-        sourceFiles.addAll(Sketch.findFilesInFolder(folder, "cpp", false));
-        sourceFiles.addAll(Sketch.findFilesInFolder(folder, "c", false));
-        sourceFiles.addAll(Sketch.findFilesInFolder(folder, "S", false));
-        archiveFiles.addAll(Sketch.findFilesInFolder(folder, "a", false));
-        headerFiles.addAll(Sketch.findFilesInFolder(folder, "h", false));
+        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "cpp", false));
+        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "c", false));
+        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "S", false));
+        archiveFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "a", false));
+        headerFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "h", false));
 
         if (utilityFolder.exists() && utilityFolder.isDirectory()) {
             sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", utilRecurse));
@@ -140,7 +165,9 @@ public class Library implements Comparable {
 
         probedFiles = new ArrayList<String>();
 
-        gatherIncludes(mainInclude);
+        for (File f : headerFiles) {
+            gatherIncludes(f);
+        }
 
         for (File f : sourceFiles) {
             gatherIncludes(f);
@@ -428,8 +455,17 @@ public class Library implements Comparable {
 
                 File files[] = f.listFiles();
                 for (File sf : files) {
-                    if ((sf.getName().equals(f.getName() + ".h") || (sf.getName().startsWith(f.getName() + "_") && sf.getName().endsWith(".h")))) {
-                        Library newLibrary = new Library(sf, group, core);
+                    if (sf.getName().equals("library.properties")) {
+                        Library newLibrary = new Library(f, group, core);
+                        if (newLibrary.isValid()) {
+                            addLibrary(group, newLibrary);
+                            Debug.message("    Adding 1.5.x style library " + newLibrary.getName() + " from " + f.getAbsolutePath());
+                            if (newLibrary.getLibrariesFolder().exists()) {
+                                loadLibrariesFromFolder(newLibrary.getLibrariesFolder(), group, core);
+                            }
+                        }
+                    } else if ((sf.getName().equals(f.getName() + ".h") || (sf.getName().startsWith(f.getName() + "_") && sf.getName().endsWith(".h")))) {
+                        Library newLibrary = new Library(f, group, core);
                         if (newLibrary.isValid()) {
                             addLibrary(group, newLibrary);
                             Debug.message("    Adding new library " + newLibrary.getName() + " from " + f.getAbsolutePath());
@@ -522,7 +558,9 @@ public class Library implements Comparable {
     }
 
     public static Library getLibraryByInclude(String include, String core) {
+        System.err.println("Looking for a library with header file " + include);
         if (!include.endsWith(".h")) {
+            System.err.println("Not a header file");
             return null;
         }
 
@@ -530,6 +568,7 @@ public class Library implements Comparable {
         String name = include.substring(0, include.lastIndexOf("."));
         Library lib = getLibraryByName(name, core);
         if (lib != null) {
+            System.err.println("Found library " + lib);
             return lib;
         }
 
@@ -537,6 +576,7 @@ public class Library implements Comparable {
             for (Library l : dataSet) {
                 if (l.worksWith(core)) {
                     if (l.hasHeader(include)) {
+                        System.err.println("  >>>>>>>>>>>>>>>> Found library match " + l);
                         return l;
                     }
                 }
@@ -584,6 +624,10 @@ public class Library implements Comparable {
             return c.getLibrariesFolder();
         }
         return null;
+    }
+
+    public File getIncludeFolder() {
+        return sourceFolder;
     }
 }
 

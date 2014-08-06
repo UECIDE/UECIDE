@@ -32,6 +32,7 @@ package uecide.app;
 
 import java.io.*;
 import java.util.*;
+import javax.swing.*;
 import uecide.app.*;
 
 /*
@@ -221,5 +222,19 @@ public class UObject implements Comparable {
         }
         return false;
     }
+
+    public ImageIcon getIcon(int size) {
+        String path = get("icon." + size);
+        if (path  == null) {
+            return null;
+        }
+        File f = new File(getFolder(), path);
+        if (!f.exists()) {
+            return null;
+        }
+        return new ImageIcon(f.getAbsolutePath());
+    }
+
+
 
 }

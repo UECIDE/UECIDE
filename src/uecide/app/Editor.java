@@ -60,6 +60,11 @@ import java.beans.*;
 import java.util.jar.*;
 import java.util.zip.*;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceListener;
+import javax.jmdns.ServiceInfo;
+
 
 
 public class Editor extends JFrame {
@@ -83,6 +88,7 @@ public class Editor extends JFrame {
     JMenu toolsMenu;
     JMenu helpMenu;
     JMenu serialPortsMenu;
+    JMenu discoveredBoardsMenu;
 
     JToolBar toolbar;
     JToolBar treeToolBar;
@@ -707,6 +713,32 @@ public class Editor extends JFrame {
                     }
                     return container;
                 }
+
+                if (userObject instanceof Sketch) {
+                    Sketch so = (Sketch)userObject;
+                    System.err.println("Found sketch object " + so.getName());
+                    JLabel text = new JLabel(so.getName());
+                    icon = so.getIcon(16);
+                    if (icon == null) {
+                        icon = Base.loadIconFromResource("icon16.png");
+                    }
+                    text.setBorder(paddingBorder);
+                    if (selected) {
+                        text.setBackground(bg);
+                        text.setForeground(fg);
+                        text.setOpaque(true);
+                    } else {
+                        text.setOpaque(false);
+                    }
+
+                    container.setOpaque(false);
+                    container.setBorder(noBorder);
+                    JLabel i = new JLabel(icon);
+                    container.add(i, BorderLayout.WEST);
+                    container.add(text, BorderLayout.CENTER);
+                    return container;
+                }
+
                 JLabel text = new JLabel(userObject.toString());
                 if (expanded) {
                     icon = Base.loadIconFromResource("files/folder-open.png");
@@ -752,6 +784,7 @@ public class Editor extends JFrame {
 
     public void initTreeStructure() {
         treeRoot = new DefaultMutableTreeNode(loadedSketch.getName());
+        treeRoot.setUserObject(loadedSketch);
         treeModel = new DefaultTreeModel(treeRoot);
         sketchContentTree = new JTree(treeModel);
         treeSource = new DefaultMutableTreeNode("Source");
@@ -1129,8 +1162,6 @@ public class Editor extends JFrame {
         DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
         DefaultMutableTreeNode node;
         for (File f : loadedSketch.sketchFiles) {
-            Debug.message("Loading file " + f.getAbsolutePath());
-            Debug.message("File is class " + f.getClass().getName());
             int type = FileType.getType(f);
             switch (type) {
                 case FileType.CSOURCE:
@@ -1262,7 +1293,7 @@ public class Editor extends JFrame {
     public void updateTree() {
         boolean treeRootOpen = sketchContentTree.isExpanded(new TreePath(treeRoot.getPath()));
 
-        treeRoot.setUserObject(loadedSketch.getName());
+        treeRoot.setUserObject(loadedSketch);
 
         updateSourceTree();
         updateHeadersTree();
@@ -1323,8 +1354,6 @@ public class Editor extends JFrame {
 
                 // If the user object is a string then it must be one of the logical groups.  Work out
                 // which one by what the string says.
-
-                Debug.message("Tree node class: " + o.getUserObject().getClass().getName());
 
                 if (o.getUserObject().getClass().equals(String.class)) {
                     String s = (String)o.getUserObject();
@@ -1840,6 +1869,87 @@ public class Editor extends JFrame {
         consoleTextPane.setCaretPosition(consoleDoc.getLength());
     }
 
+    String mBuffer = "";
+    public void messageStream(String msg) {
+        mBuffer += msg;
+        int nlpos = mBuffer.lastIndexOf("\n");
+        if (nlpos == -1) {
+            return;
+        }
+
+        boolean eol = false;
+        if (mBuffer.endsWith("\n")) {
+            mBuffer = mBuffer.substring(0, mBuffer.length()-1);
+            eol = true;
+        }
+
+        String[] bits = mBuffer.split("\n");
+        for (int i = 0; i < bits.length-1; i++) {
+            message(bits[i]);
+        }
+
+        if (eol) {
+            mBuffer = "";
+            message(bits[bits.length-1]);
+        } else {
+            mBuffer = bits[bits.length-1];
+        }
+    }
+        
+    String wBuffer = "";
+    public void warningStream(String msg) {
+        wBuffer += msg;
+        int nlpos = wBuffer.lastIndexOf("\n");
+        if (nlpos == -1) {
+            return;
+        }
+
+        boolean eol = false;
+        if (wBuffer.endsWith("\n")) {
+            wBuffer = wBuffer.substring(0, wBuffer.length()-1);
+            eol = true;
+        }
+
+        String[] bits = wBuffer.split("\n");
+        for (int i = 0; i < bits.length-1; i++) {
+            warning(bits[i]);
+        }
+
+        if (eol) {
+            wBuffer = "";
+            warning(bits[bits.length-1]);
+        } else {
+            wBuffer = bits[bits.length-1];
+        }
+    }
+        
+    String eBuffer = "";
+    public void errorStream(String msg) {
+        eBuffer += msg;
+        int nlpos = eBuffer.lastIndexOf("\n");
+        if (nlpos == -1) {
+            return;
+        }
+
+        boolean eol = false;
+        if (eBuffer.endsWith("\n")) {
+            eBuffer = eBuffer.substring(0, eBuffer.length()-1);
+            eol = true;
+        }
+
+        String[] bits = eBuffer.split("\n");
+        for (int i = 0; i < bits.length-1; i++) {
+            error(bits[i]);
+        }
+
+        if (eol) {
+            eBuffer = "";
+            error(bits[bits.length-1]);
+        } else {
+            eBuffer = bits[bits.length-1];
+        }
+    }
+        
     public void error(String msg) {
         Debug.message(msg);
         if (!msg.endsWith("\n")) { msg += "\n"; }
@@ -2475,6 +2585,21 @@ public class Editor extends JFrame {
         });
         hardwareMenu.add(serialPortsMenu);
 
+        discoveredBoardsMenu = new JMenu("Discovered Boards");
+        populateDiscoveredBoardsMenu(discoveredBoardsMenu);
+        discoveredBoardsMenu.addMenuListener(new MenuListener() {
+            public void menuSelected(MenuEvent e) {
+                populateDiscoveredBoardsMenu(discoveredBoardsMenu);
+            }
+            public void menuCanceled(MenuEvent e) {
+            }
+            public void menuDeselected(MenuEvent e) {
+            }
+        });
+        hardwareMenu.add(discoveredBoardsMenu);
+        
+
+
         submenu = new JMenu("Programmers");
         populateProgrammersMenu(submenu);
         hardwareMenu.add(submenu);
@@ -2536,6 +2661,35 @@ public class Editor extends JFrame {
         helpMenu.addSeparator();
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
         submenu = new JMenu("Debug");
+        item = new JMenuItem("Connect to SKT500 device");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Stk500 dev = new Stk500(Editor.this, loadedSketch.getSerialPort(), 115200);
+                if (dev.connect(500)) {
+                    String dn = dev.getDeviceName();
+                    if (dn != null) {
+                        message("Connected to " + dn);
+                    }
+                    if (dev.enterProgMode()) {
+                        message("Entered programming mode");
+                    }
+
+                    if (dev.loadHexFile(new File(loadedSketch.getFolder(), loadedSketch.getName() + ".hex"))) {
+                        message("File loaded");
+                    }
+                    if (dev.uploadProgram()) {
+                        message("Upload complete");
+                    }
+
+                    if (dev.leaveProgMode()) {
+                        message("Left programming mode");
+                    }
+                    dev.disconnect();
+                }
+            }
+        });
+        submenu.add(item);
+
         item = new JMenuItem("Debug Console");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -2619,6 +2773,45 @@ public class Editor extends JFrame {
         }
     }
 
+    public class DiscoveredBoardAction extends AbstractAction {
+        DiscoveredBoard discoveredBoard;
+
+        public DiscoveredBoardAction(DiscoveredBoard b) {
+            super(b.toString());
+            discoveredBoard = b;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            System.err.println(discoveredBoard.toString());
+            loadedSketch.setBoard(discoveredBoard.board);
+            loadedSketch.setPort(discoveredBoard.location);
+            for (Object k : discoveredBoard.properties.keySet()) {
+                loadedSketch.put("mdns." + (String)k, discoveredBoard.properties.get((String)k));
+            }
+        }
+    }
+
+    public void populateDiscoveredBoardsMenu(JMenu menu) {
+        menu.removeAll();
+        ButtonGroup portGroup = new ButtonGroup();
+        for (Object ob : Base.discoveredBoards.keySet()) {
+            DiscoveredBoard b = Base.discoveredBoards.get(ob);
+            
+            JMenuItem item = new JMenuItem(new DiscoveredBoardAction(b));
+            ImageIcon i = b.board.getIcon(16);
+            if (i == null) {
+                Core c = b.board.getCore();
+                if (c != null) {
+                    i = c.getIcon(16);
+                }
+            }
+            if (i != null) {
+                item.setIcon(i);
+            }
+            menu.add(item);
+        }
+    }
+
     public String[] getBoardGroups() {
         ArrayList<String> out = new ArrayList<String>();
         for (Board board : Base.boards.values()) {
@@ -2690,6 +2883,16 @@ public class Editor extends JFrame {
                     item.setSelected(true);
                 }
             }
+            ImageIcon i = board.getIcon(16);
+            if (i == null) {
+                Core c = board.getCore();
+                if (c != null) {
+                    i = c.getIcon(16);
+                }
+            }
+            if (i != null) {
+                item.setIcon(i);
+            }
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setBoard(e.getActionCommand());
@@ -2718,6 +2921,10 @@ public class Editor extends JFrame {
             coreGroup.add(item);
             if (loadedSketch.getCore() != null) {
                 item.setSelected(loadedSketch.getCore().equals(core));
+            }
+            ImageIcon i = core.getIcon(16);
+            if (i != null) {
+                item.setIcon(i);
             }
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -2816,7 +3023,9 @@ public class Editor extends JFrame {
 
         statusInfo.append(loadedSketch.getBoard().getDescription());
 
-        if (loadedSketch.getSerialPort() == null) {
+        if (loadedSketch.getNetworkPortIP() != null) {
+            statusInfo.append(" on " + loadedSketch.getNetworkPortIP());
+        } else if (loadedSketch.getSerialPort() == null) {
             statusInfo.append(" - No port selected!");
         } else {
             statusInfo.append(" on ");
@@ -3403,7 +3612,6 @@ public class Editor extends JFrame {
             // Convert the DefaultShellFolder into a File object via a string representation
             // of the path
             File f = new File(fc.getSelectedFile().getAbsolutePath());
-            Debug.message("File chooser return class = " + f.getClass().getName());
             loadSketch(f);
         }
     }
@@ -3414,16 +3622,15 @@ public class Editor extends JFrame {
 
     public void loadSketch(File f) {
         if (loadedSketch.isUntitled() && !isModified()) {
-            Debug.message("Replacing existing blank editor session");
             closeAllTabs();
             loadedSketch = new Sketch(f);
             loadedSketch.attachToEditor(this);
             filesTreeRoot.setUserObject(loadedSketch.getFolder());
+            treeRoot.setUserObject(loadedSketch);
             updateAll();
             treeModel.nodeStructureChanged(treeRoot);
             openOrSelectFile(loadedSketch.getMainFile());
         } else {
-            Debug.message("Creating new editor instance");
             Base.createNewEditor(f.getPath());
         }
         fireEvent(UEvent.SKETCH_OPEN);
@@ -3530,7 +3737,6 @@ public class Editor extends JFrame {
                 ArrayList<LibCatObject> cats = new ArrayList<LibCatObject>();
 
                 for (String group : Library.getLibraryCategories()) {
-                    Debug.message(group);
                     if (group.startsWith("cat:")) {
                         LibCatObject ob = new LibCatObject(group, Library.getCategoryName(group));
                         cats.add(ob);
@@ -3543,7 +3749,6 @@ public class Editor extends JFrame {
 
                 if (loc != null) {
                     File installPath = Library.getCategoryLocation(loc.getKey());
-                    Debug.message(loc.getKey());
                     message("Installing to " + installPath.getAbsolutePath());
 
                     for (String lib : foundLibs.keySet()) {
@@ -3944,6 +4149,5 @@ public class Editor extends JFrame {
             Base.preferences.saveDelay();
         }
     }
-
 }
 

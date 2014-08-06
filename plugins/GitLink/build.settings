@@ -1,2 +1,2 @@
 version=0.1.6f
-thirdparty.jars=https://repo.eclipse.org/content/groups/releases//org/eclipse/jgit/org.eclipse.jgit/3.4.1.201406201815-r/org.eclipse.jgit-3.4.1.201406201815-r.jar,http://optimate.dl.sourceforge.net/project/jsch/jsch.jar/0.1.51/jsch-0.1.51.jar
+thirdparty.jars=https://repo.eclipse.org/content/groups/releases//org/eclipse/jgit/org.eclipse.jgit/3.4.1.201406201815-r/org.eclipse.jgit-3.4.1.201406201815-r.jar

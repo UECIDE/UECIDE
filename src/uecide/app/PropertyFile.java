@@ -510,4 +510,8 @@ public class PropertyFile {
     public int size() {
         return properties.size();
     }
+
+    public Set<Object> keySet() {
+        return properties.keySet();
+    }
 }

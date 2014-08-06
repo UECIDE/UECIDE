@@ -32,7 +32,7 @@ package uecide.app;
 
 import java.io.*;
 import java.util.*;
-
+import javax.swing.*;
 import uecide.app.*;
 
 public class Core extends UObject {
@@ -70,5 +70,4 @@ public class Core extends UObject {
         }
         return Base.compilers.get(c);
     }
-
 }

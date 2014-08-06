@@ -54,6 +54,12 @@ import java.util.zip.ZipInputStream;
 
 import com.jtattoo.plaf.*;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceListener;
+import javax.jmdns.ServiceInfo;
+
+
 /**
  * The base class for the main uecide.application.
  * Primary role of this class is for platform identification and
@@ -109,7 +115,10 @@ public class Base {
     static File untitledFolder;
 
     public static PropertyFile preferences;
+    public static PropertyFile session = new PropertyFile();
     public static Theme theme;
+
+    public static HashMap<Object, DiscoveredBoard> discoveredBoards = new HashMap<Object, DiscoveredBoard>();
 
     public static Board getBoard(String name) { return boards.get(name); }
     public static Core getCore(String name) { return cores.get(name); }
@@ -461,7 +470,8 @@ public class Base {
         if (headless) {
             System.exit(0);
         }
-            
+
+        NetworkDiscoveryService.startDiscoveringBoards();
     }
 
     static boolean doOpenThings(File sketch) {
