@@ -205,6 +205,7 @@ public class Library implements Comparable {
                 contents.append(buffer, 0, read);
                 read = in.read(buffer);
             } while (read >= 0);
+            in.close();
             data = contents.toString().split("\n");
         } catch (Exception e) {
             Base.error(e);

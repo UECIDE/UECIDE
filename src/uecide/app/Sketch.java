@@ -290,7 +290,7 @@ public class Sketch implements MessageConsumer {
         if (spl != null) {
             Arrays.sort(spl);
             for (String pn : spl) {
-                String name = props.get("upload." + pn + ".name");
+                String name = parseString(props.get("upload." + pn + ".name"));
                 out.put(pn, name);
             }
         }
