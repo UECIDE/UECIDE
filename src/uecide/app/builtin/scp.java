@@ -10,11 +10,13 @@ public class scp {
     static String host;
     static String user;
 
-    public static boolean main(Editor editor, String[] arg) {
+    public static boolean main(Sketch sketch, String[] arg) {
         if(arg.length!=2) {
             System.err.println("usage: __builtin_scp file1 user@remotehost:file2");
             return false;
         }
+
+        Session session = null;
 
         FileInputStream fis=null;
         try {
@@ -25,10 +27,8 @@ public class scp {
             host=arg[1].substring(0, arg[1].indexOf(':'));
             String rfile=arg[1].substring(arg[1].indexOf(':')+1);
 
-            System.err.println("Copying file " + lfile + " to " + rfile + " on " + host + " as user " + user);
-
             JSch jsch=new JSch();
-            Session session=jsch.getSession(user, host, 22);
+            session=jsch.getSession(user, host, 22);
 
             String password = Base.preferences.get("ssh." + host + "." + user);
             if (password == null) {
@@ -37,6 +37,7 @@ public class scp {
             if (password == null) {
                 password = askPassword();
                 if (password == null) {
+                    sketch.error("Unable to log in without a password");
                     return false;
                 }
             }
@@ -47,7 +48,7 @@ public class scp {
             } catch (JSchException e) {
                 if (e.getMessage().equals("Auth fail")) {
                     password = null;
-                    editor.error("Authentication failed");
+                    sketch.error("Authentication failed");
                     session.disconnect();
                     return false;
                 } else {
@@ -76,7 +77,8 @@ public class scp {
             channel.connect();
 
             if(checkAck(in)!=0) {
-                System.err.println("checkAck failed");
+                sketch.error("Channel open failed");
+                session.disconnect();
                 return false;
             }
 
@@ -90,7 +92,8 @@ public class scp {
                 out.write(command.getBytes());
                 out.flush();
                 if(checkAck(in)!=0) {
-                    System.err.println("checkAck failed");
+                    sketch.error("Timestamp failed");
+                    session.disconnect();
                     return false;
                 }
             }
@@ -107,26 +110,37 @@ public class scp {
             out.write(command.getBytes());
             out.flush();
             if(checkAck(in)!=0) {
-                    System.err.println("checkAck failed");
+                sketch.error("Remote open failed");
+                session.disconnect();
                 return false;
             }
 
 // send a content of lfile
-            fis=new FileInputStream(lfile);
             byte[] buf=new byte[1024];
-            while(true) {
-                int len=fis.read(buf, 0, buf.length);
-                if(len<=0) break;
-                out.write(buf, 0, len); //out.flush();
+            fis=new FileInputStream(lfile);
+            try {
+                while(true) {
+                    int len=fis.read(buf, 0, buf.length);
+                    if(len<=0) break;
+                    out.write(buf, 0, len); //out.flush();
+                }
+                fis.close();
+                fis=null;
+            } catch (Exception e) {
+                sketch.error("Copy failed: " + e.getMessage());
+                session.disconnect();
+                try {
+                    if(fis!=null)fis.close();
+                } catch(Exception ee) {}
+                return false;
             }
-            fis.close();
-            fis=null;
 // send '\0'
             buf[0]=0;
             out.write(buf, 0, 1);
             out.flush();
             if(checkAck(in)!=0) {
-                    System.err.println("checkAck failed");
+                sketch.error("Flush failed");
+                session.disconnect();
                 return false;
             }
             out.close();
@@ -134,9 +148,13 @@ public class scp {
             channel.disconnect();
             session.disconnect();
 
-            System.err.println("Copied");
             return true;
         } catch(Exception e) {
+            if (session != null) {
+                session.disconnect();
+            }
+            sketch.error("Copy failed: " + e.getMessage());
+
             System.out.println(e);
             try {
                 if(fis!=null)fis.close();

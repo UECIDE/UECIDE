@@ -2135,6 +2135,14 @@ public class Sketch implements MessageConsumer {
                 }
             } else if (mid.equals("ip")) {
                 mid = getNetworkPortIP();
+            } else if (mid.startsWith("exec:")) {
+                String content = mid.substring(5);
+                String[] bits = content.split(",");
+                if (executeScript(bits[1])) {
+                    mid = bits[2];
+                } else {
+                    mid = bits[3];
+                }
             } else {
                 String tmid = tokens.get(mid);
                 if (tmid == null) {
@@ -2895,12 +2903,12 @@ public class Sketch implements MessageConsumer {
             }
 
             Class<?>[] param_types = new Class<?>[2];
-            param_types[0] = Editor.class;
+            param_types[0] = Sketch.class;
             param_types[1] = String[].class;
             Method m = c.getMethod("main", param_types);
 
             Object[] args = new Object[2];
-            args[0] = editor;
+            args[0] = this;
             args[1] = arg;
 
             return (Boolean)m.invoke(c, args);
@@ -3150,6 +3158,88 @@ public class Sketch implements MessageConsumer {
             }
         }
     }
+
+    String mBuffer = "";
+    public void messageStream(String msg) {
+        mBuffer += msg;
+        int nlpos = mBuffer.lastIndexOf("\n");
+        if (nlpos == -1) {
+            return;
+        }
+
+        boolean eol = false;
+        if (mBuffer.endsWith("\n")) {
+            mBuffer = mBuffer.substring(0, mBuffer.length()-1);
+            eol = true;
+        }
+
+        String[] bits = mBuffer.split("\n");
+        for (int i = 0; i < bits.length-1; i++) {
+            message(bits[i]);
+        }
+
+        if (eol) {
+            mBuffer = "";
+            message(bits[bits.length-1]);
+        } else {
+            mBuffer = bits[bits.length-1];
+        }
+    }
+
+    String wBuffer = "";
+    public void warningStream(String msg) {
+        wBuffer += msg;
+        int nlpos = wBuffer.lastIndexOf("\n");
+        if (nlpos == -1) {
+            return;
+        }
+
+        boolean eol = false;
+        if (wBuffer.endsWith("\n")) {
+            wBuffer = wBuffer.substring(0, wBuffer.length()-1);
+            eol = true;
+        }
+
+        String[] bits = wBuffer.split("\n");
+        for (int i = 0; i < bits.length-1; i++) {
+            warning(bits[i]);
+        }
+
+        if (eol) {
+            wBuffer = "";
+            warning(bits[bits.length-1]);
+        } else {
+            wBuffer = bits[bits.length-1];
+        }
+    }
+
+    String eBuffer = "";
+    public void errorStream(String msg) {
+        eBuffer += msg;
+        int nlpos = eBuffer.lastIndexOf("\n");
+        if (nlpos == -1) {
+            return;
+        }
+
+        boolean eol = false;
+        if (eBuffer.endsWith("\n")) {
+            eBuffer = eBuffer.substring(0, eBuffer.length()-1);
+            eol = true;
+        }
+
+        String[] bits = eBuffer.split("\n");
+        for (int i = 0; i < bits.length-1; i++) {
+            error(bits[i]);
+        }
+
+        if (eol) {
+            eBuffer = "";
+            error(bits[bits.length-1]);
+        } else {
+            eBuffer = bits[bits.length-1];
+        }
+    }
+
 
     public void message(String s) {
         flagError(s);

@@ -20,12 +20,12 @@ public class ssh  {
     static String host;
     static String user;
 
-    public static boolean main(Editor editor, String[] arg) {
+    public static boolean main(Sketch sketch, String[] arg) {
         try {
             JSch jsch=new JSch();
 
             if (arg.length != 2) {
-                System.err.println("Usage: __builtin_ssh user@host command");
+                sketch.error("Usage: __builtin_ssh user@host command");
                 return false;
             }
             host=arg[0];
@@ -52,7 +52,7 @@ public class ssh  {
             } catch (JSchException e) {
                 if (e.getMessage().equals("Auth fail")) {
                     password = null;
-                    editor.error("Authentication failed");
+                    sketch.error("Authentication failed");
                     session.disconnect();
                     return false;
                 } else {
@@ -84,18 +84,15 @@ public class ssh  {
                 while(in.available()>0) {
                     int i=in.read(tmp, 0, 20);
                     if(i<0)break;
-                    editor.messageStream(new String(tmp, 0, i));
-                    System.out.print(new String(tmp, 0, i));
+                    sketch.messageStream(new String(tmp, 0, i));
                 }
                 while(err.available()>0) {
                     int i=err.read(tmp, 0, 20);
                     if(i<0)break;
-                    editor.errorStream(new String(tmp, 0, i));
-                    System.out.print(new String(tmp, 0, i));
+                    sketch.errorStream(new String(tmp, 0, i));
                 }
                 if(channel.isClosed()) {
                     if(in.available()>0) continue;
-                    System.out.println("exit-status: "+channel.getExitStatus());
                     break;
                 }
                 try {
@@ -105,7 +102,7 @@ public class ssh  {
             channel.disconnect();
             session.disconnect();
         } catch(Exception e) {
-            System.out.println(e);
+            Base.error(e);
         }
         return true;
     }
