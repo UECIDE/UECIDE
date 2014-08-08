@@ -39,6 +39,7 @@ public class NetworkDiscoveryService {
                                         db.board = foundBoard;
                                         db.name = info.getName();
                                         db.location = ips[0];
+                                        db.programmer = foundBoard.get("mdns.programmer");
                                         db.version = info.getPropertyString(foundBoard.get("mdns.version"));
                                         db.type = DiscoveredBoard.NETWORK;
                                         for (Enumeration<String> e = info.getPropertyNames(); e.hasMoreElements();) {

@@ -2784,6 +2784,9 @@ public class Editor extends JFrame {
             System.err.println(discoveredBoard.toString());
             loadedSketch.setBoard(discoveredBoard.board);
             loadedSketch.setPort(discoveredBoard.location);
+            if (discoveredBoard.programmer != null) {
+                loadedSketch.setProgrammer(discoveredBoard.programmer);
+            }
             for (Object k : discoveredBoard.properties.keySet()) {
                 loadedSketch.put("mdns." + (String)k, discoveredBoard.properties.get((String)k));
             }

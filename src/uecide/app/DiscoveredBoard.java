@@ -6,6 +6,7 @@ public class DiscoveredBoard {
     public Object location;
     public String version;
     public int type;
+    public String programmer;
 
     public PropertyFile properties = new PropertyFile();
 
