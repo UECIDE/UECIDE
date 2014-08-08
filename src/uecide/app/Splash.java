@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2014, Majenko Technologies
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of Majenko Technologies nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -91,17 +91,19 @@ public class Splash extends Window {
                 devices[0].getDisplayMode().getHeight()
             );
 
-            if (sw == 0) {
+            if(sw == 0) {
                 sw = screen.width;
             }
-            if (sh == 0) {
+
+            if(sh == 0) {
                 sh = screen.height;
             }
+
             x = sx + (sw - w) / 2;
             y = sy + (sh - h) / 2;
             setBounds(x, y, w, h);
             setVisible(true);
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
     }
@@ -114,6 +116,7 @@ public class Splash extends Window {
         int by = 0;
         int mx = 0;
         int my = 0;
+
         try {
             x = Base.theme.getInteger("splash.version.x");
             y = Base.theme.getInteger("splash.version.y");
@@ -123,18 +126,18 @@ public class Splash extends Window {
 
             bx = Base.theme.getInteger("splash.beta.x");
             by = Base.theme.getInteger("splash.beta.y");
-        } catch (Exception e) {
+        } catch(Exception e) {
         }
 
         BufferedImage temp = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = temp.createGraphics();
         g2.drawImage(image, 0, 0, null);
 
-        if (x < 0) {
+        if(x < 0) {
             x = w + x;
         }
 
-        if (y < 0) {
+        if(y < 0) {
             y = h + y;
         }
 
@@ -144,21 +147,34 @@ public class Splash extends Window {
         g2.setColor(Base.theme.getColor("splash.version.color"));
         g2.drawString("v" + Base.systemVersion, x, y);
 
-        if (Base.theme.get("splash.message.font") != null) { g2.setFont(Base.theme.getFont("splash.message.font")); }
-        if (Base.theme.get("splash.message.color") != null) { g2.setColor(Base.theme.getColor("splash.message.color")); }
+        if(Base.theme.get("splash.message.font") != null) {
+            g2.setFont(Base.theme.getFont("splash.message.font"));
+        }
+
+        if(Base.theme.get("splash.message.color") != null) {
+            g2.setColor(Base.theme.getColor("splash.message.color"));
+        }
+
         g2.drawString(message, mx, my);
 
-        if (bx == -1) {
+        if(bx == -1) {
             FontMetrics fm = g2.getFontMetrics();
             int sw = fm.stringWidth(betaMessage);
             bx = w / 2 - sw / 2;
         }
-        if (Base.theme.get("splash.beta.font") != null) { g2.setFont(Base.theme.getFont("splash.beta.font")); }
-        if (Base.theme.get("splash.beta.color") != null) { g2.setColor(Base.theme.getColor("splash.beta.color")); }
+
+        if(Base.theme.get("splash.beta.font") != null) {
+            g2.setFont(Base.theme.getFont("splash.beta.font"));
+        }
+
+        if(Base.theme.get("splash.beta.color") != null) {
+            g2.setColor(Base.theme.getColor("splash.beta.color"));
+        }
+
         g2.drawString(betaMessage, bx, by);
 
-        g2.setColor(new Color(200,0,00));
-        g2.fillRect(0, h-4, (int) (((float)percent / 100.0) * (float)w) , h - 1); 
+        g2.setColor(new Color(200, 0, 00));
+        g2.fillRect(0, h - 4, (int)(((float)percent / 100.0) * (float)w) , h - 1);
         g.drawImage(temp, 0, 0, null);
     }
 

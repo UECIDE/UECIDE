@@ -25,8 +25,7 @@ import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.*;
 
 
-public class ProjectSearch
-{
+public class ProjectSearch {
     JFrame frame;
     JPanel mainContainer;
     Editor editor;
@@ -54,7 +53,7 @@ public class ProjectSearch
                 doSearch();
             }
         });
-        
+
         tb.add(searchButton);
         tb.setFloatable(false);
 
@@ -74,7 +73,7 @@ public class ProjectSearch
 
         final HashMap<String, ArrayList<Integer>> matches = new HashMap<String, ArrayList<Integer>>();
 
-        for (File f : editor.loadedSketch.sketchFiles) {
+        for(File f : editor.loadedSketch.sketchFiles) {
             JPanel res = new JPanel();
             res.setLayout(new BorderLayout());
             JButton fname = new JButton(f.getName());
@@ -82,15 +81,19 @@ public class ProjectSearch
             fname.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     ArrayList<Integer>finds = matches.get(e.getActionCommand());
-                    if (finds != null) {
+
+                    if(finds != null) {
                         String theme = "theme." + Base.preferences.get("theme.selected", "default") + ".";
                         File f = new File(e.getActionCommand());
                         int tab = editor.openOrSelectFile(f);
-                        if (tab == -1) {
+
+                        if(tab == -1) {
                             return;
                         }
+
                         EditorBase eb = editor.getTab(tab);
-                        for (int i : finds) {
+
+                        for(int i : finds) {
                             eb.highlightLine(i, Base.theme.getColor(theme + "editor.searchall.bgcolor"));
                         }
                     }
@@ -107,27 +110,32 @@ public class ProjectSearch
 
             int lineno = 0;
             ArrayList<Integer> finds = new ArrayList<Integer>();
-            for (String line : content) {
+
+            for(String line : content) {
                 lineno++;
-                if (line.toLowerCase().contains(searchTerm.getText().toLowerCase())) {
+
+                if(line.toLowerCase().contains(searchTerm.getText().toLowerCase())) {
                     foundText = true;
                     RSyntaxTextArea text = new RSyntaxTextArea();
                     RTextScrollPane sp = new RTextScrollPane(text);
 
-                    finds.add(lineno-1);
-                    
+                    finds.add(lineno - 1);
+
                     int startLine = lineno;
                     int focusLine = 0;
                     JLabel ln = new JLabel(Integer.toString(lineno));
                     StringBuilder to = new StringBuilder();
-                    if (lineno > 1) {
-                        to.append(content[lineno-2]);
+
+                    if(lineno > 1) {
+                        to.append(content[lineno - 2]);
                         to.append("\n");
                         startLine = lineno - 1;
                         focusLine = 1;
                     }
+
                     to.append(line);
-                    if (lineno < content.length) {
+
+                    if(lineno < content.length) {
                         to.append("\n");
                         to.append(content[lineno]);
                     }
@@ -147,18 +155,19 @@ public class ProjectSearch
                             scroll.dispatchEvent(e);
                         }
                     });
+
                     try {
                         text.addLineHighlight(focusLine, Base.theme.getColor("editor.searchall.bgcolor"));
                         text.setHighlightCurrentLine(false);
-                    } catch (Exception e) {
+                    } catch(Exception e) {
                         Base.error(e);
                     }
-                        
+
                     resContent.add(sp);
                 }
             }
 
-            if (foundText) {
+            if(foundText) {
                 resContent.add(Box.createVerticalGlue());
                 res.add(resContent, BorderLayout.CENTER);
                 matches.put(f.getAbsolutePath(), finds);
@@ -176,15 +185,18 @@ public class ProjectSearch
             BufferedReader reader = new BufferedReader(new FileReader(f));
             String line = null;
             StringBuilder sb = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
+
+            while((line = reader.readLine()) != null) {
                 sb.append(line);
                 sb.append("\n");
             }
+
             reader.close();
             return sb.toString().split("\n");
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
+
         return null;
     }
 }

@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2014, Majenko Technologies
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of Majenko Technologies nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -68,7 +68,7 @@ import javax.jmdns.ServiceInfo;
 
 
 public class Editor extends JFrame {
-    
+
     Box mainDecorationContainer;
 
     JSplitPane topBottomSplit;
@@ -143,7 +143,7 @@ public class Editor extends JFrame {
         File file;
         int line;
         String proto;
-    
+
         public FunctionBookmark(File f, int l, String p) {
             file = f;
             line = l;
@@ -177,16 +177,18 @@ public class Editor extends JFrame {
             programButton.setEnabled(false);
             runButton.setVisible(false);
             abortButton.setVisible(true);
+
             try {
-               if(loadedSketch.build()) {
-            //        reportSize();
-                    if (upload) {
+                if(loadedSketch.build()) {
+                    //        reportSize();
+                    if(upload) {
                         loadedSketch.upload();
                     }
                 }
-            } catch (Exception e) {
+            } catch(Exception e) {
                 error(e);
             }
+
             runButton.setEnabled(true);
             programButton.setEnabled(true);
             runButton.setVisible(true);
@@ -204,11 +206,13 @@ public class Editor extends JFrame {
             programButton.setEnabled(false);
             runButton.setVisible(false);
             abortButton.setVisible(true);
+
             try {
                 loadedSketch.precompileLibrary(library);
-            } catch (Exception e) {
+            } catch(Exception e) {
                 error(e);
             }
+
             runButton.setEnabled(true);
             programButton.setEnabled(true);
             runButton.setVisible(true);
@@ -222,12 +226,12 @@ public class Editor extends JFrame {
         loadedSketch = s;
         s.attachToEditor(this);
 
-        for (Class<?> plugin : Base.plugins.values()) {
+        for(Class<?> plugin : Base.plugins.values()) {
             try {
                 Constructor<?> ctor = plugin.getConstructor(Editor.class);
                 Plugin p = (Plugin)(ctor.newInstance(new Object[] { this }));
                 plugins.add(p);
-            } catch (Exception e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }
@@ -262,11 +266,14 @@ public class Editor extends JFrame {
         editorPanel.add(editorTabs, BorderLayout.CENTER);
 
         int width = Base.preferences.getInteger("editor.window.width");
-        if (width < Base.preferences.getInteger("editor.window.width.min")) {
+
+        if(width < Base.preferences.getInteger("editor.window.width.min")) {
             width = Base.preferences.getInteger("editor.window.width.min");
         }
+
         int height = Base.preferences.getInteger("editor.window.height");
-        if (height < Base.preferences.getInteger("editor.window.height.min")) {
+
+        if(height < Base.preferences.getInteger("editor.window.height.min")) {
             height = Base.preferences.getInteger("editor.window.height.min");
         }
 
@@ -346,35 +353,36 @@ public class Editor extends JFrame {
         toolbar.addHierarchyListener(new HierarchyListener() {
             public void hierarchyChanged(HierarchyEvent e) {
                 Window window = SwingUtilities.getWindowAncestor(toolbar);
-                if (window == Editor.this) {
-                    if (e.getChangeFlags() == HierarchyEvent.PARENT_CHANGED) {
+
+                if(window == Editor.this) {
+                    if(e.getChangeFlags() == HierarchyEvent.PARENT_CHANGED) {
 
                         JPanel pan = (JPanel)e.getChangedParent();
 
                         BorderLayout layout = (BorderLayout)pan.getLayout();
 
-                        if (toolbar == layout.getLayoutComponent(BorderLayout.NORTH)) {
+                        if(toolbar == layout.getLayoutComponent(BorderLayout.NORTH)) {
                             Base.preferences.set("editor.toolbar.position", "n");
                             Base.preferences.saveDelay();
                         }
 
-                        if (toolbar == layout.getLayoutComponent(BorderLayout.SOUTH)) {
+                        if(toolbar == layout.getLayoutComponent(BorderLayout.SOUTH)) {
                             Base.preferences.set("editor.toolbar.position", "s");
                             Base.preferences.saveDelay();
                         }
 
-                        if (toolbar == layout.getLayoutComponent(BorderLayout.EAST)) {
+                        if(toolbar == layout.getLayoutComponent(BorderLayout.EAST)) {
                             Base.preferences.set("editor.toolbar.position", "e");
                             Base.preferences.saveDelay();
                         }
 
-                        if (toolbar == layout.getLayoutComponent(BorderLayout.WEST)) {
+                        if(toolbar == layout.getLayoutComponent(BorderLayout.WEST)) {
                             Base.preferences.set("editor.toolbar.position", "w");
                             Base.preferences.saveDelay();
                         }
                     }
                 } else {
-                    if (e.getChangeFlags() == HierarchyEvent.PARENT_CHANGED) {
+                    if(e.getChangeFlags() == HierarchyEvent.PARENT_CHANGED) {
                         Base.preferences.set("editor.toolbar.position", "f");
                         Base.preferences.saveDelay();
                     }
@@ -392,16 +400,17 @@ public class Editor extends JFrame {
         statusLabel.setFont(new Font(labelFont.getName(), Font.PLAIN, 12));
 
         String tbPos = Base.preferences.get("editor.toolbar.position");
-        if ((tbPos == null) || tbPos.equals("f") || tbPos.equals("n")) {
+
+        if((tbPos == null) || tbPos.equals("f") || tbPos.equals("n")) {
             this.add(toolbar, BorderLayout.NORTH);
             toolbar.setOrientation(JToolBar.HORIZONTAL);
-        } else if (tbPos.equals("s")) {
+        } else if(tbPos.equals("s")) {
             this.add(toolbar, BorderLayout.SOUTH);
             toolbar.setOrientation(JToolBar.HORIZONTAL);
-        } else if (tbPos.equals("e")) {
+        } else if(tbPos.equals("e")) {
             this.add(toolbar, BorderLayout.EAST);
             toolbar.setOrientation(JToolBar.VERTICAL);
-        } else if (tbPos.equals("w")) {
+        } else if(tbPos.equals("w")) {
             this.add(toolbar, BorderLayout.WEST);
             toolbar.setOrientation(JToolBar.VERTICAL);
         } else {
@@ -410,7 +419,7 @@ public class Editor extends JFrame {
         }
 
         this.add(statusBar, BorderLayout.SOUTH);
-    
+
         JButton refreshButton = Editor.addToolbarButton(treeToolBar, "toolbar/refresh.png", "Refresh Project Tree", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 loadedSketch.rescanFileTree();
@@ -456,7 +465,7 @@ public class Editor extends JFrame {
                 program();
             }
         });
-                    
+
         toolbar.addSeparator();
 
         Editor.addToolbarButton(toolbar, "toolbar/new.png", "New Sketch", new ActionListener() {
@@ -512,28 +521,29 @@ public class Editor extends JFrame {
         });
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-/*
-        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        manager.addKeyEventDispatcher(new KeyEventDispatcher() {
-            public boolean dispatchKeyEvent(KeyEvent e) { 
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    if (e.getKeyCode() == KeyEvent.VK_F11) {
-                        System.err.println("Toggle");
-                        toggleFullScreen();
-                        return true;
+        /*
+                KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+                manager.addKeyEventDispatcher(new KeyEventDispatcher() {
+                    public boolean dispatchKeyEvent(KeyEvent e) {
+                        if (e.getID() == KeyEvent.KEY_PRESSED) {
+                            if (e.getKeyCode() == KeyEvent.VK_F11) {
+                                System.err.println("Toggle");
+                                toggleFullScreen();
+                                return true;
+                            }
+                        }
+                        return false;
                     }
-                }
-                return false; 
-            }
-        });
-*/
+                });
+        */
 
-        if (Base.preferences.getBoolean("editor.fullscreen")) {
+        if(Base.preferences.getBoolean("editor.fullscreen")) {
             isFullScreen = true;
             this.dispose();
             setUndecorated(true);
             setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
+
         this.pack();
         this.setVisible(true);
 
@@ -571,31 +581,31 @@ public class Editor extends JFrame {
         // We want to do this last as the previous SETs trigger this change listener.
 
         leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    int pos = (Integer)(e.getNewValue());
-                    Base.preferences.setInteger("editor.tree.split", pos);
-                    Base.preferences.saveDelay();
-                }
+        new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent e) {
+                int pos = (Integer)(e.getNewValue());
+                Base.preferences.setInteger("editor.tree.split", pos);
+                Base.preferences.saveDelay();
             }
-        );
+        }
+                                                );
 
         topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    int pos = (Integer)(e.getNewValue());
-                    Base.preferences.setInteger("editor.divider.split", pos);
-                    Base.preferences.saveDelay();
-                }
+        new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent e) {
+                int pos = (Integer)(e.getNewValue());
+                Base.preferences.setInteger("editor.divider.split", pos);
+                Base.preferences.saveDelay();
             }
-        );
+        }
+                                                );
 
     }
 
     class FileCellRenderer implements TreeCellRenderer {
         DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-            if ((value != null) && (value instanceof DefaultMutableTreeNode)) {
+            if((value != null) && (value instanceof DefaultMutableTreeNode)) {
                 JPanel container = new JPanel();
                 container.setLayout(new BorderLayout());
                 ImageIcon icon = null;
@@ -604,79 +614,93 @@ public class Editor extends JFrame {
                 Color fg = defaults.getColor("List.selectionForeground");
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
                 Object userObject = node.getUserObject();
-                Border noBorder = BorderFactory.createEmptyBorder(0,0,0,0);
-                Border paddingBorder = BorderFactory.createEmptyBorder(2,2,2,2);
+                Border noBorder = BorderFactory.createEmptyBorder(0, 0, 0, 0);
+                Border paddingBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
 
-                if (userObject instanceof FunctionBookmark) {
+                if(userObject instanceof FunctionBookmark) {
                     FunctionBookmark bm = (FunctionBookmark)userObject;
                     JLabel text = new JLabel(bm.getFunction());
                     icon = Base.loadIconFromResource("files/function.png");
                     text.setBorder(paddingBorder);
-                    if (selected) {
+
+                    if(selected) {
                         text.setBackground(bg);
                         text.setForeground(fg);
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
                     }
+
                     container.setOpaque(false);
                     container.setBorder(noBorder);
-                    if (icon != null) {
+
+                    if(icon != null) {
                         JLabel i = new JLabel(icon);
                         container.add(i, BorderLayout.WEST);
                     }
+
                     Font f = text.getFont();
-                    text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize()-2));
+                    text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
                     container.add(text, BorderLayout.CENTER);
                     return container;
                 }
-                if (userObject instanceof File) {
+
+                if(userObject instanceof File) {
                     File file = (File)userObject;
                     JLabel text = new JLabel(file.getName());
-                    if (file.isDirectory()) {
-                        if (expanded) {
+
+                    if(file.isDirectory()) {
+                        if(expanded) {
                             icon = Base.loadIconFromResource("files/folder-open.png");
                         } else {
                             icon = Base.loadIconFromResource("files/folder.png");
                         }
                     } else {
                         OverlayIcon oicon = new OverlayIcon(Base.loadIconFromResource(FileType.getIcon(file)));
-                        for (Plugin plugin : plugins) {
+
+                        for(Plugin plugin : plugins) {
                             try {
                                 ImageIcon fi = plugin.getFileIconOverlay(file);
-                                if (fi != null) {
+
+                                if(fi != null) {
                                     oicon.add(fi);
                                 }
-                            } catch (AbstractMethodError e) {
-                            } catch (Exception e) {
+                            } catch(AbstractMethodError e) {
+                            } catch(Exception e) {
                                 error(e);
                             }
                         }
+
                         icon = (ImageIcon)oicon;
                     }
+
                     text.setBorder(paddingBorder);
-                    if (selected) {
+
+                    if(selected) {
                         text.setBackground(bg);
                         text.setForeground(fg);
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
                     }
+
                     container.setOpaque(false);
                     container.setBorder(noBorder);
-                    if (icon != null) {
+
+                    if(icon != null) {
                         JLabel i = new JLabel(icon);
                         container.add(i, BorderLayout.WEST);
                     }
+
                     container.add(text, BorderLayout.CENTER);
                     return container;
                 }
 
-                if (userObject instanceof Library) {
+                if(userObject instanceof Library) {
                     Library lib = (Library)userObject;
                     int pct = lib.getCompiledPercent();
 
-                    if (loadedSketch.libraryIsCompiled(lib) && (pct >= 100 || pct <= 0)) {
+                    if(loadedSketch.libraryIsCompiled(lib) && (pct >= 100 || pct <= 0)) {
                         icon = Base.loadIconFromResource("files/library-good.png");
                     } else {
                         icon = Base.loadIconFromResource("files/library-bad.png");
@@ -687,7 +711,7 @@ public class Editor extends JFrame {
                     JLabel i = new JLabel(icon);
                     container.add(i, BorderLayout.WEST);
 
-                    if (pct > 0 && pct < 100) {
+                    if(pct > 0 && pct < 100) {
                         JProgressBar bar = new JProgressBar();
                         bar.setString(lib.getName());
                         Dimension d = bar.getSize();
@@ -702,27 +726,33 @@ public class Editor extends JFrame {
                     } else {
                         JLabel text = new JLabel(lib.getName());
                         text.setBorder(paddingBorder);
-                        if (selected) {
+
+                        if(selected) {
                             text.setBackground(bg);
                             text.setForeground(fg);
                             text.setOpaque(true);
                         } else {
                             text.setOpaque(false);
                         }
+
                         container.add(text, BorderLayout.CENTER);
                     }
+
                     return container;
                 }
 
-                if (userObject instanceof Sketch) {
+                if(userObject instanceof Sketch) {
                     Sketch so = (Sketch)userObject;
                     JLabel text = new JLabel(so.getName());
                     icon = so.getIcon(16);
-                    if (icon == null) {
+
+                    if(icon == null) {
                         icon = Base.loadIconFromResource("icon16.png");
                     }
+
                     text.setBorder(paddingBorder);
-                    if (selected) {
+
+                    if(selected) {
                         text.setBackground(bg);
                         text.setForeground(fg);
                         text.setOpaque(true);
@@ -739,13 +769,16 @@ public class Editor extends JFrame {
                 }
 
                 JLabel text = new JLabel(userObject.toString());
-                if (expanded) {
+
+                if(expanded) {
                     icon = Base.loadIconFromResource("files/folder-open.png");
                 } else {
                     icon = Base.loadIconFromResource("files/folder.png");
                 }
+
                 text.setBorder(paddingBorder);
-                if (selected) {
+
+                if(selected) {
                     text.setBackground(bg);
                     text.setForeground(fg);
                     text.setOpaque(true);
@@ -761,21 +794,26 @@ public class Editor extends JFrame {
                 return container;
 
             }
+
             return defaultRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         }
     }
 
     public void addFileTreeToNode(DefaultMutableTreeNode treenode, File dir) {
-        if (!dir.exists() || !dir.isDirectory()) {
+        if(!dir.exists() || !dir.isDirectory()) {
             return;
         }
+
         File[] buildFiles = dir.listFiles();
-        for (File file : buildFiles) {
+
+        for(File file : buildFiles) {
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(file.getName());
             node.setUserObject(file);
-            if (file.isDirectory()) {
+
+            if(file.isDirectory()) {
                 addFileTreeToNode(node, file);
             }
+
             treenode.add(node);
         };
     }
@@ -836,24 +874,27 @@ public class Editor extends JFrame {
                 nodesFlavor = new DataFlavor(mimeType);
                 nixFileDataFlavor = new DataFlavor("text/uri-list;class=java.lang.String");
                 flavors[0] = nodesFlavor;
-            } catch (ClassNotFoundException e) {
+            } catch(ClassNotFoundException e) {
                 error(e);
             }
         }
 
         public boolean canImport(TransferHandler.TransferSupport support) {
-            if (!support.isDrop()) {
+            if(!support.isDrop()) {
                 return false;
             }
+
             support.setShowDropLocation(true);
-            if (support.isDataFlavorSupported(nodesFlavor)) {
+
+            if(support.isDataFlavorSupported(nodesFlavor)) {
                 JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
                 JTree tree = (JTree)support.getComponent();
                 int dropRow = tree.getRowForPath(dl.getPath());
 
                 int[] selRows = tree.getSelectionRows();
-                for (int i = 0; i < selRows.length; i++) {
-                    if (selRows[i] == dropRow) {
+
+                for(int i = 0; i < selRows.length; i++) {
+                    if(selRows[i] == dropRow) {
                         return false;
                     }
                 }
@@ -862,19 +903,22 @@ public class Editor extends JFrame {
                 DefaultMutableTreeNode target = (DefaultMutableTreeNode)dest.getLastPathComponent();
                 TreePath path = tree.getPathForRow(selRows[0]);
                 DefaultMutableTreeNode firstNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-                if (firstNode.getChildCount() > 0 && target.getLevel() < firstNode.getLevel()) {
+
+                if(firstNode.getChildCount() > 0 && target.getLevel() < firstNode.getLevel()) {
                     return false;
                 }
+
                 return true;
             }
 
             try {
-                if (support.isDataFlavorSupported(nixFileDataFlavor)) {
+                if(support.isDataFlavorSupported(nixFileDataFlavor)) {
                     return true;
                 }
-            } catch (Exception e) {
+            } catch(Exception e) {
                 //error(e);
             }
+
             return false;
         }
 
@@ -883,25 +927,29 @@ public class Editor extends JFrame {
             TreePath path = tree.getPathForRow(selRows[0]);
             DefaultMutableTreeNode first = (DefaultMutableTreeNode)path.getLastPathComponent();
             int childCount = first.getChildCount();
-            if (childCount > 0 && selRows.length == 1) {
+
+            if(childCount > 0 && selRows.length == 1) {
                 return false;
             }
 
-            for (int i = 1; i < selRows.length; i++) {
+            for(int i = 1; i < selRows.length; i++) {
                 path = tree.getPathForRow(selRows[i]);
                 DefaultMutableTreeNode next = (DefaultMutableTreeNode)path.getLastPathComponent();
-                if (first.isNodeChild(next)) {
-                    if (childCount > selRows.length - 1) {
+
+                if(first.isNodeChild(next)) {
+                    if(childCount > selRows.length - 1) {
                         return false;
                     }
                 }
             }
+
             return true;
         }
 
         protected Transferable createTransferable(JComponent c) {
             JTree tree = (JTree)c;
             TreePath[] paths = tree.getSelectionPaths();
+
             if(paths != null) {
                 // Make up a node array of copies for transfer and
                 // another for/of the nodes that will be removed in
@@ -915,9 +963,11 @@ public class Editor extends JFrame {
                 DefaultMutableTreeNode copy = copy(node);
                 copies.add(copy);
                 toRemove.add(node);
+
                 for(int i = 1; i < paths.length; i++) {
                     DefaultMutableTreeNode next =
                         (DefaultMutableTreeNode)paths[i].getLastPathComponent();
+
                     // Do not allow higher level nodes to be added to list.
                     if(next.getLevel() < node.getLevel()) {
                         break;
@@ -929,12 +979,14 @@ public class Editor extends JFrame {
                         toRemove.add(next);
                     }
                 }
+
                 DefaultMutableTreeNode[] nodes =
                     copies.toArray(new DefaultMutableTreeNode[copies.size()]);
                 nodesToRemove =
                     toRemove.toArray(new DefaultMutableTreeNode[toRemove.size()]);
                 return new NodesTransferable(nodes);
             }
+
             return null;
         }
 
@@ -947,9 +999,10 @@ public class Editor extends JFrame {
             if((action & MOVE) == MOVE) {
                 JTree tree = (JTree)source;
                 DefaultTreeModel model = (DefaultTreeModel)tree.getModel();
+
                 // Remove nodes saved in nodesToRemove in createTransferable.
                 for(int i = 0; i < nodesToRemove.length; i++) {
-                    if (nodesToRemove[i].getParent() != null) {
+                    if(nodesToRemove[i].getParent() != null) {
                         model.removeNodeFromParent(nodesToRemove[i]);
                     }
                 }
@@ -966,9 +1019,10 @@ public class Editor extends JFrame {
                     return false;
                 }
 
-                if (support.isDataFlavorSupported(nodesFlavor)) {
+                if(support.isDataFlavorSupported(nodesFlavor)) {
                     // Extract transfer data.
                     DefaultMutableTreeNode[] nodes = null;
+
                     try {
                         Transferable t = support.getTransferable();
                         nodes = (DefaultMutableTreeNode[])t.getTransferData(nodesFlavor);
@@ -977,6 +1031,7 @@ public class Editor extends JFrame {
                     } catch(java.io.IOException ioe) {
                         System.out.println("I/O error: " + ioe.getMessage());
                     }
+
                     // Get drop location info.
 
                     JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
@@ -987,14 +1042,15 @@ public class Editor extends JFrame {
                     // You can't drop files into another file, so if it's not a directory
                     // that we're dropping onto then move up a level.
                     File destinationFile = (File)parent.getUserObject();
-                    if (!destinationFile.isDirectory()) {
+
+                    if(!destinationFile.isDirectory()) {
                         parent = (DefaultMutableTreeNode)parent.getParent();
                         destinationFile = destinationFile.getParentFile();
                     }
 
                     File originalParent = ((File)((DefaultMutableTreeNode)nodes[0].getUserObject()).getUserObject()).getParentFile();
 
-                    if (destinationFile.equals(originalParent)) {
+                    if(destinationFile.equals(originalParent)) {
                         return false;
                     }
 
@@ -1002,6 +1058,7 @@ public class Editor extends JFrame {
                     DefaultTreeModel model = (DefaultTreeModel)tree.getModel();
                     // Configure for drop mode.
                     int index = childIndex;    // DropMode.INSERT
+
                     if(childIndex == -1) {     // DropMode.ON
                         index = parent.getChildCount();
                     }
@@ -1014,19 +1071,20 @@ public class Editor extends JFrame {
                         // If the file is open in a tab then change the file referenced by the tab
                         // to the new path name.
                         int tab = getTabByFile(nodeFile);
-                        if (tab >= 0) {
+
+                        if(tab >= 0) {
                             setTabFile(tab, newFile);
                         }
 
                         // If the file being moved was a "top level" file then move it, otherwise ignore it.
-                        if (nodeFile.getParentFile().equals(originalParent)) {
+                        if(nodeFile.getParentFile().equals(originalParent)) {
                             nodeFile.renameTo(newFile);
                         }
 
 
                         model.insertNodeInto(nodes[i], parent, index++);
                     }
-                } else if (support.isDataFlavorSupported(nixFileDataFlavor)) {
+                } else if(support.isDataFlavorSupported(nixFileDataFlavor)) {
                     Transferable t = support.getTransferable();
                     String data = (String)t.getTransferData(nixFileDataFlavor);
 
@@ -1035,22 +1093,26 @@ public class Editor extends JFrame {
                     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)dest.getLastPathComponent();
 
                     File destinationFile = (File)parent.getUserObject();
-                    if (!destinationFile.isDirectory()) {
+
+                    if(!destinationFile.isDirectory()) {
                         parent = (DefaultMutableTreeNode)parent.getParent();
                         destinationFile = destinationFile.getParentFile();
                     }
 
                     for(StringTokenizer st = new StringTokenizer(data, "\r\n"); st.hasMoreTokens();) {
                         String token = st.nextToken().trim();
+
                         if(token.startsWith("#") || token.isEmpty()) {
                             // comment line, by RFC 2483
                             continue;
                         }
+
                         try {
                             File file = new File(new URI(token));
                             // store this somewhere
                             File destfile = new File(destinationFile, file.getName());
-                            if (file.isDirectory()) {
+
+                            if(file.isDirectory()) {
                                 Base.copyDir(file, destfile);
                             } else {
                                 Base.copyFile(file, destfile);
@@ -1062,9 +1124,10 @@ public class Editor extends JFrame {
 
                 loadedSketch.rescanFileTree();
                 updateTree();
-            } catch (Exception ee) {
+            } catch(Exception ee) {
                 ee.printStackTrace();
             }
+
             return true;
         }
 
@@ -1077,12 +1140,13 @@ public class Editor extends JFrame {
 
             public NodesTransferable(DefaultMutableTreeNode[] nodes) {
                 this.nodes = nodes;
-             }
+            }
 
             public Object getTransferData(DataFlavor flavor)
-                                     throws UnsupportedFlavorException {
+            throws UnsupportedFlavorException {
                 if(!isDataFlavorSupported(flavor))
                     throw new UnsupportedFlavorException(flavor);
+
                 return nodes;
             }
 
@@ -1111,18 +1175,21 @@ public class Editor extends JFrame {
         // First go through and remove any nodes in dst that aren't in src.
         boolean removedNodes = false;
         int currentNode = 0;
-        while (currentNode < dst.getChildCount()) {
+
+        while(currentNode < dst.getChildCount()) {
             boolean found = false;
             DefaultMutableTreeNode foundNode = null;
-            for (int i = 0; i < src.getChildCount(); i++) {
-                if (src.getChildAt(i).toString().equals(dst.getChildAt(currentNode).toString())) {
+
+            for(int i = 0; i < src.getChildCount(); i++) {
+                if(src.getChildAt(i).toString().equals(dst.getChildAt(currentNode).toString())) {
                     foundNode = (DefaultMutableTreeNode)src.getChildAt(i);
                     src.remove(i);
                     found = true;
                     break;
                 }
             }
-            if (!found) {
+
+            if(!found) {
                 removedNodes = true;
                 dst.remove(currentNode);
                 continue;
@@ -1132,7 +1199,8 @@ public class Editor extends JFrame {
             DefaultMutableTreeNode dnode = (DefaultMutableTreeNode)dst.getChildAt(currentNode);
             Object sob = foundNode.getUserObject();
             Object dob = dnode.getUserObject();
-            if (sob != dob) {
+
+            if(sob != dob) {
                 dnode.setUserObject(sob);
                 treeModel.nodeStructureChanged(dnode);
             }
@@ -1144,11 +1212,13 @@ public class Editor extends JFrame {
         // Now copy across any new objects.
 
         boolean addedNodes = false;
-        while (src.getChildCount() > 0) {
-            dst.add((DefaultMutableTreeNode)src.getChildAt(0));  
+
+        while(src.getChildCount() > 0) {
+            dst.add((DefaultMutableTreeNode)src.getChildAt(0));
             addedNodes = true;
         }
-        if (addedNodes || removedNodes) {
+
+        if(addedNodes || removedNodes) {
             treeModel.nodeStructureChanged(dst);
         }
     }
@@ -1160,25 +1230,29 @@ public class Editor extends JFrame {
 
         DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
         DefaultMutableTreeNode node;
-        for (File f : loadedSketch.sketchFiles) {
+
+        for(File f : loadedSketch.sketchFiles) {
             int type = FileType.getType(f);
-            switch (type) {
-                case FileType.CSOURCE:
-                case FileType.CPPSOURCE:
-                case FileType.ASMSOURCE:
-                case FileType.SKETCH:
-                    node = new DefaultMutableTreeNode(f.getName());
-                    node.setUserObject(f);
-                    ntc.add(node);
-                    HashMap<Integer, String> funcs = loadedSketch.getFunctionsForFile(f);
-                    if (funcs != null) {
-                        for (int line : funcs.keySet()) {
-                            FunctionBookmark b = new FunctionBookmark(f, line, funcs.get(line));
-                            DefaultMutableTreeNode fe = new DefaultMutableTreeNode(b);
-                            node.add(fe);
-                        }
+
+            switch(type) {
+            case FileType.CSOURCE:
+            case FileType.CPPSOURCE:
+            case FileType.ASMSOURCE:
+            case FileType.SKETCH:
+                node = new DefaultMutableTreeNode(f.getName());
+                node.setUserObject(f);
+                ntc.add(node);
+                HashMap<Integer, String> funcs = loadedSketch.getFunctionsForFile(f);
+
+                if(funcs != null) {
+                    for(int line : funcs.keySet()) {
+                        FunctionBookmark b = new FunctionBookmark(f, line, funcs.get(line));
+                        DefaultMutableTreeNode fe = new DefaultMutableTreeNode(b);
+                        node.add(fe);
                     }
-                    break;
+                }
+
+                break;
             }
         }
 
@@ -1191,16 +1265,19 @@ public class Editor extends JFrame {
         TreePath[] saved = saveTreeState(sketchContentTree);
         treeDocs.removeAllChildren();
         DefaultMutableTreeNode node;
-        for (File f : loadedSketch.getFolder().listFiles()) {
+
+        for(File f : loadedSketch.getFolder().listFiles()) {
             int type = FileType.getType(f);
-            switch (type) {
-                case FileType.DOCUMENT:
-                    node = new DefaultMutableTreeNode(f.getName());
-                    node.setUserObject(f);
-                    treeDocs.add(node);
-                    break;
+
+            switch(type) {
+            case FileType.DOCUMENT:
+                node = new DefaultMutableTreeNode(f.getName());
+                node.setUserObject(f);
+                treeDocs.add(node);
+                break;
             }
         }
+
         treeModel.nodeStructureChanged(treeDocs);
         restoreTreeState(sketchContentTree, saved);
     }
@@ -1220,16 +1297,19 @@ public class Editor extends JFrame {
         TreePath[] saved = saveTreeState(sketchContentTree);
         treeHeaders.removeAllChildren();
         DefaultMutableTreeNode node;
-        for (File f : loadedSketch.sketchFiles) {
+
+        for(File f : loadedSketch.sketchFiles) {
             int type = FileType.getType(f);
-            switch (type) {
-                case FileType.HEADER:
-                    node = new DefaultMutableTreeNode(f.getName());
-                    node.setUserObject(f);
-                    treeHeaders.add(node);
-                    break;
+
+            switch(type) {
+            case FileType.HEADER:
+                node = new DefaultMutableTreeNode(f.getName());
+                node.setUserObject(f);
+                treeHeaders.add(node);
+                break;
             }
         }
+
         treeModel.nodeStructureChanged(treeHeaders);
         restoreTreeState(sketchContentTree, saved);
     }
@@ -1239,13 +1319,15 @@ public class Editor extends JFrame {
         treeLibraries.removeAllChildren();
         HashMap<String, Library>libList = loadedSketch.getLibraries();
         DefaultMutableTreeNode node;
-        if (libList != null) {
-            for (String libname : libList.keySet()) {
+
+        if(libList != null) {
+            for(String libname : libList.keySet()) {
                 node = new DefaultMutableTreeNode(libname);
                 node.setUserObject(libList.get(libname));
                 treeLibraries.add(node);
             }
         }
+
         treeModel.nodeStructureChanged(treeLibraries);
         restoreTreeState(sketchContentTree, saved);
     }
@@ -1255,17 +1337,21 @@ public class Editor extends JFrame {
         treeBinaries.removeAllChildren();
         File bins = loadedSketch.getBinariesFolder();
         DefaultMutableTreeNode node;
-        if (bins.exists() && bins.isDirectory()) {
+
+        if(bins.exists() && bins.isDirectory()) {
             File[] files = bins.listFiles();
-            for (File binFile : files) {
-                if (binFile.getName().startsWith(".")) {
+
+            for(File binFile : files) {
+                if(binFile.getName().startsWith(".")) {
                     continue;
                 }
+
                 node = new DefaultMutableTreeNode(binFile.getName());
                 node.setUserObject(binFile);
                 treeBinaries.add(node);
             }
         }
+
         treeModel.nodeStructureChanged(treeBinaries);
         restoreTreeState(sketchContentTree, saved);
     }
@@ -1276,7 +1362,9 @@ public class Editor extends JFrame {
         treeOutput.removeAllChildren();
         addFileTreeToNode(treeOutput, loadedSketch.getBuildFolder());
         treeModel.nodeStructureChanged(treeOutput);
-        if (treeOutputOpen) sketchContentTree.expandPath(new TreePath(treeOutput.getPath()));
+
+        if(treeOutputOpen) sketchContentTree.expandPath(new TreePath(treeOutput.getPath()));
+
         restoreTreeState(sketchContentTree, saved);
     }
 
@@ -1302,7 +1390,7 @@ public class Editor extends JFrame {
         updateDocsTree();
         updateFilesTree();
 
-        if (treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
+        if(treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
     }
 
     // This is the main routine for generating the context menus for the Project tree view.  For the
@@ -1327,16 +1415,16 @@ public class Editor extends JFrame {
             TreePath selPath = sketchContentTree.getPathForLocation(e.getX(), e.getY());
             sketchContentTree.setSelectionPath(selPath);
 
-            if (selPath == null) {
+            if(selPath == null) {
                 return;
             }
 
             DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)selPath.getLastPathComponent();
             Object userObject = selectedNode.getUserObject();
 
-            if (e.getButton() == 1) {
-                if (e.getClickCount() == 2) {
-                    if (userObject instanceof FunctionBookmark) {
+            if(e.getButton() == 1) {
+                if(e.getClickCount() == 2) {
+                    if(userObject instanceof FunctionBookmark) {
                         FunctionBookmark bm = (FunctionBookmark)userObject;
                         int tab = openOrSelectFile(bm.getFile());
                         EditorBase eb = getTab(tab);
@@ -1345,8 +1433,8 @@ public class Editor extends JFrame {
                     }
                 }
 
-            } else if (e.getButton() == 3) {
-            // Now handle just the right mouse button.
+            } else if(e.getButton() == 3) {
+                // Now handle just the right mouse button.
                 JPopupMenu menu = new JPopupMenu();
                 DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
                 DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();
@@ -1354,9 +1442,10 @@ public class Editor extends JFrame {
                 // If the user object is a string then it must be one of the logical groups.  Work out
                 // which one by what the string says.
 
-                if (o.getUserObject().getClass().equals(String.class)) {
+                if(o.getUserObject().getClass().equals(String.class)) {
                     String s = (String)o.getUserObject();
-                    if (s.equals(loadedSketch.getName())) {
+
+                    if(s.equals(loadedSketch.getName())) {
                         JMenuItem openInOS = new JMenuItem("Open in OS");
                         openInOS.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
@@ -1370,7 +1459,7 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_SKETCH | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if (s.equals("Source")) {
+                    } else if(s.equals("Source")) {
                         JMenuItem item = new JMenuItem("Create sketch file (.ino)");
                         item.setActionCommand("ino");
                         item.addActionListener(createNewAction);
@@ -1397,7 +1486,7 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_SOURCE | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if (s.equals("Headers")) {
+                    } else if(s.equals("Headers")) {
                         JMenuItem item = new JMenuItem("Create header file");
                         item.setActionCommand("h");
                         item.addActionListener(createNewAction);
@@ -1412,7 +1501,7 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_HEADERS | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if (s.equals("Libraries")) {
+                    } else if(s.equals("Libraries")) {
                         populateContextMenu(menu, Plugin.MENU_TREE_LIBRARIES | Plugin.MENU_TOP, o);
 
                         populateLibrariesMenu(menu);
@@ -1421,7 +1510,7 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_LIBRARIES | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if (s.equals("Binaries")) {
+                    } else if(s.equals("Binaries")) {
                         JMenuItem item = new JMenuItem("Add binary file");
                         item.setActionCommand("binary");
                         item.addActionListener(importFileAction);
@@ -1432,7 +1521,7 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if (s.equals("Output")) {
+                    } else if(s.equals("Output")) {
                         JMenuItem item = new JMenuItem("Purge output files");
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
@@ -1445,7 +1534,7 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_BOTTOM, o);
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if (s.equals("Documentation")) {
+                    } else if(s.equals("Documentation")) {
                         JMenuItem item = new JMenuItem("Create Markdown file");
                         item.setActionCommand("md");
                         item.addActionListener(createNewAction);
@@ -1454,15 +1543,16 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_BOTTOM, o);
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } 
+                    }
 
-                // Otherwise, if the user object is a File, then it must be one of the entries in one
-                // of the groups, except the libraries group. 
-                } else if (o.getUserObject().getClass().equals(File.class)) {
+                    // Otherwise, if the user object is a File, then it must be one of the entries in one
+                    // of the groups, except the libraries group.
+                } else if(o.getUserObject().getClass().equals(File.class)) {
                     File thisFile = (File)o.getUserObject();
 
                     String ee = Base.preferences.get("editor.external.command");
-                    if (ee != null && !ee.equals("")) {
+
+                    if(ee != null && !ee.equals("")) {
                         JMenuItem openExternal = new JMenuItem("Open in external editor");
                         openExternal.setActionCommand(thisFile.getAbsolutePath());
                         openExternal.addActionListener(new ActionListener() {
@@ -1483,19 +1573,24 @@ public class Editor extends JFrame {
                             String fn = e.getActionCommand();
                             File f = new File(fn);
                             File mf = loadedSketch.getMainFile();
-                            if (f.equals(mf)) {
+
+                            if(f.equals(mf)) {
                                 alert("You cannot rename the main sketch file.\nUse \"Save As\" instead.");
                                 return;
                             }
+
                             String newName = askForFilename(f.getName());
-                            if (newName != null) {
+
+                            if(newName != null) {
                                 File newFile = new File(f.getParentFile(), newName);
                                 int tab = getTabByFile(f);
                                 loadedSketch.renameFile(f, newFile);
                                 f.renameTo(newFile);
-                                if (tab >= 0) {
+
+                                if(tab >= 0) {
                                     setTabFile(tab, newFile);
                                 }
+
                                 updateTree();
                             }
                         }
@@ -1509,23 +1604,28 @@ public class Editor extends JFrame {
                             String fn = e.getActionCommand();
                             File f = new File(fn);
                             File mf = loadedSketch.getMainFile();
-                            if (f.equals(mf)) {
+
+                            if(f.equals(mf)) {
                                 alert("You cannot delete the main sketch file.");
                                 return;
                             }
-                            if (twoOptionBox(JOptionPane.QUESTION_MESSAGE, "Delete?", "Are you sure you want to delete\n" + f.getName() + "?", "Yes", "No") == 0) {
+
+                            if(twoOptionBox(JOptionPane.QUESTION_MESSAGE, "Delete?", "Are you sure you want to delete\n" + f.getName() + "?", "Yes", "No") == 0) {
                                 loadedSketch.deleteFile(f);
                                 int tab = getTabByFile(f);
-                                if (f.isDirectory()) {
+
+                                if(f.isDirectory()) {
                                     Base.removeDir(f);
                                 } else {
                                     f.delete();
                                 }
-                                if (tab >= 0) {
+
+                                if(tab >= 0) {
                                     TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
                                     tl.cancelFileWatcher();
                                     editorTabs.remove(tab);
                                 }
+
                                 updateTree();
                             }
                         }
@@ -1554,16 +1654,18 @@ public class Editor extends JFrame {
 
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_MID, o);
 
-                    if (p.getUserObject().getClass().equals(String.class)) {
+                    if(p.getUserObject().getClass().equals(String.class)) {
                         String ptext = (String)p.getUserObject();
-                        if (ptext.equals("Binaries")) {
+
+                        if(ptext.equals("Binaries")) {
                             JMenuItem insertRef = new JMenuItem("Insert reference");
                             insertRef.addActionListener(new ActionListener() {
                                 public void actionPerformed(ActionEvent e) {
                                     String filename = e.getActionCommand();
-                                    filename = filename.replaceAll("\\.","_");
+                                    filename = filename.replaceAll("\\.", "_");
                                     int at = getActiveTab();
-                                    if (at > -1) {
+
+                                    if(at > -1) {
                                         EditorBase eb = getTab(at);
                                         eb.insertAtCursor("extern char " + filename + "[] asm(\"_binary_objects_" + filename + "_start\");\n");
                                     }
@@ -1573,14 +1675,15 @@ public class Editor extends JFrame {
                             menu.add(insertRef);
                         }
                     }
+
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_BOTTOM, o);
 
                     menu.show(sketchContentTree, e.getX(), e.getY());
 
-                // Otherwise it might be a library.  This generates the menu entries for a
-                // library object.
+                    // Otherwise it might be a library.  This generates the menu entries for a
+                    // library object.
 
-                } else if (o.getUserObject().getClass().equals(Library.class)) {
+                } else if(o.getUserObject().getClass().equals(Library.class)) {
                     final Library lib = (Library)(o.getUserObject());
                     JMenuItem item = new JMenuItem("Delete cached archive");
                     item.setEnabled(loadedSketch.libraryIsCompiled(lib));
@@ -1598,17 +1701,20 @@ public class Editor extends JFrame {
                         public void actionPerformed(ActionEvent e) {
                             loadedSketch.purgeLibrary(lib);
                             clearConsole();
-                            if (compilerRunning()) {
+
+                            if(compilerRunning()) {
                                 error("Sorry, there is already a compiler thread running for this sketch.");
                                 return;
                             }
+
                             LibCompileRunHandler runHandler = new LibCompileRunHandler(lib);
                             compilationThread = new Thread(runHandler, "Compiler");
                             compilationThread.start();
                         }
                     });
                     menu.add(item);
-                    if (lib.isLocal(loadedSketch.getFolder())) {
+
+                    if(lib.isLocal(loadedSketch.getFolder())) {
                         item = new JMenuItem("Export library...");
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
@@ -1620,10 +1726,11 @@ public class Editor extends JFrame {
                         item = new JMenuItem("Localize library");
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
-                                if (loadedSketch.parentIsProtected()) {
+                                if(loadedSketch.parentIsProtected()) {
                                     error("You cannot localize a library in an example. Use Save As first.");
                                     return;
                                 }
+
                                 File libs = new File(loadedSketch.getFolder(), "libraries");
                                 libs.mkdirs();
                                 File newLibDir = new File(libs, lib.getName());
@@ -1634,14 +1741,18 @@ public class Editor extends JFrame {
                         });
                         menu.add(item);
                     }
+
                     menu.show(sketchContentTree, e.getX(), e.getY());
                 }
+
                 return;
             }
+
             if(selRow != -1) {
                 if(e.getClickCount() == 2) {
                     DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
-                    if (o.getUserObject().getClass().equals(File.class)) {
+
+                    if(o.getUserObject().getClass().equals(File.class)) {
                         File sf = (File)o.getUserObject();
                         openOrSelectFile(sf);
                     }
@@ -1655,26 +1766,28 @@ public class Editor extends JFrame {
         public void mousePressed(MouseEvent e) {
             ActionListener createNewAction = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                   // createNewAnyFile(e.getActionCommand());
+                    // createNewAnyFile(e.getActionCommand());
                 }
             };
             ActionListener importFileAction = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                   // importAnyFile(e.getActionCommand());
+                    // importAnyFile(e.getActionCommand());
                 }
             };
 
             int selRow = sketchFilesTree.getRowForLocation(e.getX(), e.getY());
             TreePath selPath = sketchFilesTree.getPathForLocation(e.getX(), e.getY());
             sketchFilesTree.setSelectionPath(selPath);
-            if (e.getButton() == 3) {
+
+            if(e.getButton() == 3) {
                 DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
                 DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();
-                if (o.getUserObject().getClass().equals(File.class)) {
+
+                if(o.getUserObject().getClass().equals(File.class)) {
                     File thisFile = (File)o.getUserObject();
                     JPopupMenu menu = new JPopupMenu();
 
-                    if (thisFile.isDirectory()) {
+                    if(thisFile.isDirectory()) {
                         JMenuItem openInOS = new JMenuItem("Open in OS");
                         openInOS.setActionCommand(thisFile.getAbsolutePath());
                         openInOS.addActionListener(new ActionListener() {
@@ -1691,7 +1804,8 @@ public class Editor extends JFrame {
                                 String fn = e.getActionCommand();
                                 File f = new File(fn);
                                 String newName = askForFilename(null);
-                                if (newName != null) {
+
+                                if(newName != null) {
                                     File newFile = new File(f, newName);
                                     newFile.mkdirs();
                                     updateTree();
@@ -1709,7 +1823,8 @@ public class Editor extends JFrame {
                         menu.add(unzipItem);
                     } else {
                         String ee = Base.preferences.get("editor.external.command");
-                        if (ee != null && !ee.equals("")) {
+
+                        if(ee != null && !ee.equals("")) {
                             JMenuItem openExternal = new JMenuItem("Open in external editor");
                             openExternal.setActionCommand(thisFile.getAbsolutePath());
                             openExternal.addActionListener(new ActionListener() {
@@ -1734,19 +1849,24 @@ public class Editor extends JFrame {
                             String fn = e.getActionCommand();
                             File f = new File(fn);
                             File mf = loadedSketch.getMainFile();
-                            if (f.equals(mf)) {
+
+                            if(f.equals(mf)) {
                                 alert("You cannot rename the main sketch file.\nUse \"Save As\" instead.");
                                 return;
                             }
+
                             String newName = askForFilename(f.getName());
-                            if (newName != null) {
+
+                            if(newName != null) {
                                 File newFile = new File(f.getParentFile(), newName);
                                 int tab = getTabByFile(f);
                                 loadedSketch.renameFile(f, newFile);
                                 f.renameTo(newFile);
-                                if (tab >= 0) {
+
+                                if(tab >= 0) {
                                     setTabFile(tab, newFile);
                                 }
+
                                 updateTree();
                             }
                         }
@@ -1759,23 +1879,28 @@ public class Editor extends JFrame {
                             String fn = e.getActionCommand();
                             File f = new File(fn);
                             File mf = loadedSketch.getMainFile();
-                            if (f.equals(mf)) {
+
+                            if(f.equals(mf)) {
                                 alert("You cannot delete the main sketch file.");
                                 return;
                             }
-                            if (twoOptionBox(JOptionPane.QUESTION_MESSAGE, "Delete?", "Are you sure you want to delete\n" + f.getName() + "?", "Yes", "No") == 0) {
+
+                            if(twoOptionBox(JOptionPane.QUESTION_MESSAGE, "Delete?", "Are you sure you want to delete\n" + f.getName() + "?", "Yes", "No") == 0) {
                                 loadedSketch.deleteFile(f);
                                 int tab = getTabByFile(f);
-                                if (f.isDirectory()) {
+
+                                if(f.isDirectory()) {
                                     Base.removeDir(f);
                                 } else {
                                     f.delete();
                                 }
-                                if (tab >= 0) {
+
+                                if(tab >= 0) {
                                     TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
                                     tl.cancelFileWatcher();
                                     editorTabs.remove(tab);
                                 }
+
                                 updateTree();
                             }
                         }
@@ -1806,15 +1931,19 @@ public class Editor extends JFrame {
                     populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_BOTTOM, o);
                     menu.show(sketchFilesTree, e.getX(), e.getY());
                 }
+
                 return;
             }
+
             if(selRow != -1) {
                 if(e.getClickCount() == 2) {
                     DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
-                    if (o.getUserObject().getClass().equals(File.class)) {
+
+                    if(o.getUserObject().getClass().equals(File.class)) {
                         File sf = (File)o.getUserObject();
                         String cl = FileType.getEditor(sf);
-                        if (cl != null) {
+
+                        if(cl != null) {
                             openOrSelectFile(sf);
                         }
                     }
@@ -1823,23 +1952,26 @@ public class Editor extends JFrame {
         }
     }
     public Board getBoard() {
-        if (loadedSketch == null) {
+        if(loadedSketch == null) {
             return null;
         }
+
         return loadedSketch.getBoard();
     }
 
     public Core getCore() {
-        if (loadedSketch == null) {
+        if(loadedSketch == null) {
             return null;
         }
+
         return loadedSketch.getCore();
     }
 
     public Compiler getCompiler() {
-        if (loadedSketch == null) {
+        if(loadedSketch == null) {
             return null;
         }
+
         return loadedSketch.getCompiler();
     }
 
@@ -1853,8 +1985,15 @@ public class Editor extends JFrame {
 
     public void message(String msg) {
         Debug.message(msg);
-        if (msg == null) { return; }
-        if (!msg.endsWith("\n")) { msg += "\n"; }
+
+        if(msg == null) {
+            return;
+        }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
         consoleDoc.appendString(msg, stdStyle);
         consoleDoc.insertAll();
         consoleTextPane.setCaretPosition(consoleDoc.getLength());
@@ -1862,7 +2001,11 @@ public class Editor extends JFrame {
 
     public void warning(String msg) {
         Debug.message(msg);
-        if (!msg.endsWith("\n")) { msg += "\n"; }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
         consoleDoc.appendString(msg, warnStyle);
         consoleDoc.insertAll();
         consoleTextPane.setCaretPosition(consoleDoc.getLength());
@@ -1872,86 +2015,99 @@ public class Editor extends JFrame {
     public void messageStream(String msg) {
         mBuffer += msg;
         int nlpos = mBuffer.lastIndexOf("\n");
-        if (nlpos == -1) {
+
+        if(nlpos == -1) {
             return;
         }
 
         boolean eol = false;
-        if (mBuffer.endsWith("\n")) {
-            mBuffer = mBuffer.substring(0, mBuffer.length()-1);
+
+        if(mBuffer.endsWith("\n")) {
+            mBuffer = mBuffer.substring(0, mBuffer.length() - 1);
             eol = true;
         }
 
         String[] bits = mBuffer.split("\n");
-        for (int i = 0; i < bits.length-1; i++) {
+
+        for(int i = 0; i < bits.length - 1; i++) {
             message(bits[i]);
         }
 
-        if (eol) {
+        if(eol) {
             mBuffer = "";
-            message(bits[bits.length-1]);
+            message(bits[bits.length - 1]);
         } else {
-            mBuffer = bits[bits.length-1];
+            mBuffer = bits[bits.length - 1];
         }
     }
-        
+
     String wBuffer = "";
     public void warningStream(String msg) {
         wBuffer += msg;
         int nlpos = wBuffer.lastIndexOf("\n");
-        if (nlpos == -1) {
+
+        if(nlpos == -1) {
             return;
         }
 
         boolean eol = false;
-        if (wBuffer.endsWith("\n")) {
-            wBuffer = wBuffer.substring(0, wBuffer.length()-1);
+
+        if(wBuffer.endsWith("\n")) {
+            wBuffer = wBuffer.substring(0, wBuffer.length() - 1);
             eol = true;
         }
 
         String[] bits = wBuffer.split("\n");
-        for (int i = 0; i < bits.length-1; i++) {
+
+        for(int i = 0; i < bits.length - 1; i++) {
             warning(bits[i]);
         }
 
-        if (eol) {
+        if(eol) {
             wBuffer = "";
-            warning(bits[bits.length-1]);
+            warning(bits[bits.length - 1]);
         } else {
-            wBuffer = bits[bits.length-1];
+            wBuffer = bits[bits.length - 1];
         }
     }
-        
+
     String eBuffer = "";
     public void errorStream(String msg) {
         eBuffer += msg;
         int nlpos = eBuffer.lastIndexOf("\n");
-        if (nlpos == -1) {
+
+        if(nlpos == -1) {
             return;
         }
 
         boolean eol = false;
-        if (eBuffer.endsWith("\n")) {
-            eBuffer = eBuffer.substring(0, eBuffer.length()-1);
+
+        if(eBuffer.endsWith("\n")) {
+            eBuffer = eBuffer.substring(0, eBuffer.length() - 1);
             eol = true;
         }
 
         String[] bits = eBuffer.split("\n");
-        for (int i = 0; i < bits.length-1; i++) {
+
+        for(int i = 0; i < bits.length - 1; i++) {
             error(bits[i]);
         }
 
-        if (eol) {
+        if(eol) {
             eBuffer = "";
-            error(bits[bits.length-1]);
+            error(bits[bits.length - 1]);
         } else {
-            eBuffer = bits[bits.length-1];
+            eBuffer = bits[bits.length - 1];
         }
     }
-        
+
     public void error(String msg) {
         Debug.message(msg);
-        if (!msg.endsWith("\n")) { msg += "\n"; }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
         consoleDoc.appendString(msg, errStyle);
         consoleDoc.insertAll();
         consoleTextPane.setCaretPosition(consoleDoc.getLength());
@@ -1968,7 +2124,7 @@ public class Editor extends JFrame {
     public void clearConsole() {
         try {
             consoleDoc.remove(0, consoleDoc.getLength());
-        } catch (BadLocationException e) {
+        } catch(BadLocationException e) {
         }
     }
 
@@ -1982,7 +2138,8 @@ public class Editor extends JFrame {
 
     public int openOrSelectFile(File sf) {
         int existing = getTabByFile(sf);
-        if (existing == -1) {
+
+        if(existing == -1) {
             return openNewTab(sf);
         } else {
             selectTab(existing);
@@ -1998,83 +2155,94 @@ public class Editor extends JFrame {
         ImageIcon buttonIcon = Base.loadIconFromResource(path);
         JButton button = new JButton(buttonIcon);
         button.setToolTipText(tooltip);
-        if (al != null) {
+
+        if(al != null) {
             button.addActionListener(al);
         }
+
 //        button.setBorderPainted(false);
-/*
-        button.addMouseListener(new MouseListener() {
-            public void mouseEntered(MouseEvent e) {
-                ((JButton)(e.getComponent())).setBackground(UIManager.getColor("control").brighter());
-                ((JButton)(e.getComponent())).setOpaque(true);
-            }
-            public void mouseExited(MouseEvent e) {
-                ((JButton)(e.getComponent())).setBackground(UIManager.getColor("control"));
-                ((JButton)(e.getComponent())).setOpaque(false);
-            }
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseClicked(MouseEvent e) {}
-        });
-*/
+        /*
+                button.addMouseListener(new MouseListener() {
+                    public void mouseEntered(MouseEvent e) {
+                        ((JButton)(e.getComponent())).setBackground(UIManager.getColor("control").brighter());
+                        ((JButton)(e.getComponent())).setOpaque(true);
+                    }
+                    public void mouseExited(MouseEvent e) {
+                        ((JButton)(e.getComponent())).setBackground(UIManager.getColor("control"));
+                        ((JButton)(e.getComponent())).setOpaque(false);
+                    }
+                    public void mousePressed(MouseEvent e) {}
+                    public void mouseReleased(MouseEvent e) {}
+                    public void mouseClicked(MouseEvent e) {}
+                });
+        */
         tb.add(button);
         return button;
     }
 
     public boolean closeTab(int tab) {
-        if (tab == -1) return false;
-        if (editorTabs.getComponentAt(tab) instanceof EditorBase) {
-            EditorBase eb = (EditorBase)editorTabs.getComponentAt(tab);
-            if (eb.isModified()) {
-                int option = threeOptionBox(
-                    JOptionPane.WARNING_MESSAGE,
-                    Translate.t("Unsaved File"),
-                    Translate.w("This file has been modified.  Do you want to save your work before you close this tab?", 40, "\n"), 
-                    "Save", 
-                    "Don't Save", 
-                    "Cancel"
-                );
+        if(tab == -1) return false;
 
-                if (option == 2) return false;
-                if (option == 0) eb.save();
+        if(editorTabs.getComponentAt(tab) instanceof EditorBase) {
+            EditorBase eb = (EditorBase)editorTabs.getComponentAt(tab);
+
+            if(eb.isModified()) {
+                int option = threeOptionBox(
+                                 JOptionPane.WARNING_MESSAGE,
+                                 Translate.t("Unsaved File"),
+                                 Translate.w("This file has been modified.  Do you want to save your work before you close this tab?", 40, "\n"),
+                                 "Save",
+                                 "Don't Save",
+                                 "Cancel"
+                             );
+
+                if(option == 2) return false;
+
+                if(option == 0) eb.save();
             }
+
             TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
             tl.cancelFileWatcher();
         }
+
         editorTabs.remove(tab);
         return true;
     }
 
     public int openNewTab(File sf) {
-        if (sf.exists() == false) {
+        if(sf.exists() == false) {
             error("Sorry, I can't find " + sf.getName() + ".");
             return -1;
         }
+
         try {
             String className = FileType.getEditor(sf.getName());
-            if (className == null) {
+
+            if(className == null) {
                 error("File type for " + sf.getName() + " unknown");
                 return -1;
             }
+
             setCursor(new Cursor(Cursor.WAIT_CURSOR));
             Class<?> edClass = Class.forName(className);
             Constructor<?> edConst = edClass.getConstructor(Sketch.class, File.class, Editor.class);
 
             EditorBase ed = (EditorBase)edConst.newInstance(loadedSketch, sf, this);
-        
+
             editorTabs.addTab(sf.getName(), (JPanel) ed);
             int tabno = editorTabs.getTabCount() - 1;
 
             TabLabel lab = new TabLabel(this, sf);
             editorTabs.setTabComponentAt(tabno, lab);
-            
+
             selectTab(tabno);
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             ed.requestFocus();
             return tabno;
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
+
         return -1;
     }
 
@@ -2087,7 +2255,7 @@ public class Editor extends JFrame {
     }
 
     public EditorBase getTab(int i) {
-        if (editorTabs.getComponentAt(i) instanceof EditorBase) {
+        if(editorTabs.getComponentAt(i) instanceof EditorBase) {
             return (EditorBase)editorTabs.getComponentAt(i);
         } else {
             return null;
@@ -2121,29 +2289,34 @@ public class Editor extends JFrame {
 
     public void setTabModified(int t, boolean m) {
         TabLabel tl = getTabLabel(t);
-        if (tl != null) {
+
+        if(tl != null) {
             tl.setModified(m);
         }
     }
 
     public int getTabByFile(File f) {
-        for (int i = 0; i < editorTabs.getTabCount(); i++) {
+        for(int i = 0; i < editorTabs.getTabCount(); i++) {
             TabLabel l = (TabLabel)editorTabs.getTabComponentAt(i);
             File cf = l.getFile();
-            if (cf != null && cf.equals(f)) {
+
+            if(cf != null && cf.equals(f)) {
                 return i;
             }
         }
+
         return -1;
     }
 
     public int getTabByLabel(TabLabel lab) {
-        for (int i = 0; i < editorTabs.getTabCount(); i++) {
+        for(int i = 0; i < editorTabs.getTabCount(); i++) {
             TabLabel l = (TabLabel)editorTabs.getTabComponentAt(i);
-            if (l == lab) {
+
+            if(l == lab) {
                 return i;
             }
         }
+
         return -1;
     }
 
@@ -2157,39 +2330,44 @@ public class Editor extends JFrame {
 
     public void selectTab(int tab) {
         TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
-        if (tl == null) {
+
+        if(tl == null) {
             return;
         }
+
         editorTabs.setSelectedIndex(tab);
     }
 
     public boolean isModified() {
-        for (int i = 0; i < editorTabs.getTabCount(); i++) {
-            if (editorTabs.getComponentAt(i) instanceof EditorBase) {
+        for(int i = 0; i < editorTabs.getTabCount(); i++) {
+            if(editorTabs.getComponentAt(i) instanceof EditorBase) {
                 EditorBase eb = (EditorBase)editorTabs.getComponentAt(i);
-                if (eb.isModified()) {
+
+                if(eb.isModified()) {
                     return true;
                 }
             }
         }
+
         return false;
     }
 
     public void saveAllTabs() {
-        if (loadedSketch.isUntitled()) {
-            saveAs();
-            return; 
-        }
-
-        if (loadedSketch.parentIsProtected()) {
+        if(loadedSketch.isUntitled()) {
             saveAs();
             return;
         }
 
-        for (int i = 0; i < editorTabs.getTabCount(); i++) {
-            if (editorTabs.getComponentAt(i) instanceof EditorBase) {
+        if(loadedSketch.parentIsProtected()) {
+            saveAs();
+            return;
+        }
+
+        for(int i = 0; i < editorTabs.getTabCount(); i++) {
+            if(editorTabs.getComponentAt(i) instanceof EditorBase) {
                 EditorBase eb = (EditorBase)editorTabs.getComponentAt(i);
-                if (eb.isModified()) {
+
+                if(eb.isModified()) {
                     eb.save();
                 }
             }
@@ -2200,8 +2378,8 @@ public class Editor extends JFrame {
     }
 
     public void closeAllTabs() {
-        while (editorTabs.getTabCount() > 0) {
-            if (!closeTab(0)) {
+        while(editorTabs.getTabCount() > 0) {
+            if(!closeTab(0)) {
                 return;
             }
         }
@@ -2225,76 +2403,87 @@ public class Editor extends JFrame {
 
         Base.preferences.save();
 
-        if (editorList.size() == 1) {
-            if (Base.isMacOS()) {
+        if(editorList.size() == 1) {
+            if(Base.isMacOS()) {
                 Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
                 String prompt =
                     "<html> " +
-                    "<head> <style type=\"text/css\">"+
-                    "b { font: 13pt \"Lucida Grande\" }"+
-                    "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }"+
+                    "<head> <style type=\"text/css\">" +
+                    "b { font: 13pt \"Lucida Grande\" }" +
+                    "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }" +
                     "</style> </head>" +
                     "<b>" + Translate.t("Are you sure you want to Quit?") + "</b>" +
                     "<p>" + Translate.t("Closing the last open sketch will quit %1.", Base.theme.get("product.cap"));
 
                 int result = JOptionPane.showOptionDialog(this,
-                    prompt,
-                    Translate.t("Quit"),
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    options,
-                    options[0]);
-                if (result == JOptionPane.NO_OPTION ||
-                    result == JOptionPane.CLOSED_OPTION
-                ) {
+                             prompt,
+                             Translate.t("Quit"),
+                             JOptionPane.YES_NO_OPTION,
+                             JOptionPane.QUESTION_MESSAGE,
+                             null,
+                             options,
+                             options[0]);
+
+                if(result == JOptionPane.NO_OPTION ||
+                        result == JOptionPane.CLOSED_OPTION
+                  ) {
                     return false;
                 }
             }
         }
 
-        if (isModified()) {
+        if(isModified()) {
             int option = threeOptionBox(
-                JOptionPane.WARNING_MESSAGE,
-                Translate.t("Unsaved Files"),
-                Translate.w("You have unsaved files.  Do you want to save your work before you close this window?", 40, "\n"), 
-                "Save", 
-                "Don't Save", 
-                "Cancel"
-            );
-            if (option == 0) {
+                             JOptionPane.WARNING_MESSAGE,
+                             Translate.t("Unsaved Files"),
+                             Translate.w("You have unsaved files.  Do you want to save your work before you close this window?", 40, "\n"),
+                             "Save",
+                             "Don't Save",
+                             "Cancel"
+                         );
+
+            if(option == 0) {
                 saveAllTabs();
             }
-            if (option == 2) {
+
+            if(option == 2) {
                 return false;
             }
         }
 
         Editor.unregisterEditor(this);
         this.dispose();
-        if (Editor.shouldQuit()) {
+
+        if(Editor.shouldQuit()) {
             Base.preferences.save();
             System.exit(0);
         }
+
         return true;
     }
 
     public void addSketchesFromFolder(JMenu menu, File folder) {
-        if (folder == null) return;
-        if (menu == null) return;
-        if (!folder.exists()) return;
+        if(folder == null) return;
+
+        if(menu == null) return;
+
+        if(!folder.exists()) return;
+
         File[] files = folder.listFiles();
         Arrays.sort(files);
-        for (File file : files) {
-            if (file.isDirectory()) {
+
+        for(File file : files) {
+            if(file.isDirectory()) {
                 File testFile1 = new File(file, file.getName() + ".ino");
                 File testFile2 = new File(file, file.getName() + ".pde");
-                if (testFile1.exists() || testFile2.exists()) {
+
+                if(testFile1.exists() || testFile2.exists()) {
                     JMenuItem item = new JMenuItem(file.getName());
                     item.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             String path = e.getActionCommand();
-                            if (new File(path).exists()) {
+
+                            if(new File(path).exists()) {
                                 loadSketch(path);
                             } else {
                                 error("Unable to find file " + path);
@@ -2306,7 +2495,8 @@ public class Editor extends JFrame {
                 } else {
                     JMenu submenu = new JMenu(file.getName());
                     addSketchesFromFolder(submenu, file);
-                    if (submenu.getItemCount() > 0) {
+
+                    if(submenu.getItemCount() > 0) {
                         menu.add(submenu);
                     }
                 }
@@ -2350,12 +2540,13 @@ public class Editor extends JFrame {
         submenu = new JMenu(Translate.t("Recent Sketches"));
         fileMenu.add(submenu);
 
-        for (File m : Base.MRUList) {
+        for(File m : Base.MRUList) {
             item = new JMenuItem(m.getName());
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String path = e.getActionCommand();
-                    if (new File(path).exists()) {
+
+                    if(new File(path).exists()) {
                         loadSketch(path);
                     } else {
                         error("Unable to find file " + path);
@@ -2368,7 +2559,8 @@ public class Editor extends JFrame {
 
 
         submenu = new JMenu(Translate.t("Examples"));
-        if (loadedSketch.getCore() != null) {
+
+        if(loadedSketch.getCore() != null) {
             addSketchesFromFolder(submenu, loadedSketch.getCompiler().getExamplesFolder());
             addSketchesFromFolder(submenu, loadedSketch.getCore().getExamplesFolder());
             addSketchesFromFolder(submenu, loadedSketch.getBoard().getExamplesFolder());
@@ -2378,21 +2570,26 @@ public class Editor extends JFrame {
 
             TreeSet<String> catNames = Library.getLibraryCategories();
 
-            for (String group : catNames) {
+            for(String group : catNames) {
                 TreeSet<Library>libs = Library.getLibraries(group, loadedSketch.getCore().getName());
-                if (libs != null && libs.size() > 0) {
+
+                if(libs != null && libs.size() > 0) {
                     JMenu top = new JMenu(Library.getCategoryName(group));
-                    for (Library lib : libs) {
+
+                    for(Library lib : libs) {
                         JMenu libMenu = new JMenu(lib.getName());
                         addSketchesFromFolder(libMenu, lib.getExamplesFolder());
-                        if (libMenu.getItemCount() > 0) {
+
+                        if(libMenu.getItemCount() > 0) {
                             top.add(libMenu);
                         }
                     }
+
                     submenu.add(top);
                 }
             }
         }
+
         fileMenu.add(submenu);
 
         fileMenu.addSeparator();
@@ -2415,7 +2612,7 @@ public class Editor extends JFrame {
             }
         });
         fileMenu.add(item);
-        
+
         item = new JMenuItem(Translate.t("Save As..."));
         item.setAccelerator(KeyStroke.getKeyStroke('S', modifiers | ActionEvent.SHIFT_MASK));
         item.addActionListener(new ActionListener() {
@@ -2459,7 +2656,7 @@ public class Editor extends JFrame {
         item.setAccelerator(KeyStroke.getKeyStroke("alt Q"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (Editor.closeAllEditors()) {
+                if(Editor.closeAllEditors()) {
                     Base.preferences.save();
                     System.exit(0);
                 }
@@ -2515,7 +2712,7 @@ public class Editor extends JFrame {
         item.addActionListener(createNewAction);
         submenu.add(item);
         sketchMenu.add(submenu);
-        
+
 
         submenu = new JMenu("Import file");
         item = new JMenuItem("Source file");
@@ -2537,7 +2734,7 @@ public class Editor extends JFrame {
         submenu.addSeparator();
         populateLibrariesMenu(submenu);
         sketchMenu.add(submenu);
-        
+
 
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_TOP);
         sketchMenu.addSeparator();
@@ -2596,7 +2793,7 @@ public class Editor extends JFrame {
             }
         });
         hardwareMenu.add(discoveredBoardsMenu);
-        
+
 
 
         submenu = new JMenu("Programmers");
@@ -2627,7 +2824,7 @@ public class Editor extends JFrame {
 
         PropertyFile links = Base.theme.getChildren("links");
 
-        for (String link : links.childKeys()) {
+        for(String link : links.childKeys()) {
             item = new JMenuItem(links.get(link + ".name"));
             item.setActionCommand(links.get(link + ".url"));
             item.addActionListener(new ActionListener() {
@@ -2641,9 +2838,10 @@ public class Editor extends JFrame {
 
         links = loadedSketch.mergeAllProperties().getChildren("links");
 
-        for (String link : links.childKeys()) {
+        for(String link : links.childKeys()) {
             String iname = links.get(link + ".name");
-            if (iname != null) {
+
+            if(iname != null) {
                 item = new JMenuItem(iname);
                 item.setActionCommand(links.get(link + ".url"));
                 item.addActionListener(new ActionListener() {
@@ -2664,25 +2862,30 @@ public class Editor extends JFrame {
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Stk500 dev = new Stk500(Editor.this, loadedSketch.getSerialPort(), 115200);
-                if (dev.connect(500)) {
+
+                if(dev.connect(500)) {
                     String dn = dev.getDeviceName();
-                    if (dn != null) {
+
+                    if(dn != null) {
                         message("Connected to " + dn);
                     }
-                    if (dev.enterProgMode()) {
+
+                    if(dev.enterProgMode()) {
                         message("Entered programming mode");
                     }
 
-                    if (dev.loadHexFile(new File(loadedSketch.getFolder(), loadedSketch.getName() + ".hex"))) {
+                    if(dev.loadHexFile(new File(loadedSketch.getFolder(), loadedSketch.getName() + ".hex"))) {
                         message("File loaded");
                     }
-                    if (dev.uploadProgram()) {
+
+                    if(dev.uploadProgram()) {
                         message("Upload complete");
                     }
 
-                    if (dev.leaveProgMode()) {
+                    if(dev.leaveProgMode()) {
                         message("Left programming mode");
                     }
+
                     dev.disconnect();
                 }
             }
@@ -2723,11 +2926,13 @@ public class Editor extends JFrame {
 
     public void populateOptionsMenu(JMenu menu) {
         TreeMap<String, String> opts = loadedSketch.getOptionGroups();
-        for (String opt : opts.keySet()) {
+
+        for(String opt : opts.keySet()) {
             JMenu submenu = new JMenu(opts.get(opt));
             TreeMap<String, String>optvals = loadedSketch.getOptionNames(opt);
             ButtonGroup thisGroup = new ButtonGroup();
-            for (String key : optvals.keySet()) {
+
+            for(String key : optvals.keySet()) {
                 JMenuItem item = new JRadioButtonMenuItem(optvals.get(key));
                 thisGroup.add(item);
                 item.setActionCommand(opt + "=" + key);
@@ -2737,13 +2942,14 @@ public class Editor extends JFrame {
                         String data = e.getActionCommand();
                         int idx = data.indexOf("=");
                         String key = data.substring(0, idx);
-                        String value = data.substring(idx+1);
+                        String value = data.substring(idx + 1);
                         loadedSketch.setOption(key, value);
                     }
                 });
-                        
+
                 submenu.add(item);
             }
+
             menu.add(submenu);
         }
     }
@@ -2752,14 +2958,17 @@ public class Editor extends JFrame {
         menu.removeAll();
         ButtonGroup portGroup = new ButtonGroup();
         ArrayList<String> ports = Serial.getPortList();
-        for (String port : ports) {
+
+        for(String port : ports) {
             String pn = Serial.getName(port);
             JMenuItem item = null;
-            if (pn != null & !pn.equals("")) {
+
+            if(pn != null & !pn.equals("")) {
                 item = new JRadioButtonMenuItem(port + ": " + pn);
             } else {
                 item = new JRadioButtonMenuItem(port);
             }
+
             portGroup.add(item);
             item.setSelected(port.equals(loadedSketch.getSerialPort()));
             item.addActionListener(new ActionListener() {
@@ -2784,10 +2993,12 @@ public class Editor extends JFrame {
             System.err.println(discoveredBoard.toString());
             loadedSketch.setBoard(discoveredBoard.board);
             loadedSketch.setPort(discoveredBoard.location);
-            if (discoveredBoard.programmer != null) {
+
+            if(discoveredBoard.programmer != null) {
                 loadedSketch.setProgrammer(discoveredBoard.programmer);
             }
-            for (Object k : discoveredBoard.properties.keySet()) {
+
+            for(Object k : discoveredBoard.properties.keySet()) {
                 loadedSketch.put("mdns." + (String)k, discoveredBoard.properties.get((String)k));
             }
         }
@@ -2796,29 +3007,36 @@ public class Editor extends JFrame {
     public void populateDiscoveredBoardsMenu(JMenu menu) {
         menu.removeAll();
         ButtonGroup portGroup = new ButtonGroup();
-        for (Object ob : Base.discoveredBoards.keySet()) {
+
+        for(Object ob : Base.discoveredBoards.keySet()) {
             DiscoveredBoard b = Base.discoveredBoards.get(ob);
-            
+
             JMenuItem item = new JMenuItem(new DiscoveredBoardAction(b));
             ImageIcon i = b.board.getIcon(16);
-            if (i == null) {
+
+            if(i == null) {
                 Core c = b.board.getCore();
-                if (c != null) {
+
+                if(c != null) {
                     i = c.getIcon(16);
                 }
             }
-            if (i != null) {
+
+            if(i != null) {
                 item.setIcon(i);
             }
+
             menu.add(item);
         }
     }
 
     public String[] getBoardGroups() {
         ArrayList<String> out = new ArrayList<String>();
-        for (Board board : Base.boards.values()) {
+
+        for(Board board : Base.boards.values()) {
             String group = board.get("group");
-            if (out.indexOf(group) == -1) {
+
+            if(out.indexOf(group) == -1) {
                 out.add(group);
             }
         }
@@ -2834,7 +3052,7 @@ public class Editor extends JFrame {
         TreeMap<String, String> programmers = loadedSketch.getProgrammerList();
         ButtonGroup programmerGroup = new ButtonGroup();
 
-        for (String pn : programmers.keySet()) {
+        for(String pn : programmers.keySet()) {
             JMenuItem item = new JRadioButtonMenuItem(programmers.get(pn));
             programmerGroup.add(item);
             item.setSelected(loadedSketch.getProgrammer().equals(pn));
@@ -2852,14 +3070,15 @@ public class Editor extends JFrame {
         boardMenuButtonGroup = new ButtonGroup();
         String[] groups = getBoardGroups();
 
-        if (groups == null) {
+        if(groups == null) {
             return;
         }
 
-        for (String group : groups) {
+        for(String group : groups) {
             JMenu groupmenu = new JMenu(group);
             fillGroupMenu(groupmenu, group);
-            if (groupmenu.getItemCount() > 0) {
+
+            if(groupmenu.getItemCount() > 0) {
                 menu.add(groupmenu);
             }
         }
@@ -2868,8 +3087,9 @@ public class Editor extends JFrame {
 
     public void fillGroupMenu(JMenu menu, String group) {
         ArrayList<Board> boards = new ArrayList<Board>();
-        for (Board board : Base.boards.values()) {
-            if (board.get("group").equals(group)) {
+
+        for(Board board : Base.boards.values()) {
+            if(board.get("group").equals(group)) {
                 boards.add(board);
             }
         }
@@ -2877,24 +3097,30 @@ public class Editor extends JFrame {
         Board[] boardList = boards.toArray(new Board[0]);
         Arrays.sort(boardList);
 
-        for (Board board : boardList) {
+        for(Board board : boardList) {
             JMenuItem item = new JRadioButtonMenuItem(board.getDescription());
             boardMenuButtonGroup.add(item);
-            if (loadedSketch.getBoard() != null) {
-                if (loadedSketch.getBoard().equals(board)) {
+
+            if(loadedSketch.getBoard() != null) {
+                if(loadedSketch.getBoard().equals(board)) {
                     item.setSelected(true);
                 }
             }
+
             ImageIcon i = board.getIcon(16);
-            if (i == null) {
+
+            if(i == null) {
                 Core c = board.getCore();
-                if (c != null) {
+
+                if(c != null) {
                     i = c.getIcon(16);
                 }
             }
-            if (i != null) {
+
+            if(i != null) {
                 item.setIcon(i);
             }
+
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setBoard(e.getActionCommand());
@@ -2910,24 +3136,29 @@ public class Editor extends JFrame {
         Board board = loadedSketch.getBoard();
         ArrayList<Core> coreList = new ArrayList<Core>();
 
-        for (Core core : Base.cores.values()) {
-            if (core.worksWith(board)) {
+        for(Core core : Base.cores.values()) {
+            if(core.worksWith(board)) {
                 coreList.add(core);
             }
         }
 
         Core[] cores = coreList.toArray(new Core[0]);
         Arrays.sort(cores);
-        for (Core core : cores) {
+
+        for(Core core : cores) {
             JMenuItem item = new JRadioButtonMenuItem(core.getName());
             coreGroup.add(item);
-            if (loadedSketch.getCore() != null) {
+
+            if(loadedSketch.getCore() != null) {
                 item.setSelected(loadedSketch.getCore().equals(core));
             }
+
             ImageIcon i = core.getIcon(16);
-            if (i != null) {
+
+            if(i != null) {
                 item.setIcon(i);
             }
+
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setCore(e.getActionCommand());
@@ -2936,7 +3167,7 @@ public class Editor extends JFrame {
             item.setActionCommand(core.getName());
             menu.add(item);
         }
-            
+
     }
 
     public void populateCompilersMenu(JMenu menu) {
@@ -2944,18 +3175,20 @@ public class Editor extends JFrame {
         Core core = loadedSketch.getCore();
         ArrayList<Compiler> compilerList = new ArrayList<Compiler>();
 
-        if (core == null) {
+        if(core == null) {
             return;
         }
-        for (Compiler compiler : Base.compilers.values()) {
-            if (compiler.worksWith(core)) {
+
+        for(Compiler compiler : Base.compilers.values()) {
+            if(compiler.worksWith(core)) {
                 compilerList.add(compiler);
             }
         }
 
         Compiler[] compilers = compilerList.toArray(new Compiler[0]);
         Arrays.sort(compilers);
-        for (Compiler compiler : compilers) {
+
+        for(Compiler compiler : compilers) {
             JMenuItem item = new JRadioButtonMenuItem(compiler.getName());
             compilerGroup.add(item);
             item.setSelected(loadedSketch.getCompiler().equals(compiler));
@@ -2971,44 +3204,47 @@ public class Editor extends JFrame {
 
     public void addMenuChunk(JMenu menu, int filterFlags) {
         int tab = getActiveTab();
-        if (tab > -1) {
+
+        if(tab > -1) {
             EditorBase eb = getTab(tab);
-            if (eb != null) {
+
+            if(eb != null) {
                 eb.populateMenu(menu, filterFlags);
             }
         }
+
         addPluginsToMenu(menu, filterFlags);
     }
 
 
     public void populateContextMenu(JPopupMenu menu, int filterFlags, DefaultMutableTreeNode node) {
-        for (Plugin plugin : plugins) {
+        for(Plugin plugin : plugins) {
             try {
                 plugin.populateContextMenu(menu, filterFlags, node);
-            } catch (AbstractMethodError e) {
-            } catch (Exception e) {
+            } catch(AbstractMethodError e) {
+            } catch(Exception e) {
                 error(e);
             }
         }
     }
 
     public void addPluginsToMenu(JMenu menu, int filterFlags) {
-        for (Plugin plugin : plugins) {
+        for(Plugin plugin : plugins) {
             try {
                 plugin.populateMenu(menu, filterFlags);
-            } catch (AbstractMethodError e) {
-            } catch (Exception e) {
+            } catch(AbstractMethodError e) {
+            } catch(Exception e) {
                 error(e);
             }
         }
     }
 
     public void addPluginsToToolbar(JToolBar tb, int filterFlags) {
-        for (final Plugin plugin : plugins) {
+        for(final Plugin plugin : plugins) {
             try {
                 plugin.addToolbarButtons(tb, filterFlags);
-            } catch (AbstractMethodError e) {
-            } catch (Exception e) {
+            } catch(AbstractMethodError e) {
+            } catch(Exception e) {
                 error(e);
             }
         }
@@ -3017,17 +3253,17 @@ public class Editor extends JFrame {
     public void updateStatus() {
         StringBuilder statusInfo = new StringBuilder();
 
-        if (loadedSketch.getBoard() == null) {
+        if(loadedSketch.getBoard() == null) {
             setStatus("No board selected!");
             return;
-        }            
+        }
 
 
         statusInfo.append(loadedSketch.getBoard().getDescription());
 
-        if (loadedSketch.getNetworkPortIP() != null) {
+        if(loadedSketch.getNetworkPortIP() != null) {
             statusInfo.append(" on " + loadedSketch.getNetworkPortIP());
-        } else if (loadedSketch.getSerialPort() == null) {
+        } else if(loadedSketch.getSerialPort() == null) {
             statusInfo.append(" - No port selected!");
         } else {
             statusInfo.append(" on ");
@@ -3048,7 +3284,7 @@ public class Editor extends JFrame {
     }
 
     public void message(String s, int c) {
-        if (c == 2) {
+        if(c == 2) {
             error(s);
         } else {
             message(s);
@@ -3069,7 +3305,7 @@ public class Editor extends JFrame {
 
         int rv = fc.showOpenDialog(this);
 
-        if (rv == JFileChooser.APPROVE_OPTION) {
+        if(rv == JFileChooser.APPROVE_OPTION) {
             try {
                 File sarFile = fc.getSelectedFile();
                 JarFile sarfile = new JarFile(sarFile);
@@ -3151,18 +3387,19 @@ public class Editor extends JFrame {
                 ArrayList<String> dests = new ArrayList<String>();
                 dests.add("Do not import");
                 dests.add("Import to sketch folder");
-                for (String group : Library.getLibraryCategories()) {
-                    if (group.startsWith("cat:")) {
+
+                for(String group : Library.getLibraryCategories()) {
+                    if(group.startsWith("cat:")) {
                         dests.add(Library.getCategoryName(group));
                     }
                 }
 
-                for (String l : libarr) {
+                for(String l : libarr) {
                     label = new JLabel(l + ":");
                     c.gridx = 0;
                     panel.add(label, c);
 
-                
+
                     JComboBox cb = new JComboBox(dests.toArray(new String[0]));
                     c.gridx = 1;
                     panel.add(cb, c);
@@ -3170,6 +3407,7 @@ public class Editor extends JFrame {
 
                     c.gridy++;
                 }
+
                 c.gridx = 0;
                 c.gridwidth = 1;
                 final Editor me = this;
@@ -3198,57 +3436,60 @@ public class Editor extends JFrame {
                 dialog.setLocationRelativeTo(this);
                 dialog.setVisible(true);
 
-                if (willDoImport) {
+                if(willDoImport) {
                     String oldSketchName = sketchName;
                     sketchName = sketchNameBox.getText();
                     File targetDir = new File(Base.getSketchbookFolder(), sketchName);
                     message("Importing to " + targetDir.getAbsolutePath());
                     int n = 0;
-                    if (targetDir.exists()) {
+
+                    if(targetDir.exists()) {
                         Object[] options = { "Yes", "No" };
                         n = JOptionPane.showOptionDialog(this,
-                            "The sketch " + sketchName + " already exists.\n" +
-                            "Do you want to overwrite it?",
-                            "Sketch Exists",
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            options,
-                            options[1]);
-                        if (n == 0) {
+                                                         "The sketch " + sketchName + " already exists.\n" +
+                                                         "Do you want to overwrite it?",
+                                                         "Sketch Exists",
+                                                         JOptionPane.YES_NO_OPTION,
+                                                         JOptionPane.QUESTION_MESSAGE,
+                                                         null,
+                                                         options,
+                                                         options[1]);
+
+                        if(n == 0) {
                             Base.removeDir(targetDir);
                         }
                     }
 
-                    if (n == 0) {
+                    if(n == 0) {
                         message("Starting import...");
                         byte[] buffer = new byte[1024];
                         ZipInputStream zis = new ZipInputStream(new FileInputStream(sarFile));
                         ZipEntry ze = zis.getNextEntry();
-                        while (ze != null) {
+
+                        while(ze != null) {
                             String fileName = ze.getName();
                             message("  " + fileName + " ->");
                             String spl[] = fileName.split("/");
 
                             File newFile = null;
 
-                            if (spl[0].equals("META-INF")) {
+                            if(spl[0].equals("META-INF")) {
                                 ze = zis.getNextEntry();
                                 continue;
                             }
 
-                            if (spl[0].equals(oldSketchName)) {
+                            if(spl[0].equals(oldSketchName)) {
                                 spl[0] = sketchName;
                             }
 
-                            if (fileName.startsWith(".")) {
+                            if(fileName.startsWith(".")) {
                                 ze = zis.getNextEntry();
                                 continue;
                             }
 
-                            if (spl[0].equals("libraries")) {
-                                if (spl.length > 1) {
-                                    if (libcheck.get(spl[1]) == null) {
+                            if(spl[0].equals("libraries")) {
+                                if(spl.length > 1) {
+                                    if(libcheck.get(spl[1]) == null) {
                                         // This is a library we don't know about - ignore it
                                         ze = zis.getNextEntry();
                                         warning("    (ignore)");
@@ -3256,7 +3497,8 @@ public class Editor extends JFrame {
                                     }
 
                                     JComboBox cb = libcheck.get(spl[1]);
-                                    if (cb.getSelectedIndex() == 0) {
+
+                                    if(cb.getSelectedIndex() == 0) {
                                         // The library isn't selected for import
                                         ze = zis.getNextEntry();
                                         message("    (skip)");
@@ -3268,24 +3510,28 @@ public class Editor extends JFrame {
                                     // path of the selected target.
 
                                     File libTarget = null;
-                                    if (cb.getSelectedIndex() == 1) {
+
+                                    if(cb.getSelectedIndex() == 1) {
                                         // Sketch folder
                                         File sf = new File(Base.getSketchbookFolder(), sketchName);
                                         libTarget = new File(sf, "libraries");
                                     } else {
                                         String dname = (String)cb.getSelectedItem();
                                         String cat = null;
-                                        for (String k : Library.getLibraryCategories()) {
-                                            if (Library.getCategoryName(k).equals(dname)) {
+
+                                        for(String k : Library.getLibraryCategories()) {
+                                            if(Library.getCategoryName(k).equals(dname)) {
                                                 cat = k;
                                             }
                                         }
+
                                         libTarget = Library.getCategoryLocation(cat);
                                     }
 
-                                    if (libTarget != null) {
+                                    if(libTarget != null) {
                                         newFile = libTarget;
-                                        for (int i = 1; i < spl.length; i++) {
+
+                                        for(int i = 1; i < spl.length; i++) {
                                             newFile = new File(newFile, spl[i]);
                                         }
                                     }
@@ -3295,48 +3541,59 @@ public class Editor extends JFrame {
                                 }
                             } else {
                                 newFile = Base.getSketchbookFolder();
-                                for (int i = 0; i < spl.length; i++) {
-                                    if (spl[i].equals(oldSketchName)) {
+
+                                for(int i = 0; i < spl.length; i++) {
+                                    if(spl[i].equals(oldSketchName)) {
                                         spl[i] = sketchName;
                                     }
+
                                     int di = spl[i].lastIndexOf(".");
-                                    if (di >= 0) {
+
+                                    if(di >= 0) {
                                         String s = spl[i].substring(0, di);
                                         String e = spl[i].substring(di + 1);
                                         warning(s);
                                         warning(e);
-                                        if (s.equals(oldSketchName)) {
+
+                                        if(s.equals(oldSketchName)) {
                                             spl[i] = sketchName + "." + e;
                                         }
                                     }
+
                                     newFile = new File(newFile, spl[i]);
                                 }
                             }
 
-                            if (newFile == null) {
+                            if(newFile == null) {
                                 ze = zis.getNextEntry();
                                 error("    (broken)");
                                 continue;
                             }
+
                             message("    " + newFile.getAbsolutePath());
 
                             newFile.getParentFile().mkdirs();
 
-                            if (ze.isDirectory()) {
+                            if(ze.isDirectory()) {
                                 newFile.mkdirs();
                             } else {
                                 FileOutputStream fos = new FileOutputStream(newFile);
                                 int len;
-                                while ((len = zis.read(buffer)) > 0) {
+
+                                while((len = zis.read(buffer)) > 0) {
                                     fos.write(buffer, 0, len);
                                 }
+
                                 fos.close();
-                                if (!newFile.exists()) {    
+
+                                if(!newFile.exists()) {
                                     error("FAILED MAKING FILE");
                                 }
                             }
+
                             ze = zis.getNextEntry();
                         }
+
                         zis.closeEntry();
                         zis.close();
                         Base.gatherLibraries();
@@ -3344,7 +3601,7 @@ public class Editor extends JFrame {
                         Base.createNewEditor(new File(Base.getSketchbookFolder(), sketchName).getAbsolutePath());
                     }
                 }
-            } catch (Exception e) {
+            } catch(Exception e) {
                 Base.error(e);
             }
         }
@@ -3360,7 +3617,8 @@ public class Editor extends JFrame {
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
         int rv = fc.showSaveDialog(this);
-        if (rv == JFileChooser.APPROVE_OPTION) {
+
+        if(rv == JFileChooser.APPROVE_OPTION) {
             newFile = fc.getSelectedFile();
             loadedSketch.generateSarFile(newFile);
         }
@@ -3379,19 +3637,23 @@ public class Editor extends JFrame {
 
         int rv = fc.showSaveDialog(this);
 
-        if (rv == JFileChooser.APPROVE_OPTION) {
+        if(rv == JFileChooser.APPROVE_OPTION) {
             File newFile = fc.getSelectedFile();
-            if (newFile.exists()) {
+
+            if(newFile.exists()) {
                 int n = twoOptionBox(
-                    JOptionPane.WARNING_MESSAGE,
-                    "Overwrite File?",
-                    Translate.w("Do you really want to overwrite the file %1?", 40, "\n", newFile.getName()),
-                    "Yes", "No");
-                if (n != 0) {
+                            JOptionPane.WARNING_MESSAGE,
+                            "Overwrite File?",
+                            Translate.w("Do you really want to overwrite the file %1?", 40, "\n", newFile.getName()),
+                            "Yes", "No");
+
+                if(n != 0) {
                     return;
                 }
+
                 newFile.delete();
             }
+
             loadedSketch.saveAs(newFile);
         }
     }
@@ -3399,40 +3661,43 @@ public class Editor extends JFrame {
     public boolean validName(String name) {
         final String validCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-";
 
-        if (name == null) return false;
+        if(name == null) return false;
 
-        for (int i = 0; i < name.length(); i++) {
-            if (validCharacters.indexOf(name.charAt(i)) == -1) {
+        for(int i = 0; i < name.length(); i++) {
+            if(validCharacters.indexOf(name.charAt(i)) == -1) {
                 return false;
             }
         }
+
         return true;
     }
 
     public void createNewSketchFile(String extension) {
         String name = (String)JOptionPane.showInputDialog(
-                    this,
-                    "Enter filename",
-                    "Create new ." + extension + " file",
-                    JOptionPane.PLAIN_MESSAGE
-                    );
-        while (!validName(name)) {
-            if (name == null) {
+                          this,
+                          "Enter filename",
+                          "Create new ." + extension + " file",
+                          JOptionPane.PLAIN_MESSAGE
+                      );
+
+        while(!validName(name)) {
+            if(name == null) {
                 return;
             }
+
             JOptionPane.showMessageDialog(this,
-                "Invalid Filename",
-                "The filename contains invalid characters.",
-                JOptionPane.ERROR_MESSAGE);
+                                          "Invalid Filename",
+                                          "The filename contains invalid characters.",
+                                          JOptionPane.ERROR_MESSAGE);
             name = (String)JOptionPane.showInputDialog(
-                this,
-                "Enter filename",
-                "Create new ." + extension + " file",
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                null,
-                name
-            );
+                       this,
+                       "Enter filename",
+                       "Create new ." + extension + " file",
+                       JOptionPane.PLAIN_MESSAGE,
+                       null,
+                       null,
+                       name
+                   );
         }
 
         loadedSketch.createNewFile(name + "." + extension);
@@ -3443,14 +3708,16 @@ public class Editor extends JFrame {
     public void importFile(String type) {
         JFileChooser fc = new JFileChooser();
         javax.swing.filechooser.FileFilter filter;
-        if (type == "source") {
+
+        if(type == "source") {
             filter = new SourceFileFilter();
             fc.setFileFilter(filter);
-        } else if (type == "header") {
+        } else if(type == "header") {
             filter = new HeaderFileFilter();
             fc.setFileFilter(filter);
         }
-        if (importFileDefaultDir == null) {
+
+        if(importFileDefaultDir == null) {
             importFileDefaultDir = new File(System.getProperty("user.dir"));
         }
 
@@ -3458,29 +3725,37 @@ public class Editor extends JFrame {
 
         int r = fc.showOpenDialog(this);
 
-        if (r == JFileChooser.APPROVE_OPTION) {
+        if(r == JFileChooser.APPROVE_OPTION) {
             File src = fc.getSelectedFile();
             importFileDefaultDir = src.getParentFile();
-            if (!src.exists()) {
+
+            if(!src.exists()) {
                 JOptionPane.showMessageDialog(this, "Cannot find file", "Unable to find the file " + src.getName(), JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
             File dest = null;
-            if (type == "source" || type == "header") {
+
+            if(type == "source" || type == "header") {
                 dest = new File(loadedSketch.getFolder(), src.getName());
-            } else if (type == "binary") {
+            } else if(type == "binary") {
                 dest = new File(loadedSketch.getBinariesFolder(), src.getName());
             } else {
                 return;
             }
+
             File dp = dest.getParentFile();
-            if (!dp.exists()) {
+
+            if(!dp.exists()) {
                 dp.mkdirs();
             }
+
             Base.copyFile(src, dest);
-            if (type == "source" || type == "header") {
+
+            if(type == "source" || type == "header") {
                 loadedSketch.loadFile(dest);
             }
+
             updateTree();
         }
     }
@@ -3497,9 +3772,11 @@ public class Editor extends JFrame {
     void insertStringAtStart(File f, String s) {
         openOrSelectFile(f);
         int tab = getTabByFile(f);
-        if (tab == -1) {
+
+        if(tab == -1) {
             return;
         }
+
         EditorBase eb = getTab(tab);
         eb.insertAtStart(s);
     }
@@ -3508,38 +3785,41 @@ public class Editor extends JFrame {
         JMenuItem item;
 
         Core thisCore = loadedSketch.getCore();
-        if (thisCore == null) {
+
+        if(thisCore == null) {
             return;
         }
 
         TreeMap<String, TreeSet<Library>> libs = Library.getFilteredLibraries(thisCore.getName());
 
-        for (String group : libs.keySet()) {
+        for(String group : libs.keySet()) {
             String groupName = Library.getCategoryName(group);
             JMenu libsMenu = new JMenu(groupName);
-            for (Library lib : libs.get(group)) {
+
+            for(Library lib : libs.get(group)) {
                 item = new JMenuItem(lib.getName());
                 item.addActionListener(insertIncludeAction);
                 item.setActionCommand(lib.getName());
                 libsMenu.add(item);
             }
+
             menu.add(libsMenu);
         }
     }
 
     public void releasePort(String portName) {
-        for (Plugin plugin : plugins) {
+        for(Plugin plugin : plugins) {
             try {
                 plugin.releasePort(portName);
-            } catch (Exception e) {
+            } catch(Exception e) {
                 Base.error(e);
             }
         }
     }
 
     public void launchPlugin(Class<?> pluginClass) {
-        for (Plugin plugin : plugins) {
-            if (plugin.getClass() == pluginClass) {
+        for(Plugin plugin : plugins) {
+            if(plugin.getClass() == pluginClass) {
                 Debug.message("Launching plugin " + plugin.getClass());
                 plugin.launch();
             }
@@ -3560,36 +3840,38 @@ public class Editor extends JFrame {
     }
 
     public static void broadcast(String msg) {
-        for (Editor e : editorList) {
+        for(Editor e : editorList) {
             e.message(msg);
         }
     }
 
     public static void updateAllEditors() {
-        for (Editor e : editorList) {
+        for(Editor e : editorList) {
             e.updateAll();
         }
     }
 
     public static void selectAllEditorBoards() {
-        for (Editor e : editorList) {
+        for(Editor e : editorList) {
             e.reselectEditorBoard();
         }
     }
 
     public void reselectEditorBoard() {
         String eb = loadedSketch.getBoardName();
-        if (eb != null) {
+
+        if(eb != null) {
             loadedSketch.setBoard(eb);
         }
     }
 
     public static boolean closeAllEditors() {
-        for (Editor e : editorList) {
-            if (e.askCloseWindow() == false) {
+        for(Editor e : editorList) {
+            if(e.askCloseWindow() == false) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -3610,7 +3892,7 @@ public class Editor extends JFrame {
 
         int rv = fc.showOpenDialog(this);
 
-        if (rv == JFileChooser.APPROVE_OPTION) {
+        if(rv == JFileChooser.APPROVE_OPTION) {
             // Convert the DefaultShellFolder into a File object via a string representation
             // of the path
             File f = new File(fc.getSelectedFile().getAbsolutePath());
@@ -3623,7 +3905,7 @@ public class Editor extends JFrame {
     }
 
     public void loadSketch(File f) {
-        if (loadedSketch.isUntitled() && !isModified()) {
+        if(loadedSketch.isUntitled() && !isModified()) {
             closeAllTabs();
             loadedSketch = new Sketch(f);
             loadedSketch.attachToEditor(this);
@@ -3635,30 +3917,32 @@ public class Editor extends JFrame {
         } else {
             Base.createNewEditor(f.getPath());
         }
+
         fireEvent(UEvent.SKETCH_OPEN);
     }
 
     public static void updateLookAndFeel() {
-        for (Editor e : editorList) {
+        for(Editor e : editorList) {
             SwingUtilities.updateComponentTreeUI(e);
         }
     }
 
     public static void releasePorts(String n) {
-        for (Editor e : editorList) {
+        for(Editor e : editorList) {
             e.releasePort(n);
         }
     }
 
     public static void refreshAllEditors() {
-        for (Editor e : editorList) {
+        for(Editor e : editorList) {
             e.refreshEditors();
         }
     }
 
     public void refreshEditors() {
         int ntabs = editorTabs.getTabCount();
-        for (int i = 0; i < ntabs; i++) {
+
+        for(int i = 0; i < ntabs; i++) {
             EditorBase eb = getTab(i);
             eb.refreshSettings();
         }
@@ -3680,12 +3964,14 @@ public class Editor extends JFrame {
 
         fc.setFileFilter(new javax.swing.filechooser.FileFilter() {
             public boolean accept(File f) {
-                if (f.getName().toLowerCase().endsWith(".zip")) {
+                if(f.getName().toLowerCase().endsWith(".zip")) {
                     return true;
                 }
-                if (f.isDirectory()) {
+
+                if(f.isDirectory()) {
                     return true;
                 }
+
                 return false;
             }
 
@@ -3695,7 +3981,8 @@ public class Editor extends JFrame {
         });
 
         int rv = fc.showOpenDialog(this);
-        if (rv == JFileChooser.APPROVE_OPTION) {
+
+        if(rv == JFileChooser.APPROVE_OPTION) {
             String[] entries = getZipEntries(fc.getSelectedFile());
             message("Analyzing " + fc.getSelectedFile().getName() + "...");
 
@@ -3709,24 +3996,27 @@ public class Editor extends JFrame {
             // First we'll do a quick check to see if it's a properly packaged archive.
             // We expect to have at least one header file (xxx.h) in one folder (xxx/)
 
-            for (String entry : entries) {
-                if (entry.endsWith(".h")) {
+            for(String entry : entries) {
+                if(entry.endsWith(".h")) {
 
                     String[] parts = entry.split("/");
-                    if (parts.length >= 2) {
-                        String name = parts[parts.length-1];
-                        String parent = parts[parts.length-2];
+
+                    if(parts.length >= 2) {
+                        String name = parts[parts.length - 1];
+                        String parent = parts[parts.length - 2];
 
                         String possibleLibraryName = name.substring(0, name.lastIndexOf("."));
                         String folder = "";
-                        for (int i = 0; i < parts.length-1; i++) {
-                            if (folder.equals("") == false) {
+
+                        for(int i = 0; i < parts.length - 1; i++) {
+                            if(folder.equals("") == false) {
                                 folder += "/";
                             }
+
                             folder += parts[i];
                         }
 
-                        if (parent.equals(possibleLibraryName) || parent.contains(possibleLibraryName)) {
+                        if(parent.equals(possibleLibraryName) || parent.contains(possibleLibraryName)) {
                             // this looks like a valid archive at this point.
                             message("Found library " + possibleLibraryName + " at " + folder);
                             foundLibs.put(possibleLibraryName, folder);
@@ -3735,25 +4025,26 @@ public class Editor extends JFrame {
                 }
             }
 
-            if (foundLibs.size() > 0) {
+            if(foundLibs.size() > 0) {
                 ArrayList<LibCatObject> cats = new ArrayList<LibCatObject>();
 
-                for (String group : Library.getLibraryCategories()) {
-                    if (group.startsWith("cat:")) {
+                for(String group : Library.getLibraryCategories()) {
+                    if(group.startsWith("cat:")) {
                         LibCatObject ob = new LibCatObject(group, Library.getCategoryName(group));
                         cats.add(ob);
                     }
                 }
-                LibCatObject[] catarr = cats.toArray(new LibCatObject[cats.size()]);
-                
-                LibCatObject loc = (LibCatObject)JOptionPane.showInputDialog(this, "Select location to store this library:", "Select Destination", JOptionPane.PLAIN_MESSAGE,
-                    null, catarr, null);
 
-                if (loc != null) {
+                LibCatObject[] catarr = cats.toArray(new LibCatObject[cats.size()]);
+
+                LibCatObject loc = (LibCatObject)JOptionPane.showInputDialog(this, "Select location to store this library:", "Select Destination", JOptionPane.PLAIN_MESSAGE,
+                                   null, catarr, null);
+
+                if(loc != null) {
                     File installPath = Library.getCategoryLocation(loc.getKey());
                     message("Installing to " + installPath.getAbsolutePath());
 
-                    for (String lib : foundLibs.keySet()) {
+                    for(String lib : foundLibs.keySet()) {
                         message("Installing " + lib + "...");
                         // First make a list of remapped files...
                         TreeMap<String, File> translatedFiles = new TreeMap<String, File>();
@@ -3761,8 +4052,9 @@ public class Editor extends JFrame {
                         File libDir = new File(installPath, lib);
 
                         String prefix = foundLibs.get(lib) + "/";
-                        for (String entry : entries) {
-                            if (entry.startsWith(prefix)) {
+
+                        for(String entry : entries) {
+                            if(entry.startsWith(prefix)) {
                                 String filePart = entry.substring(prefix.length());
                                 File destFile = new File(libDir, filePart);
                                 translatedFiles.put(entry, destFile);
@@ -3773,6 +4065,7 @@ public class Editor extends JFrame {
                         extractZipMapped(fc.getSelectedFile(), translatedFiles);
 
                     }
+
                     message("Updating library list...");
                     Base.gatherLibraries();
                     Editor.updateAllEditors();
@@ -3789,27 +4082,35 @@ public class Editor extends JFrame {
         try {
             ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
             ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
+
+            while(ze != null) {
                 File outputFile = mapping.get(ze.getName());
-                if (outputFile != null) {
+
+                if(outputFile != null) {
                     File p = outputFile.getParentFile();
-                    if (!p.exists()) {
+
+                    if(!p.exists()) {
                         p.mkdirs();
                     }
+
                     byte[] buffer = new byte[1024];
                     FileOutputStream fos = new FileOutputStream(outputFile);
                     int len;
-                    while ((len = zis.read(buffer)) > 0) {
+
+                    while((len = zis.read(buffer)) > 0) {
                         fos.write(buffer, 0, len);
                     }
+
                     fos.close();
                     outputFile.setExecutable(true, false);
                 }
+
                 ze = zis.getNextEntry();
             }
+
             zis.closeEntry();
             zis.close();
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
             return;
         }
@@ -3832,18 +4133,22 @@ public class Editor extends JFrame {
 
     public String[] getZipEntries(File zipFile) {
         ArrayList<String> files = new ArrayList<String>();
+
         try {
             ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
             ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
-                if (!ze.isDirectory()) {
+
+            while(ze != null) {
+                if(!ze.isDirectory()) {
                     files.add(ze.getName());
                 }
+
                 ze = zis.getNextEntry();
             }
+
             zis.closeEntry();
             zis.close();
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
             return null;
         }
@@ -3855,37 +4160,42 @@ public class Editor extends JFrame {
     }
 
     public String askForFilename(String oldName) {
-        if (oldName == null) {
+        if(oldName == null) {
             oldName = "";
         }
+
         String newName = (String)JOptionPane.showInputDialog(
-            this,
-            "Enter filename:",
-            "Enter Filename",
-            JOptionPane.PLAIN_MESSAGE,
-            null,
-            null,
-            oldName);
+                             this,
+                             "Enter filename:",
+                             "Enter Filename",
+                             JOptionPane.PLAIN_MESSAGE,
+                             null,
+                             null,
+                             oldName);
         return newName;
     }
 
     public void findAndUnzipZipFile(String dest) {
         File destFolder = new File(dest);
-        if (!destFolder.isDirectory()) {
+
+        if(!destFolder.isDirectory()) {
             return;
         }
+
         JFileChooser fc = new JFileChooser();
 
         fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
         fc.setFileFilter(new javax.swing.filechooser.FileFilter() {
             public boolean accept(File f) {
-                if (f.getName().toLowerCase().endsWith(".zip")) {
+                if(f.getName().toLowerCase().endsWith(".zip")) {
                     return true;
                 }
-                if (f.isDirectory()) {
+
+                if(f.isDirectory()) {
                     return true;
                 }
+
                 return false;
             }
 
@@ -3895,39 +4205,51 @@ public class Editor extends JFrame {
         });
 
         int rv = fc.showOpenDialog(this);
-        if (rv == JFileChooser.APPROVE_OPTION) {
+
+        if(rv == JFileChooser.APPROVE_OPTION) {
             setCursor(new Cursor(Cursor.WAIT_CURSOR));
             File zipFile = fc.getSelectedFile();
+
             try {
                 ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
                 ZipEntry ze = zis.getNextEntry();
-                while (ze != null) {
+
+                while(ze != null) {
                     File extractTo = new File(destFolder, ze.getName());
-                    if (ze.isDirectory()) {
+
+                    if(ze.isDirectory()) {
                         extractTo.mkdirs();
                     } else {
                         File p = extractTo.getParentFile();
-                        if (!p.exists()) {
+
+                        if(!p.exists()) {
                             p.mkdirs();
                         }
+
                         byte[] buffer = new byte[1024];
                         FileOutputStream fos = new FileOutputStream(extractTo);
                         int len;
-                        while ((len = zis.read(buffer)) > 0) {
+
+                        while((len = zis.read(buffer)) > 0) {
                             fos.write(buffer, 0, len);
                         }
+
                         fos.close();
                         extractTo.setExecutable(true, false);
                     }
+
                     ze = zis.getNextEntry();
                 }
+
                 zis.closeEntry();
                 zis.close();
-            } catch (Exception e) {
+            } catch(Exception e) {
                 Base.error(e);
             }
+
             setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
+
         updateTree();
     }
 
@@ -3942,8 +4264,9 @@ public class Editor extends JFrame {
     public void getPaths(JTree tree, TreePath parent, ArrayList<TreePath> list) {
         list.add(parent);
         TreeNode node = (TreeNode) parent.getLastPathComponent();
-        if (node.getChildCount() >= 0) {
-            for (Enumeration e = node.children(); e.hasMoreElements();) {
+
+        if(node.getChildCount() >= 0) {
+            for(Enumeration e = node.children(); e.hasMoreElements();) {
                 TreeNode n = (TreeNode) e.nextElement();
                 TreePath path = parent.pathByAddingChild(n);
                 getPaths(tree, path, list);
@@ -3955,8 +4278,8 @@ public class Editor extends JFrame {
         TreePath[] allPaths = getPaths(tree);
         ArrayList<TreePath> openPaths = new ArrayList<TreePath>();
 
-        for (TreePath path : allPaths) {
-            if (tree.isExpanded(path)) {
+        for(TreePath path : allPaths) {
+            if(tree.isExpanded(path)) {
                 openPaths.add(path);
             }
         }
@@ -3967,71 +4290,84 @@ public class Editor extends JFrame {
     public TreePath findPathByStrings(JTree tree, TreePath path) {
         Object[] pathComponents = path.getPath();
         TreePath[] allPaths = getPaths(tree);
-        for (TreePath testPath : allPaths) {
+
+        for(TreePath testPath : allPaths) {
             Object[] testComponents = testPath.getPath();
-            if (testComponents.length != pathComponents.length) {
+
+            if(testComponents.length != pathComponents.length) {
                 continue;
             }
+
             boolean match = true;
-            for (int i = 0; i < pathComponents.length; i++) {
+
+            for(int i = 0; i < pathComponents.length; i++) {
                 Object po = pathComponents[i];
                 Object to = testComponents[i];
-                if (!po.toString().equals(to.toString())) {
+
+                if(!po.toString().equals(to.toString())) {
                     match = false;
                     break;
                 }
             }
-            if (match) {
+
+            if(match) {
                 return testPath;
             }
         }
+
         return null;
     }
 
     public void restoreTreeState(JTree tree, TreePath[] savedState) {
         TreePath[] allPaths = getPaths(tree);
-        for (TreePath path : savedState) {
+
+        for(TreePath path : savedState) {
             TreePath foundPath = findPathByStrings(tree, path);
-            if (foundPath != null) {
+
+            if(foundPath != null) {
                 tree.expandPath(foundPath);
             }
         }
-/*
-            DefaultMutableTreeNode oldnode = (DefaultMutableTreeNode)path.getLastPathComponent();
-            if (oldnode.getUserObject() instanceof File) {
-                File oldFile = (File)oldnode.getUserObject();
-                for (TreePath np : allPaths) {
-                    DefaultMutableTreeNode newnode = (DefaultMutableTreeNode)np.getLastPathComponent();
-                    File newFile = (File)newnode.getUserObject();
-                    if (newFile.equals(oldFile)) {
-                        tree.expandPath(np);
+
+        /*
+                    DefaultMutableTreeNode oldnode = (DefaultMutableTreeNode)path.getLastPathComponent();
+                    if (oldnode.getUserObject() instanceof File) {
+                        File oldFile = (File)oldnode.getUserObject();
+                        for (TreePath np : allPaths) {
+                            DefaultMutableTreeNode newnode = (DefaultMutableTreeNode)np.getLastPathComponent();
+                            File newFile = (File)newnode.getUserObject();
+                            if (newFile.equals(oldFile)) {
+                                tree.expandPath(np);
+                            }
+                        }
+                    } else if (oldnode.getUserObject() instanceof String) {
+                        String oldFile = oldnode.getUserObject().toString();
+                        for (TreePath np : allPaths) {
+                            DefaultMutableTreeNode newnode = (DefaultMutableTreeNode)np.getLastPathComponent();
+                            String newFile = newnode.getUserObject().toString();
+                            if (newFile.equals(oldFile)) {
+                                tree.expandPath(np);
+                            }
+                        }
                     }
                 }
-            } else if (oldnode.getUserObject() instanceof String) {
-                String oldFile = oldnode.getUserObject().toString();
-                for (TreePath np : allPaths) {
-                    DefaultMutableTreeNode newnode = (DefaultMutableTreeNode)np.getLastPathComponent();
-                    String newFile = newnode.getUserObject().toString();
-                    if (newFile.equals(oldFile)) {
-                        tree.expandPath(np);
-                    }
-                }
-            }
-        }
-*/
+        */
     }
 
     public void compile() {
         clearConsole();
-        if (compilerRunning()) {
+
+        if(compilerRunning()) {
             error("Sorry, there is already a compiler thread running for this sketch.");
             return;
         }
-        if (Base.preferences.getBoolean("editor.autosave")) {
-            if (!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
+
+        if(Base.preferences.getBoolean("editor.autosave")) {
+            if(!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
                 saveAllTabs();
             }
         }
+
         DefaultRunHandler runHandler = new DefaultRunHandler(false);
         compilationThread = new Thread(runHandler, "Compiler");
         compilationThread.start();
@@ -4039,35 +4375,42 @@ public class Editor extends JFrame {
 
     public void program() {
         clearConsole();
-        if (compilerRunning()) {
+
+        if(compilerRunning()) {
             error("Sorry, there is already a compiler thread running for this sketch.");
             return;
         }
-        if (Base.preferences.getBoolean("editor.autosave")) {
-            if (!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
+
+        if(Base.preferences.getBoolean("editor.autosave")) {
+            if(!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
                 saveAllTabs();
             }
         }
+
         DefaultRunHandler runHandler = new DefaultRunHandler(true);
         compilationThread = new Thread(runHandler, "Compiler");
         compilationThread.start();
     }
 
     public boolean compilerRunning() {
-        if (compilationThread == null) {
+        if(compilationThread == null) {
             return false;
         }
+
         return compilationThread.isAlive();
     }
 
     public void abortCompilation() {
-        if (!compilerRunning()) {
+        if(!compilerRunning()) {
             return;
         }
+
         loadedSketch.requestTermination();
-        while (compilerRunning()) {
+
+        while(compilerRunning()) {
             continue;
         }
+
         runButton.setEnabled(true);
         programButton.setEnabled(true);
         runButton.setVisible(true);
@@ -4084,9 +4427,11 @@ public class Editor extends JFrame {
             fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
             int rv = fc.showSaveDialog(this);
-            if (rv == JFileChooser.APPROVE_OPTION) {
+
+            if(rv == JFileChooser.APPROVE_OPTION) {
                 File archiveFile = fc.getSelectedFile();
-                if (archiveFile.exists()) {
+
+                if(archiveFile.exists()) {
                     archiveFile.delete(); // Confirm!!!
                 }
 
@@ -4102,17 +4447,17 @@ public class Editor extends JFrame {
                 zip.flush();
                 zip.close();
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
     }
 
     public void fireEvent(int event) {
-        for (Plugin plugin : plugins) {
+        for(Plugin plugin : plugins) {
             try {
                 plugin.catchEvent(event);
-            } catch (AbstractMethodError e) {
-            } catch (Exception e) {
+            } catch(AbstractMethodError e) {
+            } catch(Exception e) {
                 error(e);
             }
         }
@@ -4120,7 +4465,7 @@ public class Editor extends JFrame {
 
     public boolean isFullScreen = false;
     public void toggleFullScreen() {
-        if (!isFullScreen) {
+        if(!isFullScreen) {
             this.dispose();
             setUndecorated(true);
             setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -4131,11 +4476,14 @@ public class Editor extends JFrame {
             Base.preferences.saveDelay();
         } else {
             int width = Base.preferences.getInteger("editor.window.width");
-            if (width < Base.preferences.getInteger("editor.window.width.min")) {
+
+            if(width < Base.preferences.getInteger("editor.window.width.min")) {
                 width = Base.preferences.getInteger("editor.window.width.min");
             }
+
             int height = Base.preferences.getInteger("editor.window.height");
-            if (height < Base.preferences.getInteger("editor.window.height.min")) {
+
+            if(height < Base.preferences.getInteger("editor.window.height.min")) {
                 height = Base.preferences.getInteger("editor.window.height.min");
             }
 

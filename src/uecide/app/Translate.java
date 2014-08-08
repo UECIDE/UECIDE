@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2014, Majenko Technologies
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of Majenko Technologies nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -56,29 +56,33 @@ import java.nio.charset.*;
 public class Translate {
     public static TreeMap<String, String> translations = new TreeMap<String, String>();
 
-    public static void load(String language)
-    {
+    public static void load(String language) {
         InputStream fis;
         BufferedReader br;
         String line;
         File lib = Base.getContentFile("lib");
         File lang = new File(lib, language + ".po");
-    
+
         translations = new TreeMap<String, String>();
-        if (!lang.exists()) {
+
+        if(!lang.exists()) {
             return;
         }
+
         try {
             fis = new FileInputStream(lang);
             br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
-            while ((line = br.readLine()) != null) {
+
+            while((line = br.readLine()) != null) {
                 String[] bits = line.split("::");
-                if (bits.length == 2) {
+
+                if(bits.length == 2) {
                     translations.put(bits[0], bits[1]);
                 }
             }
+
             br.close();
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
     }
@@ -121,10 +125,12 @@ public class Translate {
 
     public static String t(String i, String p1, String p2, String p3, String p4, String p5, String p6, String p7, String p8, String p9) {
         String j = translations.get(i);
-        if (j == null) {
-  //          System.err.println("Unhandled translation: \"" + i + "\"");
+
+        if(j == null) {
+            //          System.err.println("Unhandled translation: \"" + i + "\"");
             j = i;
         }
+
         j = j.replace("%1", p1);
         j = j.replace("%2", p2);
         j = j.replace("%3", p3);
@@ -178,8 +184,9 @@ public class Translate {
         String o = "";
         String[] b = j.split(" ");
         int len = 0;
-        for (String q : b) {
-            if (len + q.length() > w) {
+
+        for(String q : b) {
+            if(len + q.length() > w) {
                 o += d;
                 o += q + " ";
                 len = q.length() + 1;
@@ -188,6 +195,7 @@ public class Translate {
                 len += q.length() + 1;
             }
         }
+
         return o;
     }
 }

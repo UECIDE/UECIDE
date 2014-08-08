@@ -53,22 +53,26 @@ public class Stk500 {
 
     public int[] newPage() {
         int[] page = new int[(int)pageSize];
-        for (int i = 0; i < (int)pageSize; i++) {
+
+        for(int i = 0; i < (int)pageSize; i++) {
             page[i] = 0xff;
         }
+
         return page;
     }
-        
+
     public void disconnect() {
-        if (!connected) {
+        if(!connected) {
             return;
         }
+
         try {
             port.setDTR(false);
             port.setRTS(false);
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
+
         connected = false;
         Serial.closePort(port);
     }
@@ -76,87 +80,100 @@ public class Stk500 {
     public boolean connect(int to) {
         timeout = to;
         port = Serial.requestPort(portName, baudRate);
-        if (port == null) {
-            if (editor != null) {
+
+        if(port == null) {
+            if(editor != null) {
                 editor.error("Unable to open port " + portName);
             }
+
             return false;
         }
 
         try {
             Thread.sleep(100); // Initial short delay
-        } catch (Exception e) {
+        } catch(Exception e) {
         }
 
         try {
             port.setDTR(true);
             port.setRTS(true);
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
 
         int tries = 10;
         int[] rv = null;
-        while (tries > 0 && rv == null) {
+
+        while(tries > 0 && rv == null) {
             rv = sendCommand(new int[] {CMD_SIGN_ON});
             tries--;
         }
-        if (tries == 0) {
+
+        if(tries == 0) {
             connected = false;
-            if (editor != null) {
+
+            if(editor != null) {
                 editor.error("Connection timed out");
             }
+
             Serial.closePort(port);
             return false;
         }
-        if (rv == null) {
+
+        if(rv == null) {
             connected = false;
             Serial.closePort(port);
             return false;
         }
 
-        if (rv[0] != CMD_SIGN_ON) {
+        if(rv[0] != CMD_SIGN_ON) {
             connected = false;
             Serial.closePort(port);
             return false;
         }
-        
+
         int status = rv[1];
-        if (status != STATUS_CMD_OK) {
+
+        if(status != STATUS_CMD_OK) {
             connected = false;
             Serial.closePort(port);
             return false;
         }
+
         int rlen = rv[2];
-        
+
         deviceName = "";
-        for (int i = 0; i < rlen; i++) {
-            char c = (char)rv[3+i];
+
+        for(int i = 0; i < rlen; i++) {
+            char c = (char)rv[3 + i];
             deviceName += c;
         }
 
         connected = true;
 
         return true;
-        
+
     }
 
     public String getDeviceName() {
-        if (!connected) {
+        if(!connected) {
             return null;
         }
+
         return deviceName;
     }
 
     public int[] sendCommand(int[] command) {
 
         System.err.print(">> [ " + command.length + ": ");
-        for (int i = 0; i < command.length; i++) {
+
+        for(int i = 0; i < command.length; i++) {
             System.err.print(String.format("0x%02X ", command[i]));
         }
+
         System.err.println("]");
 
-            
+
         try {
             int checksum = 0;
             port.writeByte((byte)0x1B);
@@ -169,16 +186,19 @@ public class Stk500 {
             checksum ^= (command.length & 0xFF);
             port.writeByte((byte)0x0E);
             checksum ^= 0x0E;
-            for (int i = 0; i < command.length; i++) {
+
+            for(int i = 0; i < command.length; i++) {
                 port.writeByte((byte)(command[i] & 0xFF));
                 checksum ^= command[i];
             }
+
             port.writeByte((byte)(checksum & 0xFF));
 
             sequence++;
-            
+
             byte[] header = port.readBytes(5, timeout);
-            while (header[0] != (byte)0x1B && header[4] != (byte)0x0E) {
+
+            while(header[0] != (byte)0x1B && header[4] != (byte)0x0E) {
                 byte[] next = port.readBytes(1, timeout);
                 header[0] = header[1];
                 header[1] = header[2];
@@ -192,103 +212,127 @@ public class Stk500 {
             byte[] cs = port.readBytes(1, timeout);
 
             int[] out = new int[msglen];
-            for (int i = 0; i < msglen; i++) {
+
+            for(int i = 0; i < msglen; i++) {
                 out[i] = unsigned_byte(message[i]);
             }
 
             System.err.print("<< [ " + msglen + ": ");
-            for (int i = 0; i < msglen; i++) {
+
+            for(int i = 0; i < msglen; i++) {
                 System.err.print(String.format("0x%02X ", out[i]));
             }
+
             System.err.println("]");
 
             return out;
 
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
             return null;
         }
     }
 
     public boolean setParameter(int param, int val) {
-        if (!connected) {
+        if(!connected) {
             return false;
         }
+
         int[] rv = sendCommand(new int[] {CMD_SET_PARAMETER, param, val});
-        if (rv == null) {
+
+        if(rv == null) {
             return false;
         }
-        if (rv[1] == STATUS_CMD_OK) {
+
+        if(rv[1] == STATUS_CMD_OK) {
             return true;
         }
+
         return false;
     }
 
     public int getParameter(int param) {
-        if (!connected) {
+        if(!connected) {
             return 0;
         }
+
         int[] rv = sendCommand(new int[] {CMD_GET_PARAMETER, param});
-        if (rv == null) {
+
+        if(rv == null) {
             return 0;
         }
-        if (rv[1] == STATUS_CMD_OK) {
+
+        if(rv[1] == STATUS_CMD_OK) {
             return rv[2];
         }
+
         return 0;
     }
 
     public boolean osccal() {
-        if (!connected) {
+        if(!connected) {
             return false;
         }
+
         int[] rv = sendCommand(new int[] {CMD_OSCCAL});
-        if (rv == null) {
+
+        if(rv == null) {
             return false;
         }
-        if (rv[1] == STATUS_CMD_OK) {
+
+        if(rv[1] == STATUS_CMD_OK) {
             return true;
         }
+
         return false;
     }
 
     public boolean uploadProgram() {
-        if (!connected) {
+        if(!connected) {
             return false;
         }
 
         boolean firstrun = true;
-        
+
         long currentAddress = 0;
-        
-        for (Long start : memChunks.keySet()) {
-            if (start != currentAddress) {
-                if (firstrun) {
+
+        for(Long start : memChunks.keySet()) {
+            if(start != currentAddress) {
+                if(firstrun) {
                     currentAddress = start;
-                    if (!loadAddress(currentAddress)) {
+
+                    if(!loadAddress(currentAddress)) {
                         Base.error(String.format("Load Address failed at address 0x%08x", currentAddress));
                         return false;
                     }
+
                     firstrun = false;
                     currentAddress += pageSize;
                     continue;
                 } else {
                     int[] page = newPage();
-                    while (currentAddress != start) {
+
+                    while(currentAddress != start) {
                         System.err.println(String.format("Padding 0x%08X", currentAddress));
-                        if (!uploadPage(page)) {
+
+                        if(!uploadPage(page)) {
                             return false;
                         }
+
                         currentAddress += page.length;
                     }
                 }
             }
+
             int[] chunk = memChunks.get(start);
-            if (!uploadPage(chunk))
+
+            if(!uploadPage(chunk))
                 return false;
+
             System.err.println(String.format("0x%08x: %d bytes", start, memChunks.get(start).length));
             currentAddress += chunk.length;
         }
+
         return true;
     }
 
@@ -305,27 +349,32 @@ public class Stk500 {
         message[7] = 0x20;
         message[8] = 0;
         message[9] = 0;
-        for (int i = 0; i < len; i++) {
-            message[10+i] = data[i];
+
+        for(int i = 0; i < len; i++) {
+            message[10 + i] = data[i];
         }
+
         int[] rv = sendCommand(message);
-        if (rv == null) {
+
+        if(rv == null) {
             Base.error("Upload failed");
             return false;
         }
-        if (rv[1] != STATUS_CMD_OK) {
+
+        if(rv[1] != STATUS_CMD_OK) {
             Base.error("Upload failed");
             return false;
         }
+
         return true;
     }
 
     public boolean loadAddress(long address) {
-        if (!connected) {
+        if(!connected) {
             return false;
         }
 
-        if (address <= 65535) {
+        if(address <= 65535) {
 
             address = address >>> 1;
 
@@ -337,20 +386,25 @@ public class Stk500 {
             int a3 = (int)((address >> 24) & 0xFFL);
 
             int[] rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, a3, a2, a1, a0});
-            if (rv == null) {
+
+            if(rv == null) {
                 return false;
             }
-            if (rv[1] == STATUS_CMD_OK) {
+
+            if(rv[1] == STATUS_CMD_OK) {
                 return true;
             }
+
             return false;
         } else {
             System.err.println(String.format("Loading extended address 0x%08X", address));
             int[] rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, 0x80, 0x00, 0x00, 0x00});
-            if (rv == null) {
+
+            if(rv == null) {
                 return false;
             }
-            if (rv[1] != STATUS_CMD_OK) {
+
+            if(rv[1] != STATUS_CMD_OK) {
                 return false;
             }
 
@@ -370,46 +424,53 @@ public class Stk500 {
     }
 
     public boolean enterProgMode() {
-        if (!connected) {
+        if(!connected) {
             return false;
         }
-        
+
         int[] rv = sendCommand(new int[] {
-            CMD_ENTER_PROGMODE_ISP, 
-            200,
-            100,
-            25,
-            32,
-            0,
-            0x53,
-            3,
-            0xAC,
-            0x53,
-            0,
-            0
-        });
-        if (rv == null) {
+                                   CMD_ENTER_PROGMODE_ISP,
+                                   200,
+                                   100,
+                                   25,
+                                   32,
+                                   0,
+                                   0x53,
+                                   3,
+                                   0xAC,
+                                   0x53,
+                                   0,
+                                   0
+                               });
+
+        if(rv == null) {
             return false;
         }
-        if (rv[1] == STATUS_CMD_OK) {
+
+        if(rv[1] == STATUS_CMD_OK) {
             return true;
         }
+
         return false;
     }
 
     public boolean leaveProgMode() {
-        if (!connected) {
+        if(!connected) {
             return false;
         }
+
         int[] rv = sendCommand(new int[] { CMD_LEAVE_PROGMODE_ISP, 1, 1});
-        if (rv == null) {
+
+        if(rv == null) {
             Base.error("Timeout leaving programming mode!");
             return false;
         }
-        if (rv[1] != STATUS_CMD_OK) {
+
+        if(rv[1] != STATUS_CMD_OK) {
             Base.error("Error leaving programming mode!");
             return false;
         }
+
         return true;
     }
 
@@ -430,7 +491,7 @@ public class Stk500 {
         public final static int StartLinearAddress = 0x05;
 
         public HexRecord(String line) {
-            if (line.startsWith(":")) {
+            if(line.startsWith(":")) {
                 lineBuffer = line.substring(1);
 
                 length = shiftHex();
@@ -439,23 +500,36 @@ public class Stk500 {
                 address = ((a0  << 8) | a1) & 0xFFFF;
                 type = shiftHex();
                 data = new int[length];
-                for (int i = 0; i < length; i++) {
+
+                for(int i = 0; i < length; i++) {
                     data[i] = shiftHex();
                 }
+
                 checksum = shiftHex();
             }
         }
 
-        public int getLength() { return (int)length; }
-        public long getAddress() { return address; }
-        public int[] getData() { return data; }
-        public int getChecksum() { return checksum; }
-        public int getType() { return type; }
+        public int getLength() {
+            return (int)length;
+        }
+        public long getAddress() {
+            return address;
+        }
+        public int[] getData() {
+            return data;
+        }
+        public int getChecksum() {
+            return checksum;
+        }
+        public int getType() {
+            return type;
+        }
 
         private int shiftHex() {
-            if (lineBuffer.length() < 2) {
+            if(lineBuffer.length() < 2) {
                 return 0;
             }
+
             char c0 = lineBuffer.charAt(0);
             char c1 = lineBuffer.charAt(1);
             lineBuffer = lineBuffer.substring(2);
@@ -466,30 +540,74 @@ public class Stk500 {
         }
 
         private int h2d(char c) {
-            switch (c) {
-                case '0': return 0;
-                case '1': return 1;
-                case '2': return 2;
-                case '3': return 3;
-                case '4': return 4;
-                case '5': return 5;
-                case '6': return 6;
-                case '7': return 7;
-                case '8': return 8;
-                case '9': return 9;
-                case 'a': return 10;
-                case 'A': return 10;
-                case 'b': return 11;
-                case 'B': return 11;
-                case 'c': return 12;
-                case 'C': return 12;
-                case 'd': return 13;
-                case 'D': return 13;
-                case 'e': return 14;
-                case 'E': return 14;
-                case 'f': return 15;
-                case 'F': return 15;
+            switch(c) {
+            case '0':
+                return 0;
+
+            case '1':
+                return 1;
+
+            case '2':
+                return 2;
+
+            case '3':
+                return 3;
+
+            case '4':
+                return 4;
+
+            case '5':
+                return 5;
+
+            case '6':
+                return 6;
+
+            case '7':
+                return 7;
+
+            case '8':
+                return 8;
+
+            case '9':
+                return 9;
+
+            case 'a':
+                return 10;
+
+            case 'A':
+                return 10;
+
+            case 'b':
+                return 11;
+
+            case 'B':
+                return 11;
+
+            case 'c':
+                return 12;
+
+            case 'C':
+                return 12;
+
+            case 'd':
+                return 13;
+
+            case 'D':
+                return 13;
+
+            case 'e':
+                return 14;
+
+            case 'E':
+                return 14;
+
+            case 'f':
+                return 15;
+
+            case 'F':
+                return 15;
             }
+
             return 0;
         }
     }
@@ -508,7 +626,7 @@ public class Stk500 {
         long segmentAddress = 0;
         long recordAddress = 0;
         long currentAddress = 0;
-        
+
         memChunks = new TreeMap<Long, int[]>();
         int b0;
         int b1;
@@ -518,45 +636,54 @@ public class Stk500 {
         InputStream fis;
         BufferedReader br;
         String line;
+
         try {
             fis = new FileInputStream(hexFile);
             br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-            while ((line = br.readLine()) != null) {
-                if (!line.startsWith(":")) {
+
+            while((line = br.readLine()) != null) {
+                if(!line.startsWith(":")) {
                     continue;
                 }
 
                 HexRecord hr = new HexRecord(line);
-                switch (hr.getType()) {
-                    case HexRecord.Data:
-                        recordAddress = hr.getAddress(); 
-                        fullAddress = baseAddress + (recordAddress + segmentAddress);
-                        System.err.println(String.format("Base: 0x%08x Record: 0x%08x Segment: 0x%08x Absolute: 0x%08x",
-                            baseAddress, recordAddress, segmentAddress, fullAddress));
-                        memChunks.put((Long)fullAddress, (int[])hr.getData());
-                        break;
-                    case HexRecord.EoF:
-                        break;
-                    case HexRecord.ExtendedSegmentAddress:
-                        data = hr.getData();
-                        segmentAddress = (data[0] << 8) | data[1];
-                        segmentAddress *= 16;
-                        break;
-                    case HexRecord.StartSegmentAddress:
-                        // Not supported
-                        break;
-                    case HexRecord.ExtendedLinearAddress:
-                        data = hr.getData();
-                        baseAddress = 0x80000000L | ((data[0] << 24) | (data[1] << 16));
-                        System.err.println(String.format("New base address 0x%08x", baseAddress));
-                        break;
-                    case HexRecord.StartLinearAddress:
-                        // Not supported
-                        break;
+
+                switch(hr.getType()) {
+                case HexRecord.Data:
+                    recordAddress = hr.getAddress();
+                    fullAddress = baseAddress + (recordAddress + segmentAddress);
+                    System.err.println(String.format("Base: 0x%08x Record: 0x%08x Segment: 0x%08x Absolute: 0x%08x",
+                                                     baseAddress, recordAddress, segmentAddress, fullAddress));
+                    memChunks.put((Long)fullAddress, (int[])hr.getData());
+                    break;
+
+                case HexRecord.EoF:
+                    break;
+
+                case HexRecord.ExtendedSegmentAddress:
+                    data = hr.getData();
+                    segmentAddress = (data[0] << 8) | data[1];
+                    segmentAddress *= 16;
+                    break;
+
+                case HexRecord.StartSegmentAddress:
+                    // Not supported
+                    break;
+
+                case HexRecord.ExtendedLinearAddress:
+                    data = hr.getData();
+                    baseAddress = 0x80000000L | ((data[0] << 24) | (data[1] << 16));
+                    System.err.println(String.format("New base address 0x%08x", baseAddress));
+                    break;
+
+                case HexRecord.StartLinearAddress:
+                    // Not supported
+                    break;
                 }
             }
+
             br.close();
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
             return false;
         }
@@ -566,14 +693,15 @@ public class Stk500 {
         System.err.println("Coalescing...");
         TreeMap<Long, int[]> compressedChunks = new TreeMap<Long, int[]>();
 
-        for (Long start : memChunks.keySet()) {
+        for(Long start : memChunks.keySet()) {
             int[] chunkData = memChunks.get(start);
 
             long pagestart = start & ~(pageSize - 1L);
 
 
             int[] pageData = compressedChunks.get(pagestart);
-            if (pageData == null) {
+
+            if(pageData == null) {
                 pageData = newPage();
             }
 
@@ -581,27 +709,31 @@ public class Stk500 {
 
             System.err.println(String.format("Copying %d bytes of data at offset %02X", chunkData.length, pageoffset));
 
-            for (int i = 0; i < chunkData.length; i++) {
-                if (pageoffset + i == pageSize) {
+            for(int i = 0; i < chunkData.length; i++) {
+                if(pageoffset + i == pageSize) {
                     compressedChunks.put(pagestart, pageData);
                     pagestart += pageSize;
                     pageoffset = 0;
                     pageData = compressedChunks.get(pagestart);
-                    if (pageData == null) {
+
+                    if(pageData == null) {
                         pageData = newPage();
                     }
                 }
+
                 pageData[i + (int)pageoffset] = chunkData[i];
             }
+
             compressedChunks.put(pagestart, pageData);
             System.err.println(String.format("  0x%08X -> 0x%08X + 0x%02X", start, pagestart, pageoffset));
         }
 
         System.err.println("Coalescing done!");
-        
-        for (Long page : compressedChunks.keySet()) {
+
+        for(Long page : compressedChunks.keySet()) {
             System.err.println(String.format("Page at 0x%08X of size %d", page, compressedChunks.get(page).length));
         }
+
         memChunks = compressedChunks;
 
 

@@ -21,8 +21,10 @@ import org.json.simple.*;
 import java.beans.*;
 import javax.imageio.*;
 
-public class About
-{
+/*! The About class provides an About box with the logo, license, list of
+ *  contributors, etc.
+ */
+public class About {
 
     JDialog frame;
     JPanel mainContainer;
@@ -48,7 +50,7 @@ public class About
             JLabel picLabel = new JLabel(new ImageIcon(image));
 
             mainContainer.add(picLabel, BorderLayout.NORTH);
-        } catch (Exception ex) {
+        } catch(Exception ex) {
             Base.error(ex);
         }
 
@@ -64,8 +66,8 @@ public class About
         info.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         info.setEnabled(false);
-        info.setBackground(new Color(0,0,0));
-        info.setForeground(new Color(0,255,0));
+        info.setBackground(new Color(0, 0, 0));
+        info.setForeground(new Color(0, 255, 0));
         Font f = info.getFont();
         info.setFont(new Font(f.getFamily(), Font.PLAIN, 12));
 
@@ -80,15 +82,15 @@ public class About
         Dimension eSize = editor.getSize();
         Point ePos = editor.getLocation();
         frame.setLocation(new Point(
-            ePos.x + (eSize.width / 2) - mySize.width / 2,
-            ePos.y + (eSize.height / 2) - mySize.height / 2 
-        ));
+                              ePos.x + (eSize.width / 2) - mySize.width / 2,
+                              ePos.y + (eSize.height / 2) - mySize.height / 2
+                          ));
 
         frame.addKeyListener(new KeyListener() {
             public void keyTyped(KeyEvent ev) {
             }
             public void keyPressed(KeyEvent ev) {
-                if (ev.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                if(ev.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     frame.dispose();
                 }
             }
@@ -109,33 +111,39 @@ public class About
         s.append("Build number " + Base.BUILDNO + "\n");
         s.append("\n");
         s.append("Contributors:\n");
+
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(contributors.openStream()));
             String cont = "";
-            while ((cont = reader.readLine()) != null) {
+
+            while((cont = reader.readLine()) != null) {
                 Pattern p = Pattern.compile("\\d+\\s+(.*)");
                 Matcher m = p.matcher(cont);
-                if (m.find()) {
+
+                if(m.find()) {
                     s.append("    ");
                     s.append(m.group(1));
                     s.append("\n");
                 }
             }
-        } catch (Exception ex) {
+        } catch(Exception ex) {
             Base.error(ex);
         }
+
         s.append("\n");
 
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(license.openStream()));
             String line = "";
-            while ((line = reader.readLine()) != null) {
+
+            while((line = reader.readLine()) != null) {
                 s.append(line);
                 s.append("\n");
             }
-        } catch (Exception ex) {
+        } catch(Exception ex) {
             Base.error(ex);
         }
+
         s.append("\n");
 
         s.append("\n");

@@ -78,19 +78,31 @@ public abstract class Plugin {
 
 
     public Plugin() { }
-    public Plugin(Editor e) { editor = e; }
-    public Plugin(EditorBase eb) { editorTab = eb; }
+    public Plugin(Editor e) {
+        editor = e;
+    }
+    public Plugin(EditorBase eb) {
+        editorTab = eb;
+    }
 
     public static void setLoader(URLClassLoader l) { };
     public static void setInfo(HashMap<String, String>info) { };
-    public static String getInfo(String item) { return null; };
+    public static String getInfo(String item) {
+        return null;
+    };
 
     public static void populatePreferences(JPanel panel) { }
-    public static String getPreferencesTitle() { return null; }
+    public static String getPreferencesTitle() {
+        return null;
+    }
     public static void savePreferences() { }
 
-    public static boolean wantEditorInstance() { return false; }
-    public static boolean wantTabInstance() { return false; }
+    public static boolean wantEditorInstance() {
+        return false;
+    }
+    public static boolean wantTabInstance() {
+        return false;
+    }
     public abstract void addToolbarButtons(JToolBar toolbar, int flags);
     public abstract void populateMenu(JMenu menu, int flags);
     public abstract void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node);
@@ -98,7 +110,9 @@ public abstract class Plugin {
 
     public void releasePort(String port) { }
 
-    public void launch() { System.err.println("Not overridden"); }
+    public void launch() {
+        System.err.println("Not overridden");
+    }
 
     public void catchEvent(int event) { };
 }

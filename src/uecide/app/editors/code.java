@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2014, Majenko Technologies
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of Majenko Technologies nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -77,16 +77,18 @@ public class code extends JPanel implements EditorBase {
     JToolBar toolbar;
 
     public void openFindPanel() {
-        if (findPanel == null) {
+        if(findPanel == null) {
             ImageIcon closeIcon = Base.loadIconFromResource("tabs/close.png");
             findCloseButton = new JButton(closeIcon);
             findCloseButton.setBorder(new EmptyBorder(0, 2, 0, 2));
             findCloseButton.setContentAreaFilled(false);
             findPanel = new JPanel();
             findPanel.setLayout(new BoxLayout(findPanel, BoxLayout.LINE_AXIS));
-            if (Base.preferences.getBoolean("editor.keepfindopen") == false) {
+
+            if(Base.preferences.getBoolean("editor.keepfindopen") == false) {
                 findPanel.add(findCloseButton);
             }
+
             findPanel.add(searchTerm);
             findPanel.add(findButton);
             findPanel.add(matchCase);
@@ -99,7 +101,7 @@ public class code extends JPanel implements EditorBase {
             repaint();
             findButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    if (findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
+                    if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
                         searchTerm.setBackground(UIManager.getColor("TextField.background"));
                     } else {
                         searchTerm.setBackground(textArea.getSyntaxScheme().getStyle(SyntaxScheme.ERROR_IDENTIFIER).background);
@@ -108,7 +110,7 @@ public class code extends JPanel implements EditorBase {
             });
             searchTerm.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    if (findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
+                    if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
                         searchTerm.setBackground(UIManager.getColor("TextField.background"));
                     } else {
                         searchTerm.setBackground(textArea.getSyntaxScheme().getStyle(SyntaxScheme.ERROR_IDENTIFIER).background);
@@ -137,6 +139,7 @@ public class code extends JPanel implements EditorBase {
                 }
             });
         }
+
         searchTerm.requestFocus();
     }
 
@@ -152,15 +155,18 @@ public class code extends JPanel implements EditorBase {
         search.setMatchCase(mc);
         search.setSearchForward(!back);
         SearchResult res = SearchEngine.find(textArea, search);
-        if (!res.wasFound()) {
+
+        if(!res.wasFound()) {
             textArea.setCaretPosition(0);
             int cp = textArea.getCaretPosition();
             res = SearchEngine.find(textArea, search);
-            if (!res.wasFound()) {
+
+            if(!res.wasFound()) {
                 textArea.setCaretPosition(cp);
                 return false;
             }
         }
+
         return true;
     }
 
@@ -191,21 +197,27 @@ public class code extends JPanel implements EditorBase {
             public String getToolTipText(MouseEvent e) {
                 try {
                     HashMap<Integer, String> comments = sketch.getLineComments(file);
-                    if (comments == null) {
+
+                    if(comments == null) {
                         return null;
                     }
-                    for (int line : comments.keySet()) {
-                        int y = textArea.yForLine(line-1);
-                        if (y == -1) {
+
+                    for(int line : comments.keySet()) {
+                        int y = textArea.yForLine(line - 1);
+
+                        if(y == -1) {
                             continue;
                         }
+
                         int z = y + textArea.getLineHeight();
-                        if (e.getY() > y && e.getY() < z) {
+
+                        if(e.getY() > y && e.getY() < z) {
                             return comments.get(line);
                         }
                     }
-                } catch (Exception ex) {
+                } catch(Exception ex) {
                 }
+
                 return null;
             }
         };
@@ -278,10 +290,12 @@ public class code extends JPanel implements EditorBase {
 
         refreshSettings();
         this.add(scrollPane, BorderLayout.CENTER);
-        if (f != null) {
+
+        if(f != null) {
             loadFile(f);
         }
-        if (Base.preferences.getBoolean("editor.keepfindopen")) {
+
+        if(Base.preferences.getBoolean("editor.keepfindopen")) {
             openFindPanel();
         }
     }
@@ -298,11 +312,13 @@ public class code extends JPanel implements EditorBase {
         textArea.setCodeFoldingEnabled(true);
         textArea.setAntiAliasingEnabled(true);
         textArea.setMarkOccurrences(true);
-        if (Base.preferences.get("editor.tabsize") != null) {
+
+        if(Base.preferences.get("editor.tabsize") != null) {
             textArea.setTabSize(Base.preferences.getInteger("editor.tabsize"));
         } else {
             textArea.setTabSize(4);
         }
+
         textArea.setTabsEmulated(Base.preferences.getBoolean("editor.expandtabs"));
         textArea.setPaintTabLines(Base.preferences.getBoolean("editor.showtabs"));
 
@@ -314,82 +330,101 @@ public class code extends JPanel implements EditorBase {
         textArea.setFont(Base.preferences.getFont("editor.font"));
 
         Gutter g = scrollPane.getGutter();
-        if (Base.theme.get(theme + "editor.gutter.bgcolor") != null) {
+
+        if(Base.theme.get(theme + "editor.gutter.bgcolor") != null) {
             g.setBackground(Base.theme.getColor(theme + "editor.gutter.bgcolor"));
         }
-        if (Base.theme.get(theme + "editor.gutter.fgcolor") != null) {
+
+        if(Base.theme.get(theme + "editor.gutter.fgcolor") != null) {
             g.setLineNumberColor(Base.theme.getColor(theme + "editor.gutter.fgcolor"));
         }
-        if (Base.theme.get(theme + "editor.gutter.bordercolor") != null) {
+
+        if(Base.theme.get(theme + "editor.gutter.bordercolor") != null) {
             g.setBorderColor(Base.theme.getColor(theme + "editor.gutter.bordercolor"));
         }
-        if (Base.theme.get(theme + "editor.fold.bgcolor") != null) {
+
+        if(Base.theme.get(theme + "editor.fold.bgcolor") != null) {
             g.setFoldBackground(Base.theme.getColor(theme + "editor.fold.bgcolor"));
         }
-        if (Base.theme.get(theme + "editor.fold.fgcolor") != null) {
+
+        if(Base.theme.get(theme + "editor.fold.fgcolor") != null) {
             g.setFoldIndicatorForeground(Base.theme.getColor(theme + "editor.fold.fgcolor"));
         }
 
-        if (Base.theme.get(theme + "editor.line.bgcolor") != null) {
+        if(Base.theme.get(theme + "editor.line.bgcolor") != null) {
             textArea.setCurrentLineHighlightColor(Base.theme.getColor(theme + "editor.line.bgcolor"));
         }
+
         textArea.setFadeCurrentLineHighlight(Base.theme.getBoolean(theme + "editor.line.fade"));
         textArea.setHighlightCurrentLine(Base.theme.getBoolean(theme + "editor.line.enabled"));
         textArea.setRoundedSelectionEdges(Base.theme.getBoolean(theme + "editor.select.rounded"));
-        if (Base.theme.get(theme + "editor.caret.fgcolor") != null) {
+
+        if(Base.theme.get(theme + "editor.caret.fgcolor") != null) {
             textArea.setCaretColor(Base.theme.getColor(theme + "editor.caret.fgcolor"));
         }
 
-        if (Base.theme.get(theme + "editor.caret.style.insert") != null) {
-            if (Base.theme.get(theme + "editor.caret.style.insert").equals("box")) {
+        if(Base.theme.get(theme + "editor.caret.style.insert") != null) {
+            if(Base.theme.get(theme + "editor.caret.style.insert").equals("box")) {
                 textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_BORDER_STYLE);
             }
-            if (Base.theme.get(theme + "editor.caret.style.insert").equals("block")) {
+
+            if(Base.theme.get(theme + "editor.caret.style.insert").equals("block")) {
                 textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_STYLE);
             }
-            if (Base.theme.get(theme + "editor.caret.style.insert").equals("line")) {
+
+            if(Base.theme.get(theme + "editor.caret.style.insert").equals("line")) {
                 textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.VERTICAL_LINE_STYLE);
             }
-            if (Base.theme.get(theme + "editor.caret.style.insert").equals("thick")) {
+
+            if(Base.theme.get(theme + "editor.caret.style.insert").equals("thick")) {
                 textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
             }
-            if (Base.theme.get(theme + "editor.caret.style.insert").equals("underline")) {
+
+            if(Base.theme.get(theme + "editor.caret.style.insert").equals("underline")) {
                 textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.UNDERLINE_STYLE);
             }
         }
 
-        if (Base.theme.get(theme + "editor.caret.style.replace") != null) {
-            if (Base.theme.get(theme + "editor.caret.style.replace").equals("box")) {
+        if(Base.theme.get(theme + "editor.caret.style.replace") != null) {
+            if(Base.theme.get(theme + "editor.caret.style.replace").equals("box")) {
                 textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.BLOCK_BORDER_STYLE);
             }
-            if (Base.theme.get(theme + "editor.caret.style.replace").equals("block")) {
+
+            if(Base.theme.get(theme + "editor.caret.style.replace").equals("block")) {
                 textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.BLOCK_STYLE);
             }
-            if (Base.theme.get(theme + "editor.caret.style.replace").equals("line")) {
+
+            if(Base.theme.get(theme + "editor.caret.style.replace").equals("line")) {
                 textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.VERTICAL_LINE_STYLE);
             }
-            if (Base.theme.get(theme + "editor.caret.style.replace").equals("thick")) {
+
+            if(Base.theme.get(theme + "editor.caret.style.replace").equals("thick")) {
                 textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
             }
-            if (Base.theme.get(theme + "editor.caret.style.replace").equals("underline")) {
+
+            if(Base.theme.get(theme + "editor.caret.style.replace").equals("underline")) {
                 textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.UNDERLINE_STYLE);
             }
         }
 
-        if (Base.theme.get(theme + "editor.markall.bgcolor") != null) {
+        if(Base.theme.get(theme + "editor.markall.bgcolor") != null) {
             textArea.setMarkOccurrencesColor(Base.theme.getColor(theme + "editor.markall.bgcolor"));
             textArea.setMarkAllHighlightColor(Base.theme.getColor(theme + "editor.markall.bgcolor"));
         }
+
         textArea.setPaintMarkOccurrencesBorder(Base.theme.getBoolean(theme + "editor.markall.border"));
-        if (Base.theme.get(theme + "editor.bracket.bgcolor") != null) {
+
+        if(Base.theme.get(theme + "editor.bracket.bgcolor") != null) {
             textArea.setMatchedBracketBGColor(Base.theme.getColor(theme + "editor.bracket.bgcolor"));
         }
-        if (Base.theme.get(theme + "editor.bracket.bordercolor") != null) {
+
+        if(Base.theme.get(theme + "editor.bracket.bordercolor") != null) {
             textArea.setMatchedBracketBorderColor(Base.theme.getColor(theme + "editor.bracket.bordercolor"));
         }
+
         textArea.setPaintMatchedBracketPair(Base.theme.getBoolean(theme + "editor.bracket.pair"));
 
-        if (Base.theme.get(theme + "editor.select.bgcolor") != null) {
+        if(Base.theme.get(theme + "editor.select.bgcolor") != null) {
             textArea.setSelectionColor(Base.theme.getColor(theme + "editor.select.bgcolor"));
         }
 
@@ -414,24 +449,25 @@ public class code extends JPanel implements EditorBase {
     public String getText() {
         return textArea.getText();
     }
-    
+
     public String getText(int s, int e) {
         try {
             return textArea.getText(s, e);
-        } catch (Exception ex) {
+        } catch(Exception ex) {
             return "";
         }
     }
-    
+
     public void setText(String text) {
         textArea.setText(text);
     }
 
     public void setModified(boolean m) {
-        if (m != modified) {
+        if(m != modified) {
             modified = m;
             int tab = editor.getTabByEditor(this);
-            if (tab > -1) {
+
+            if(tab > -1) {
                 editor.setTabModified(tab, m);
             }
         }
@@ -439,9 +475,9 @@ public class code extends JPanel implements EditorBase {
 
     public void scrollTo(final int pos) {
         SwingUtilities.invokeLater(new Runnable() {
-           public void run() { 
-               scrollPane.getVerticalScrollBar().setValue(pos);
-           }
+            public void run() {
+                scrollPane.getVerticalScrollBar().setValue(pos);
+            }
         });
     }
 
@@ -450,7 +486,7 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void applyThemeFGColor(int index, String cs) {
-        if (Base.theme.get(cs) != null) {
+        if(Base.theme.get(cs) != null) {
             Color c = Base.theme.getColor(cs);
             org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
             s.foreground = c;
@@ -459,7 +495,7 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void applyThemeBGColor(int index, String cs) {
-        if (Base.theme.get(cs) != null) {
+        if(Base.theme.get(cs) != null) {
             Color c = Base.theme.getColor(cs);
             org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
             s.background = c;
@@ -468,7 +504,7 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void applyThemeFont(int index, String fs) {
-        if (Base.theme.get(fs) != null) {
+        if(Base.theme.get(fs) != null) {
             Font f = Base.theme.getFont(fs);
             org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
             s.font = f;
@@ -477,7 +513,7 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void applyThemeUnderline(int index, String us) {
-        if (Base.theme.get(us) != null) {
+        if(Base.theme.get(us) != null) {
             boolean u = Base.theme.getBoolean(us);
             org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
             s.underline = u;
@@ -664,7 +700,7 @@ public class code extends JPanel implements EditorBase {
         applyThemeBGColor(SyntaxScheme.PREPROCESSOR,                    theme + "editor.preprocessor.bgcolor");
         applyThemeFont(SyntaxScheme.PREPROCESSOR,                       theme + "editor.preprocessor.font");
         applyThemeUnderline(SyntaxScheme.PREPROCESSOR,                  theme + "editor.preprocessor.underline");
-        
+
         // Regex
         applyThemeFGColor(SyntaxScheme.REGEX,                           theme + "editor.regex.fgcolor");
         applyThemeBGColor(SyntaxScheme.REGEX,                           theme + "editor.regex.bgcolor");
@@ -707,17 +743,18 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void revertFile() {
-        if (!isModified()) {
+        if(!isModified()) {
             return;
         }
-    
+
         int n = editor.twoOptionBox(JOptionPane.WARNING_MESSAGE,
-            "Revert File?", 
-            Translate.w("You have unsaved changes.  Reverting the file will lose those changes.  Are you sure?", 40, "\n"),
-            "Yes",
-            "No"
-        );
-        if (n != 0) {
+                                    "Revert File?",
+                                    Translate.w("You have unsaved changes.  Reverting the file will lose those changes.  Are you sure?", 40, "\n"),
+                                    "Yes",
+                                    "No"
+                                   );
+
+        if(n != 0) {
             return;
         }
 
@@ -729,87 +766,87 @@ public class code extends JPanel implements EditorBase {
         int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
 
-        switch (flags) {
-            case (Plugin.MENU_FILE | Plugin.MENU_MID):
-                item = new JMenuItem(Translate.t("Revert File"));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        revertFile();
-                    }
-                });
-                menu.add(item);
-                break;
+        switch(flags) {
+        case(Plugin.MENU_FILE | Plugin.MENU_MID):
+            item = new JMenuItem(Translate.t("Revert File"));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    revertFile();
+                }
+            });
+            menu.add(item);
+            break;
 
-            case (Plugin.MENU_EDIT | Plugin.MENU_TOP):
-                item = new JMenuItem(Translate.t("Copy"));
-                item.setAccelerator(KeyStroke.getKeyStroke('C', modifiers));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        textArea.copy();
-                    }
-                });
-                menu.add(item);
-                item = new JMenuItem(Translate.t("Cut"));
-                item.setAccelerator(KeyStroke.getKeyStroke('X', modifiers));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        textArea.cut();
-                    }
-                });
-                menu.add(item);
-                item = new JMenuItem(Translate.t("Paste"));
-                item.setAccelerator(KeyStroke.getKeyStroke('V', modifiers));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        textArea.paste();
-                    }
-                });
-                menu.add(item);
-                break;
+        case(Plugin.MENU_EDIT | Plugin.MENU_TOP):
+            item = new JMenuItem(Translate.t("Copy"));
+            item.setAccelerator(KeyStroke.getKeyStroke('C', modifiers));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    textArea.copy();
+                }
+            });
+            menu.add(item);
+            item = new JMenuItem(Translate.t("Cut"));
+            item.setAccelerator(KeyStroke.getKeyStroke('X', modifiers));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    textArea.cut();
+                }
+            });
+            menu.add(item);
+            item = new JMenuItem(Translate.t("Paste"));
+            item.setAccelerator(KeyStroke.getKeyStroke('V', modifiers));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    textArea.paste();
+                }
+            });
+            menu.add(item);
+            break;
 
-            case (Plugin.MENU_EDIT | Plugin.MENU_MID):
-                item = new JMenuItem(Translate.t("Select All"));
-                item.setAccelerator(KeyStroke.getKeyStroke('A', modifiers));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        textArea.selectAll();
-                    }
-                });
-                menu.add(item);
-                break;
+        case(Plugin.MENU_EDIT | Plugin.MENU_MID):
+            item = new JMenuItem(Translate.t("Select All"));
+            item.setAccelerator(KeyStroke.getKeyStroke('A', modifiers));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    textArea.selectAll();
+                }
+            });
+            menu.add(item);
+            break;
 
-            case (Plugin.MENU_EDIT | Plugin.MENU_BOTTOM):
-                item = new JMenuItem(Translate.t("Find & Replace"));
-                item.setAccelerator(KeyStroke.getKeyStroke('F', modifiers));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        openFindPanel();
-                    }
-                });
-                menu.add(item);
-                item = new JMenuItem(Translate.t("Undo"));
-                item.setAccelerator(KeyStroke.getKeyStroke('Z', modifiers));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        textArea.undoLastAction();
-                    }
-                });
-                menu.add(item);
-                item = new JMenuItem(Translate.t("Redo"));
-                item.setAccelerator(KeyStroke.getKeyStroke('Y', modifiers));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        textArea.redoLastAction();
-                    }
-                });
-                menu.add(item);
-                break;
+        case(Plugin.MENU_EDIT | Plugin.MENU_BOTTOM):
+            item = new JMenuItem(Translate.t("Find & Replace"));
+            item.setAccelerator(KeyStroke.getKeyStroke('F', modifiers));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    openFindPanel();
+                }
+            });
+            menu.add(item);
+            item = new JMenuItem(Translate.t("Undo"));
+            item.setAccelerator(KeyStroke.getKeyStroke('Z', modifiers));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    textArea.undoLastAction();
+                }
+            });
+            menu.add(item);
+            item = new JMenuItem(Translate.t("Redo"));
+            item.setAccelerator(KeyStroke.getKeyStroke('Y', modifiers));
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    textArea.redoLastAction();
+                }
+            });
+            menu.add(item);
+            break;
         }
     }
 
     // Save the file contents to disk
     public boolean save() {
-        if (file == null) {
+        if(file == null) {
             return false;
         }
 
@@ -821,9 +858,10 @@ public class code extends JPanel implements EditorBase {
             pw.close();
             setModified(false);
             return true;
-        } catch (Exception e) {
+        } catch(Exception e) {
             sketch.error(e);
         }
+
         return false;
     }
 
@@ -831,12 +869,12 @@ public class code extends JPanel implements EditorBase {
         file = f;
         return save();
     }
-    
+
     public void reloadFile() {
         int cp = textArea.getCaretPosition();
         textArea.setText(sketch.getFileContent(file, true));
         textArea.setCaretPosition(cp);
-     //   scrollTo(0);
+        //   scrollTo(0);
         setModified(false);
     }
 
@@ -858,11 +896,12 @@ public class code extends JPanel implements EditorBase {
         Action act;
         act = map.get(DefaultEditorKit.insertTabAction);
         String selection = textArea.getSelectedText();
-        if (selection == null || selection.equals("")) {
+
+        if(selection == null || selection.equals("")) {
             int off = textArea.getCaretPosition();
             textArea.setCaretPosition(textArea.getLineStartOffsetOfCurrentLine());
             act.actionPerformed(e);
-            textArea.setCaretPosition(off+1); 
+            textArea.setCaretPosition(off + 1);
         } else {
             act.actionPerformed(e);
         }
@@ -899,7 +938,7 @@ public class code extends JPanel implements EditorBase {
     public void highlightLine(int line, Color color) {
         try {
             textArea.addLineHighlight(line, color);
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
     }
@@ -911,8 +950,8 @@ public class code extends JPanel implements EditorBase {
     public void gotoLine(int line) {
         try {
             textArea.setCaretPosition(textArea.getLineStartOffset(line));
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
-        } 
+        }
     }
 }

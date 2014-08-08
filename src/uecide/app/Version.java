@@ -8,18 +8,20 @@ import java.util.*;
 // it reperesent values in different bases.  For example, the number
 // "34b" has two base-10 numbers (3 and 4) and a base-26 number (b = 2).
 
-public class Version implements Comparable,Cloneable {
+public class Version implements Comparable, Cloneable {
     public ArrayList<Integer> chunks;
     public String versionString;
 
     public Version(String data) {
-        if (data == null) {
+        if(data == null) {
             data = "0.0.0a";
         }
+
         try {
             versionString = data;
             chunks = new ArrayList<Integer>();
-            if (data != null) {
+
+            if(data != null) {
                 // First, let's standardize any separators
                 data = data.replaceAll("-", ".");
                 data = data.replaceAll("_", ".");
@@ -30,25 +32,27 @@ public class Version implements Comparable,Cloneable {
                 String[] parts = data.split("\\.");
 
                 // And iterate through it all cleaning the data and converting it to numbers
-                for (String part : parts) {
+                for(String part : parts) {
                     int val = 0;
                     char[] letters = part.toCharArray();
-                    for (char letter : letters) {
-                        if (letter >= '0' && letter <= '9') {
+
+                    for(char letter : letters) {
+                        if(letter >= '0' && letter <= '9') {
                             val = val * 10;
                             val += (letter - '0');
-                        } else if (letter >= 'a' && letter <= 'z') {
+                        } else if(letter >= 'a' && letter <= 'z') {
                             val = val * 26;
                             val += (letter - 'a');
-                        } else if (letter >= 'A' && letter <= 'Z') {
+                        } else if(letter >= 'A' && letter <= 'Z') {
                             val = val * 26;
                             val += (letter - 'A');
                         }
                     }
+
                     chunks.add(val);
                 }
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
         }
     }
@@ -56,20 +60,24 @@ public class Version implements Comparable,Cloneable {
     public int compareTo(Object o) {
         Version v = (Version)o;
         int i = 0;
-        for (i = 0; i < chunks.size(); i++) {
+
+        for(i = 0; i < chunks.size(); i++) {
 
             int targetValue = 0;
-            if (i < (v.chunks.size())) {
+
+            if(i < (v.chunks.size())) {
                 targetValue = v.chunks.get(i);
             }
 
-            if (chunks.get(i) < targetValue) {
+            if(chunks.get(i) < targetValue) {
                 return -1;
             }
-            if (chunks.get(i) > targetValue) {
+
+            if(chunks.get(i) > targetValue) {
                 return 1;
             }
         }
+
         return 0;
     }
 

@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2014, Majenko Technologies
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of Majenko Technologies nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -52,54 +52,60 @@ public class Serial {
 
         SerialPort port = serialPorts.get(name);
 
-        if (port == null) {
+        if(port == null) {
             updatePortList();
             port = serialPorts.get(name);
         }
-        
-        if (port == null) {
+
+        if(port == null) {
             JOptionPane.showMessageDialog(new Frame(), "The port could not be found.\nCheck you have the right port\nselected in the Hardware menu.", "Port not found", JOptionPane.ERROR_MESSAGE);
             return null;
         }
+
         try {
 
             Debug.message("Request for port " + name);
-            if (port.isOpened()) {
+
+            if(port.isOpened()) {
                 port.purgePort(1);
                 port.purgePort(2);
                 port.closePort();
                 Debug.message("Purged and closed " + name);
             }
-                
+
             Editor.releasePorts(name);
             Debug.message("Released " + name + " in all plugins");
 
             try {
                 Thread.sleep(100); // Arduino has this, so I guess we should too.
-            } catch (Exception e) {
+            } catch(Exception e) {
                 Base.error(e);
             }
 
             port.openPort();
             Debug.message("Re-opened port");
-            if (!port.isOpened()) {
+
+            if(!port.isOpened()) {
                 JOptionPane.showMessageDialog(new Frame(), "The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.", "Port didn't open", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
 
             return port;
 
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
+
         return null;
     }
 
     public static void closePort(SerialPort p) {
         Debug.message("Request to close port");
-        if (p == null)
+
+        if(p == null)
             return;
-        if (!p.isOpened())
+
+        if(!p.isOpened())
             return;
 
         try {
@@ -108,7 +114,7 @@ public class Serial {
             p.purgePort(2);
             p.closePort();
             Debug.message("Port closed OK");
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
 
@@ -116,7 +122,8 @@ public class Serial {
 
     public static SerialPort requestPort(String name, int baudRate) {
         SerialPort nsp = requestPort(name);
-        if (nsp == null) {
+
+        if(nsp == null) {
             return null;
         }
 
@@ -124,9 +131,10 @@ public class Serial {
             if(nsp.setParams(baudRate, 8, 1, 0)) {
                 return nsp;
             }
-        } catch (Exception e) {
+        } catch(Exception e) {
             Base.error(e);
         }
+
         return null;
     }
 
@@ -134,12 +142,29 @@ public class Serial {
         ArrayList<String> names = new ArrayList<String>();
         File dev = new File("/dev");
         File[] devs = dev.listFiles();
-        for (File devfile : devs) {
-            if (devfile.getName().startsWith("ttyACM")) { names.add(devfile.getAbsolutePath()); continue; }
-            if (devfile.getName().startsWith("ttyUSB")) { names.add(devfile.getAbsolutePath()); continue; }
-            if (devfile.getName().startsWith("ttyAMA")) { names.add(devfile.getAbsolutePath()); continue; }
-            if (devfile.getName().startsWith("rfcomm")) { names.add(devfile.getAbsolutePath()); continue; }
+
+        for(File devfile : devs) {
+            if(devfile.getName().startsWith("ttyACM")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
+
+            if(devfile.getName().startsWith("ttyUSB")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
+
+            if(devfile.getName().startsWith("ttyAMA")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
+
+            if(devfile.getName().startsWith("rfcomm")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
         }
+
         return names;
     }
 
@@ -147,11 +172,24 @@ public class Serial {
         ArrayList<String> names = new ArrayList<String>();
         File dev = new File("/dev");
         File[] devs = dev.listFiles();
-        for (File devfile : devs) {
-            if (devfile.getName().startsWith("tty.serial")) { names.add(devfile.getAbsolutePath()); continue; }
-            if (devfile.getName().startsWith("tty.usbserial")) { names.add(devfile.getAbsolutePath()); continue; }
-            if (devfile.getName().startsWith("tty.usbmodem")) { names.add(devfile.getAbsolutePath()); continue; }
+
+        for(File devfile : devs) {
+            if(devfile.getName().startsWith("tty.serial")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
+
+            if(devfile.getName().startsWith("tty.usbserial")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
+
+            if(devfile.getName().startsWith("tty.usbmodem")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
         }
+
         return names;
     }
 
@@ -159,41 +197,44 @@ public class Serial {
         ArrayList<String> names = new ArrayList<String>();
         SerialPortList spl = new SerialPortList();
         String[] nlist = spl.getPortNames();
-        for (String n : nlist) {
+
+        for(String n : nlist) {
             names.add(n);
         }
+
         return names;
     }
 
     public static void updatePortList() {
         ArrayList<String>names = null;
-        if (Base.isLinux()) {
+
+        if(Base.isLinux()) {
             names = getPortListLinux();
-        } else if (Base.isMacOS()) {
+        } else if(Base.isMacOS()) {
             names = getPortListOSX();
         } else {
             names = getPortListDefault();
         }
 
-        for (String p : extraPorts) {
-            if (names.indexOf(p) == -1) {
+        for(String p : extraPorts) {
+            if(names.indexOf(p) == -1) {
                 names.add(p);
             }
         }
 
         portList = names.toArray(new String[0]);
 
-        for (String port : names) {
-            if (serialPorts.get(port) == null) {
+        for(String port : names) {
+            if(serialPorts.get(port) == null) {
                 try {
                     serialPorts.put(port, new SerialPort(port));
-                } catch (Exception e) {
+                } catch(Exception e) {
                 }
             }
         }
 
-        for (String port : serialPorts.keySet()) {
-            if (names.indexOf(port) == -1) {
+        for(String port : serialPorts.keySet()) {
+            if(names.indexOf(port) == -1) {
                 serialPorts.remove(port);
             }
         }
@@ -202,7 +243,7 @@ public class Serial {
     static public ArrayList<String> getPortList() {
         ArrayList<String> pl = new ArrayList<String>();
 
-        for (String p : portList) {
+        for(String p : portList) {
             pl.add(p);
         }
 
@@ -226,7 +267,8 @@ public class Serial {
         int pnum = 0;
         clearExtraPorts();
         String pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
-        while (pname != null) {
+
+        while(pname != null) {
             addExtraPort(pname);
             pnum++;
             pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
@@ -239,66 +281,71 @@ public class Serial {
             pn = pn.substring(pn.lastIndexOf("/") + 1);
 
             File classFolder = new File("/sys/class/tty", pn);
-            if (classFolder == null || !classFolder.exists()) {
+
+            if(classFolder == null || !classFolder.exists()) {
                 return "";
             }
 
             File dev = new File(classFolder.getCanonicalPath());
-            if (dev.getAbsolutePath().indexOf("/usb") == -1) {
+
+            if(dev.getAbsolutePath().indexOf("/usb") == -1) {
                 return "";
             }
 
             File root = dev;
             File prodFile = new File(root, "product");
 
-            while (!root.getName().startsWith("usb") && !prodFile.exists()) {
+            while(!root.getName().startsWith("usb") && !prodFile.exists()) {
                 root = root.getParentFile();
                 prodFile = new File(root, "product");
             }
 
-            if (!prodFile.exists()) {
+            if(!prodFile.exists()) {
                 return "";
             }
 
             File mfgFile = new File(root, "manufacturer");
-            if (!mfgFile.exists()) {
+
+            if(!mfgFile.exists()) {
                 return "";
             }
 
-            BufferedReader reader = new BufferedReader( new FileReader (prodFile));
+            BufferedReader reader = new BufferedReader(new FileReader(prodFile));
             String product = reader.readLine();
-            reader = new BufferedReader( new FileReader (mfgFile));
+            reader = new BufferedReader(new FileReader(mfgFile));
             String manufacturer = reader.readLine();
 
             return manufacturer + " " + product;
-    /*
+            /*
 
-            File deviceFolder = new File(classFolder, "device");
-            if (deviceFolder == null || !deviceFolder.exists()) {
-                return "";
-            }
+                    File deviceFolder = new File(classFolder, "device");
+                    if (deviceFolder == null || !deviceFolder.exists()) {
+                        return "";
+                    }
 
-            File uevent = new File(deviceFolder, "uevent");
-            if (uevent == null || !uevent.exists()) {
-                return "";
-            }
+                    File uevent = new File(deviceFolder, "uevent");
+                    if (uevent == null || !uevent.exists()) {
+                        return "";
+                    }
 
-            PropertyFile ueventData = new PropertyFile(uevent);
-            return ueventData.get("PRODUCT");
-    */
-        } catch (Exception e) {
+                    PropertyFile ueventData = new PropertyFile(uevent);
+                    return ueventData.get("PRODUCT");
+            */
+        } catch(Exception e) {
             Base.error(e);
             return "";
         }
     }
-   
+
     static String getName(SerialPort port) {
-        if (port == null) {
+        if(port == null) {
             return "";
         }
-        if (Base.isLinux()) {
+
+        if(Base.isLinux()) {
             return getNameLinux(port);
         }
+
         return "";
     }
 

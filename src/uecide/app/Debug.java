@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2014, Majenko Technologies
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of Majenko Technologies nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -74,9 +74,10 @@ public class Debug {
     }
 
     public static void show() {
-        if (shown) {
+        if(shown) {
             return;
         }
+
         win = new JFrame("Debug Console");
 
         Container contentPane = win.getContentPane();
@@ -97,8 +98,7 @@ public class Debug {
         JButton trashButton = new JButton(trashIcon);
         trashButton.setToolTipText(Translate.t("Clear Debug Log"));
         trashButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 Debug.debugText = new StringBuilder();
                 textArea.setText("");
             }
@@ -122,19 +122,21 @@ public class Debug {
         win.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         win.pack();
         win.setMinimumSize(new Dimension(100, 100));
-        if (Base.preferences != null) {
+
+        if(Base.preferences != null) {
             win.setSize(new Dimension(
-                Base.preferences.getInteger("debug.window.width"),
-                Base.preferences.getInteger("debug.window.height")
-            ));
+                            Base.preferences.getInteger("debug.window.width"),
+                            Base.preferences.getInteger("debug.window.height")
+                        ));
             win.setLocation(new Point(
-                Base.preferences.getInteger("debug.window.x"),
-                Base.preferences.getInteger("debug.window.y")
-            ));
+                                Base.preferences.getInteger("debug.window.x"),
+                                Base.preferences.getInteger("debug.window.y")
+                            ));
         } else {
             win.setSize(new Dimension(400, 400));
             win.setLocation(new Point(0, 0));
         }
+
         win.setVisible(true);
         shown = true;
         win.addComponentListener(new ComponentListener() {
@@ -159,15 +161,17 @@ public class Debug {
     }
 
     public static void hide() {
-        if (!shown) {
+        if(!shown) {
             return;
         }
+
         handleClose();
     }
 
     public static void handleClose() {
         shown = false;
-        if (Base.preferences != null) {
+
+        if(Base.preferences != null) {
             Dimension d = win.getSize();
             Base.preferences.setInteger("debug.window.width", d.width);
             Base.preferences.setInteger("debug.window.height", d.height);
@@ -176,6 +180,7 @@ public class Debug {
             Base.preferences.setInteger("debug.window.y", p.y);
             Base.preferences.save();
         }
+
         win.dispose();
     }
 
@@ -188,34 +193,40 @@ public class Debug {
 
         debugText.append(tag);
         debugText.append(s);
-        if (verbose) System.out.print(tag + s);
-        if (!s.endsWith("\n")) {
+
+        if(verbose) System.out.print(tag + s);
+
+        if(!s.endsWith("\n")) {
             debugText.append("\n");
-            if (verbose) System.out.print("\n");
+
+            if(verbose) System.out.print("\n");
         }
-        if (shown) {
+
+        if(shown) {
             textArea.append(tag);
             textArea.append(s);
-            if (!s.endsWith("\n")) {
+
+            if(!s.endsWith("\n")) {
                 textArea.append("\n");
             }
-            if (!pauseButton.isSelected()) {
+
+            if(!pauseButton.isSelected()) {
                 try {
                     textArea.setCaretPosition(debugText.length());
-                } catch (Exception e) {
+                } catch(Exception e) {
                 }
             }
         }
     }
 
     public static void setSize(Dimension d) {
-        if (shown) {
+        if(shown) {
             win.setSize(d);
         }
     }
 
     public static void setLocation(Point p) {
-        if (shown) {
+        if(shown) {
             win.setLocation(p);
         }
     }

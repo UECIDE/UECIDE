@@ -311,9 +311,15 @@ public class AStyle extends Plugin {
 
     public static void savePreferences() {
         int idx = astyleStyle.getSelectedIndex();
+        System.err.println("ASTYLE: idx = " + idx);
+        System.err.println("ASTYLE: codes.length = " + codes.length);
+
         if (idx == -1) return;
         if (idx >= codes.length) return;
         String code = codes[idx];
+        
+        System.err.println("ASTYLE: code = " + code);
+
         Base.preferences.set("astyle.style", code);
 
         Base.preferences.setBoolean("astyle.pad.blocks", padBlocks.isSelected());

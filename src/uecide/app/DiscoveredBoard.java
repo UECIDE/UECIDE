@@ -16,17 +16,19 @@ public class DiscoveredBoard {
 
     public String toString() {
         String loc = location.toString();
-        if (type == NETWORK) {
-            if (loc.startsWith("/")) {
+
+        if(type == NETWORK) {
+            if(loc.startsWith("/")) {
                 loc = loc.substring(1);
             }
         }
+
         return String.format("%s v%s (%s) on %s",
-            board.getDescription(),
-            version,
-            name,
-            loc
-        );
+                             board.getDescription(),
+                             version,
+                             name,
+                             loc
+                            );
     }
 
 }

@@ -21,9 +21,11 @@ public class OverlayIcon extends ImageIcon {
     }
 
     @Override
+
     public synchronized void paintIcon(Component c, Graphics g, int x, int y) {
         base.paintIcon(c, g, x, y);
-        for(ImageIcon icon: overlays) {
+
+        for(ImageIcon icon : overlays) {
             icon.paintIcon(c, g, x, y);
         }
     }

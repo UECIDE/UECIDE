@@ -36,7 +36,7 @@ public class FileType {
             group = g;
         }
     };
-        
+
 
     public static final int INVALID = 0;
     public static final int HEADER = 1;
@@ -105,60 +105,77 @@ public class FileType {
 
     }
 
-    public static int getType(File f) { return getType(f.getName()); }
+    public static int getType(File f) {
+        return getType(f.getName());
+    }
     public static int getType(String f) {
-        for (String extension : fileTypeList.keySet()) {
-            if (f.endsWith("." + extension)) {
+        for(String extension : fileTypeList.keySet()) {
+            if(f.endsWith("." + extension)) {
                 return fileTypeList.get(extension).type;
             }
         }
+
         return FileType.INVALID;
     }
 
-    public static boolean isValid(File f) { return isValid(f.getName()); }
+    public static boolean isValid(File f) {
+        return isValid(f.getName());
+    }
     public static boolean isValid(String f) {
         return getType(f) != FileType.INVALID;
     }
 
-    public static String getEditor(File f) { return getEditor(f.getName()); }
+    public static String getEditor(File f) {
+        return getEditor(f.getName());
+    }
     public static String getEditor(String f) {
-        for (String extension : fileTypeList.keySet()) {
-            if (f.endsWith("." + extension)) {
+        for(String extension : fileTypeList.keySet()) {
+            if(f.endsWith("." + extension)) {
                 return fileTypeList.get(extension).editor;
             }
         }
+
         return null;
     }
 
-    public static String getSyntaxStyle(File f) { return getSyntaxStyle(f.getName()); }
+    public static String getSyntaxStyle(File f) {
+        return getSyntaxStyle(f.getName());
+    }
     public static String getSyntaxStyle(String f) {
-        for (String extension : fileTypeList.keySet()) {
-            if (f.endsWith("." + extension)) {
+        for(String extension : fileTypeList.keySet()) {
+            if(f.endsWith("." + extension)) {
                 return fileTypeList.get(extension).style;
             }
         }
+
         return SyntaxConstants.SYNTAX_STYLE_NONE;
     }
 
-    public static String getIcon(File f) { return getIcon(f.getName()); }
+    public static String getIcon(File f) {
+        return getIcon(f.getName());
+    }
     public static String getIcon(String f) {
-        for (String extension : fileTypeList.keySet()) {
-            if (f.endsWith("." + extension)) {
+        for(String extension : fileTypeList.keySet()) {
+            if(f.endsWith("." + extension)) {
                 return fileTypeList.get(extension).icon;
             }
         }
+
         return "unknown.png";
     }
 
-    public static int getGroup(File f) { return getGroup(f.getName()); }
+    public static int getGroup(File f) {
+        return getGroup(f.getName());
+    }
     public static int getGroup(String f) {
-        for (String extension : fileTypeList.keySet()) {
-            if (f.endsWith("." + extension)) {
+        for(String extension : fileTypeList.keySet()) {
+            if(f.endsWith("." + extension)) {
                 return fileTypeList.get(extension).group;
             }
         }
+
         return GROUP_OTHER;
     }
 
-    
+
 };

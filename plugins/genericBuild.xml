@@ -132,5 +132,12 @@
         </exec>
     </target>
 
+    <target name="publish" depends="build">
+        <exec executable="scp">
+            <arg value="${project}.jar" />
+            <arg value="autobuild:/var/www/uecide/plugins-087/plugins" />
+        </exec>
+    </target>
+
 
 </project>

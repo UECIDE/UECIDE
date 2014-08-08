@@ -1,21 +1,21 @@
 /*
  * Copyright (c) 2014, Majenko Technologies
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of Majenko Technologies nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -67,7 +67,7 @@ public class TabLabel extends JPanel {
     Timer fileWatchTimer;
     boolean fileWatchMutex = false;
     Editor editor;
-    
+
     public TabLabel(Editor e, File sf) {
         editor = e;
         sketchFile = sf;
@@ -75,9 +75,11 @@ public class TabLabel extends JPanel {
         this.setLayout(new BorderLayout());
         nameLabel = new JLabel(name);
         fileIcon = Base.loadIconFromResource(FileType.getIcon(sketchFile));
-        if (fileIcon != null) {
+
+        if(fileIcon != null) {
             nameLabel.setIcon(fileIcon);
         }
+
         JLabel blab = new JLabel();
         nameLabel.setOpaque(false);
         blab.setIcon(Base.loadIconFromResource("tabs/close.png"));
@@ -102,14 +104,17 @@ public class TabLabel extends JPanel {
         fileWatchTimer = new Timer();
         fileWatchTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
-                if (TabLabel.this.needsReload()) {
-                    if (fileWatchMutex) return;
+                if(TabLabel.this.needsReload()) {
+                    if(fileWatchMutex) return;
+
                     fileWatchMutex = true;
-                    if (modified) {
+
+                    if(modified) {
                         TabLabel.this.askReload();
                     } else {
                         reloadFile();
                     }
+
                     fileWatchMutex = false;
                 }
             }
@@ -145,7 +150,8 @@ public class TabLabel extends JPanel {
 
     public void update() {
         Font labelFont = nameLabel.getFont();
-        if (modified) {
+
+        if(modified) {
             nameLabel.setFont(new Font(labelFont.getName(), Font.BOLD, labelFont.getSize()));
             nameLabel.setText(sketchFile.getName() + " * ");
         } else {
@@ -164,11 +170,12 @@ public class TabLabel extends JPanel {
 
     public void askReload() {
         int n = editor.twoOptionBox(
-            JOptionPane.WARNING_MESSAGE,
-            "Reload File?",
-            Translate.w("The file %1 has been modified outside UECIDE.  Do you want to reload it??", 40, "\n", sketchFile.getName()),
-            "Yes", "No");
-        if (n == 0) {
+                    JOptionPane.WARNING_MESSAGE,
+                    "Reload File?",
+                    Translate.w("The file %1 has been modified outside UECIDE.  Do you want to reload it??", 40, "\n", sketchFile.getName()),
+                    "Yes", "No");
+
+        if(n == 0) {
             reloadFile();
         } else {
             setReloaded();
@@ -183,10 +190,11 @@ public class TabLabel extends JPanel {
     }
 
     public void setModified(boolean m) {
-        if (modified != m) {
-            if (!m) {
+        if(modified != m) {
+            if(!m) {
                 expectedFileTime = sketchFile.lastModified();
             }
+
             modified = m;
             update();
         }

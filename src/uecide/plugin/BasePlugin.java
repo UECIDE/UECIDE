@@ -27,6 +27,8 @@ public class BasePlugin extends Plugin {
     public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {
     }
 
-    public ImageIcon getFileIconOverlay(File f) { return null; }
+    public ImageIcon getFileIconOverlay(File f) {
+        return null;
+    }
 }
 
