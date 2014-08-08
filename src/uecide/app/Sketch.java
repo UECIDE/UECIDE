@@ -2008,12 +2008,19 @@ public class Sketch implements MessageConsumer {
         String os = Base.getOSName();
         String arch = Base.getOSArch();
 
+        // Now if all those failed then it might be a script.  Look for
+        // a .0 entry point for the script.
+
         String env = null;
         if (envkey != null) {
             env = props.get(envkey);
             if (env != null) {
                 env = parseString(env);
             }
+        }
+
+        if (props.keyExists(key + ".0")) {
+            return executeScript(key, env);
         }
 
         // First look for an os and arch specific command
@@ -2034,12 +2041,6 @@ public class Sketch implements MessageConsumer {
             return executeCommand(parseString(foundData), env);
         }
 
-        // Now if all those failed then it might be a script.  Look for
-        // a .0 entry point for the script.
-
-        if (props.keyExists(key + ".0")) {
-            return executeScript(key, env);
-        }
 
         return false;
     }
@@ -2928,8 +2929,51 @@ public class Sketch implements MessageConsumer {
         PropertyFile script = props.getChildren(key);
         Set<Object>lines = script.keySet();
         int lineno = 0;
+
         while (script.keyExists(Integer.toString(lineno))) {
             String lk = String.format("%s.%d", key, lineno);
+            String linekey = props.keyForOS(lk);
+            String ld = props.get(linekey);
+
+            ld = ld.trim();
+
+            if  (ld.startsWith("goto::")) {
+                ld = parseString(ld);
+                String num = ld.substring(6);
+                try {
+                    lineno = Integer.parseInt(num);
+                    continue;
+                } catch (Exception e) {
+                    error("Syntax error in " + key + " at line " + lineno);
+                    error(ld);
+                    return false;
+                }
+            }
+
+            if (ld.startsWith("set::")) {
+                ld = parseString(ld);
+                String param = ld.substring(5);
+                int epos = param.indexOf("=");
+                if (epos == -1) {
+                    error("Syntax error in " + key + " at line " + lineno);
+                    error(ld);
+                    return false;
+                }
+                String kk = param.substring(0, epos);
+                String vv = param.substring(epos + 1);
+                settings.put(kk, vv);
+                lineno++;
+                continue;
+            }
+
+            if (ld.equals("fail")) {
+                return false;
+            }
+
+            if (ld.equals("end")) {
+                return true;
+            }
+
             boolean res = executeKey(lk, env);
             if (!res) {
                 return false;

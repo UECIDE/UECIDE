@@ -531,4 +531,16 @@ public class PropertyFile {
         }
         return false;
     }
+
+    public String keyForOS(String key) {
+        String os = Base.getOSName();
+        String arch = Base.getOSArch();
+        if (properties.get(key + "." + os + "_" + arch) != null) {
+            return key + "." + os + "_" + arch;
+        }
+        if (properties.get(key + "." + os) != null) {
+            return key + "." + os;
+        }
+        return key;
+    }
 }
