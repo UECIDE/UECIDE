@@ -2954,8 +2954,10 @@ public class Sketch implements MessageConsumer {
             message(mess);
         }
 
-        if (props.get("upload." + programmer + ".using").equals("script")) {
-            return executeScript("upload." + programmer + ".script");
+        if (props.get("upload." + programmer + ".using") != null) {
+            if (props.get("upload." + programmer + ".using").equals("script")) {
+                return executeScript("upload." + programmer + ".script");
+            }
         }
        
 
