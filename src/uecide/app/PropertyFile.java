@@ -514,4 +514,21 @@ public class PropertyFile {
     public Set<Object> keySet() {
         return properties.keySet();
     }
+
+    // Find if a key exists, either as an entry in its
+    // own right, or as a parent part of a key that
+    // exists.
+    public boolean keyExists(String key) {
+        if (properties.get(key) != null) {
+            return true;
+        }
+
+        for (Object ko : properties.keySet()) {
+            String k = (String)ko;
+            if (k.startsWith(key + ".")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
