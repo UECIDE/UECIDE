@@ -59,9 +59,8 @@ import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
 import javax.jmdns.ServiceInfo;
 
-
 /*! The Base class provides the initial application
- *  startup code, parsing command line options, loading 
+ *  startup code, parsing command line options, loading
  *  preferences, themes, etc, then scanning all the boards,
  *  cores, compilers etc.  It also provides a central storage
  *  location for application data, and a selection of useful
@@ -137,7 +136,7 @@ public class Base {
     }
 
     /*! The main execution entry function. It just creates an instance of this
-     *  object and passes the command line arguments. 
+     *  object and passes the command line arguments.
      */
     public static void main(String args[]) {
         new Base(args);
@@ -536,6 +535,7 @@ public class Base {
         }
 
         NetworkDiscoveryService.startDiscoveringBoards();
+        UsbDiscoveryService.startDiscoveringBoards();
     }
 
     /*! Open a sketch in a new Editor (if not running headless) and set up any preset values

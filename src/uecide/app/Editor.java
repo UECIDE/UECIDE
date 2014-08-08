@@ -3261,15 +3261,6 @@ public class Editor extends JFrame {
 
         statusInfo.append(loadedSketch.getBoard().getDescription());
 
-        if(loadedSketch.getNetworkPortIP() != null) {
-            statusInfo.append(" on " + loadedSketch.getNetworkPortIP());
-        } else if(loadedSketch.getSerialPort() == null) {
-            statusInfo.append(" - No port selected!");
-        } else {
-            statusInfo.append(" on ");
-            statusInfo.append(loadedSketch.getSerialPort());
-        }
-
         setStatus(statusInfo.toString());
     }
 

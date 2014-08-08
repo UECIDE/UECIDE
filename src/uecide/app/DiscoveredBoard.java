@@ -12,7 +12,7 @@ public class DiscoveredBoard {
 
     static public final int SERIAL = 1;
     static public final int NETWORK = 2;
-    static public final int HID = 3;
+    static public final int USB = 3;
 
     public String toString() {
         String loc = location.toString();
