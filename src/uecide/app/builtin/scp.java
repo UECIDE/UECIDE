@@ -48,6 +48,8 @@ public class scp {
             } catch (JSchException e) {
                 if (e.getMessage().equals("Auth fail")) {
                     password = null;
+                    Base.preferences.unset("ssh." + host + "." + user);
+                    Base.session.unset("ssh." + host + "." + user);
                     sketch.error("Authentication failed");
                     session.disconnect();
                     return false;
