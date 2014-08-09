@@ -40,7 +40,7 @@ import java.net.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import java.util.regex.*;
+
 import say.swing.*;
 
 import java.util.Timer;
@@ -55,8 +55,6 @@ public class PropertyFile {
     Properties properties;
     File userFile;
     boolean doPlatformOverride = false;
-
-    ArrayList<String> includeItems = new ArrayList<String>();
 
     /*! Create a new PropertyFile from a file on disk.  All properties are loaded and stored from the file. */
     public PropertyFile(File user) {
@@ -76,7 +74,7 @@ public class PropertyFile {
             properties = new Properties();
 
             if(br != null) {
-                loadFromReader(properties, br);
+                properties.load(br);
             }
 
             br.close();
@@ -97,7 +95,7 @@ public class PropertyFile {
             defaultProperties = new Properties();
 
             if(br != null) {
-                loadFromReader(defaultProperties, br);
+                defaultProperties.load(br);
             }
 
             br.close();
@@ -106,7 +104,7 @@ public class PropertyFile {
             if(user != null) {
                 if(user.exists()) {
                     FileReader r = new FileReader(user);
-                    loadFromReader(properties, r);
+                    properties.load(r);
                     r.close();
                 }
             }
@@ -129,7 +127,7 @@ public class PropertyFile {
             if(defaults.exists()) {
                 try {
                     FileReader r = new FileReader(defaults);
-                    loadFromReader(defaultProperties, r);
+                    defaultProperties.load(r);
                     r.close();
                 } catch(Exception e) {
                     Base.error(e);
@@ -143,7 +141,7 @@ public class PropertyFile {
             if(user.exists()) {
                 try {
                     FileReader r = new FileReader(user);
-                    loadFromReader(properties, r);
+                    properties.load(r);
                     r.close();
                 } catch(Exception e) {
                     Base.error(e);
@@ -194,17 +192,6 @@ public class PropertyFile {
 
         for(String key : pf.getProperties().stringPropertyNames()) {
             set(key, pf.getProperties().getProperty(key));
-        }
-    }
-
-    /*! Merge the data from an existing PropertyFile into this PropertyFile's defaults. */
-    public void mergeDefaultData(PropertyFile pf) {
-        if(pf == null) {
-            return;
-        }
-
-        for(String key : pf.getProperties().stringPropertyNames()) {
-            defaultProperties.setProperty(key, pf.getProperties().getProperty(key));
         }
     }
 
@@ -596,7 +583,7 @@ public class PropertyFile {
                     // is all successful.
                     Properties newProperties = new Properties(defaultProperties);
                     FileReader r = new FileReader(user);
-                    loadFromReader(newProperties, r);
+                    newProperties.load(r);
                     r.close();
                     properties = newProperties;
                 } catch(Exception e) {
@@ -700,94 +687,5 @@ public class PropertyFile {
         }
 
         return key;
-    }
-
-    public void loadFromReader(Properties prop, Reader br) {
-        if (br instanceof BufferedReader) {
-            loadFromBufferedReader(prop, (BufferedReader)br);
-            return;
-        }
-        if (br instanceof FileReader) {
-            try {
-                BufferedReader nr = new BufferedReader(br);
-                loadFromBufferedReader(prop, nr);
-                nr.close();
-            } catch (Exception e) {
-                Base.error(e);
-            }
-            return;
-        }
-    }
-    
-    public void loadFromBufferedReader(Properties prop, BufferedReader br) {
-        String line;
-        try {
-            while ((line = br.readLine()) != null) {
-                loadFromString(prop, line);
-            }
-        } catch (Exception e) {
-            Base.error(e);
-        }
-    }
-
-    // As we can't be sure things have loaded yet, we will have to do includes
-    // as paths on disk, not the names of objects.  So, all paths
-    // will be relative to the uecide "root".
-
-    public void runIncludeOption(String item) {
-        if (includeItems.indexOf(item) == -1) {
-            includeItems.add(item);
-        }
-    }
-
-    public void loadFromString(Properties prop, String line) {
-        Pattern p = Pattern.compile("^([^=]+)\\s*=\\s*(.*)$");
-        Pattern i = Pattern.compile("^\\.include\\s+(.*)$");
-        line = line.trim();
-        if (line.startsWith("#")) {
-            return;
-        }
-
-        Matcher m = i.matcher(line);
-        if (m.find()) {
-            runIncludeOption(m.group(1));
-            return;
-        }
-
-        m = p.matcher(line);
-        if (m.find()) {
-            String key = m.group(1);
-            String val = m.group(2);
-
-            prop.setProperty(key.trim(), val.trim());
-        }
-    }
-
-    public void processIncludes() {
-        Pattern p = Pattern.compile("(.*)\\s+(.*)");
-        for (String i : includeItems) {
-            Matcher m = p.matcher(i);
-            if (m.find()) {
-                String type = m.group(1);
-                String key = m.group(2);
-
-                if (type.equals("board")) {
-                    Board b = Base.boards.get(key);
-                    if (b != null) {
-                        mergeDefaultData(b.getProperties());
-                    }
-                } else if (type.equals("core")) {
-                    Core c = Base.cores.get(key);
-                    if (c != null) {
-                        mergeDefaultData(c.getProperties());
-                    }
-                } else if (type.equals("compiler")) {
-                    Compiler c = Base.compilers.get(key);
-                    if (c != null) {
-                        mergeDefaultData(c.getProperties());
-                    }
-                }
-            }
-        }
     }
 }
