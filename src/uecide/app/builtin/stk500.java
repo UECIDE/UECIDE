@@ -1,20 +1,21 @@
-package uecide.app;
+package uecide.app.builtin;
 
+import uecide.app.*;
 import jssc.*;
 import java.util.*;
 import java.io.*;
 
-public class Stk500 {
+public class stk500 {
 
-    SerialPort port = null;
-    String portName = null;
-    int baudRate = 115200;
-    Editor editor;
-    int sequence = 0;
-    boolean connected = false;
-    int timeout = 1000;
+    static SerialPort port = null;
+    static String portName = null;
+    static int baudRate = 115200;
+    static Sketch sketch;
+    static int sequence = 0;
+    static boolean connected = false;
+    static int timeout = 1000;
 
-    String deviceName = null;
+    static String deviceName = null;
 
     public static final int CMD_SIGN_ON                = 0x01;
     public static final int CMD_SET_PARAMETER          = 0x02;
@@ -41,17 +42,62 @@ public class Stk500 {
 
     public static final int STATUS_CMD_OK              = 0x00;
 
-    TreeMap<Long, int[]>memChunks;
+    static TreeMap<Long, int[]>memChunks;
 
-    public long pageSize = 256;
+    public static long pageSize = 256;
 
-    public Stk500(Editor e, String p, int br) {
-        editor = e;
-        portName = p;
-        baudRate = br;
+    public static boolean main(Sketch sktch, String[] args) {
+        sketch = sktch;
+        if (args.length != 3) {
+            sketch.error("Usage: __builtin_stk500::port::baud::filename");
+            return false;
+        }
+        portName = args[0];
+        String brd = args[1];
+        String fle = args[2];
+
+        baudRate = 115200;
+
+        try {
+            baudRate = Integer.parseInt(brd);
+        } catch (Exception e) {
+            Base.error(e);
+        }
+
+        if(loadHexFile(new File(fle))) {
+            sketch.message("File loaded");
+        } else {
+            sketch.error("Unable to load file " + fle);
+            return false;
+        }
+
+        if (!connect(1000)) {
+            sketch.error("Unable to connect");
+            return false;
+        }
+
+        String dn = getDeviceName();
+        if(dn != null) {
+            sketch.message("Connected to " + dn);
+        }
+
+        if(enterProgMode()) {
+            sketch.message("Entered programming mode");
+        }
+
+        if(uploadProgram()) {
+            sketch.message("Upload complete");
+        }
+
+        if(leaveProgMode()) {
+            sketch.message("Left programming mode");
+        }
+
+        disconnect();
+        return true;
     }
 
-    public int[] newPage() {
+    public static int[] newPage() {
         int[] page = new int[(int)pageSize];
 
         for(int i = 0; i < (int)pageSize; i++) {
@@ -61,7 +107,7 @@ public class Stk500 {
         return page;
     }
 
-    public void disconnect() {
+    public static void disconnect() {
         if(!connected) {
             return;
         }
@@ -77,15 +123,14 @@ public class Stk500 {
         Serial.closePort(port);
     }
 
-    public boolean connect(int to) {
+    public static boolean connect(int to) {
         timeout = to;
         port = Serial.requestPort(portName, baudRate);
 
-        if(port == null) {
-            if(editor != null) {
-                editor.error("Unable to open port " + portName);
-            }
+        sequence = 0;
 
+        if(port == null) {
+            sketch.error("Unable to open port " + portName);
             return false;
         }
 
@@ -112,9 +157,7 @@ public class Stk500 {
         if(tries == 0) {
             connected = false;
 
-            if(editor != null) {
-                editor.error("Connection timed out");
-            }
+            sketch.error("Connection timed out");
 
             Serial.closePort(port);
             return false;
@@ -155,7 +198,7 @@ public class Stk500 {
 
     }
 
-    public String getDeviceName() {
+    public static String getDeviceName() {
         if(!connected) {
             return null;
         }
@@ -163,16 +206,15 @@ public class Stk500 {
         return deviceName;
     }
 
-    public int[] sendCommand(int[] command) {
+    public static int[] sendCommand(int[] command) {
 
-        System.err.print(">> [ " + command.length + ": ");
-
-        for(int i = 0; i < command.length; i++) {
-            System.err.print(String.format("0x%02X ", command[i]));
-        }
-
-        System.err.println("]");
-
+//        System.out.print("STK500V2: stk500v2_command(");
+//        for (int i : command) {
+//            System.out.print(String.format("0x%02x ", i & 0xFF));
+//        }
+//        System.out.print(", ");
+//        System.out.print(command.length);
+//        System.out.println(")");
 
         try {
             int checksum = 0;
@@ -217,14 +259,6 @@ public class Stk500 {
                 out[i] = unsigned_byte(message[i]);
             }
 
-            System.err.print("<< [ " + msglen + ": ");
-
-            for(int i = 0; i < msglen; i++) {
-                System.err.print(String.format("0x%02X ", out[i]));
-            }
-
-            System.err.println("]");
-
             return out;
 
         } catch(Exception e) {
@@ -233,7 +267,7 @@ public class Stk500 {
         }
     }
 
-    public boolean setParameter(int param, int val) {
+    public static boolean setParameter(int param, int val) {
         if(!connected) {
             return false;
         }
@@ -251,7 +285,7 @@ public class Stk500 {
         return false;
     }
 
-    public int getParameter(int param) {
+    public static int getParameter(int param) {
         if(!connected) {
             return 0;
         }
@@ -269,7 +303,7 @@ public class Stk500 {
         return 0;
     }
 
-    public boolean osccal() {
+    public static boolean osccal() {
         if(!connected) {
             return false;
         }
@@ -287,7 +321,7 @@ public class Stk500 {
         return false;
     }
 
-    public boolean uploadProgram() {
+    public static boolean uploadProgram() {
         if(!connected) {
             return false;
         }
@@ -295,25 +329,42 @@ public class Stk500 {
         boolean firstrun = true;
 
         long currentAddress = 0;
+        long offset = 0;
+
+        int numberOfChunks = memChunks.keySet().size();
+        int currentChunk = 0;
 
         for(Long start : memChunks.keySet()) {
-            if(start != currentAddress) {
-                if(firstrun) {
-                    currentAddress = start;
 
-                    if(!loadAddress(currentAddress)) {
-                        Base.error(String.format("Load Address failed at address 0x%08x", currentAddress));
-                        return false;
-                    }
+            int perc = currentChunk * 100 / numberOfChunks;
+            sketch.setCompilingProgress(perc);
 
-                    firstrun = false;
-                    currentAddress += pageSize;
-                    continue;
+            currentChunk ++;
+
+            
+            if(firstrun) {
+                currentAddress = start;
+                offset = start;
+
+                if(!loadAddress(currentAddress)) {
+                    Base.error(String.format("Load Address failed at address 0x%08x", currentAddress));
+                    return false;
+                }
+
+                firstrun = false;
+                currentAddress += pageSize;
+                continue;
+            }
+
+            if (start != currentAddress) {
+                loadAddress(start - offset);
+                currentAddress = start;
+            }
+/*
                 } else {
                     int[] page = newPage();
 
                     while(currentAddress != start) {
-                        System.err.println(String.format("Padding 0x%08X", currentAddress));
 
                         if(!uploadPage(page)) {
                             return false;
@@ -323,20 +374,20 @@ public class Stk500 {
                     }
                 }
             }
+*/
 
             int[] chunk = memChunks.get(start);
 
             if(!uploadPage(chunk))
                 return false;
 
-            System.err.println(String.format("0x%08x: %d bytes", start, memChunks.get(start).length));
             currentAddress += chunk.length;
         }
 
         return true;
     }
 
-    public boolean uploadPage(int[] data) {
+    public static boolean uploadPage(int[] data) {
         int[] message = new int[data.length + 10];
         int len = data.length;
         message[0] = CMD_PROGRAM_FLASH_ISP;
@@ -347,8 +398,8 @@ public class Stk500 {
         message[5] = 0x40;
         message[6] = 0x4c;
         message[7] = 0x20;
-        message[8] = 0;
-        message[9] = 0;
+        message[8] = 0xFF; // 0x00
+        message[9] = 0xFF; // 0x00
 
         for(int i = 0; i < len; i++) {
             message[10 + i] = data[i];
@@ -369,16 +420,14 @@ public class Stk500 {
         return true;
     }
 
-    public boolean loadAddress(long address) {
+    public static boolean loadAddress(long address) {
         if(!connected) {
             return false;
         }
 
         if(address <= 65535) {
-
             address = address >>> 1;
 
-            System.err.println(String.format("Loading address 0x%08x", address));
 
             int a0 = (int)(address & 0xFFL);
             int a1 = (int)((address >> 8) & 0xFFL);
@@ -397,8 +446,8 @@ public class Stk500 {
 
             return false;
         } else {
-            System.err.println(String.format("Loading extended address 0x%08X", address));
-            int[] rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, 0x80, 0x00, 0x00, 0x00});
+            //int[] rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, 0x80, 0x00, 0x00, 0x00});
+            int[] rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, 0x00, 0x00, 0x00, 0x00});
 
             if(rv == null) {
                 return false;
@@ -423,7 +472,7 @@ public class Stk500 {
         }
     }
 
-    public boolean enterProgMode() {
+    public static boolean enterProgMode() {
         if(!connected) {
             return false;
         }
@@ -454,7 +503,7 @@ public class Stk500 {
         return false;
     }
 
-    public boolean leaveProgMode() {
+    public static boolean leaveProgMode() {
         if(!connected) {
             return false;
         }
@@ -474,7 +523,7 @@ public class Stk500 {
         return true;
     }
 
-    class HexRecord {
+    static class HexRecord {
         int length = 0;
         long address = 0;
         int type = 0;
@@ -612,15 +661,15 @@ public class Stk500 {
         }
     }
 
-    public int unsigned_byte(byte b) {
+    public static int unsigned_byte(byte b) {
         return (int)b & 0xFF;
     }
 
-    public long unsigned_int(int b) {
+    public static long unsigned_int(int b) {
         return (long)b & 0xFFFFFFFFL;
     }
 
-    public boolean loadHexFile(File hexFile) {
+    public static boolean loadHexFile(File hexFile) {
         long baseAddress = 0;
         long fullAddress = 0;
         long segmentAddress = 0;
@@ -652,9 +701,9 @@ public class Stk500 {
                 case HexRecord.Data:
                     recordAddress = hr.getAddress();
                     fullAddress = baseAddress + (recordAddress + segmentAddress);
-                    System.err.println(String.format("Base: 0x%08x Record: 0x%08x Segment: 0x%08x Absolute: 0x%08x",
-                                                     baseAddress, recordAddress, segmentAddress, fullAddress));
                     memChunks.put((Long)fullAddress, (int[])hr.getData());
+                    System.out.println(String.format("Loaded block at 0x%08x, size %d, made up of ba: 0x%08x, ra: 0x%08x, sa: 0x%08x",
+                        fullAddress, hr.getLength(), baseAddress, recordAddress, segmentAddress));
                     break;
 
                 case HexRecord.EoF:
@@ -672,12 +721,15 @@ public class Stk500 {
 
                 case HexRecord.ExtendedLinearAddress:
                     data = hr.getData();
-                    baseAddress = 0x80000000L | ((data[0] << 24) | (data[1] << 16));
-                    System.err.println(String.format("New base address 0x%08x", baseAddress));
+                    baseAddress = ((data[0] << 24) | (data[1] << 16));
+                    System.out.println(String.format("New base address 0x%08x", baseAddress));
                     break;
 
                 case HexRecord.StartLinearAddress:
                     // Not supported
+                    break;
+                default:
+                    System.out.println(String.format("Unknown record type 0x%02X", hr.getType()));
                     break;
                 }
             }
@@ -690,7 +742,6 @@ public class Stk500 {
 
         // Now let's see about coalescing the chunks into big blocks, each of a page in size.
 
-        System.err.println("Coalescing...");
         TreeMap<Long, int[]> compressedChunks = new TreeMap<Long, int[]>();
 
         for(Long start : memChunks.keySet()) {
@@ -707,7 +758,8 @@ public class Stk500 {
 
             long pageoffset = start - pagestart;
 
-            System.err.println(String.format("Copying %d bytes of data at offset %02X", chunkData.length, pageoffset));
+            System.out.println(String.format("Coalesced block at 0x%08x into page 0x%08x offset 0x%04x",
+                start, pagestart, pageoffset));
 
             for(int i = 0; i < chunkData.length; i++) {
                 if(pageoffset + i == pageSize) {
@@ -725,13 +777,6 @@ public class Stk500 {
             }
 
             compressedChunks.put(pagestart, pageData);
-            System.err.println(String.format("  0x%08X -> 0x%08X + 0x%02X", start, pagestart, pageoffset));
-        }
-
-        System.err.println("Coalescing done!");
-
-        for(Long page : compressedChunks.keySet()) {
-            System.err.println(String.format("Page at 0x%08X of size %d", page, compressedChunks.get(page).length));
         }
 
         memChunks = compressedChunks;

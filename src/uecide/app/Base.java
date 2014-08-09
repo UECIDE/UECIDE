@@ -455,6 +455,8 @@ public class Base {
         if(!headless) splashScreen.setMessage("Loading Libraries...", 70);
 
         gatherLibraries();
+
+        processPropertyIncludes();
         initMRU();
 
         if(!headless) splashScreen.setMessage("Opening Editor...", 80);
@@ -2267,12 +2269,25 @@ public class Base {
                 rescanBoards();
                 rescanPlugins();
                 rescanLibraries();
+                processPropertyIncludes();
                 Editor.broadcast(Translate.t("Update complete"));
                 Editor.updateAllEditors();
                 Editor.selectAllEditorBoards();
             }
         };
         thr.start();
+    }
+
+    public static void processPropertyIncludes() {
+        for (Board x : boards.values()) {
+            x.getProperties().processIncludes();
+        }
+        for (Core x : cores.values()) {
+            x.getProperties().processIncludes();
+        }
+        for (Compiler x : compilers.values()) {
+            x.getProperties().processIncludes();
+        }
     }
 
     public static void rescanPlugins() {
@@ -2290,12 +2305,14 @@ public class Base {
         compilers = new TreeMap<String, Compiler>();
         Editor.broadcast(Translate.t("Scanning compilers..."));
         loadCompilers();
+        processPropertyIncludes();
     }
 
     public static void rescanCores() {
         cores = new TreeMap<String, Core>();
         Editor.broadcast(Translate.t("Scanning cores..."));
         loadCores();
+        processPropertyIncludes();
     }
 
     public static void rescanBoards() {
@@ -2303,6 +2320,7 @@ public class Base {
             boards = new TreeMap<String, Board>();
             Editor.broadcast(Translate.t("Scanning boards..."));
             loadBoards();
+            processPropertyIncludes();
             Editor.updateAllEditors();
             Editor.selectAllEditorBoards();
         } catch(Exception e) {

@@ -2858,39 +2858,6 @@ public class Editor extends JFrame {
         helpMenu.addSeparator();
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
         submenu = new JMenu("Debug");
-        item = new JMenuItem("Connect to SKT500 device");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Stk500 dev = new Stk500(Editor.this, loadedSketch.getSerialPort(), 115200);
-
-                if(dev.connect(500)) {
-                    String dn = dev.getDeviceName();
-
-                    if(dn != null) {
-                        message("Connected to " + dn);
-                    }
-
-                    if(dev.enterProgMode()) {
-                        message("Entered programming mode");
-                    }
-
-                    if(dev.loadHexFile(new File(loadedSketch.getFolder(), loadedSketch.getName() + ".hex"))) {
-                        message("File loaded");
-                    }
-
-                    if(dev.uploadProgram()) {
-                        message("Upload complete");
-                    }
-
-                    if(dev.leaveProgMode()) {
-                        message("Left programming mode");
-                    }
-
-                    dev.disconnect();
-                }
-            }
-        });
-        submenu.add(item);
 
         item = new JMenuItem("Debug Console");
         item.addActionListener(new ActionListener() {

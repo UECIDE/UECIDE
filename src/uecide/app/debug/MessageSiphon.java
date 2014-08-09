@@ -69,6 +69,8 @@ public class MessageSiphon implements Runnable {
             String currentLine;
 
             while((currentLine = streamReader.readLine()) != null) {
+
+                System.err.println(channel + ": " + currentLine);
                 switch(channel) {
                 default:
                 case 0:

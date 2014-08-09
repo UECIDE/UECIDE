@@ -69,6 +69,9 @@ public class Sketch implements MessageConsumer {
     public String uuid;             // A globally unique ID for temporary folders etc
     public PropertyFile configFile = null;  // File containing sketch configuration
 
+    public String percentageFilter = null;
+    public float percentageMultiplier = 1.0f;
+
     boolean isUntitled;             // Whether or not the sketch has been named
 
     // These are used to redirect stdout and stderr from commands
@@ -3117,27 +3120,52 @@ public class Sketch implements MessageConsumer {
 
         Base.processes.add(runningProcess);
 
-        MessageSiphon in = new MessageSiphon(runningProcess.getInputStream(), this);
-        MessageSiphon err = new MessageSiphon(runningProcess.getErrorStream(), this);
-        in.setChannel(0);
-        err.setChannel(2);
+//        MessageSiphon in = new MessageSiphon(runningProcess.getInputStream(), this);
+//        MessageSiphon err = new MessageSiphon(runningProcess.getErrorStream(), this);
+//        in.setChannel(0);
+//        err.setChannel(2);
+        InputStream in = runningProcess.getInputStream();
+        InputStream err = runningProcess.getErrorStream();
         boolean running = true;
         int result = -1;
 
-        while(running) {
+        byte[] tmp = new byte[1024];
+
+
+        while(isProcessRunning(runningProcess)) {
             try {
-                if(in.thread != null)
-                    in.thread.join();
 
-                if(err.thread != null)
-                    err.thread.join();
+                while(in.available() > 0) {
+                    int i = in.read(tmp, 0, 20);
 
-                result = runningProcess.waitFor();
-                running = false;
+                    if(i < 0)break;
+
+                    messageStream(new String(tmp, 0, i));
+                }
+
+                while(err.available() > 0) {
+                    int i = err.read(tmp, 0, 20);
+
+                    if(i < 0)break;
+
+                    errorStream(new String(tmp, 0, i));
+                }
+
+
+//                if(in.thread != null)
+//                    in.thread.join();
+//
+//                if(err.thread != null)
+//                    err.thread.join();
+//
+//                result = runningProcess.waitFor();
+//                running = false;
             } catch(Exception ignored) {
                 Base.error(ignored);
             }
         }
+
+        result = runningProcess.exitValue();
 
         Base.processes.remove(runningProcess);
 
@@ -3146,6 +3174,19 @@ public class Sketch implements MessageConsumer {
         }
 
         return false;
+    }
+
+    public static boolean isProcessRunning(Process process) 
+    {
+        try 
+        {
+            process.exitValue();
+            return false;
+        } 
+        catch(IllegalThreadStateException e) 
+        {
+            return true;
+        }
     }
 
     public boolean isUntitled() {
@@ -3380,6 +3421,9 @@ public class Sketch implements MessageConsumer {
         message(Translate.t("Uploading firmware..."));
         settings.put("filename", file);
 
+        if (props.get("upload." + programmer + ".message") != null) {
+            message(props.get("upload." + programmer + ".message"));
+        }
 
         if(props.get("upload." + programmer + ".using") != null) {
             if(props.get("upload." + programmer + ".using").equals("script")) {
@@ -3427,15 +3471,25 @@ public class Sketch implements MessageConsumer {
                 }
             }
 
-            performSerialReset(dtr, rts, progbaud);
+            if (!performSerialReset(dtr, rts, progbaud)) {
+                return false;
+            }
         } else if(uploadType.equals("usbcdc")) {
             int baud = props.getInteger("upload." + programmer + ".reset.baud");
-            performBaudBasedReset(baud);
+            if (!performBaudBasedReset(baud)) {
+                return false;
+            }
         }
 
-        message("Uploading...");
-
+        percentageFilter = props.get("upload." + programmer + ".percent");
+        try {
+            percentageMultiplier = Float.parseFloat(props.get("upload." + programmer + ".percent.multiply"));
+        } catch (Exception ee) {
+            percentageMultiplier = 1.0f;
+        }
+        
         boolean res = executeKey(cmdKey, envKey);
+        percentageFilter = null;
 
         if(uploadType.equals("serial")) {
 
@@ -3453,7 +3507,9 @@ public class Sketch implements MessageConsumer {
                 }
             }
 
-            performSerialReset(dtr, rts, progbaud);
+            if (!performSerialReset(dtr, rts, progbaud)) {
+                return false;
+            }
         }
 
         if(res) {
@@ -3551,8 +3607,14 @@ public class Sketch implements MessageConsumer {
         int nlpos = mBuffer.lastIndexOf("\n");
 
         if(nlpos == -1) {
+            nlpos = mBuffer.lastIndexOf("\r");
+        }
+        if(nlpos == -1) {
             return;
         }
+
+        mBuffer.replaceAll("\\r\\n", "\\n");
+        mBuffer.replaceAll("\\r", "\\n");
 
         boolean eol = false;
 
@@ -3638,6 +3700,21 @@ public class Sketch implements MessageConsumer {
 
     public void message(String s) {
         flagError(s);
+
+        if (percentageFilter != null) {
+            Pattern p = Pattern.compile(percentageFilter);
+            Matcher m = p.matcher(s);
+            if (m.find()) {
+                try {
+                    String ps = m.group(1);
+                    float perc = Float.parseFloat(ps);
+                    setCompilingProgress((int)(perc * percentageMultiplier));
+                    return;
+                } catch (Exception e) {
+                    Base.error(e);
+                }
+            }
+        }
 
         if(!s.endsWith("\n")) {
             s += "\n";
