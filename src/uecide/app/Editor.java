@@ -3892,6 +3892,7 @@ public class Editor extends JFrame {
     }
 
     public static void refreshAllEditors() {
+        System.err.println("Refresh called!");
         for(Editor e : editorList) {
             e.refreshEditors();
         }
