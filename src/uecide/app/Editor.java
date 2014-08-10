@@ -322,8 +322,6 @@ public class Editor extends JFrame {
                         Pattern p = Pattern.compile("^uecide://error/(\\d+)/(.*)$");
                         Matcher m = p.matcher(e.getDescription());
                         if (m.find()) {
-                            System.err.println("File: " + m.group(2));
-                            System.err.println("Line: " + m.group(1));
 
                             File f = new File(m.group(2));
                             int line = 0;
@@ -368,7 +366,38 @@ public class Editor extends JFrame {
         consoleDoc = (HTMLDocument)consoleKit.createDefaultDocument();
         consoleTextPane.setDocument(consoleDoc);
         consoleTextPane.setCaretPosition(0);
+        clearConsole();
 
+        consoleTextPane.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    JPopupMenu menu = new JPopupMenu();
+                    JMenuItem item = new JMenuItem("Copy");
+                    item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            consoleTextPane.copy();
+                        }
+                    });
+                    menu.add(item);
+                    item = new JMenuItem("Select All");
+                    item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            consoleTextPane.selectAll();
+                        }
+                    });
+                    menu.add(item);
+                    menu.addSeparator();
+                    item = new JMenuItem("Clear Console");
+                    item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            clearConsole();
+                        }
+                    });
+                    menu.add(item);
+                    menu.show(consoleTextPane, e.getX(), e.getY());
+                }
+            }
+        });
 
 
         MutableAttributeSet standard = new SimpleAttributeSet();
@@ -3851,6 +3880,12 @@ public class Editor extends JFrame {
 
     public static boolean shouldQuit() {
         return (editorList.size() == 0);
+    }
+
+    public static void rawBroadcast(String msg) {
+        for(Editor e : editorList) {
+            e.appendToConsole(msg);
+        }
     }
 
     public static void broadcast(String msg) {

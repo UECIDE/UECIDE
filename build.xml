@@ -378,4 +378,16 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
     <target name="dist" depends="testMode, dist-release, dist-beta">
     </target>
 
+    <target name="tag">
+        <exec executable="git">
+            <arg value="tag" />
+            <arg value="-s" />
+            <arg value="${version}" />
+        </exec>
+        <exec executable="git">
+            <arg value="push" />
+            <arg value="--tags" />
+        </exec>
+    </target>
+
 </project>
