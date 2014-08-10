@@ -309,12 +309,16 @@ public class Editor extends JFrame {
         MutableAttributeSet standard = new SimpleAttributeSet();
         StyleConstants.setAlignment(standard, StyleConstants.ALIGN_LEFT);
         consoleDoc.setParagraphAttributes(0, 0, standard, true);
+        
+
+        String theme = Base.preferences.get("theme.selected", "default");
+        theme = "theme." + theme + ".";
 
         // build styles for different types of console output
-        Color bgColor    = Base.theme.getColor("console.color");
-        Color fgColorOut = Base.theme.getColor("console.output.color");
-        Color fgColorErr = Base.theme.getColor("console.error.color");
-        Color fgColorWarn = Base.theme.getColor("console.warning.color");
+        Color bgColor    = Base.theme.getColor(theme + "console.color");
+        Color fgColorOut = Base.theme.getColor(theme + "console.output.color");
+        Color fgColorErr = Base.theme.getColor(theme + "console.error.color");
+        Color fgColorWarn = Base.theme.getColor(theme + "console.warning.color");
         Font font        = Base.preferences.getFont("console.font");
 
         stdStyle = new SimpleAttributeSet();
@@ -445,6 +449,11 @@ public class Editor extends JFrame {
         projectPanel.add(projectTabs, BorderLayout.CENTER);
         projectTabs.add(treePanel, "Project");
         projectTabs.add(filesPanel, "Files");
+
+        sketchContentTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
+        sketchContentTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
+        sketchFilesTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
+        sketchFilesTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
 
         File themeFolder = Base.getContentFile("lib/theme");
 
@@ -605,6 +614,12 @@ public class Editor extends JFrame {
     class FileCellRenderer implements TreeCellRenderer {
         DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+
+            String theme = Base.preferences.get("theme.selected", "default");
+            theme = "theme." + theme + ".";
+
+            Color textColor = Base.theme.getColor(theme + "editor.fgcolor");
+
             if((value != null) && (value instanceof DefaultMutableTreeNode)) {
                 JPanel container = new JPanel();
                 container.setLayout(new BorderLayout());
@@ -629,6 +644,7 @@ public class Editor extends JFrame {
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
+                        text.setForeground(textColor);
                     }
 
                     container.setOpaque(false);
@@ -682,6 +698,7 @@ public class Editor extends JFrame {
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
+                        text.setForeground(textColor);
                     }
 
                     container.setOpaque(false);
@@ -733,6 +750,7 @@ public class Editor extends JFrame {
                             text.setOpaque(true);
                         } else {
                             text.setOpaque(false);
+                            text.setForeground(textColor);
                         }
 
                         container.add(text, BorderLayout.CENTER);
@@ -758,6 +776,7 @@ public class Editor extends JFrame {
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
+                        text.setForeground(textColor);
                     }
 
                     container.setOpaque(false);
@@ -784,6 +803,7 @@ public class Editor extends JFrame {
                     text.setOpaque(true);
                 } else {
                     text.setOpaque(false);
+                    text.setForeground(textColor);
                 }
 
                 container.setOpaque(false);

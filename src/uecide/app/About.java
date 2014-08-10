@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.swing.text.html.*;
 import javax.swing.table.*;
 import javax.swing.tree.*;
 import java.awt.*;
@@ -32,7 +33,7 @@ public class About {
     Editor editor;
     BufferedImage image;
 
-    JTextArea info;
+    JTextPane info;
 
     public About(Editor e) {
         editor = e;
@@ -58,21 +59,46 @@ public class About {
         infoScroll = new JScrollPane();
         infoScroll.setPreferredSize(new Dimension(imageWidth, 150));
 
-        info = new JTextArea();
+        info = new JTextPane();
+        info.setContentType("text/html");
         infoScroll.setViewportView(info);
 
-        info.setText(generateInfoData());
 
         info.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        info.setEnabled(false);
+//        info.setEnabled(false);
+        info.setEditable(false);
         info.setBackground(new Color(0, 0, 0));
         info.setForeground(new Color(0, 255, 0));
         Font f = info.getFont();
-        info.setFont(new Font(f.getFamily(), Font.PLAIN, 12));
+//        info.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+
+        info.addHyperlinkListener(new HyperlinkListener() {
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    if (e.getDescription().equals("uecide://close")) {
+                        frame.dispose();
+                        return;
+                    }
+                    Base.openURL(e.getURL().toString());
+                }
+            }
+        });
+
+        HTMLEditorKit kit = new HTMLEditorKit();
+        info.setEditorKit(kit);
+        StyleSheet css = kit.getStyleSheet();
+
+        css.addRule("body {color: #88ff88; font-family: Arial,Helvetica,Sans-Serif;}");
+        css.addRule("a {color: #88ffff;}");
+        css.addRule("a:visited {color: #00aaaa;}");
+        Document doc = kit.createDefaultDocument();
+        info.setDocument(doc);
+
+        info.setText(generateInfoData());
 
         info.setCaretPosition(0);
-
         mainContainer.add(infoScroll, BorderLayout.CENTER);
 
         frame.pack();
@@ -101,16 +127,33 @@ public class About {
         frame.setVisible(true);
     }
 
+    public void appendTextFile(StringBuilder s, String res) {
+        URL u = About.class.getResource(res);
+    
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(u.openStream()));
+            String cont = "";
+
+            while((cont = reader.readLine()) != null) {
+                s.append(cont);
+                s.append("\n");
+            }
+        } catch(Exception ex) {
+            Base.error(ex);
+        }
+    }
+
     public String generateInfoData() {
         StringBuilder s = new StringBuilder();
         URL contributors = About.class.getResource("/uecide/app/contributors.txt");
-        URL license = About.class.getResource("/uecide/app/license.txt");
 
+        s.append("<html><body>");
 
-        s.append(Base.theme.get("product.cap") + " version " + Base.systemVersion + "\n");
-        s.append("Build number " + Base.BUILDNO + "\n");
-        s.append("\n");
-        s.append("Contributors:\n");
+        s.append("<h1>" + Base.theme.get("product.cap") + "</h1>");
+        s.append("<h4>Version " + Base.systemVersion + "</h4>");
+        s.append("<h4>Build number " + Base.BUILDNO + "</h4>");
+        s.append("<br/>");
+        s.append("<h4>Contributors:</h4><ul>");
 
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(contributors.openStream()));
@@ -121,33 +164,26 @@ public class About {
                 Matcher m = p.matcher(cont);
 
                 if(m.find()) {
-                    s.append("    ");
+                    s.append("<li>");
                     s.append(m.group(1));
-                    s.append("\n");
+                    s.append("</li>");
                 }
             }
         } catch(Exception ex) {
             Base.error(ex);
         }
 
-        s.append("\n");
+        s.append("</ul><br/>");
 
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(license.openStream()));
-            String line = "";
+        appendTextFile(s, "/uecide/app/license.html");
+        s.append("<br/>");
+        s.append("<h4>Third party libraries and plugins:</h4>");
+        s.append("<br/>");
+        appendTextFile(s, "/uecide/app/thirdparty.html");
+        s.append("<br/>");
+        s.append("<p><a href='uecide://close'>Click to close this window.</a></p><br/>");
 
-            while((line = reader.readLine()) != null) {
-                s.append(line);
-                s.append("\n");
-            }
-        } catch(Exception ex) {
-            Base.error(ex);
-        }
-
-        s.append("\n");
-
-        s.append("\n");
-        s.append("Press <ESC> to close this window.");
+        s.append("</body></html>");
 
         return s.toString();
     }
