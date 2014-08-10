@@ -1541,7 +1541,7 @@ public class Sketch implements MessageConsumer {
                 return false;
             }
 
-            message("Resetting board...");
+            rawMessage("<ul><li>Resetting board...</li></ul>");
             serialPort.setDTR(dtr);
             serialPort.setRTS(dtr);
             Thread.sleep(1000);
@@ -1599,7 +1599,7 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        message(Translate.t("Compiling..."));
+        rawMessage("<h3>Compiling...</h3>");
 
         try {
             if(!prepare()) {
@@ -2157,7 +2157,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        message(Translate.t("Compiling Sketch..."));
+        rawMessage("<ul><li>Compiling sketch...</li></ul>");
         setCompilingProgress(10);
         ArrayList<File>sketchObjects = compileSketch();
 
@@ -2166,7 +2166,7 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        message(Translate.t("Compiling Core..."));
+        rawMessage("<ul><li>Compiling core...</li></ul>");
         setCompilingProgress(20);
 
         if(!compileCore()) {
@@ -2176,7 +2176,7 @@ public class Sketch implements MessageConsumer {
 
         setCompilingProgress(30);
 
-        message(Translate.t("Compiling Libraries..."));
+        rawMessage("<ul><li>Compiling libraries...</li></ul>");
 
         if(!compileLibraries()) {
             error("Failed compiling libraries");
@@ -2185,7 +2185,7 @@ public class Sketch implements MessageConsumer {
 
         setCompilingProgress(40);
 
-        message(Translate.t("Linking sketch..."));
+        rawMessage("<ul><li>Linking sketch...</li></ul>");
 
         if(!compileLink(sketchObjects)) {
             error("Failed linking sketch");
@@ -2261,12 +2261,13 @@ public class Sketch implements MessageConsumer {
         }
 
 
-        message(Translate.t("Compiling Done"));
+        rawMessage("<ul><li>Compiling done.</li></ul>");
         setCompilingProgress(100);
 
         if(editor != null) {
             editor.updateOutputTree();
         }
+
 
         compileSize();
 
@@ -2274,7 +2275,42 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean compileSize() {
-        return executeKey("compile.size", "compile.size.environment");
+        PropertyFile props = mergeAllProperties();
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+
+        redirectChannel(1, pw);
+        executeKey("compile.size", "compile.size.environment");
+        unredirectChannel(1);
+
+        String reg = props.get("compiler.size.regex", "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
+        int tpos = props.getInteger("compiler.size.text", 1);
+        int dpos = props.getInteger("compiler.size.data", 2);
+        int bpos = props.getInteger("compiler.size.bss", 3);
+        String[] lines = sw.toString().split("\n");
+        Pattern p = Pattern.compile(reg);
+        int textSize = 0;
+        int dataSize = 0;
+        int bssSize = 0;
+        for (String line : lines) {
+
+            try {
+                Matcher m = p.matcher(line);
+                if (m.find()) {
+                    textSize = Integer.parseInt(m.group(tpos));
+                    dataSize = Integer.parseInt(m.group(dpos));
+                    bssSize = Integer.parseInt(m.group(bpos));
+                    rawMessage("<h3>Memory usage</h3><ul>" + 
+                        "<li>Program size: " + (textSize + dataSize) + " bytes</li>" +
+                        "<li>Memory size: " + (bssSize + dataSize) + " bytes</li>" +
+                        "</ul>");
+                    return true;
+                }
+            } catch (Exception e) {
+            }
+        }
+        return true;
     }
 
     public boolean compileLibraries() {
@@ -2555,7 +2591,7 @@ public class Sketch implements MessageConsumer {
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
 
         for(String lib : coreLibs.keySet()) {
-            message("..." + lib);
+            rawMessage("<ul><ul><li>" + lib + "</li></ul></ul>");
 
             if(!compileCore(coreLibs.get(lib), "Core_" + lib)) {
                 return false;
@@ -2622,6 +2658,7 @@ public class Sketch implements MessageConsumer {
         File archive = getCacheFile(lib.getArchiveName());  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
         PropertyFile props = mergeAllProperties();
+        rawMessage("<ul><ul><li>" + lib + "</li></ul></ul>");
 
         settings.put("library", archive.getAbsolutePath());
 
@@ -3418,7 +3455,8 @@ public class Sketch implements MessageConsumer {
 
     public boolean programFile(String programmer, String file) {
         PropertyFile props = mergeAllProperties();
-        message(Translate.t("Uploading firmware..."));
+        rawMessage("<h3>Uploading firmware...</h3>");
+
         settings.put("filename", file);
 
         if (props.get("upload." + programmer + ".message") != null) {
@@ -3487,6 +3525,8 @@ public class Sketch implements MessageConsumer {
         } catch (Exception ee) {
             percentageMultiplier = 1.0f;
         }
+
+        rawMessage("<ul><li>Uploading...</li></ul>");
         
         boolean res = executeKey(cmdKey, envKey);
         percentageFilter = null;
@@ -3513,10 +3553,10 @@ public class Sketch implements MessageConsumer {
         }
 
         if(res) {
-            message(Translate.t("Upload Complete"));
+            rawMessage("<h3>Upload Complete</h3>");
             return true;
         } else {
-            error(Translate.t("Upload Failed"));
+            rawMessage("<h3><span class='error'>Upload Failed</span></h3>");
             return false;
         }
     }
@@ -3565,6 +3605,8 @@ public class Sketch implements MessageConsumer {
                             EditorBase eb = editor.getTab(tabNumber);
                             eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(theme + "editor.compile.error.bgcolor"));
                         }
+
+                        error("<a href='uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "'>Error in file " + errorFile.getName() + " at line " + errorLineNumber + ":</a>");
 
                         setLineComment(errorFile, errorLineNumber, eMat.group(eMessage));
                     }
@@ -3697,6 +3739,13 @@ public class Sketch implements MessageConsumer {
         }
     }
 
+    public void rawMessage(String s) {
+        if (editor == null) {
+            System.out.println(s);
+        } else {
+            editor.appendToConsole(s);
+        }
+    }
 
     public void message(String s) {
         flagError(s);

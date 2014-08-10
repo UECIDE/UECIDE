@@ -42,7 +42,7 @@
         </delete>
     </target>
 
-    <target name="compile" description="Compile" depends="build_number, git_contributors, thirdparty">
+    <target name="compile" description="Compile" depends="build_number, git_contributors">
         <mkdir dir="bin" />
         <javac target="1.6" 
                 debug="true"
@@ -80,22 +80,6 @@
         </jar>
         <chmod perm="0755" file="uecide.jar" />
         <copy file="uecide.jar" tofile="uecide-${build.number}.jar" />
-    </target>
-
-    <target name="thirdparty" 
-            description="Compile third party java files" 
-            depends="present-thirdparty"
-            unless="${exists.thirdparty}">
-        <subant buildpath="thirdparty"/>
-    </target>
-
-    <target name="present-thirdparty">
-        <condition property="exists.thirdparty">
-            <and>
-                <available file="lib/rsyntaxtextarea.jar" />
-                <available file="lib/autocomplete.jar" />
-            </and>
-        </condition>
     </target>
 
     <target name="test_git"><available file=".git" property="git.available" /></target>

@@ -3,39 +3,31 @@
     default="install"
 >
 
-    <target name="build" depends="update-all">
-        <subant buildpath="RSyntaxTextArea" />
-        <subant buildpath="AutoComplete" />
+    <target name="build" depends="update-all, build-rsyntaxtextarea">
+    </target>
+
+    <target name="build-rsyntaxtextarea">
+        <exec executable="gradle" dir="RSyntaxTextArea" />
     </target>
 
     <target name="install" depends="build">
         <copy file="RSyntaxTextArea/dist/rsyntaxtextarea.jar" tofile="../lib/rsyntaxtextarea.jar" />
-        <copy file="AutoComplete/dist/autocomplete.jar" tofile="../lib/autocomplete.jar" />
     </target>
 
     <target name="update-all" depends="
-        exists-rsyntaxarea, download-rsyntaxarea, update-rsyntaxarea, 
-        exists-autocomplete, download-autocomplete, update-autocomplete
+        exists-rsyntaxarea, download-rsyntaxarea, update-rsyntaxarea
     " />
 
     <target name="update-rsyntaxarea" if="present.rsyntaxarea">
         <antcall target="pull"><param name="dir" value="RSyntaxTextArea" /></antcall>
     </target>
 
-    <target name="update-autocomplete" if="present.autocomplete">
-        <antcall target="pull"><param name="dir" value="AutoComplete" /></antcall>
-    </target>
-
     <target name="download-rsyntaxarea" unless="present.rsyntaxarea">
         <antcall target="clone"><param name="uri" value="https://github.com/bobbylight/RSyntaxTextArea.git" /></antcall>
     </target>
 
-    <target name="download-autocomplete" unless="present.autocomplete">
-        <antcall target="clone"><param name="uri" value="https://github.com/bobbylight/AutoComplete.git" /></antcall>
-    </target>
 
     <target name="exists-rsyntaxarea"><available file="RSyntaxTextArea" property="present.rsyntaxarea"/></target>
-    <target name="exists-autocomplete"><available file="AutoComplete" property="present.autocomplete"/></target>
 
     <target name="pull">
         <exec executable="git" dir="${dir}">

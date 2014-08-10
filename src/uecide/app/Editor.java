@@ -39,6 +39,7 @@ import java.awt.image.*;
 import java.awt.event.*;
 
 import java.util.*;
+import java.util.regex.*;
 import java.io.*;
 import java.net.*;
 
@@ -46,6 +47,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 import javax.swing.text.*;
+import javax.swing.text.html.*;
 import javax.swing.border.*;
 import java.lang.reflect.*;
 import javax.imageio.*;
@@ -119,8 +121,9 @@ public class Editor extends JFrame {
     DefaultTreeModel filesTreeModel;
 
     JScrollPane consoleScroll;
-    BufferedStyledDocument consoleDoc;
     JTextPane consoleTextPane;
+    HTMLDocument consoleDoc;
+    HTMLEditorKit consoleKit;
 
     MutableAttributeSet stdStyle;
     MutableAttributeSet errStyle;
@@ -300,52 +303,77 @@ public class Editor extends JFrame {
         final Editor me = this;
 
         consoleScroll = new JScrollPane();
-        int maxLineCount = Base.preferences.getInteger("console.length");
+        consoleTextPane = new JTextPane();
 
-        consoleDoc = new BufferedStyledDocument(10000, maxLineCount);
-        consoleTextPane = new JTextPane(consoleDoc);
-        consoleTextPane.setEditable(false);
 
-        MutableAttributeSet standard = new SimpleAttributeSet();
-        StyleConstants.setAlignment(standard, StyleConstants.ALIGN_LEFT);
-        consoleDoc.setParagraphAttributes(0, 0, standard, true);
-        
+        consoleTextPane.setContentType("text/html");
+
+        consoleTextPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         String theme = Base.preferences.get("theme.selected", "default");
         theme = "theme." + theme + ".";
+        consoleTextPane.setEditable(false);
+        consoleTextPane.setBackground(Base.theme.getColor(theme + "console.color"));
 
-        // build styles for different types of console output
-        Color bgColor    = Base.theme.getColor(theme + "console.color");
-        Color fgColorOut = Base.theme.getColor(theme + "console.output.color");
-        Color fgColorErr = Base.theme.getColor(theme + "console.error.color");
-        Color fgColorWarn = Base.theme.getColor(theme + "console.warning.color");
-        Font font        = Base.preferences.getFont("console.font");
+        consoleTextPane.addHyperlinkListener(new HyperlinkListener() {
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    if (e.getDescription().startsWith("uecide://error/")) {
+                        Pattern p = Pattern.compile("^uecide://error/(\\d+)/(.*)$");
+                        Matcher m = p.matcher(e.getDescription());
+                        if (m.find()) {
+                            System.err.println("File: " + m.group(2));
+                            System.err.println("Line: " + m.group(1));
 
-        stdStyle = new SimpleAttributeSet();
-        StyleConstants.setForeground(stdStyle, fgColorOut);
-        StyleConstants.setBackground(stdStyle, bgColor);
-        StyleConstants.setFontSize(stdStyle, font.getSize());
-        StyleConstants.setFontFamily(stdStyle, font.getFamily());
-        StyleConstants.setBold(stdStyle, font.isBold());
-        StyleConstants.setItalic(stdStyle, font.isItalic());
+                            File f = new File(m.group(2));
+                            int line = 0;
+                            try {
+                                line = Integer.parseInt(m.group(1));
+                            } catch (Exception ee) {
+                            }
+                            if (line > 0) {
+                                int tab = openOrSelectFile(f);
+                                if (tab >= 0) {
+                                    EditorBase eb = getTab(tab);
+                                    eb.gotoLine(line-1);
+                                    eb.requestFocus();
+                                }
+                            }
+                        }
+                        return;
+                    }
+                        
+                    if (e.getURL() != null) {
+                        Base.openURL(e.getURL().toString());
+                    }
+                }
+            }
+        });
 
-        errStyle = new SimpleAttributeSet();
-        StyleConstants.setForeground(errStyle, fgColorErr);
-        StyleConstants.setBackground(errStyle, bgColor);
-        StyleConstants.setFontSize(errStyle, font.getSize());
-        StyleConstants.setFontFamily(errStyle, font.getFamily());
-        StyleConstants.setBold(errStyle, font.isBold());
-        StyleConstants.setItalic(errStyle, font.isItalic());
+        consoleKit = new HTMLEditorKit();
+        consoleTextPane.setEditorKit(consoleKit);
+        StyleSheet css = consoleKit.getStyleSheet();
 
-        warnStyle = new SimpleAttributeSet();
-        StyleConstants.setForeground(warnStyle, fgColorWarn);
-        StyleConstants.setBackground(warnStyle, bgColor);
-        StyleConstants.setFontSize(warnStyle, font.getSize());
-        StyleConstants.setFontFamily(warnStyle, font.getFamily());
-        StyleConstants.setBold(warnStyle, font.isBold());
-        StyleConstants.setItalic(warnStyle, font.isItalic());
+        css.addRule("body {" + Base.theme.get(theme + "console.body", Base.theme.get("theme.default.console.body")) + "}");
+        css.addRule("span.warning {" + Base.theme.get(theme + "console.warning", Base.theme.get("theme.default.console.warning")) + "}");
+        css.addRule("span.error {" + Base.theme.get(theme + "console.error", Base.theme.get("theme.default.console.error")) + "}");
+        css.addRule("a {" + Base.theme.get(theme + "console.a", Base.theme.get("theme.default.console.a")) + "}");
+        css.addRule("ul {" + Base.theme.get(theme + "console.ul", Base.theme.get("theme.default.console.ul")) + "}");
+        css.addRule("ol {" + Base.theme.get(theme + "console.ol", Base.theme.get("theme.default.console.ol")) + "}");
+        css.addRule("li {" + Base.theme.get(theme + "console.li", Base.theme.get("theme.default.console.li")) + "}");
+        css.addRule("h1 {" + Base.theme.get(theme + "console.h1", Base.theme.get("theme.default.console.h1")) + "}");
+        css.addRule("h2 {" + Base.theme.get(theme + "console.h2", Base.theme.get("theme.default.console.h2")) + "}");
+        css.addRule("h3 {" + Base.theme.get(theme + "console.h3", Base.theme.get("theme.default.console.h3")) + "}");
+        css.addRule("h4 {" + Base.theme.get(theme + "console.h4", Base.theme.get("theme.default.console.h4")) + "}");
+        consoleDoc = (HTMLDocument)consoleKit.createDefaultDocument();
+        consoleTextPane.setDocument(consoleDoc);
+        consoleTextPane.setCaretPosition(0);
 
-        consoleTextPane.setBackground(bgColor);
+
+
+        MutableAttributeSet standard = new SimpleAttributeSet();
+        StyleConstants.setAlignment(standard, StyleConstants.ALIGN_LEFT);
+        
 
         consoleScroll.setViewportView(consoleTextPane);
 
@@ -2003,33 +2031,6 @@ public class Editor extends JFrame {
         return loadedSketch;
     }
 
-    public void message(String msg) {
-        Debug.message(msg);
-
-        if(msg == null) {
-            return;
-        }
-
-        if(!msg.endsWith("\n")) {
-            msg += "\n";
-        }
-
-        consoleDoc.appendString(msg, stdStyle);
-        consoleDoc.insertAll();
-        consoleTextPane.setCaretPosition(consoleDoc.getLength());
-    }
-
-    public void warning(String msg) {
-        Debug.message(msg);
-
-        if(!msg.endsWith("\n")) {
-            msg += "\n";
-        }
-
-        consoleDoc.appendString(msg, warnStyle);
-        consoleDoc.insertAll();
-        consoleTextPane.setCaretPosition(consoleDoc.getLength());
-    }
 
     String mBuffer = "";
     public void messageStream(String msg) {
@@ -2121,6 +2122,42 @@ public class Editor extends JFrame {
         }
     }
 
+
+    public void appendToConsole(String s) {
+        try {
+            consoleKit.insertHTML(consoleDoc, consoleDoc.getLength(), s, 0, 0, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        consoleTextPane.setCaretPosition(consoleDoc.getLength());
+    }
+    
+    public void message(String msg) {
+        Debug.message(msg);
+
+        if(msg == null) {
+            return;
+        }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
+        msg = msg.replaceAll("\n", "<br/>");
+        appendToConsole("<span>" + msg + "</span>");
+    }
+
+    public void warning(String msg) {
+        Debug.message(msg);
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
+        msg = msg.replaceAll("\n", "<br/>");
+        appendToConsole("<span class='warning'>" + msg + "</span>");
+    }
+
     public void error(String msg) {
         Debug.message(msg);
 
@@ -2128,9 +2165,8 @@ public class Editor extends JFrame {
             msg += "\n";
         }
 
-        consoleDoc.appendString(msg, errStyle);
-        consoleDoc.insertAll();
-        consoleTextPane.setCaretPosition(consoleDoc.getLength());
+        msg = msg.replaceAll("\n", "<br/>");
+        appendToConsole("<span class='error'>" + msg + "</span>");
     }
 
     public void error(Throwable e) {

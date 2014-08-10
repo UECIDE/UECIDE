@@ -66,13 +66,10 @@ public class About {
 
         info.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-//        info.setEnabled(false);
         info.setEditable(false);
         info.setBackground(new Color(0, 0, 0));
         info.setForeground(new Color(0, 255, 0));
         Font f = info.getFont();
-//        info.setFont(new Font("Monospaced", Font.PLAIN, 12));
-
 
         info.addHyperlinkListener(new HyperlinkListener() {
             public void hyperlinkUpdate(HyperlinkEvent e) {
