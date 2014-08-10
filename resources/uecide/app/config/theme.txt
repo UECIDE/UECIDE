@@ -92,7 +92,7 @@ theme.default.editor.compile.error.bgcolor=#FFaaaa
 theme.default.editor.compile.warning.bgcolor=#FFFFaa
 theme.default.editor.searchall.bgcolor=#aaffaa
 
-theme.default.console.body=background-color: #000000; color: #00FF00; font-familt: Arial, Helvetica, Sans-Serif; font-size: 10px;
+theme.default.console.body=background-color: #000000; color: #00FF00; font-family: Arial, Helvetica, Sans-Serif; font-size: 10px;
 theme.default.console.warning=color: #FFFF00;
 theme.default.console.error=color: #FF0000;
 theme.default.console.a=color: #44FF44; text-decoration: underline; font-weight: bold;
