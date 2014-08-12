@@ -249,6 +249,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <mkdir dir="bundle/windows/uecide-${version}/lib" />
         <mkdir dir="windows" /> 
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows" />
         <copy file="dist/windows/config.xml" todir="bundle/windows" />
         <copy file="dist/windows/about.bmp" todir="bundle/windows" />
         <copy file="dist/windows/application.ico" todir="bundle/windows" />
@@ -270,6 +271,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
         <unzip dest="bundle/windows/uecide-${version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows" />
         <copy file="dist/windows/config.xml" todir="bundle/windows" />
         <copy file="dist/windows/about.bmp" todir="bundle/windows" />
         <copy file="dist/windows/application.ico" todir="bundle/windows" />
@@ -288,6 +290,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <mkdir dir="bundle/windows/uecide-${version}/lib" />
         <mkdir dir="windows" /> 
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows" />
         <copy file="dist/windows/config.xml" todir="bundle/windows" />
         <copy file="dist/windows/about.bmp" todir="bundle/windows" />
         <copy file="dist/windows/application.ico" todir="bundle/windows" />
@@ -320,6 +323,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
         <unzip dest="bundle/windows/uecide-${version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows" />
         <copy file="dist/windows/config.xml" todir="bundle/windows" />
         <copy file="dist/windows/about.bmp" todir="bundle/windows" />
         <copy file="dist/windows/application.ico" todir="bundle/windows" />

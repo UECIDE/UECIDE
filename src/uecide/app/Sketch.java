@@ -1117,19 +1117,28 @@ public class Sketch implements MessageConsumer {
                 newinclist.put(incfile, LIB_PROCESSED);
                 ArrayList<String> req = lib.getRequiredLibraries();
 
-                for(String r : req) {
-                    if(inclist.get(r) == null) {
-                        if(includeOrder.indexOf(r) == -1) {
-                            includeOrder.add(r);
+                if (req != null) {
+                    System.err.print("Required for " + lib.getFolder() + ": ");
+                    for(String r : req) {
+
+                        System.err.print(req + " ");
+
+                        if(inclist.get(r) == null) {
+                            if(includeOrder.indexOf(r) == -1) {
+                                includeOrder.add(r);
+                            }
+
+                            newinclist.put(r, LIB_PENDING);
+                        } else {
+                            newinclist.put(r, LIB_PROCESSED);
                         }
-
-                        newinclist.put(r, LIB_PENDING);
-                    } else {
-                        newinclist.put(r, LIB_PROCESSED);
                     }
-                }
+                    System.err.println("");
 
-                processed++;
+                    processed++;
+                } else {
+                    System.err.println("!!! FAIL: Get required libraries: " + lib);
+                }
             }
 
             inclist.clear();
@@ -1497,8 +1506,12 @@ public class Sketch implements MessageConsumer {
                     // And then work through all the required libraries and add them.
                     ArrayList<String> requiredLibraries = lib.getRequiredLibraries();
 
-                    for(String req : requiredLibraries) {
-                        addLibraryToImportList(req);
+                    if (requiredLibraries != null) {
+                        for(String req : requiredLibraries) {
+                            addLibraryToImportList(req);
+                        }
+                    } else {
+                        System.err.println(">>> Failed getting required libraries for " + lib);
                     }
 
                     return lib;
@@ -3144,8 +3157,7 @@ public class Sketch implements MessageConsumer {
         Debug.message("Execute: " + sb.toString());
 
         if(Base.preferences.getBoolean("compiler.verbose")) {
-            message("");
-            message(sb.toString());
+            rawMessage("<div class='command'>" + sb.toString() + "</div>");
         }
 
         try {

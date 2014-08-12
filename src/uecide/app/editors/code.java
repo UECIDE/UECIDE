@@ -52,7 +52,6 @@ import javax.swing.JToolBar;
 
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.*;
-import org.fife.ui.autocomplete.*;
 
 public class code extends JPanel implements EditorBase {
     File file = null;
@@ -326,7 +325,6 @@ public class code extends JPanel implements EditorBase {
         setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
         textArea.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
 
-        System.err.println("Setting foreground to " + Base.theme.get(theme + "editor.fgcolor"));
         textArea.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
         textArea.setFont(Base.preferences.getFont("editor.font"));
 

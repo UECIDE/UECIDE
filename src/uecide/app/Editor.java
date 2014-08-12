@@ -355,6 +355,7 @@ public class Editor extends JFrame {
         css.addRule("body {" + Base.theme.get(theme + "console.body", Base.theme.get("theme.default.console.body")) + "}");
         css.addRule("span.warning {" + Base.theme.get(theme + "console.warning", Base.theme.get("theme.default.console.warning")) + "}");
         css.addRule("span.error {" + Base.theme.get(theme + "console.error", Base.theme.get("theme.default.console.error")) + "}");
+        css.addRule("div.command {" + Base.theme.get(theme + "console.command", Base.theme.get("theme.default.console.command")) + "}");
         css.addRule("a {" + Base.theme.get(theme + "console.a", Base.theme.get("theme.default.console.a")) + "}");
         css.addRule("ul {" + Base.theme.get(theme + "console.ul", Base.theme.get("theme.default.console.ul")) + "}");
         css.addRule("ol {" + Base.theme.get(theme + "console.ol", Base.theme.get("theme.default.console.ol")) + "}");

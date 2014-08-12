@@ -48,7 +48,7 @@ import javax.swing.border.TitledBorder;
 
 public class Library implements Comparable {
     public ArrayList<String> requiredLibraries;
-    public File folder;
+    public File root;
     public String name;
     public File examplesFolder = null;
     public ArrayList<File> sourceFiles;
@@ -80,7 +80,7 @@ public class Library implements Comparable {
         type = t;
         core = c;
 
-        File root = loc;
+        root = loc;
 
         // Identify library type.
 
@@ -94,7 +94,7 @@ public class Library implements Comparable {
             // Yes.
             mainInclude = hdr;
 
-            propertyFile = new File(folder, "library.txt");
+            propertyFile = new File(root, "library.txt");
 
             if(propertyFile.exists()) {
                 properties = new PropertyFile(propertyFile);
@@ -280,7 +280,7 @@ public class Library implements Comparable {
 
                 // If the file is not local to the library then go ahead and add it.
                 // Local files override other libraries.
-                File localFile = new File(folder, i);
+                File localFile = new File(root, i);
 
                 if(!hasHeader(localFile.getName())) {
                     if(requiredLibraries.indexOf(i) == -1) {
@@ -308,7 +308,7 @@ public class Library implements Comparable {
     }
 
     public File getFolder() {
-        return folder;
+        return root;
     }
 
     public File getUtilityFolder() {
@@ -404,9 +404,9 @@ public class Library implements Comparable {
 
     public boolean isLocal(File sketchFolder) {
         File wouldBeLocalLibs = new File(sketchFolder, "libraries");
-        File wouldBeLocal = new File(wouldBeLocalLibs, folder.getName());
+        File wouldBeLocal = new File(wouldBeLocalLibs, root.getName());
 
-        if(wouldBeLocal.equals(folder)) {
+        if(wouldBeLocal.equals(root)) {
             return true;
         }
 

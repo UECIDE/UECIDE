@@ -1859,6 +1859,7 @@ public class Base {
                 className = findClassInZipFile(jar);
 
                 if(className == null) {
+                    System.err.println("Unable to find class in JAR file!");
                     return;
                 }
             }
@@ -1885,6 +1886,7 @@ public class Base {
             }
 
         } catch(Exception e) {
+            e.printStackTrace();
             error(e);
         }
     }
