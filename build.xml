@@ -385,6 +385,8 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
     <target name="tag">
         <exec executable="git">
             <arg value="tag" />
+            <arg value="-m" />
+            <arg value="Auto generated tag" />
             <arg value="-s" />
             <arg value="${version}" />
         </exec>

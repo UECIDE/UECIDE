@@ -2530,6 +2530,63 @@ public class Base {
         return themeList;
     }
 
+    public static int redProportion(Color c) {
+        int red = c.getRed();
+        int green = c.getGreen();
+        int blue = c.getBlue();
+        int tot = red + green + blue;
+        return red * 100 / tot;
+    }
+
+    public static int greenProportion(Color c) {
+        int red = c.getRed();
+        int green = c.getGreen();
+        int blue = c.getBlue();
+        int tot = red + green + blue;
+        return green * 100 / tot;
+    }
+
+    public static int blueProportion(Color c) {
+        int red = c.getRed();
+        int green = c.getGreen();
+        int blue = c.getBlue();
+        int tot = red + green + blue;
+        return blue * 100 / tot;
+    }
+
+    public static Color reddest(Color first, Color... colors) {
+        Color cmax = first;
+        for (Color c : colors) {
+            int rp = redProportion(c);
+            if (rp > redProportion(cmax)) {
+                cmax = c;
+            }
+        }
+        return cmax;
+    }
+
+    public static Color bluest(Color first, Color... colors) {
+        Color cmax = first;
+        for (Color c : colors) {
+            int rp = blueProportion(c);
+            if (rp > blueProportion(cmax)) {
+                cmax = c;
+            }
+        }
+        return cmax;
+    }
+
+    public static Color greenest(Color first, Color... colors) {
+        Color cmax = first;
+        for (Color c : colors) {
+            int rp = greenProportion(c);
+            if (rp > greenProportion(cmax)) {
+                cmax = c;
+            }
+        }
+        return cmax;
+    }
+
 
 }
 

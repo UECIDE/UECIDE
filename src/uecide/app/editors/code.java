@@ -301,6 +301,7 @@ public class code extends JPanel implements EditorBase {
 
     public void requestFocus() {
         textArea.requestFocus();
+//        textArea.forceCurrentLineHighlightRepaint();
     }
 
     public void refreshSettings() {

@@ -67,14 +67,13 @@ import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
 import javax.jmdns.ServiceInfo;
 
-
-
 public class Editor extends JFrame {
 
     Box mainDecorationContainer;
 
     JSplitPane topBottomSplit;
     JSplitPane leftRightSplit;
+    JSplitPane manualSplit;
 
     JTree sketchContentTree;
     JTree sketchFilesTree;
@@ -135,6 +134,12 @@ public class Editor extends JFrame {
     JButton abortButton;
     JButton runButton;
     JButton programButton;
+
+    JScrollPane manualScroll;
+    Browser manualPane;
+    JToolBar manualBar;
+
+    JButton manualButton;
 
     public static ArrayList<Editor>editorList = new ArrayList<Editor>();
 
@@ -280,19 +285,32 @@ public class Editor extends JFrame {
             height = Base.preferences.getInteger("editor.window.height.min");
         }
 
-        leftRightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, projectPanel, editorPanel);
-        topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, leftRightSplit, consolePanel);
+        manualPane = new Browser(loadedSketch.getCore().getManual());
+        manualScroll = new JScrollPane();
+        manualScroll.setViewportView(manualPane);
 
+        leftRightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, projectPanel, editorPanel);
+        manualSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, manualScroll);
+        topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, manualSplit, consolePanel);
+
+
+        manualSplit.setOneTouchExpandable(false);
         leftRightSplit.setOneTouchExpandable(true);
         topBottomSplit.setOneTouchExpandable(true);
+
+        manualScroll.setVisible(false);
 
         leftRightSplit.setContinuousLayout(true);
         topBottomSplit.setContinuousLayout(true);
 
         leftRightSplit.setResizeWeight(0D);
         topBottomSplit.setResizeWeight(1D);
+        manualSplit.setResizeWeight(1D);
 
-        int dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
+        int dividerSize = Base.preferences.getInteger("editor.manual.split", width - 250);
+        manualSplit.setDividerLocation(dividerSize);
+
+        dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
         topBottomSplit.setDividerLocation(dividerSize);
 
         dividerSize = Base.preferences.getInteger("editor.tree.split", 150);
@@ -541,8 +559,6 @@ public class Editor extends JFrame {
             }
         });
 
-
-
         Editor.addToolbarButton(toolbar, "toolbar/open.png", "Open Sketch", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleOpenPrompt();
@@ -558,6 +574,17 @@ public class Editor extends JFrame {
         toolbar.addSeparator();
 
         addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
+
+        toolbar.addSeparator();
+        Editor.addToolbarButton(toolbar, "toolbar/manual.png", "Manual", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (manualScroll.isVisible()) {
+                    hideManual();
+                } else {
+                    showManual();
+                }
+            }
+        });
 
         menuBar = new JMenuBar();
 
@@ -587,22 +614,6 @@ public class Editor extends JFrame {
             }
         });
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
-        /*
-                KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-                manager.addKeyEventDispatcher(new KeyEventDispatcher() {
-                    public boolean dispatchKeyEvent(KeyEvent e) {
-                        if (e.getID() == KeyEvent.KEY_PRESSED) {
-                            if (e.getKeyCode() == KeyEvent.VK_F11) {
-                                System.err.println("Toggle");
-                                toggleFullScreen();
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                });
-        */
 
         if(Base.preferences.getBoolean("editor.fullscreen")) {
             isFullScreen = true;
@@ -647,26 +658,61 @@ public class Editor extends JFrame {
 
         // We want to do this last as the previous SETs trigger this change listener.
 
-        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-        new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent e) {
-                int pos = (Integer)(e.getNewValue());
-                Base.preferences.setInteger("editor.tree.split", pos);
-                Base.preferences.saveDelay();
+        manualSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    int pos = (Integer)(e.getNewValue());
+                    Base.preferences.setInteger("editor.manual.split", pos);
+                    Base.preferences.saveDelay();
+                }
             }
-        }
-                                                );
+        );
+
+        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    int pos = (Integer)(e.getNewValue());
+                    Base.preferences.setInteger("editor.tree.split", pos);
+                    Base.preferences.saveDelay();
+                }
+            }
+        );
 
         topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-        new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent e) {
-                int pos = (Integer)(e.getNewValue());
-                Base.preferences.setInteger("editor.divider.split", pos);
-                Base.preferences.saveDelay();
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    int pos = (Integer)(e.getNewValue());
+                    Base.preferences.setInteger("editor.divider.split", pos);
+                    Base.preferences.saveDelay();
+                }
             }
-        }
-                                                );
+        );
 
+        if (Base.preferences.getBoolean("manual.split.visible")) {
+            showManual();
+        }
+
+    }
+
+    public void hideManual() {
+        manualScroll.setVisible(false);
+        int w = getSize().width;
+        int spos = w - manualSplit.getDividerLocation();
+        Base.preferences.setInteger("manual.split.position", spos);
+        Base.preferences.setBoolean("manual.split.visible", false);
+        manualSplit.setDividerLocation(1D);
+        Base.preferences.saveDelay();
+    }
+
+    public void showManual() {
+        manualScroll.setVisible(true);
+        int w = getSize().width;
+        int spos = Base.preferences.getInteger("manual.split.position", 200);
+        Base.preferences.setBoolean("manual.split.visible", true);
+        manualSplit.setDividerLocation(w - spos);
+        Base.preferences.saveDelay();
+        manualPane.setRoot(loadedSketch.getCore().getManual());
+        manualPane.home();
     }
 
     class FileCellRenderer implements TreeCellRenderer {
@@ -3054,6 +3100,8 @@ public class Editor extends JFrame {
             for(Object k : discoveredBoard.properties.keySet()) {
                 loadedSketch.put("mdns." + (String)k, discoveredBoard.properties.get((String)k));
             }
+            manualPane.setRoot(loadedSketch.getCore().getManual());
+            manualPane.home();
         }
     }
 
@@ -3177,6 +3225,8 @@ public class Editor extends JFrame {
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setBoard(e.getActionCommand());
+                    manualPane.setRoot(loadedSketch.getCore().getManual());
+                    manualPane.home();
                 }
             });
             item.setActionCommand(board.getName());
@@ -3215,6 +3265,8 @@ public class Editor extends JFrame {
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setCore(e.getActionCommand());
+                    manualPane.setRoot(loadedSketch.getCore().getManual());
+                    manualPane.home();
                 }
             });
             item.setActionCommand(core.getName());
@@ -3912,6 +3964,8 @@ public class Editor extends JFrame {
 
         if(eb != null) {
             loadedSketch.setBoard(eb);
+            manualPane.setRoot(loadedSketch.getCore().getManual());
+            manualPane.home();
         }
     }
 

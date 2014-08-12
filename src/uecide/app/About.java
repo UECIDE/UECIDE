@@ -135,6 +135,7 @@ public class About {
                 s.append(cont);
                 s.append("\n");
             }
+            reader.close();
         } catch(Exception ex) {
             Base.error(ex);
         }

@@ -267,5 +267,12 @@ public class UObject implements Comparable {
     }
 
 
-
+    public File getManual() {
+        String path = get("manual");
+        if (path != null) {
+            return new File(getFolder(), path);
+        } else {
+            return new File(getFolder(), "manual");
+        }
+    }
 }

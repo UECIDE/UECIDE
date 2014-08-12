@@ -51,22 +51,6 @@ public class Core extends UObject {
         return (new File(path)).list(onlyHFiles);
     }
 
-    public File getManual() {
-        String m = get("manual");
-
-        if(m == null) {
-            return null;
-        }
-
-        File mf = new File(getFolder(), m);
-
-        if(!mf.exists()) {
-            return null;
-        }
-
-        return mf;
-    }
-
     public Compiler getCompiler() {
         String c = get("compiler");
 

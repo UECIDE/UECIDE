@@ -74,9 +74,9 @@ public class ProjectSearch {
         text.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         String theme = Base.preferences.get("theme.selected", "default");
         theme = "theme." + theme + ".";
-        text.setBackground(Base.theme.getColor(theme + "console.color"));
+        text.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
 
-       text.addHyperlinkListener(new HyperlinkListener() {
+        text.addHyperlinkListener(new HyperlinkListener() {
             public void hyperlinkUpdate(HyperlinkEvent e) {
                 if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                     if (e.getDescription().startsWith("uecide://goto/")) {
@@ -114,18 +114,16 @@ public class ProjectSearch {
         text.setEditorKit(kit);
         StyleSheet css = kit.getStyleSheet();
 
-        css.addRule("body {" + Base.theme.get(theme + "console.body", Base.theme.get("theme.default.console.body")) + "}");
-        css.addRule("span.warning {" + Base.theme.get(theme + "console.warning", Base.theme.get("theme.default.console.warning")) + "}");
-        css.addRule("span.error {" + Base.theme.get(theme + "console.error", Base.theme.get("theme.default.console.error")) + "}");
-        css.addRule("div.command {" + Base.theme.get(theme + "console.command", Base.theme.get("theme.default.console.command")) + "}");
-        css.addRule("a {" + Base.theme.get(theme + "console.a", Base.theme.get("theme.default.console.a")) + "}");
-        css.addRule("ul {" + Base.theme.get(theme + "console.ul", Base.theme.get("theme.default.console.ul")) + "}");
-        css.addRule("ol {" + Base.theme.get(theme + "console.ol", Base.theme.get("theme.default.console.ol")) + "}");
-        css.addRule("li {" + Base.theme.get(theme + "console.li", Base.theme.get("theme.default.console.li")) + "}");
-        css.addRule("h1 {" + Base.theme.get(theme + "console.h1", Base.theme.get("theme.default.console.h1")) + "}");
-        css.addRule("h2 {" + Base.theme.get(theme + "console.h2", Base.theme.get("theme.default.console.h2")) + "}");
-        css.addRule("h3 {" + Base.theme.get(theme + "console.h3", Base.theme.get("theme.default.console.h3")) + "}");
-        css.addRule("h4 {" + Base.theme.get(theme + "console.h4", Base.theme.get("theme.default.console.h4")) + "}");
+        css.addRule("body {" + Base.theme.get(theme + "search.body", Base.theme.get("theme.default.search.body")) + "}");
+        css.addRule("span.term {" + Base.theme.get(theme + "search.term", Base.theme.get("theme.default.search.error")) + "}");
+        css.addRule("a {" + Base.theme.get(theme + "search.a", Base.theme.get("theme.default.search.a")) + "}");
+        css.addRule("ul {" + Base.theme.get(theme + "search.ul", Base.theme.get("theme.default.search.ul")) + "}");
+        css.addRule("ol {" + Base.theme.get(theme + "search.ol", Base.theme.get("theme.default.search.ol")) + "}");
+        css.addRule("li {" + Base.theme.get(theme + "search.li", Base.theme.get("theme.default.search.li")) + "}");
+        css.addRule("h1 {" + Base.theme.get(theme + "search.h1", Base.theme.get("theme.default.search.h1")) + "}");
+        css.addRule("h2 {" + Base.theme.get(theme + "search.h2", Base.theme.get("theme.default.search.h2")) + "}");
+        css.addRule("h3 {" + Base.theme.get(theme + "search.h3", Base.theme.get("theme.default.search.h3")) + "}");
+        css.addRule("h4 {" + Base.theme.get(theme + "search.h4", Base.theme.get("theme.default.search.h4")) + "}");
         doc = (HTMLDocument)kit.createDefaultDocument();
         text.setDocument(doc);
         text.setCaretPosition(0);
@@ -157,10 +155,17 @@ public class ProjectSearch {
 
 
     public void doSearch() {
+        String theme = Base.preferences.get("theme.selected", "default");
+        theme = "theme." + theme + ".";
         String term = searchTerm.getText().toLowerCase();
         clearText();
         for(File f : editor.loadedSketch.sketchFiles) {
             StringBuilder chunk = new StringBuilder();
+            int tab = editor.getTabByFile(f);
+            EditorBase eb = null;
+            if (tab > -1) {
+                eb = editor.getTab(tab);
+            }
 
             String[] content = loadFileLines(f);
             boolean foundText = false;
@@ -176,8 +181,11 @@ public class ProjectSearch {
 
                 if(line.toLowerCase().contains(term)) {
                     foundText = true;
+                    if (eb != null) {
+                        eb.highlightLine(lineno - 1, Base.theme.getColor(theme + "editor.searchall.bgcolor"));
+                    }
 
-                    String rep = line.replaceAll("(?i)(" + term + ")", "<span class='error'>$1</span>");
+                    String rep = line.replaceAll("(?i)(" + term + ")", "<span class='term'>$1</span>");
 
                     chunk.append("<hr><td><a href='uecide://goto/" + lineno + "/" + f.getAbsolutePath() + "'>" + lineno + "</a></td><td>" + rep + "</td></tr>");
                 }
