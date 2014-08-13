@@ -152,10 +152,73 @@ public class Editor extends JFrame {
         int line;
         String proto;
 
+        String returnType;
+        String name;
+        ArrayList<String> parameters = new ArrayList<String>();
+
         public FunctionBookmark(File f, int l, String p) {
             file = f;
             line = l;
-            proto = p;
+            proto = p.trim();
+            parsePrototype();
+            System.err.println("Function: " + name);
+        }
+
+        public String simplify(String in) {
+            String out = in.trim();
+            String rep = out.replaceAll("\\s\\s", " ");
+            while (!rep.equals(out)) {
+                out = rep;
+                rep = out.replaceAll("\\s\\s", " ");
+            }
+            return out;
+        }
+
+        public void parsePrototype() {
+            Pattern p = Pattern.compile("^(.*)\\((.*)\\)$");
+            Matcher m = p.matcher(proto);
+            if (m.find()) {
+                String def = simplify(m.group(1));
+                String parms = simplify(m.group(2));
+                String[] spl = def.split(" ");
+                int num = spl.length;
+                name = spl[num-1];
+                returnType = "";
+                for (int i = 0; i < num-1; i++) {
+                    if (i != 0) {
+                        returnType += " ";
+                    }
+                    returnType += spl[i];
+                }
+    
+                spl = parms.split(",");
+                for (String parm : spl) {
+                    parameters.add(simplify(parm));
+                }
+
+            }
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String formatted() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(returnType);
+            sb.append(" ");
+            sb.append(name);
+            sb.append("(");
+            boolean first = true;
+            for (String parm : parameters) {
+                if (!first) {
+                    sb.append(", ");
+                }
+                sb.append(parm);
+                first = false;
+            }
+            sb.append(")");
+            return sb.toString();
         }
 
         public String toString() {
@@ -293,7 +356,10 @@ public class Editor extends JFrame {
         manualSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, manualScroll);
         topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, manualSplit, consolePanel);
 
-
+/*
+String sexy = null;
+System.err.println(sexy.length());
+*/
         manualSplit.setOneTouchExpandable(false);
         leftRightSplit.setOneTouchExpandable(true);
         topBottomSplit.setOneTouchExpandable(true);
@@ -738,7 +804,7 @@ public class Editor extends JFrame {
 
                 if(userObject instanceof FunctionBookmark) {
                     FunctionBookmark bm = (FunctionBookmark)userObject;
-                    JLabel text = new JLabel(bm.getFunction());
+                    JLabel text = new JLabel(bm.formatted());
                     icon = Base.loadIconFromResource("files/function.png");
                     text.setBorder(paddingBorder);
 
@@ -1406,20 +1472,14 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
             DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
             String nt = child.getUserObject().toString();
             if (child.getUserObject() instanceof FunctionBookmark) {
-                int bracket = nt.indexOf("(");
-                if (bracket >= 0) {
-                    nt = nt.substring(nt.lastIndexOf(" ", bracket) + 1);
-                }
+                nt = ((FunctionBookmark)child.getUserObject()).getName();
             }
 
             for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
                 DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
                 String np = prevNode.getUserObject().toString();
-                if (child.getUserObject() instanceof FunctionBookmark) {
-                    int bracket = np.indexOf("(");
-                    if (bracket >= 0) {
-                        np = np.substring(np.lastIndexOf(" ", bracket) + 1);
-                    }
+                if (prevNode.getUserObject() instanceof FunctionBookmark) {
+                    np = ((FunctionBookmark)prevNode.getUserObject()).getName();
                 }
 
                 if(nt.compareToIgnoreCase(np) > 0) {

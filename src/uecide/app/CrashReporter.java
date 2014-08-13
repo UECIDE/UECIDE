@@ -63,167 +63,9 @@ public class CrashReporter {
 
         if (n == 2) {
             frame = new JDialog(null, JDialog.ModalityType.APPLICATION_MODAL);
-            mainContainer = new JPanel();
-            mainContainer.setLayout(new BorderLayout());
-            frame.add(mainContainer);
-
-            infoScroll = new JScrollPane();
-            infoScroll.setPreferredSize(new Dimension(400, 500));
-
-            info = new JTextPane();
-            info.setContentType("text/html");
-            infoScroll.setViewportView(info);
-
-
-            info.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-            info.setEditable(false);
-            info.setBackground(new Color(0, 0, 0));
-            info.setForeground(new Color(0, 255, 0));
-            Font f = info.getFont();
-
-            info.addHyperlinkListener(new HyperlinkListener() {
-                public void hyperlinkUpdate(HyperlinkEvent e) {
-                    if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                        if (e.getDescription().equals("uecide://close")) {
-                            System.exit(10);
-                            frame.dispose();
-                            return;
-                        }
-                        if (e.getDescription().equals("uecide://ignore")) {
-                            frame.dispose();
-                            return;
-                        }
-                        if (e.getDescription().equals("uecide://report")) {
-                            reportError();
-                            return;
-                        }
-                        Base.openURL(e.getURL().toString());
-                    }
-                }
-            });
-
-            HTMLEditorKit kit = new HTMLEditorKit();
-            info.setEditorKit(kit);
-            StyleSheet css = kit.getStyleSheet();
-
-            css.addRule("body {color: #88ff88; font-family: Arial,Helvetica,Sans-Serif;}");
-            css.addRule("a {color: #88ffff;}");
-            css.addRule("a:visited {color: #00aaaa;}");
-            Document doc = kit.createDefaultDocument();
-            info.setDocument(doc);
-
-            info.setText(generateInfoData());
-
-            info.setCaretPosition(0);
-            mainContainer.add(infoScroll, BorderLayout.CENTER);
-
-            frame.pack();
-
-            Dimension mySize = frame.getSize();
-
-            frame.addKeyListener(new KeyListener() {
-                public void keyTyped(KeyEvent ev) {
-                }
-                public void keyPressed(KeyEvent ev) {
-                    if(ev.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                        frame.dispose();
-                    }
-                }
-                public void keyReleased(KeyEvent ev) {
-                }
-            });
-
-            JPanel bp = new JPanel();
-            bp.setLayout(new FlowLayout());
-
-            JButton q = new JButton("Quit");
-            q.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    System.exit(10);
-                }
-            });
-            bp.add(q);
-
-            JButton i = new JButton("Ignore");
-            i.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    frame.dispose();
-                    return;
-                }
-            });
-            bp.add(i);
-
-            JButton r = new JButton("Report");
-            r.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    reportError();
-                }
-            });
-            bp.add(r);
-
-            mainContainer.add(bp, BorderLayout.SOUTH);
-
+            reportError();
             frame.setVisible(true);
         }
-    }
-
-    public void appendTextFile(StringBuilder s, String res) {
-        URL u = About.class.getResource(res);
-    
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(u.openStream()));
-            String cont = "";
-
-            while((cont = reader.readLine()) != null) {
-                s.append(cont);
-                s.append("\n");
-            }
-            reader.close();
-        } catch(Exception ex) {
-            Base.error(ex);
-        }
-    }
-
-    public String generateInfoData() {
-        StringBuilder s = new StringBuilder();
-        URL contributors = About.class.getResource("/uecide/app/contributors.txt");
-
-        s.append("<html><body>");
-
-        s.append("<h1>" + Base.theme.get("product.cap") + "</h1>");
-        s.append("<h4>Version " + Base.systemVersion);
-        s.append(" Build number " + Base.BUILDNO + "</h4>");
-        s.append("<br/>");
-        s.append("<p>A serious error has occurred.  The detail of the error is shown below.  You can try and continue past this error, but things might not work right, or you can quit and try running again (any unsaved work will be lost).  Alternatively, you can report the error to Majenko Technologies and we will try and resolve the problem.</p>");
-        s.append("<p><b>Summary:</b> " + exception.toString() + "</p>");
-        s.append("<p><b>Cause:</b> " + exception.getCause() + "</p>");
-        s.append("<p><b>Message:</b> " + exception.getMessage() + "</p>");
-
-        StackTraceElement[] els = exception.getStackTrace();
-        int tp = 0;
-        for (StackTraceElement e : els) {
-            s.append("<h3>Trace point " + tp + " in class " + e.getClassName() + ":</h3>");
-            s.append("<ul>");
-            s.append("<li>File: " + e.getFileName() + "</li>");
-            s.append("<li>Line: " + e.getLineNumber() + "</li>");
-            s.append("<li>Method: " + e.getMethodName() + "</li>");
-            s.append("<li>Native: " + e.isNativeMethod() + "</li>");
-            tp++;
-        }
-
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        exception.printStackTrace(pw);
-        String o = sw.toString();
-        s.append("<h3>Full text of the exception:</h3>");
-        s.append("<pre>");
-        s.append(o);
-        s.append("</pre>");
-        s.append("<br/>");
-        s.append("</body></html>");
-
-        return s.toString();
     }
 
     public void reportError() {
@@ -319,8 +161,18 @@ public class CrashReporter {
                     wr.flush();
                     wr.close();
                     int resp = connection.getResponseCode();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String inputLine;
+                    StringBuffer response = new StringBuffer();
+
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+                    System.err.println(response);
                     connection.disconnect();
                     if (resp == 200) {
+                        Base.openURL(response.toString());
                         int n = JOptionPane.showConfirmDialog(frame, "Report sent OK.\nClose UECIDE now?", "Report sent", JOptionPane.YES_NO_OPTION);
                         if (n == 0) {
                             System.exit(10);
