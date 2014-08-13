@@ -212,6 +212,7 @@ public class TabLabel extends JPanel {
     }
 
     public void cancelFileWatcher() {
+        System.err.println("Cancelling watcher on " + sketchFile);
         fileWatchTimer.cancel();
     }
 

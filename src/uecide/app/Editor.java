@@ -1295,6 +1295,10 @@ public class Editor extends JFrame {
         }, 1000, 1000);
     }
 
+    public void cancelSourceWatchTimer() {
+        sourceWatchTimer.cancel();
+    }
+
     public void mergeTrees(DefaultMutableTreeNode dst, DefaultMutableTreeNode src) {
         // First go through and remove any nodes in dst that aren't in src.
         boolean removedNodes = false;
@@ -1383,11 +1387,68 @@ public class Editor extends JFrame {
                 }
 
                     mergeTrees(treeSource, ntc);
-        treeModel.nodeStructureChanged(treeSource);
+//        treeModel.nodeStructureChanged(treeSource);
+                    treeModel.reload(sortTree(treeSource));
                     restoreTreeState(sketchContentTree, saved);
             }
         });
     }
+
+
+
+public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
+
+    //sort alphabetically
+    if (node.getChildCount() == 1) {
+        sortTree((DefaultMutableTreeNode)node.getChildAt(0));
+    } else {
+        for(int i = 0; i < node.getChildCount() - 1; i++) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+            String nt = child.getUserObject().toString();
+            if (child.getUserObject() instanceof FunctionBookmark) {
+                int bracket = nt.indexOf("(");
+                if (bracket >= 0) {
+                    nt = nt.substring(nt.lastIndexOf(" ", bracket) + 1);
+                }
+            }
+
+            for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
+                DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
+                String np = prevNode.getUserObject().toString();
+                if (child.getUserObject() instanceof FunctionBookmark) {
+                    int bracket = np.indexOf("(");
+                    if (bracket >= 0) {
+                        np = np.substring(np.lastIndexOf(" ", bracket) + 1);
+                    }
+                }
+
+                if(nt.compareToIgnoreCase(np) > 0) {
+                    node.insert(child, j);
+                    node.insert(prevNode, i);
+                }
+            }
+            if(child.getChildCount() > 0) {
+                sortTree(child);
+            }
+        }
+
+        //put folders first - normal on Windows and some flavors of Linux but not on Mac OS X.
+        for(int i = 0; i < node.getChildCount() - 1; i++) {
+            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+            for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
+                DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
+
+                if(!prevNode.isLeaf() && child.isLeaf()) {
+                    node.insert(child, j);
+                    node.insert(prevNode, i);
+                }
+            }
+        }
+    }
+
+    return node;
+
+}
 
     public void updateDocsTree() {
         SwingUtilities.invokeLater(new Runnable() {
@@ -2610,6 +2671,9 @@ public class Editor extends JFrame {
             }
         }
 
+        closeAllTabs();
+
+        cancelSourceWatchTimer();
         Editor.unregisterEditor(this);
         this.dispose();
 
