@@ -435,6 +435,7 @@ public class Base {
         if(!headless) splashScreen.setMessage("Loading Themes...", 25);
 
         loadThemes();
+        theme.fullyParseFile();
 
         if(!headless) splashScreen.setMessage("Loading Compilers...", 30);
 
@@ -2169,9 +2170,12 @@ public class Base {
 
     static public void broken(Thread t, Throwable e) {
         try {
+            CrashReporter rep = new CrashReporter(e);
+            e.printStackTrace();
             if(e.getCause() == null) {
                 return;
             }
+
 
             Debug.message("");
             Debug.message("******************** EXCEPTION ********************");
@@ -2587,7 +2591,83 @@ public class Base {
         return cmax;
     }
 
+    public static String parseString(String in, PropertyFile tokens, Sketch sketch) {
+        int iStart;
+        int iEnd;
+        int iTest;
+        String out;
+        String start;
+        String end;
+        String mid;
+
+        if(in == null) {
+            return null;
+        }
+
+        out = in;
+
+        iStart = out.indexOf("${");
+
+        if(iStart == -1) {
+            return out;
+        }
+
+        iEnd = out.indexOf("}", iStart);
+        iTest = out.indexOf("${", iStart + 1);
+
+        while((iTest > -1) && (iTest < iEnd)) {
+            iStart = iTest;
+            iTest = out.indexOf("${", iStart + 1);
+        }
+
+        while(iStart != -1) {
+            start = out.substring(0, iStart);
+            end = out.substring(iEnd + 1);
+            mid = out.substring(iStart + 2, iEnd);
+
+            if(mid.indexOf(":") > -1) {
+                if (sketch != null) {
+                    String command = mid.substring(0, mid.indexOf(":"));
+                    String param = mid.substring(mid.indexOf(":") + 1);
+
+                    mid = sketch.runFunctionVariable(command, param);
+                } else {
+                    mid = "[context error]";
+                }
+            } else {
+                String tmid = tokens.get(mid);
+
+                if(tmid == null) {
+                    tmid = "";
+                }
+
+                mid = tmid;
+            }
+
+
+            if(mid != null) {
+                out = start + mid + end;
+            } else {
+                out = start + end;
+            }
+
+            iStart = out.indexOf("${");
+            iEnd = out.indexOf("}", iStart);
+            iTest = out.indexOf("${", iStart + 1);
+
+            while((iTest > -1) && (iTest < iEnd)) {
+                iStart = iTest;
+                iTest = out.indexOf("${", iStart + 1);
+            }
+        }
+
+        // This shouldn't be needed as the methodology should always find any tokens put in
+        // by other token replacements.  But just in case, eh?
+        if(out != in) {
+            out = parseString(out, tokens, sketch);
+        }
+
+        return out;
+    }
 
 }
-
-

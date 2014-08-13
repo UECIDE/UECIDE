@@ -688,4 +688,20 @@ public class PropertyFile {
 
         return key;
     }
+
+    public String getParsed(String key) {
+        String data = get(key);
+        if (data == null) {
+            return null;
+        }
+        return Base.parseString(data, this, null);
+    }
+
+    public void fullyParseFile() {
+        for (String key : properties.stringPropertyNames()) {
+            String data = get(key);
+            data = Base.parseString(data, this, null);
+            set(key, data);
+        }
+    }
 }

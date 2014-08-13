@@ -2539,13 +2539,8 @@ public class Editor extends JFrame {
             if(Base.isMacOS()) {
                 Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
                 String prompt =
-                    "<html> " +
-                    "<head> <style type=\"text/css\">" +
-                    "b { font: 13pt \"Lucida Grande\" }" +
-                    "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }" +
-                    "</style> </head>" +
-                    "<b>" + Translate.t("Are you sure you want to Quit?") + "</b>" +
-                    "<p>" + Translate.t("Closing the last open sketch will quit %1.", Base.theme.get("product.cap"));
+                    "Are you sure you want to Quit?\n" + 
+                    "Closing the last open sketch will quit UECIDE.";
 
                 int result = JOptionPane.showOptionDialog(this,
                              prompt,

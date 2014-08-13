@@ -47,7 +47,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 public class Library implements Comparable {
-    public ArrayList<String> requiredLibraries;
+    public ArrayList<String> requiredLibraries = new ArrayList<String>();
     public File root;
     public String name;
     public File examplesFolder = null;
@@ -80,12 +80,18 @@ public class Library implements Comparable {
         type = t;
         core = c;
 
-        root = loc;
 
         // Identify library type.
 
         // 1. Is it an old style library?
         name = loc.getName();
+
+        if (name.endsWith(".h")) {
+            loc = loc.getParentFile();
+            name = loc.getName();
+        }
+
+        root = loc;
 
         File hdr = new File(root, name + ".h");
         Debug.message("Looking for header file " + hdr.getAbsolutePath());
@@ -106,6 +112,7 @@ public class Library implements Comparable {
                 core = properties.get("core", "all");
             } else {
                 utilityFolder = new File(root, "utility");
+                archFolder = null;
                 examplesFolder = new File(root, "examples");
                 librariesFolder = new File(root, "libraries");
                 sourceFolder = root;

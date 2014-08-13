@@ -2142,7 +2142,7 @@ public class Sketch implements MessageConsumer {
         // executable needs certain DLL files to be in the current working
         // directory (which is the build folder).
 
-        String precopy = parseString(props.get("compile.precopy"));
+        String precopy = parseString(props.getPlatformSpecific("compile.precopy"));
 
         if(precopy != null) {
             Debug.message("Copying files...");
@@ -2393,120 +2393,30 @@ public class Sketch implements MessageConsumer {
     }
 
     public String parseString(String in) {
-        int iStart;
-        int iEnd;
-        int iTest;
-        String out;
-        String start;
-        String end;
-        String mid;
-
-        if(in == null) {
-            return null;
-        }
-
         PropertyFile tokens = mergeAllProperties();
 
-        out = in;
-
-        if(out == null) {
-            return null;
+        tokens.set("compiler.root", getCompiler().getFolder().getAbsolutePath());
+        tokens.set("core.root", getCore().getFolder().getAbsolutePath());
+        tokens.set("board.root", getBoard().getFolder().getAbsolutePath());
+        tokens.set("cache.root", getCacheFolder().getAbsolutePath());
+        if(Base.preferences.getBoolean("export.verbose")) {
+            tokens.set("verbose", tokens.get("upload." + getProgrammer() + ".verbose"));
+        } else {
+            tokens.set("verbose", tokens.get("upload." + getProgrammer() + ".quiet"));
         }
-
-        iStart = out.indexOf("${");
-
-        if(iStart == -1) {
-            return out;
-        }
-
-        iEnd = out.indexOf("}", iStart);
-        iTest = out.indexOf("${", iStart + 1);
-
-        while((iTest > -1) && (iTest < iEnd)) {
-            iStart = iTest;
-            iTest = out.indexOf("${", iStart + 1);
-        }
-
-        while(iStart != -1) {
-            start = out.substring(0, iStart);
-            end = out.substring(iEnd + 1);
-            mid = out.substring(iStart + 2, iEnd);
-
-            if(mid.indexOf(":") > -1) {
-                String command = mid.substring(0, mid.indexOf(":"));
-                String param = mid.substring(mid.indexOf(":") + 1);
-
-                mid = runFunctionVariable(command, param);
-            } else if(mid.equals("compiler.root")) {
-                mid = getCompiler().getFolder().getAbsolutePath();
-            } else if(mid.equals("cache.root")) {
-                mid = getCacheFolder().getAbsolutePath();
-            } else if(mid.equals("core.root")) {
-                mid = getCore().getFolder().getAbsolutePath();
-            } else if(mid.equals("board.root")) {
-                mid = getBoard().getFolder().getAbsolutePath();
-            } else if(mid.equals("verbose")) {
-                if(Base.preferences.getBoolean("export.verbose"))
-                    mid = tokens.get("upload." + getProgrammer() + ".verbose");
-                else
-                    mid = tokens.get("upload." + getProgrammer() + ".quiet");
-            } else if(mid.equals("port.base")) {
-                if(Base.isWindows()) {
-                    mid = getSerialPort();
-                } else {
-                    String sp = getSerialPort();
-                    mid = sp.substring(sp.lastIndexOf('/') + 1);
-                }
-            } else if(mid.equals("port")) {
-                if(Base.isWindows()) {
-                    mid = "\\\\.\\" + getSerialPort();
-                } else {
-                    mid = getSerialPort();
-                }
-            } else if(mid.equals("ip")) {
-                mid = getNetworkPortIP();
-            } else if(mid.startsWith("exec:")) {
-                String content = mid.substring(5);
-                String[] bits = content.split(",");
-
-                if(executeScript(bits[1])) {
-                    mid = bits[2];
-                } else {
-                    mid = bits[3];
-                }
-            } else {
-                String tmid = tokens.get(mid);
-
-                if(tmid == null) {
-                    tmid = "";
-                }
-
-                mid = tmid;
-            }
-
-            if(mid != null) {
-                out = start + mid + end;
-            } else {
-                out = start + end;
-            }
-
-            iStart = out.indexOf("${");
-            iEnd = out.indexOf("}", iStart);
-            iTest = out.indexOf("${", iStart + 1);
-
-            while((iTest > -1) && (iTest < iEnd)) {
-                iStart = iTest;
-                iTest = out.indexOf("${", iStart + 1);
+        if(Base.isWindows()) {
+            tokens.set("port.base", getSerialPort());
+            tokens.set("port", "\\\\.\\" + getSerialPort());
+        } else {
+            String sp = getSerialPort();
+            if (sp != null) {
+                tokens.set("port.base", sp.substring(sp.lastIndexOf('/') + 1));
+                tokens.set("port", sp);
             }
         }
+        tokens.set("ip", getNetworkPortIP());
 
-        // This shouldn't be needed as the methodology should always find any tokens put in
-        // by other token replacements.  But just in case, eh?
-        if(out != in) {
-            out = parseString(out);
-        }
-
-        return out;
+        return Base.parseString(in, tokens, this);
     }
 
     private File compileFile(File src) {
