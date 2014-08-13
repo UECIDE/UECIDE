@@ -106,7 +106,6 @@ public class Browser extends JTextPane implements HyperlinkListener {
 
         for (String t : tags) {
             String data = Base.theme.get(theme + "browser." + t, Base.theme.get("theme.default.browser." + t));
-            System.err.println(t + " { " + data + " }");
             css.addRule(t + " {" + data + "}");
         }
     }
@@ -126,8 +125,6 @@ public class Browser extends JTextPane implements HyperlinkListener {
         if (from.isDirectory()) {
             from = new File(from, "index.html");
         }
-
-        System.err.println("From: " + from);
 
         navigate(from);
     }
@@ -232,7 +229,6 @@ public class Browser extends JTextPane implements HyperlinkListener {
             if (e.getDescription().equals("back://")) {
                 if (history.size() > 0) {
                     File h = history.pop();
-                    System.err.println("History: " + h);
                     navigate(h);
                 }
                 return;
@@ -259,7 +255,6 @@ public class Browser extends JTextPane implements HyperlinkListener {
 
     public void setRoot(File f) {
         root = f;
-        System.err.println("Root: " + f);
         home();
     }
 

@@ -1292,7 +1292,7 @@ public class Editor extends JFrame {
             public void run() {
                 updateSourceTree();
             }
-        }, 5000, 5000);
+        }, 1000, 1000);
     }
 
     public void mergeTrees(DefaultMutableTreeNode dst, DefaultMutableTreeNode src) {
@@ -1326,7 +1326,7 @@ public class Editor extends JFrame {
 
             if(sob != dob) {
                 dnode.setUserObject(sob);
-                treeModel.nodeStructureChanged(dnode);
+//                treeModel.nodeStructureChanged(dnode);
             }
 
             mergeTrees(dnode, foundNode);
@@ -1342,68 +1342,76 @@ public class Editor extends JFrame {
             addedNodes = true;
         }
 
-        if(addedNodes || removedNodes) {
-            treeModel.nodeStructureChanged(dst);
-        }
+//        if(addedNodes || removedNodes) {
+//            treeModel.nodeStructureChanged(dst);
+//        }
     }
 
     public void updateSourceTree() {
-        loadedSketch.findAllFunctions();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                loadedSketch.findAllFunctions();
 
-        TreePath[] saved = saveTreeState(sketchContentTree);
+                TreePath[] saved = saveTreeState(sketchContentTree);
 
-        DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
-        DefaultMutableTreeNode node;
+                DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
+                DefaultMutableTreeNode node;
 
-        for(File f : loadedSketch.sketchFiles) {
-            int type = FileType.getType(f);
+                for(File f : loadedSketch.sketchFiles) {
+                    int type = FileType.getType(f);
 
-            switch(type) {
-            case FileType.CSOURCE:
-            case FileType.CPPSOURCE:
-            case FileType.ASMSOURCE:
-            case FileType.SKETCH:
-                node = new DefaultMutableTreeNode(f.getName());
-                node.setUserObject(f);
-                ntc.add(node);
-                HashMap<Integer, String> funcs = loadedSketch.getFunctionsForFile(f);
+                    switch(type) {
+                        case FileType.CSOURCE:
+                        case FileType.CPPSOURCE:
+                        case FileType.ASMSOURCE:
+                        case FileType.SKETCH:
+                            node = new DefaultMutableTreeNode(f.getName());
+                            node.setUserObject(f);
+                            ntc.add(node);
+                            HashMap<Integer, String> funcs = loadedSketch.getFunctionsForFile(f);
 
-                if(funcs != null) {
-                    for(int line : funcs.keySet()) {
-                        FunctionBookmark b = new FunctionBookmark(f, line, funcs.get(line));
-                        DefaultMutableTreeNode fe = new DefaultMutableTreeNode(b);
-                        node.add(fe);
+                            if(funcs != null) {
+                                for(int line : funcs.keySet()) {
+                                    FunctionBookmark b = new FunctionBookmark(f, line, funcs.get(line));
+                                    DefaultMutableTreeNode fe = new DefaultMutableTreeNode(b);
+                                    node.add(fe);
+                                }
+                            }
+
+                            break;
                     }
                 }
 
-                break;
+                    mergeTrees(treeSource, ntc);
+        treeModel.nodeStructureChanged(treeSource);
+                    restoreTreeState(sketchContentTree, saved);
             }
-        }
-
-        mergeTrees(treeSource, ntc);
-//        treeModel.nodeStructureChanged(treeSource);
-        restoreTreeState(sketchContentTree, saved);
+        });
     }
 
     public void updateDocsTree() {
-        TreePath[] saved = saveTreeState(sketchContentTree);
-        treeDocs.removeAllChildren();
-        DefaultMutableTreeNode node;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TreePath[] saved = saveTreeState(sketchContentTree);
+                treeDocs.removeAllChildren();
+                DefaultMutableTreeNode node;
 
-        for(File f : loadedSketch.getFolder().listFiles()) {
-            int type = FileType.getType(f);
+                for(File f : loadedSketch.getFolder().listFiles()) {
+                    int type = FileType.getType(f);
 
-            switch(type) {
-            case FileType.DOCUMENT:
-                node = new DefaultMutableTreeNode(f.getName());
-                node.setUserObject(f);
-                treeDocs.add(node);
-                break;
-            }
-        }
+                    switch(type) {
+                        case FileType.DOCUMENT:
+                            node = new DefaultMutableTreeNode(f.getName());
+                            node.setUserObject(f);
+                            treeDocs.add(node);
+                            break;
+                    }
+                }
 
         treeModel.nodeStructureChanged(treeDocs);
-        restoreTreeState(sketchContentTree, saved);
+                restoreTreeState(sketchContentTree, saved);
+            }
+        });
     }
 
     public void refreshTreeModel() {
@@ -1418,87 +1426,105 @@ public class Editor extends JFrame {
     }
 
     public void updateHeadersTree() {
-        TreePath[] saved = saveTreeState(sketchContentTree);
-        treeHeaders.removeAllChildren();
-        DefaultMutableTreeNode node;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TreePath[] saved = saveTreeState(sketchContentTree);
+                treeHeaders.removeAllChildren();
+                DefaultMutableTreeNode node;
 
-        for(File f : loadedSketch.sketchFiles) {
-            int type = FileType.getType(f);
+                for(File f : loadedSketch.sketchFiles) {
+                    int type = FileType.getType(f);
 
-            switch(type) {
-            case FileType.HEADER:
-                node = new DefaultMutableTreeNode(f.getName());
-                node.setUserObject(f);
-                treeHeaders.add(node);
-                break;
-            }
-        }
+                    switch(type) {
+                        case FileType.HEADER:
+                            node = new DefaultMutableTreeNode(f.getName());
+                            node.setUserObject(f);
+                            treeHeaders.add(node);
+                            break;
+                    }
+                }
 
         treeModel.nodeStructureChanged(treeHeaders);
-        restoreTreeState(sketchContentTree, saved);
+                restoreTreeState(sketchContentTree, saved);
+            }
+        });
     }
 
     public void updateLibrariesTree() {
-        TreePath[] saved = saveTreeState(sketchContentTree);
-        treeLibraries.removeAllChildren();
-        HashMap<String, Library>libList = loadedSketch.getLibraries();
-        DefaultMutableTreeNode node;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TreePath[] saved = saveTreeState(sketchContentTree);
+                treeLibraries.removeAllChildren();
+                HashMap<String, Library>libList = loadedSketch.getLibraries();
+                DefaultMutableTreeNode node;
 
-        if(libList != null) {
-            for(String libname : libList.keySet()) {
-                node = new DefaultMutableTreeNode(libname);
-                node.setUserObject(libList.get(libname));
-                treeLibraries.add(node);
-            }
-        }
+                if(libList != null) {
+                    for(String libname : libList.keySet()) {
+                        node = new DefaultMutableTreeNode(libname);
+                        node.setUserObject(libList.get(libname));
+                        treeLibraries.add(node);
+                    }
+                }
 
         treeModel.nodeStructureChanged(treeLibraries);
-        restoreTreeState(sketchContentTree, saved);
+                restoreTreeState(sketchContentTree, saved);
+            }
+        });
     }
 
     public void updateBinariesTree() {
-        TreePath[] saved = saveTreeState(sketchContentTree);
-        treeBinaries.removeAllChildren();
-        File bins = loadedSketch.getBinariesFolder();
-        DefaultMutableTreeNode node;
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TreePath[] saved = saveTreeState(sketchContentTree);
+                treeBinaries.removeAllChildren();
+                File bins = loadedSketch.getBinariesFolder();
+                DefaultMutableTreeNode node;
 
-        if(bins.exists() && bins.isDirectory()) {
-            File[] files = bins.listFiles();
+                if(bins.exists() && bins.isDirectory()) {
+                    File[] files = bins.listFiles();
 
-            for(File binFile : files) {
-                if(binFile.getName().startsWith(".")) {
-                    continue;
+                    for(File binFile : files) {
+                        if(binFile.getName().startsWith(".")) {
+                            continue;
+                        }
+
+                        node = new DefaultMutableTreeNode(binFile.getName());
+                        node.setUserObject(binFile);
+                        treeBinaries.add(node);
+                    }
                 }
 
-                node = new DefaultMutableTreeNode(binFile.getName());
-                node.setUserObject(binFile);
-                treeBinaries.add(node);
-            }
-        }
-
         treeModel.nodeStructureChanged(treeBinaries);
-        restoreTreeState(sketchContentTree, saved);
+                restoreTreeState(sketchContentTree, saved);
+            }
+        });
     }
 
     public void updateOutputTree() {
-        TreePath[] saved = saveTreeState(sketchContentTree);
-        boolean treeOutputOpen = sketchContentTree.isExpanded(new TreePath(treeOutput.getPath()));
-        treeOutput.removeAllChildren();
-        addFileTreeToNode(treeOutput, loadedSketch.getBuildFolder());
-        treeModel.nodeStructureChanged(treeOutput);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TreePath[] saved = saveTreeState(sketchContentTree);
+                treeOutput.removeAllChildren();
+                addFileTreeToNode(treeOutput, loadedSketch.getBuildFolder());
+                treeModel.nodeStructureChanged(treeOutput);
 
-        if(treeOutputOpen) sketchContentTree.expandPath(new TreePath(treeOutput.getPath()));
 
-        restoreTreeState(sketchContentTree, saved);
+                restoreTreeState(sketchContentTree, saved);
+            }
+        });
     }
 
     public void updateFilesTree() {
-        TreePath[] saved = saveTreeState(sketchFilesTree);
-        filesTreeRoot.removeAllChildren();
-        filesTreeRoot.setUserObject(loadedSketch.getFolder());
-        addFileTreeToNode(filesTreeRoot, loadedSketch.getFolder());
-        filesTreeModel.nodeStructureChanged(filesTreeRoot);
-        restoreTreeState(sketchFilesTree, saved);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TreePath[] saved = saveTreeState(sketchFilesTree);
+                filesTreeRoot.removeAllChildren();
+                filesTreeRoot.setUserObject(loadedSketch.getFolder());
+                addFileTreeToNode(filesTreeRoot, loadedSketch.getFolder());
+                filesTreeModel.nodeStructureChanged(filesTreeRoot);
+                restoreTreeState(sketchFilesTree, saved);
+            }
+        });
     }
 
     public void updateTree() {
@@ -2428,8 +2454,14 @@ public class Editor extends JFrame {
     }
 
     public int getTabByFile(File f) {
+        if (f == null) {
+            return -1;
+        }
         for(int i = 0; i < editorTabs.getTabCount(); i++) {
             TabLabel l = (TabLabel)editorTabs.getTabComponentAt(i);
+            if (l == null) {
+                continue;
+            }
             File cf = l.getFile();
 
             if(cf != null && cf.equals(f)) {
@@ -2669,6 +2701,7 @@ public class Editor extends JFrame {
 
         for(File m : Base.MRUList) {
             item = new JMenuItem(m.getName());
+            item.setToolTipText(m.getAbsolutePath());
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String path = e.getActionCommand();
@@ -4011,7 +4044,7 @@ public class Editor extends JFrame {
             filesTreeRoot.setUserObject(loadedSketch.getFolder());
             treeRoot.setUserObject(loadedSketch);
             updateAll();
-            treeModel.nodeStructureChanged(treeRoot);
+//            treeModel.nodeStructureChanged(treeRoot);
             openOrSelectFile(loadedSketch.getMainFile());
         } else {
             Base.createNewEditor(f.getPath());
