@@ -161,7 +161,6 @@ public class Editor extends JFrame {
             line = l;
             proto = p.trim();
             parsePrototype();
-            System.err.println("Function: " + name);
         }
 
         public String simplify(String in) {

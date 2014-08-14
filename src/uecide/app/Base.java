@@ -111,6 +111,8 @@ public class Base {
     public static ArrayList<Plugin> pluginInstances;
     static Splash splashScreen;
 
+    public static CommandLine cli = new CommandLine();
+
     // Location for untitled items
     static File untitledFolder;
 
@@ -167,70 +169,43 @@ public class Base {
     /*! The constructor is the main execution routine. */
     public Base(String[] args) {
 
-        boolean redirectExceptions = true;
+        cli.addParameter("debug", "", Boolean.class, "Enable the debug window");
+        cli.addParameter("verbose", "", Boolean.class, "Output debug log to stdout");
+        cli.addParameter("exceptions", "", Boolean.class, "Output exceptions to stderr");
+        cli.addParameter("headless", "", Boolean.class, "Enable headless operation");
+        cli.addParameter("datadir", "location", String.class, "Specify location for plugins and data");
+        cli.addParameter("last-sketch", "", Boolean.class, "Automatically load last used sketch");
+        cli.addParameter("compile", "", Boolean.class, "Immediately compile loaded sketch");
+        cli.addParameter("upload", "", Boolean.class, "Immediately compile and upload loaded sketch");
+        cli.addParameter("board", "name", String.class, "Select specific board");
+        cli.addParameter("core", "name", String.class, "Select specific core");
+        cli.addParameter("compiler", "name", String.class, "Select specific compiler");
+        cli.addParameter("port", "name", String.class, "Select specific serial port");
+        cli.addParameter("programmer", "name", String.class, "Select specific programmer");
+        cli.addParameter("help", "", Boolean.class, "This help text");
+    
 
-        headless = false;
-        boolean loadLastSketch = false;
+        cli.process(args);
 
+        headless = cli.isSet("headless");
+        boolean loadLastSketch = cli.isSet("last-sketch");
 
-        for(int i = 0; i < args.length; i++) {
-            String path = args[i];
-
-            if(path.equals("--verbose")) {
-                Debug.setVerbose(true);
-            }
-
-            if(path.equals("--debug")) {
-                extraDebug = true;
-                Debug.show();
-            }
-
-            if(path.equals("--exceptions")) {
-                redirectExceptions = false;
-            }
-
-            if(path.equals("--headless")) {
-                headless = true;
-            }
-
-            if(path.startsWith("--datadir=")) {
-                overrideSettingsFolder = path.substring(10);
-            }
-
-            if(path.equals("--last-sketch")) {
-                loadLastSketch = true;
-            }
-
-            if(path.equals("--compile")) {
-                autoCompile = true;
-            }
-
-            if(path.equals("--upload")) {
-                autoProgram = true;
-            }
-
-            if(path.startsWith("--port=")) {
-                presetPort = path.substring(7);
-            }
-
-            if(path.startsWith("--board=")) {
-                presetBoard = path.substring(8);
-            }
-
-            if(path.startsWith("--core=")) {
-                presetCore = path.substring(7);
-            }
-
-            if(path.startsWith("--compiler=")) {
-                presetCompiler = path.substring(11);
-            }
-
-            if(path.startsWith("--programmer=")) {
-                presetProgrammer = path.substring(13);
-            }
+        Debug.setVerbose(cli.isSet("verbose"));
+        if (cli.isSet("debug")) {
+            Debug.show();
         }
 
-        if(redirectExceptions) {
+        overrideSettingsFolder = cli.getString("datadir");
+        autoCompile = cli.isSet("compile");
+        autoProgram = cli.isSet("upload");
+        presetPort = cli.getString("port");
+        presetBoard = cli.getString("board");
+        presetCore = cli.getString("core");
+        presetCompiler = cli.getString("compiler");
+        presetProgrammer = cli.getString("programmer");
+
+
+        if(!cli.isSet("exceptions")) {
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
                 public void uncaughtException(Thread t, Throwable e) {
                     Base.broken(t, e);
@@ -2292,6 +2267,7 @@ public class Base {
     public static void rescanThemes() {
         Editor.rawBroadcast("&diams; Scanning themes...");
         loadThemes();
+        theme.fullyParseFile();
     }
     public static void rescanCompilers() {
         compilers = new TreeMap<String, Compiler>();
