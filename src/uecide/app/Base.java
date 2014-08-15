@@ -628,8 +628,16 @@ public class Base {
 
     /*! Update the internal MRU list with a new File */
     public static void updateMRU(File f) {
+        if (f == null) {
+            return;
+        }
+
         if(!f.isDirectory()) {
             f = f.getParentFile();
+        }
+
+        if (MRUList == null) {
+            initMRU();
         }
 
         MRUList.remove(f);
