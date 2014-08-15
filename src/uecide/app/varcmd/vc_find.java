@@ -3,8 +3,8 @@ package uecide.app.varcmd;
 import uecide.app.*;
 import java.io.File;
 
-public class vc_find {
-    public static String main(Sketch sketch, String args) {
+public class vc_find implements VariableCommand {
+    public String main(Sketch sketch, String args) {
         int commaPos = args.indexOf(',');
 
         if(commaPos > 0) {

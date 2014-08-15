@@ -233,10 +233,16 @@ public class Serial {
             }
         }
 
+        ArrayList<String>toRemove = new ArrayList<String>();
+
         for(String port : serialPorts.keySet()) {
             if(names.indexOf(port) == -1) {
-                serialPorts.remove(port);
+                toRemove.add(port);
             }
+        }
+
+        for(String port : toRemove) {
+            serialPorts.remove(port);
         }
     }
 

@@ -347,7 +347,11 @@ public class Editor extends JFrame {
             height = Base.preferences.getInteger("editor.window.height.min");
         }
 
-        manualPane = new Browser(loadedSketch.getCore().getManual());
+        File manroot = null;
+        if (loadedSketch.getCore() != null) {
+            manroot = loadedSketch.getCore().getManual();
+        }
+        manualPane = new Browser(manroot);
         manualScroll = new JScrollPane();
         manualScroll.setViewportView(manualPane);
 

@@ -34,6 +34,8 @@ import uecide.app.debug.*;
 import uecide.app.preproc.*;
 import uecide.app.editors.*;
 import uecide.plugin.*;
+import uecide.app.builtin.BuiltinCommand;
+import uecide.app.varcmd.VariableCommand;
 
 import java.util.regex.*;
 
@@ -55,6 +57,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import uecide.app.Compiler;
+
+import javax.script.*;
 
 /**
  * The sketch class is the heart of the IDE.  It manages not only what files a
@@ -230,6 +234,8 @@ public class Sketch implements MessageConsumer {
             core = board.getCore();
         }
 
+        Debug.message("Board's core is " + core);
+
         if(core != null) {
             setCore(core);
         }
@@ -246,7 +252,13 @@ public class Sketch implements MessageConsumer {
         setCore(c);
     }
 
+    public void setSettings() {
+        settings.put("sketch.name", getName());
+        settings.put("sketch.path", getFolder().getAbsolutePath());
+    }
+
     public void setCore(Core core) {
+        Debug.message("Selecting core " + core);
         if(core == null) {
             return;
         }
@@ -286,6 +298,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setCompiler(Compiler compiler) {
+        Debug.message("Selecting compiler " + compiler);
         if(compiler == null) {
             return;
         }
@@ -1052,7 +1065,6 @@ public class Sketch implements MessageConsumer {
                 if(!line.endsWith(")")) {
                     continuation = true;
                 } else {
-                    Debug.message("Found function " + decimated.toString() + " at line " + lineno);
                     funcs.put(lineno - 1, decimated.toString());
                     decimated = new StringBuilder();
                 }
@@ -2136,6 +2148,31 @@ public class Sketch implements MessageConsumer {
         settings.put("option.cflags", getFlags("cflags"));
         settings.put("option.cppflags", getFlags("cppflags"));
         settings.put("option.ldflags", getFlags("ldflags"));
+
+        String libPaths = "";
+        String libNames = "";
+
+        for (Library lib : importedLibraries.values()) {
+            if (!libPaths.equals("")) {
+                libPaths += "::";
+            }
+            if (!libNames.equals("")) {
+                libNames += "::";
+            }
+            libPaths += lib.getFolder().getAbsolutePath();
+            libNames += lib.getName();
+            settings.put("library." + lib.getName() + ".path", lib.getFolder().getAbsolutePath());
+        }
+
+        settings.put("library.paths", libPaths);
+        settings.put("library.names", libNames);
+
+        settings.put("build.path", buildFolder.getAbsolutePath());
+
+
+        if (props.keyExists("compile.script.0")) {
+            return executeKey("compile.script");
+        }
 
         // Copy any specified files from the compiler, core or board folders
         // into the build folder.  This is especially good if the compiler
@@ -3231,6 +3268,9 @@ public class Sketch implements MessageConsumer {
                 return "";
             }
 
+            Constructor<?> ctor = c.getConstructor();
+            VariableCommand  p = (VariableCommand)(ctor.newInstance());
+
             Class[] param_types = new Class<?>[2];
             param_types[0] = Sketch.class;
             param_types[1] = String.class;
@@ -3243,7 +3283,7 @@ public class Sketch implements MessageConsumer {
             Object[] args = new Object[2];
             args[0] = this;
             args[1] = param;
-            return (String)m.invoke(c, args);
+            return (String)m.invoke(p, args);
         } catch(Exception e) {
             Base.error(e);
         }
@@ -3271,6 +3311,9 @@ public class Sketch implements MessageConsumer {
             cmdName = cmdName.substring(10);
             Class<?> c = Class.forName("uecide.app.builtin." + cmdName);
 
+            Constructor<?> ctor = c.getConstructor();
+            BuiltinCommand  p = (BuiltinCommand)(ctor.newInstance());
+
             if(c == null) {
                 return false;
             }
@@ -3284,7 +3327,7 @@ public class Sketch implements MessageConsumer {
             args[0] = this;
             args[1] = arg;
 
-            return (Boolean)m.invoke(c, args);
+            return (Boolean)m.invoke(p, args);
 
 
         } catch(Exception e) {

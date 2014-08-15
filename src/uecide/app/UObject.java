@@ -233,7 +233,6 @@ public class UObject implements Comparable {
         String[] myFamilies = fam.split("::");
 
         if(c == null) {
-            System.err.println("No other object");
             return false;
         }
 
@@ -274,5 +273,9 @@ public class UObject implements Comparable {
         } else {
             return new File(getFolder(), "manual");
         }
+    }
+
+    public String toString() {
+        return _description;
     }
 }

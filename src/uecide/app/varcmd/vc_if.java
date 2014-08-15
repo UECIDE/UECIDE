@@ -2,8 +2,8 @@ package uecide.app.varcmd;
 
 import uecide.app.*;
 
-public class vc_if {
-    public static String main(Sketch sketch, String args) {
+public class vc_if implements VariableCommand {
+    public String main(Sketch sketch, String args) {
         String[] bits = args.split(",");
 
         if(bits.length != 3) {

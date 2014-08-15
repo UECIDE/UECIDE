@@ -1059,6 +1059,16 @@ public class PluginManager extends Plugin implements PropertyChangeListener
             // Find recommended core
             String recCore = pe.get("Core");
             PluginEntry core = getUnique(recCore + ".jar", availableCores, PluginEntry.CORE);
+            if (core == null) {
+                JOptionPane.showMessageDialog(frame,
+                    "The core for this board (" + recCore + ") is not available.\nI will install the board anyway\nbut it may not work until the core is installed.",
+                    "No core available",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                
+                return;
+            }
+    
             if (core.canInstall()) {
                 Object[] options = {"Yes", "No"};
                 int n = JOptionPane.showOptionDialog(
@@ -1086,6 +1096,14 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                     compiler = te;
                     break;
                 }
+            }
+            if (compiler == null) {
+                JOptionPane.showMessageDialog(frame,
+                    "The compiler for this core is not available.\nI will install the compiler anyway\nbut it may not work until the compiler is installed.",
+                    "No core available",
+                    JOptionPane.ERROR_MESSAGE);
+                
+                return;
             }
             if (compiler.canInstall()) {
                 Object[] options = {"Yes", "No"};

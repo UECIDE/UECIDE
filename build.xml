@@ -249,7 +249,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <mkdir dir="bundle/windows/uecide-${version}/lib" />
         <mkdir dir="windows" /> 
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows/uecide-${version}/" />
         <copy file="dist/windows/config.xml" todir="bundle/windows" />
         <copy file="dist/windows/about.bmp" todir="bundle/windows" />
         <copy file="dist/windows/application.ico" todir="bundle/windows" />

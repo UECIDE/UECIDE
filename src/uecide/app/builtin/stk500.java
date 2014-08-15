@@ -5,17 +5,17 @@ import jssc.*;
 import java.util.*;
 import java.io.*;
 
-public class stk500 {
+public class stk500 implements BuiltinCommand {
 
-    static SerialPort port = null;
-    static String portName = null;
-    static int baudRate = 115200;
-    static Sketch sketch;
-    static int sequence = 0;
-    static boolean connected = false;
-    static int timeout = 1000;
+    SerialPort port = null;
+    String portName = null;
+    int baudRate = 115200;
+    Sketch sketch;
+    int sequence = 0;
+    boolean connected = false;
+    int timeout = 1000;
 
-    static String deviceName = null;
+    String deviceName = null;
 
     public static final int CMD_SIGN_ON                = 0x01;
     public static final int CMD_SET_PARAMETER          = 0x02;
@@ -42,11 +42,11 @@ public class stk500 {
 
     public static final int STATUS_CMD_OK              = 0x00;
 
-    static TreeMap<Long, int[]>memChunks;
+    TreeMap<Long, int[]>memChunks;
 
     public static long pageSize = 256;
 
-    public static boolean main(Sketch sktch, String[] args) {
+    public boolean main(Sketch sktch, String[] args) {
         sketch = sktch;
         if (args.length != 3) {
             sketch.error("Usage: __builtin_stk500::port::baud::filename");
@@ -97,7 +97,7 @@ public class stk500 {
         return true;
     }
 
-    public static int[] newPage() {
+    public int[] newPage() {
         int[] page = new int[(int)pageSize];
 
         for(int i = 0; i < (int)pageSize; i++) {
@@ -107,7 +107,7 @@ public class stk500 {
         return page;
     }
 
-    public static void disconnect() {
+    public void disconnect() {
         if(!connected) {
             return;
         }
@@ -123,7 +123,7 @@ public class stk500 {
         Serial.closePort(port);
     }
 
-    public static boolean connect(int to) {
+    public boolean connect(int to) {
         timeout = to;
         port = Serial.requestPort(portName, baudRate);
 
@@ -198,7 +198,7 @@ public class stk500 {
 
     }
 
-    public static String getDeviceName() {
+    public String getDeviceName() {
         if(!connected) {
             return null;
         }
@@ -206,7 +206,7 @@ public class stk500 {
         return deviceName;
     }
 
-    public static int[] sendCommand(int[] command) {
+    public int[] sendCommand(int[] command) {
 
 //        System.out.print("STK500V2: stk500v2_command(");
 //        for (int i : command) {
@@ -267,7 +267,7 @@ public class stk500 {
         }
     }
 
-    public static boolean setParameter(int param, int val) {
+    public boolean setParameter(int param, int val) {
         if(!connected) {
             return false;
         }
@@ -285,7 +285,7 @@ public class stk500 {
         return false;
     }
 
-    public static int getParameter(int param) {
+    public int getParameter(int param) {
         if(!connected) {
             return 0;
         }
@@ -303,7 +303,7 @@ public class stk500 {
         return 0;
     }
 
-    public static boolean osccal() {
+    public boolean osccal() {
         if(!connected) {
             return false;
         }
@@ -321,7 +321,7 @@ public class stk500 {
         return false;
     }
 
-    public static boolean uploadProgram() {
+    public boolean uploadProgram() {
         if(!connected) {
             return false;
         }
@@ -387,7 +387,7 @@ public class stk500 {
         return true;
     }
 
-    public static boolean uploadPage(int[] data) {
+    public boolean uploadPage(int[] data) {
         int[] message = new int[data.length + 10];
         int len = data.length;
         message[0] = CMD_PROGRAM_FLASH_ISP;
@@ -420,7 +420,7 @@ public class stk500 {
         return true;
     }
 
-    public static boolean loadAddress(long address) {
+    public boolean loadAddress(long address) {
         if(!connected) {
             return false;
         }
@@ -472,7 +472,7 @@ public class stk500 {
         }
     }
 
-    public static boolean enterProgMode() {
+    public boolean enterProgMode() {
         if(!connected) {
             return false;
         }
@@ -503,7 +503,7 @@ public class stk500 {
         return false;
     }
 
-    public static boolean leaveProgMode() {
+    public boolean leaveProgMode() {
         if(!connected) {
             return false;
         }
@@ -523,7 +523,7 @@ public class stk500 {
         return true;
     }
 
-    static class HexRecord {
+    class HexRecord {
         int length = 0;
         long address = 0;
         int type = 0;
@@ -661,15 +661,15 @@ public class stk500 {
         }
     }
 
-    public static int unsigned_byte(byte b) {
+    public int unsigned_byte(byte b) {
         return (int)b & 0xFF;
     }
 
-    public static long unsigned_int(int b) {
+    public long unsigned_int(int b) {
         return (long)b & 0xFFFFFFFFL;
     }
 
-    public static boolean loadHexFile(File hexFile) {
+    public boolean loadHexFile(File hexFile) {
         long baseAddress = 0;
         long fullAddress = 0;
         long segmentAddress = 0;

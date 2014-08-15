@@ -2,8 +2,8 @@ package uecide.app.builtin;
 
 import uecide.app.*;
 
-public class warning {
-    public static boolean main(Sketch sketch, String[] arg) {
+public class warning implements BuiltinCommand {
+    public boolean main(Sketch sketch, String[] arg) {
         StringBuilder sb = new StringBuilder();
 
         for(String s : arg) {

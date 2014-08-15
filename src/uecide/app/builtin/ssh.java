@@ -16,11 +16,11 @@ import java.awt.*;
 import javax.swing.*;
 import java.io.*;
 
-public class ssh  {
-    static String host;
-    static String user;
+public class ssh  implements BuiltinCommand {
+    String host;
+    String user;
 
-    public static boolean main(Sketch sketch, String[] arg) {
+    public boolean main(Sketch sketch, String[] arg) {
         try {
             JSch jsch = new JSch();
 
@@ -126,7 +126,7 @@ public class ssh  {
         return true;
     }
 
-    public static String askPassword() {
+    public String askPassword() {
         JTextField passwordField = (JTextField)new JPasswordField(20);
         JCheckBox save = new JCheckBox("Remember password");
         Object[] ob = {passwordField, save};

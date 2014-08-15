@@ -6,11 +6,11 @@ import java.awt.*;
 import javax.swing.*;
 import java.io.*;
 
-public class scp {
-    static String host;
-    static String user;
+public class scp implements BuiltinCommand {
+    String host;
+    String user;
 
-    public static boolean main(Sketch sketch, String[] arg) {
+    public boolean main(Sketch sketch, String[] arg) {
         if(arg.length != 2) {
             System.err.println("usage: __builtin_scp file1 user@remotehost:file2");
             return false;
@@ -187,7 +187,7 @@ public class scp {
         return false;
     }
 
-    static int checkAck(InputStream in) throws IOException {
+    int checkAck(InputStream in) throws IOException {
         int b = in.read();
 
 // b may be 0 for success,
@@ -219,7 +219,7 @@ public class scp {
         return b;
     }
 
-    public static String askPassword() {
+    public String askPassword() {
         JTextField passwordField = (JTextField)new JPasswordField(20);
         JCheckBox save = new JCheckBox("Remember password");
         Object[] ob = {passwordField, save};
