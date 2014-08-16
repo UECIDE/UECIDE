@@ -29,4 +29,6 @@ public interface EditorBase {
     public void highlightLine(int line, Color color);
     public void clearHighlights();
     public void gotoLine(int line);
+    public int getCursorPosition();
+    public void setCursorPosition(int pos);
 }

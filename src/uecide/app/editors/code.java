@@ -954,4 +954,12 @@ public class code extends JPanel implements EditorBase {
             Base.error(e);
         }
     }
+
+    public void setCursorPosition(int pos) {
+        textArea.setCaretPosition(pos);
+    }
+
+    public int getCursorPosition() {
+        return textArea.getCaretPosition();
+    }
 }

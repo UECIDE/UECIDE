@@ -53,7 +53,7 @@
                bootclasspath="${bootclass.path}"
                includeAntRuntime="false"
                srcdir="src" destdir="bin"
-               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/jssc.jar; lib/JTattoo-1.6.10.jar; lib/liquidlnf.jar; lib/jna.jar; lib/apple.jar; lib/rsyntaxtextarea.jar; lib/autocomplete.jar; lib/jfontchooser-1.0.5.jar; lib/json-simple-1.1.1.jar; lib/tinylaf.jar; lib/jmdns.jar; lib/jsch-0.1.51.jar; lib/usb4java-1.2.0.jar; lib/jsr80-1.0.1.jar; lib/commons-lang3-3.2.1.jar">
+               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/jssc.jar; lib/JTattoo-1.6.10.jar; lib/liquidlnf.jar; lib/jna.jar; lib/apple.jar; lib/rsyntaxtextarea.jar; lib/autocomplete.jar; lib/jfontchooser-1.0.5.jar; lib/json-simple-1.1.1.jar; lib/tinylaf.jar; lib/jmdns.jar; lib/jsch-0.1.51.jar; lib/usb4java-1.2.0.jar; lib/jsr80-1.0.1.jar; lib/commons-lang3-3.2.1.jar; lib/reflections.jar; lib/guava.jar; lib/javassist.jar">
             <compilerarg value="-Xlint:unchecked"/>
 
         </javac>

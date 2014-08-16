@@ -54,7 +54,6 @@ import javax.imageio.*;
 
 import java.awt.datatransfer.*;
 
-import java.util.Timer;
 import uecide.app.Compiler;
 
 import java.beans.*;
@@ -1051,8 +1050,6 @@ System.err.println(sexy.length());
         sketchFilesTree.setDropMode(DropMode.ON_OR_INSERT);
         sketchFilesTree.setTransferHandler(new TreeTransferHandler());
         sketchFilesTree.getSelectionModel().setSelectionMode(TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
-
-        enableSourceWatchTimer();
     }
 
     class TreeTransferHandler extends TransferHandler {
@@ -1353,21 +1350,6 @@ System.err.println(sexy.length());
         }
     }
 
-    Timer sourceWatchTimer;
-
-    public void enableSourceWatchTimer() {
-        sourceWatchTimer = new Timer();
-        sourceWatchTimer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                updateSourceTree();
-            }
-        }, 1000, 1000);
-    }
-
-    public void cancelSourceWatchTimer() {
-        sourceWatchTimer.cancel();
-    }
-
     public void mergeTrees(DefaultMutableTreeNode dst, DefaultMutableTreeNode src) {
         // First go through and remove any nodes in dst that aren't in src.
         boolean removedNodes = false;
@@ -1652,7 +1634,7 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
     }
 
     public void updateTree() {
-        boolean treeRootOpen = sketchContentTree.isExpanded(new TreePath(treeRoot.getPath()));
+//        boolean treeRootOpen = sketchContentTree.isExpanded(new TreePath(treeRoot.getPath()));
 
         treeRoot.setUserObject(loadedSketch);
 
@@ -1664,7 +1646,7 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
         updateDocsTree();
         updateFilesTree();
 
-        if(treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
+//        if(treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
     }
 
     // This is the main routine for generating the context menus for the Project tree view.  For the
@@ -1895,8 +1877,6 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
                                 }
 
                                 if(tab >= 0) {
-                                    TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
-                                    tl.cancelFileWatcher();
                                     editorTabs.remove(tab);
                                 }
 
@@ -2170,8 +2150,6 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
                                 }
 
                                 if(tab >= 0) {
-                                    TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
-                                    tl.cancelFileWatcher();
                                     editorTabs.remove(tab);
                                 }
 
@@ -2483,8 +2461,6 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
                 if(option == 0) eb.save();
             }
 
-            TabLabel tl = (TabLabel)editorTabs.getTabComponentAt(tab);
-            tl.cancelFileWatcher();
         }
 
         editorTabs.remove(tab);
@@ -2736,7 +2712,6 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
 
         closeAllTabs();
 
-        cancelSourceWatchTimer();
         Editor.unregisterEditor(this);
         this.dispose();
 
@@ -3096,6 +3071,14 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_TOP);
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_MID);
+        item = new JMenuItem("Service Manager");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ServiceManager.open(Editor.this);
+            }
+        });
+        toolsMenu.add(item);
+
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_BOTTOM);
 
@@ -4125,7 +4108,9 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
     }
 
     public static boolean closeAllEditors() {
-        for(Editor e : editorList) {
+        ArrayList<Editor>localList = new ArrayList<Editor>();
+        localList.addAll(editorList);
+        for(Editor e : localList) {
             if(e.askCloseWindow() == false) {
                 return false;
             }

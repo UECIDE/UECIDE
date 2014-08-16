@@ -588,10 +588,11 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
                     if (bits.length == 2) {
                         if (bits[0] == "") bits[0] = "1";
                         if (bits[1] == "") bits[1] = "1";
-                        cursorPosition = new Point(
-                            Integer.parseInt(bits[1]),
-                            Integer.parseInt(bits[0])
-                        );
+                        int cx = Integer.parseInt(bits[1]) - 1;
+                        int cy = Integer.parseInt(bits[0]) - 1;
+                        if (cx < 0) cx = 0;
+                        if (cy < 0) cy = 0;
+                        cursorPosition = new Point(cx, cy);
                         if (cursorPosition.x >= textSize.width) {
                             cursorPosition.x = textSize.width - 1;
                         }

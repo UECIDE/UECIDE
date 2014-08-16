@@ -90,7 +90,9 @@ public class AStyle extends Plugin {
                 sb.append(line);
                 sb.append("\n");
             }
+            int pos = editorTab.getCursorPosition();
             editorTab.setText(sb.toString());
+            editorTab.setCursorPosition(pos);
 
             temp.delete();
 

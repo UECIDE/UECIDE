@@ -262,3 +262,11 @@ compiler.disable_prototypes=false
 compiler.generate_lss=false
 
 version.check=true
+
+# Services
+
+service.networkdiscoveryservice.autostart=true
+service.treeupdaterservice.autostart=true
+service.usbdiscoveryservice.autostart=true
+service.changedfileservice.autostart=true
+

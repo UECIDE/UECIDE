@@ -1657,6 +1657,8 @@ public class Sketch implements MessageConsumer {
 
         File[] files = sketchFolder.listFiles();
 
+        Base.removeDescendants(buildFolder);
+
         for(File f : files) {
             if(f.equals(oldMainFile)) {
                 Debug.message("Copy main file " + f.getAbsolutePath() + " to " + newMainFile.getAbsolutePath());

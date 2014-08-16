@@ -211,4 +211,11 @@ public class bitmap extends JPanel implements EditorBase {
 
     public void requestFocus() {
     }
+
+    public void setCursorPosition(int pos) {
+    }
+
+    public int getCursorPosition() {
+        return 0;
+    }
 }

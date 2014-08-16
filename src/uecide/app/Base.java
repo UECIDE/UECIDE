@@ -40,7 +40,7 @@ import java.util.zip.*;
 import java.util.jar.*;
 import uecide.plugin.*;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 
 
 
@@ -58,6 +58,8 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
 import javax.jmdns.ServiceInfo;
+
+import org.reflections.*;
 
 /*! The Base class provides the initial application
  *  startup code, parsing command line options, loading
@@ -511,8 +513,23 @@ public class Base {
             System.exit(0);
         }
 
-        NetworkDiscoveryService.startDiscoveringBoards();
-        UsbDiscoveryService.startDiscoveringBoards();
+        Reflections reflections = new Reflections("uecide.app");
+        Set<Class<? extends Service>> classes = reflections.getSubTypesOf(Service.class);
+        for (Class<? extends Service> c : classes) {
+            try {
+                System.err.println(c);
+                Constructor<?> ctor = c.getConstructor();
+                Service s = (Service)(ctor.newInstance());
+                ServiceManager.addService(s);
+            } catch (NoSuchMethodException ex) {
+            } catch (InstantiationException ex) {
+            } catch (IllegalAccessException ex) {
+            } catch (InvocationTargetException ex) {
+            }
+        }
+//        ServiceManager.addService(new NetworkDiscoveryService());
+//        ServiceManager.addService(new UsbDiscoveryService());
+//        ServiceManager.addService(new TreeUpdaterService());
     }
 
     /*! Open a sketch in a new Editor (if not running headless) and set up any preset values

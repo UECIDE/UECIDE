@@ -13,55 +13,69 @@ import org.usb4java.*;
 import javax.usb.*;
 import javax.usb.event.*;
 
-public class UsbDiscoveryService {
+public class UsbDiscoveryService extends Service {
 
-    static Thread serviceDiscoveryThread = null;
-    static boolean serviceDiscoveryThreadRunning = true;
-    static UsbServices services = null;
-    static UsbHub rootHub = null;
+    UsbServices services = null;
+    UsbHub rootHub = null;
+    UsbServicesListener listener = null;
 
-    static public void startDiscoveringBoards() {
-        serviceDiscoveryThread = new Thread() {
-            public void run() {
-                try {
-                    services = UsbHostManager.getUsbServices();
-                    rootHub = services.getRootUsbHub();
-                    serviceDiscoveryThreadRunning = true;
+    public UsbDiscoveryService() {
+        setInterval(1000); // Irelevant for this service really.
+        setName("USB Device Discovery");
+    }
 
-                    UsbServicesListener listener = new UsbServicesListener() {
-                        public void usbDeviceAttached(UsbServicesEvent evt) {
-                            UsbDiscoveryService.deviceAttached(evt.getUsbDevice());
-                        }
-                        public void usbDeviceDetached(UsbServicesEvent evt) {
-                            UsbDiscoveryService.deviceDetached(evt.getUsbDevice());
-                        }
-                    
-                    };
-                    services.addUsbServicesListener(listener);
+    public void setup() {
+        try {
+            services = UsbHostManager.getUsbServices();
+        } catch (UsbException ex) {
+            stop();
+            return;
+        }
+        if (services == null) {
+            stop();
+            return;
+        }
 
-                    ArrayList<UsbDevice> devs = getAllUsbDevices(rootHub);
+        try {
+            rootHub = services.getRootUsbHub();
+        } catch (UsbException ex) {
+            stop();
+            return;
+        }
+        if (rootHub == null) {
+            stop();
+            return;
+        }
 
-                    for (UsbDevice dev : devs) {
-                        deviceAttached(dev);
-                    }
-
-                    while (serviceDiscoveryThreadRunning) {
-                        Thread.sleep(5000);
-                    }
-                    services.removeUsbServicesListener(listener);
-                } catch (Exception ee) {
-                    Base.error(ee);
-                }
+        listener = new UsbServicesListener() {
+            public void usbDeviceAttached(UsbServicesEvent evt) {
+                deviceAttached(evt.getUsbDevice());
             }
+            public void usbDeviceDetached(UsbServicesEvent evt) {
+                deviceDetached(evt.getUsbDevice());
+            }
+        
         };
-        serviceDiscoveryThread.start();
+        services.addUsbServicesListener(listener);
+
+        ArrayList<UsbDevice> devs = (ArrayList<UsbDevice>) getAllUsbDevices(rootHub);
+
+        for (UsbDevice dev : devs) {
+            deviceAttached(dev);
+        }
     }
 
-    static public void stopDiscoveringBoards() {
-        serviceDiscoveryThreadRunning = false;
+    public void loop() {
+        // Nothing gets done here
     }
 
-    public static ArrayList<UsbDevice>  getAllUsbDevices(UsbDevice device) {
+    public void cleanup() {
+        if (services != null) {
+            services.removeUsbServicesListener(listener);
+        }
+    }
+
+    public ArrayList<UsbDevice>  getAllUsbDevices(UsbDevice device) {
         ArrayList<UsbDevice> devs = new ArrayList<UsbDevice>();
         try {
             devs.add(device);
@@ -70,7 +84,7 @@ public class UsbDiscoveryService {
                 final UsbHub hub = (UsbHub) device;
 
                 for(UsbDevice child : (List<UsbDevice>) hub.getAttachedUsbDevices()) {
-                    ArrayList<UsbDevice> subs = getAllUsbDevices(child);
+                    ArrayList<UsbDevice> subs = (ArrayList<UsbDevice>) getAllUsbDevices(child);
                     devs.addAll(subs);
                 }
             }
@@ -80,7 +94,7 @@ public class UsbDiscoveryService {
         return devs;
     }
 
-    public static void deviceAttached(UsbDevice dev) {
+    public void deviceAttached(UsbDevice dev) {
         try {
             Board b = getBoardByDevice(dev);
             if (b != null) {
@@ -99,7 +113,7 @@ public class UsbDiscoveryService {
             Base.error(exex);
         }
     }
-    public static void deviceDetached(UsbDevice dev) {
+    public void deviceDetached(UsbDevice dev) {
         try {
             DiscoveredBoard b = Base.discoveredBoards.get(dev);
             if (b != null) {
@@ -111,7 +125,7 @@ public class UsbDiscoveryService {
         }
     }
 
-    public static Board getBoardByDevice(UsbDevice dev) {
+    public Board getBoardByDevice(UsbDevice dev) {
         try {
             UsbDeviceDescriptor desc = dev.getUsbDeviceDescriptor();
             short vid = desc.idVendor();

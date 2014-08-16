@@ -52,7 +52,6 @@ import javax.imageio.*;
 
 import java.awt.datatransfer.*;
 
-import java.util.Timer;
 import uecide.app.Compiler;
 
 import java.beans.*;
@@ -64,7 +63,6 @@ public class TabLabel extends JPanel {
     String name;
     long expectedFileTime;
     boolean modified = false;
-    Timer fileWatchTimer;
     boolean fileWatchMutex = false;
     Editor editor;
 
@@ -101,24 +99,6 @@ public class TabLabel extends JPanel {
         this.add(blab, BorderLayout.EAST);
         expectedFileTime = sf.lastModified();
         update();
-        fileWatchTimer = new Timer();
-        fileWatchTimer.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                if(TabLabel.this.needsReload()) {
-                    if(fileWatchMutex) return;
-
-                    fileWatchMutex = true;
-
-                    if(modified) {
-                        TabLabel.this.askReload();
-                    } else {
-                        reloadFile();
-                    }
-
-                    fileWatchMutex = false;
-                }
-            }
-        }, 1000, 1000);
     }
 
     public TabLabel(Editor e, String tabname) {
@@ -189,6 +169,10 @@ public class TabLabel extends JPanel {
         setReloaded();
     }
 
+    public boolean isModified() {
+        return modified;
+    }
+
     public void setModified(boolean m) {
         if(modified != m) {
             if(!m) {
@@ -209,11 +193,6 @@ public class TabLabel extends JPanel {
 
     public File getFile() {
         return sketchFile;
-    }
-
-    public void cancelFileWatcher() {
-        System.err.println("Cancelling watcher on " + sketchFile);
-        fileWatchTimer.cancel();
     }
 
     public void save() {
