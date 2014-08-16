@@ -54,7 +54,6 @@ import javax.imageio.*;
 
 import java.awt.datatransfer.*;
 
-import java.util.Timer;
 import uecide.app.Compiler;
 
 import java.beans.*;

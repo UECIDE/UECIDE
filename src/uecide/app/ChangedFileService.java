@@ -17,6 +17,9 @@ public class ChangedFileService extends Service {
             int tabs = ed.getTabCount();
             for (int i = 0; i < tabs; i++) {
                 TabLabel tl = ed.getTabLabel(i);
+                if (tl == null) {
+                    continue;
+                }
                 if (tl.needsReload()) {
                     if(tl.isModified()) {
                         tl.askReload();
