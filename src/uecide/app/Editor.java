@@ -1550,29 +1550,34 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
                     }
                 }
 
-        treeModel.nodeStructureChanged(treeHeaders);
+                treeModel.nodeStructureChanged(treeHeaders);
                 restoreTreeState(sketchContentTree, saved);
             }
         });
     }
 
-    public void updateLibrariesTree() {
+    public synchronized void updateLibrariesTree() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TreePath[] saved = saveTreeState(sketchContentTree);
-                treeLibraries.removeAllChildren();
+//                treeLibraries.removeAllChildren();
                 HashMap<String, Library>libList = loadedSketch.getLibraries();
+                
+                DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
                 DefaultMutableTreeNode node;
 
                 if(libList != null) {
-                    for(String libname : libList.keySet()) {
+                    ArrayList<String> libs = new ArrayList<String>();
+                    libs.addAll(libList.keySet());
+                    for(String libname : libs) {
                         node = new DefaultMutableTreeNode(libname);
                         node.setUserObject(libList.get(libname));
-                        treeLibraries.add(node);
+                        ntc.add(node);
                     }
                 }
 
-        treeModel.nodeStructureChanged(treeLibraries);
+                mergeTrees(treeLibraries, ntc);
+                treeModel.reload(sortTree(treeLibraries));
                 restoreTreeState(sketchContentTree, saved);
             }
         });
@@ -2542,6 +2547,9 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
     }
 
     public int getTabCount() {
+        if (editorTabs == null) {
+            return 0;
+        }
         return editorTabs.getTabCount();
     }
 
