@@ -1591,7 +1591,7 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
                     np = ((FunctionBookmark)prevNode.getUserObject()).getName();
                 }
 
-                if(nt.compareToIgnoreCase(np) > 0) {
+                if(nt.compareTo(np) > 0) {
                     node.insert(child, j);
                     node.insert(prevNode, i);
                 }
