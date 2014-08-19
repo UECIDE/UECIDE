@@ -146,6 +146,29 @@ public class Editor extends JFrame {
 
     Thread compilationThread = null;
 
+    class FlaggedList {
+        String name;
+        int color;
+
+        public static final int Red = 1;
+        public static final int Green = 2;
+        public static final int Yellow = 3;
+        public static final int Blue = 4;
+
+        public FlaggedList(int c, String n) {
+            color = c;
+            name = n;
+        }
+
+        public String toString() {
+            return name;
+        }
+     
+        public int getColor() {
+            return color;
+        }
+    }
+
     class FunctionBookmark {
         File file;
         int line;
@@ -804,6 +827,75 @@ System.err.println(sexy.length());
                 Border noBorder = BorderFactory.createEmptyBorder(0, 0, 0, 0);
                 Border paddingBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
 
+                if (userObject instanceof FlaggedList) {
+                    FlaggedList ent = (FlaggedList)userObject;
+
+                    JLabel text = new JLabel(ent.toString());
+                    if (ent.getColor() == FlaggedList.Red) {
+                        icon = Base.loadIconFromResource("files/flag-red.png");
+                    } else if (ent.getColor() == FlaggedList.Green) {
+                        icon = Base.loadIconFromResource("files/flag-green.png");
+                    } else if (ent.getColor() == FlaggedList.Yellow) {
+                        icon = Base.loadIconFromResource("files/flag-yellow.png");
+                    } else if (ent.getColor() == FlaggedList.Blue) {
+                        icon = Base.loadIconFromResource("files/flag-blue.png");
+                    }
+
+                    text.setBorder(paddingBorder);
+
+                    if(selected) {
+                        text.setBackground(bg);
+                        text.setForeground(fg);
+                        text.setOpaque(true);
+                    } else {
+                        text.setOpaque(false);
+                        text.setForeground(textColor);
+                    }
+
+                    container.setOpaque(false);
+                    container.setBorder(noBorder);
+
+                    if(icon != null) {
+                        JLabel i = new JLabel(icon);
+                        container.add(i, BorderLayout.WEST);
+                    }
+
+                    Font f = text.getFont();
+                    text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
+                    container.add(text, BorderLayout.CENTER);
+                    return container;
+                }
+
+                if (userObject instanceof TodoEntry) {
+                    TodoEntry ent = (TodoEntry)userObject;
+
+                    JLabel text = new JLabel(ent.toString());
+                    icon = Base.loadIconFromResource("files/todo.png");
+                    text.setBorder(paddingBorder);
+
+                    if(selected) {
+                        text.setBackground(bg);
+                        text.setForeground(fg);
+                        text.setOpaque(true);
+                    } else {
+                        text.setOpaque(false);
+                        text.setForeground(textColor);
+                    }
+
+                    container.setOpaque(false);
+                    container.setBorder(noBorder);
+
+                    if(icon != null) {
+                        JLabel i = new JLabel(icon);
+                        container.add(i, BorderLayout.WEST);
+                    }
+
+                    Font f = text.getFont();
+                    text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
+                    container.add(text, BorderLayout.CENTER);
+                    return container;
+                }
+
                 if(userObject instanceof FunctionBookmark) {
                     FunctionBookmark bm = (FunctionBookmark)userObject;
                     JLabel text = new JLabel(bm.formatted());
@@ -1433,6 +1525,38 @@ System.err.println(sexy.length());
                                 }
                             }
 
+                            ArrayList<TodoEntry> todo = loadedSketch.todo(f);
+                            if (todo != null && todo.size() > 0) {
+
+                                FlaggedList noteList = new FlaggedList(FlaggedList.Green, "Notes");
+                                FlaggedList todoList = new FlaggedList(FlaggedList.Yellow, "To Do");
+                                FlaggedList fixmeList = new FlaggedList(FlaggedList.Red, "Fix Me");
+
+                                DefaultMutableTreeNode noteEntries = new DefaultMutableTreeNode(noteList);
+                                DefaultMutableTreeNode todoEntries = new DefaultMutableTreeNode(todoList);
+                                DefaultMutableTreeNode fixmeEntries = new DefaultMutableTreeNode(fixmeList);
+
+                                for (TodoEntry ent : todo) {
+                                    DefaultMutableTreeNode tent = new DefaultMutableTreeNode(ent);
+                                    if (ent.getType() == TodoEntry.Note) {
+                                        noteEntries.add(tent);
+                                    } else if (ent.getType() == TodoEntry.Todo) {
+                                        todoEntries.add(tent);
+                                    } else if (ent.getType() == TodoEntry.Fixme) {
+                                        fixmeEntries.add(tent);
+                                    }
+                                }
+                                if (noteEntries.getChildCount() > 0) {
+                                    node.add(noteEntries);
+                                }
+                                if (todoEntries.getChildCount() > 0) {
+                                    node.add(todoEntries);
+                                }
+                                if (fixmeEntries.getChildCount() > 0) {
+                                    node.add(fixmeEntries);
+                                }
+                            }
+
                             break;
                     }
                 }
@@ -1690,6 +1814,12 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
                         int tab = openOrSelectFile(bm.getFile());
                         EditorBase eb = getTab(tab);
                         eb.gotoLine(bm.getLine());
+                        eb.requestFocus();
+                    } else if (userObject instanceof TodoEntry) {
+                        TodoEntry ent = (TodoEntry)userObject;
+                        int tab = openOrSelectFile(ent.getFile());
+                        EditorBase eb = getTab(tab);
+                        eb.gotoLine(ent.getLine());
                         eb.requestFocus();
                     }
                 }

@@ -4214,4 +4214,40 @@ public class Sketch implements MessageConsumer {
         return getBoard().get("family");
     }
 
+    public ArrayList<TodoEntry> todo(File f) {
+        if (sketchFiles.indexOf(f) == -1) {
+            return null;
+        }
+
+        Pattern p = Pattern.compile("(?i)\\/\\/\\s*(TODO|NOTE|FIXME):\\s*(.*)$");
+
+        ArrayList<TodoEntry> found = new ArrayList<TodoEntry>();
+
+        String content = getFileContent(f);
+        String[] lines = content.split("\n");
+        int lineno = 0;
+        for (String line : lines) {
+            Matcher m = p.matcher(line);
+            if (m.find()) {
+                String type = m.group(1).trim().toLowerCase();
+                String comment = m.group(2).trim();
+                int itype = 0;
+
+                if (type.equals("todo")) {
+                    itype = TodoEntry.Todo;
+                } else if (type.equals("note")) {
+                    itype = TodoEntry.Note;
+                } else if (type.equals("fixme")) {
+                    itype = TodoEntry.Fixme;
+                }
+                if (itype != 0) {
+                    found.add(new TodoEntry(f, lineno, comment, itype));
+                }
+            }
+            lineno++;
+        }
+
+        return found;
+    }
+
 }
