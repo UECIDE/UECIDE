@@ -14,7 +14,7 @@ editor.fgcolor = #000000
 editor.bgcolor = #ffffff
 editor.external.bgcolor = #ffeedd
 
-splash.version.x = 350
+splash.version.x = 330
 splash.version.y = 150
 splash.version.color = #b2bebe
 splash.version.font = SansSerif,bold,16

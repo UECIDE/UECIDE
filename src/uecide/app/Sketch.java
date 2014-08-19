@@ -1491,6 +1491,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public Library addLibraryToImportList(String filename) {
+        System.err.println("I am using aLTIL.");
         String l = filename;
 
         if(filename.endsWith(".h")) {
@@ -1505,12 +1506,14 @@ public class Sketch implements MessageConsumer {
         File sketchLibFolder = new File(sketchFolder, "libraries");
 
         if(sketchLibFolder.exists() && sketchLibFolder.isDirectory()) {
+            System.err.println("You have a libraries folder.");
             File libFolder = new File(sketchLibFolder, l);
 
             if(libFolder.exists() && libFolder.isDirectory()) {
                 File libHeader = new File(libFolder, l + ".h");
 
                 if(libHeader.exists()) {
+                    System.err.println("Found library " + l + " in sketch!!!");
                     lib = new Library(libHeader, "sketch", "all");
                     importedLibraries.put(l, lib);
                     orderedLibraries.add(lib);
@@ -2009,6 +2012,34 @@ public class Sketch implements MessageConsumer {
         doPrePurge = true;
     }
 
+    public Library getSketchLibrary(String lib) {
+        if (lib.endsWith(".h")) {
+            lib = lib.substring(0, lib.lastIndexOf("."));
+        }
+
+        File libs = new File(sketchFolder, "libraries");
+        if (!libs.exists()) {
+            return null;
+        }
+
+        if (!libs.isDirectory()) {
+            return null;
+        }
+
+        File libDir = new File(libs, lib);
+        if (!libDir.exists()) {
+            return null;
+        }
+        if (!libDir.isDirectory()) {
+            return null;
+        }
+        Library libob = new Library(libDir, "sketch", "all");
+        if (!libob.isValid()) {
+            return null;
+        }
+        return libob;
+    }
+
     public String generateIncludes() {
         updateLibraryList();
         ArrayList<File> includes = new ArrayList<File>();
@@ -2021,7 +2052,13 @@ public class Sketch implements MessageConsumer {
         }
 
         for(String lib : includeOrder) {
-            Library l = Library.getLibraryByInclude(lib, getCore().getName());
+            System.err.println("Finding " + lib);
+
+            Library l = getSketchLibrary(lib);
+
+            if (l == null) {
+                l = Library.getLibraryByInclude(lib, getCore().getName());
+            }
 
             if(l != null) {
                 for (File lf : l.getIncludeFolders(this)) {
