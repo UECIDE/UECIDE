@@ -3,15 +3,32 @@
     default="install"
 >
 
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="/usr/share/ant/lib/ant-contrib.jar"/>
+        </classpath>
+    </taskdef>
+
+
     <target name="build" depends="update-all, build-rsyntaxtextarea">
     </target>
 
     <target name="build-rsyntaxtextarea">
-        <exec executable="gradle" dir="RSyntaxTextArea" />
+        <exec executable="gradle" dir="RSyntaxTextArea">
+            <arg value="jar" />
+        </exec>
     </target>
 
     <target name="install" depends="build">
-        <copy file="RSyntaxTextArea/dist/rsyntaxtextarea.jar" tofile="../lib/rsyntaxtextarea.jar" />
+        <timestampselector property="latest.modified">
+            <path>
+                <fileset dir="RSyntaxTextArea/build/libs">
+                    <include name="RSyntaxTextArea-*.jar" />
+                </fileset>
+            </path>
+        </timestampselector>
+
+        <copy tofile="../lib/rsyntaxtextarea.jar" file="${latest.modified}" />
     </target>
 
     <target name="update-all" depends="

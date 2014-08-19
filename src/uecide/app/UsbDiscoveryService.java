@@ -83,7 +83,10 @@ public class UsbDiscoveryService extends Service {
             if(device.isUsbHub()) {
                 final UsbHub hub = (UsbHub) device;
 
-                for(UsbDevice child : (List<UsbDevice>) hub.getAttachedUsbDevices()) {
+                @SuppressWarnings("unchecked")
+                List<UsbDevice>devlist = (List<UsbDevice>)hub.getAttachedUsbDevices();
+
+                for(UsbDevice child : devlist) {
                     ArrayList<UsbDevice> subs = (ArrayList<UsbDevice>) getAllUsbDevices(child);
                     devs.addAll(subs);
                 }

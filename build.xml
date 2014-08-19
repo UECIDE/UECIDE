@@ -44,23 +44,32 @@
 
     <target name="compile" description="Compile" depends="build_number, git_contributors">
         <mkdir dir="bin" />
+        <path id="class.path">
+            <fileset dir="lib">
+                <include name="*.jar" />
+            </fileset>
+        </path>
         <javac target="1.6" 
-                debug="true"
-                debuglevel="lines,vars,source"
-                deprecation="true"
+               debug="true"
+               debuglevel="lines,vars,source"
+               deprecation="true"
                source="1.6"
                encoding="UTF-8"
                bootclasspath="${bootclass.path}"
                includeAntRuntime="false"
-               srcdir="src" destdir="bin"
-               classpath="${env.JAVA_HOME}/lib/tools.jar; lib/jssc.jar; lib/JTattoo-1.6.10.jar; lib/liquidlnf.jar; lib/jna.jar; lib/apple.jar; lib/rsyntaxtextarea.jar; lib/autocomplete.jar; lib/jfontchooser-1.0.5.jar; lib/json-simple-1.1.1.jar; lib/tinylaf.jar; lib/jmdns.jar; lib/jsch-0.1.51.jar; lib/usb4java-1.2.0.jar; lib/jsr80-1.0.1.jar; lib/commons-lang3-3.2.1.jar; lib/reflections.jar; lib/guava.jar; lib/javassist.jar">
+               srcdir="src" 
+               destdir="bin">
+            <classpath refid="class.path" />
             <compilerarg value="-Xlint:unchecked"/>
-
         </javac>
     </target>		
 
     <target name="plugins" depends="compile" description="Build and bundle plugins">
         <subant target="bundle" buildpath="plugins" />
+    </target>
+
+    <target name="thirdparty" description="Build third party libraries">
+        <subant target="install" buildpath="thirdparty" />
     </target>
 
     <target name="build" depends="compile" description="Build uecide">
