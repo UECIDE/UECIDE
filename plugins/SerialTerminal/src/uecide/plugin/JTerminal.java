@@ -33,6 +33,11 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
     Point selectStart = null;
     Point selectEnd = null;
 
+    char[] codepage;
+
+    final static int fgShift = 16;
+    final static int bgShift = 20;
+
     boolean disconnected = false;
     boolean autoCr = false;
 
@@ -71,8 +76,8 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
     int topOfScreen = 2000 - 24;
     int scrollbackPosition = 0;
 
-    final int IS_BRIGHT = 0x4000;
-    final int IS_DIM    = 0x8000;
+    final int IS_BRIGHT = 0x100000;
+    final int IS_DIM    = 0x200000;
 
     public JTerminal()
     {
@@ -136,18 +141,18 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
     }
 
     public char characterIn(Point position) {
-        return (char) (scrollback[position.y][position.x] & 0xFF);
+        return (char) (scrollback[position.y][position.x] & 0xFFFF);
     }
 
     public char characterAt(Point position)
     {
-        return (char) (scrollback[position.y + topOfScreen - scrollbackPosition][position.x] & 0xFF);
+        return (char) (scrollback[position.y + topOfScreen - scrollbackPosition][position.x] & 0xFFFF);
     }
 
     public Color selectedForegroundAt(Point position)
     {
         int character = scrollback[position.y + topOfScreen - scrollbackPosition][position.x];
-        int colorIndex = (character >> 8) & 0x07;
+        int colorIndex = (character >> fgShift) & 0x07;
         if ((character & IS_BRIGHT) != 0) {
             return brightColors[7-colorIndex];
         }
@@ -160,7 +165,7 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
     public Color foregroundAt(Point position)
     {
         int character = scrollback[position.y + topOfScreen - scrollbackPosition][position.x];
-        int colorIndex = (character >> 8) & 0x07;
+        int colorIndex = (character >> fgShift) & 0x07;
         if ((character & IS_BRIGHT) != 0) {
             return brightColors[colorIndex];
         }
@@ -173,14 +178,14 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
     public Color selectedBackgroundAt(Point position)
     {
         int character = scrollback[position.y + topOfScreen - scrollbackPosition][position.x];
-        int colorIndex = (character >> 11) & 0x07;
+        int colorIndex = (character >> bgShift) & 0x07;
         return normalColors[7-colorIndex];
     }
 
     public Color backgroundAt(Point position)
     {
         int character = scrollback[position.y + topOfScreen - scrollbackPosition][position.x];
-        int colorIndex = (character >> 11) & 0x07;
+        int colorIndex = (character >> bgShift) & 0x07;
         return normalColors[colorIndex];
     }
 
@@ -372,8 +377,8 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
             }
         }
         int bCol = 32;
-        bCol |= color << 8;
-        bCol |= background << 11;
+        bCol |= color << fgShift;
+        bCol |= background << bgShift;
         if (brightness < 0) {
             bCol |= IS_DIM;
         }
@@ -387,9 +392,9 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
 
     public void drawCharacter(char c)
     {
-        int bCol = (int)c;
-        bCol |= color << 8;
-        bCol |= background << 11;
+        int bCol = codepage[((int)c) & 0xFF];
+        bCol |= color << fgShift;
+        bCol |= background << bgShift;
         if (brightness < 0) {
             bCol |= IS_DIM;
         }
@@ -837,4 +842,25 @@ public class JTerminal extends JComponent implements KeyListener,MouseListener,F
     public void setDisconnected(boolean b) {
         disconnected = b;
     }
+
+    public void loadCodePage(String file) {
+        codepage = new char[256];
+        InputStream in = JTerminal.class.getResourceAsStream(file);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        String line;
+        int cno = 0;
+        try {
+            while ((line = reader.readLine()) != null) {
+                try {
+                    codepage[cno] = (char)Integer.parseInt(line, 16);
+                } catch (Exception e) {
+                }
+                cno++;
+            }
+            reader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

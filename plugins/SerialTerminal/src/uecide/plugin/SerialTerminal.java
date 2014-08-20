@@ -68,7 +68,9 @@ public class SerialTerminal extends Plugin implements SerialPortEventListener,Me
         }
         serialPort = editor.getSerialPort();
 
+
         Debug.message(this + ": Opening serial terminal on port " + serialPort);
+
         win = new JFrame(Translate.t("Serial Terminal"));
         win.getContentPane().setLayout(new BorderLayout());
         win.setResizable(false);
@@ -84,6 +86,7 @@ public class SerialTerminal extends Plugin implements SerialPortEventListener,Me
             Base.preferences.set("serial.font", "Monospaced,plain,12");
         }
         term.setFont(f);
+        term.loadCodePage("/uecide/plugin/SerialTerminal/" + Base.preferences.get("serial.codepage", "cp437") + ".cp");
         term.setKeypressConsumer(this);
         term.boxCursor(true);
 
@@ -462,7 +465,14 @@ public class SerialTerminal extends Plugin implements SerialPortEventListener,Me
                 if (port == null) {
                     return;
                 }
-                term.message(port.readString());
+                byte[] bytes = port.readBytes();
+                String s = "";
+                for (byte b : bytes) {
+                    int i = ((int)b) & 0xFF;
+                    s += (char)i;
+                }
+                term.message(s);
+                //term.message(port.readString());
             } catch (Exception ex) {
                 editor.error(ex);
             }
