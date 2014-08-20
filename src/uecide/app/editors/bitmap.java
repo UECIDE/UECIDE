@@ -218,4 +218,17 @@ public class bitmap extends JPanel implements EditorBase {
     public int getCursorPosition() {
         return 0;
     }
+
+    public void removeAllFlags() {
+    }
+
+    public void flagLine(int line, Icon icon, int group) {
+    }
+
+    public void removeFlag(int line) {
+    }
+
+    public void removeFlagGroup(int group) {
+    }
+
 }

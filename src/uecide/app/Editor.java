@@ -1532,12 +1532,22 @@ System.err.println(sexy.length());
                                 FlaggedList todoList = new FlaggedList(FlaggedList.Yellow, "To Do");
                                 FlaggedList fixmeList = new FlaggedList(FlaggedList.Red, "Fix Me");
 
+                                EditorBase eb = null;
+                                int tab = getTabByFile(f);
+                                if (tab != -1) {
+                                    eb = getTab(tab);
+                                    eb.removeFlagGroup(0x2000);
+                                }
+
                                 DefaultMutableTreeNode noteEntries = new DefaultMutableTreeNode(noteList);
                                 DefaultMutableTreeNode todoEntries = new DefaultMutableTreeNode(todoList);
                                 DefaultMutableTreeNode fixmeEntries = new DefaultMutableTreeNode(fixmeList);
 
                                 for (TodoEntry ent : todo) {
                                     DefaultMutableTreeNode tent = new DefaultMutableTreeNode(ent);
+                                    if (eb != null) {
+                                        eb.flagLine(ent.getLine(), Base.loadIconFromResource("files/flag-blue.png"), 0x2000);
+                                    }
                                     if (ent.getType() == TodoEntry.Note) {
                                         noteEntries.add(tent);
                                     } else if (ent.getType() == TodoEntry.Todo) {

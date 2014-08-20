@@ -31,4 +31,8 @@ public interface EditorBase {
     public void gotoLine(int line);
     public int getCursorPosition();
     public void setCursorPosition(int pos);
+    public void removeAllFlags();
+    public void flagLine(int line, Icon icon, int group);
+    public void removeFlag(int line);
+    public void removeFlagGroup(int group);
 }

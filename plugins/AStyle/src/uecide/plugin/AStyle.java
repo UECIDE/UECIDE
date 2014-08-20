@@ -70,6 +70,12 @@ public class AStyle extends Plugin {
             if (Base.preferences.getBoolean("astyle.add.brackets")) command.add("--add-brackets");
             if (Base.preferences.getBoolean("astyle.add.onelinebrackets")) command.add("--add-one-line-brackets");
 
+            if (Base.preferences.getBoolean("editor.expandtabs")) {
+                command.add("--indent=spaces=" + Base.preferences.getInteger("editor.tabsize"));
+            } else {
+                command.add("--indent=tab");
+            }
+
             if (Base.preferences.getBoolean("astyle.pad.parenthesis")) {
                 command.add("--pad-paren");
             } else {
@@ -313,15 +319,11 @@ public class AStyle extends Plugin {
 
     public static void savePreferences() {
         int idx = astyleStyle.getSelectedIndex();
-        System.err.println("ASTYLE: idx = " + idx);
-        System.err.println("ASTYLE: codes.length = " + codes.length);
 
         if (idx == -1) return;
         if (idx >= codes.length) return;
         String code = codes[idx];
         
-        System.err.println("ASTYLE: code = " + code);
-
         Base.preferences.set("astyle.style", code);
 
         Base.preferences.setBoolean("astyle.pad.blocks", padBlocks.isSelected());
@@ -362,7 +364,6 @@ public class AStyle extends Plugin {
 
         try {
             InputStream from = AStyle.class.getResourceAsStream(res);
-            System.err.println(from);
             OutputStream to = new BufferedOutputStream(new FileOutputStream(dfile));
             byte[] buffer = new byte[16 * 1024];
             int bytesRead;

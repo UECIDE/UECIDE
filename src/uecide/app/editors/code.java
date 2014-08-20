@@ -72,8 +72,35 @@ public class code extends JPanel implements EditorBase {
     JButton replaceButton = new JButton("Replace");
     JButton replaceAllButton = new JButton("All");
     JButton findCloseButton;
+    Gutter gutter;
 
     JToolBar toolbar;
+
+    class Flag {
+        Icon icon;
+        int group;
+        int line;
+
+        public Flag(int l, Icon i, int g) {
+            line = l;
+            icon = i;
+            group = g;
+        }
+
+        public int getLine() {
+            return line;
+        }
+
+        public int getGroup() {
+            return group;
+        }
+
+        public Icon getIcon() {
+            return icon;
+        }
+    }
+
+    ArrayList<Flag> flagList = new ArrayList<Flag>();
 
     public void openFindPanel() {
         if(findPanel == null) {
@@ -323,32 +350,33 @@ public class code extends JPanel implements EditorBase {
         textArea.setPaintTabLines(Base.preferences.getBoolean("editor.showtabs"));
 
         scrollPane.setFoldIndicatorEnabled(true);
+        scrollPane.setIconRowHeaderEnabled(true);
         setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
         textArea.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
 
         textArea.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
         textArea.setFont(Base.preferences.getFont("editor.font"));
 
-        Gutter g = scrollPane.getGutter();
+        gutter = scrollPane.getGutter();
 
         if(Base.theme.get(theme + "editor.gutter.bgcolor") != null) {
-            g.setBackground(Base.theme.getColor(theme + "editor.gutter.bgcolor"));
+            gutter.setBackground(Base.theme.getColor(theme + "editor.gutter.bgcolor"));
         }
 
         if(Base.theme.get(theme + "editor.gutter.fgcolor") != null) {
-            g.setLineNumberColor(Base.theme.getColor(theme + "editor.gutter.fgcolor"));
+            gutter.setLineNumberColor(Base.theme.getColor(theme + "editor.gutter.fgcolor"));
         }
 
         if(Base.theme.get(theme + "editor.gutter.bordercolor") != null) {
-            g.setBorderColor(Base.theme.getColor(theme + "editor.gutter.bordercolor"));
+            gutter.setBorderColor(Base.theme.getColor(theme + "editor.gutter.bordercolor"));
         }
 
         if(Base.theme.get(theme + "editor.fold.bgcolor") != null) {
-            g.setFoldBackground(Base.theme.getColor(theme + "editor.fold.bgcolor"));
+            gutter.setFoldBackground(Base.theme.getColor(theme + "editor.fold.bgcolor"));
         }
 
         if(Base.theme.get(theme + "editor.fold.fgcolor") != null) {
-            g.setFoldIndicatorForeground(Base.theme.getColor(theme + "editor.fold.fgcolor"));
+            gutter.setFoldIndicatorForeground(Base.theme.getColor(theme + "editor.fold.fgcolor"));
         }
 
         if(Base.theme.get(theme + "editor.line.bgcolor") != null) {
@@ -947,11 +975,64 @@ public class code extends JPanel implements EditorBase {
         textArea.removeAllLineHighlights();
     }
 
-    public void gotoLine(int line) {
+    public void removeAllFlags() {
+        flagList.clear();
+        updateFlags();
+    }
+
+    public void removeFlag(int line) {
+        Flag foundFlag = null;
+        for (Flag f : flagList) {
+            if (f.getLine() == line) {
+                foundFlag = f;
+                break;
+            }
+        }
+        if (foundFlag != null) {
+            flagList.remove(foundFlag);
+        }
+        updateFlags();
+    }
+
+    public void removeFlagGroup(int group) {
+
+        boolean found = false;
+        do {
+            found = false;
+            Iterator it = flagList.iterator();
+
+            while (it.hasNext()) {
+                Flag f = (Flag)it.next();
+                if (f.getGroup() == group) {
+                    it.remove();
+                    found = true;
+                }
+            }
+        } while (found == true);
+        updateFlags();
+    }
+
+    public void flagLine(int line, Icon icon, int group) {
+            flagList.add(new Flag(line, icon, group));
+            updateFlags();
+    }
+
+    public void updateFlags() {
+        gutter.removeAllTrackingIcons();
+        for (Flag f : flagList) {
+            Icon i = f.getIcon();
+            try {
+                gutter.addLineTrackingIcon(f.getLine(), i);
+            } catch (BadLocationException ex) {
+            }
+        }
+    }
+
+
+    public void gotoLine(final int line) {
         try {
             textArea.setCaretPosition(textArea.getLineStartOffset(line));
-        } catch(Exception e) {
-            Base.error(e);
+        } catch(BadLocationException e) {
         }
     }
 

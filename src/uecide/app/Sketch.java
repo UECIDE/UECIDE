@@ -1040,7 +1040,6 @@ public class Sketch implements MessageConsumer {
 
                 if(line.endsWith(")")) {
                     continuation = false;
-                    Debug.message("Found function " + decimated.toString() + " at line " + lineno);
                     funcs.put(lineno - 1, decimated.toString());
                     decimated = new StringBuilder();
                 }
@@ -1988,6 +1987,7 @@ public class Sketch implements MessageConsumer {
         if(c <= 1) {
             if(stdoutRedirect != null) {
                 try {
+                    stdoutRedirect.flush();
                     stdoutRedirect.close();
                 } catch(Exception e) {
                 }
@@ -1999,6 +1999,7 @@ public class Sketch implements MessageConsumer {
         if(c == 2) {
             if(stderrRedirect != null) {
                 try {
+                    stderrRedirect.flush();
                     stderrRedirect.close();
                 } catch(Exception e) {
                 }
@@ -2157,6 +2158,8 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean compile() {
+        
+        long startTime = System.currentTimeMillis();
 
         PropertyFile props = mergeAllProperties();
         clearLineComments();
@@ -2167,6 +2170,8 @@ public class Sketch implements MessageConsumer {
 
                 if(eb != null) {
                     eb.clearHighlights();
+                    eb.removeFlagGroup(0x1000); // Error flags
+                    eb.removeFlagGroup(0x1001); // Warning flags
                 }
             }
         }
@@ -2328,6 +2333,7 @@ public class Sketch implements MessageConsumer {
                     }
                 }
             }
+
         }
 
         setCompilingProgress(70);
@@ -2360,6 +2366,9 @@ public class Sketch implements MessageConsumer {
 
         compileSize();
 
+            long endTime = System.currentTimeMillis();
+            double compileTime = (double)(endTime - startTime) / 1000d;
+            rawMessage("<ul><li>Compilation took " + compileTime + " seconds</li></ul>");
         return true;
     }
 
@@ -3169,7 +3178,6 @@ public class Sketch implements MessageConsumer {
 
         while(isProcessRunning(runningProcess)) {
             try {
-
                 while(in.available() > 0) {
                     int i = in.read(tmp, 0, 20);
 
@@ -3186,19 +3194,31 @@ public class Sketch implements MessageConsumer {
                     errorStream(new String(tmp, 0, i));
                 }
 
-
-//                if(in.thread != null)
-//                    in.thread.join();
-//
-//                if(err.thread != null)
-//                    err.thread.join();
-//
-//                result = runningProcess.waitFor();
-//                running = false;
             } catch(Exception ignored) {
                 Base.error(ignored);
             }
         }
+
+            try {
+                while(in.available() > 0) {
+                    int i = in.read(tmp, 0, 20);
+
+                    if(i < 0)break;
+
+                    messageStream(new String(tmp, 0, i));
+                }
+
+                while(err.available() > 0) {
+                    int i = err.read(tmp, 0, 20);
+
+                    if(i < 0)break;
+
+                    errorStream(new String(tmp, 0, i));
+                }
+
+            } catch(Exception ignored) {
+                Base.error(ignored);
+            }
 
         result = runningProcess.exitValue();
 
@@ -3608,6 +3628,7 @@ public class Sketch implements MessageConsumer {
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
                             eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(theme + "editor.compile.error.bgcolor"));
+                            eb.flagLine(errorLineNumber - 1, Base.loadIconFromResource("files/flag-red.png"), 0x1000);
                         }
 
                         error("<a href='uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "'>Error in file " + errorFile.getName() + " at line " + errorLineNumber + ":</a>");
@@ -3636,6 +3657,7 @@ public class Sketch implements MessageConsumer {
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
                             eb.highlightLine(warningLineNumber - 1, Base.theme.getColor(theme + "editor.compile.warning.bgcolor"));
+                            eb.flagLine(warningLineNumber - 1, Base.loadIconFromResource("files/flag-yellow.png"), 0x1001);
                         }
 
                         setLineComment(warningFile, warningLineNumber, wMat.group(wMessage));
