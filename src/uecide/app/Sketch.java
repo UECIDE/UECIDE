@@ -3193,6 +3193,7 @@ public class Sketch implements MessageConsumer {
 
                     errorStream(new String(tmp, 0, i));
                 }
+                Thread.sleep(1);
 
             } catch(Exception ignored) {
                 Base.error(ignored);
