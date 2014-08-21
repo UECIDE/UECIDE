@@ -1473,7 +1473,6 @@ System.err.println(sexy.length());
 
             if(sob != dob) {
                 dnode.setUserObject(sob);
-//                treeModel.nodeStructureChanged(dnode);
             }
 
             mergeTrees(dnode, foundNode);
@@ -1489,9 +1488,6 @@ System.err.println(sexy.length());
             addedNodes = true;
         }
 
-//        if(addedNodes || removedNodes) {
-//            treeModel.nodeStructureChanged(dst);
-//        }
     }
 
     public void updateSourceTree() {
@@ -1502,9 +1498,14 @@ System.err.println(sexy.length());
                 TreePath[] saved = saveTreeState(sketchContentTree);
 
                 DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
+                treeSource.removeAllChildren();
                 DefaultMutableTreeNode node;
 
-                for(File f : loadedSketch.sketchFiles) {
+                File[] flist = loadedSketch.sketchFiles.toArray(new File[0]);
+
+                Arrays.sort(flist);
+
+                for(File f : flist) {
                     int type = FileType.getType(f);
 
                     switch(type) {
@@ -1514,7 +1515,7 @@ System.err.println(sexy.length());
                         case FileType.SKETCH:
                             node = new DefaultMutableTreeNode(f.getName());
                             node.setUserObject(f);
-                            ntc.add(node);
+                            treeSource.add(node);
                             HashMap<Integer, String> funcs = loadedSketch.getFunctionsForFile(f);
 
                             if(funcs != null) {
@@ -1571,63 +1572,58 @@ System.err.println(sexy.length());
                     }
                 }
 
-                    mergeTrees(treeSource, ntc);
-//        treeModel.nodeStructureChanged(treeSource);
                     treeModel.reload(sortTree(treeSource));
                     restoreTreeState(sketchContentTree, saved);
             }
         });
     }
 
-
-
-public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
-
-    //sort alphabetically
-    if (node.getChildCount() == 1) {
-        sortTree((DefaultMutableTreeNode)node.getChildAt(0));
-    } else {
-        for(int i = 0; i < node.getChildCount() - 1; i++) {
-            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
-            String nt = child.getUserObject().toString();
-            if (child.getUserObject() instanceof FunctionBookmark) {
-                nt = ((FunctionBookmark)child.getUserObject()).getName();
-            }
-
-            for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
-                DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
-                String np = prevNode.getUserObject().toString();
-                if (prevNode.getUserObject() instanceof FunctionBookmark) {
-                    np = ((FunctionBookmark)prevNode.getUserObject()).getName();
-                }
-
-                if(nt.compareTo(np) > 0) {
-                    node.insert(child, j);
-                    node.insert(prevNode, i);
-                }
-            }
-            if(child.getChildCount() > 0) {
-                sortTree(child);
+    public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode root) {
+        Enumeration e = root.depthFirstEnumeration();
+        while(e.hasMoreElements()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)e.nextElement();
+            if(!node.isLeaf()) {
+                sort2(node);   //selection sort
             }
         }
+        return root;
+    }
 
-        //put folders first - normal on Windows and some flavors of Linux but not on Mac OS X.
-        for(int i = 0; i < node.getChildCount() - 1; i++) {
-            DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
-            for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
-                DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
+    public Comparator tnc = new Comparator() {
+        public int compare(Object ao, Object bo) {
+            DefaultMutableTreeNode a = (DefaultMutableTreeNode)ao;
+            DefaultMutableTreeNode b = (DefaultMutableTreeNode)bo;
+            //Sort the parent and child nodes separately:
+            if ((a.getUserObject() instanceof FlaggedList) && !(b.getUserObject() instanceof FlaggedList)) {
+                return -1;
+            } else if (!(a.getUserObject() instanceof FlaggedList) && (b.getUserObject() instanceof FlaggedList)) {
+                return 1;
+            } else {
+                String sa = a.getUserObject().toString();
+                String sb = b.getUserObject().toString();
+                return sa.compareToIgnoreCase(sb);
+            }
+        }
+    };
 
-                if(!prevNode.isLeaf() && child.isLeaf()) {
-                    node.insert(child, j);
-                    node.insert(prevNode, i);
+    public void sort2(DefaultMutableTreeNode parent) {
+        int n = parent.getChildCount();
+        for(int i=0;i< n-1;i++) {
+            int min = i;
+            for(int j=i+1;j< n;j++) {
+                if(tnc.compare((DefaultMutableTreeNode)parent.getChildAt(min),
+                               (DefaultMutableTreeNode)parent.getChildAt(j))>0) {
+                    min = j;
                 }
+            }
+            if(i!=min) {
+                MutableTreeNode a = (MutableTreeNode)parent.getChildAt(i);
+                MutableTreeNode b = (MutableTreeNode)parent.getChildAt(min);
+                parent.insert(b, i);
+                parent.insert(a, min);
             }
         }
     }
-
-    return node;
-
-}
 
     public void updateDocsTree() {
         SwingUtilities.invokeLater(new Runnable() {
@@ -1773,7 +1769,6 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
     }
 
     public void updateTree() {
-//        boolean treeRootOpen = sketchContentTree.isExpanded(new TreePath(treeRoot.getPath()));
 
         treeRoot.setUserObject(loadedSketch);
 
@@ -1784,8 +1779,6 @@ public DefaultMutableTreeNode sortTree(DefaultMutableTreeNode node) {
         updateOutputTree();
         updateDocsTree();
         updateFilesTree();
-
-//        if(treeRootOpen) sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
     }
 
     // This is the main routine for generating the context menus for the Project tree view.  For the

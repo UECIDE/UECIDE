@@ -1129,7 +1129,6 @@ public class Sketch implements MessageConsumer {
                 ArrayList<String> req = lib.getRequiredLibraries();
 
                 if (req != null) {
-                    System.err.print("Required for " + lib.getFolder() + ": ");
                     for(String r : req) {
 
                         System.err.print(req + " ");
@@ -1147,8 +1146,6 @@ public class Sketch implements MessageConsumer {
                     System.err.println("");
 
                     processed++;
-                } else {
-                    System.err.println("!!! FAIL: Get required libraries: " + lib);
                 }
             }
 
