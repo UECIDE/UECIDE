@@ -247,6 +247,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <arg value="-apple" />
             <arg value="-o" />
             <arg value="uecide-${version}-macosx.dmg" />
+            <arg value="-dir-mode" />
+            <arg value="0755" />
+            <arg value="-file-mode" />
+            <arg value="0755" />
             <arg value="bundle/macosx" />
         </exec>
 
