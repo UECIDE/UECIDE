@@ -2381,11 +2381,13 @@ public class Sketch implements MessageConsumer {
 
         String reg = props.get("compiler.size.regex", "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
         int tpos = props.getInteger("compiler.size.text", 1);
+        int rpos = props.getInteger("compiler.size.rodata", 0);
         int dpos = props.getInteger("compiler.size.data", 2);
         int bpos = props.getInteger("compiler.size.bss", 3);
         String[] lines = sw.toString().split("\n");
         Pattern p = Pattern.compile(reg);
         int textSize = 0;
+        int rodataSize = 0;
         int dataSize = 0;
         int bssSize = 0;
         for (String line : lines) {
@@ -2393,18 +2395,26 @@ public class Sketch implements MessageConsumer {
             try {
                 Matcher m = p.matcher(line);
                 if (m.find()) {
-                    textSize = Integer.parseInt(m.group(tpos));
-                    dataSize = Integer.parseInt(m.group(dpos));
-                    bssSize = Integer.parseInt(m.group(bpos));
-                    rawMessage("<h3>Memory usage</h3><ul>" + 
-                        "<li>Program size: " + (textSize + dataSize) + " bytes</li>" +
-                        "<li>Memory size: " + (bssSize + dataSize) + " bytes</li>" +
-                        "</ul>");
-                    return true;
+                    if (tpos > 0) {
+                        textSize = Integer.parseInt(m.group(tpos));
+                    }
+                    if (rpos > 0) {
+                        rodataSize = Integer.parseInt(m.group(rpos));
+                    }
+                    if (dpos > 0) {
+                        dataSize = Integer.parseInt(m.group(dpos));
+                    }
+                    if (bpos > 0) {
+                        bssSize = Integer.parseInt(m.group(bpos));
+                    }
                 }
             } catch (Exception e) {
             }
         }
+        rawMessage("<h3>Memory usage</h3><ul>" + 
+            "<li>Program size: " + (textSize + dataSize + rodataSize) + " bytes</li>" +
+            "<li>Memory size: " + (bssSize + dataSize) + " bytes</li>" +
+            "</ul>");
         return true;
     }
 

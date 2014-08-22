@@ -658,6 +658,8 @@ public class Preferences {
                     UIManager.setLookAndFeel(laf);
                     SwingUtilities.updateComponentTreeUI(dialog);
                     Base.updateLookAndFeel();
+                    dialog.pack();
+                    
                 } catch(Exception ignored) {
                 }
             }
@@ -721,6 +723,7 @@ public class Preferences {
                     UIManager.setLookAndFeel(laf);
                     SwingUtilities.updateComponentTreeUI(dialog);
                     Base.updateLookAndFeel();
+                    dialog.pack();
                 } catch(Exception ignored) {
                 }
             }

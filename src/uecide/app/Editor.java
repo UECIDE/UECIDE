@@ -783,6 +783,14 @@ System.err.println(sexy.length());
             showManual();
         }
 
+        for (int i = 0; toolbar.getComponentAtIndex(i) != null; i++) {
+            Component c = toolbar.getComponentAtIndex(i);
+            if (c instanceof JButton) {
+                JButton b = (JButton)c;
+                b.setBorderPainted(false);
+            }
+        }
+
     }
 
     public void hideManual() {

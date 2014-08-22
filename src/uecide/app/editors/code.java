@@ -324,6 +324,15 @@ public class code extends JPanel implements EditorBase {
         if(Base.preferences.getBoolean("editor.keepfindopen")) {
             openFindPanel();
         }
+
+        for (int i = 0; toolbar.getComponentAtIndex(i) != null; i++) {
+            Component c = toolbar.getComponentAtIndex(i);
+            if (c instanceof JButton) {
+                JButton b = (JButton)c;
+                b.setBorderPainted(false);
+            }
+        }
+
     }
 
     public void requestFocus() {
