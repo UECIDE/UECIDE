@@ -351,6 +351,12 @@ public class Editor extends JFrame {
 
         editorTabs.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
+                for (int i = 0; i < getTabCount(); i++) {
+                    TabLabel l = getTabLabel(i);
+                    if (l != null) {
+                        l.changeState(i == editorTabs.getSelectedIndex());
+                    }
+                }
                 updateMenus();
             }
         });

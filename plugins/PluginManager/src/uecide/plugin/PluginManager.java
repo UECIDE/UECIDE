@@ -189,6 +189,14 @@ public class PluginManager extends Plugin implements PropertyChangeListener
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         downloadPluginList();
+        for (int i = 0; toolbar.getComponentAtIndex(i) != null; i++) {
+            Component c = toolbar.getComponentAtIndex(i);
+            if (c instanceof JButton) {
+                JButton b = (JButton)c;
+                b.setBorderPainted(false);
+            }
+        }
+
         frame.pack();
         frame.setVisible(true);
     }

@@ -66,6 +66,8 @@ public class TabLabel extends JPanel {
     boolean fileWatchMutex = false;
     Editor editor;
 
+    boolean isSelected = false;
+
     public TabLabel(Editor e, File sf) {
         editor = e;
         sketchFile = sf;
@@ -99,6 +101,7 @@ public class TabLabel extends JPanel {
         this.add(blab, BorderLayout.EAST);
         expectedFileTime = sf.lastModified();
         update();
+        isSelected = true; // Just been made, so must be selected!
     }
 
     public TabLabel(Editor e, String tabname) {
@@ -126,6 +129,7 @@ public class TabLabel extends JPanel {
         this.setOpaque(false);
         this.add(nameLabel, BorderLayout.CENTER);
         this.add(blab, BorderLayout.EAST);
+        isSelected = true; // Just been made, so must be selected!
     }
 
     public void update() {
@@ -203,5 +207,9 @@ public class TabLabel extends JPanel {
         expectedFileTime = sketchFile.lastModified();
         update();
     }
+
+    public void changeState(boolean state) {
+        isSelected = state;
+    } 
 }
 

@@ -1116,6 +1116,18 @@ public class Sketch implements MessageConsumer {
                     continue;
                 }
 
+                boolean inExisting = false;
+
+                for (Library existing : importedLibraries.values()) {
+                    if (existing.hasHeader(incfile)) {
+                        inExisting = true;
+                    }
+                }
+                if (inExisting) {
+                    inclist.put(incfile, LIB_PROCESSED);
+                    continue;
+                }
+
                 inclist.put(incfile, LIB_PROCESSED);
                 Library lib = findLibrary(incfile);
 
@@ -1129,9 +1141,10 @@ public class Sketch implements MessageConsumer {
                 ArrayList<String> req = lib.getRequiredLibraries();
 
                 if (req != null) {
+                    System.err.println("\nRequired for " + lib + ":");
                     for(String r : req) {
 
-                        System.err.print(req + " ");
+                        System.err.print(r + ": " + req + " ");
 
                         if(inclist.get(r) == null) {
                             if(includeOrder.indexOf(r) == -1) {
@@ -2051,6 +2064,23 @@ public class Sketch implements MessageConsumer {
 
         for(String lib : includeOrder) {
             System.err.println("Finding " + lib);
+
+            // First look to see if the header is already in a library we have included thus far
+            boolean inExisting = false;
+
+            for (Library existing : importedLibraries.values()) {
+                if (existing.hasHeader(lib)) {
+                    System.err.println("  Considering " + existing);
+                    ArrayList<File> lf = existing.getIncludeFolders(this);
+                    if (includes.indexOf(lf.get(0)) != -1) {
+                        inExisting = true;
+                    }
+                }
+            }
+            if (inExisting) {
+                System.err.println("In existing library");
+                continue;
+            }
 
             Library l = getSketchLibrary(lib);
 
