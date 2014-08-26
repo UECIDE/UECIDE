@@ -35,4 +35,7 @@ public interface EditorBase {
     public void flagLine(int line, Icon icon, int group);
     public void removeFlag(int line);
     public void removeFlagGroup(int group);
+    public void clearKeywords();
+    public void addKeyword(String name, Integer type);
+    public void repaint();
 }

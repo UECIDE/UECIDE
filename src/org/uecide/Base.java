@@ -503,15 +503,17 @@ public class Base {
             splashScreen.setMessage("Complete", 100);
             splashScreen.dispose();
 
-            if(boards.size() == 0) {
-                showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
-            } else if(cores.size() == 0) {
-                showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
-            } else if(compilers.size() == 0) {
-                showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+            synchronized (Editor.editorList) {
+                if(boards.size() == 0) {
+                    showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                        Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                } else if(cores.size() == 0) {
+                    showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                    Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                } else if(compilers.size() == 0) {
+                    showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
+                    Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                }
             }
         }
 
@@ -2624,6 +2626,32 @@ public class Base {
         }
 
         return out;
+    }
+
+    public static String getFileAsString(File f) {
+        if (f == null) {
+            return "";
+        }
+        if (!f.exists()) {
+            return "";
+        }
+        if (f.isDirectory()) {
+            return "";
+        }
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            BufferedReader reader = new BufferedReader(new FileReader(f));
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+                sb.append("\n");
+            }
+            reader.close();
+            return sb.toString();
+        } catch (FileNotFoundException ex) {
+        } catch (IOException ex) {
+        }
+        return "";
     }
 
 }

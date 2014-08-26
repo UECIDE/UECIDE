@@ -277,4 +277,8 @@ public class UObject implements Comparable {
     public String toString() {
         return _description;
     }
+
+    public File getKeywords() {
+        return new File(getFolder(), get("keywords", "keywords.txt"));
+    }
 }

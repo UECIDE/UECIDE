@@ -777,5 +777,9 @@ public class Library implements Comparable {
         
         return folders;
     }
+
+    public File getKeywords() {
+        return new File(getFolder(), "keywords.txt");
+    }
 }
 

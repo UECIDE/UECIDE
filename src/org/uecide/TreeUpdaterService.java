@@ -13,8 +13,15 @@ public class TreeUpdaterService extends Service {
     }
 
     public void loop() {
-        for (Editor e : Editor.editorList) {
-            e.updateSourceTree();
+        synchronized (Editor.editorList) {
+            for (Editor e : Editor.editorList) {
+                e.loadedSketch.findAllFunctions();
+                e.loadedSketch.updateKeywords();
+                e.loadedSketch.updateLibraryList();
+                e.updateKeywords();
+                e.updateLibrariesTree();
+                e.updateSourceTree();
+            }
         }
     }
 }

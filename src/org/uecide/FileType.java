@@ -84,18 +84,18 @@ public class FileType {
         fileTypeList.put("tcc", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_HEADER));
 
 
-        fileTypeList.put("pde", new FileTypeInfo(FileType.SKETCH, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
-        fileTypeList.put("ino", new FileTypeInfo(FileType.SKETCH, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("pde", new FileTypeInfo(FileType.SKETCH, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_EXTENDABLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
+        fileTypeList.put("ino", new FileTypeInfo(FileType.SKETCH, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_EXTENDABLE_CPLUSPLUS, "files/text-x-c++.png", GROUP_SOURCE));
 
-        fileTypeList.put("lss", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
-        fileTypeList.put("hex", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
-        fileTypeList.put("cfg", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
-        fileTypeList.put("ini", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
-        fileTypeList.put("txt", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
-        fileTypeList.put("dat", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
-        fileTypeList.put("md", new FileTypeInfo(FileType.DOCUMENT, "org.uecide.editors.text", null, "files/text-x-markdown.png", GROUP_DOCS));
-        fileTypeList.put("plist", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
-        fileTypeList.put("properties", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", null, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("lss", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("hex", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("cfg", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("ini", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("txt", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("dat", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("md", new FileTypeInfo(FileType.DOCUMENT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-markdown.png", GROUP_DOCS));
+        fileTypeList.put("plist", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-generic.png", GROUP_OTHER));
+        fileTypeList.put("properties", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "files/text-x-generic.png", GROUP_OTHER));
 
         fileTypeList.put("o", new FileTypeInfo(FileType.OBJECT, "org.uecide.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));
         fileTypeList.put("a", new FileTypeInfo(FileType.OBJECT, "org.uecide.editors.object", null, "files/application-octet-stream.png", GROUP_BINARY));

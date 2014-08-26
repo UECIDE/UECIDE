@@ -169,96 +169,6 @@ public class Editor extends JFrame {
         }
     }
 
-    class FunctionBookmark {
-        File file;
-        int line;
-        String proto;
-
-        String returnType;
-        String name;
-        ArrayList<String> parameters = new ArrayList<String>();
-
-        public FunctionBookmark(File f, int l, String p) {
-            file = f;
-            line = l;
-            proto = p.trim();
-            parsePrototype();
-        }
-
-        public String simplify(String in) {
-            String out = in.trim();
-            String rep = out.replaceAll("\\s\\s", " ");
-            while (!rep.equals(out)) {
-                out = rep;
-                rep = out.replaceAll("\\s\\s", " ");
-            }
-            return out;
-        }
-
-        public void parsePrototype() {
-            Pattern p = Pattern.compile("^(.*)\\((.*)\\)$");
-            Matcher m = p.matcher(proto);
-            if (m.find()) {
-                String def = simplify(m.group(1));
-                String parms = simplify(m.group(2));
-                String[] spl = def.split(" ");
-                int num = spl.length;
-                name = spl[num-1];
-                returnType = "";
-                for (int i = 0; i < num-1; i++) {
-                    if (i != 0) {
-                        returnType += " ";
-                    }
-                    returnType += spl[i];
-                }
-    
-                spl = parms.split(",");
-                for (String parm : spl) {
-                    parameters.add(simplify(parm));
-                }
-
-            }
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String formatted() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(returnType);
-            sb.append(" ");
-            sb.append(name);
-            sb.append("(");
-            boolean first = true;
-            for (String parm : parameters) {
-                if (!first) {
-                    sb.append(", ");
-                }
-                sb.append(parm);
-                first = false;
-            }
-            sb.append(")");
-            return sb.toString();
-        }
-
-        public String toString() {
-            return proto;
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        public int getLine() {
-            return line;
-        }
-
-        public String getFunction() {
-            return proto;
-        }
-    }
-
     class DefaultRunHandler implements Runnable {
         boolean upload = false;
         public DefaultRunHandler(boolean doUpload) {
@@ -1504,11 +1414,24 @@ System.err.println(sexy.length());
 
     }
 
+    public void updateKeywords() {
+        HashMap<String, Integer>keywordList = loadedSketch.getKeywords();
+        for (int i = 0; i < getTabCount(); i++) {
+            EditorBase eb = getTab(i);
+            if (eb != null) {
+                eb.clearKeywords();
+                for (Map.Entry<String, Integer>kw : keywordList.entrySet()) {
+                    eb.addKeyword(kw.getKey(), kw.getValue());
+                }
+                eb.repaint();
+            }
+        }
+    }
+
     public void updateSourceTree() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                loadedSketch.findAllFunctions();
-
+                    
                 TreePath[] saved = saveTreeState(sketchContentTree);
 
                 DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
@@ -1586,8 +1509,8 @@ System.err.println(sexy.length());
                     }
                 }
 
-                    treeModel.reload(sortTree(treeSource));
-                    restoreTreeState(sketchContentTree, saved);
+                treeModel.reload(sortTree(treeSource));
+                restoreTreeState(sketchContentTree, saved);
             }
         });
     }
@@ -4200,12 +4123,16 @@ System.err.println(sexy.length());
     }
 
     public static void registerEditor(Editor e) {
-        editorList.remove(e); // Just in case...?
-        editorList.add(e);
+        synchronized (editorList) {
+            editorList.remove(e); // Just in case...?
+            editorList.add(e);
+        }
     }
 
     public static void unregisterEditor(Editor e) {
-        editorList.remove(e);
+        synchronized (editorList) {
+            editorList.remove(e);
+        }
     }
 
     public static boolean shouldQuit() {

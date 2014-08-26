@@ -11,13 +11,15 @@ public class BackgroundLibraryCompileService extends Service {
     public void cleanup() { }
 
     public void loop() {
-        for (Editor e : Editor.editorList) {
-            e.loadedSketch.updateLibraryList();
-            e.loadedSketch.generateIncludes();
-            for (Library lib : e.loadedSketch.getImportedLibraries()) {
-                if (!e.loadedSketch.libraryIsCompiled(lib)) {
-                    System.err.println(lib);
-                    e.loadedSketch.precompileLibrary(lib);
+        synchronized (Editor.editorList) {
+            for (Editor e : Editor.editorList) {
+                e.loadedSketch.updateLibraryList();
+                e.loadedSketch.generateIncludes();
+                for (Library lib : e.loadedSketch.getImportedLibraries()) {
+                    if (!e.loadedSketch.libraryIsCompiled(lib)) {
+                        System.err.println(lib);
+                        e.loadedSketch.precompileLibrary(lib);
+                    }
                 }
             }
         }

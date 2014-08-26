@@ -51,6 +51,7 @@ import javax.swing.text.*;
 import javax.swing.JToolBar;
 
 import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rsyntaxtextarea.modes.*;
 import org.fife.ui.rtextarea.*;
 
 public class code extends JPanel implements EditorBase {
@@ -73,6 +74,8 @@ public class code extends JPanel implements EditorBase {
     JButton replaceAllButton = new JButton("All");
     JButton findCloseButton;
     Gutter gutter;
+
+    String fileSyntax;
 
     JToolBar toolbar;
 
@@ -248,7 +251,11 @@ public class code extends JPanel implements EditorBase {
             }
         };
 
-        textArea.setSyntaxEditingStyle(FileType.getSyntaxStyle(f.getName()));
+        fileSyntax = FileType.getSyntaxStyle(f.getName());
+        if (fileSyntax == null) {
+            fileSyntax = SyntaxConstants.SYNTAX_STYLE_NONE;
+        }
+        textArea.setSyntaxEditingStyle(fileSyntax);
 
         Document d = textArea.getDocument();
         d.addDocumentListener(new DocumentListener() {
@@ -679,6 +686,9 @@ public class code extends JPanel implements EditorBase {
         applyThemeBGColor(SyntaxScheme.LITERAL_CHAR,                    theme + "editor.literal.bgcolor");
         applyThemeFont(SyntaxScheme.LITERAL_CHAR,                       theme + "editor.literal.font");
         applyThemeUnderline(SyntaxScheme.LITERAL_CHAR,                  theme + "editor.literal.underline");
+        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_BINARY,           theme + "editor.literal.fgcolor");
+        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_BINARY,           theme + "editor.literal.bgcolor");
+        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_BINARY,              theme + "editor.literal.font");
         applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,      theme + "editor.literal.fgcolor");
         applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,      theme + "editor.literal.bgcolor");
         applyThemeFont(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,         theme + "editor.literal.font");
@@ -709,6 +719,9 @@ public class code extends JPanel implements EditorBase {
         applyThemeBGColor(SyntaxScheme.LITERAL_CHAR,                    theme + "editor.literal.char.bgcolor");
         applyThemeFont(SyntaxScheme.LITERAL_CHAR,                       theme + "editor.literal.char.font");
         applyThemeUnderline(SyntaxScheme.LITERAL_CHAR,                  theme + "editor.literal.char.underline");
+        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_BINARY,           theme + "editor.literal.binary.fgcolor");
+        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_BINARY,           theme + "editor.literal.binary.bgcolor");
+        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_BINARY,              theme + "editor.literal.binary.font");
         applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,      theme + "editor.literal.decimal.fgcolor");
         applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,      theme + "editor.literal.decimal.bgcolor");
         applyThemeFont(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,         theme + "editor.literal.decimal.font");
@@ -1051,5 +1064,39 @@ public class code extends JPanel implements EditorBase {
 
     public int getCursorPosition() {
         return textArea.getCaretPosition();
+    }
+
+    public void clearKeywords() {
+        if (fileSyntax.equals(SyntaxConstants.SYNTAX_STYLE_EXTENDABLE_CPLUSPLUS)) {
+            RSyntaxDocument d = (RSyntaxDocument)textArea.getDocument();
+            ExtendableCPlusPlusTokenMaker tm = (ExtendableCPlusPlusTokenMaker)d.getSyntaxStyle();
+            tm.clear();
+        }
+    }
+
+    public void addKeyword(String name, Integer type) {
+        if (fileSyntax.equals(SyntaxConstants.SYNTAX_STYLE_EXTENDABLE_CPLUSPLUS)) {
+            RSyntaxDocument d = (RSyntaxDocument)textArea.getDocument();
+            ExtendableCPlusPlusTokenMaker tm = (ExtendableCPlusPlusTokenMaker)d.getSyntaxStyle();
+            if (type == KeywordTypes.LITERAL1) {
+                tm.addKeyword(name, TokenTypes.VARIABLE);
+            } else if (type == KeywordTypes.LITERAL2) {
+                tm.addKeyword(name, TokenTypes.PREPROCESSOR);
+            } else if (type == KeywordTypes.LITERAL3) {
+                tm.addKeyword(name, TokenTypes.PREPROCESSOR);
+            } else if (type == KeywordTypes.KEYWORD1) {
+                tm.addKeyword(name, TokenTypes.RESERVED_WORD);
+            } else if (type == KeywordTypes.KEYWORD2) {
+                tm.addKeyword(name, TokenTypes.IDENTIFIER);
+            } else if (type == KeywordTypes.KEYWORD3) {
+                tm.addKeyword(name, TokenTypes.FUNCTION);
+            }
+        }
+    }
+
+    public void repaint() {
+        if (textArea != null) {
+            textArea.repaint();
+        }
     }
 }

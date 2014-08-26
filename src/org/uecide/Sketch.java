@@ -124,6 +124,8 @@ public class Sketch implements MessageConsumer {
 
     HashMap<File, HashMap<Integer, String>>lineComments = new HashMap<File, HashMap<Integer, String>>();
 
+    HashMap<String, Integer>keywords = new HashMap<String, Integer>();
+
     public void setLineComment(File file, int line, String comment) {
         HashMap<Integer, String> comments = lineComments.get(file);
 
@@ -935,6 +937,14 @@ public class Sketch implements MessageConsumer {
         return Library.getLibraryByInclude(filename, getCore().getName());
     }
 
+    public TreeSet<String> getAllFunctionNames() {
+        TreeSet<String>funcs = new TreeSet<String>();
+        for (HashMap<Integer, String> ent : functionList.values()) {
+            funcs.addAll(ent.values());
+        }
+        return funcs;
+    }
+
     public HashMap<Integer, String> getFunctionsForFile(File f) {
         return functionList.get(f);
     }
@@ -1107,6 +1117,7 @@ public class Sketch implements MessageConsumer {
         int processed = 0;
 
         do {
+            Thread.yield();
             HashMap<String, Integer> newinclist = new HashMap<String, Integer>();
             processed = 0;
 
@@ -1141,10 +1152,7 @@ public class Sketch implements MessageConsumer {
                 ArrayList<String> req = lib.getRequiredLibraries();
 
                 if (req != null) {
-                    System.err.println("\nRequired for " + lib + ":");
                     for(String r : req) {
-
-                        System.err.print(r + ": " + req + " ");
 
                         if(inclist.get(r) == null) {
                             if(includeOrder.indexOf(r) == -1) {
@@ -1156,7 +1164,6 @@ public class Sketch implements MessageConsumer {
                             newinclist.put(r, LIB_PROCESSED);
                         }
                     }
-                    System.err.println("");
 
                     processed++;
                 }
@@ -1500,7 +1507,6 @@ public class Sketch implements MessageConsumer {
     }
 
     public Library addLibraryToImportList(String filename) {
-        System.err.println("I am using aLTIL.");
         String l = filename;
 
         if(filename.endsWith(".h")) {
@@ -1515,14 +1521,12 @@ public class Sketch implements MessageConsumer {
         File sketchLibFolder = new File(sketchFolder, "libraries");
 
         if(sketchLibFolder.exists() && sketchLibFolder.isDirectory()) {
-            System.err.println("You have a libraries folder.");
             File libFolder = new File(sketchLibFolder, l);
 
             if(libFolder.exists() && libFolder.isDirectory()) {
                 File libHeader = new File(libFolder, l + ".h");
 
                 if(libHeader.exists()) {
-                    System.err.println("Found library " + l + " in sketch!!!");
                     lib = new Library(libHeader, "sketch", "all");
                     importedLibraries.put(l, lib);
                     orderedLibraries.add(lib);
@@ -1535,7 +1539,6 @@ public class Sketch implements MessageConsumer {
                             addLibraryToImportList(req);
                         }
                     } else {
-                        System.err.println(">>> Failed getting required libraries for " + lib);
                     }
 
                     return lib;
@@ -2063,14 +2066,12 @@ public class Sketch implements MessageConsumer {
         }
 
         for(String lib : includeOrder) {
-            System.err.println("Finding " + lib);
 
             // First look to see if the header is already in a library we have included thus far
             boolean inExisting = false;
 
             for (Library existing : importedLibraries.values()) {
                 if (existing.hasHeader(lib)) {
-                    System.err.println("  Considering " + existing);
                     ArrayList<File> lf = existing.getIncludeFolders(this);
                     if (includes.indexOf(lf.get(0)) != -1) {
                         inExisting = true;
@@ -2078,7 +2079,6 @@ public class Sketch implements MessageConsumer {
                 }
             }
             if (inExisting) {
-                System.err.println("In existing library");
                 continue;
             }
 
@@ -2090,7 +2090,6 @@ public class Sketch implements MessageConsumer {
 
             if(l != null) {
                 for (File lf : l.getIncludeFolders(this)) {
-                    System.err.println("Including " + lf.getAbsolutePath());
                     if (includes.indexOf(lf) == -1) {
                         includes.add(lf);
                     }
@@ -4310,4 +4309,51 @@ public class Sketch implements MessageConsumer {
         return found;
     }
 
+    public void addKeywordsFromFile(File f) {
+        String kwd = Base.getFileAsString(f);
+
+        String[] lines = kwd.split("\n");
+        Pattern p = Pattern.compile("^\\s*([^\\s]+)\\s+([^\\s]+)");
+        for (String line : lines) {
+            Matcher m = p.matcher(line);
+            if (m.find()) {
+                String name = m.group(1);
+                String type = m.group(2);
+                if (type.equals("LITERAL1")) {
+                    keywords.put(name, KeywordTypes.LITERAL1);
+                } else if (type.equals("LITERAL2")) {
+                    keywords.put(name, KeywordTypes.LITERAL2);
+                } else if (type.equals("LITERAL3")) {
+                    keywords.put(name, KeywordTypes.LITERAL3);
+                } else if (type.equals("KEYWORD1")) {
+                    keywords.put(name, KeywordTypes.KEYWORD1);
+                } else if (type.equals("KEYWORD2")) {
+                    keywords.put(name, KeywordTypes.KEYWORD2);
+                } else if (type.equals("KEYWORD3")) {
+                    keywords.put(name, KeywordTypes.KEYWORD3);
+                }
+            }
+        }
+    }
+
+    public void updateKeywords() {
+        keywords.clear();
+        addKeywordsFromFile(selectedCompiler.getKeywords());
+        addKeywordsFromFile(selectedCore.getKeywords());
+        addKeywordsFromFile(selectedBoard.getKeywords());
+        for (Library l : importedLibraries.values()) {
+            addKeywordsFromFile(l.getKeywords());
+        }
+        TreeSet<String> fl = getAllFunctionNames();
+        for (String s : fl) {
+            FunctionBookmark bm = new FunctionBookmark(null, 0, s);
+
+            keywords.put(bm.getName(), KeywordTypes.KEYWORD3);
+        }
+
+    }
+
+    public HashMap<String, Integer> getKeywords() {
+        return keywords;
+    }
 }
