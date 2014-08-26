@@ -23,4 +23,10 @@
             <dirset dir="." includes="*"/>
         </subant>
     </target>
+
+    <target name="publish">
+        <subant target="publish">
+            <dirset dir="." includes="*"/>
+        </subant>
+    </target>
 </project>

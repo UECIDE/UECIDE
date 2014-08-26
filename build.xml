@@ -79,7 +79,7 @@
             <zipgroupfileset dir="lib" includes="*.jar" />
             <manifest>
                 <attribute name="Built-By" value="${user.name}" />
-                <attribute name="Main-Class" value="uecide.app.Base" />
+                <attribute name="Main-Class" value="org.uecide.Base" />
                 <attribute name="Class-Path" value="uecide.jar" />
                 <attribute name="Version" value="${version}" />
                 <attribute name="Build" value="${build.number}" />
@@ -113,7 +113,7 @@
     </target>
     
     <target name="git_contributors" depends="test_git" if="git.available">
-        <exec output="resources/uecide/app/contributors.txt" executable="git">
+        <exec output="resources/org/uecide/contributors.txt" executable="git">
             <arg value="shortlog" />
             <arg value="-sn" />
             <arg value="HEAD" />
