@@ -1,11 +1,6 @@
 <?xml version="1.0"?>
 <project name="UECIDE Core" default="build">
 
-    <property name="launch4j.dir" value="dist/windows/launcher/launch4j/" />
-    <taskdef name="launch4j"
-        classname="net.sf.launch4j.ant.Launch4jTask"
-        classpath="${launch4j.dir}/launch4j.jar; ${launch4j.dir}/lib/xstream.jar; " />
-
     <property file="version.plist"/>
     <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar">
         <and>
@@ -263,15 +258,8 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <mkdir dir="windows" /> 
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
         <copy file="dist/windows/dist/debug.bat" todir="bundle/windows/uecide-${version}/" />
-        <copy file="dist/windows/config.xml" todir="bundle/windows" />
-        <copy file="dist/windows/about.bmp" todir="bundle/windows" />
-        <copy file="dist/windows/application.ico" todir="bundle/windows" />
-        <launch4j configFile="bundle/windows/config.xml" />
-        <copy file="bundle/windows/uecide.exe" todir="bundle/windows/uecide-${version}" />
-        <delete file="bundle/windows/config.xml" />
-        <delete file="bundle/windows/about.bmp" />
-        <delete file="bundle/windows/uecide.exe" />
-        <delete file="bundle/windows/application.ico" />
+        <copy file="dist/windows/UECIDE.bat" todir="bundle/windows/uecide-${version}" />
+        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${version}" />
         <zip file="uecide-${version}-windows-lite.zip" basedir="bundle/windows/" />
         <delete dir="windows" />
         <delete dir="bundle/windows" />
@@ -284,16 +272,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
         <unzip dest="bundle/windows/uecide-${version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows" />
-        <copy file="dist/windows/config.xml" todir="bundle/windows" />
-        <copy file="dist/windows/about.bmp" todir="bundle/windows" />
-        <copy file="dist/windows/application.ico" todir="bundle/windows" />
-        <launch4j configFile="bundle/windows/config.xml" />
-        <copy file="bundle/windows/uecide.exe" todir="bundle/windows/uecide-${version}" />
-        <delete file="bundle/windows/config.xml" />
-        <delete file="bundle/windows/about.bmp" />
-        <delete file="bundle/windows/uecide.exe" />
-        <delete file="bundle/windows/application.ico" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${version}" />
+        <copy file="dist/windows/UECIDE.bat" todir="bundle/windows/uecide-${version}" />
+        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${version}" />
         <zip file="uecide-${version}-windows-full.zip" basedir="bundle/windows/" />
         <delete dir="windows" />
         <delete dir="bundle/windows" />
@@ -303,16 +284,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <mkdir dir="bundle/windows/uecide-${version}/lib" />
         <mkdir dir="windows" /> 
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows" />
-        <copy file="dist/windows/config.xml" todir="bundle/windows" />
-        <copy file="dist/windows/about.bmp" todir="bundle/windows" />
-        <copy file="dist/windows/application.ico" todir="bundle/windows" />
-        <launch4j configFile="bundle/windows/config.xml" />
-        <copy file="bundle/windows/uecide.exe" todir="bundle/windows/uecide-${version}" />
-        <delete file="bundle/windows/config.xml" />
-        <delete file="bundle/windows/about.bmp" />
-        <delete file="bundle/windows/uecide.exe" />
-        <delete file="bundle/windows/application.ico" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${version}" />
+        <copy file="dist/windows/UECIDE.bat" todir="bundle/windows/uecide-${version}" />
+        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${version}" />
         <copy todir="bundle/windows" file="dist/windows/script.nsi" />
         <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${version}" />
         <replace file="bundle/windows/script.nsi" token="%TYPE%" value="lite" />
@@ -336,16 +310,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
         <unzip dest="bundle/windows/uecide-${version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows" />
-        <copy file="dist/windows/config.xml" todir="bundle/windows" />
-        <copy file="dist/windows/about.bmp" todir="bundle/windows" />
-        <copy file="dist/windows/application.ico" todir="bundle/windows" />
-        <launch4j configFile="bundle/windows/config.xml" />
-        <copy file="bundle/windows/uecide.exe" todir="bundle/windows/uecide-${version}" />
-        <delete file="bundle/windows/config.xml" />
-        <delete file="bundle/windows/about.bmp" />
-        <delete file="bundle/windows/uecide.exe" />
-        <delete file="bundle/windows/application.ico" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${version}" />
+        <copy file="dist/windows/UECIDE.bat" todir="bundle/windows/uecide-${version}" />
+        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${version}" />
         <copy todir="bundle/windows" file="dist/windows/script.nsi" />
         <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${version}" />
         <replace file="bundle/windows/script.nsi" token="%TYPE%" value="full" />

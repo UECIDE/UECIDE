@@ -227,6 +227,9 @@ public class LogicAnalyzer extends Plugin implements SerialPortEventListener, Mo
         Base.preferences.saveDelay();
 
         serialPort = Serial.requestPort((String)portList.getSelectedItem(), (Integer)baudList.getSelectedItem());
+        if (serialPort == null) {
+            return;
+        }
         try {
             serialPort.addEventListener(this);
         } catch (SerialPortException ex) {

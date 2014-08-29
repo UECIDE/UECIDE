@@ -4331,16 +4331,33 @@ public class Sketch implements MessageConsumer {
                     keywords.put(name, KeywordTypes.KEYWORD2);
                 } else if (type.equals("KEYWORD3")) {
                     keywords.put(name, KeywordTypes.KEYWORD3);
+                } else if (type.equals("OBJECT")) {
+                    keywords.put(name, KeywordTypes.OBJECT);
+                } else if (type.equals("VARIABLE")) {
+                    keywords.put(name, KeywordTypes.VARIABLE);
+                } else if (type.equals("FUNCTION")) {
+                    keywords.put(name, KeywordTypes.FUNCTION);
+                } else if (type.equals("DATATYPE")) {
+                    keywords.put(name, KeywordTypes.DATATYPE);
+                } else if (type.equals("RESERVED")) {
+                    keywords.put(name, KeywordTypes.RESERVED);
                 }
             }
         }
     }
 
+
     public void updateKeywords() {
         keywords.clear();
-        addKeywordsFromFile(selectedCompiler.getKeywords());
-        addKeywordsFromFile(selectedCore.getKeywords());
-        addKeywordsFromFile(selectedBoard.getKeywords());
+        if (selectedCompiler != null) {
+            addKeywordsFromFile(selectedCompiler.getKeywords());
+        }
+        if (selectedCore != null) {
+            addKeywordsFromFile(selectedCore.getKeywords());
+        }
+        if (selectedBoard != null) {
+            addKeywordsFromFile(selectedBoard.getKeywords());
+        }
         for (Library l : importedLibraries.values()) {
             addKeywordsFromFile(l.getKeywords());
         }

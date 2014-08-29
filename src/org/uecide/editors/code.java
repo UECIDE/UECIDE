@@ -1090,6 +1090,16 @@ public class code extends JPanel implements EditorBase {
                 tm.addKeyword(name, TokenTypes.IDENTIFIER);
             } else if (type == KeywordTypes.KEYWORD3) {
                 tm.addKeyword(name, TokenTypes.FUNCTION);
+            } else if (type == KeywordTypes.OBJECT) {
+                tm.addKeyword(name, TokenTypes.RESERVED_WORD_2);
+            } else if (type == KeywordTypes.VARIABLE) {
+                tm.addKeyword(name, TokenTypes.VARIABLE);
+            } else if (type == KeywordTypes.FUNCTION) {
+                tm.addKeyword(name, TokenTypes.FUNCTION);
+            } else if (type == KeywordTypes.DATATYPE) {
+                tm.addKeyword(name, TokenTypes.DATA_TYPE);
+            } else if (type == KeywordTypes.RESERVED) {
+                tm.addKeyword(name, TokenTypes.RESERVED_WORD);
             }
         }
     }

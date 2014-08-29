@@ -12,7 +12,7 @@
   <customProcName>false</customProcName>
   <stayAlive>false</stayAlive>
   <manifest></manifest>
-  <icon>application.ico</icon>
+  <icon>UECIDE.ico</icon>
   <classPath>
     <mainClass>org.uecide.Base</mainClass>
     <cp>lib/uecide.jar</cp>

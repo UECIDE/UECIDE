@@ -559,9 +559,13 @@ public class Base {
         Class sysclass = URLClassLoader.class;
 
         try {
+            Debug.message("...1");
             Method method = sysclass.getDeclaredMethod("addURL", parameters);
+            Debug.message("...2");
             method.setAccessible(true);
+            Debug.message("...3");
             method.invoke(sysloader, new Object[]{u});
+            Debug.message("...4");
         } catch (Throwable ex) {
             Base.error(ex);
         }
@@ -1813,8 +1817,10 @@ public class Base {
 
     public static void loadPlugins() {
         File folder = getUserPluginsFolder();
+        Debug.message("Loading plugins from " + folder);
         File[] files = folder.listFiles();
         for (File f : files) {
+            Debug.message("  Loading " + f);
             try {
                 URL u = f.toURI().toURL();
                 addURL(u);
@@ -1825,7 +1831,9 @@ public class Base {
 
         Reflections pluginReflections = new Reflections("");
         Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
+        Debug.message(pluginClasses.toString());
         for (Class<? extends Plugin> c : pluginClasses) {
+            Debug.message("Found plugin class " + c.getName());
             plugins.put(c.getName(), c);
         }
     }
