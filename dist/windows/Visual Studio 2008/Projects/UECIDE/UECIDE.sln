@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UECIDE", "UECIDE\UECIDE.vcproj", "{2FB31987-319C-4E06-8C36-5CD1F31A1C5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2FB31987-319C-4E06-8C36-5CD1F31A1C5B}.Debug|Win32.ActiveCfg = Release|Win32
+		{2FB31987-319C-4E06-8C36-5CD1F31A1C5B}.Debug|Win32.Build.0 = Release|Win32
+		{2FB31987-319C-4E06-8C36-5CD1F31A1C5B}.Release|Win32.ActiveCfg = Release|Win32
+		{2FB31987-319C-4E06-8C36-5CD1F31A1C5B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
