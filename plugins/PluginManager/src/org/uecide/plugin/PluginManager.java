@@ -460,7 +460,8 @@ public class PluginManager extends Plugin implements PropertyChangeListener
                     StringBuilder tt = new StringBuilder();
 
                     tt.append("<html><head><style>");
-                    tt.append("body { font-size: 10px; font-weight: bold; }\n");
+                    tt.append("html { background-color: white; color: black; font-size: 10px; font-weight: bold; }\n");
+                    tt.append("body { background-color: white; color: black; font-size: 10px; font-weight: bold; }\n");
                     tt.append("span.header { font-size: 8px; font-weight: bold; }\n");
                     tt.append("span.version { font-size: 8px; font-weight: normal; }\n");
                     tt.append("</style></head><body>");

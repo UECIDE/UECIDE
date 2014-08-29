@@ -483,7 +483,11 @@ public class Base {
                 }
             }
 
-            opened = doOpenThings(new File(path));
+            File p = new File(path);
+            Debug.message("Loading sketch " + p);
+            if (p.exists()) {
+                opened = doOpenThings(p);
+            }
         }
 
         if(loadLastSketch) {

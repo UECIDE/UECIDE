@@ -545,16 +545,19 @@ public class Sketch implements MessageConsumer {
         }
 
         File fileList[] = sketchFolder.listFiles();
-        Arrays.sort(fileList);
+        if (fileList != null) {
 
-        for(File f : fileList) {
-            switch(FileType.getType(f)) {
-            case FileType.SKETCH:
-            case FileType.CSOURCE:
-            case FileType.CPPSOURCE:
-            case FileType.ASMSOURCE:
-            case FileType.HEADER:
-                loadFile(f);
+            Arrays.sort(fileList);
+
+            for(File f : fileList) {
+                switch(FileType.getType(f)) {
+                case FileType.SKETCH:
+                case FileType.CSOURCE:
+                case FileType.CPPSOURCE:
+                case FileType.ASMSOURCE:
+                case FileType.HEADER:
+                    loadFile(f);
+                }
             }
         }
 
