@@ -40,12 +40,12 @@ Section "Install"
     SetOutPath "$INSTDIR"
     File /r "uecide-${VERSION}/*"
 
-    CreateShortCut "$DESKTOP\${PRODUCTCAP}.lnk" "$INSTDIR\${PRODUCT}.bat" "" "$INSTDIR\${PRODUCT}.ico" 0
+    CreateShortCut "$DESKTOP\${PRODUCTCAP}.lnk" "$INSTDIR\${PRODUCT}.exe" "" "$INSTDIR\${PRODUCT}.exe" 0
  
     CreateDirectory "$SMPROGRAMS\${PUBLISHER}"
     CreateDirectory "$SMPROGRAMS\${PUBLISHER}\${PRODUCTCAP}"
     CreateShortCut "$SMPROGRAMS\${PUBLISHER}\${PRODUCTCAP}\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\Uninstall.exe" 0
-    CreateShortCut "$SMPROGRAMS\${PUBLISHER}\${PRODUCTCAP}\${PRODUCTCAP}.lnk" "$INSTDIR\${PRODUCT}.bat" "" "$INSTDIR\${PRODUCT}.ico" 0
+    CreateShortCut "$SMPROGRAMS\${PUBLISHER}\${PRODUCTCAP}\${PRODUCTCAP}.lnk" "$INSTDIR\${PRODUCT}.exe" "" "$INSTDIR\${PRODUCT}.exe" 0
  
 ;write uninstall information to the registry
     WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCTCAP}" "DisplayName" "${PRODUCTCAP} (remove only)"
