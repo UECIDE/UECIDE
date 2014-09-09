@@ -1092,7 +1092,7 @@ public class Sketch implements MessageConsumer {
 
     ArrayList<String> includeOrder = new ArrayList<String>();
 
-    public void updateLibraryList() {
+    public synchronized void updateLibraryList() {
         cleanFiles();
         includeOrder = new ArrayList<String>();
         HashMap<String, Integer> inclist = new HashMap<String, Integer>();
@@ -1584,7 +1584,7 @@ public class Sketch implements MessageConsumer {
                 return false;
             }
 
-            rawMessage("<ul><li>Resetting board...</li></ul>");
+            bullet("Resetting board...");
             serialPort.setDTR(dtr);
             serialPort.setRTS(dtr);
             Thread.sleep(1000);
@@ -1642,7 +1642,7 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        rawMessage("<h3>Compiling...</h3>");
+        heading("Compiling...");
 
         try {
             if(!prepare()) {
@@ -2280,7 +2280,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        rawMessage("<ul><li>Compiling sketch...</li></ul>");
+        bullet("Compiling sketch...");
         setCompilingProgress(10);
         ArrayList<File>sketchObjects = compileSketch();
 
@@ -2289,7 +2289,7 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        rawMessage("<ul><li>Compiling core...</li></ul>");
+        bullet("Compiling core...");
         setCompilingProgress(20);
 
         if(!compileCore()) {
@@ -2299,7 +2299,7 @@ public class Sketch implements MessageConsumer {
 
         setCompilingProgress(30);
 
-        rawMessage("<ul><li>Compiling libraries...</li></ul>");
+        bullet("Compiling libraries...");
 
         if(!compileLibraries()) {
             error("Failed compiling libraries");
@@ -2308,7 +2308,7 @@ public class Sketch implements MessageConsumer {
 
         setCompilingProgress(40);
 
-        rawMessage("<ul><li>Linking sketch...</li></ul>");
+        bullet("Linking sketch...");
 
         if(!compileLink(sketchObjects)) {
             error("Failed linking sketch");
@@ -2385,7 +2385,7 @@ public class Sketch implements MessageConsumer {
         }
 
 
-        rawMessage("<ul><li>Compiling done.</li></ul>");
+        heading("Compiling done.");
         setCompilingProgress(100);
 
         if(editor != null) {
@@ -2397,7 +2397,7 @@ public class Sketch implements MessageConsumer {
 
             long endTime = System.currentTimeMillis();
             double compileTime = (double)(endTime - startTime) / 1000d;
-            rawMessage("<ul><li>Compilation took " + compileTime + " seconds</li></ul>");
+            bullet("Compilation took " + compileTime + " seconds");
         return true;
     }
 
@@ -2406,6 +2406,8 @@ public class Sketch implements MessageConsumer {
 
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
+
+        heading("Memory usage");
 
         redirectChannel(1, pw);
         executeKey("compile.size", "compile.size.environment");
@@ -2443,10 +2445,8 @@ public class Sketch implements MessageConsumer {
             } catch (Exception e) {
             }
         }
-        rawMessage("<h3>Memory usage</h3><ul>" + 
-            "<li>Program size: " + (textSize + dataSize + rodataSize) + " bytes</li>" +
-            "<li>Memory size: " + (bssSize + dataSize) + " bytes</li>" +
-            "</ul>");
+        bullet("Program size: " + (textSize + dataSize + rodataSize) + " bytes");
+        bullet("Memory size: " + (bssSize + dataSize) + " bytes");
         return true;
     }
 
@@ -2550,7 +2550,7 @@ public class Sketch implements MessageConsumer {
 
         if(terminateExecution) {
             terminateExecution = false;
-            message("Compilation terminated");
+            error("Compilation terminated");
             return null;
         }
 
@@ -2584,12 +2584,13 @@ public class Sketch implements MessageConsumer {
         }
 
         if(recipe == null) {
-            message("Error: I don't know how to compile " + fileName);
+            error("Error: I don't know how to compile " + fileName);
             return null;
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-        File dest = new File(buildFolder, baseName + ".o");
+        File dest = new File(buildFolder, fileName + ".o");
+        //File dest = new File(buildFolder, baseName + ".o");
 
         if(dest.exists()) {
             if(dest.lastModified() > src.lastModified()) {
@@ -2638,7 +2639,7 @@ public class Sketch implements MessageConsumer {
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
 
         for(String lib : coreLibs.keySet()) {
-            rawMessage("<ul><ul><li>" + lib + "</li></ul></ul>");
+            bullet2(lib.toString());
 
             if(!compileCore(coreLibs.get(lib), "Core_" + lib)) {
                 return false;
@@ -2705,7 +2706,7 @@ public class Sketch implements MessageConsumer {
         File archive = getCacheFile(lib.getArchiveName());  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
         PropertyFile props = mergeAllProperties();
-        rawMessage("<ul><ul><li>" + lib + "</li></ul></ul>");
+        bullet2(lib.toString());
 
         settings.put("library", archive.getAbsolutePath());
 
@@ -2790,7 +2791,7 @@ public class Sketch implements MessageConsumer {
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
                 if(Base.preferences.getBoolean("compiler.verbose")) {
-                    message("Skipping " + file.getAbsolutePath() + " as not modified.");
+                    bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
                 }
 
                 continue;
@@ -2832,7 +2833,8 @@ public class Sketch implements MessageConsumer {
         for(File file : sSources) {
             String fileName = file.getName();
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, baseName + ".o");
+            File objectFile = new File(dest, fileName + ".o");
+            //File objectFile = new File(dest, baseName + ".o");
             objectPaths.add(objectFile);
 
             settings.put("source.name", file.getAbsolutePath());
@@ -2840,7 +2842,7 @@ public class Sketch implements MessageConsumer {
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
                 if(Base.preferences.getBoolean("compiler.verbose")) {
-                    message("Skipping " + file.getAbsolutePath() + " as not modified.");
+                    bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
                 }
 
                 continue;
@@ -2856,7 +2858,8 @@ public class Sketch implements MessageConsumer {
         for(File file : cSources) {
             String fileName = file.getName();
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, baseName + ".o");
+            File objectFile = new File(dest, fileName + ".o");
+            //File objectFile = new File(dest, baseName + ".o");
             objectPaths.add(objectFile);
 
             settings.put("source.name", file.getAbsolutePath());
@@ -2864,7 +2867,7 @@ public class Sketch implements MessageConsumer {
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
                 if(Base.preferences.getBoolean("compiler.verbose")) {
-                    message("Skipping " + file.getAbsolutePath() + " as not modified.");
+                    bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
                 }
 
                 continue;
@@ -2880,7 +2883,8 @@ public class Sketch implements MessageConsumer {
         for(File file : cppSources) {
             String fileName = file.getName();
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, baseName + ".o");
+            File objectFile = new File(dest, fileName + ".o");
+            //File objectFile = new File(dest, baseName + ".o");
             objectPaths.add(objectFile);
 
             settings.put("source.name", file.getAbsolutePath());
@@ -2888,7 +2892,7 @@ public class Sketch implements MessageConsumer {
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
                 if(Base.preferences.getBoolean("compiler.verbose")) {
-                    message("Skipping " + file.getAbsolutePath() + " as not modified.");
+                    bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
                 }
 
                 continue;
@@ -3191,7 +3195,7 @@ public class Sketch implements MessageConsumer {
         Debug.message("Execute: " + sb.toString());
 
         if(Base.preferences.getBoolean("compiler.verbose")) {
-            rawMessage("<div class='command'>" + sb.toString() + "</div>");
+            command(sb.toString());
         }
 
         try {
@@ -3346,9 +3350,9 @@ public class Sketch implements MessageConsumer {
     }
 
     public void about() {
-        message("Sketch folder: " + sketchFolder.getAbsolutePath());
-        message("Selected board: " + getBoard().getName());
-        message("Board folder: " + getBoard().getFolder().getAbsolutePath());
+        bullet("Sketch folder: " + sketchFolder.getAbsolutePath());
+        bullet("Selected board: " + getBoard().getName());
+        bullet("Board folder: " + getBoard().getFolder().getAbsolutePath());
     }
 
     public File getLibrariesFolder() {
@@ -3519,7 +3523,7 @@ public class Sketch implements MessageConsumer {
 
     public boolean programFile(String programmer, String file) {
         PropertyFile props = mergeAllProperties();
-        rawMessage("<h3>Uploading firmware...</h3>");
+        heading("Uploading firmware...");
 
         settings.put("filename", file);
 
@@ -3590,7 +3594,7 @@ public class Sketch implements MessageConsumer {
             percentageMultiplier = 1.0f;
         }
 
-        rawMessage("<ul><li>Uploading...</li></ul>");
+        bullet("Uploading...");
         
         boolean res = executeKey(cmdKey, envKey);
         percentageFilter = null;
@@ -3617,10 +3621,10 @@ public class Sketch implements MessageConsumer {
         }
 
         if(res) {
-            rawMessage("<h3>Upload Complete</h3>");
+            bullet("Upload Complete");
             return true;
         } else {
-            rawMessage("<h3><span class='error'>Upload Failed</span></h3>");
+            error("Upload Failed");
             return false;
         }
     }
@@ -3671,7 +3675,7 @@ public class Sketch implements MessageConsumer {
                             eb.flagLine(errorLineNumber - 1, Base.loadIconFromResource("files/flag-red.png"), 0x1000);
                         }
 
-                        error("<a href='uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "'>Error in file " + errorFile.getName() + " at line " + errorLineNumber + ":</a>");
+                        link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Error at line " + errorLineNumber + " in file " + errorFile.getName());
 
                         setLineComment(errorFile, errorLineNumber, eMat.group(eMessage));
                     }
@@ -3805,13 +3809,62 @@ public class Sketch implements MessageConsumer {
         }
     }
 
-    public void rawMessage(String s) {
-        if (editor == null) {
-            System.out.println(s);
-        } else {
-            editor.appendToConsole(s);
+    public void link(String s) {
+        if(!s.endsWith("\n")) {
+            s += "\n";
         }
-    }
+        if(editor != null) {
+            editor.link(s);
+        }
+    }        
+
+    public void command(String s) {
+        if(!s.endsWith("\n")) {
+            s += "\n";
+        }
+        if(editor != null) {
+            editor.command(s);
+        } else {
+            System.out.print(s);
+        }
+    }        
+
+    public void bullet(String s) {
+        if(!s.endsWith("\n")) {
+            s += "\n";
+        }
+        if(editor != null) {
+            editor.bullet(s);
+        } else {
+            System.out.print("    * " + s);
+        }
+    }        
+
+    public void bullet2(String s) {
+        if(!s.endsWith("\n")) {
+            s += "\n";
+        }
+        if(editor != null) {
+            editor.bullet2(s);
+        } else {
+            System.out.print("      > " + s);
+        }
+    }        
+
+    public void heading(String s) {
+        if(!s.endsWith("\n")) {
+            s += "\n";
+        }
+        if(editor != null) {
+            editor.heading(s);
+        } else {
+            System.out.print(s);
+            for (int i = 0; i < s.trim().length(); i++) {
+                System.out.print("=");
+            }
+            System.out.println();
+        }
+    }        
 
     public void message(String s) {
         flagError(s);

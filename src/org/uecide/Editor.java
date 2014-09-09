@@ -93,12 +93,14 @@ public class Editor extends JFrame {
     JToolBar toolbar;
     JToolBar treeToolBar;
 
-    JPanel consolePanel;
     JPanel treePanel;
     JPanel editorPanel;
     JPanel statusBar;
     JPanel projectPanel;
     JPanel filesPanel;
+    JPanel consolePanel;
+
+    Console console;
 
     JTabbedPane editorTabs;
     JTabbedPane projectTabs;
@@ -119,13 +121,6 @@ public class Editor extends JFrame {
     DefaultTreeModel filesTreeModel;
 
     JScrollPane consoleScroll;
-    JTextPane consoleTextPane;
-    HTMLDocument consoleDoc;
-    HTMLEditorKit consoleKit;
-
-    MutableAttributeSet stdStyle;
-    MutableAttributeSet errStyle;
-    MutableAttributeSet warnStyle;
 
     JProgressBar statusProgress;
     JLabel statusLabel;
@@ -328,109 +323,11 @@ System.err.println(sexy.length());
         final Editor me = this;
 
         consoleScroll = new JScrollPane();
-        consoleTextPane = new JTextPane();
+        console = new Console();
 
+        console.setURLClickListener(this);
 
-        consoleTextPane.setContentType("text/html");
-
-        consoleTextPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        String theme = Base.preferences.get("theme.selected", "default");
-        theme = "theme." + theme + ".";
-        consoleTextPane.setEditable(false);
-        consoleTextPane.setBackground(Base.theme.getColor(theme + "console.color"));
-
-        consoleTextPane.addHyperlinkListener(new HyperlinkListener() {
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    if (e.getDescription().startsWith("uecide://error/")) {
-                        Pattern p = Pattern.compile("^uecide://error/(\\d+)/(.*)$");
-                        Matcher m = p.matcher(e.getDescription());
-                        if (m.find()) {
-
-                            File f = new File(m.group(2));
-                            int line = 0;
-                            try {
-                                line = Integer.parseInt(m.group(1));
-                            } catch (Exception ee) {
-                            }
-                            if (line > 0) {
-                                int tab = openOrSelectFile(f);
-                                if (tab >= 0) {
-                                    EditorBase eb = getTab(tab);
-                                    eb.gotoLine(line-1);
-                                    eb.requestFocus();
-                                }
-                            }
-                        }
-                        return;
-                    }
-                        
-                    if (e.getURL() != null) {
-                        Base.openURL(e.getURL().toString());
-                    }
-                }
-            }
-        });
-
-        consoleKit = new HTMLEditorKit();
-        consoleTextPane.setEditorKit(consoleKit);
-        StyleSheet css = consoleKit.getStyleSheet();
-
-        css.addRule("body {" + Base.theme.get(theme + "console.body", Base.theme.get("theme.default.console.body")) + "}");
-        css.addRule("span.warning {" + Base.theme.get(theme + "console.warning", Base.theme.get("theme.default.console.warning")) + "}");
-        css.addRule("span.error {" + Base.theme.get(theme + "console.error", Base.theme.get("theme.default.console.error")) + "}");
-        css.addRule("div.command {" + Base.theme.get(theme + "console.command", Base.theme.get("theme.default.console.command")) + "}");
-        css.addRule("a {" + Base.theme.get(theme + "console.a", Base.theme.get("theme.default.console.a")) + "}");
-        css.addRule("ul {" + Base.theme.get(theme + "console.ul", Base.theme.get("theme.default.console.ul")) + "}");
-        css.addRule("ol {" + Base.theme.get(theme + "console.ol", Base.theme.get("theme.default.console.ol")) + "}");
-        css.addRule("li {" + Base.theme.get(theme + "console.li", Base.theme.get("theme.default.console.li")) + "}");
-        css.addRule("h1 {" + Base.theme.get(theme + "console.h1", Base.theme.get("theme.default.console.h1")) + "}");
-        css.addRule("h2 {" + Base.theme.get(theme + "console.h2", Base.theme.get("theme.default.console.h2")) + "}");
-        css.addRule("h3 {" + Base.theme.get(theme + "console.h3", Base.theme.get("theme.default.console.h3")) + "}");
-        css.addRule("h4 {" + Base.theme.get(theme + "console.h4", Base.theme.get("theme.default.console.h4")) + "}");
-        consoleDoc = (HTMLDocument)consoleKit.createDefaultDocument();
-        consoleTextPane.setDocument(consoleDoc);
-        consoleTextPane.setCaretPosition(0);
-        clearConsole();
-
-        consoleTextPane.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    JPopupMenu menu = new JPopupMenu();
-                    JMenuItem item = new JMenuItem("Copy");
-                    item.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            consoleTextPane.copy();
-                        }
-                    });
-                    menu.add(item);
-                    item = new JMenuItem("Select All");
-                    item.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            consoleTextPane.selectAll();
-                        }
-                    });
-                    menu.add(item);
-                    menu.addSeparator();
-                    item = new JMenuItem("Clear Console");
-                    item.addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            clearConsole();
-                        }
-                    });
-                    menu.add(item);
-                    menu.show(consoleTextPane, e.getX(), e.getY());
-                }
-            }
-        });
-
-
-        MutableAttributeSet standard = new SimpleAttributeSet();
-        StyleConstants.setAlignment(standard, StyleConstants.ALIGN_LEFT);
-        
-
-        consoleScroll.setViewportView(consoleTextPane);
+        consoleScroll.setViewportView(console);
 
         consolePanel.add(consoleScroll);
 
@@ -532,6 +429,9 @@ System.err.println(sexy.length());
         projectPanel.add(projectTabs, BorderLayout.CENTER);
         projectTabs.add(treePanel, "Project");
         projectTabs.add(filesPanel, "Files");
+
+        String theme = Base.preferences.get("theme.selected", "default");
+        theme = "theme." + theme + ".";
 
         sketchContentTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
         sketchContentTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
@@ -2403,14 +2303,79 @@ System.err.println(sexy.length());
 
 
     public void appendToConsole(String s) {
-        try {
-            consoleKit.insertHTML(consoleDoc, consoleDoc.getLength(), s, 0, 0, null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        consoleTextPane.setCaretPosition(consoleDoc.getLength());
+        console.append(s, Console.BODY);
     }
     
+    public void link(String msg) {
+        Debug.message(msg);
+
+        if(msg == null) {
+            return;
+        }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
+        console.append(msg, Console.LINK);
+    }
+
+    public void command(String msg) {
+        Debug.message(msg);
+
+        if(msg == null) {
+            return;
+        }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
+        console.append(msg, Console.COMMAND);
+    }
+
+    public void heading(String msg) {
+        Debug.message(msg);
+
+        if(msg == null) {
+            return;
+        }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
+        console.append(msg, Console.HEADING);
+    }
+
+    public void bullet(String msg) {
+        Debug.message(msg);
+
+        if(msg == null) {
+            return;
+        }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
+        console.append(msg, Console.BULLET);
+    }
+
+    public void bullet2(String msg) {
+        Debug.message(msg);
+
+        if(msg == null) {
+            return;
+        }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
+        console.append(msg, Console.BULLET2);
+    }
+
     public void message(String msg) {
         Debug.message(msg);
 
@@ -2422,8 +2387,7 @@ System.err.println(sexy.length());
             msg += "\n";
         }
 
-        msg = msg.replaceAll("\n", "<br/>");
-        appendToConsole("<span>" + msg + "</span>");
+        console.append(msg, Console.BODY);
     }
 
     public void warning(String msg) {
@@ -2433,8 +2397,7 @@ System.err.println(sexy.length());
             msg += "\n";
         }
 
-        msg = msg.replaceAll("\n", "<br/>");
-        appendToConsole("<span class='warning'>" + msg + "</span>");
+        console.append(msg, Console.WARNING);
     }
 
     public void error(String msg) {
@@ -2444,8 +2407,7 @@ System.err.println(sexy.length());
             msg += "\n";
         }
 
-        msg = msg.replaceAll("\n", "<br/>");
-        appendToConsole("<span class='error'>" + msg + "</span>");
+        console.append(msg, Console.ERROR);
     }
 
     public void error(Throwable e) {
@@ -2457,10 +2419,7 @@ System.err.println(sexy.length());
 
 
     public void clearConsole() {
-        try {
-            consoleDoc.remove(0, consoleDoc.getLength());
-        } catch(BadLocationException e) {
-        }
+        console.clear();
     }
 
     public void setProgress(int x) {
@@ -3356,7 +3315,9 @@ System.err.println(sexy.length());
         for(String pn : programmers.keySet()) {
             JMenuItem item = new JRadioButtonMenuItem(programmers.get(pn));
             programmerGroup.add(item);
-            item.setSelected(loadedSketch.getProgrammer().equals(pn));
+            if (loadedSketch.getProgrammer() != null) {
+                item.setSelected(loadedSketch.getProgrammer().equals(pn));
+            }
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setProgrammer(e.getActionCommand());
@@ -4808,6 +4769,23 @@ System.err.println(sexy.length());
             isFullScreen = false;
             Base.preferences.setBoolean("editor.fullscreen", false);
             Base.preferences.saveDelay();
+        }
+    }
+
+    void urlClicked(String url) {
+        Pattern p = Pattern.compile("^uecide://error/(\\d+)/(.*)$");
+        Matcher m = p.matcher(url);
+        if (m.find()) {
+            try {
+                int line = Integer.parseInt(m.group(1));
+                int tab = openOrSelectFile(new File(m.group(2)));
+                if (tab != -1) {
+                    EditorBase eb = getTab(tab);
+                    eb.gotoLine(line - 1);
+                }
+
+            } catch (Exception e) {
+            }
         }
     }
 }
