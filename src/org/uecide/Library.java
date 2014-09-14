@@ -380,11 +380,6 @@ public class Library implements Comparable {
         return core.equals(c);
     }
 
-    public String getArchiveName() {
-        String[] bits = type.split(":");
-        return "lib" + bits[0] + "_" + name + ".a";
-    }
-
     public String getLinkName() {
         String[] bits = type.split(":");
         return bits[0] + "_" + name;

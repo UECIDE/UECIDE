@@ -2589,8 +2589,9 @@ public class Sketch implements MessageConsumer {
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-        File dest = new File(buildFolder, fileName + ".o");
-        //File dest = new File(buildFolder, baseName + ".o");
+        String objExt = props.get("compiler.object","o");
+        File dest = new File(buildFolder, fileName + "." +objExt);
+        //File dest = new File(buildFolder, baseName + "." + objExt);
 
         if(dest.exists()) {
             if(dest.lastModified() > src.lastModified()) {
@@ -2637,6 +2638,28 @@ public class Sketch implements MessageConsumer {
 
     public boolean compileCore() {
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
+        PropertyFile props = mergeAllProperties();
+
+        if (props.get("compile.stub") != null) {
+            String mainStub = parseString(props.get("compile.stub"));
+            String[] bits = mainStub.split("::");
+            for (String stubFile : bits) {
+                System.err.println("Compiling stub file: " + stubFile);
+                File mainStubFile = new File(stubFile);
+                if (mainStubFile.exists()) {
+                    System.err.println("File exists: " + mainStubFile.getAbsolutePath());
+                    File mainStubObject = compileFile(mainStubFile);
+                    File cachedStubObject = getCacheFile(mainStubObject.getName());
+                    System.err.println("Object is: " + mainStubObject.getAbsolutePath());
+                    System.err.println("Cache is: " + cachedStubObject.getAbsolutePath());
+                    if (!mainStubObject.exists()) {
+                        System.err.println("Cannot find object!");
+                    }
+                    Base.copyFile(mainStubObject, cachedStubObject);
+                    mainStubObject.delete();
+                }
+            }
+        }
 
         for(String lib : coreLibs.keySet()) {
             bullet2(lib.toString());
@@ -2650,7 +2673,10 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean compileCore(ArrayList<File> core, String name) {
-        File archive = getCacheFile("lib" + name + ".a");
+        PropertyFile props = mergeAllProperties();
+        String prefix = props.get("compiler.library.prefix","lib");
+        String suffix = props.get("compiler.library", ".a");
+        File archive = getCacheFile(prefix + name + "." + suffix);
 
         settings.put("library", archive.getAbsolutePath());
 
@@ -2702,8 +2728,15 @@ public class Sketch implements MessageConsumer {
         return settings.get(k);
     }
 
+    public String getArchiveName(Library lib) {
+        PropertyFile props = mergeAllProperties();
+        String prefix = props.get("compiler.library.prefix","lib");
+        String suffix = props.get("compiler.library", ".a");
+        return prefix + lib.getLinkName() + "." + suffix;
+    }
+
     public boolean compileLibrary(Library lib) {
-        File archive = getCacheFile(lib.getArchiveName());  //getCacheFile("lib" + lib.getName() + ".a");
+        File archive = getCacheFile(getArchiveName(lib));  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
         PropertyFile props = mergeAllProperties();
         bullet2(lib.toString());
@@ -2784,9 +2817,10 @@ public class Sketch implements MessageConsumer {
         PropertyFile props = mergeAllProperties();
 
         settings.put("build.path", dest.getAbsolutePath());
+        String objExt = props.get("compiler.object","o");
 
         for(File file : sources) {
-            File objectFile = new File(dest, file.getName() + ".o");
+            File objectFile = new File(dest, file.getName() + "." + objExt);
             objectPaths.add(objectFile);
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
@@ -2829,12 +2863,13 @@ public class Sketch implements MessageConsumer {
         PropertyFile props = mergeAllProperties();
 
         settings.put("build.path", dest.getAbsolutePath());
+        String objExt = props.get("compiler.object","o");
 
         for(File file : sSources) {
             String fileName = file.getName();
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, fileName + ".o");
-            //File objectFile = new File(dest, baseName + ".o");
+            File objectFile = new File(dest, fileName + "." + objExt);
+            //File objectFile = new File(dest, baseName + "." + objExt);
             objectPaths.add(objectFile);
 
             settings.put("source.name", file.getAbsolutePath());
@@ -2858,8 +2893,8 @@ public class Sketch implements MessageConsumer {
         for(File file : cSources) {
             String fileName = file.getName();
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, fileName + ".o");
-            //File objectFile = new File(dest, baseName + ".o");
+            File objectFile = new File(dest, fileName + "." + objExt);
+            //File objectFile = new File(dest, baseName + "." + objExt);
             objectPaths.add(objectFile);
 
             settings.put("source.name", file.getAbsolutePath());
@@ -2883,8 +2918,8 @@ public class Sketch implements MessageConsumer {
         for(File file : cppSources) {
             String fileName = file.getName();
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, fileName + ".o");
-            //File objectFile = new File(dest, baseName + ".o");
+            File objectFile = new File(dest, fileName + "." + objExt);
+            //File objectFile = new File(dest, baseName + "." + objExt);
             objectPaths.add(objectFile);
 
             settings.put("source.name", file.getAbsolutePath());
@@ -3065,7 +3100,7 @@ public class Sketch implements MessageConsumer {
 
         for(String libName : importedLibraries.keySet()) {
             Library lib = importedLibraries.get(libName);
-            File aFile = getCacheFile(lib.getArchiveName());
+            File aFile = getCacheFile(getArchiveName(lib));
             String headerName = lib.getName() + ".h";
             boolean inc = true;
 
@@ -3100,16 +3135,25 @@ public class Sketch implements MessageConsumer {
 
     private boolean compileEEP() {
         PropertyFile props = mergeAllProperties();
+        if (props.get("compile.eep") == null) {
+            return true;
+        }
         return executeKey("compile.eep", "compile.eep.environment");
     }
 
     private boolean compileLSS() {
         PropertyFile props = mergeAllProperties();
+        if (props.get("compile.lss") == null) {
+            return true;
+        }
         return executeKey("compile.lss", "compile.lss.environment");
     }
 
     private boolean compileHEX() {
         PropertyFile props = mergeAllProperties();
+        if (props.get("compile.hex") == null) {
+            return true;
+        }
         return executeKey("compile.hex", "compile.hex.environment");
     }
 
@@ -4052,12 +4096,12 @@ public class Sketch implements MessageConsumer {
             return true;
         }
 
-        File arch = new File(getCacheFolder(), l.getArchiveName());
+        File arch = new File(getCacheFolder(), getArchiveName(l));
         return arch.exists();
     }
 
     public void purgeLibrary(Library lib) {
-        File arch = new File(getCacheFolder(), lib.getArchiveName());
+        File arch = new File(getCacheFolder(), getArchiveName(lib));
         arch.delete();
     }
 
