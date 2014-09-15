@@ -2675,7 +2675,7 @@ public class Sketch implements MessageConsumer {
     public boolean compileCore(ArrayList<File> core, String name) {
         PropertyFile props = mergeAllProperties();
         String prefix = props.get("compiler.library.prefix","lib");
-        String suffix = props.get("compiler.library", ".a");
+        String suffix = props.get("compiler.library", "a");
         File archive = getCacheFile(prefix + name + "." + suffix);
 
         settings.put("library", archive.getAbsolutePath());
@@ -2731,7 +2731,7 @@ public class Sketch implements MessageConsumer {
     public String getArchiveName(Library lib) {
         PropertyFile props = mergeAllProperties();
         String prefix = props.get("compiler.library.prefix","lib");
-        String suffix = props.get("compiler.library", ".a");
+        String suffix = props.get("compiler.library", "a");
         return prefix + lib.getLinkName() + "." + suffix;
     }
 
