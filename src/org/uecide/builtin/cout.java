@@ -10,7 +10,7 @@ public class cout implements BuiltinCommand {
             sb.append(s);
         }
 
-        sketch.rawMessage(sb.toString());
+        sketch.message(sb.toString());
         return true;
     }
 }

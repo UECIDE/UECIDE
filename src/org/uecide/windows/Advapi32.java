@@ -327,6 +327,12 @@ public interface Advapi32  extends StdCallLibrary {
         public int dwServiceSpecificExitCode;
         public int dwCheckPoint;
         public int dwWaitHint;
+        protected java.util.List getFieldOrder() {
+            return java.util.Arrays.asList(new String[] {
+                "dwServiceType", "dwCurrentState", "dwControlsAccepted", "dwWin32ExitCode",
+                "dwServiceSpecificExitCode", "dwCheckPoint", "dwWaitHint"
+            });
+        }
     }
 
     /*
@@ -338,9 +344,17 @@ public interface Advapi32  extends StdCallLibrary {
     public static class SERVICE_TABLE_ENTRY extends Structure {
         public String lpServiceName;
         public SERVICE_MAIN_FUNCTION lpServiceProc;
+        protected java.util.List getFieldOrder() {
+            return java.util.Arrays.asList(new String[] {
+                "lpServiceName", "lpServiceProc"
+            });
+        }
     }
 
     public static class ChangeServiceConfig2Info extends Structure {
+        protected java.util.List getFieldOrder() {
+            return null;
+        }
     }
 
     /*

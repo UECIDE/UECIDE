@@ -50,6 +50,12 @@ public interface WINBASE {
         public int nLength;
         public Pointer lpSecurityDescriptor;
         public boolean bInheritHandle;
+        protected java.util.List getFieldOrder() {
+            return java.util.Arrays.asList(new String[] {
+                "nLength", "lpSecurityDescriptot", "bInheritHandle"
+            });
+        }
+
     }
 
     /*
@@ -60,5 +66,11 @@ public interface WINBASE {
     public static class FILETIME extends Structure {
         public int dwLowDateTime;
         public int dwHighDateTime;
+        protected java.util.List getFieldOrder() {
+            return java.util.Arrays.asList(new String[] {
+                "dwLowDateTime", "dwHighDateTime"
+            });
+        }
+
     }
 }
