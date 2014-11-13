@@ -2844,31 +2844,39 @@ System.err.println(sexy.length());
         submenu = new JMenu(Translate.t("Examples"));
 
         if(loadedSketch.getCore() != null) {
-            addSketchesFromFolder(submenu, loadedSketch.getCompiler().getExamplesFolder());
-            addSketchesFromFolder(submenu, loadedSketch.getCore().getExamplesFolder());
-            addSketchesFromFolder(submenu, loadedSketch.getBoard().getExamplesFolder());
+            if (loadedSketch.getCompiler() != null) {
+                addSketchesFromFolder(submenu, loadedSketch.getCompiler().getExamplesFolder());
+            }
+            if (loadedSketch.getCore() != null) {
+                addSketchesFromFolder(submenu, loadedSketch.getCore().getExamplesFolder());
+            }
+            if (loadedSketch.getBoard() != null) {
+                addSketchesFromFolder(submenu, loadedSketch.getBoard().getExamplesFolder());
+            }
 
             submenu.addSeparator();
 
 
             TreeSet<String> catNames = Library.getLibraryCategories();
 
-            for(String group : catNames) {
-                TreeSet<Library>libs = Library.getLibraries(group, loadedSketch.getCore().getName());
+            if (loadedSketch.getCore() != null) {
+                for(String group : catNames) {
+                    TreeSet<Library>libs = Library.getLibraries(group, loadedSketch.getCore().getName());
 
-                if(libs != null && libs.size() > 0) {
-                    JMenu top = new JMenu(Library.getCategoryName(group));
+                    if(libs != null && libs.size() > 0) {
+                        JMenu top = new JMenu(Library.getCategoryName(group));
 
-                    for(Library lib : libs) {
-                        JMenu libMenu = new JMenu(lib.getName());
-                        addSketchesFromFolder(libMenu, lib.getExamplesFolder());
+                        for(Library lib : libs) {
+                            JMenu libMenu = new JMenu(lib.getName());
+                            addSketchesFromFolder(libMenu, lib.getExamplesFolder());
 
-                        if(libMenu.getItemCount() > 0) {
-                            top.add(libMenu);
+                            if(libMenu.getItemCount() > 0) {
+                                top.add(libMenu);
+                            }
                         }
-                    }
 
-                    submenu.add(top);
+                        submenu.add(top);
+                    }
                 }
             }
         }

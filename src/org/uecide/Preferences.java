@@ -618,50 +618,54 @@ public class Preferences {
         selectedTheme = new JComboBox(keys);
         selectedTheme.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String value = (String)selectedTheme.getSelectedItem();
-                String laf = themes.get(value);
-                String lafTheme = "";
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        try {
+                            String value = (String)selectedTheme.getSelectedItem();
+                            String laf = themes.get(value);
+                            String lafTheme = "";
 
-                if(laf.indexOf(";") > -1) {
-                    lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
-                    laf = laf.substring(0, laf.lastIndexOf(";"));
-                }
-
-                try {
-                    if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
-
-                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-                        URI themeURI = null;
-
-                        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-                            if(td.getName().equals(lafTheme)) {
-                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
-                                break;
+                            if(laf.indexOf(";") > -1) {
+                                lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
+                                laf = laf.substring(0, laf.lastIndexOf(";"));
                             }
+
+                            if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
+
+                                de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+                                URI themeURI = null;
+
+                                for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+                                    if(td.getName().equals(lafTheme)) {
+                                        de.muntjak.tinylookandfeel.Theme.loadTheme(td);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if(laf.startsWith("com.jtattoo.plaf.")) {
+                                Properties props = new Properties();
+                                props.put("windowDecoration", useSystemDecorator.isSelected() ? "on" : "off");
+                                props.put("logoString", "UECIDE");
+                                props.put("textAntiAliasing", "on");
+
+                                Class<?> cls = Class.forName(laf);
+                                Class[] cArg = new Class[1];
+                                cArg[0] = Properties.class;
+                                Method mth = cls.getMethod("setCurrentTheme", cArg);
+                                mth.invoke(cls, props);
+                            } else {
+                            }
+
+                            UIManager.setLookAndFeel(laf);
+                            SwingUtilities.updateComponentTreeUI(dialog);
+                            Base.updateLookAndFeel();
+                            dialog.pack();
+                            
+                        } catch(Exception ignored) {
                         }
                     }
-
-                    if(laf.startsWith("com.jtattoo.plaf.")) {
-                        Properties props = new Properties();
-                        props.put("windowDecoration", useSystemDecorator.isSelected() ? "on" : "off");
-                        props.put("logoString", "UECIDE");
-                        props.put("textAntiAliasing", "on");
-
-                        Class<?> cls = Class.forName(laf);
-                        Class[] cArg = new Class[1];
-                        cArg[0] = Properties.class;
-                        Method mth = cls.getMethod("setCurrentTheme", cArg);
-                        mth.invoke(cls, props);
-                    } else {
-                    }
-
-                    UIManager.setLookAndFeel(laf);
-                    SwingUtilities.updateComponentTreeUI(dialog);
-                    Base.updateLookAndFeel();
-                    dialog.pack();
-                    
-                } catch(Exception ignored) {
-                }
+                });
             }
         });
 
@@ -683,49 +687,53 @@ public class Preferences {
 
         useSystemDecorator.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String value = (String)selectedTheme.getSelectedItem();
-                String laf = themes.get(value);
-                String lafTheme = "";
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        String value = (String)selectedTheme.getSelectedItem();
+                        String laf = themes.get(value);
+                        String lafTheme = "";
 
-                if(laf.indexOf(";") > -1) {
-                    lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
-                    laf = laf.substring(0, laf.lastIndexOf(";"));
-                }
+                        if(laf.indexOf(";") > -1) {
+                            lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
+                            laf = laf.substring(0, laf.lastIndexOf(";"));
+                        }
 
-                try {
-                    if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
-                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-                        URI themeURI = null;
+                        try {
+                            if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
+                                de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+                                URI themeURI = null;
 
-                        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-                            if(td.getName().equals(lafTheme)) {
-                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
-                                break;
+                                for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+                                    if(td.getName().equals(lafTheme)) {
+                                        de.muntjak.tinylookandfeel.Theme.loadTheme(td);
+                                        break;
+                                    }
+                                }
                             }
+
+                            if(laf.startsWith("com.jtattoo.plaf.")) {
+                                Properties props = new Properties();
+                                props.put("windowDecoration", useSystemDecorator.isSelected() ? "off" : "on");
+                                props.put("logoString", "UECIDE");
+                                props.put("textAntiAliasing", "on");
+
+                                System.err.println(props.toString());
+
+                                Class<?> cls = Class.forName(laf);
+                                Class[] cArg = new Class[1];
+                                cArg[0] = Properties.class;
+                                Method mth = cls.getMethod("setCurrentTheme", cArg);
+                                mth.invoke(cls, props);
+                            }
+
+                            UIManager.setLookAndFeel(laf);
+                            SwingUtilities.updateComponentTreeUI(dialog);
+                            Base.updateLookAndFeel();
+                            dialog.pack();
+                        } catch(Exception ignored) {
                         }
                     }
-
-                    if(laf.startsWith("com.jtattoo.plaf.")) {
-                        Properties props = new Properties();
-                        props.put("windowDecoration", useSystemDecorator.isSelected() ? "off" : "on");
-                        props.put("logoString", "UECIDE");
-                        props.put("textAntiAliasing", "on");
-
-                        System.err.println(props.toString());
-
-                        Class<?> cls = Class.forName(laf);
-                        Class[] cArg = new Class[1];
-                        cArg[0] = Properties.class;
-                        Method mth = cls.getMethod("setCurrentTheme", cArg);
-                        mth.invoke(cls, props);
-                    }
-
-                    UIManager.setLookAndFeel(laf);
-                    SwingUtilities.updateComponentTreeUI(dialog);
-                    Base.updateLookAndFeel();
-                    dialog.pack();
-                } catch(Exception ignored) {
-                }
+                });
             }
         });
 

@@ -937,6 +937,9 @@ public class Sketch implements MessageConsumer {
             }
         }
 
+        if (getCore() == null) {
+            return null;
+        }
         return Library.getLibraryByInclude(filename, getCore().getName());
     }
 

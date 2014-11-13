@@ -1834,11 +1834,15 @@ public class Base {
         }
 
         Reflections pluginReflections = new Reflections("");
-        Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
-        Debug.message(pluginClasses.toString());
-        for (Class<? extends Plugin> c : pluginClasses) {
-            Debug.message("Found plugin class " + c.getName());
-            plugins.put(c.getName(), c);
+        try {
+            Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
+            Debug.message(pluginClasses.toString());
+            for (Class<? extends Plugin> c : pluginClasses) {
+                Debug.message("Found plugin class " + c.getName());
+                plugins.put(c.getName(), c);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
