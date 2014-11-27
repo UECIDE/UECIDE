@@ -128,7 +128,7 @@
     <target name="linux64-deb">
         <antcall target="linux-build-deb">
             <param name="arch" value="amd64" />
-            <param name="deps.extra" value=", libc6-i386, zlib1g:i386" />
+            <param name="deps.extra" value=", libc6-i386" />
         </antcall>
     </target>
 

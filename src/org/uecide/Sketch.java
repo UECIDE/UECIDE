@@ -1335,7 +1335,21 @@ public class Sketch implements MessageConsumer {
                     pw.write("\n");
 
                     if(props.get("core.header") != null) {
-                        pw.write("#include <" + props.get("core.header") + ">\n");
+                        boolean gotHeader = false;
+                        String[] lines = cleanedFiles.get(f).split("\n");
+                        Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
+                        for (String l : lines) {
+                            Matcher m = inc.matcher(l);
+                            if (m.find()) {
+                                if (m.group(1).equals(props.get("core.header"))) {
+                                    gotHeader = true;
+                                }
+                            }
+                        }
+                        
+                        if (!gotHeader) {
+                            pw.write("#include <" + props.get("core.header") + ">\n");
+                        }
                     }
 
                     if(!Base.preferences.getBoolean("compiler.combine_ino")) {
