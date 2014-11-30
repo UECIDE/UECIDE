@@ -2948,7 +2948,7 @@ System.err.println(sexy.length());
         item.setAccelerator(KeyStroke.getKeyStroke("ctrl-,"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Preferences prefs = new Preferences();
+                Preferences prefs = new Preferences(Editor.this);
                 prefs.showFrame();
             }
         });

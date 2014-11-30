@@ -113,6 +113,7 @@ public class Preferences {
     JCheckBox visibleTabs;
     JCheckBox checkNewVersion;
     JCheckBox autoSave;
+    JCheckBox crashReport;
     JTextField tabSize;
     JCheckBox hideSecondaryToolbar;
 
@@ -127,6 +128,8 @@ public class Preferences {
     JTextField compilersLocationField;
     JCheckBox  createBackups;
     JTextField backupNumber;
+
+    Editor editor;
 
     JComboBox selectedTheme;
     JComboBox selectedEditorTheme;
@@ -362,7 +365,8 @@ public class Preferences {
     }
 
 
-    public Preferences() {
+    public Preferences(Editor ed) {
+        editor = ed;
 
         // setup dialog for the prefs
 
@@ -479,8 +483,9 @@ public class Preferences {
 
         Dimension size = dialog.getSize();
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        dialog.setLocation((screen.width - size.width) / 2,
-                           (screen.height - size.height) / 2);
+        dialog.setLocationRelativeTo(editor);
+//        dialog.setLocation((screen.width - size.width) / 2,
+//                           (screen.height - size.height) / 2);
 
     }
 
@@ -661,6 +666,7 @@ public class Preferences {
                             SwingUtilities.updateComponentTreeUI(dialog);
                             Base.updateLookAndFeel();
                             dialog.pack();
+                            dialog.setLocationRelativeTo(editor);
                             
                         } catch(Exception ignored) {
                         }
@@ -730,6 +736,7 @@ public class Preferences {
                             SwingUtilities.updateComponentTreeUI(dialog);
                             Base.updateLookAndFeel();
                             dialog.pack();
+                            dialog.setLocationRelativeTo(editor);
                         } catch(Exception ignored) {
                         }
                     }
@@ -941,6 +948,13 @@ public class Preferences {
         autoSave = new JCheckBox(Translate.t("Automatically save sketch before compile"));
         p.add(autoSave, c);
         autoSave.setSelected(Base.preferences.getBoolean("editor.autosave"));
+
+        c.gridx = 0;
+        c.gridy++;
+        c.gridwidth = 3;
+        crashReport = new JCheckBox(Translate.t("Disable crash reporter"));
+        p.add(crashReport, c);
+        crashReport.setSelected(Base.preferences.getBoolean("crash.noreport"));
     }
 
     public void populateLocationSettings(JPanel p) {
@@ -1228,6 +1242,7 @@ public class Preferences {
         Base.preferences.setBoolean("editor.subtoolbar.hidden", hideSecondaryToolbar.isSelected());
         Base.preferences.setBoolean("version.check", checkNewVersion.isSelected());
         Base.preferences.setBoolean("editor.autosave", autoSave.isSelected());
+        Base.preferences.setBoolean("crash.noreport", crashReport.isSelected());
 
         Base.preferences.setBoolean("editor.expandtabs", useSpacesForTabs.isSelected());
         Base.preferences.setBoolean("editor.showtabs", visibleTabs.isSelected());

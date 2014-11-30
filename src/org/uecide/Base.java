@@ -2160,7 +2160,9 @@ public class Base {
 
     static public void broken(Thread t, Throwable e) {
         try {
-            CrashReporter rep = new CrashReporter(e);
+            if (Base.preferences.getBoolean("crash.noreport") == false) {
+                CrashReporter rep = new CrashReporter(e);
+            }
             e.printStackTrace();
             if(e.getCause() == null) {
                 return;
