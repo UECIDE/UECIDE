@@ -30,14 +30,18 @@
 
 package org.uecide.windows;
 
-import java.io.File;
+import java.io.*;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 
+import javax.swing.*;
+import java.util.regex.*;
+
 import org.uecide.Base;
+import org.uecide.PropertyFile;
 import org.uecide.windows.Registry.REGISTRY_ROOT_KEY;
 
 import javax.swing.UIManager;
@@ -76,6 +80,7 @@ public class Platform extends org.uecide.Platform {
         checkAssociations();
         checkQuickTime();
         checkPath();
+        probeInfo();
     }
 
 
@@ -330,13 +335,51 @@ public class Platform extends org.uecide.Platform {
         return clib._putenv(variable + "=");
     }
 
+    public PropertyFile platformInfo = new PropertyFile();
+
+    public void probeInfo() {
+        Runtime rt; 
+        Process pr; 
+        BufferedReader in;
+        String line = "";
+        String sysInfo = "";
+        String edition = "";
+        String version = "";
+        final String   SEARCH_TERM = "OS Name:";
+        final String[] EDITIONS = { "Basic", "Home", "Professional", "Enterprise" };
+
+        try {
+            rt = Runtime.getRuntime();
+            pr = rt.exec("SYSTEMINFO");
+            in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+
+            Pattern pat = Pattern.compile("Microsoft Windows ([^\\s]+) ([^\\s]+)");
+
+            //add all the lines into a variable
+            while((line=in.readLine()) != null) {
+                Matcher mat = pat.matcher(line);
+                if (mat.find()) {
+                    version = mat.group(1).toLowerCase().trim();
+                    edition = mat.group(2).toLowerCase().trim();
+                } 
+            }
+
+            platformInfo.set("version", version);
+            platformInfo.set("flavour", edition);
+
+        } catch (IOException ioe) {   
+            System.err.println(ioe.getMessage());
+        }
+    }
+
     public String getVersion() {
-        return "win32";
+        return platformInfo.get("version");
     }
 
     public String getFlavour() {
-        return "win32";
+        return platformInfo.get("flavour");
     }
+
 }
 
 

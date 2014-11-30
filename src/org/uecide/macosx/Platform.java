@@ -31,16 +31,18 @@
 package org.uecide.macosx;
 
 import java.awt.Insets;
-import java.io.File;
+import java.io.*;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.regex.*;
 
 import javax.swing.UIManager;
 
 import com.apple.eio.FileManager;
 
 import org.uecide.Base;
+import org.uecide.PropertyFile;
 
 /**
  * Platform handler for Mac OS X.
@@ -70,6 +72,7 @@ public class Platform extends org.uecide.Platform {
     public void init(Base base) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
         ThinkDifferent.init(base);
+        probeInfo();
     }
 
 
@@ -189,11 +192,100 @@ public class Platform extends org.uecide.Platform {
         }
     }
 
+
+    public PropertyFile platformInfo = new PropertyFile();
+
+    public void probeInfo() {
+        File f = new File("/System/Library/CoreServices/SystemVersion.plist");
+        if (f.exists()) {
+
+            Pattern key = Pattern.compile("<key>(.*)</key>");
+            Pattern value = Pattern.compile("<string>(.*)</string>");
+
+            PropertyFile prop = new PropertyFile();
+            try {
+                BufferedReader in = new BufferedReader(new FileReader(f));
+                String line;
+
+                String thisKey = "";
+
+                while((line = in.readLine()) != null) {
+                    Matcher m = key.matcher(line);
+                    if (m.find()) {
+                        thisKey = m.group(1);
+                        continue;
+                    }
+
+                    m = value.matcher(line);
+                    if (m.find()) {
+                        prop.set(thisKey, m.group(1));
+                        continue;
+                    }
+                }
+                in.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            platformInfo.set("flavour", "osx");
+            platformInfo.set("version", "unknown");
+
+            String version = prop.get("ProductVersion");
+
+            if (version.startsWith("10.0.")) {
+                platformInfo.set("version", "cheetah");
+            }
+
+            if (version.startsWith("10.1.")) {
+                platformInfo.set("version", "puma");
+            }
+           
+            if (version.startsWith("10.2.")) {
+                platformInfo.set("version", "jaguar");
+            }
+           
+            if (version.startsWith("10.3.")) {
+                platformInfo.set("version", "panther");
+            }
+           
+            if (version.startsWith("10.4.")) {
+                platformInfo.set("version", "tiger");
+            }
+           
+            if (version.startsWith("10.5.")) {
+                platformInfo.set("version", "leopard");
+            }
+           
+            if (version.startsWith("10.6.")) {
+                platformInfo.set("version", "snowleopard");
+            }
+           
+            if (version.startsWith("10.7.")) {
+                platformInfo.set("version", "lion");
+            }
+           
+            if (version.startsWith("10.8.")) {
+                platformInfo.set("version", "mountainlion");
+            }
+
+            if (version.startsWith("10.9.")) {
+                platformInfo.set("version", "mavericks");
+            }
+           
+            if (version.startsWith("10.10.")) {
+                platformInfo.set("version", "yosemite");
+            }
+           
+        }
+    }
+
     public String getVersion() {
-        return "lion";
+        return platformInfo.get("version");
     }
 
     public String getFlavour() {
-        return "osx";
+        return platformInfo.get("flavour");
     }
+
+
 }
