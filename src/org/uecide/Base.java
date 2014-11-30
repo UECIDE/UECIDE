@@ -970,7 +970,7 @@ public class Base {
     * Show the Preferences window.
     */
     public static void handlePrefs() {
-        if(preferencesFrame == null) preferencesFrame = new Preferences();
+        if(preferencesFrame == null) preferencesFrame = new Preferences(null);
 
         preferencesFrame.showFrame();
     }

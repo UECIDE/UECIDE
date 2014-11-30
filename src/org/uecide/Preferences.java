@@ -483,7 +483,7 @@ public class Preferences {
 
         Dimension size = dialog.getSize();
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        dialog.setLocationRelativeTo(editor);
+        if (editor != null) dialog.setLocationRelativeTo(editor);
 //        dialog.setLocation((screen.width - size.width) / 2,
 //                           (screen.height - size.height) / 2);
 
@@ -666,7 +666,7 @@ public class Preferences {
                             SwingUtilities.updateComponentTreeUI(dialog);
                             Base.updateLookAndFeel();
                             dialog.pack();
-                            dialog.setLocationRelativeTo(editor);
+                            if (editor != null) dialog.setLocationRelativeTo(editor);
                             
                         } catch(Exception ignored) {
                         }
@@ -736,7 +736,7 @@ public class Preferences {
                             SwingUtilities.updateComponentTreeUI(dialog);
                             Base.updateLookAndFeel();
                             dialog.pack();
-                            dialog.setLocationRelativeTo(editor);
+                            if (editor != null) dialog.setLocationRelativeTo(editor);
                         } catch(Exception ignored) {
                         }
                     }
