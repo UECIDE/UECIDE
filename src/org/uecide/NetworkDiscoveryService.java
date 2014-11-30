@@ -126,9 +126,10 @@ public class NetworkDiscoveryService extends Service {
                 String key = board.get("mdns.model.key");
                 String value = board.get("mdns.model.value");
                 String btype = info.getPropertyString(key);
-
-                if(btype.equals(value)) {
-                    return board;
+                if (btype != null) {
+                    if(btype.equals(value)) {
+                        return board;
+                    }
                 }
             }
         }

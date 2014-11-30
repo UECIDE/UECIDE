@@ -620,6 +620,12 @@ System.err.println(sexy.length());
     }
 
     public void showManual() {
+        if (loadedSketch == null) {
+            return;
+        }
+        if (loadedSketch.getCore() == null) {
+            return;
+        }
         manualScroll.setVisible(true);
         int w = getSize().width;
         int spos = Base.preferences.getInteger("manual.split.position", 200);
@@ -2502,6 +2508,10 @@ System.err.println(sexy.length());
     }
 
     public int openNewTab(File sf) {
+        if (sf == null) {
+            error("No file specified");
+            return -1;
+        }
         if(sf.exists() == false) {
             error("Sorry, I can't find " + sf.getName() + ".");
             return -1;
@@ -2592,6 +2602,9 @@ System.err.println(sexy.length());
 
     public int getTabByFile(File f) {
         if (f == null) {
+            return -1;
+        }
+        if (editorTabs == null) {
             return -1;
         }
         for(int i = 0; i < editorTabs.getTabCount(); i++) {
