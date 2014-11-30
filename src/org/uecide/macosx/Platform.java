@@ -188,4 +188,12 @@ public class Platform extends org.uecide.Platform {
             return null;
         }
     }
+
+    public String getVersion() {
+        return "lion";
+    }
+
+    public String getFlavour() {
+        return "osx";
+    }
 }

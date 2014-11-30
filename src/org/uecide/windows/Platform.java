@@ -329,4 +329,14 @@ public class Platform extends org.uecide.Platform {
         //return 0;
         return clib._putenv(variable + "=");
     }
+
+    public String getVersion() {
+        return "win32";
+    }
+
+    public String getFlavour() {
+        return "win32";
+    }
 }
+
+

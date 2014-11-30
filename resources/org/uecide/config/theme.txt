@@ -36,7 +36,7 @@ links.forums.url=http://uecide.org/forum
 links.blog.name=UECIDE Blog
 links.blog.url=http://uecide.org/blog
 
-plugins.url=http://uecide.org/plugins-088.php
+plugins.url=http://uecide.org/plugins-088.php?platform=${os:name}&os=${os:flavour}&release=${os:version}&arch=${os:arch}&version=${uecide:version}
 
 editor.line.enabled=true
 editor.line.fade=true

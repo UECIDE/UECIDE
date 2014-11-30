@@ -3424,37 +3424,6 @@ public class Sketch implements MessageConsumer {
         return importedLibraries;
     }
 
-    public String runFunctionVariable(String command, String param) {
-        try {
-            Class<?> c = Class.forName("org.uecide.varcmd.vc_" + command);
-
-            if(c == null) {
-                return "";
-            }
-
-            Constructor<?> ctor = c.getConstructor();
-            VariableCommand  p = (VariableCommand)(ctor.newInstance());
-
-            Class[] param_types = new Class<?>[2];
-            param_types[0] = Sketch.class;
-            param_types[1] = String.class;
-            Method m = c.getMethod("main", param_types);
-
-            if(m == null) {
-                return "";
-            }
-
-            Object[] args = new Object[2];
-            args[0] = this;
-            args[1] = param;
-            return (String)m.invoke(p, args);
-        } catch(Exception e) {
-            Base.error(e);
-        }
-
-        return "";
-    }
-
     public boolean runBuiltinCommand(String commandline) {
         try {
             String[] split = commandline.split("::");

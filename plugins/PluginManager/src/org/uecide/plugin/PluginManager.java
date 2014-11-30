@@ -249,10 +249,13 @@ public class PluginManager extends Plugin implements PropertyChangeListener
             @Override
             public Void doInBackground() {
                 try {
-                    URL url = new URL(Base.theme.get("plugins.url") + 
-                        "?platform=" + Base.getOSName() + 
-                        "&arch=" + Base.getOSArch() + 
-                        "&version=" + Base.systemVersion);
+                    URL url = new URL(Base.parseString(Base.theme.get("plugins.url"), null, null));
+  
+ //                       "?platform=" + Base.getOSName() + 
+ //                       "&os=" + Base.getOSFlavour() +
+ //                       "&release=" + Base.getOSVersion() +
+ //                       "&arch=" + Base.getOSArch() + 
+ //                       "&version=" + Base.systemVersion);
                     setProgress(0);
                     BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                     String data = in.readLine();

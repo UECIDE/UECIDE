@@ -37,6 +37,8 @@ import javax.swing.UIManager;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 
+import java.util.regex.*;
+
 
 /**
  * Used by Base for platform-specific tweaking, for instance finding the
@@ -80,6 +82,7 @@ public class Platform {
 
     public void init(Base base) {
         this.base = base;
+        probeInfo();
     }
 
 
@@ -250,4 +253,42 @@ public class Platform {
                          "\"launcher=/path/to/app\" line to preferences.txt",
                          null);
     }
+
+    public PropertyFile platformInfo = new PropertyFile();
+
+    public void probeInfo() {
+        File f = new File("/etc/os-release");
+        if (f.exists()) {
+            PropertyFile p = new PropertyFile(f);
+            String flav = p.get("ID");
+            if (flav != null) {
+                platformInfo.set("flavour", flav);
+            }
+
+            if (flav.equals("debian")) {
+                String v = p.get("VERSION");
+                Pattern pat = Pattern.compile("\\d+\\s+\\((.*)\\)");
+                Matcher m = pat.matcher(v);
+                if (m.find()) {
+                    platformInfo.set("version", m.group(1).toLowerCase());
+                }
+            } else if (flav.equals("ubuntu")) {
+                String v = p.get("VERSION");
+                Pattern pat = Pattern.compile(",\\s+([^\\s]+)\\s+.+");
+                Matcher m = pat.matcher(v);
+                if (m.find()) {
+                    platformInfo.set("version", m.group(1).toLowerCase());
+                }
+            }
+        }
+    }
+
+    public String getVersion() {
+        return platformInfo.get("version");
+    }
+
+    public String getFlavour() {
+        return platformInfo.get("flavour");
+    }
+
 }

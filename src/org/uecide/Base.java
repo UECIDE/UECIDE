@@ -40,7 +40,14 @@ import java.util.zip.*;
 import java.util.jar.*;
 import org.uecide.plugin.*;
 
+import org.uecide.builtin.BuiltinCommand;
+import org.uecide.varcmd.VariableCommand;
+
+
 import java.lang.reflect.*;
+
+import java.util.regex.*;
+
 
 import java.security.*;
 
@@ -537,6 +544,9 @@ public class Base {
             }
         }
 
+        System.err.println("OS Version: " + getOSVersion());
+        session.set("os.version", getOSVersion());
+
         if(headless) {
             System.exit(0);
         }
@@ -974,6 +984,13 @@ public class Base {
         return System.getProperty("os.arch");
     }
 
+    public static String getOSVersion() {
+        return platform.getVersion();
+    }
+
+    public static String getOSFlavour() {
+        return platform.getFlavour();
+    }
 
     public static String getOSFullName() {
         return getOSName() + "_" + getOSArch();
@@ -2565,6 +2582,84 @@ public class Base {
         return cmax;
     }
 
+    public static String runFunctionVariable(Sketch sketch, String command, String param) {
+        try {
+            Class<?> c = Class.forName("org.uecide.varcmd.vc_" + command);
+
+            if(c == null) {
+                return "";
+            }
+
+            Constructor<?> ctor = c.getConstructor();
+            VariableCommand  p = (VariableCommand)(ctor.newInstance());
+
+            Class[] param_types = new Class<?>[2];
+            param_types[0] = Sketch.class;
+            param_types[1] = String.class;
+            Method m = c.getMethod("main", param_types);
+
+            if(m == null) {
+                return "";
+            }
+
+            Object[] args = new Object[2];
+            args[0] = sketch;
+            args[1] = param;
+            return (String)m.invoke(p, args);
+        } catch(Exception e) {
+            Base.error(e);
+        }
+
+        return "";
+    }
+
+    public static boolean runBuiltinCommand(Sketch sketch, String commandline) {
+        try {
+            String[] split = commandline.split("::");
+            int argc = split.length - 1;
+
+            String cmdName = split[0];
+
+            String[] arg = new String[argc];
+
+            for(int i = 0; i < argc; i++) {
+                arg[i] = split[i + 1];
+            }
+
+            if(!cmdName.startsWith("__builtin_")) {
+                return false;
+            }
+
+            cmdName = cmdName.substring(10);
+            Class<?> c = Class.forName("org.uecide.builtin." + cmdName);
+
+            Constructor<?> ctor = c.getConstructor();
+            BuiltinCommand  p = (BuiltinCommand)(ctor.newInstance());
+
+            if(c == null) {
+                return false;
+            }
+
+            Class<?>[] param_types = new Class<?>[2];
+            param_types[0] = Sketch.class;
+            param_types[1] = String[].class;
+            Method m = c.getMethod("main", param_types);
+
+            Object[] args = new Object[2];
+            args[0] = sketch;
+            args[1] = arg;
+
+            return (Boolean)m.invoke(p, args);
+
+
+        } catch(Exception e) {
+            Base.error(e);
+        }
+
+        return false;
+    }
+
+
     public static String parseString(String in, PropertyFile tokens, Sketch sketch) {
         int iStart;
         int iEnd;
@@ -2600,14 +2695,14 @@ public class Base {
             mid = out.substring(iStart + 2, iEnd);
 
             if(mid.indexOf(":") > -1) {
-                if (sketch != null) {
+         //       if (sketch != null) {
                     String command = mid.substring(0, mid.indexOf(":"));
                     String param = mid.substring(mid.indexOf(":") + 1);
 
-                    mid = sketch.runFunctionVariable(command, param);
-                } else {
-                    mid = "[context error]";
-                }
+                    mid = runFunctionVariable(sketch, command, param);
+//                } else {
+//                    mid = "[context error]";
+//                }
             } else {
                 String tmid = tokens.get(mid);
 
