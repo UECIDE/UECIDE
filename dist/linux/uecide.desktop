@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=UECIDE
+Comment=Universal Embedded Computing IDE
+Exec=/usr/bin/uecide
+Icon=uecide.png
+Terminal=false
+Type=Application
+Categories=Application;Development;Programming;
+StartupNotify=false
+MimeType=application/x-uecide
