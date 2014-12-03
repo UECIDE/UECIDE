@@ -2536,9 +2536,15 @@ public class Sketch implements MessageConsumer {
     public String parseString(String in) {
         PropertyFile tokens = mergeAllProperties();
 
-        tokens.set("compiler.root", getCompiler().getFolder().getAbsolutePath());
-        tokens.set("core.root", getCore().getFolder().getAbsolutePath());
-        tokens.set("board.root", getBoard().getFolder().getAbsolutePath());
+        if (getCompiler() != null) {
+            tokens.set("compiler.root", getCompiler().getFolder().getAbsolutePath());
+        }
+        if (getCore() != null) {
+            tokens.set("core.root", getCore().getFolder().getAbsolutePath());
+        }
+        if (getBoard() != null) {
+            tokens.set("board.root", getBoard().getFolder().getAbsolutePath());
+        }
         tokens.set("cache.root", getCacheFolder().getAbsolutePath());
         if(Base.preferences.getBoolean("export.verbose")) {
             tokens.set("verbose", tokens.get("upload." + getProgrammer() + ".verbose"));

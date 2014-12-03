@@ -4289,6 +4289,10 @@ System.err.println(sexy.length());
 
         if(rv == JFileChooser.APPROVE_OPTION) {
             String[] entries = getZipEntries(fc.getSelectedFile());
+            if (fc.getSelectedFile() == null) {
+                error("Open seems to have been cancelled. Aborting");
+                return;
+            }
             message("Analyzing " + fc.getSelectedFile().getName() + "...");
 
             // In a library we expect certain things to be in certain places.  That's only

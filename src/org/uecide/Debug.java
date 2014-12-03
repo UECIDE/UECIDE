@@ -192,6 +192,12 @@ public class Debug {
         String tag = caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): ";
 
         debugText.append(tag);
+
+        if (s == null) {
+            debugText.append("[null]\n");
+            return;
+        }
+
         debugText.append(s);
 
         if(verbose) System.out.print(tag + s);
