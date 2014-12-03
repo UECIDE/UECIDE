@@ -2954,6 +2954,7 @@ System.err.println(sexy.length());
         });
         fileMenu.add(item);
 
+
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_BOTTOM);
 
         item = new JMenuItem(Translate.t("Quit"));
@@ -2989,6 +2990,27 @@ System.err.println(sexy.length());
                 createNewSketchFile(e.getActionCommand());
             }
         };
+
+        item = new JMenuItem(Translate.t("Compile"));
+        item.setAccelerator(KeyStroke.getKeyStroke('R', modifiers));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                compile();
+            }
+        });
+        sketchMenu.add(item);
+        
+        item = new JMenuItem(Translate.t("Compile and Program"));
+        item.setAccelerator(KeyStroke.getKeyStroke('U', modifiers));
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                program();
+            }
+        });
+        sketchMenu.add(item);
+        
+        addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_TOP);
+        sketchMenu.addSeparator();
 
         submenu = new JMenu("Create new");
         item = new JMenuItem("Sketch file (.ino)");
@@ -3040,8 +3062,6 @@ System.err.println(sexy.length());
         sketchMenu.add(submenu);
 
 
-        addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_TOP);
-        sketchMenu.addSeparator();
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_MID);
         sketchMenu.addSeparator();
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_BOTTOM);
