@@ -464,6 +464,9 @@ public class SerialTerminal extends Plugin implements SerialPortEventListener,Me
                     return;
                 }
                 byte[] bytes = port.readBytes();
+                if (bytes == null) {
+                    return;
+                }
                 String s = "";
                 for (byte b : bytes) {
                     int i = ((int)b) & 0xFF;

@@ -2255,7 +2255,7 @@ public class Base {
         Thread thr = new Thread() {
             public void run() {
 
-                Editor.broadcast("&diams; Updating serial ports...");
+                Editor.bulletAll("Updating serial ports...");
 
                 Serial.updatePortList();
                 Serial.fillExtraPorts();
@@ -2266,7 +2266,7 @@ public class Base {
                 rescanBoards();
                 rescanPlugins();
                 rescanLibraries();
-                Editor.broadcast("&diams; Update complete.");
+                Editor.bulletAll("Update complete.");
                 Editor.updateAllEditors();
                 Editor.selectAllEditorBoards();
             }
@@ -2277,31 +2277,31 @@ public class Base {
     public static void rescanPlugins() {
         plugins = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
-        Editor.rawBroadcast("&diams; Scanning plugins...");
+        Editor.bulletAll("Scanning plugins...");
         loadPlugins();
     }
 
     public static void rescanThemes() {
-        Editor.rawBroadcast("&diams; Scanning themes...");
+        Editor.bulletAll("Scanning themes...");
         loadThemes();
         theme.fullyParseFile();
     }
     public static void rescanCompilers() {
         compilers = new TreeMap<String, Compiler>();
-        Editor.rawBroadcast("&diams; Scanning compilers...");
+        Editor.bulletAll("Scanning compilers...");
         loadCompilers();
     }
 
     public static void rescanCores() {
         cores = new TreeMap<String, Core>();
-        Editor.rawBroadcast("&diams; Scanning cores...");
+        Editor.bulletAll("Scanning cores...");
         loadCores();
     }
 
     public static void rescanBoards() {
         try {
             boards = new TreeMap<String, Board>();
-            Editor.rawBroadcast("&diams; Scanning boards...");
+            Editor.bulletAll("Scanning boards...");
             loadBoards();
             Editor.updateAllEditors();
             Editor.selectAllEditorBoards();
@@ -2311,7 +2311,7 @@ public class Base {
     }
 
     public static void rescanLibraries() {
-        Editor.rawBroadcast("&diams; Scanning libraries...");
+        Editor.bulletAll("Scanning libraries...");
         gatherLibraries();
     }
 

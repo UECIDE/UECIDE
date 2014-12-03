@@ -1,0 +1,3 @@
+DESTDIR?=/
+build:
+	ant 

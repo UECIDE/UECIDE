@@ -4133,6 +4133,18 @@ System.err.println(sexy.length());
         }
     }
 
+    public static void bulletAll(String msg) {
+        for (Editor e : editorList) {
+            e.bullet(msg);
+        }
+    }
+
+    public static void bullet2All(String msg) {
+        for (Editor e : editorList) {
+            e.bullet2(msg);
+        }
+    }
+
     public static void updateAllEditors() {
         for(Editor e : editorList) {
             e.updateAll();
