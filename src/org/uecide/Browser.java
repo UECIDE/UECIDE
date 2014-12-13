@@ -94,7 +94,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
         browserDoc = (HTMLDocument)editorKit.createDefaultDocument();
 
         refreshTheme();
-        editorKit.setStyleSheet(css);
+//        editorKit.setStyleSheet(css);
         setEditorKit(editorKit);
         navigate("/index.html");
     }
@@ -105,7 +105,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
 
         for (String t : tags) {
             String data = Base.theme.get(theme + "browser." + t, Base.theme.get("theme.default.browser." + t));
-            css.addRule(t + " {" + data + "}");
+            //css.addRule(t + " {" + data + "}");
         }
     }
 

@@ -436,6 +436,14 @@ public class Sketch implements MessageConsumer {
         if(editor != null) editor.updateAll();
     }
 
+    public String getProgramPort() {
+        String ip = getNetworkPortIP();
+        if (ip != null) {
+            return ip;
+        }
+        return getSerialPort();
+    }
+
     void attachToEditor(Editor e) {
         editor = e;
         editor.setTitle(Base.theme.get("product.cap") + " | " + sketchName);

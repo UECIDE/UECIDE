@@ -123,7 +123,7 @@ public class Editor extends JFrame {
     JScrollPane consoleScroll;
 
     JProgressBar statusProgress;
-    JLabel statusLabel;
+    JLabel statusText;
 
     JButton abortButton;
     JButton runButton;
@@ -374,14 +374,18 @@ System.err.println(sexy.length());
             }
         });
 
-        statusLabel = new JLabel("");
+        statusText = new JLabel("");
         statusProgress = new JProgressBar();
 
-        statusBar.add(statusLabel, BorderLayout.CENTER);
+        JPanel sp = new JPanel();
+
+        sp.add(statusText);
+
+        statusBar.add(sp, BorderLayout.WEST);
         statusBar.add(statusProgress, BorderLayout.EAST);
 
-        Font labelFont = statusLabel.getFont();
-        statusLabel.setFont(new Font(labelFont.getName(), Font.PLAIN, 12));
+        Font labelFont = statusText.getFont();
+        statusText.setFont(new Font(labelFont.getName(), Font.PLAIN, 12));
 
         String tbPos = Base.preferences.get("editor.toolbar.position");
 
@@ -2432,8 +2436,20 @@ System.err.println(sexy.length());
         statusProgress.setValue(x);
     }
 
-    public void setStatus(String s) {
-        statusLabel.setText(s);
+    public void setStatus() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("<html><b>Board: </b><i>");
+        sb.append((loadedSketch.getBoard() != null ? loadedSketch.getBoard() : "None"));
+        sb.append("</i> <b>Core: </b><i>");
+        sb.append((loadedSketch.getCore() != null ? loadedSketch.getCore() : "None"));
+        sb.append("</i> <b>Compiler: </b><i>");
+        sb.append((loadedSketch.getCompiler() != null ? loadedSketch.getCompiler() : "None"));
+        sb.append("</i> <b>Port: </b><i>");
+        sb.append((loadedSketch.getProgramPort() != null ? loadedSketch.getProgramPort() : "None"));
+        sb.append("</i></html>");
+        statusText.setText(sb.toString());
+        statusText.setOpaque(false);
     }
 
     public int openOrSelectFile(File sf) {
@@ -3557,24 +3573,10 @@ System.err.println(sexy.length());
         }
     }
 
-    public void updateStatus() {
-        StringBuilder statusInfo = new StringBuilder();
-
-        if(loadedSketch.getBoard() == null) {
-            setStatus("No board selected!");
-            return;
-        }
-
-
-        statusInfo.append(loadedSketch.getBoard().getDescription());
-
-        setStatus(statusInfo.toString());
-    }
-
     public void updateAll() {
         updateMenus();
         updateTree();
-        updateStatus();
+        setStatus();
     }
 
     public String getSerialPort() {
