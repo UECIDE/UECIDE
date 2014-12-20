@@ -1324,7 +1324,7 @@ public class Sketch implements MessageConsumer {
         try {
             for(File f : cleanedFiles.keySet()) {
                 if(FileType.getType(f) == FileType.SKETCH) {
-                    String ext = props.get("build.extension");
+                    String ext = parseString(props.get("build.extension"));
 
                     if(ext == null) {
                         ext = "cpp";
@@ -1344,19 +1344,20 @@ public class Sketch implements MessageConsumer {
 
                     if(props.get("core.header") != null) {
                         boolean gotHeader = false;
+                        String hdr = parseString(props.get("core.header"));
                         String[] lines = cleanedFiles.get(f).split("\n");
                         Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
                         for (String l : lines) {
                             Matcher m = inc.matcher(l);
                             if (m.find()) {
-                                if (m.group(1).equals(props.get("core.header"))) {
+                                if (m.group(1).equals(hdr)) {
                                     gotHeader = true;
                                 }
                             }
                         }
                         
                         if (!gotHeader) {
-                            pw.write("#include <" + props.get("core.header") + ">\n");
+                            pw.write("#include <" + hdr + ">\n");
                         }
                     }
 
@@ -1878,7 +1879,7 @@ public class Sketch implements MessageConsumer {
 
         for(String key : props.childKeysOf("compiler.library")) {
             String coreLibName = key.substring(17);
-            String libPaths = props.get(key);
+            String libPaths = parseString(props.get(key));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 String[] libPathsArray = libPaths.split("::");
@@ -1895,7 +1896,7 @@ public class Sketch implements MessageConsumer {
 
         for(String key : props.childKeysOf("core.library")) {
             String coreLibName = key.substring(13);
-            String libPaths = props.get(key);
+            String libPaths = parseString(props.get(key));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 String[] libPathsArray = libPaths.split("::");
@@ -1912,7 +1913,7 @@ public class Sketch implements MessageConsumer {
 
         for(String key : props.childKeysOf("board.library")) {
             String coreLibName = key.substring(14);
-            String libPaths = props.get(key);
+            String libPaths = parseString(props.get(key));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 String[] libPathsArray = libPaths.split("::");
@@ -2150,7 +2151,7 @@ public class Sketch implements MessageConsumer {
 
         for(String coreLibName : props.childKeysOf("compiler.library")) {
             ArrayList<File> files = new ArrayList<File>();
-            String libPaths = props.get("compiler.library." + coreLibName);
+            String libPaths = parseString(props.get("compiler.library." + coreLibName));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 libPaths = parseString(libPaths);
@@ -2170,7 +2171,7 @@ public class Sketch implements MessageConsumer {
 
         for(String coreLibName : props.childKeysOf("core.library")) {
             ArrayList<File> files = new ArrayList<File>();
-            String libPaths = props.get("core.library." + coreLibName);
+            String libPaths = parseString(props.get("core.library." + coreLibName));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 libPaths = parseString(libPaths);
@@ -2190,7 +2191,7 @@ public class Sketch implements MessageConsumer {
 
         for(String coreLibName : props.childKeysOf("board.library")) {
             ArrayList<File> files = new ArrayList<File>();
-            String libPaths = props.get("board.library." + coreLibName);
+            String libPaths = parseString(props.get("board.library." + coreLibName));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 libPaths = parseString(libPaths);
@@ -2543,6 +2544,9 @@ public class Sketch implements MessageConsumer {
 
     public String parseString(String in) {
         PropertyFile tokens = mergeAllProperties();
+        if (in == null) {
+            return null;
+        }
 
         if (getCompiler() != null) {
             tokens.set("compiler.root", getCompiler().getFolder().getAbsolutePath());
@@ -2620,7 +2624,7 @@ public class Sketch implements MessageConsumer {
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-        String objExt = props.get("compiler.object","o");
+        String objExt = parseString(props.get("compiler.object","o"));
         File dest = new File(buildFolder, fileName + "." +objExt);
         //File dest = new File(buildFolder, baseName + "." + objExt);
 
@@ -2705,8 +2709,8 @@ public class Sketch implements MessageConsumer {
 
     public boolean compileCore(ArrayList<File> core, String name) {
         PropertyFile props = mergeAllProperties();
-        String prefix = props.get("compiler.library.prefix","lib");
-        String suffix = props.get("compiler.library", "a");
+        String prefix = parseString(props.get("compiler.library.prefix","lib"));
+        String suffix = parseString(props.get("compiler.library", "a"));
         File archive = getCacheFile(prefix + name + "." + suffix);
 
         settings.put("library", archive.getAbsolutePath());
@@ -2761,8 +2765,8 @@ public class Sketch implements MessageConsumer {
 
     public String getArchiveName(Library lib) {
         PropertyFile props = mergeAllProperties();
-        String prefix = props.get("compiler.library.prefix","lib");
-        String suffix = props.get("compiler.library", "a");
+        String prefix = parseString(props.get("compiler.library.prefix","lib"));
+        String suffix = parseString(props.get("compiler.library", "a"));
         return prefix + lib.getLinkName() + "." + suffix;
     }
 
@@ -2848,7 +2852,7 @@ public class Sketch implements MessageConsumer {
         PropertyFile props = mergeAllProperties();
 
         settings.put("build.path", dest.getAbsolutePath());
-        String objExt = props.get("compiler.object","o");
+        String objExt = parseString(props.get("compiler.object","o"));
 
         for(File file : sources) {
             File objectFile = new File(dest, file.getName() + "." + objExt);
@@ -2894,7 +2898,7 @@ public class Sketch implements MessageConsumer {
         PropertyFile props = mergeAllProperties();
 
         settings.put("build.path", dest.getAbsolutePath());
-        String objExt = props.get("compiler.object","o");
+        String objExt = parseString(props.get("compiler.object","o"));
 
         for(File file : sSources) {
             String fileName = file.getName();
@@ -3007,7 +3011,7 @@ public class Sketch implements MessageConsumer {
             return null;
         }
 
-        String boardFiles = props.get("build.files");
+        String boardFiles = parseString(props.get("build.files"));
 
         if(boardFiles != null) {
             if(!boardFiles.equals("")) {
@@ -3238,7 +3242,7 @@ public class Sketch implements MessageConsumer {
 //            }
 //        }
 //
-        String env = props.get("environment");
+        String env = parseString(props.get("environment"));
 
         if(env != null) {
             for(String ev : env.split("::")) {
@@ -3572,7 +3576,7 @@ public class Sketch implements MessageConsumer {
         settings.put("filename", file);
 
         if (props.get("upload." + programmer + ".message") != null) {
-            message(props.get("upload." + programmer + ".message"));
+            message(parseString(props.get("upload." + programmer + ".message")));
         }
 
         if(props.get("upload." + programmer + ".using") != null) {
