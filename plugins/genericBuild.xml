@@ -109,11 +109,12 @@
             <zipgroupfileset dir="zipfix" includes="*.jar" />
             <manifest>
                 <attribute name="Version" value="${version}" />
-                <attribute name="Minimum-Version" value="0.8.6a" />
+                <attribute name="Minimum-Version" value="${version.minimum}" />
                 <attribute name="Compiled" value="${TODAY}" />
                 <attribute name="Author" value="Majenko Technologies" />
-                <attribute name="Main-Class" value="org.uecide.plugin.${project}"/>
+                <attribute name="Main-Class" value="org.uecide.plugin.${project}" />
                 <attribute name="Shortcut" value="-" />
+                <attribute name="Description" value="${description}" />
             </manifest>
         </jar>
     </target>

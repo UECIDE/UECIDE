@@ -1,0 +1,3 @@
+version=0.8.8a
+version.minimum=0.8.7z26
+description=Burn a bootloader onto a blank chip using a hardware programmer

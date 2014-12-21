@@ -1,2 +1,4 @@
 version=0.8.8c
+version.minimum=0.8.7a
 bundle=true
+description=The core plugin management system
