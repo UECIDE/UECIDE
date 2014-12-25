@@ -1598,7 +1598,15 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean upload() {
-        return programFile(getProgrammer(), sketchName);
+        PropertyFile props = mergeAllProperties();
+        if (props.get("upload.precmd") != null) {
+            executeKey("upload.precmd");
+        }
+        boolean ret = programFile(getProgrammer(), sketchName);
+        if (props.get("upload.postcmd") != null) {
+            executeKey("upload.postcmd");
+        }
+        return ret;
     }
 
     public boolean performSerialReset(boolean dtr, boolean rts, int speed) {
@@ -2219,6 +2227,11 @@ public class Sketch implements MessageConsumer {
         PropertyFile props = mergeAllProperties();
         clearLineComments();
 
+
+        if (props.get("compile.precmd") != null) {
+            executeKey("compile.precmd");
+        }
+
         if(editor != null) {
             for(int i = 0; i < editor.getTabCount(); i++) {
                 EditorBase eb = editor.getTab(i);
@@ -2424,6 +2437,9 @@ public class Sketch implements MessageConsumer {
             long endTime = System.currentTimeMillis();
             double compileTime = (double)(endTime - startTime) / 1000d;
             bullet("Compilation took " + compileTime + " seconds");
+        if (props.get("compile.postcmd") != null) {
+            executeKey("compile.postcmd");
+        }
         return true;
     }
 

@@ -3467,7 +3467,7 @@ System.err.println(sexy.length());
         Arrays.sort(cores);
 
         for(Core core : cores) {
-            JMenuItem item = new JRadioButtonMenuItem(core.getName());
+            JMenuItem item = new JRadioButtonMenuItem(core.toString());
             coreGroup.add(item);
 
             if(loadedSketch.getCore() != null) {
