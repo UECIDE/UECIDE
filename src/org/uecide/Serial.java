@@ -216,9 +216,27 @@ public class Serial {
             names = getPortListDefault();
         }
 
-        for(String p : extraPorts) {
-            if(names.indexOf(p) == -1) {
-                names.add(p);
+        if (Base.isUnix()) {
+            for(String p : extraPorts) {
+                if(names.indexOf(p) == -1) {
+                    File fp = new File(p);
+                    if (fp.exists()) {
+                        names.add(p);
+                        try {
+                            String dst = fp.getCanonicalPath();
+                            if (!dst.equals(p)) { // Sym link
+                                names.remove(dst);
+                            }
+                        } catch (IOException ex) {
+                        }
+                    }
+                }
+            }
+        } else {
+            for(String p : extraPorts) {
+                if(names.indexOf(p) == -1) {
+                    names.add(p);
+                }
             }
         }
 
@@ -284,6 +302,8 @@ public class Serial {
     static String getNameLinux(SerialPort port) {
         try {
             String pn = port.getPortName();
+            File f = new File(pn);
+            pn = f.getCanonicalPath();
             pn = pn.substring(pn.lastIndexOf("/") + 1);
 
             File classFolder = new File("/sys/class/tty", pn);
