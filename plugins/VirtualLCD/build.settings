@@ -1,0 +1,4 @@
+version=0.8.8a
+version.minimum=0.8.7a
+bundle=false
+description=Virtual LCD screen
