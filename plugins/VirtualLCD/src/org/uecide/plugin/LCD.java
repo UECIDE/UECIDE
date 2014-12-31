@@ -25,8 +25,8 @@ public class LCD extends JComponent
     byte[] screenData;
     
 
-    Color bg = new Color(30, 30, 255);
-    Color fg = new Color(200, 200, 255);
+    Color bg = new Color(0, 0, 0);
+    Color fg = new Color(255, 255, 255);
 
     int lcd_width = 248;
     int lcd_height = 64;
@@ -38,9 +38,6 @@ public class LCD extends JComponent
         lcd_height = h;
         lcd_bytes = (w / 8) * h;
         screenData = new byte[lcd_bytes];
-        for (int i = 0; i < lcd_bytes; i++) {
-            screenData[i] = (byte)(Math.random() * 255.0);
-        }
     }
 
     public void paintComponent(Graphics screen) 
@@ -103,6 +100,24 @@ public class LCD extends JComponent
         for (int i = 0; i < len; i++) {
             screenData[i] = data[i];
         }
+        repaint();
+    }
+
+    public void setDimensions(Dimension size) {
+        lcd_width = size.width;
+        lcd_height = size.height;
+        lcd_bytes = (lcd_width / 8) * lcd_height;
+        screenData = new byte[lcd_bytes];
+        repaint();
+    }
+
+    public void setBackground(int r, int g, int b) {
+        bg = new Color(r, g, b);
+        repaint();
+    }
+
+    public void setForeground(int r, int g, int b) {
+        fg = new Color(r, g, b);
         repaint();
     }
 }
