@@ -48,7 +48,7 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
 
         win = new JFrame(Translate.t("Virtual LCD"));
         win.getContentPane().setLayout(new BorderLayout());
-        win.setResizable(false);
+        win.setResizable(true);
 
         lcd = new LCD(248,64);
         win.add(lcd, BorderLayout.CENTER);
