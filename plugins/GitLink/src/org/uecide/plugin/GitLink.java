@@ -50,6 +50,7 @@ public class GitLink extends Plugin {
     public Repository localRepo = null;
     public Git git = null;
     public File dotGit = null;
+    public File repoRoot = null;
 
     public boolean hasRepo = false;
 
@@ -59,7 +60,7 @@ public class GitLink extends Plugin {
     }
 
     public String relative(File f) {
-        URI sketch = editor.getSketch().getFolder().toURI();
+        URI sketch = repoRoot.toURI();
         URI file = f.toURI();
         return sketch.relativize(file).getPath();
     }
@@ -79,6 +80,8 @@ public class GitLink extends Plugin {
                 dotGit = new File(here, ".git");
             }
 
+            repoRoot = here;
+
             localRepo = new FileRepository(dotGit);
             git = new Git(localRepo);
             hasRepo = true;
@@ -86,6 +89,7 @@ public class GitLink extends Plugin {
             Base.error(e);
             hasRepo = false;
             localRepo = null;
+            repoRoot = null;
         }
     }
 
@@ -276,7 +280,7 @@ public class GitLink extends Plugin {
                 treeWalk.addTree(tree);
                 treeWalk.setRecursive(true);
                 while (treeWalk.next()) {
-                    File target = new File(editor.getSketch().getFolder(), treeWalk.getPathString());
+                    File target = new File(repoRoot, treeWalk.getPathString());
                     if (target.equals(f)) {
                         return true;
                     }
@@ -767,31 +771,31 @@ public class GitLink extends Plugin {
                 Set<String> untracked = s.getUntracked();
 
                 for (String str : added) { 
-                    File file = new File(editor.getSketch().getFolder(), str);
+                    File file = new File(repoRoot, str);
                     ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-added.png");
                     iconCache.put(file, i);
                 }
                     
                 for (String str : changed) { 
-                    File file = new File(editor.getSketch().getFolder(), str);
+                    File file = new File(repoRoot, str);
                     ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-locally-modified-not-staged.png");
                     iconCache.put(file, i);
                 }
                     
                 for (String str : missing) { 
-                    File file = new File(editor.getSketch().getFolder(), str);
+                    File file = new File(repoRoot, str);
                     ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-locally-modified-not-staged.png");
                     iconCache.put(file, i);
                 }
                     
                 for (String str : modified) { 
-                    File file = new File(editor.getSketch().getFolder(), str);
+                    File file = new File(repoRoot, str);
                     ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-locally-modified.png");
                     iconCache.put(file, i);
                 }
                     
                 for (String str : untracked) { 
-                    File file = new File(editor.getSketch().getFolder(), str);
+                    File file = new File(repoRoot, str);
                     ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-conflicting.png");
                     iconCache.put(file, i);
                 }
