@@ -127,6 +127,17 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
     }
     
     public void addToolbarButtons(JToolBar toolbar, int flags) {
+        if (flags == Plugin.TOOLBAR_EDITOR) {
+            JButton b = new JButton(Base.loadIconFromResource("/org/uecide/plugin/VirtualLCD/22x22/lcd.png"));
+            b.setToolTipText("Virtual LCD");
+            b.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    run();
+                }
+            });
+            toolbar.add(b);
+        }
+
     }
 
     public static void populatePreferences(JPanel p) {
@@ -164,6 +175,8 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
     public final byte CMD_SET_FG = (byte)132;
     public final byte CMD_SET_PIX = (byte)133;
     public final byte CMD_CLR_PIX = (byte)134;
+    public final byte CMD_SET_LINE = (byte)135;
+    public final byte CMD_CLR_LINE = (byte)136;
 
     int nextByte = NEXT_NONE;
 
@@ -179,6 +192,10 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
         int px;
         int py;
         int pz;
+        int x0;
+        int x1;
+        int y0;
+        int y1;
         if (e.isRXCHAR()) {
             try {
                 if (port == null) {
@@ -235,6 +252,26 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
                                     py = commandStack.pop();
                                     px = commandStack.pop();
                                     lcd.setPixel(px, py, false);
+                                }
+                                commandStack.clear();
+                                break;
+                            case CMD_SET_LINE: // Draw a line
+                                if (commandStack.size() >= 4) {
+                                    y1 = commandStack.pop();
+                                    x1 = commandStack.pop();
+                                    y0 = commandStack.pop();
+                                    x0 = commandStack.pop();
+                                    drawLine(x0, y0, x1, y1, true);
+                                }
+                                commandStack.clear();
+                                break;
+                            case CMD_CLR_LINE: // Erase a line
+                                if (commandStack.size() >= 4) {
+                                    y1 = commandStack.pop();
+                                    x1 = commandStack.pop();
+                                    y0 = commandStack.pop();
+                                    x0 = commandStack.pop();
+                                    drawLine(x0, y0, x1, y1, false);
                                 }
                                 commandStack.clear();
                                 break;
@@ -305,5 +342,52 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
 
     public ImageIcon getFileIconOverlay(File f) { return null; }
 
+    public void drawLine(int x0, int y0, int x1, int y1, boolean onoff) {
+        boolean steep = Math.abs(y1 - y0) > Math.abs(x1 - x0);
+        if (steep) {
+            int t = x0;
+            x0 = y0;
+            y0 = t;
+            t = x1;
+            x1 = y1;
+            y1 = t;
+        }
+
+        if (x0 > x1) {
+            int t = x0;
+            x0 = x1;
+            x1 = t;
+            t = y0;
+            y0 = y1;
+            y1 = t;
+        }
+
+        int dx;
+        int dy;
+        dx = x1 - x0;
+        dy = Math.abs(y1 - y0);
+
+        int err = dx / 2;
+        int ystep;
+
+        if (y0 < y1) {
+            ystep = 1;
+        } else {
+            ystep = -1;
+        }
+
+        for (; x0 <= x1; x0++) {
+            if (steep) {
+                lcd.setPixel(y0, x0, onoff);
+            } else {
+                lcd.setPixel(x0, y0, onoff);
+            }
+            err -= dy;
+            if (err < 0) {
+                y0 += ystep;
+                err += dx;
+            }
+        }
+    }
 }
 

@@ -1,4 +1,4 @@
-version=0.8.8d
+version=0.8.8e
 version.minimum=0.8.7a
 bundle=false
 description=Virtual LCD screen
