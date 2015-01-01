@@ -66,16 +66,26 @@ public class GitLink extends Plugin {
 
     public void openRepo() {
         try {
-            dotGit = new File(editor.getSketch().getFolder(), ".git");
+            File here = editor.getSketch().getFolder();
+            dotGit = new File(here, ".git");
+
+            while (!dotGit.exists()) {
+                here = here.getParentFile();
+                if (here == null) {
+                    localRepo = null;
+                    hasRepo = false;
+                    return;
+                }
+                dotGit = new File(here, ".git");
+            }
+
             localRepo = new FileRepository(dotGit);
             git = new Git(localRepo);
-            if (!dotGit.exists() || !dotGit.isDirectory()) {
-                hasRepo = false;
-                return;
-            }
             hasRepo = true;
         } catch (Exception e) {
             Base.error(e);
+            hasRepo = false;
+            localRepo = null;
         }
     }
 
