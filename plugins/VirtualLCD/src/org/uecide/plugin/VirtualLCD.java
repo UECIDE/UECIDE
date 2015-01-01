@@ -63,13 +63,13 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
             }
         });
         Base.setIcon(win);
+        serialPort = editor.getSerialPort();
         win.setTitle(Translate.t("Virtual LCD") + " :: " + serialPort);
         win.setLocationRelativeTo(editor);
         win.pack();
         win.setVisible(true);
 
 
-        serialPort = editor.getSerialPort();
         
         try {
             Debug.message(this + ": Open port " + serialPort);
@@ -153,27 +153,32 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
     byte currentByte = 0;
     int bytepos = 0;
 
+    Stack<Integer> commandStack = new Stack<Integer>();
+
     public final int NEXT_NONE = 0;
-    public final int NEXT_XL = 1;
-    public final int NEXT_XH = 2;
-    public final int NEXT_YL = 3;
-    public final int NEXT_YH = 4;
-    public final int NEXT_BRL = 5;
-    public final int NEXT_BRH = 6;
-    public final int NEXT_BGL = 7;
-    public final int NEXT_BGH = 8;
-    public final int NEXT_BBL = 9;
-    public final int NEXT_BBH = 10;
-    public final int NEXT_FRL = 11;
-    public final int NEXT_FRH = 12;
-    public final int NEXT_FGL = 13;
-    public final int NEXT_FGH = 14;
-    public final int NEXT_FBL = 15;
-    public final int NEXT_FBH = 16;
+    public final int NEXT_PUSH_L = 1;
+    public final int NEXT_PUSH_H = 2;
+    public final byte CMD_PUSH = (byte)129;
+    public final byte CMD_SET_DIM = (byte)130;
+    public final byte CMD_SET_BG = (byte)131;
+    public final byte CMD_SET_FG = (byte)132;
+    public final byte CMD_SET_PIX = (byte)133;
+    public final byte CMD_CLR_PIX = (byte)134;
 
     int nextByte = NEXT_NONE;
 
+    int px = 0;
+    int py = 0;
+
+    int pushVal = 0;
+
     public void serialEvent(SerialPortEvent e) {
+        int red;
+        int green;
+        int blue;
+        int px;
+        int py;
+        int pz;
         if (e.isRXCHAR()) {
             try {
                 if (port == null) {
@@ -186,22 +191,54 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
                 for (byte b : bytes) {
                     if (((int)b & 0xFF) > 128) {
                         switch (b) {
-                            case (byte)129: nextByte = NEXT_XL; break;
-                            case (byte)130: nextByte = NEXT_XH; break;
-                            case (byte)131: nextByte = NEXT_YL; break;
-                            case (byte)132: nextByte = NEXT_YH; break;
-                            case (byte)133: nextByte = NEXT_BRL; break;
-                            case (byte)134: nextByte = NEXT_BRH; break;
-                            case (byte)135: nextByte = NEXT_BGL; break;
-                            case (byte)136: nextByte = NEXT_BGH; break;
-                            case (byte)137: nextByte = NEXT_BBL; break;
-                            case (byte)138: nextByte = NEXT_BBH; break;
-                            case (byte)139: nextByte = NEXT_FRL; break;
-                            case (byte)140: nextByte = NEXT_FRH; break;
-                            case (byte)141: nextByte = NEXT_FGL; break;
-                            case (byte)142: nextByte = NEXT_FGH; break;
-                            case (byte)143: nextByte = NEXT_FBL; break;
-                            case (byte)144: nextByte = NEXT_FBH; break;
+                            case CMD_PUSH: nextByte = NEXT_PUSH_L; break;
+                            case CMD_SET_DIM: // Set Dimensions
+                                if (commandStack.size() >= 2) {
+                                    size.height = commandStack.pop();
+                                    size.width = commandStack.pop();
+                                    size.height &= 0xFFF8;
+                                    size.width &= 0xFFF8;
+                                    data = new byte[size.width/8 * size.height];
+                                    lcd.setDimensions(size);
+                                    win.pack();
+                                }
+                                commandStack.clear();
+                                break;
+                            case CMD_SET_BG: // Set background
+                                if (commandStack.size() >= 3) {
+                                    blue = commandStack.pop();
+                                    green = commandStack.pop();
+                                    red = commandStack.pop();
+                                    lcd.setBackground(red, green, blue);
+                                }
+                                commandStack.clear();
+                                break;
+                            case CMD_SET_FG: // Set foreground
+                                if (commandStack.size() >= 3) {
+                                    blue = commandStack.pop();
+                                    green = commandStack.pop();
+                                    red = commandStack.pop();
+                                    lcd.setForeground(red, green, blue);
+                                }
+                                commandStack.clear();
+                                break;
+                            case CMD_SET_PIX: // Set pixel
+                                if (commandStack.size() >= 2) {
+                                    py = commandStack.pop();
+                                    px = commandStack.pop();
+                                    lcd.setPixel(px, py, true);
+                                }
+                                commandStack.clear();
+                                break;
+                            case CMD_CLR_PIX: // Clear pixel
+                                if (commandStack.size() >= 2) {
+                                    py = commandStack.pop();
+                                    px = commandStack.pop();
+                                    lcd.setPixel(px, py, false);
+                                }
+                                commandStack.clear();
+                                break;
+
                             default: nextByte = NEXT_NONE; break;
                         }
                         continue;
@@ -229,75 +266,14 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
                                 }
                             }
                             break;
-                        case NEXT_XL:
-                            size.width = ((b - 97));
-                            nextByte = NEXT_NONE;
+                        case NEXT_PUSH_L:
+                            pushVal = (((int)(b - 97)) & 0xF);
+                            nextByte = NEXT_PUSH_H;
                             break;
-                        case NEXT_XH:
-                            size.width |= ((b - 97) << 4);
+                        case NEXT_PUSH_H:
+                            pushVal |= ((((int)(b - 97)) & 0xF) << 4);
+                            commandStack.push(pushVal);
                             nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_YL:
-                            size.height = ((b - 97));
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_YH:
-                            size.height |= ((b - 97) << 4);
-                            nextByte = NEXT_NONE;
-                            data = new byte[size.width/8 * size.height];
-                            lcd.setDimensions(size);
-                            win.pack();
-                            System.err.print("New dimensions: " + size);
-                            break;
-                        case NEXT_BRL:
-                            col_r = ((b - 97));
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_BRH:
-                            col_r |= ((b - 97) << 4);
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_BGL:
-                            col_g = ((b - 97));
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_BGH:
-                            col_g |= ((b - 97) << 4);
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_BBL:
-                            col_b = ((b - 97));
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_BBH:
-                            col_b |= ((b - 97) << 4);
-                            nextByte = NEXT_NONE;
-                            lcd.setBackground(col_r, col_g, col_b);
-                            break;
-                        case NEXT_FRL:
-                            col_r = ((b - 97));
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_FRH:
-                            col_r |= ((b - 97) << 4);
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_FGL:
-                            col_g = ((b - 97));
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_FGH:
-                            col_g |= ((b - 97) << 4);
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_FBL:
-                            col_b = ((b - 97));
-                            nextByte = NEXT_NONE;
-                            break;
-                        case NEXT_FBH:
-                            col_b |= ((b - 97) << 4);
-                            nextByte = NEXT_NONE;
-                            lcd.setForeground(col_r, col_g, col_b);
                             break;
                     } 
                 }

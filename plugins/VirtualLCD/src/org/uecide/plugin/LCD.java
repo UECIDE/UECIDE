@@ -120,4 +120,18 @@ public class LCD extends JComponent
         fg = new Color(r, g, b);
         repaint();
     }
+
+    public void setPixel(int x, int y, boolean state) {
+        int offset = ((lcd_width * y) / 8) + (x / 8);
+        int bitpos = (x % 8);
+        if (offset >= lcd_bytes) {
+            return;
+        }
+        if (state) {
+            screenData[offset] |= (1<<bitpos);
+        } else {
+            screenData[offset] &= ~(1<<bitpos);
+        }
+        repaint();
+    }
 }
