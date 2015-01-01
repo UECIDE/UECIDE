@@ -276,7 +276,9 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
                                 commandStack.clear();
                                 break;
 
-                            default: nextByte = NEXT_NONE; break;
+                            default: 
+                                commandStack.clear();
+                                break;
                         }
                         continue;
                     }

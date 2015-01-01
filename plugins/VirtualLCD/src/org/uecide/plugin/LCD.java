@@ -87,7 +87,9 @@ public class LCD extends JComponent
     public Dimension getMaximumSize() { return new Dimension(lcd_width * 8, lcd_height * 8); }
 
     public void setByte(int offset, byte data) {
-        screenData[offset] = data;
+        if (offset < lcd_bytes) {
+            screenData[offset] = data;
+        }
         repaint();
     }
 
@@ -122,6 +124,9 @@ public class LCD extends JComponent
     }
 
     public void setPixel(int x, int y, boolean state) {
+        if ((x < 0) || (y < 0) || (x >= lcd_width) || (y >= lcd_height)) {
+            return;
+        }
         int offset = ((lcd_width * y) / 8) + (x / 8);
         int bitpos = 7 - (x % 8);
         if (offset >= lcd_bytes) {
