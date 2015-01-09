@@ -903,7 +903,7 @@ public class code extends JPanel implements EditorBase {
         Debug.message("I think I am saving to " + file.getAbsolutePath());
 
         try {
-            PrintWriter pw = new PrintWriter(file);
+            PrintWriter pw = new PrintWriter(file, "UTF-8");
             pw.write(textArea.getText());
             pw.close();
             setModified(false);
