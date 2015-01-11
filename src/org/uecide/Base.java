@@ -276,8 +276,6 @@ public class Base {
         theme = new Theme("/org/uecide/config/theme.txt");
         theme.setPlatformAutoOverride(true);
 
-        System.err.println("Loading " + theme.get("product") + "...");
-
         initPlatform();
 
         preferences = new PropertyFile(getSettingsFile("preferences.txt"), "/org/uecide/config/preferences.txt");
@@ -544,7 +542,6 @@ public class Base {
             }
         }
 
-        System.err.println("OS Version: " + getOSVersion());
         session.set("os.version", getOSVersion());
 
         if(headless) {
@@ -626,11 +623,16 @@ public class Base {
 
         if(e == null) {
             if(autoProgram) {
-                if(s.build()) {
-                    s.upload();
+                if(!s.build()) {
+                    System.exit(10);
+                }
+                if (!s.upload()) {
+                    System.exit(10);
                 }
             } else if(autoCompile) {
-                s.build();
+                if (!s.build()) {
+                    System.exit(10);
+                }
             }
         } else {
             if(autoProgram) {
