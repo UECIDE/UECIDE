@@ -4365,6 +4365,11 @@ public class Sketch implements MessageConsumer {
     public ImageIcon getIcon(int size) {
         ImageIcon i = null;
 
+        if (size == 16) {
+            i = getIcon();
+            if(i != null) return i;
+        }
+
         if(selectedBoard != null) {
             i = selectedBoard.getIcon(size);
 
@@ -4492,5 +4497,15 @@ public class Sketch implements MessageConsumer {
 
     public HashMap<String, Integer> getKeywords() {
         return keywords;
+    }
+
+    public ImageIcon getIcon() {
+        if ((configFile.get("icon") != null) && !(configFile.get("icon").equals(""))) {
+            File iconFile = new File(sketchFolder, configFile.get("icon"));
+            if (iconFile.exists()) {
+                return Base.loadIconFromFile(iconFile);
+            }
+        }
+        return null;
     }
 }

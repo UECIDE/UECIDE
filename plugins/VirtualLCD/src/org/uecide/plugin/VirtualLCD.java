@@ -21,7 +21,7 @@ import jssc.*;
 import say.swing.*;
 
 
-public class VirtualLCD extends Plugin implements SerialPortEventListener,MessageConsumer
+public class VirtualLCD extends Plugin implements SerialPortEventListener
 {
     public static HashMap<String, String> pluginInfo = null;
     public static void setInfo(HashMap<String, String>info) { pluginInfo = info; }
@@ -51,7 +51,7 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
             close();
         }
 
-        win = new JFrame(Translate.t("Virtual LCD"));
+        win = new JFrame("Virtual LCD");
         win.getContentPane().setLayout(new BorderLayout());
         win.setResizable(true);
         lcd = new LCD(size.width,size.height);
@@ -64,7 +64,7 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
         });
         Base.setIcon(win);
         serialPort = editor.getSerialPort();
-        win.setTitle(Translate.t("Virtual LCD") + " :: " + serialPort);
+        win.setTitle("Virtual LCD" + " :: " + serialPort);
         win.setLocationRelativeTo(editor);
         win.pack();
         win.setVisible(true);
@@ -72,12 +72,16 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
 
         
         try {
-            Debug.message(this + ": Open port " + serialPort);
             port = Serial.requestPort(serialPort, 115200);
             if (port == null) {
                 editor.error("Unable to open serial port");
                 return;
             }
+            port.setDTR(true);
+            port.setRTS(true);
+            Thread.sleep(500);
+            port.setDTR(false);
+            port.setRTS(false);
                 
         } catch(Exception e) {
             editor.error("Unable to open serial port:");
@@ -104,28 +108,11 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener,Messag
             port = null;
         }
         win.dispose();
-        Debug.message(this + ": Closing serial terminal on port " + serialPort);
     }
 
     public void warning(String m) { editor.warning(m); }
     public void error(String m) { editor.error(m); }
 
-    public void message(String m) {
-        if (port == null) {
-            win.setVisible(false);
-            return;
-        }
-        if (Base.preferences.getBoolean("serial.autocr_out")) {
-            m = m.replace("\n", "\r\n");
-        }
-
-        try {
-            port.writeString(m);
-        } catch (Exception e) {
-            Base.error(e);
-        }
-    }
-    
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == Plugin.TOOLBAR_EDITOR) {
             JButton b = new JButton(Base.loadIconFromResource("/org/uecide/plugin/VirtualLCD/22x22/lcd.png"));

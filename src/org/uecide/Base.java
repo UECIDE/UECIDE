@@ -2319,6 +2319,10 @@ public class Base {
         Editor.updateLookAndFeel();
     }
 
+    public static ImageIcon loadIconFromFile(File f) {
+        return new ImageIcon(f.getAbsolutePath());
+    }
+
     public static ImageIcon loadIconFromResource(String res, URLClassLoader loader) {
         URL loc = loader.getResource(res);
 

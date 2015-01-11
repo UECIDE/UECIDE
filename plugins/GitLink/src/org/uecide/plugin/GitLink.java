@@ -281,8 +281,10 @@ public class GitLink extends Plugin {
                 treeWalk.setRecursive(true);
                 while (treeWalk.next()) {
                     File target = new File(repoRoot, treeWalk.getPathString());
-                    if (target.equals(f)) {
-                        return true;
+                    if ((target != null) && (f != null)) {
+                        if (target.equals(f)) {
+                            return true;
+                        }
                     }
                 }
             }

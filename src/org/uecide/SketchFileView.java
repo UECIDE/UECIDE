@@ -50,6 +50,13 @@ import javax.imageio.*;
 public class SketchFileView extends javax.swing.filechooser.FileView {
     public String getTypeDescription(File f) {
         if(Base.isSketchFolder(f)) {
+            File sketchConfigFile = new File(f, "sketch.cfg");
+            if (sketchConfigFile.exists()) {
+                PropertyFile sketchConfig = new PropertyFile(sketchConfigFile);
+                if ((sketchConfig.get("summary") != null) && !(sketchConfig.get("summary").equals(""))) {
+                    return sketchConfig.get("summary");
+                }
+            }
             return Translate.t("UECIDE Sketch Folder");
         }
 
@@ -66,8 +73,17 @@ public class SketchFileView extends javax.swing.filechooser.FileView {
 
     public Icon getIcon(File f) {
         if(Base.isSketchFolder(f)) {
-            ImageIcon icon = Base.loadIconFromResource("icon16.png");
-            return icon;
+            File sketchConfigFile = new File(f, "sketch.cfg");
+            if (sketchConfigFile.exists()) {
+                PropertyFile sketchConfig = new PropertyFile(sketchConfigFile);
+                if (sketchConfig.get("icon") != null) {
+                    File iconFile = new File(f, sketchConfig.get("icon"));
+                    if (iconFile.exists()) {
+                        return Base.loadIconFromFile(iconFile);
+                    }
+                }
+            }
+            return Base.loadIconFromResource("icon16.png");
         }
 
         return null;
