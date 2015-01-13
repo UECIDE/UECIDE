@@ -82,7 +82,7 @@ public class TabLabel extends JPanel {
 
         JLabel blab = new JLabel();
         nameLabel.setOpaque(false);
-        blab.setIcon(Base.loadIconFromResource("tabs/close.png"));
+        blab.setIcon(Base.getIcon("actions", "close", 16));
 
         blab.addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {

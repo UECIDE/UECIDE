@@ -2227,6 +2227,9 @@ public class Sketch implements MessageConsumer {
         PropertyFile props = mergeAllProperties();
         clearLineComments();
 
+        if (props.getBoolean("purge")) {
+            doPrePurge = true;
+        }
 
         if (props.get("compile.precmd") != null) {
             executeKey("compile.precmd");
@@ -3736,7 +3739,7 @@ public class Sketch implements MessageConsumer {
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
                             eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(theme + "editor.compile.error.bgcolor"));
-                            eb.flagLine(errorLineNumber - 1, Base.loadIconFromResource("files/flag-red.png"), 0x1000);
+                            eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "fixme", 16), 0x1000);
                         }
 
                         link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Error at line " + errorLineNumber + " in file " + errorFile.getName());
@@ -3765,7 +3768,7 @@ public class Sketch implements MessageConsumer {
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
                             eb.highlightLine(warningLineNumber - 1, Base.theme.getColor(theme + "editor.compile.warning.bgcolor"));
-                            eb.flagLine(warningLineNumber - 1, Base.loadIconFromResource("files/flag-yellow.png"), 0x1001);
+                            eb.flagLine(warningLineNumber - 1, Base.getIcon("flags", "todo", 16), 0x1001);
                         }
 
                         setLineComment(warningFile, warningLineNumber, wMat.group(wMessage));

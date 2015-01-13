@@ -107,7 +107,7 @@ public class code extends JPanel implements EditorBase {
 
     public void openFindPanel() {
         if(findPanel == null) {
-            ImageIcon closeIcon = Base.loadIconFromResource("tabs/close.png");
+            ImageIcon closeIcon = Base.getIcon("actions", "close", 16);
             findCloseButton = new JButton(closeIcon);
             findCloseButton.setBorder(new EmptyBorder(0, 2, 0, 2));
             findCloseButton.setContentAreaFilled(false);
@@ -275,44 +275,44 @@ public class code extends JPanel implements EditorBase {
         toolbar.setVisible(!Base.preferences.getBoolean("editor.subtoolbar.hidden"));
         this.add(toolbar, BorderLayout.NORTH);
 
-        Editor.addToolbarButton(toolbar, "toolbar/edit-copy.png", "Copy", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "copy", "Copy", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.copy();
             }
         });
-        Editor.addToolbarButton(toolbar, "toolbar/edit-cut.png", "Cut", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "cut", "Cut", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.cut();
             }
         });
 
-        Editor.addToolbarButton(toolbar, "toolbar/edit-paste.png", "Paste", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "paste", "Paste", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.paste();
             }
         });
 
         toolbar.addSeparator();
-        Editor.addToolbarButton(toolbar, "toolbar/edit-undo.png", "Undo", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "undo", "Undo", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.undoLastAction();
             }
         });
 
-        JButton redoButton = Editor.addToolbarButton(toolbar, "toolbar/edit-redo.png", "Redo", new ActionListener() {
+        JButton redoButton = Editor.addToolbarButton(toolbar, "actions", "redo", "Redo", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.redoLastAction();
             }
         });
 
         toolbar.addSeparator();
-        JButton indentButton = Editor.addToolbarButton(toolbar, "toolbar/format-indent-more.png", "Increase Indent");
+        JButton indentButton = Editor.addToolbarButton(toolbar, "actions", "indent-more", "Increase Indent");
         indentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 increaseIndent(e);
             }
         });
-        JButton outdentButton = Editor.addToolbarButton(toolbar, "toolbar/format-indent-less.png", "Decrease Indent");
+        JButton outdentButton = Editor.addToolbarButton(toolbar, "actions", "indent-less", "Decrease Indent");
         outdentButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 decreaseIndent(e);

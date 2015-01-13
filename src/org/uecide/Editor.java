@@ -408,7 +408,7 @@ System.err.println(sexy.length());
 
         this.add(statusBar, BorderLayout.SOUTH);
 
-        JButton refreshButton = Editor.addToolbarButton(treeToolBar, "toolbar/refresh.png", "Refresh Project Tree", new ActionListener() {
+        JButton refreshButton = Editor.addToolbarButton(treeToolBar, "actions", "refresh", "Refresh Project Tree", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 loadedSketch.rescanFileTree();
                 updateTree();
@@ -416,7 +416,7 @@ System.err.println(sexy.length());
         });
         treeToolBar.add(refreshButton);
 
-        JButton projectSearchButton = Editor.addToolbarButton(treeToolBar, "toolbar/edit-find-project.png", "Search entire project", new ActionListener() {
+        JButton projectSearchButton = Editor.addToolbarButton(treeToolBar, "actions", "search", "Search entire project", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new ProjectSearch(Editor.this);
             }
@@ -444,19 +444,19 @@ System.err.println(sexy.length());
 
         File themeFolder = Base.getContentFile("lib/theme");
 
-        abortButton = Editor.addToolbarButton(toolbar, "toolbar/stop.png", "Abort", new ActionListener() {
+        abortButton = Editor.addToolbarButton(toolbar, "actions", "cancel", "Abort", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 abortCompilation();
             }
         });
         abortButton.setVisible(false);
-        runButton = Editor.addToolbarButton(toolbar, "toolbar/run.png", "Compile", new ActionListener() {
+        runButton = Editor.addToolbarButton(toolbar, "actions", "run", "Compile", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 compile();
             }
         });
 
-        programButton = Editor.addToolbarButton(toolbar, "toolbar/burn.png", "Program", new ActionListener() {
+        programButton = Editor.addToolbarButton(toolbar, "actions", "program", "Program", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 program();
             }
@@ -464,19 +464,19 @@ System.err.println(sexy.length());
 
         toolbar.addSeparator();
 
-        Editor.addToolbarButton(toolbar, "toolbar/new.png", "New Sketch", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "new", "New Sketch", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.handleNew();
             }
         });
 
-        Editor.addToolbarButton(toolbar, "toolbar/open.png", "Open Sketch", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "open", "Open Sketch", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleOpenPrompt();
             }
         });
 
-        Editor.addToolbarButton(toolbar, "toolbar/save.png", "Save Sketch", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "save", "Save Sketch", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveAllTabs();
             }
@@ -487,7 +487,7 @@ System.err.println(sexy.length());
         addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
 
         toolbar.addSeparator();
-        Editor.addToolbarButton(toolbar, "toolbar/manual.png", "Manual", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "apps", "manual", "Manual", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (manualScroll.isVisible()) {
                     hideManual();
@@ -666,13 +666,13 @@ System.err.println(sexy.length());
 
                     JLabel text = new JLabel(ent.toString());
                     if (ent.getColor() == FlaggedList.Red) {
-                        icon = Base.loadIconFromResource("files/flag-red.png");
+                        icon = Base.getIcon("flags", "fixme", 16);
                     } else if (ent.getColor() == FlaggedList.Green) {
-                        icon = Base.loadIconFromResource("files/flag-green.png");
+                        icon = Base.getIcon("flags", "note", 16);
                     } else if (ent.getColor() == FlaggedList.Yellow) {
-                        icon = Base.loadIconFromResource("files/flag-yellow.png");
+                        icon = Base.getIcon("flags", "todo", 16);
                     } else if (ent.getColor() == FlaggedList.Blue) {
-                        icon = Base.loadIconFromResource("files/flag-blue.png");
+                        icon = Base.getIcon("flags", "info", 16);
                     }
 
                     text.setBorder(paddingBorder);
@@ -704,7 +704,7 @@ System.err.println(sexy.length());
                     TodoEntry ent = (TodoEntry)userObject;
 
                     JLabel text = new JLabel(ent.toString());
-                    icon = Base.loadIconFromResource("files/todo.png");
+                    icon = Base.getIcon("bookmarks", "todo", 16);
                     text.setBorder(paddingBorder);
 
                     if(selected) {
@@ -733,7 +733,7 @@ System.err.println(sexy.length());
                 if(userObject instanceof FunctionBookmark) {
                     FunctionBookmark bm = (FunctionBookmark)userObject;
                     JLabel text = new JLabel(bm.formatted());
-                    icon = Base.loadIconFromResource("files/function.png");
+                    icon = Base.getIcon("bookmarks", "function", 16);
                     text.setBorder(paddingBorder);
 
                     if(selected) {
@@ -765,12 +765,12 @@ System.err.println(sexy.length());
 
                     if(file.isDirectory()) {
                         if(expanded) {
-                            icon = Base.loadIconFromResource("files/folder-open.png");
+                            icon = Base.getIcon("bookmarks", "folder-open", 16);
                         } else {
-                            icon = Base.loadIconFromResource("files/folder.png");
+                            icon = Base.getIcon("bookmarks", "folder", 16);
                         }
                     } else {
-                        OverlayIcon oicon = new OverlayIcon(Base.loadIconFromResource(FileType.getIcon(file)));
+                        OverlayIcon oicon = new OverlayIcon(Base.getIcon("mime", FileType.getIcon(file), 16));
 
                         for(Plugin plugin : plugins) {
                             try {
@@ -816,9 +816,13 @@ System.err.println(sexy.length());
                     int pct = lib.getCompiledPercent();
 
                     if(loadedSketch.libraryIsCompiled(lib) && (pct >= 100 || pct <= 0)) {
-                        icon = Base.loadIconFromResource("files/library-good.png");
+                        icon = Base.getIcon("bookmarks", "library-good", 16);
                     } else {
-                        icon = Base.loadIconFromResource("files/library-bad.png");
+                        if (pct >= 50) {
+                            icon = Base.getIcon("bookmarks", "library-semi", 16);
+                        } else {
+                            icon = Base.getIcon("bookmarks", "library-bad", 16);
+                        }
                     }
 
                     container.setOpaque(false);
@@ -888,9 +892,9 @@ System.err.println(sexy.length());
                 JLabel text = new JLabel(userObject.toString());
 
                 if(expanded) {
-                    icon = Base.loadIconFromResource("files/folder-open.png");
+                    icon = Base.getIcon("bookmarks", "folder-open", 16);
                 } else {
-                    icon = Base.loadIconFromResource("files/folder.png");
+                    icon = Base.getIcon("bookmarks", "folder", 16);
                 }
 
                 text.setBorder(paddingBorder);
@@ -1393,15 +1397,21 @@ System.err.println(sexy.length());
 
                                 for (TodoEntry ent : todo) {
                                     DefaultMutableTreeNode tent = new DefaultMutableTreeNode(ent);
-                                    if (eb != null) {
-                                        eb.flagLine(ent.getLine(), Base.loadIconFromResource("files/flag-blue.png"), 0x2000);
-                                    }
                                     if (ent.getType() == TodoEntry.Note) {
                                         noteEntries.add(tent);
+                                        if (eb != null) {
+                                            eb.flagLine(ent.getLine(), Base.getIcon("flags", "note", 16), 0x2000);
+                                        }
                                     } else if (ent.getType() == TodoEntry.Todo) {
                                         todoEntries.add(tent);
+                                        if (eb != null) {
+                                            eb.flagLine(ent.getLine(), Base.getIcon("flags", "todo", 16), 0x2000);
+                                        }
                                     } else if (ent.getType() == TodoEntry.Fixme) {
                                         fixmeEntries.add(tent);
+                                        if (eb != null) {
+                                            eb.flagLine(ent.getLine(), Base.getIcon("flags", "fixme", 16), 0x2000);
+                                        }
                                     }
                                 }
                                 if (noteEntries.getChildCount() > 0) {
@@ -2464,7 +2474,7 @@ System.err.println(sexy.length());
     }
 
     public static JButton addToolbarButton(JToolBar tb, String path, String tooltip) {
-        return addToolbarButton(tb, path, tooltip, null);
+        return addToolbarButton(tb, path, tooltip, (ActionListener)null);
     }
 
     public static JButton addToolbarButton(JToolBar tb, String path, String tooltip, ActionListener al) {
@@ -2476,22 +2486,23 @@ System.err.println(sexy.length());
             button.addActionListener(al);
         }
 
-//        button.setBorderPainted(false);
-        /*
-                button.addMouseListener(new MouseListener() {
-                    public void mouseEntered(MouseEvent e) {
-                        ((JButton)(e.getComponent())).setBackground(UIManager.getColor("control").brighter());
-                        ((JButton)(e.getComponent())).setOpaque(true);
-                    }
-                    public void mouseExited(MouseEvent e) {
-                        ((JButton)(e.getComponent())).setBackground(UIManager.getColor("control"));
-                        ((JButton)(e.getComponent())).setOpaque(false);
-                    }
-                    public void mousePressed(MouseEvent e) {}
-                    public void mouseReleased(MouseEvent e) {}
-                    public void mouseClicked(MouseEvent e) {}
-                });
-        */
+        tb.add(button);
+        return button;
+    }
+
+    public static JButton addToolbarButton(JToolBar tb, String cat, String name, String tooltip) {
+        return addToolbarButton(tb, cat, name, tooltip, (ActionListener)null);
+    }
+
+    public static JButton addToolbarButton(JToolBar tb, String cat, String name, String tooltip, ActionListener al) {
+        ImageIcon buttonIcon = Base.getIcon(cat, name, 22);
+        JButton button = new JButton(buttonIcon);
+        button.setToolTipText(tooltip);
+
+        if(al != null) {
+            button.addActionListener(al);
+        }
+
         tb.add(button);
         return button;
     }

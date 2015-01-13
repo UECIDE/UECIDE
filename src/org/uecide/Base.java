@@ -84,6 +84,8 @@ public class Base {
     public static int BUILDNO = 0;
     public static String BUILDER = "";
 
+    public static String iconSet = "default";
+
     public static String overrideSettingsFolder = null;
 
     public static ArrayList<Process> processes = new ArrayList<Process>();
@@ -196,6 +198,9 @@ public class Base {
     public static String presetCore = null;
     public static String presetProgrammer = null;
 
+    public static boolean cleanBuild = false;
+    public static boolean purgeCache = false;
+
     public static boolean extraDebug = false;
 
     /*! The constructor is the main execution routine. */
@@ -207,6 +212,7 @@ public class Base {
         cli.addParameter("headless", "", Boolean.class, "Enable headless operation");
         cli.addParameter("datadir", "location", String.class, "Specify location for plugins and data");
         cli.addParameter("last-sketch", "", Boolean.class, "Automatically load last used sketch");
+        cli.addParameter("clean", "", Boolean.class, "Clean the build folder");
         cli.addParameter("compile", "", Boolean.class, "Immediately compile loaded sketch");
         cli.addParameter("upload", "", Boolean.class, "Immediately compile and upload loaded sketch");
         cli.addParameter("board", "name", String.class, "Select specific board");
@@ -214,6 +220,7 @@ public class Base {
         cli.addParameter("compiler", "name", String.class, "Select specific compiler");
         cli.addParameter("port", "name", String.class, "Select specific serial port");
         cli.addParameter("programmer", "name", String.class, "Select specific programmer");
+        cli.addParameter("purge", "", Boolean.class, "Purge the cache files");
         cli.addParameter("help", "", Boolean.class, "This help text");
 
         cli.process(args);
@@ -234,6 +241,8 @@ public class Base {
         presetCore = cli.getString("core");
         presetCompiler = cli.getString("compiler");
         presetProgrammer = cli.getString("programmer");
+        purgeCache = cli.isSet("purge");
+        cleanBuild = cli.isSet("clean");
 
 
         if(!cli.isSet("exceptions")) {
@@ -504,7 +513,7 @@ public class Base {
         }
 
         // Create a new empty window (will be replaced with any files to be opened)
-        if(!opened) {
+        if(!opened && !headless) {
             handleNew();
         }
 
@@ -619,6 +628,14 @@ public class Base {
 
         if(presetProgrammer != null) {
             s.setProgrammer(presetProgrammer);
+        }
+
+        if (purgeCache) {
+            s.purgeCache();
+        }
+
+        if (cleanBuild) {
+            s.purgeBuildFiles();
         }
 
         if(e == null) {
@@ -2458,15 +2475,11 @@ public class Base {
         Base.preferences.setInteger("version.lastcheck", time);
 
         if(Base.preferences.getBoolean("version.check")) {
-            System.err.println("Testing for newer version.");
-            System.err.println("My version: " + systemVersion);
             Version newVersion = getLatestVersion();
 
             if(newVersion == null) {
                 return false;
             }
-
-            System.err.println("Current version: " + newVersion);
 
             if(newVersion.compareTo(systemVersion) > 0) {
                 return true;
@@ -2771,6 +2784,27 @@ public class Base {
         } catch (IOException ex) {
         }
         return "";
+    }
+
+    public static ImageIcon getIcon(String category, String name, int size) {
+
+        URL loc = Base.class.getResource("/org/uecide/icons/" + iconSet + "/" + size + "x" + size + "/" + category + "/" + name + ".png");
+        if(loc == null) {
+            loc = Base.class.getResource("/org/uecide/icons/default/" + size + "x" + size + "/" + category + "/" + name + ".png");
+        }
+        if(loc == null) {
+            loc = Base.class.getResource("/org/uecide/icons/default/" + size + "x" + size + "/actions/unknown.png");
+        }
+
+        return new ImageIcon(loc);
+    }
+
+    public static void setIconSet(String name) {
+        iconSet = name;
+    }
+
+    public static String getIconSet() {
+        return iconSet;
     }
 
 }
