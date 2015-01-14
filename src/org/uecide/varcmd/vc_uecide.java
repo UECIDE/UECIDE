@@ -2,6 +2,7 @@ package org.uecide.varcmd;
 
 import org.uecide.*;
 import java.io.File;
+import java.util.UUID;
 
 public class vc_uecide implements VariableCommand {
     public String main(Sketch sketch, String args) {
@@ -10,6 +11,9 @@ public class vc_uecide implements VariableCommand {
         }
         if (args.equals("version")) {
             return Base.systemVersion.toString();
+        }
+        if (args.equals("uuid")) {
+            return UUID.randomUUID().toString();
         }
         return "unknown";
     }
