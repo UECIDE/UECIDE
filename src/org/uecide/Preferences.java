@@ -133,6 +133,7 @@ public class Preferences {
 
     JComboBox selectedTheme;
     JComboBox selectedEditorTheme;
+    JComboBox selectedIconTheme;
     JCheckBox useSystemDecorator;
 
     JList extraPortList;
@@ -775,6 +776,19 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridy++;
+        c.gridwidth = 1;
+        label = new JLabel("Icon Theme:");
+        p.add(label, c);
+        c.gridwidth = 1;
+        c.gridx = 1;
+
+        selectedIconTheme = new JComboBox(Base.iconSets.keySet().toArray(new String[0]));
+        selectedIconTheme.setSelectedItem(Base.iconSet);
+
+        p.add(selectedIconTheme, c);
+
+        c.gridx = 0;
+        c.gridy++;
         c.gridwidth = 3;
         label = new JLabel("Sketchbook location:");
         p.add(label, c);
@@ -1248,6 +1262,9 @@ public class Preferences {
         Base.preferences.setBoolean("editor.showtabs", visibleTabs.isSelected());
         Base.preferences.set("editor.tabsize", tabSize.getText());
         Base.preferences.set("theme.selected", ((KVPair)selectedEditorTheme.getSelectedItem()).getKey());
+
+        Base.preferences.set("editor.icons", (String)selectedIconTheme.getSelectedItem());
+        Base.iconSet = (String)selectedIconTheme.getSelectedItem();
 
         File f = new File(sketchbookLocationField.getText());
 

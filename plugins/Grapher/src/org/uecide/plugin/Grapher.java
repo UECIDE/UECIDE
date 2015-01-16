@@ -309,14 +309,25 @@ public class Grapher extends Plugin implements SerialPortEventListener
     
     public void addToolbarButtons(JToolBar tb, int flags) {
         if (flags == Plugin.TOOLBAR_EDITOR) {
-            ImageIcon icon = Base.loadIconFromResource("/org/uecide/plugin/Grapher/grapher.png");
-            JButton btn = new JButton(icon);
-            btn.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    openMainWindow();
-                }
-            });
-            tb.add(btn);
+
+            Version iconTest = new Version("0.8.7z31");
+
+            if (Base.systemVersion.compareTo(iconTest) > 0) {
+                editor.addToolbarButton(tb, "apps", "grapher", "Grapher", new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        openMainWindow();
+                    }
+                });
+            } else {
+                ImageIcon icon = Base.loadIconFromResource("/org/uecide/plugin/Grapher/grapher.png");
+                JButton btn = new JButton(icon);
+                btn.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        openMainWindow();
+                    }
+                });
+                tb.add(btn);
+            }
         }
     }
 

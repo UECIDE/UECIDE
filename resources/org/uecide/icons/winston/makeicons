@@ -1,0 +1,14 @@
+#!/bin/bash
+
+for SUBD in 48x48/*; do
+    SUB=`basename ${SUBD}`
+    for ICON in 48x48/$SUB/*.png; do
+        NAME=`basename ${ICON} .png`
+        for SIZE in 32 24 16 8; do
+            mkdir -p ${SIZE}x${SIZE}/$SUB
+            NEW=${SIZE}x${SIZE}/$SUB/${NAME}.png
+            echo ${ICON} to ${NEW}
+            convert ${ICON} -resize ${SIZE} ${NEW}
+        done
+    done
+done

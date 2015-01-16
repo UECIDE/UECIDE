@@ -477,11 +477,8 @@ public class GitLink extends Plugin {
 
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == Plugin.TOOLBAR_EDITOR) {
-            toolbar.addSeparator();
-            hasFile(null);
-            pullButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/pull.png"));
-            pullButton.setToolTipText("Pull from remote repository");
-            pullButton.addActionListener(new ActionListener() {
+
+            ActionListener pullAction = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         if (localRepo == null) {
@@ -523,21 +520,16 @@ public class GitLink extends Plugin {
                                 }
                             });
                             menu.add(item);
-        
+
                             menu.show(pullButton, 0, size.height);
                         }
                     } catch (Exception ex) {
                         Base.error(ex);
                     }
                 }
-            });
-            toolbar.add(pullButton);
-            pullButton.setEnabled(hasRepo);
+            };
 
-
-            pushButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/push.png"));
-            pushButton.setToolTipText("Push to remote repository");
-            pushButton.addActionListener(new ActionListener() {
+            ActionListener pushAction = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         if (localRepo == null) {
@@ -579,31 +571,24 @@ public class GitLink extends Plugin {
                                 }
                             });
                             menu.add(item);
-        
+
                             menu.show(pushButton, 0, size.height);
                         }
                     } catch (Exception ex) {
                         Base.error(ex);
                     }
                 }
-            });
-            toolbar.add(pushButton);
-            pushButton.setEnabled(hasRepo);
+            };
 
-            commitButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/commit.png"));
-            commitButton.setToolTipText("Commit all changes");
-            commitButton.addActionListener(new ActionListener() {
+
+            ActionListener commitAction = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     commitAllUpdates();
                     editor.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 }
-            });
-            toolbar.add(commitButton);
-            commitButton.setEnabled(hasRepo);
+            };
 
-            branchButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/branch.png"));
-            branchButton.setToolTipText("Branch");
-            branchButton.addActionListener(new ActionListener() {
+            ActionListener branchAction = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         if (localRepo == null) {
@@ -697,7 +682,7 @@ public class GitLink extends Plugin {
                                     });
                                 }
                             }
-                            
+
                             menu.add(sub);
                             menu.show(branchButton, 0, size.height);
                         }
@@ -705,12 +690,45 @@ public class GitLink extends Plugin {
                         Base.error(ex);
                     }
                 }
- 
-            });
+            };
 
-            toolbar.add(branchButton);
+            toolbar.addSeparator();
+            hasFile(null);
+
+            Version iconTest = new Version("0.8.7z31");
+
+            if (Base.systemVersion.compareTo(iconTest) > 0) {
+                pullButton = editor.addToolbarButton(toolbar, "actions", "pull", "Pull from remote repository", pullAction);
+                pushButton = editor.addToolbarButton(toolbar, "actions", "push", "Push to remote repository", pushAction);
+                commitButton = editor.addToolbarButton(toolbar, "actions", "commit", "Commit all changes", commitAction);
+                branchButton = editor.addToolbarButton(toolbar, "actions", "branch", "Branch", branchAction);
+            } else {
+                pullButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/pull.png"));
+                pullButton.setToolTipText("Pull from remote repository");
+                pullButton.addActionListener(pullAction);
+                toolbar.add(pullButton);
+
+                pushButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/push.png"));
+                pushButton.setToolTipText("Push to remote repository");
+                pushButton.addActionListener(pushAction);
+                toolbar.add(pushButton);
+
+                commitButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/commit.png"));
+                commitButton.setToolTipText("Commit all changes");
+                commitButton.addActionListener(commitAction);
+                toolbar.add(commitButton);
+
+                branchButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/branch.png"));
+                branchButton.setToolTipText("Branch");
+                branchButton.addActionListener(branchAction);
+
+                toolbar.add(branchButton);
+
+            }
+            pullButton.setEnabled(hasRepo);
+            pushButton.setEnabled(hasRepo);
+            commitButton.setEnabled(hasRepo);
             branchButton.setEnabled(hasRepo);
-
             toolbar.addSeparator();
         }
     }

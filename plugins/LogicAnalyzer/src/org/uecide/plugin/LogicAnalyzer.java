@@ -57,6 +57,18 @@ public class LogicAnalyzer extends Plugin implements SerialPortEventListener, Mo
     }
 
     public void addToolbarButtons(JToolBar toolbar, int flags) {
+        if (flags == Plugin.TOOLBAR_EDITOR) {
+
+            Version iconTest = new Version("0.8.7z31");
+
+            if (Base.systemVersion.compareTo(iconTest) > 0) {
+                editor.addToolbarButton(toolbar, "apps", "logic", "Logic Analyzer", new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        openWindow();
+                    }
+                });
+            } 
+        }
     }
 
     public static void populatePreferences(JPanel p) {

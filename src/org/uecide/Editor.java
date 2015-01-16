@@ -2495,7 +2495,7 @@ System.err.println(sexy.length());
     }
 
     public static JButton addToolbarButton(JToolBar tb, String cat, String name, String tooltip, ActionListener al) {
-        ImageIcon buttonIcon = Base.getIcon(cat, name, 22);
+        ImageIcon buttonIcon = Base.getIcon(cat, name, 24);
         JButton button = new JButton(buttonIcon);
         button.setToolTipText(tooltip);
 

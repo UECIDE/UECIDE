@@ -74,7 +74,7 @@ public class TabLabel extends JPanel {
         name = sketchFile.getName();
         this.setLayout(new BorderLayout());
         nameLabel = new JLabel(name);
-        fileIcon = Base.loadIconFromResource(FileType.getIcon(sketchFile));
+        fileIcon = Base.getIcon("mime",(FileType.getIcon(sketchFile)), 16);
 
         if(fileIcon != null) {
             nameLabel.setIcon(fileIcon);

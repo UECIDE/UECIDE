@@ -125,19 +125,34 @@ public class AStyle extends Plugin {
 
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == TOOLBAR_TAB) {
-            JButton b = new JButton(Base.loadIconFromResource("/org/uecide/plugin/AStyle/astyle22.png"));
-            b.setToolTipText("Auto Format with Artistic Style");
-            b.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    int tn = editor.getActiveTab();
-                    if (tn == -1) {
-                        return;
+
+            Version iconTest = new Version("0.8.7z30");
+            if (Base.systemVersion.compareTo(iconTest) > 0) {
+                editor.addToolbarButton(toolbar, "apps", "astyle", "Auto Format with Artistic Style", new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        int tn = editor.getActiveTab();
+                        if (tn == -1) {
+                            return;
+                        }
+                        editorTab = editor.getTab(tn);
+                        run();
                     }
-                    editorTab = editor.getTab(tn);
-                    run();
-                }
-            });
-            toolbar.add(b);
+                });
+            } else {
+                JButton b = new JButton(Base.loadIconFromResource("/org/uecide/plugin/AStyle/astyle22.png"));
+                b.setToolTipText("Auto Format with Artistic Style");
+                b.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        int tn = editor.getActiveTab();
+                        if (tn == -1) {
+                            return;
+                        }
+                        editorTab = editor.getTab(tn);
+                        run();
+                    }
+                });
+                toolbar.add(b);
+            }
         }
     }
 

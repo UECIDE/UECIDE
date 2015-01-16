@@ -115,14 +115,24 @@ public class VirtualLCD extends Plugin implements SerialPortEventListener
 
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == Plugin.TOOLBAR_EDITOR) {
-            JButton b = new JButton(Base.loadIconFromResource("/org/uecide/plugin/VirtualLCD/22x22/lcd.png"));
-            b.setToolTipText("Virtual LCD");
-            b.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    run();
-                }
-            });
-            toolbar.add(b);
+            Version iconTest = new Version("0.8.7z31");
+
+            if (Base.systemVersion.compareTo(iconTest) > 0) {
+                editor.addToolbarButton(toolbar, "apps", "vlcd", "Virtual LCD", new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        run();
+                    }
+                });
+            } else {
+                JButton b = new JButton(Base.loadIconFromResource("/org/uecide/plugin/VirtualLCD/22x22/lcd.png"));
+                b.setToolTipText("Virtual LCD");
+                b.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        run();
+                    }
+                });
+                toolbar.add(b);
+            }
         }
 
     }

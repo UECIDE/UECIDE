@@ -79,12 +79,16 @@ import org.reflections.scanners.*;
  */
 public class Base {
 
+    public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
+
+    public static final String defaultIconSet = "Gnomic";
+
     public static int REVISION = 23;
     public static String RELEASE = "release";
     public static int BUILDNO = 0;
     public static String BUILDER = "";
 
-    public static String iconSet = "default";
+    public static String iconSet = defaultIconSet;
 
     public static String overrideSettingsFolder = null;
 
@@ -465,6 +469,16 @@ public class Base {
         if(!headless) splashScreen.setMessage("Loading Plugins...", 60);
 
         loadPlugins();
+
+        loadIconSets();
+
+        if (preferences.get("editor.icons") != null) {
+            if (iconSets.get(preferences.get("editor.icons")) == null) {
+                iconSet = defaultIconSet;
+            } else {
+                iconSet = preferences.get("editor.icons");
+            }
+        }
 
         if(!headless) splashScreen.setMessage("Loading Libraries...", 70);
 
@@ -2786,14 +2800,22 @@ public class Base {
         return "";
     }
 
+    public static String getIconsPath(String name) {
+        PropertyFile pf = iconSets.get(name);
+        return pf.get("path");
+    }
+
     public static ImageIcon getIcon(String category, String name, int size) {
 
-        URL loc = Base.class.getResource("/org/uecide/icons/" + iconSet + "/" + size + "x" + size + "/" + category + "/" + name + ".png");
+        String path = getIconsPath(iconSet);
+
+        URL loc = Base.class.getResource(path + "/" + size + "x" + size + "/" + category + "/" + name + ".png");
         if(loc == null) {
-            loc = Base.class.getResource("/org/uecide/icons/default/" + size + "x" + size + "/" + category + "/" + name + ".png");
+            path = getIconsPath(defaultIconSet);
+            loc = Base.class.getResource(path + "/" + size + "x" + size + "/" + category + "/" + name + ".png");
         }
         if(loc == null) {
-            loc = Base.class.getResource("/org/uecide/icons/default/" + size + "x" + size + "/actions/unknown.png");
+            loc = Base.class.getResource(path + "/" + size + "x" + size + "/actions/unknown.png");
         }
 
         return new ImageIcon(loc);
@@ -2805,6 +2827,27 @@ public class Base {
 
     public static String getIconSet() {
         return iconSet;
+    }
+
+    public static void loadIconSets() {
+        iconSets = new HashMap<String, PropertyFile>();
+
+        System.err.println("Loading icon sets...");      
+
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forPackage("org.uecide"))
+                .setScanners(new ResourcesScanner()));
+
+        Pattern pat = Pattern.compile(".*\\.icon");
+        Set<String> icons = reflections.getResources(pat);
+
+        for (String icon : icons) {
+            PropertyFile pf = new PropertyFile("/" + icon);
+            if (pf.get("name") != null) {
+                System.err.println("Icon file " + icon + " = " + pf.get("name"));
+                iconSets.put(pf.get("name"), pf);
+            }
+        }
     }
 
 }

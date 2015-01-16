@@ -1,4 +1,4 @@
-version=0.8.8c
+version=0.8.8e
 thirdparty.jars=https://repo.eclipse.org/content/groups/releases//org/eclipse/jgit/org.eclipse.jgit/3.4.1.201406201815-r/org.eclipse.jgit-3.4.1.201406201815-r.jar
-version.minimum=0.8.7a
+version.minimum=0.8.7z31
 description=Keep your precious sketch on Github.<br/>Check in changes, collaborate with others, etc.
