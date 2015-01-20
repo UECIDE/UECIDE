@@ -111,6 +111,11 @@ public class Library implements Comparable {
                 librariesFolder = new File(root, properties.get("libraries", "libraries"));
                 archFolder = null;
                 core = properties.get("core", "all");
+                if (properties.get("source") == null) {
+                    sourceFolder = root;
+                } else {
+                    sourceFolder = new File(root, properties.get("source"));
+                }
             } else {
                 utilityFolder = new File(root, "utility");
                 archFolder = null;
@@ -775,6 +780,13 @@ public class Library implements Comparable {
 
     public File getKeywords() {
         return new File(getFolder(), "keywords.txt");
+    }
+
+    public PropertyFile getProperties() {
+        if (properties != null) {
+            return properties;
+        }
+        return new PropertyFile();
     }
 }
 

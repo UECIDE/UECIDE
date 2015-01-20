@@ -2141,6 +2141,9 @@ public class Sketch implements MessageConsumer {
         String includeList = "";
 
         for(File f : includes) {
+            if (f == null) {
+                continue;
+            }
             String path = f.getAbsolutePath();
 
             if(!(includeList.equals(""))) {
@@ -2698,19 +2701,14 @@ public class Sketch implements MessageConsumer {
             String mainStub = parseString(props.get("compile.stub"));
             String[] bits = mainStub.split("::");
             for (String stubFile : bits) {
-                System.err.println("Compiling stub file: " + stubFile);
                 File mainStubFile = new File(stubFile);
                 if (mainStubFile.exists()) {
-                    System.err.println("File exists: " + mainStubFile.getAbsolutePath());
                     File mainStubObject = compileFile(mainStubFile);
                     File cachedStubObject = getCacheFile(mainStubObject.getName());
-                    System.err.println("Object is: " + mainStubObject.getAbsolutePath());
-                    System.err.println("Cache is: " + cachedStubObject.getAbsolutePath());
-                    if (!mainStubObject.exists()) {
-                        System.err.println("Cannot find object!");
+                    if (mainStubObject.exists()) {
+                        Base.copyFile(mainStubObject, cachedStubObject);
+                        mainStubObject.delete();
                     }
-                    Base.copyFile(mainStubObject, cachedStubObject);
-                    mainStubObject.delete();
                 }
             }
         }
@@ -3086,6 +3084,10 @@ public class Sketch implements MessageConsumer {
     static public ArrayList<File> findFilesInFolder(File sketchFolder,
             String extension, boolean recurse) {
         ArrayList<File> files = new ArrayList<File>();
+
+        if (sketchFolder == null) {
+            return files;
+        }
 
         if(sketchFolder.listFiles() == null)
             return files;
@@ -4036,8 +4038,21 @@ public class Sketch implements MessageConsumer {
         PropertyFile opts = Base.preferences.getChildren("board." + selectedBoard.getName() + ".options");
         String optval = opts.get(opt);
 
+
         if(optval == null) {
-            optval = props.get("options." + opt + ".default");
+            if (opt.contains("@")) {
+                String bits[] = opt.split("@");
+                String libLinkName = bits[0];
+                String libCatName = bits[1];
+                for(Library lib : importedLibraries.values()) {
+                    if (lib.getLinkName().equals(libLinkName)) {
+                        props = lib.getProperties();
+                        optval = props.get("options." + libCatName + ".default");
+                    }
+                }
+            } else {
+                optval = props.get("options." + opt + ".default");
+            }
         }
 
         return optval;
@@ -4048,8 +4063,22 @@ public class Sketch implements MessageConsumer {
         Base.preferences.set("board." + selectedBoard.getName() + ".options." + opt, val);
         Base.preferences.save();
 
-        if(props.getBoolean("options." + opt + ".purge")) {
-            needPurge();
+        if (opt.contains("@")) {
+            String bits[] = opt.split("@");
+            String libLinkName = bits[0];
+            String libCatName = bits[1];
+            for(Library lib : importedLibraries.values()) {
+                if (lib.getLinkName().equals(libLinkName)) {
+                    props = lib.getProperties();
+                    if (props.getBoolean("options." + libCatName + ".purge")) {
+                        needPurge();
+                    }
+                }
+            }
+        } else {
+            if(props.getBoolean("options." + opt + ".purge")) {
+                needPurge();
+            }
         }
     }
 
@@ -4064,25 +4093,59 @@ public class Sketch implements MessageConsumer {
             out.put(opt, optName);
         }
 
+        for(Library lib : importedLibraries.values()) {
+            props = lib.getProperties();
+            options = props.childKeysOf("options");
+            for (String opt : options) {
+                String optName = props.get("options." + opt + ".name");
+                out.put(lib.getLinkName() + "@" + opt, optName);
+            }
+        }
+
         return out;
     }
 
     public TreeMap<String, String> getOptionNames(String group) {
         TreeMap<String, String> out = new TreeMap<String, String>();
         PropertyFile props = mergeAllProperties();
-        PropertyFile opts = props.getChildren("options." + group);
 
-        for(String opt : opts.childKeys()) {
-            if(opt.equals("name")) continue;
+        if (group.contains("@")) {
+            String bits[] = group.split("@");
+            String libLinkName = bits[0];
+            String libCatName = bits[1];
+            for(Library lib : importedLibraries.values()) {
+                if (lib.getLinkName().equals(libLinkName)) {
+                    props = lib.getProperties();
+                    PropertyFile opts = props.getChildren("options." + libCatName);
+                    for (String opt : opts.childKeys()) {
+                        if(opt.equals("name")) continue;
 
-            if(opt.equals("default")) continue;
+                        if(opt.equals("default")) continue;
 
-            if(opt.equals("purge")) continue;
+                        if(opt.equals("purge")) continue;
 
-            String name = opts.get(opt + ".name");
+                        String name = opts.get(opt + ".name");
 
-            if(name != null) {
-                out.put(opt, name);
+                        if(name != null) {
+                            out.put(opt, name);
+                        }
+                    }
+                }
+            }
+        } else {
+            PropertyFile opts = props.getChildren("options." + group);
+            for(String opt : opts.childKeys()) {
+                if(opt.equals("name")) continue;
+
+                if(opt.equals("default")) continue;
+
+                if(opt.equals("purge")) continue;
+
+                String name = opts.get(opt + ".name");
+
+                if(name != null) {
+                    out.put(opt, name);
+                }
             }
         }
 
@@ -4098,10 +4161,25 @@ public class Sketch implements MessageConsumer {
 
         for(String opt : options.keySet()) {
             String value = getOption(opt);
-            String data = props.get("options." + opt + "." + value + "." + type);
+            if (opt.contains("@")) {
+                String bits[] = opt.split("@");
+                String libLinkName = bits[0];
+                String libOptName = bits[1];
+                for (Library lib : importedLibraries.values()) {
+                    if (lib.getLinkName().equals(libLinkName)) {
+                        PropertyFile lprops = lib.getProperties();
+                        String data = lprops.get("options." + libOptName + "." + value + "." + type);
+                        if(data != null) {
+                            flags = flags + "::" + data;
+                        }
+                    }
+                }
+            } else {
+                String data = props.get("options." + opt + "." + value + "." + type);
 
-            if(data != null) {
-                flags = flags + "::" + data;
+                if(data != null) {
+                    flags = flags + "::" + data;
+                }
             }
         }
 

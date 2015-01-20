@@ -89,6 +89,7 @@ public class Editor extends JFrame {
     JMenu helpMenu;
     JMenu serialPortsMenu;
     JMenu discoveredBoardsMenu;
+    JMenu optionsMenu;
 
     JToolBar toolbar;
     JToolBar treeToolBar;
@@ -450,14 +451,23 @@ System.err.println(sexy.length());
             }
         });
         abortButton.setVisible(false);
-        runButton = Editor.addToolbarButton(toolbar, "actions", "run", "Compile", new ActionListener() {
+        runButton = Editor.addToolbarButton(toolbar, "actions", "run", "Compile (Shift: clean compile)", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                    loadedSketch.purgeCache();
+                    loadedSketch.purgeBuildFiles();
+                }
+                
                 compile();
             }
         });
 
-        programButton = Editor.addToolbarButton(toolbar, "actions", "program", "Program", new ActionListener() {
+        programButton = Editor.addToolbarButton(toolbar, "actions", "program", "Program (Shift: clean compile and program)", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                    loadedSketch.purgeCache();
+                    loadedSketch.purgeBuildFiles();
+                }
                 program();
             }
         });
@@ -928,6 +938,8 @@ System.err.println(sexy.length());
 
         File[] buildFiles = dir.listFiles();
 
+        Arrays.sort(buildFiles);
+
         for(File file : buildFiles) {
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(file.getName());
             node.setUserObject(file);
@@ -1280,10 +1292,11 @@ System.err.println(sexy.length());
         }
     }
 
-    public void mergeTrees(DefaultMutableTreeNode dst, DefaultMutableTreeNode src) {
+    public boolean mergeTrees(DefaultMutableTreeNode dst, DefaultMutableTreeNode src) {
         // First go through and remove any nodes in dst that aren't in src.
         boolean removedNodes = false;
         int currentNode = 0;
+        boolean hasChanged = false;
 
         while(currentNode < dst.getChildCount()) {
             boolean found = false;
@@ -1301,6 +1314,7 @@ System.err.println(sexy.length());
             if(!found) {
                 removedNodes = true;
                 dst.remove(currentNode);
+                hasChanged = true;
                 continue;
             }
 
@@ -1313,7 +1327,9 @@ System.err.println(sexy.length());
                 dnode.setUserObject(sob);
             }
 
-            mergeTrees(dnode, foundNode);
+            if (mergeTrees(dnode, foundNode)) {
+                hasChanged = true;
+            }
             currentNode++;
         }
 
@@ -1323,9 +1339,11 @@ System.err.println(sexy.length());
 
         while(src.getChildCount() > 0) {
             dst.add((DefaultMutableTreeNode)src.getChildAt(0));
+            hasChanged = true;
             addedNodes = true;
         }
 
+        return hasChanged;
     }
 
     public void updateKeywords() {
@@ -1563,9 +1581,13 @@ System.err.println(sexy.length());
                     }
                 }
 
-                mergeTrees(treeLibraries, ntc);
+                boolean hasChanged = mergeTrees(treeLibraries, ntc);
                 treeModel.reload(sortTree(treeLibraries));
                 restoreTreeState(sketchContentTree, saved);
+                if (hasChanged) {
+                    populateOptionsMenu(optionsMenu);
+                    optionsMenu.setEnabled(optionsMenu.getItemCount() > 0);
+                }
             }
         });
     }
@@ -3113,10 +3135,10 @@ System.err.println(sexy.length());
         populateCompilersMenu(submenu);
         hardwareMenu.add(submenu);
 
-        submenu = new JMenu("Options");
-        populateOptionsMenu(submenu);
-        submenu.setEnabled(submenu.getItemCount() > 0);
-        hardwareMenu.add(submenu);
+        optionsMenu = new JMenu("Options");
+        populateOptionsMenu(optionsMenu);
+        optionsMenu.setEnabled(optionsMenu.getItemCount() > 0);
+        hardwareMenu.add(optionsMenu);
 
         serialPortsMenu = new JMenu("Serial Port");
         populateSerialMenu(serialPortsMenu);
@@ -3252,6 +3274,8 @@ System.err.println(sexy.length());
 
     public void populateOptionsMenu(JMenu menu) {
         TreeMap<String, String> opts = loadedSketch.getOptionGroups();
+
+        menu.removeAll();
 
         for(String opt : opts.keySet()) {
             JMenu submenu = new JMenu(opts.get(opt));

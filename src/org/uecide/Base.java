@@ -359,6 +359,8 @@ public class Base {
 
                 String laf = Base.preferences.get("editor.laf");
 
+                UIManager.setLookAndFeel(laf);
+
                 if(laf == null) {
                     laf = Base.preferences.getPlatformSpecific("editor.laf.default");
 
@@ -387,6 +389,7 @@ public class Base {
                         }
                     }
 
+
                     if(laf.startsWith("com.jtattoo.plaf.")) {
                         Properties props = new Properties();
                         props.put("windowDecoration", Base.preferences.getBoolean("editor.laf.decorator") ? "off" : "on");
@@ -400,7 +403,6 @@ public class Base {
                         mth.invoke(cls, props);
                     }
 
-                    UIManager.setLookAndFeel(laf);
                 }
             }
 
