@@ -37,6 +37,7 @@ import java.io.*;
 import java.util.*;
 import java.lang.reflect.Method;
 import java.net.*;
+import java.util.regex.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -74,7 +75,8 @@ public class PropertyFile {
             properties = new Properties();
 
             if(br != null) {
-                properties.load(br);
+                loadProperties(properties, br);
+//                properties.load(br);
             }
 
             br.close();
@@ -95,7 +97,8 @@ public class PropertyFile {
             defaultProperties = new Properties();
 
             if(br != null) {
-                defaultProperties.load(br);
+                loadProperties(defaultProperties, br);
+//                defaultProperties.load(br);
             }
 
             br.close();
@@ -103,8 +106,9 @@ public class PropertyFile {
 
             if(user != null) {
                 if(user.exists()) {
-                    FileReader r = new FileReader(user);
-                    properties.load(r);
+                    BufferedReader r = new BufferedReader(new FileReader(user));
+                    loadProperties(properties, r);
+//                    properties.load(r);
                     r.close();
                 }
             }
@@ -126,8 +130,9 @@ public class PropertyFile {
         if(defaults != null) {
             if(defaults.exists()) {
                 try {
-                    FileReader r = new FileReader(defaults);
-                    defaultProperties.load(r);
+                    BufferedReader r = new BufferedReader(new FileReader(defaults));
+                    loadProperties(defaultProperties, r);
+//                    defaultProperties.load(r);
                     r.close();
                 } catch(Exception e) {
                     Base.error(e);
@@ -140,8 +145,9 @@ public class PropertyFile {
         if(user != null) {
             if(user.exists()) {
                 try {
-                    FileReader r = new FileReader(user);
-                    properties.load(r);
+                    BufferedReader r = new BufferedReader(new FileReader(user));
+                    loadProperties(properties, r);
+//                    properties.load(r);
                     r.close();
                 } catch(Exception e) {
                     Base.error(e);
@@ -582,8 +588,9 @@ public class PropertyFile {
                     // properties object and only replace the old ones with the new if it
                     // is all successful.
                     Properties newProperties = new Properties(defaultProperties);
-                    FileReader r = new FileReader(user);
-                    newProperties.load(r);
+                    BufferedReader r = new BufferedReader(new FileReader(user));
+                    loadProperties(newProperties, r);
+//                    newProperties.load(r);
                     r.close();
                     properties = newProperties;
                 } catch(Exception e) {
@@ -703,5 +710,99 @@ public class PropertyFile {
             data = Base.parseString(data, this, null);
             set(key, data);
         }
+    }
+
+    public boolean loadProperties(Properties p, BufferedReader r) {
+        String line;
+        Pattern keyval = Pattern.compile("^([^=\\s]+)\\s*=\\s*(.*)$");
+        Pattern filename = Pattern.compile("file\\s*=\\s*([^\\s])+");
+        Pattern format = Pattern.compile("format\\s*=\\s*([^\\s])+");
+        try {
+            while ((line = r.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                if (line.startsWith("@")) {
+                    if (line.startsWith("@include ")) {
+                        Matcher fnmatch = filename.matcher(line);
+                        Matcher fmtmatch = format.matcher(line);
+                        if (fnmatch.find()) {
+                            String fn = fnmatch.group(1);
+                            String fmt = "propertyfile";
+                            if (fmtmatch.find()) {
+                                fmt = fmtmatch.group(1);
+                            }
+                            if (fmt.equals("propertyfile")) {
+                            } else if (fmt.equals("arduino")) {
+                            }
+                        }
+                    }
+                    continue;
+                }
+                while (line.endsWith("\\")) {
+                    line = line.substring(0, line.length() - 1);
+                    String cont = r.readLine();
+                    if (cont == null) {
+                        return true;
+                    }
+                    line += cont.trim();
+                }
+                Matcher kvm = keyval.matcher(line);
+                if (kvm.find()) {
+                    p.put(kvm.group(1), kvm.group(2));
+                }
+            }
+        } catch (Exception e) {
+            Base.error(e);
+            return false;
+        }
+        return true;
+    }
+
+    public static PropertyFile parseArduinoFile(String filename) {
+        try {
+            FileReader fr = new FileReader(filename);
+            if (fr == null) {
+                return null;
+            }
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            PropertyFile props = new PropertyFile();
+            Pattern keyval = Pattern.compile("^([^=\\s]+)\\s*=\\s*(.*)$");
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                Matcher kvm = keyval.matcher(line);
+                if (kvm.find()) {
+                    String key = kvm.group(1);
+                    String val = kvm.group(2);
+
+                    val = val.replace("{", "%%START%%");
+                    val = val.replace("%%START%%", "${");
+                    String[] sections = val.split("(?<=\")\\s+(?=\")");
+                    boolean first = true;
+                    String out = "";
+                    for (String section : sections) {
+                        if (!first) {
+                            out += "::";
+                        }
+                        first = false;
+                        if (section.startsWith("\"") && section.endsWith("\"")) {
+                            section = section.substring(1, section.length()-2);
+                        }
+                        out += section;
+                    }
+                    props.set(key, out);
+                }
+            }
+            br.close();
+            return props;
+        } catch (Exception e) {
+            Base.error(e);
+        }
+        return null;
     }
 }

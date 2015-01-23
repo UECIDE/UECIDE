@@ -47,11 +47,12 @@ public class Bootloader extends Plugin {
     }
 
     public void doProgram(String prog) {
+        editor.clearConsole();
         Sketch sketch = editor.getSketch();
         PropertyFile props = sketch.mergeAllProperties();
-        System.err.println("Programming bootloader using " + prog);
+        editor.message("Programming bootloader using " + prog);
         String bl = sketch.parseString(props.get("bootloader.file"));
-        System.err.println("Bootloader: " + bl);
+        editor.message("Bootloader: " + bl);
         if (bl == null) {
             String url = sketch.parseString(props.get("bootloader.url"));
             if (url != null) {
