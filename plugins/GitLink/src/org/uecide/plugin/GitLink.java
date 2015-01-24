@@ -355,7 +355,60 @@ public class GitLink extends Plugin {
         }
     }
 
+    public void cloneRepo(String uri) {
+        String[] bits = uri.split("/");
+        String reponame = bits[bits.length-1];
+        if (reponame.endsWith(".git")) {
+            reponame = reponame.substring(0, reponame.length() - 4);
+        }
+
+        File dest = new File(Base.getSketchbookFolder(), reponame);
+
+        editor.message("Cloning from " + uri + " to " + dest);
+
+        try {
+            Git result = Git.cloneRepository().setCloneSubmodules(true).setURI(uri).setDirectory(dest).call();
+            result.close();
+            if (Base.isSketchFolder(dest)) {
+                editor.message("Sketch cloned.  Opening now.");
+                editor.loadSketch(dest);
+            } else {
+                editor.warning("This is not a simple sketch.");
+                editor.warning("I cannot open it directly.");
+                editor.warning("Use 'File -> Open...' to browse to the sketch location");
+                editor.warning("and open it manually.");
+            }
+        } catch (Exception e) {
+            Base.error(e);
+        }
+    }
+
+    public void cloneNewRepository() {
+        String message = (String)JOptionPane.showInputDialog(
+            editor,
+            "Enter remote repository address:",
+            "Open Git Repository",
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            null,
+            "");
+        if (message != null) {
+            editor.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+            cloneRepo(message);
+            editor.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        }
+    }
+
     public void populateMenu(JMenu menu, int flags) {
+        if (flags == (Plugin.MENU_FILE | Plugin.MENU_TOP)) {
+            JMenuItem item = new JMenuItem("Open git repository");
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    cloneNewRepository();
+                }
+            });
+            menu.add(item);
+        }
     }
 
     public void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node) {

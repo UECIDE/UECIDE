@@ -61,6 +61,8 @@ import java.beans.*;
 import java.util.jar.*;
 import java.util.zip.*;
 
+import java.util.List;
+
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
@@ -439,9 +441,17 @@ System.err.println(sexy.length());
         theme = "theme." + theme + ".";
 
         sketchContentTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
+        System.err.println("Tree background: " + Base.theme.getColor(theme + "editor.bgcolor"));
         sketchContentTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
         sketchFilesTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
         sketchFilesTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
+
+        treeScroll.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
+        treePanel.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
+
+        treeScroll.setOpaque(false);
+        treePanel.setOpaque(false);
+        sketchContentTree.setOpaque(true);
 
         File themeFolder = Base.getContentFile("lib/theme");
 

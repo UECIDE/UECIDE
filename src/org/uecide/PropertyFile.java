@@ -750,7 +750,13 @@ public class PropertyFile {
                 }
                 Matcher kvm = keyval.matcher(line);
                 if (kvm.find()) {
-                    p.put(kvm.group(1), kvm.group(2));
+                    String k = kvm.group(1);
+                    String v = kvm.group(2);
+                    v = v.replace("\\#", "#");
+                    if (k.contains("color")) {
+                        System.err.println("[" + k + "] = [" + v + "]");
+                    }
+                    p.put(k,v);
                 }
             }
         } catch (Exception e) {
