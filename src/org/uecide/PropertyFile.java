@@ -75,8 +75,8 @@ public class PropertyFile {
             properties = new Properties();
 
             if(br != null) {
-                loadProperties(properties, br);
-//                properties.load(br);
+                //loadProperties(properties, br);
+                properties.load(br);
             }
 
             br.close();
@@ -97,8 +97,8 @@ public class PropertyFile {
             defaultProperties = new Properties();
 
             if(br != null) {
-                loadProperties(defaultProperties, br);
-//                defaultProperties.load(br);
+//                loadProperties(defaultProperties, br);
+                defaultProperties.load(br);
             }
 
             br.close();
@@ -107,8 +107,8 @@ public class PropertyFile {
             if(user != null) {
                 if(user.exists()) {
                     BufferedReader r = new BufferedReader(new FileReader(user));
-                    loadProperties(properties, r);
-//                    properties.load(r);
+//                    loadProperties(properties, r);
+                    properties.load(r);
                     r.close();
                 }
             }
@@ -131,8 +131,8 @@ public class PropertyFile {
             if(defaults.exists()) {
                 try {
                     BufferedReader r = new BufferedReader(new FileReader(defaults));
-                    loadProperties(defaultProperties, r);
-//                    defaultProperties.load(r);
+//                    loadProperties(defaultProperties, r);
+                    defaultProperties.load(r);
                     r.close();
                 } catch(Exception e) {
                     Base.error(e);
@@ -146,8 +146,8 @@ public class PropertyFile {
             if(user.exists()) {
                 try {
                     BufferedReader r = new BufferedReader(new FileReader(user));
-                    loadProperties(properties, r);
-//                    properties.load(r);
+//                    loadProperties(properties, r);
+                    properties.load(r);
                     r.close();
                 } catch(Exception e) {
                     Base.error(e);
@@ -589,8 +589,8 @@ public class PropertyFile {
                     // is all successful.
                     Properties newProperties = new Properties(defaultProperties);
                     BufferedReader r = new BufferedReader(new FileReader(user));
-                    loadProperties(newProperties, r);
-//                    newProperties.load(r);
+//                    loadProperties(newProperties, r);
+                    newProperties.load(r);
                     r.close();
                     properties = newProperties;
                 } catch(Exception e) {
@@ -753,6 +753,7 @@ public class PropertyFile {
                     String k = kvm.group(1);
                     String v = kvm.group(2);
                     v = v.replace("\\#", "#");
+                    v = v.replace("\\\\", "\\");
                     if (k.contains("color")) {
                         System.err.println("[" + k + "] = [" + v + "]");
                     }
