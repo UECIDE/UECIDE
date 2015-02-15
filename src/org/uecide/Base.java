@@ -359,8 +359,6 @@ public class Base {
 
                 String laf = Base.preferences.get("editor.laf");
 
-                UIManager.setLookAndFeel(laf);
-
                 if(laf == null) {
                     laf = Base.preferences.getPlatformSpecific("editor.laf.default");
 
@@ -368,6 +366,13 @@ public class Base {
                         Base.preferences.set("editor.laf", laf);
                     }
                 }
+
+                try {
+                    UIManager.setLookAndFeel(laf);
+                } catch (Exception badLaf) {
+                    System.err.println("Unable to set LAF");
+                }
+
 
                 if(laf != null) {
                     String lafTheme = "";
@@ -826,11 +831,13 @@ public class Base {
                 File cfile = new File(cdir, "compiler.txt");
 
                 if(cfile.exists()) {
-                    Debug.message("    Loading core " + cfile.getAbsolutePath());
+                    Debug.message("    Loading compiler " + cfile.getAbsolutePath());
                     Compiler newCompiler = new Compiler(cdir);
 
                     if(newCompiler.isValid()) {
                         compilers.put(newCompiler.getName(), newCompiler);
+                    } else {    
+                        Debug.message("    ==> IS NOT VALID!!!");
                     }
                 }
             }
@@ -870,6 +877,8 @@ public class Base {
 
                     if(newCore.isValid()) {
                         cores.put(newCore.getName(), newCore);
+                    } else {    
+                        Debug.message("    ==> IS NOT VALID!!!");
                     }
                 }
             }
@@ -1875,26 +1884,28 @@ public class Base {
         File folder = getUserPluginsFolder();
         Debug.message("Loading plugins from " + folder);
         File[] files = folder.listFiles();
-        for (File f : files) {
-            Debug.message("  Loading " + f);
-            try {
-                URL u = f.toURI().toURL();
-                addURL(u);
-            } catch (Exception ex) {
-                error(ex);
+        if (files != null) {
+            for (File f : files) {
+                Debug.message("  Loading " + f);
+                try {
+                    URL u = f.toURI().toURL();
+                    addURL(u);
+                } catch (Exception ex) {
+                    error(ex);
+                }
             }
-        }
 
-        Reflections pluginReflections = new Reflections("");
-        try {
-            Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
-            Debug.message(pluginClasses.toString());
-            for (Class<? extends Plugin> c : pluginClasses) {
-                Debug.message("Found plugin class " + c.getName());
-                plugins.put(c.getName(), c);
+            Reflections pluginReflections = new Reflections("");
+            try {
+                Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
+                Debug.message(pluginClasses.toString());
+                for (Class<? extends Plugin> c : pluginClasses) {
+                    Debug.message("Found plugin class " + c.getName());
+                    plugins.put(c.getName(), c);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -2850,6 +2861,79 @@ public class Base {
                 iconSets.put(pf.get("name"), pf);
             }
         }
+    }
+
+    // Set a font on a component using the newer style font specification
+
+    public static void setFont(JComponent comp, String key) {
+
+        String themekey = preferences.get("theme.selected", "default");
+        themekey = "theme." + themekey + ".";
+
+        String fontData = preferences.get(key);
+        if (fontData == null) {
+            fontData = theme.get(themekey + key);
+        }
+        if (fontData == null) {
+            return;
+        }
+
+        String[] bits = fontData.split(",");
+
+        Font f = comp.getFont();
+        Color fg = comp.getForeground();
+
+        // Work through each "bit" of the font and decide what it represents, then
+        // set the font data accordingly.
+        
+        for (String bit : bits) {
+            bit = bit.trim();
+
+            // Is it just a number?  If so it represents the size.
+            if (bit.matches("^\\d+$")) {
+                int size = 10;
+                try {
+                    size = Integer.parseInt(bit);
+                } catch (Exception ex) {
+                }
+                f = new Font(f.getFamily(), f.getStyle(), size);
+                continue;
+            }
+
+            // Now look for the style of the font
+            if (bit.equals("plain")) {
+                f = new Font(f.getFamily(), Font.PLAIN, f.getSize());
+                continue;
+            }
+            if (bit.equals("bold")) {
+                f = new Font(f.getFamily(), Font.BOLD, f.getSize());
+                continue;
+            }
+            if (bit.equals("italic")) {
+                f = new Font(f.getFamily(), Font.ITALIC, f.getSize());
+                continue;
+            }
+            if (bit.equals("bolditalic")) {
+                f = new Font(f.getFamily(), Font.BOLD | Font.ITALIC, f.getSize());
+                continue;
+            }
+
+            // Check for a colour starting with a #
+            if (bit.startsWith("#")) {
+                try {
+                    fg = new Color(Integer.parseInt(bit.substring(1), 16));
+                } catch(Exception ex) { 
+                }
+                continue;
+            }
+
+            // Anything else must be the name.
+            f = new Font(bit, f.getStyle(), f.getSize());
+        }
+
+        comp.setFont(f);
+        comp.setForeground(fg);
+
     }
 
 }

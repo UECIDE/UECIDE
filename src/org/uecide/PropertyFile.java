@@ -75,8 +75,8 @@ public class PropertyFile {
             properties = new Properties();
 
             if(br != null) {
-                //loadProperties(properties, br);
-                properties.load(br);
+                loadProperties(properties, br);
+//                properties.load(br);
             }
 
             br.close();
@@ -97,8 +97,8 @@ public class PropertyFile {
             defaultProperties = new Properties();
 
             if(br != null) {
-//                loadProperties(defaultProperties, br);
-                defaultProperties.load(br);
+                loadProperties(defaultProperties, br);
+//                defaultProperties.load(br);
             }
 
             br.close();
@@ -107,8 +107,8 @@ public class PropertyFile {
             if(user != null) {
                 if(user.exists()) {
                     BufferedReader r = new BufferedReader(new FileReader(user));
-//                    loadProperties(properties, r);
-                    properties.load(r);
+                    loadProperties(properties, r);
+//                    properties.load(r);
                     r.close();
                 }
             }
@@ -131,8 +131,8 @@ public class PropertyFile {
             if(defaults.exists()) {
                 try {
                     BufferedReader r = new BufferedReader(new FileReader(defaults));
-//                    loadProperties(defaultProperties, r);
-                    defaultProperties.load(r);
+                    loadProperties(defaultProperties, r);
+//                    defaultProperties.load(r);
                     r.close();
                 } catch(Exception e) {
                     Base.error(e);
@@ -146,8 +146,8 @@ public class PropertyFile {
             if(user.exists()) {
                 try {
                     BufferedReader r = new BufferedReader(new FileReader(user));
-//                    loadProperties(properties, r);
-                    properties.load(r);
+                    loadProperties(properties, r);
+//                    properties.load(r);
                     r.close();
                 } catch(Exception e) {
                     Base.error(e);
@@ -220,16 +220,16 @@ public class PropertyFile {
     public void save() {
         if(userFile != null) {
             try {
-                Properties saveProps = new Properties() {
-                    @Override
+                String[] keylist = properties.keySet().toArray(new String[0]);
+                Arrays.sort(keylist);
 
-                    public synchronized Enumeration<Object> keys() {
-                        return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-                    }
-                };
-                saveProps.putAll(properties);
                 FileWriter w = new FileWriter(userFile);
-                saveProps.store(w, null);
+                PrintWriter pw = new PrintWriter(w);
+                for (String k : keylist) {
+                    String v = properties.getProperty(k);
+                    pw.println(k + "=" + v);
+                }
+                pw.close();
                 w.close();
                 Debug.message("Saved property file " + userFile.getAbsolutePath());
             } catch(Exception e) {
@@ -589,8 +589,8 @@ public class PropertyFile {
                     // is all successful.
                     Properties newProperties = new Properties(defaultProperties);
                     BufferedReader r = new BufferedReader(new FileReader(user));
-//                    loadProperties(newProperties, r);
-                    newProperties.load(r);
+                    loadProperties(newProperties, r);
+//                    newProperties.load(r);
                     r.close();
                     properties = newProperties;
                 } catch(Exception e) {
@@ -734,7 +734,15 @@ public class PropertyFile {
                                 fmt = fmtmatch.group(1);
                             }
                             if (fmt.equals("propertyfile")) {
+                                PropertyFile apf = new PropertyFile(fn);
+                                for (Object k : apf.keySet()) {
+                                    p.put((String)k, apf.get((String)k));
+                                }
                             } else if (fmt.equals("arduino")) {
+                                PropertyFile apf = parseArduinoFile(fn);
+                                for (Object k : apf.keySet()) {
+                                    p.put((String)k, apf.get((String)k));
+                                }
                             }
                         }
                     }
@@ -752,11 +760,6 @@ public class PropertyFile {
                 if (kvm.find()) {
                     String k = kvm.group(1);
                     String v = kvm.group(2);
-                    v = v.replace("\\#", "#");
-                    v = v.replace("\\\\", "\\");
-                    if (k.contains("color")) {
-                        System.err.println("[" + k + "] = [" + v + "]");
-                    }
                     p.put(k,v);
                 }
             }

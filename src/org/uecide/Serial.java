@@ -109,9 +109,10 @@ public class Serial {
             return;
 
         try {
-            Debug.message("Purged port");
             p.purgePort(1);
             p.purgePort(2);
+            p.setDTR(false);
+            p.setRTS(false);
             p.closePort();
             Debug.message("Port closed OK");
         } catch(Exception e) {

@@ -646,6 +646,21 @@ public class Library implements Comparable {
             setCategoryName("cat:contrib", "Contributed");
             loadLibrariesFromFolder(f, "cat:contrib");
         }
+
+        // And now we have our new repo-based libraries.  First scan
+        // a list of categories and their folders:
+
+        File repoLibs = Base.getSettingsFile("libraries");
+        if (!repoLibs.exists()) {
+            repoLibs.mkdirs();
+        }
+        File[] subcats = repoLibs.listFiles();
+        for (File subcat : subcats) {
+            if ((!subcat.getName().startsWith(".")) && (subcat.isDirectory())) {
+                setCategoryName("repo:" + subcat.getName(), subcat.getName());
+                loadLibrariesFromFolder(subcat, "repo:" + subcat.getName());
+            }
+        }
     }
 
     public static Library getLibraryByName(String name, String core, String group) {

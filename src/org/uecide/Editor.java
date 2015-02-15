@@ -273,11 +273,19 @@ public class Editor extends JFrame {
 
         int width = Base.preferences.getInteger("editor.window.width");
 
+        if (width <= 0) {
+            width = Base.preferences.getInteger("editor.window.width.default");
+        }
+
         if(width < Base.preferences.getInteger("editor.window.width.min")) {
             width = Base.preferences.getInteger("editor.window.width.min");
         }
 
         int height = Base.preferences.getInteger("editor.window.height");
+
+        if (height <= 0) {
+            height = Base.preferences.getInteger("editor.window.height.default");
+        }
 
         if(height < Base.preferences.getInteger("editor.window.height.min")) {
             height = Base.preferences.getInteger("editor.window.height.min");
@@ -518,23 +526,30 @@ System.err.println(sexy.length());
         });
 
         menuBar = new JMenuBar();
+        Base.setFont(menuBar, "menu.bar");
 
         fileMenu = new JMenu(Translate.t("File"));
+        Base.setFont(fileMenu, "menu.bar");
         menuBar.add(fileMenu);
 
         editMenu = new JMenu(Translate.t("Edit"));
+        Base.setFont(editMenu, "menu.bar");
         menuBar.add(editMenu);
 
         sketchMenu = new JMenu(Translate.t("Sketch"));
+        Base.setFont(sketchMenu, "menu.bar");
         menuBar.add(sketchMenu);
 
         hardwareMenu = new JMenu(Translate.t("Hardware"));
+        Base.setFont(hardwareMenu, "menu.bar");
         menuBar.add(hardwareMenu);
 
         toolsMenu = new JMenu(Translate.t("Tools"));
+        Base.setFont(toolsMenu, "menu.bar");
         menuBar.add(toolsMenu);
 
         helpMenu = new JMenu(Translate.t("Help"));
+        Base.setFont(helpMenu, "menu.bar");
         menuBar.add(helpMenu);
 
         setJMenuBar(menuBar);
@@ -699,11 +714,13 @@ System.err.println(sexy.length());
 
                     if(selected) {
                         text.setBackground(bg);
-                        text.setForeground(fg);
+//                        text.setForeground(fg);
                         text.setOpaque(true);
+                        Base.setFont(text, "tree.node.selected");
                     } else {
                         text.setOpaque(false);
-                        text.setForeground(textColor);
+//                        text.setForeground(textColor);
+                        Base.setFont(text, "tree.node.unselected");
                     }
 
                     container.setOpaque(false);
@@ -729,11 +746,13 @@ System.err.println(sexy.length());
 
                     if(selected) {
                         text.setBackground(bg);
-                        text.setForeground(fg);
+//                        text.setForeground(fg);
+                        Base.setFont(text, "tree.node.selected");
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
-                        text.setForeground(textColor);
+                        Base.setFont(text, "tree.node.unselected");
+//                        text.setForeground(textColor);
                     }
 
                     container.setOpaque(false);
@@ -758,11 +777,13 @@ System.err.println(sexy.length());
 
                     if(selected) {
                         text.setBackground(bg);
-                        text.setForeground(fg);
+//                        text.setForeground(fg);
+                        Base.setFont(text, "tree.node.selected");
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
-                        text.setForeground(textColor);
+//                        text.setForeground(textColor);
+                        Base.setFont(text, "tree.node.unselected");
                     }
 
                     container.setOpaque(false);
@@ -812,11 +833,13 @@ System.err.println(sexy.length());
 
                     if(selected) {
                         text.setBackground(bg);
-                        text.setForeground(fg);
+//                        text.setForeground(fg);
+                        Base.setFont(text, "tree.node.selected");
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
-                        text.setForeground(textColor);
+//                        text.setForeground(textColor);
+                        Base.setFont(text, "tree.node.unselected");
                     }
 
                     container.setOpaque(false);
@@ -868,11 +891,13 @@ System.err.println(sexy.length());
 
                         if(selected) {
                             text.setBackground(bg);
-                            text.setForeground(fg);
+//                            text.setForeground(fg);
+                            Base.setFont(text, "tree.node.selected");
                             text.setOpaque(true);
                         } else {
                             text.setOpaque(false);
-                            text.setForeground(textColor);
+//                            text.setForeground(textColor);
+                            Base.setFont(text, "tree.node.unselected");
                         }
 
                         container.add(text, BorderLayout.CENTER);
@@ -894,11 +919,13 @@ System.err.println(sexy.length());
 
                     if(selected) {
                         text.setBackground(bg);
-                        text.setForeground(fg);
+//                        text.setForeground(fg);
+                        Base.setFont(text, "tree.node.selected");
                         text.setOpaque(true);
                     } else {
                         text.setOpaque(false);
-                        text.setForeground(textColor);
+//                        text.setForeground(textColor);
+                        Base.setFont(text, "tree.node.unselected");
                     }
 
                     container.setOpaque(false);
@@ -921,11 +948,13 @@ System.err.println(sexy.length());
 
                 if(selected) {
                     text.setBackground(bg);
-                    text.setForeground(fg);
+//                    text.setForeground(fg);
+                        Base.setFont(text, "tree.node.selected");
                     text.setOpaque(true);
                 } else {
                     text.setOpaque(false);
-                    text.setForeground(textColor);
+//                    text.setForeground(textColor);
+                        Base.setFont(text, "tree.node.unselected");
                 }
 
                 container.setOpaque(false);
@@ -1735,6 +1764,7 @@ System.err.println(sexy.length());
                                 Base.openURL(loadedSketch.getFolder().getAbsolutePath());
                             }
                         });
+                        Base.setFont(openInOS, "menu.entry");
                         menu.add(openInOS);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_SKETCH | Plugin.MENU_TOP, o);
@@ -1746,22 +1776,27 @@ System.err.println(sexy.length());
                         JMenuItem item = new JMenuItem("Create sketch file (.ino)");
                         item.setActionCommand("ino");
                         item.addActionListener(createNewAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem("Create C++ source file");
                         item.setActionCommand("cpp");
                         item.addActionListener(createNewAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem("Create C source file");
                         item.setActionCommand("c");
                         item.addActionListener(createNewAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem("Create assembly source file");
                         item.setActionCommand("S");
                         item.addActionListener(createNewAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem("Import source file");
                         item.setActionCommand("source");
                         item.addActionListener(importFileAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_SOURCE | Plugin.MENU_TOP, o);
@@ -1773,10 +1808,12 @@ System.err.println(sexy.length());
                         JMenuItem item = new JMenuItem("Create header file");
                         item.setActionCommand("h");
                         item.addActionListener(createNewAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem("Import header file");
                         item.setActionCommand("header");
                         item.addActionListener(importFileAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_HEADERS | Plugin.MENU_TOP, o);
@@ -1797,6 +1834,7 @@ System.err.println(sexy.length());
                         JMenuItem item = new JMenuItem("Add binary file");
                         item.setActionCommand("binary");
                         item.addActionListener(importFileAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_TOP, o);
@@ -1812,6 +1850,7 @@ System.err.println(sexy.length());
                                 updateOutputTree();
                             }
                         });
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_TOP, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
@@ -1821,6 +1860,7 @@ System.err.println(sexy.length());
                         JMenuItem item = new JMenuItem("Create Markdown file");
                         item.setActionCommand("md");
                         item.addActionListener(createNewAction);
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_TOP, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
@@ -1847,6 +1887,7 @@ System.err.println(sexy.length());
                                 Base.exec(c.split("::"));
                             }
                         });
+                        Base.setFont(openExternal, "menu.entry");
                         menu.add(openExternal);
                     }
 
@@ -1879,6 +1920,7 @@ System.err.println(sexy.length());
                         }
                     });
                     renameItem.setActionCommand(thisFile.getAbsolutePath());
+                    Base.setFont(renameItem, "menu.entry");
                     menu.add(renameItem);
 
                     JMenuItem deleteItem = new JMenuItem("Delete file");
@@ -1912,6 +1954,7 @@ System.err.println(sexy.length());
                         }
                     });
                     deleteItem.setActionCommand(thisFile.getAbsolutePath());
+                    Base.setFont(deleteItem, "menu.entry");
                     menu.add(deleteItem);
 
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_TOP, o);
@@ -1931,6 +1974,7 @@ System.err.println(sexy.length());
                     infoMenu.add(filePath);
                     JMenuItem fileSize = new JMenuItem(thisFile.length() + " bytes");
                     infoMenu.add(fileSize);
+                    Base.setFont(infoMenu, "menu.entry");
                     menu.add(infoMenu);
 
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_MID, o);
@@ -1953,6 +1997,7 @@ System.err.println(sexy.length());
                                 }
                             });
                             insertRef.setActionCommand(thisFile.getName());
+                            Base.setFont(insertRef, "menu.entry");
                             menu.add(insertRef);
                         }
                     }
@@ -1974,6 +2019,7 @@ System.err.println(sexy.length());
                             updateLibrariesTree();
                         }
                     });
+                    Base.setFont(item, "menu.entry");
                     menu.add(item);
                     item = new JMenuItem("Recompile now");
                     item.setEnabled(!compilerRunning());
@@ -1993,6 +2039,7 @@ System.err.println(sexy.length());
                             compilationThread.start();
                         }
                     });
+                    Base.setFont(item, "menu.entry");
                     menu.add(item);
 
                     if(lib.isLocal(loadedSketch.getFolder())) {
@@ -2002,6 +2049,7 @@ System.err.println(sexy.length());
                                 exportLocalLibrary(lib);
                             }
                         });
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                     } else {
                         item = new JMenuItem("Localize library");
@@ -2020,6 +2068,7 @@ System.err.println(sexy.length());
                                 updateTree();
                             }
                         });
+                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                     }
 
@@ -2076,6 +2125,7 @@ System.err.println(sexy.length());
                                 Base.openURL(e.getActionCommand());
                             }
                         });
+                        Base.setFont(openInOS, "menu.entry");
                         menu.add(openInOS);
 
                         JMenuItem mkdirItem = new JMenuItem("Create directory");
@@ -2093,6 +2143,7 @@ System.err.println(sexy.length());
                                 }
                             }
                         });
+                        Base.setFont(mkdirItem, "menu.entry");
                         menu.add(mkdirItem);
                         JMenuItem unzipItem = new JMenuItem("Extract ZIP file here");
                         unzipItem.setActionCommand(thisFile.getAbsolutePath());
@@ -2101,6 +2152,7 @@ System.err.println(sexy.length());
                                 findAndUnzipZipFile(e.getActionCommand());
                             }
                         });
+                        Base.setFont(unzipItem, "menu.entry");
                         menu.add(unzipItem);
                     } else {
                         String ee = Base.preferences.get("editor.external.command");
@@ -2117,6 +2169,7 @@ System.err.println(sexy.length());
                                     Base.exec(c.split("::"));
                                 }
                             });
+                            Base.setFont(openExternal, "menu.entry");
                             menu.add(openExternal);
                         }
                     }
@@ -2152,6 +2205,7 @@ System.err.println(sexy.length());
                             }
                         }
                     });
+                    Base.setFont(renameItem, "menu.entry");
                     menu.add(renameItem);
 
                     JMenuItem deleteItem = new JMenuItem("Delete file");
@@ -2186,6 +2240,7 @@ System.err.println(sexy.length());
                     });
                     deleteItem.setActionCommand(thisFile.getAbsolutePath());
 
+                    Base.setFont(deleteItem, "menu.entry");
                     menu.add(deleteItem);
 
                     menu.addSeparator();
@@ -2205,6 +2260,7 @@ System.err.println(sexy.length());
                     infoMenu.add(filePath);
                     JMenuItem fileSize = new JMenuItem(thisFile.length() + " bytes");
                     infoMenu.add(fileSize);
+                    Base.setFont(infoMenu, "menu.entry");
                     menu.add(infoMenu);
                     menu.addSeparator();
                     populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_BOTTOM, o);
@@ -2845,12 +2901,14 @@ System.err.println(sexy.length());
                         }
                     });
                     item.setActionCommand(file.getAbsolutePath());
+                    Base.setFont(item, "menu.entry");
                     menu.add(item);
                 } else {
                     JMenu submenu = new JMenu(file.getName());
                     addSketchesFromFolder(submenu, file);
 
                     if(submenu.getItemCount() > 0) {
+                        Base.setFont(submenu, "menu.entry");
                         menu.add(submenu);
                     }
                 }
@@ -2872,6 +2930,7 @@ System.err.println(sexy.length());
 
         item = new JMenuItem(Translate.t("New"));
         item.setAccelerator(KeyStroke.getKeyStroke('N', modifiers));
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -2887,11 +2946,13 @@ System.err.println(sexy.length());
                 handleOpenPrompt();
             }
         });
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_TOP);
 
         submenu = new JMenu(Translate.t("Recent Sketches"));
+        Base.setFont(submenu, "menu.entry");
         fileMenu.add(submenu);
 
         for(File m : Base.MRUList) {
@@ -2909,6 +2970,7 @@ System.err.println(sexy.length());
                 }
             });
             item.setActionCommand(m.getAbsolutePath());
+            Base.setFont(item, "menu.entry");
             submenu.add(item);
         }
 
@@ -2947,12 +3009,14 @@ System.err.println(sexy.length());
                             }
                         }
 
+                        Base.setFont(top, "menu.entry");
                         submenu.add(top);
                     }
                 }
             }
         }
 
+        Base.setFont(submenu, "menu.entry");
         fileMenu.add(submenu);
 
         fileMenu.addSeparator();
@@ -2965,6 +3029,7 @@ System.err.println(sexy.length());
                 askCloseWindow();
             }
         });
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
         item = new JMenuItem(Translate.t("Save"));
@@ -2974,6 +3039,7 @@ System.err.println(sexy.length());
                 saveAllTabs();
             }
         });
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
         item = new JMenuItem(Translate.t("Save As..."));
@@ -2983,6 +3049,7 @@ System.err.println(sexy.length());
                 saveAs();
             }
         });
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
         item = new JMenuItem(Translate.t("Export as SAR..."));
@@ -2991,6 +3058,7 @@ System.err.println(sexy.length());
                 exportSar();
             }
         });
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
         item = new JMenuItem(Translate.t("Import SAR..."));
@@ -2999,6 +3067,7 @@ System.err.println(sexy.length());
                 importSar();
             }
         });
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
 
@@ -3011,6 +3080,7 @@ System.err.println(sexy.length());
                 prefs.showFrame();
             }
         });
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
 
@@ -3026,6 +3096,7 @@ System.err.println(sexy.length());
                 }
             }
         });
+        Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_TOP);
@@ -3040,6 +3111,7 @@ System.err.println(sexy.length());
             }
         });
 
+        Base.setFont(item, "menu.entry");
         editMenu.add(item);
 
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_BOTTOM);
@@ -3057,6 +3129,7 @@ System.err.println(sexy.length());
                 compile();
             }
         });
+        Base.setFont(item, "menu.entry");
         sketchMenu.add(item);
         
         item = new JMenuItem(Translate.t("Compile and Program"));
@@ -3066,6 +3139,7 @@ System.err.println(sexy.length());
                 program();
             }
         });
+        Base.setFont(item, "menu.entry");
         sketchMenu.add(item);
         
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_TOP);
@@ -3075,37 +3149,48 @@ System.err.println(sexy.length());
         item = new JMenuItem("Sketch file (.ino)");
         item.setActionCommand("ino");
         item.addActionListener(createNewAction);
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("C++ file");
         item.setActionCommand("cpp");
         item.addActionListener(createNewAction);
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("C file");
         item.setActionCommand("c");
         item.addActionListener(createNewAction);
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("Header file");
         item.setActionCommand("h");
         item.addActionListener(createNewAction);
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("Assembly file");
         item.setActionCommand("S");
         item.addActionListener(createNewAction);
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("Library");
         item.setActionCommand("lib");
         item.addActionListener(createNewAction);
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
+        Base.setFont(submenu, "menu.entry");
         sketchMenu.add(submenu);
 
 
         submenu = new JMenu("Import file");
         item = new JMenuItem("Source file");
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("Header file");
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("Binary file");
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
+        Base.setFont(submenu, "menu.entry");
         sketchMenu.add(submenu);
 
         submenu = new JMenu("Libraries");
@@ -3115,9 +3200,11 @@ System.err.println(sexy.length());
                 installLibraryArchive();
             }
         });
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         submenu.addSeparator();
         populateLibrariesMenu(submenu);
+        Base.setFont(submenu, "menu.entry");
         sketchMenu.add(submenu);
 
 
@@ -3131,23 +3218,28 @@ System.err.println(sexy.length());
                 new SketchProperties(Editor.this, loadedSketch);
             }
         });
+        Base.setFont(item, "menu.entry");
         sketchMenu.add(item);
 
         submenu = new JMenu("Boards");
         populateBoardsMenu(submenu);
+        Base.setFont(submenu, "menu.entry");
         hardwareMenu.add(submenu);
 
         submenu = new JMenu("Cores");
         populateCoresMenu(submenu);
+        Base.setFont(submenu, "menu.entry");
         hardwareMenu.add(submenu);
 
         submenu = new JMenu("Compilers");
         populateCompilersMenu(submenu);
+        Base.setFont(submenu, "menu.entry");
         hardwareMenu.add(submenu);
 
         optionsMenu = new JMenu("Options");
         populateOptionsMenu(optionsMenu);
         optionsMenu.setEnabled(optionsMenu.getItemCount() > 0);
+        Base.setFont(optionsMenu, "menu.entry");
         hardwareMenu.add(optionsMenu);
 
         serialPortsMenu = new JMenu("Serial Port");
@@ -3162,6 +3254,7 @@ System.err.println(sexy.length());
             public void menuDeselected(MenuEvent e) {
             }
         });
+        Base.setFont(serialPortsMenu, "menu.entry");
         hardwareMenu.add(serialPortsMenu);
 
         discoveredBoardsMenu = new JMenu("Discovered Boards");
@@ -3175,12 +3268,14 @@ System.err.println(sexy.length());
             public void menuDeselected(MenuEvent e) {
             }
         });
+        Base.setFont(discoveredBoardsMenu, "menu.entry");
         hardwareMenu.add(discoveredBoardsMenu);
 
 
 
         submenu = new JMenu("Programmers");
         populateProgrammersMenu(submenu);
+        Base.setFont(submenu, "menu.entry");
         hardwareMenu.add(submenu);
 
         addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_TOP);
@@ -3198,6 +3293,7 @@ System.err.println(sexy.length());
                 ServiceManager.open(Editor.this);
             }
         });
+        Base.setFont(item, "menu.entry");
         toolsMenu.add(item);
 
         toolsMenu.addSeparator();
@@ -3209,6 +3305,7 @@ System.err.println(sexy.length());
                 handleAbout();
             }
         });
+        Base.setFont(item, "menu.entry");
         helpMenu.add(item);
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
@@ -3224,6 +3321,7 @@ System.err.println(sexy.length());
                     Base.openURL(link);
                 }
             });
+            Base.setFont(item, "menu.entry");
             helpMenu.add(item);
         }
 
@@ -3241,6 +3339,7 @@ System.err.println(sexy.length());
                         Base.openURL(link);
                     }
                 });
+                Base.setFont(item, "menu.entry");
                 helpMenu.add(item);
             }
         }
@@ -3256,6 +3355,7 @@ System.err.println(sexy.length());
                 Debug.show();
             }
         });
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("Rebuild internal structures");
         item.addActionListener(new ActionListener() {
@@ -3263,6 +3363,7 @@ System.err.println(sexy.length());
                 Base.cleanAndScanAllSettings();
             }
         });
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("Purge cache files");
         item.addActionListener(new ActionListener() {
@@ -3270,6 +3371,7 @@ System.err.println(sexy.length());
                 loadedSketch.purgeCache();
             }
         });
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
         item = new JMenuItem("Open data folder");
         item.addActionListener(new ActionListener() {
@@ -3277,7 +3379,9 @@ System.err.println(sexy.length());
                 Base.openURL(Base.getSettingsFolder().getAbsolutePath());
             }
         });
+        Base.setFont(item, "menu.entry");
         submenu.add(item);
+        Base.setFont(submenu, "menu.entry");
         helpMenu.add(submenu);
 
     }
@@ -3307,9 +3411,11 @@ System.err.println(sexy.length());
                     }
                 });
 
+                Base.setFont(item, "menu.entry");
                 submenu.add(item);
             }
 
+            Base.setFont(submenu, "menu.entry");
             menu.add(submenu);
         }
     }
@@ -3337,6 +3443,7 @@ System.err.println(sexy.length());
                 }
             });
             item.setActionCommand(port);
+            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
     }
@@ -3388,6 +3495,7 @@ System.err.println(sexy.length());
                 item.setIcon(i);
             }
 
+            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
     }
@@ -3426,6 +3534,7 @@ System.err.println(sexy.length());
                 }
             });
             item.setActionCommand(pn);
+            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
     }
@@ -3443,6 +3552,7 @@ System.err.println(sexy.length());
             fillGroupMenu(groupmenu, group);
 
             if(groupmenu.getItemCount() > 0) {
+                Base.setFont(groupmenu, "menu.entry");
                 menu.add(groupmenu);
             }
         }
@@ -3488,11 +3598,15 @@ System.err.println(sexy.length());
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setBoard(e.getActionCommand());
-                    manualPane.setRoot(loadedSketch.getCore().getManual());
+                    Core c = loadedSketch.getCore();
+                    if (c != null) {
+                        manualPane.setRoot(c.getManual());
+                    }
                     manualPane.home();
                 }
             });
             item.setActionCommand(board.getName());
+            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
     }
@@ -3533,6 +3647,7 @@ System.err.println(sexy.length());
                 }
             });
             item.setActionCommand(core.getName());
+            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
 
@@ -3566,6 +3681,7 @@ System.err.println(sexy.length());
                 }
             });
             item.setActionCommand(compiler.getName());
+            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
     }
@@ -4148,6 +4264,7 @@ System.err.println(sexy.length());
                 libsMenu.add(item);
             }
 
+            Base.setFont(libsMenu, "menu.entry");
             menu.add(libsMenu);
         }
     }

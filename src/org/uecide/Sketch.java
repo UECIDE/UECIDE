@@ -306,6 +306,10 @@ public class Sketch implements MessageConsumer {
         }
 
         selectedCompiler = compiler;
+        if (selectedBoard == null) {
+            return;
+        }
+
         Base.preferences.set("board." + selectedBoard.getName() + ".compiler", compiler.getName());
         String programmer = Base.preferences.get("board." + selectedBoard.getName() + ".programmer");
 
@@ -1396,60 +1400,113 @@ public class Sketch implements MessageConsumer {
     }
 
     public String stripComments(String data) {
-        StringBuilder b = new StringBuilder();
+        int cpos = 0;
+        boolean inString = false;
+        boolean inEscape = false;
+        boolean inMultiComment = false;
+        boolean inSingleComment = false;
 
-        // Removing multi-line comments has to be done carefully.  We need to
-        // preserve the right number of lines from the comment.
+        // We'll work through the string a character at a time pushing it on to the
+        // string builder if we want it, or pushing a space if we don't.
 
-        String[] lines = data.split("\n");
+        StringBuilder out = new StringBuilder();
 
-        b = new StringBuilder();
+        while (cpos < data.length()) {
+            char thisChar = data.charAt(cpos);
+            char nextChar = ' ';
+            if (cpos < data.length() - 1) {
+                nextChar = data.charAt(cpos + 1);
+            }
 
-        boolean inComment = false;
+            // If the last character was a \ then we'll just skip the next character since we
+            // really don't care what it is.
+            if (inEscape) {
+                out.append(thisChar);
+                cpos++;
+                inEscape = false;
+                continue;
+            }
 
-        for(String line : lines) {
-            if(!inComment) {
+            // If we're not currently escaped and we get a \ then start escaping.
+            if (thisChar == '\\') {
+                out.append(thisChar);
+                inEscape = true;
+                cpos++;
+                continue;
+            }
 
-                int comment = line.indexOf("//");
-
-                if(comment > -1) {
-                    line = line.substring(0, comment);
+            // If we're currently in a string then keep moving on until the end of the string.
+            // If we hit the closing quote we still want to move on since it'll start a new
+            // string otherwise.
+            if (inString) {
+                out.append(thisChar);
+                if (thisChar == '"') {
+                    inString = false;
                 }
-
-                comment = line.indexOf("/*");
-                int end = line.indexOf("*/");
-
-                if(comment > -1 && end > comment) {
-                    line = line.substring(0, comment);
-                }
-
-                int commentStart = line.indexOf("/*");
-
-                if(commentStart > -1) {
-                    line = line.substring(0, commentStart);
-                    inComment = true;
-                    b.append(line + "\n");
+                cpos++;
+                continue;
+            }
+            
+            // If we're in a single line comment then keep skipping until we hit the end of the line.
+            if (inSingleComment) {
+                if (thisChar == '\n') {
+                    out.append(thisChar);
+                    inSingleComment = false;
+                    cpos++;
                     continue;
                 }
-
-                b.append(line + "\n");
+                cpos++;
                 continue;
             }
 
-            int commentEnd = line.indexOf("*/");
-
-            if(commentEnd > -1) {
-                line = line.substring(commentEnd + 2);
-                b.append(line + "\n");
-                inComment = false;
+            // If we're in a multi-line comment then keep skipping until we
+            // hit the end of comment sequence.  Preserve newlines.
+            if (inMultiComment) {
+                if  (thisChar == '*' && nextChar == '/') {
+                    inMultiComment = false;
+                    cpos++;
+                    cpos++;
+                    continue;
+                }
+                if (thisChar == '\n') {
+                    out.append(thisChar);
+                    cpos++;
+                    continue;
+                }
+                cpos++;
                 continue;
             }
 
-            b.append("\n");
+            // Is this the start of a quote?
+            if (thisChar == '"') {
+                out.append(thisChar);
+                cpos++;
+                inString = true;
+                continue;
+            }
+
+            // How about the start of a single line comment?
+            if (thisChar == '/' && nextChar == '/') {
+                inSingleComment = true;
+                out.append(" ");
+                cpos++;
+                continue;
+            }
+  
+            // The start of a muti-line comment?
+            if (thisChar == '/' && nextChar == '*') {
+                inMultiComment = true;
+                out.append(" ");
+                cpos++;
+                continue;
+            }
+
+            // None of those? Then let's just append.
+            out.append(thisChar);
+            cpos++;
         }
-
-        String out = b.toString();
-        return out;
+                
+        return out.toString();
     }
 
     public String[] gatherIncludes(File f) {
@@ -2677,8 +2734,15 @@ public class Sketch implements MessageConsumer {
 
     public File getCacheFolder() {
         File cacheRoot = Base.getUserCacheFolder();
-        File coreCache = new File(cacheRoot, getCore().getName());
-        File boardCache = new File(coreCache, getBoard().getName());
+        Core c = getCore();
+        File boardCache = new File(cacheRoot, "unknownCache");
+        if (c != null) {
+            Board b = getBoard();
+            if (b != null) {
+                File coreCache = new File(cacheRoot, c.getName());
+                boardCache = new File(coreCache, b.getName());
+            }
+        }
 
         if(!boardCache.exists()) {
             boardCache.mkdirs();

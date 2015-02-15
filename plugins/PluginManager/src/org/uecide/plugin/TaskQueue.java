@@ -151,4 +151,13 @@ public class TaskQueue extends JPanel implements PropertyChangeListener {
         n += finishedList.size();
         return n;
     }
+
+    public QueueWorker getWorkerByName(String o) {
+        for (QueueWorker w : workerList) {
+            if (w.getTaskName().equals(o)) {
+                    return w;
+            }
+        }
+        return null;
+    }
 }

@@ -20,7 +20,10 @@ import java.awt.event.*;
 import say.swing.*;
 import org.json.simple.*;
 
-public abstract class QueueWorker extends SwingWorker<Void, Long> {
+import uk.co.majenko.apt.AptPercentageListener;
+import uk.co.majenko.apt.Package;
+
+public abstract class QueueWorker extends SwingWorker<Void, Long> implements AptPercentageListener {
     Object userObject = null;
     String taskCommand = null;
 
@@ -32,4 +35,8 @@ public abstract class QueueWorker extends SwingWorker<Void, Long> {
     public abstract String getTaskName();
     public abstract String getQueuedDescription();
     public abstract String getActiveDescription();
+
+    public void updatePercentage(Package pkg, int pct) {
+        setProgress(pct);
+    }
 }
