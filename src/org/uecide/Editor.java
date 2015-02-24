@@ -449,7 +449,6 @@ System.err.println(sexy.length());
         theme = "theme." + theme + ".";
 
         sketchContentTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
-        System.err.println("Tree background: " + Base.theme.getColor(theme + "editor.bgcolor"));
         sketchContentTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
         sketchFilesTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
         sketchFilesTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
@@ -1961,6 +1960,7 @@ System.err.println(sexy.length());
                     menu.addSeparator();
 
                     JMenu infoMenu = new JMenu("Info");
+                    infoMenu.add(new JMenuItem("Type code: " + FileType.getType(thisFile)));
                     JMenuItem filePath = new JMenuItem(thisFile.getAbsolutePath());
                     filePath.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -3284,6 +3284,16 @@ System.err.println(sexy.length());
         hardwareMenu.addSeparator();
         addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_BOTTOM);
 
+        item = new JMenuItem("Plugin Manager");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                PluginManager pm = new PluginManager();
+                pm.openWindow(Editor.this);
+            }
+        });
+        toolsMenu.add(item);
+
+
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_TOP);
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_MID);
@@ -3386,7 +3396,7 @@ System.err.println(sexy.length());
 
     }
 
-    public void populateOptionsMenu(JMenu menu) {
+    public synchronized void populateOptionsMenu(JMenu menu) {
         TreeMap<String, String> opts = loadedSketch.getOptionGroups();
 
         menu.removeAll();

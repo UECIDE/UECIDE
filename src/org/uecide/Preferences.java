@@ -136,6 +136,9 @@ public class Preferences {
     JComboBox selectedIconTheme;
     JCheckBox useSystemDecorator;
 
+
+    JCheckBox dlgMissingLibraries;
+
     JList extraPortList;
     DefaultListModel extraPortListModel = new DefaultListModel();
     JTextField portInput;
@@ -407,21 +410,25 @@ public class Preferences {
         JPanel advancedSettings = new JPanel(new GridBagLayout());
         JPanel locationSettings = new JPanel(new GridBagLayout());
         JPanel librarySettings = new JPanel(new GridBagLayout());
+        JPanel dialogSettings = new JPanel(new GridBagLayout());
 
         mainSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
         advancedSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
         locationSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
         librarySettings.setBorder(new EmptyBorder(5, 5, 5, 5));
+        dialogSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         tabs.add(Translate.t("Editor"), mainSettings);
         tabs.add(Translate.t("Compiler"), advancedSettings);
         tabs.add(Translate.t("Locations"), locationSettings);
         tabs.add(Translate.t("Libraries"), librarySettings);
+        tabs.add(Translate.t("Dialogs"), dialogSettings);
 
         populateEditorSettings(mainSettings);
         populateCompilerSettings(advancedSettings);
         populateLocationSettings(locationSettings);
         populateLibrarySettings(librarySettings);
+        populateDialogSettings(dialogSettings);
 
         if(Base.isPosix()) {
             JPanel serialSettings = new JPanel(new GridBagLayout());
@@ -1347,6 +1354,8 @@ public class Preferences {
             Debug.message("Adding library entry " + k);
         }
 
+        Base.preferences.setBoolean("dialogs.hide.missinglibraries", !dlgMissingLibraries.isSelected());
+
         Base.applyPreferences();
         Base.preferences.save();
         Base.cleanAndScanAllSettings();
@@ -1569,5 +1578,26 @@ public class Preferences {
             }
         }
     }
+
+    public void populateDialogSettings(JPanel p) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+
+        p.add(new JLabel("Enable or disable different popup dialogs here."), c);
+
+        c.gridy++;
+
+        dlgMissingLibraries = new JCheckBox("Suggest installing missing libraries");
+        dlgMissingLibraries.setSelected(!Base.preferences.getBoolean("dialogs.hide.missinglibraries"));
+        p.add(dlgMissingLibraries, c);
+        
+    }
 }
+
+
 

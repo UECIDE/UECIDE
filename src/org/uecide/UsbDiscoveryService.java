@@ -20,7 +20,7 @@ public class UsbDiscoveryService extends Service {
     UsbServicesListener listener = null;
 
     public UsbDiscoveryService() {
-        setInterval(1000); // Irelevant for this service really.
+        setInterval(5000); // Irelevant for this service really.
         setName("USB Device Discovery");
     }
 

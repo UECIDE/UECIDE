@@ -1151,7 +1151,7 @@ public class PluginManager implements PropertyChangeListener
                     continue;
                 }
             }
-            if (p.get("Provides").equals(include)) {
+            if (p.get("Provides").replace("-UL-","_").equals(include)) {
                 return p;
             }
         }

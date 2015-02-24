@@ -545,13 +545,16 @@ public class Base {
             synchronized (Editor.editorList) {
                 if(boards.size() == 0) {
                     showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                        Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0));
                 } else if(cores.size() == 0) {
                     showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                    Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0));
                 } else if(compilers.size() == 0) {
                     showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                    Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0));
                 }
             }
         }
@@ -1901,6 +1904,9 @@ public class Base {
                 Debug.message(pluginClasses.toString());
                 for (Class<? extends Plugin> c : pluginClasses) {
                     Debug.message("Found plugin class " + c.getName());
+                    if (c.getName().equals("org.uecide.plugin.PluginManager")) {
+                        continue;
+                    }
                     plugins.put(c.getName(), c);
                 }
             } catch (Exception ex) {
@@ -2845,8 +2851,6 @@ public class Base {
     public static void loadIconSets() {
         iconSets = new HashMap<String, PropertyFile>();
 
-        System.err.println("Loading icon sets...");      
-
         Reflections reflections = new Reflections(new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage("org.uecide"))
                 .setScanners(new ResourcesScanner()));
@@ -2857,7 +2861,6 @@ public class Base {
         for (String icon : icons) {
             PropertyFile pf = new PropertyFile("/" + icon);
             if (pf.get("name") != null) {
-                System.err.println("Icon file " + icon + " = " + pf.get("name"));
                 iconSets.put(pf.get("name"), pf);
             }
         }

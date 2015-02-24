@@ -60,6 +60,9 @@ import org.uecide.Compiler;
 
 import javax.script.*;
 
+import uk.co.majenko.apt.*;
+import uk.co.majenko.apt.Package;
+
 /**
  * The sketch class is the heart of the IDE.  It manages not only what files a
  * sketch consists of, but also deals with compilation of the sketch and uploading
@@ -102,6 +105,7 @@ public class Sketch implements MessageConsumer {
 
     public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
     public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
+    public ArrayList<String> unknownLibraries = new ArrayList<String>();
 
     public TreeMap<String, String> settings = new TreeMap<String, String>();
     public TreeMap<String, String> parameters = new TreeMap<String, String>();
@@ -1131,6 +1135,7 @@ public class Sketch implements MessageConsumer {
         }
 
         importedLibraries = new HashMap<String, Library>();
+        unknownLibraries = new ArrayList<String>();
 
         int processed = 0;
 
@@ -1162,6 +1167,9 @@ public class Sketch implements MessageConsumer {
 
                 if(lib == null) {
                     newinclist.put(incfile, LIB_SYSTEM);
+                    if (unknownLibraries.indexOf(incfile) == -1) {
+                        unknownLibraries.add(incfile);
+                    }
                     continue;
                 }
 
@@ -1205,7 +1213,7 @@ public class Sketch implements MessageConsumer {
         }
     }
 
-    public boolean prepare() {
+    public synchronized boolean prepare() {
         PropertyFile props = mergeAllProperties();
 
         if(getBoard() == null) {
@@ -2280,6 +2288,29 @@ public class Sketch implements MessageConsumer {
         return libs;
     }
 
+    public void installLibrary(APT apt, Package pkg, boolean recurse) {
+        pkg = apt.getPackage(pkg.getName());
+
+        if (recurse) {
+            Package[] deps = apt.resolveDepends(pkg);
+            if (deps != null) {
+                for (Package p : deps) {
+                    if (!apt.isInstalled(p)) {
+                        installLibrary(apt, p, false);
+                    }
+                }
+            }
+        }
+
+        if (!apt.isInstalled(pkg)) {
+            bullet2("Downloading " + pkg.getName());
+            pkg.fetchPackage(Base.getSettingsFile("apt/cache"));
+        
+            bullet2("Installing " + pkg.getName());
+            pkg.extractPackage(Base.getSettingsFile("apt/cache"), Base.getSettingsFile("apt/db/packages"), Base.getSettingsFolder());
+        }
+    }
+
     public boolean compile() {
         
         long startTime = System.currentTimeMillis();
@@ -2313,6 +2344,72 @@ public class Sketch implements MessageConsumer {
 
         settings.put("includes", generateIncludes());
         settings.put("filename", sketchName);
+
+        if (!Base.preferences.getBoolean("dialogs.hide.missinglibraries")) {
+            if (editor != null) {
+                if (unknownLibraries.size() > 0) {
+                    PluginManager pm = new PluginManager();
+                    HashMap<String, Package> foundPackages = new HashMap<String, Package>();
+                    for (String l : unknownLibraries) {
+                        Package p = pm.findLibraryByInclude(getCore(), l);
+                        if (p != null) {
+                            foundPackages.put(l, p);
+                        }
+                    }
+
+                    if (foundPackages.size() > 0) {
+                        JPanel panel = new JPanel();
+                        panel.setLayout(new GridBagLayout());
+                        GridBagConstraints c = new GridBagConstraints();
+
+                        c.gridwidth = 2;
+                        c.gridx = 0;
+                        c.gridy = 0;
+                        c.fill = GridBagConstraints.HORIZONTAL;
+                        c.anchor = GridBagConstraints.LINE_START;
+
+                        panel.add(new JLabel("I have identified some libraries you may be missing:"), c);
+                        
+                        c.gridy++;
+                        panel.add(new JLabel(" "), c);
+
+                        c.gridwidth = 1;
+
+                        for(String l : foundPackages.keySet()) {
+                            c.gridx = 0;
+                            c.gridy++;
+                            panel.add(new JLabel(l + ": "), c);
+                            c.gridx = 1;
+                            panel.add(new JLabel(foundPackages.get(l).getName()), c);
+                        }
+                        c.gridx = 0;
+                        c.gridy++;
+                        c.gridwidth = 2;
+                        panel.add(new JLabel(" "), c);
+
+                        c.gridy++;
+                        panel.add(new JLabel("Do you want me to install these libraries for you?"), c);
+
+                        JCheckBox cb = new JCheckBox("Never ask me again");
+                        Object[] options = {cb, "Yes", "No"};
+                        int n = JOptionPane.showOptionDialog(editor, panel, "Missing Libraries", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+
+                        if (cb.isSelected()) {
+                            Base.preferences.setBoolean("dialogs.hide.missinglibraries", true);
+                        }
+
+                        if (n == 1) {
+                            bullet("Installing missing libraries...");
+                            for (Package p : foundPackages.values()) {
+                                installLibrary(pm.getApt(), p, true);
+                            }
+                            Base.rescanLibraries();
+                            settings.put("includes", generateIncludes());
+                        }
+                    }
+                }
+            }
+        }
 
         if(doPrePurge) {
             doPrePurge = false;
