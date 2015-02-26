@@ -582,43 +582,17 @@ public class PluginManager implements PropertyChangeListener
         }
     };
 
-    public void updateTree() {
-        apt.initRepository();
-        TreePath[] paths = editor.saveTreeState(tree);
+    public Package lastAdded = null;
 
-        treeRoot.removeAllChildren();
-
+    public int addSectionToTree(DefaultMutableTreeNode libsNode, String section)  {
+        int fullNodeCount = 0;
         String searchCriteria = searchBox.getText().toLowerCase();
         String searchCriteriaCase = searchBox.getText();
         boolean doSearch = !searchCriteria.equals("");
-
-        int fullNodeCount = 0;
-        Package lastAdded = null;
-
-        DefaultMutableTreeNode pluginsNode = new DefaultMutableTreeNode("Plugins");
-        Package[] packages = apt.getPackages("plugins");
-        for (Package p : packages) {
-            if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                continue;
-            }
-            if (doSearch) {
-                if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                    continue;
-                }
-            }
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-            node.setUserObject(p);
-            pluginsNode.add(node);
-        }
-        if (pluginsNode.getChildCount() > 0) {
-            treeRoot.add(pluginsNode);
-        }
-
-        DefaultMutableTreeNode libsNode = new DefaultMutableTreeNode("Libraries");
-        String[] groups = apt.getUnique("libraries", "Group");
+        String[] groups = apt.getUnique(section, "Group");
         for (String group : groups) {
             DefaultMutableTreeNode gnode = new DefaultMutableTreeNode(group);
-            packages = apt.getEqual("libraries", "Group", group);
+            Package[] packages = apt.getEqual(section, "Group", group);
             ArrayList<String> subGroups = new ArrayList<String>();
             for (Package p : packages) {
                 String subGroup = p.get("Subgroup");
@@ -708,7 +682,7 @@ public class PluginManager implements PropertyChangeListener
                 libsNode.add(gnode);
             }
         }
-        packages = apt.getEqual("libraries", "Group", null);
+        Package[] packages = apt.getEqual(section, "Group", null);
         for (Package p : packages) {
             if (
                 (p.get("Family") == null) ||
@@ -737,223 +711,45 @@ public class PluginManager implements PropertyChangeListener
                 fullNodeCount++;
             }
         }
+        return fullNodeCount;
+    }
+
+    public void updateTree() {
+        apt.initRepository();
+        TreePath[] paths = editor.saveTreeState(tree);
+
+        treeRoot.removeAllChildren();
+
+
+        int fullNodeCount = 0;
+        lastAdded = null;
+
+        DefaultMutableTreeNode pluginsNode = new DefaultMutableTreeNode("Plugins");
+        fullNodeCount += addSectionToTree(pluginsNode, "plugins");
+        if (pluginsNode.getChildCount() > 0) {
+            treeRoot.add(pluginsNode);
+        }
+
+        DefaultMutableTreeNode libsNode = new DefaultMutableTreeNode("Libraries");
+        fullNodeCount += addSectionToTree(libsNode, "libraries");
         if (libsNode.getChildCount() > 0) {
             treeRoot.add(libsNode);
         }
 
         DefaultMutableTreeNode boardsNode = new DefaultMutableTreeNode("Boards");
-        groups = apt.getUnique("boards", "Group");
-        for (String group : groups) {
-            DefaultMutableTreeNode gnode = new DefaultMutableTreeNode(group);
-            packages = apt.getEqual("boards", "Group", group);
-            int count = 0;
-            for (Package p : packages) {
-                if (
-                    (p.get("Family") == null) ||
-                    (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                    (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-                ) {
-                    if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                        continue;
-                    }
-                    if (doSearch) {
-                        if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                }
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                            continue;
-                        }
-                    }
-                    count++;
-                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                    node.setUserObject(p);
-                    gnode.add(node);
-                    lastAdded = p;
-                    fullNodeCount++;
-                }
-            }
-            if (count > 0) {
-                boardsNode.add(gnode);
-            }
-        }
-        packages = apt.getEqual("boards", "Group", null);
-        for (Package p : packages) {
-            if (
-                (p.get("Family") == null) ||
-                (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-            ) {
-                    if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                        continue;
-                    }
-                    if (doSearch) {
-                        if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                }
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                            continue;
-                        }
-                    }
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                node.setUserObject(p);
-                boardsNode.add(node);
-                lastAdded = p;
-                fullNodeCount++;
-            }
-        }
+        fullNodeCount += addSectionToTree(boardsNode, "boards");
         if (boardsNode.getChildCount() > 0) {
             treeRoot.add(boardsNode);
         }
 
         DefaultMutableTreeNode coresNode = new DefaultMutableTreeNode("Cores");
-        groups = apt.getUnique("cores", "Group");
-        for (String group : groups) {
-            DefaultMutableTreeNode gnode = new DefaultMutableTreeNode(group);
-            packages = apt.getEqual("cores", "Group", group);
-            int count = 0;
-            for (Package p : packages) {
-                if (
-                    (p.get("Family") == null) ||
-                    (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                    (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-                ) {
-                    if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                        continue;
-                    }
-                    if (doSearch) {
-                        if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                }
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                            continue;
-                        }
-                    }
-                    count++;
-                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                    node.setUserObject(p);
-                    lastAdded = p;
-                    fullNodeCount++;
-                    gnode.add(node);
-                }
-            }
-            if (count > 0) {
-                coresNode.add(gnode);
-            }
-        }
-        packages = apt.getEqual("cores", "Group", null);
-        for (Package p : packages) {
-            if (
-                (p.get("Family") == null) ||
-                (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-            ) {
-                    if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                        continue;
-                    }
-                    if (doSearch) {
-                        if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                }
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                            continue;
-                        }
-                    }
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                node.setUserObject(p);
-                lastAdded = p;
-                fullNodeCount++;
-                coresNode.add(node);
-            }
-        }
+        fullNodeCount += addSectionToTree(coresNode, "cores");
         if (coresNode.getChildCount() > 0) {
             treeRoot.add(coresNode);
         }
 
         DefaultMutableTreeNode compilersNode = new DefaultMutableTreeNode("Compilers");
-        groups = apt.getUnique("compilers", "Group");
-        for (String group : groups) {
-            DefaultMutableTreeNode gnode = new DefaultMutableTreeNode(group);
-            packages = apt.getEqual("compilers", "Group", group);
-            int count =0;
-            for (Package p : packages) {
-                if (
-                    (p.get("Family") == null) ||
-                    (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                    (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-                ) {
-                    if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                        continue;
-                    }
-                    if (doSearch) {
-                        if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                }
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                            continue;
-                        }
-                    }
-                    count++;
-                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                    node.setUserObject(p);
-                    lastAdded = p;
-                    fullNodeCount++;
-                    gnode.add(node);
-                }
-            }
-            if (count > 0) {
-                compilersNode.add(gnode);
-            }
-        }
-        packages = apt.getEqual("compilers", "Group", null);
-        for (Package p : packages) {
-            if (
-                (p.get("Family") == null) ||
-                (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-            ) {
-                    if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                        continue;
-                    }
-                    if (doSearch) {
-                        if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                }
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                            continue;
-                        }
-                    }
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                node.setUserObject(p);
-                lastAdded = p;
-                fullNodeCount++;
-                compilersNode.add(node);
-            }
-        }
-
+        fullNodeCount += addSectionToTree(compilersNode, "compilers");
         if (compilersNode.getChildCount() > 0) {
             treeRoot.add(compilersNode);
         }

@@ -2755,6 +2755,10 @@ public class Sketch implements MessageConsumer {
     }
 
     private File compileFile(File src) {
+        return compileFile(src, buildFolder);
+    }
+
+    private File compileFile(File src, File fileBuildFolder) {
 
         String fileName = src.getName();
         String recipe = null;
@@ -2801,8 +2805,7 @@ public class Sketch implements MessageConsumer {
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
         String objExt = parseString(props.get("compiler.object","o"));
-        File dest = new File(buildFolder, fileName + "." +objExt);
-        //File dest = new File(buildFolder, baseName + "." + objExt);
+        File dest = new File(fileBuildFolder, fileName + "." +objExt);
 
         if(dest.exists()) {
             if(dest.lastModified() > src.lastModified()) {
@@ -2810,7 +2813,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        settings.put("build.path", buildFolder.getAbsolutePath());
+        settings.put("build.path", fileBuildFolder.getAbsolutePath());
         settings.put("source.name", src.getAbsolutePath());
         settings.put("object.name", dest.getAbsolutePath());
 
@@ -2899,6 +2902,9 @@ public class Sketch implements MessageConsumer {
             archiveDate = archive.lastModified();
         }
 
+        File coreBuildFolder = new File(buildFolder, "libCore_" + name);
+        coreBuildFolder.mkdirs();
+
         ArrayList<File> fileList = new ArrayList<File>();
 
         for(File f : core) {
@@ -2913,9 +2919,10 @@ public class Sketch implements MessageConsumer {
 
         for(File f : fileList) {
             if(f.lastModified() > archiveDate) {
-                File out = compileFile(f);
+                File out = compileFile(f, coreBuildFolder);
 
                 if(out == null) {
+                    coreBuildFolder.delete();
                     return false;
                 }
 
@@ -2923,6 +2930,8 @@ public class Sketch implements MessageConsumer {
                 boolean ok = executeKey("compile.ar", "compile.ar.environment");
 
                 if(!ok) {
+                    out.delete();
+                    coreBuildFolder.delete();
                     return false;
                 }
 
@@ -2930,6 +2939,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
+        coreBuildFolder.delete();
         return true;
     }
 
@@ -2962,6 +2972,9 @@ public class Sketch implements MessageConsumer {
             archiveDate = archive.lastModified();
         }
 
+        File libBuildFolder = new File(buildFolder, "lib" + lib.getLinkName());
+        libBuildFolder.mkdirs();
+
         ArrayList<File> fileList = lib.getSourceFiles(this);
 
         String origIncs = settings.get("includes");
@@ -2973,7 +2986,7 @@ public class Sketch implements MessageConsumer {
 
         for(File f : fileList) {
             if(f.lastModified() > archiveDate) {
-                File out = compileFile(f);
+                File out = compileFile(f, libBuildFolder);
 
                 if(out == null) {
                     purgeLibrary(lib);
@@ -2983,6 +2996,7 @@ public class Sketch implements MessageConsumer {
                         editor.updateLibrariesTree();
                     }
 
+                    libBuildFolder.delete();
                     return false;
                 }
 
@@ -2997,6 +3011,8 @@ public class Sketch implements MessageConsumer {
                         editor.updateLibrariesTree();
                     }
 
+                    out.delete();
+                    libBuildFolder.delete();
                     return false;
                 }
 
@@ -3021,6 +3037,8 @@ public class Sketch implements MessageConsumer {
         if(editor != null) {
             editor.updateLibrariesTree();
         }
+
+        libBuildFolder.delete();
 
         return true;
     }
@@ -3522,7 +3540,11 @@ public class Sketch implements MessageConsumer {
                 }
 
             } catch(Exception ignored) {
-                Base.error(ignored);
+                if (ignored.getMessage().equals("Stream closed")) {
+                    error("Cancelled");
+                } else {
+                    Base.error(ignored);
+                }
             }
 
         result = runningProcess.exitValue();

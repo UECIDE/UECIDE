@@ -421,8 +421,10 @@ System.err.println(sexy.length());
 
         JButton refreshButton = Editor.addToolbarButton(treeToolBar, "actions", "refresh", "Refresh Project Tree", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                loadedSketch.rescanFileTree();
-                updateTree();
+                if (!compilerRunning()) {
+                    loadedSketch.rescanFileTree();
+                    updateTree();
+                }
             }
         });
         treeToolBar.add(refreshButton);

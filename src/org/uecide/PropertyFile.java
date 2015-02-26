@@ -71,7 +71,7 @@ public class PropertyFile {
         userFile = null;
 
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(user)));
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(user), "UTF-8"));
             properties = new Properties();
 
             if(br != null) {
@@ -93,7 +93,7 @@ public class PropertyFile {
         userFile = user;
 
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(defaults)));
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(defaults), "UTF-8"));
             defaultProperties = new Properties();
 
             if(br != null) {
@@ -106,10 +106,11 @@ public class PropertyFile {
 
             if(user != null) {
                 if(user.exists()) {
-                    BufferedReader r = new BufferedReader(new FileReader(user));
+                    FileInputStream fis = new FileInputStream(user);
+                    BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
                     loadProperties(properties, r);
-//                    properties.load(r);
                     r.close();
+                    fis.close();
                 }
             }
         } catch(Exception e) {
@@ -130,10 +131,11 @@ public class PropertyFile {
         if(defaults != null) {
             if(defaults.exists()) {
                 try {
-                    BufferedReader r = new BufferedReader(new FileReader(defaults));
-                    loadProperties(defaultProperties, r);
-//                    defaultProperties.load(r);
+                    FileInputStream fis = new FileInputStream(defaults);
+                    BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    loadProperties(properties, r);
                     r.close();
+                    fis.close();
                 } catch(Exception e) {
                     Base.error(e);
                 }
@@ -145,10 +147,11 @@ public class PropertyFile {
         if(user != null) {
             if(user.exists()) {
                 try {
-                    BufferedReader r = new BufferedReader(new FileReader(user));
+                    FileInputStream fis = new FileInputStream(user);
+                    BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
                     loadProperties(properties, r);
-//                    properties.load(r);
                     r.close();
+                    fis.close();
                 } catch(Exception e) {
                     Base.error(e);
                 }
@@ -588,10 +591,11 @@ public class PropertyFile {
                     // properties object and only replace the old ones with the new if it
                     // is all successful.
                     Properties newProperties = new Properties(defaultProperties);
-                    BufferedReader r = new BufferedReader(new FileReader(user));
-                    loadProperties(newProperties, r);
-//                    newProperties.load(r);
+                    FileInputStream fis = new FileInputStream(user);
+                    BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    loadProperties(properties, r);
                     r.close();
+                    fis.close();
                     properties = newProperties;
                 } catch(Exception e) {
                     Base.error(e);
