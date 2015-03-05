@@ -43,6 +43,8 @@ import org.uecide.plugin.*;
 import org.uecide.builtin.BuiltinCommand;
 import org.uecide.varcmd.VariableCommand;
 
+import uk.co.majenko.apt.*;
+import uk.co.majenko.apt.Package;
 
 import java.lang.reflect.*;
 
@@ -77,7 +79,7 @@ import org.reflections.scanners.*;
  *  location for application data, and a selection of useful
  *  helper functions.
  */
-public class Base {
+public class Base implements AptPercentageListener {
 
     public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
 
@@ -227,6 +229,18 @@ public class Base {
         cli.addParameter("purge", "", Boolean.class, "Purge the cache files");
         cli.addParameter("help", "", Boolean.class, "This help text");
 
+        cli.addParameter("update", "", Boolean.class, "Update the APT repositories");
+        cli.addParameter("install", "package", String.class, "Install a package");
+        cli.addParameter("remove", "package", String.class, "Uninstall a package");
+        cli.addParameter("upgrade", "", Boolean.class, "Upgrade all packages");
+        cli.addParameter("search", "term", String.class, "Search packages for a term");
+        cli.addParameter("list", "", Boolean.class, "List packages");
+        cli.addParameter("section", "name", String.class, "Restrict to just one section");
+        cli.addParameter("group", "name", String.class, "Restrict to just one group");
+        cli.addParameter("subgroup", "name", String.class, "Restrict to just one subgroup");
+        cli.addParameter("family", "name", String.class, "Restrict to just one family");
+        cli.addParameter("force", "", Boolean.class, "Force an operation to succeed");
+
         cli.process(args);
 
         headless = cli.isSet("headless");
@@ -295,6 +309,173 @@ public class Base {
         preferences.setPlatformAutoOverride(true);
 
         platform.setSettingsFolderEnvironmentVariable();
+
+        
+        if (cli.isSet("update")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            apt.update();
+            System.exit(0);
+        }
+
+        if (cli.isSet("upgrade")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            Package[] pl = apt.getUpgradeList();
+            for (Package p : pl) {
+                System.out.print("Upgrading " + p.getName() + "...");
+                p.attachPercentageListener(this);
+                apt.upgradePackage(p);
+                System.out.println("...done.");
+            }
+            System.exit(0);
+        }
+
+        if (cli.isSet("install")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            String packageName = cli.getString("install");
+            if (packageName == null) {
+                System.err.println("Please specify a package to install");
+                System.exit(10);
+            }
+
+            Package p = apt.getPackage(packageName);
+            if (p == null) {
+                System.err.println("Unable to find package " + packageName);
+                System.err.println("Try using --search to find the package.");
+                System.exit(10);
+            }
+
+            System.out.print("Installing " + p.getName() + "...");
+            p.attachPercentageListener(this);
+            apt.installPackage(p);
+            System.out.println("...done.");
+            System.exit(0);
+        }
+            
+        if (cli.isSet("remove")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            String packageName = cli.getString("remove");
+            if (packageName == null) {
+                System.err.println("Please specify a package to uninstall");
+                System.exit(10);
+            }
+
+            Package p = apt.getPackage(packageName);
+            if (p == null) {
+                System.err.println("Unable to find package " + packageName);
+                System.err.println("Try using --search to find the package.");
+                System.exit(10);
+            }
+
+            System.out.print("Uninstalling " + p.getName() + "...");
+            p.attachPercentageListener(this);
+            String ret = apt.uninstallPackage(p, cli.isSet("force"));
+            if (ret == null) {
+                System.out.println("...done.");
+            } else {
+                System.err.println("");
+                System.err.println(ret);
+                System.exit(10);
+            }
+            System.exit(0);
+        }
+
+        if (cli.isSet("list")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            Package[] pkgs = apt.getPackages();
+            String format = "%-50s %10s %10s %s";
+            System.out.println(String.format(format, "Package", "Installed", "Available", ""));
+            ArrayList<Package> out = new ArrayList<Package>();
+            for (Package p : pkgs) {
+                if (cli.isSet("section")) {
+                    if (p.get("Section") == null) { continue; }
+                    if (!p.get("Section").equals(cli.getString("section"))) { continue; }
+                }
+                if (cli.isSet("family")) {
+                    if (p.get("Family") == null) { continue; }
+                    if (!p.get("Family").equals(cli.getString("family"))) { continue; }
+                }
+                if (cli.isSet("group")) {
+                    if (p.get("Group") == null) { continue; }
+                    if (!p.get("Group").equals(cli.getString("group"))) { continue; }
+                }
+                if (cli.isSet("subgroup")) {
+                    if (p.get("Subgroup") == null) { continue; }
+                    if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
+                }
+
+                String name = p.getName();
+                Package instPack = apt.getInstalledPackage(p.getName());
+                uk.co.majenko.apt.Version avail = p.getVersion();
+                uk.co.majenko.apt.Version inst = null;
+                String msg = "";
+                if (instPack != null) {
+                    inst = instPack.getVersion();
+                    if (avail.compareTo(inst) > 0) {
+                        msg = "UPDATE!";
+                    }
+                }
+                System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+                System.out.println("  " + p.getDescriptionLineOne());
+
+            }
+            System.exit(0);
+        }
+                
+        if (cli.isSet("search")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            Package[] pkgs = apt.getPackages();
+            String format = "%-50s %10s %10s %s";
+            System.out.println(String.format(format, "Package", "Installed", "Available", ""));
+            ArrayList<Package> out = new ArrayList<Package>();
+            String term = cli.getString("search").toLowerCase();
+            for (Package p : pkgs) {
+                if (cli.isSet("section")) {
+                    if (p.get("Section") == null) { continue; }
+                    if (!p.get("Section").equals(cli.getString("section"))) { continue; }
+                }
+                if (cli.isSet("family")) {
+                    if (p.get("Family") == null) { continue; }
+                    if (!p.get("Family").equals(cli.getString("family"))) { continue; }
+                }
+                if (cli.isSet("group")) {
+                    if (p.get("Group") == null) { continue; }
+                    if (!p.get("Group").equals(cli.getString("group"))) { continue; }
+                }
+                if (cli.isSet("subgroup")) {
+                    if (p.get("Subgroup") == null) { continue; }
+                    if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
+                }
+
+                String name = p.getName();
+                Package instPack = apt.getInstalledPackage(p.getName());
+                uk.co.majenko.apt.Version avail = p.getVersion();
+                uk.co.majenko.apt.Version inst = null;
+                String msg = "";
+                if (instPack != null) {
+                    inst = instPack.getVersion();
+                    if (avail.compareTo(inst) > 0) {
+                        msg = "UPDATE!";
+                    }
+                }
+                String comp = p.getName() + " " + p.getDescription();
+                if (comp.toLowerCase().contains(term)) {
+                    System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+                    System.out.println("  " + p.getDescriptionLineOne());
+                }
+
+            }
+            System.exit(0);
+        }
+                
+
+        //cli.addParameter("search", "term", String.class, "Search packages for a term");
+
 
         Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
         Debug.setSize(new Dimension(preferences.getInteger("debug.window.width"), preferences.getInteger("debug.window.height")));
@@ -2937,6 +3118,16 @@ public class Base {
         comp.setFont(f);
         comp.setForeground(fg);
 
+    }
+
+    int lastPct = -1;
+    public void updatePercentage(Package p, int pct) {
+        if ((pct % 10) == 0) {
+            if (pct != lastPct) {
+                lastPct = pct;
+                System.out.print("+");
+            }
+        }
     }
 
 }

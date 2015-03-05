@@ -3889,6 +3889,24 @@ public class Sketch implements MessageConsumer {
      * it goes to stdout / stderr.                                            *
      **************************************************************************/
 
+    public boolean isWarningMessage(String s) {
+        PropertyFile props = mergeAllProperties();
+        String wRec = props.get("compiler.warning");
+        int wFilename = props.getInteger("compiler.warning.filename", 1);
+        int wLine = props.getInteger("compiler.warning.line", 2);
+        int wMessage = props.getInteger("compiler.warning.message", 3);
+
+        if(wRec != null) {
+            Pattern wPat = Pattern.compile(wRec);
+            Matcher wMat = wPat.matcher(s);
+
+            if(wMat.find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void flagError(String s) {
         if(editor == null) {
             return;
@@ -3954,6 +3972,7 @@ public class Sketch implements MessageConsumer {
                             EditorBase eb = editor.getTab(tabNumber);
                             eb.highlightLine(warningLineNumber - 1, Base.theme.getColor(theme + "editor.compile.warning.bgcolor"));
                             eb.flagLine(warningLineNumber - 1, Base.getIcon("flags", "todo", 16), 0x1001);
+                            link("uecide://error/" + warningLineNumber + "/" + warningFile.getAbsolutePath() + "|Warning at line " + warningLineNumber + " in file " + warningFile.getName());
                         }
 
                         setLineComment(warningFile, warningLineNumber, wMat.group(wMessage));
@@ -4180,6 +4199,10 @@ public class Sketch implements MessageConsumer {
     }
 
     public void error(String s) {
+        if (isWarningMessage(s)) {
+            warning(s);
+            return;
+        }
         flagError(s);
 
         if(!s.endsWith("\n")) {

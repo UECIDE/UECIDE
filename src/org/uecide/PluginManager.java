@@ -165,6 +165,15 @@ public class PluginManager implements PropertyChangeListener
             longDesc += "Usage:\n";
             longDesc += "------\n";
             longDesc += "    #include <" + pe.get("Provides").replace("-UL-","_") + ">\n";
+
+            longDesc += "\n\n----\n\n";
+            longDesc += "Available: ";
+            longDesc += pe.getVersion();
+            Package ipe = apt.getInstalledPackage(pe.getName());
+            if (ipe != null) {
+                longDesc += " Installed: ";
+                longDesc += ipe.getVersion();
+            }
         }
 
         try {
@@ -584,133 +593,136 @@ public class PluginManager implements PropertyChangeListener
 
     public Package lastAdded = null;
 
-    public int addSectionToTree(DefaultMutableTreeNode libsNode, String section)  {
-        int fullNodeCount = 0;
-        String searchCriteria = searchBox.getText().toLowerCase();
-        String searchCriteriaCase = searchBox.getText();
-        boolean doSearch = !searchCriteria.equals("");
-        String[] groups = apt.getUnique(section, "Group");
-        for (String group : groups) {
-            DefaultMutableTreeNode gnode = new DefaultMutableTreeNode(group);
-            Package[] packages = apt.getEqual(section, "Group", group);
-            ArrayList<String> subGroups = new ArrayList<String>();
-            for (Package p : packages) {
-                String subGroup = p.get("Subgroup");
-                if (subGroup == null) {
-                    continue;
-                }
-                if (subGroups.indexOf(subGroup) == -1) {
-                    subGroups.add(subGroup);
-                }
-            }
-
-            int groupCount = 0;
-
-            for (String subGroup : subGroups) {
-                DefaultMutableTreeNode subGroupNode = new DefaultMutableTreeNode(subGroup);
-                for (Package p : packages) {
-                    if (p.get("Subgroup") == null) {
-                        continue;
-                    }
-                    if (!p.get("Subgroup").equals(subGroup)) {
-                        continue;
-                    }
-                    if (
-                        (p.get("Family") == null) ||
-                        (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                        (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-                    ) {
-                        if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                            continue;
-                        }
-                        if (doSearch) {
-                            if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                } 
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                                continue;
-                            }
-                        }
-                        DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                        node.setUserObject(p);
-                        subGroupNode.add(node);
-                        lastAdded = p;
-                        fullNodeCount++;
-                    }
-                }
-                if (subGroupNode.getChildCount() > 0) {
-                    gnode.add(subGroupNode);
-                }
-            }
-
-            for (Package p : packages) {
-                if (p.get("Subgroup") != null) {
-                    continue;
-                }
-                if (
-                    (p.get("Family") == null) ||
-                    (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                    (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-                ) {
-                    if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                        continue;
-                    }
-                    if (doSearch) {
-                            if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                }
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                            continue;
-                        }
-                    }
-                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                    node.setUserObject(p);
-                    gnode.add(node);
-                    lastAdded = p;
-                    fullNodeCount++;
-                }
-            }
-            if (gnode.getChildCount() > 0) {
-                libsNode.add(gnode);
-            }
-        }
-        Package[] packages = apt.getEqual(section, "Group", null);
+    public Package[] filterPackages(Package[] packages, String key, String value) {
+        ArrayList<Package> out = new ArrayList<Package>();
         for (Package p : packages) {
-            if (
-                (p.get("Family") == null) ||
-                (p.get("Family").equals(((keyval)(familySelector.getSelectedItem())).key)) ||
-                (((keyval)(familySelector.getSelectedItem())).key.equals("all"))
-            ) {
-                    if (apt.isInstalled(p) && onlyUninstalled.isSelected()) {
-                        continue;
-                    }
-                    if (doSearch) {
-                        if (searchCriteria.startsWith("provides:")) {
-                                if (p.get("Provides") == null) {
-                                    continue;
-                                }
-                                if (!p.get("Provides").replace("-UL-","_").equals(searchCriteriaCase.substring(9).trim())) {
-                                    continue;
-                                }
-                            } else if ((!p.getName().toLowerCase().contains(searchCriteria)) && (!p.getDescription().toLowerCase().contains(searchCriteria))) {
-                            continue;
-                        }
-                    }
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(p.getName());
-                node.setUserObject(p);
-                libsNode.add(node);
-                lastAdded = p;
-                fullNodeCount++;
+            if (p.get(key) != null) {
+                if (p.get(key).equals(value)) {
+                    out.add(p);
+                }
+            } else {
+                if (value == null) {
+                    out.add(p);
+                }
             }
         }
+        return out.toArray(new Package[0]);
+    }
+
+    public String[] getKeyValues(Package[] packages, String key) {
+        ArrayList<String> out = new ArrayList<String>();
+        for (Package p : packages) {
+            String value = p.get(key);
+            if (value != null) {
+                if (out.indexOf(value) == -1) {
+                    out.add(value);
+                }
+            }
+        }
+        String[] o = out.toArray(new String[0]);
+        Arrays.sort(o);
+        return o;
+    }
+
+    public int addPackagesToNode(Package[] packages, DefaultMutableTreeNode node) {
+        int addedNodes = 0;
+        for (Package p : packages) {
+            DefaultMutableTreeNode pNode = new DefaultMutableTreeNode(p);
+            node.add(pNode);
+            addedNodes++;
+            lastAdded = p;
+        }
+        return addedNodes;
+    }
+
+    public Package[] searchPackages(Package[] packages, String search) {
+        ArrayList<Package> out = new ArrayList<Package>();
+        String[] bits = search.split(":");
+        if (bits.length == 2) {
+            bits[0] = bits[0].toLowerCase().trim();
+            bits[1] = bits[1].trim();
+            if (bits[0].equals("provides")) {
+                for (Package p : packages) {
+                    if (p.get("Provides") != null) {
+                        if (p.get("Provides").equals(bits[1])) {
+                            out.add(p);
+                        }
+                    }
+                }
+            }
+        } else {
+            for (Package p : packages) {
+                String pVal = p.getName() + " " + p.getDescription();
+                if (pVal.toLowerCase().contains(search.toLowerCase())) {
+                    out.add(p);
+                }
+            }
+        }
+        return out.toArray(new Package[0]);
+    }
+
+    public Package[] filterPackagesByFamily(Package[] packages, String family) {
+        ArrayList<Package> out = new ArrayList<Package>();
+        for (Package p : packages) {
+            if (p.get("Family") == null) {
+                out.add(p);
+            } else {
+                if (p.get("Family").equals(family)) {
+                    out.add(p);
+                }
+            }
+        }
+        return out.toArray(new Package[0]);
+    }
+
+    public int addSectionToTree(DefaultMutableTreeNode node, String section)  {
+        int fullNodeCount = 0;
+        String searchCriteria = searchBox.getText();
+        String familyCriteria = ((keyval)(familySelector.getSelectedItem())).key;
+
+        Package[] packages = apt.getPackages(section);
+
+        if (!searchCriteria.equals("")) {
+            packages = searchPackages(packages, searchCriteria);
+        }
+
+        if (!familyCriteria.equals("all")) {
+            packages = filterPackagesByFamily(packages, familyCriteria);
+        }
+
+        Arrays.sort(packages);
+
+        String[] groups = getKeyValues(packages, "Group");
+
+        for (String group : groups) {
+            Package[] gPacks = filterPackages(packages, "Group", group);
+            DefaultMutableTreeNode gNode = new DefaultMutableTreeNode(group);
+            String[] subGroups = getKeyValues(gPacks, "Subgroup");
+            for (String subGroup : subGroups) {
+                Package[] sgPacks = filterPackages(gPacks, "Subgroup", subGroup);
+                DefaultMutableTreeNode sgNode = new DefaultMutableTreeNode(subGroup);
+                String[] subSubGroups = getKeyValues(sgPacks, "Subsubgroup");
+                for (String subSubGroup : subSubGroups) {
+                    Package[] ssgPacks = filterPackages(sgPacks, "Subsubgroup", subSubGroup);
+                    DefaultMutableTreeNode ssgNode = new DefaultMutableTreeNode(subSubGroup);
+                    fullNodeCount += addPackagesToNode(ssgPacks, ssgNode);
+                }
+
+                Package[] ssgNullPacks = filterPackages(sgPacks, "Subsubgroup", null);
+                fullNodeCount += addPackagesToNode(ssgNullPacks, sgNode);
+                if (sgNode.getChildCount() > 0) {
+                    gNode.add(sgNode);
+                }
+            }
+
+            Package[] sgNullPacks = filterPackages(gPacks, "Subgroup", null);
+            fullNodeCount += addPackagesToNode(sgNullPacks, gNode);
+            if (gNode.getChildCount() > 0) {
+                node.add(gNode);
+            }
+        }
+        Package[] gNullPacks = filterPackages(packages, "Group", null);
+        fullNodeCount += addPackagesToNode(gNullPacks, node);
         return fullNodeCount;
     }
 
