@@ -241,10 +241,19 @@ public class Base implements AptPercentageListener {
         cli.addParameter("family", "name", String.class, "Restrict to just one family");
         cli.addParameter("force", "", Boolean.class, "Force an operation to succeed");
 
+        cli.addParameter("mkmf", "", Boolean.class, "Generate a Makefile for a sketch");
+        cli.addParameter("force-local-build", "", Boolean.class, "Force compilation within sketch folder");
+        cli.addParameter("force-save-hex", "", Boolean.class, "Force saving HEX file to sketch folder");
+        cli.addParameter("force-join-files", "", Boolean.class, "Force joining INO and PDE files into single CPP file");
+
         cli.process(args);
 
         headless = cli.isSet("headless");
         boolean loadLastSketch = cli.isSet("last-sketch");
+
+        if (cli.isSet("mkmf")) {
+            headless = true;
+        }
 
         Debug.setVerbose(cli.isSet("verbose"));
         if (cli.isSet("debug")) {
@@ -474,7 +483,6 @@ public class Base implements AptPercentageListener {
         }
                 
 
-        //cli.addParameter("search", "term", String.class, "Search packages for a term");
 
 
         Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
@@ -654,6 +662,42 @@ public class Base implements AptPercentageListener {
 
         loadBoards();
 
+        if (cli.isSet("mkmf")) {
+            for(int i = 0; i < args.length; i++) {
+                String path = args[i];
+                if (path.startsWith("--")) {
+                    continue;
+                }
+                Sketch s = new Sketch(path);
+                if(presetPort != null) {
+                    s.setSerialPort(presetPort);
+                }
+
+                if(presetBoard != null) {
+                    s.setBoard(presetBoard);
+                }
+
+                if(presetCore != null) {
+                    s.setCore(presetCore);
+                }
+
+                if(presetCompiler != null) {
+                    s.setCompiler(presetCompiler);
+                }
+
+                if(presetProgrammer != null) {
+                    s.setProgrammer(presetProgrammer);
+                }
+
+                if (purgeCache) {
+                    s.purgeCache();
+                }
+
+                s.generateMakefile();
+            }
+            System.exit(0);
+        }
+
         if(!headless) splashScreen.setMessage("Loading Plugins...", 60);
 
         loadPlugins();
@@ -697,6 +741,10 @@ public class Base implements AptPercentageListener {
                 } catch(IOException e) {
                     error(e);
                 }
+            }
+
+            if (path.equals(".")) {
+                path = System.getProperty("user.dir");
             }
 
             File p = new File(path);
@@ -2930,14 +2978,10 @@ public class Base implements AptPercentageListener {
             mid = out.substring(iStart + 2, iEnd);
 
             if(mid.indexOf(":") > -1) {
-         //       if (sketch != null) {
-                    String command = mid.substring(0, mid.indexOf(":"));
-                    String param = mid.substring(mid.indexOf(":") + 1);
+                String command = mid.substring(0, mid.indexOf(":"));
+                String param = mid.substring(mid.indexOf(":") + 1);
 
-                    mid = runFunctionVariable(sketch, command, param);
-//                } else {
-//                    mid = "[context error]";
-//                }
+                mid = runFunctionVariable(sketch, command, param);
             } else {
                 String tmid = tokens.get(mid);
 
@@ -3129,5 +3173,4 @@ public class Base implements AptPercentageListener {
             }
         }
     }
-
 }

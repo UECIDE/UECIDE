@@ -628,7 +628,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public File createBuildFolder() {
-        if(Base.preferences.getBoolean("compiler.buildinsketch")) {
+        if(Base.preferences.getBoolean("compiler.buildinsketch") || Base.cli.isSet("force-local-build")) {
             if(!parentIsProtected()) {
                 File f = new File(sketchFolder, "build");
 
@@ -1235,7 +1235,7 @@ public class Sketch implements MessageConsumer {
         // We now have the data.  Now, if we're combining files, we shall do it
         // in this map.
 
-        if(Base.preferences.getBoolean("compiler.combine_ino")) {
+        if(Base.preferences.getBoolean("compiler.combine_ino") || Base.cli.isSet("force-join-files")) {
             File mainFile = getMainFile();
             StringBuilder out = new StringBuilder();
 
@@ -1373,7 +1373,7 @@ public class Sketch implements MessageConsumer {
                         }
                     }
 
-                    if(!Base.preferences.getBoolean("compiler.combine_ino")) {
+                    if(!Base.preferences.getBoolean("compiler.combine_ino") || Base.cli.isSet("force-join-files")) {
                         if(!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
                     }
 
@@ -2571,7 +2571,9 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        if(Base.preferences.getBoolean("export.save_hex") && !parentIsProtected()) {
+        if((
+            Base.preferences.getBoolean("export.save_hex") || Base.cli.isSet("force-save-hex")) 
+            && !parentIsProtected()) {
             try {
                 Base.copyFile(new File(buildFolder, sketchName + ".hex"), new File(sketchFolder, sketchName + ".hex"));
 
@@ -4794,5 +4796,28 @@ public class Sketch implements MessageConsumer {
             }
         }
         return null;
+    }
+
+    public void generateFileFromTemplate(String template, File output) {
+        try {
+            String[] lines = template.split("\n");
+            PrintWriter out = new PrintWriter(output);
+            for (String line : lines) {
+                String parsed = parseString(line);
+                out.println(parsed);
+            }
+            out.close();
+        } catch (Exception e) {
+            Base.error(e);
+        }
+    }
+
+    public void generateMakefile() {
+        PropertyFile props = mergeAllProperties();
+        if (props.get("makefile.template") != null) {
+            String template = Base.getFileAsString(new File(parseString(props.get("makefile.template"))));
+            File out = new File(sketchFolder, "Makefile");
+            generateFileFromTemplate(template.toString(), out);
+        }
     }
 }

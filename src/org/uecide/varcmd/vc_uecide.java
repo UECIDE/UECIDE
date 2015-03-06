@@ -15,6 +15,15 @@ public class vc_uecide implements VariableCommand {
         if (args.equals("uuid")) {
             return UUID.randomUUID().toString();
         }
+        if (args.equals("root")) {
+            File jar = Base.getJarLocation();
+            File idir = jar.getParentFile();
+            return idir.getAbsolutePath();
+        }
+        if (args.equals("jar")) {
+            File jar = Base.getJarLocation();
+            return jar.getAbsolutePath();
+        }
         return "unknown";
     }
 }
