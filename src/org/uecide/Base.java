@@ -668,6 +668,9 @@ public class Base implements AptPercentageListener {
                 if (path.startsWith("--")) {
                     continue;
                 }
+                if (path.equals(".")) {
+                    path = System.getProperty("user.dir");
+                }
                 Sketch s = new Sketch(path);
                 if(presetPort != null) {
                     s.setSerialPort(presetPort);
