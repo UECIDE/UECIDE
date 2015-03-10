@@ -246,6 +246,8 @@ public class Base implements AptPercentageListener {
         cli.addParameter("force-save-hex", "", Boolean.class, "Force saving HEX file to sketch folder");
         cli.addParameter("force-join-files", "", Boolean.class, "Force joining INO and PDE files into single CPP file");
 
+        cli.addParameter("version", "", Boolean.class, "Display the UECIDE version number");
+
         cli.process(args);
 
         headless = cli.isSet("headless");
@@ -306,6 +308,11 @@ public class Base implements AptPercentageListener {
             Debug.message("Version: " + systemVersion);
         } catch(Exception e) {
             error(e);
+        }
+
+        if (cli.isSet("version")) {
+            System.out.println("UECIDE Version " + systemVersion + " build " + BUILDNO);
+            System.exit(0);
         }
 
         // Get the initial basic theme data
