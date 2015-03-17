@@ -2399,6 +2399,9 @@ public class Sketch implements MessageConsumer {
                         }
 
                         if (n == 1) {
+                            bullet("Updating repository information...");
+                            APT apt = pm.getApt();
+                            apt.update();
                             bullet("Installing missing libraries...");
                             for (Package p : foundPackages.values()) {
                                 installLibrary(pm.getApt(), p, true);
