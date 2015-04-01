@@ -51,7 +51,7 @@ public class PluginManager implements PropertyChangeListener
     HashMap<String, String> familyNames = new HashMap<String, String>();
 
     public PluginManager() { 
-        File dd = Base.getSettingsFolder();
+        File dd = Base.getDataFolder();
 
         File aptFolder = new File(dd, "apt");
         if (!aptFolder.exists()) {
@@ -274,7 +274,7 @@ public class PluginManager implements PropertyChangeListener
 
         ArrayList<keyval> fams = new ArrayList<keyval>();
 
-        PropertyFile fp = new PropertyFile(Base.getSettingsFile("apt/db/families.db"));
+        PropertyFile fp = new PropertyFile(Base.getDataFile("apt/db/families.db"));
 
         fams.add(new keyval("all", "All Families"));
         for (String k : fp.keySet().toArray(new String[0])) {
@@ -834,7 +834,7 @@ public class PluginManager implements PropertyChangeListener
             public Void doInBackground() {
                 Package p = (Package)getUserObject();
                 p.attachPercentageListener(this);
-                p.fetchPackage(Base.getSettingsFile("apt/cache"));
+                p.fetchPackage(Base.getDataFile("apt/cache"));
                 p.detachPercentageListener();
                 return null;
             }
@@ -923,7 +923,7 @@ public class PluginManager implements PropertyChangeListener
                 if (apt.isInstalled(p)) {
                     String ret = apt.uninstallPackage(p, true);
                 } 
-                p.extractPackage(Base.getSettingsFile("apt/cache"), Base.getSettingsFile("apt/db/packages"), Base.getSettingsFolder());
+                p.extractPackage(Base.getDataFile("apt/cache"), Base.getDataFile("apt/db/packages"), Base.getDataFolder());
                 p.detachPercentageListener();
                 return null;
             }

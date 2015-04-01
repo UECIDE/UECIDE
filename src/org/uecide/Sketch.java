@@ -245,6 +245,7 @@ public class Sketch implements MessageConsumer {
         if(core != null) {
             setCore(core);
         }
+
     }
 
     public Core getCore() {
@@ -1231,6 +1232,12 @@ public class Sketch implements MessageConsumer {
         }
 
         updateLibraryList();
+
+        if (Base.preferences.getBoolean("compiler.generate_makefile")) {
+            if (props.get("makefile.template") != null) {
+                generateMakefile();
+            }
+        }
 
         // We now have the data.  Now, if we're combining files, we shall do it
         // in this map.
@@ -2304,10 +2311,10 @@ public class Sketch implements MessageConsumer {
 
         if (!apt.isInstalled(pkg)) {
             bullet2("Downloading " + pkg.getName());
-            pkg.fetchPackage(Base.getSettingsFile("apt/cache"));
+            pkg.fetchPackage(Base.getDataFile("apt/cache"));
         
             bullet2("Installing " + pkg.getName());
-            pkg.extractPackage(Base.getSettingsFile("apt/cache"), Base.getSettingsFile("apt/db/packages"), Base.getSettingsFolder());
+            pkg.extractPackage(Base.getDataFile("apt/cache"), Base.getDataFile("apt/db/packages"), Base.getDataFolder());
         }
     }
 
@@ -2838,7 +2845,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public File getCacheFolder() {
-        File cacheRoot = Base.getUserCacheFolder();
+        File cacheRoot = Base.getCacheFolder();
         Core c = getCore();
         File boardCache = new File(cacheRoot, "unknownCache");
         if (c != null) {
@@ -4494,15 +4501,15 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean parentIsBoard() {
-        return isChildOf(Base.getUserBoardsFolder());
+        return isChildOf(Base.getBoardsFolder());
     }
 
     public boolean parentIsCore() {
-        return isChildOf(Base.getUserCoresFolder());
+        return isChildOf(Base.getCoresFolder());
     }
 
     public boolean parentIsCompiler() {
-        return isChildOf(Base.getUserCompilersFolder());
+        return isChildOf(Base.getCompilersFolder());
     }
 
     public boolean parentIsProtected() {

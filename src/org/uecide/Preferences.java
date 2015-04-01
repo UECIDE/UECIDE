@@ -109,6 +109,7 @@ public class Preferences {
     JCheckBox combineIno;
     JCheckBox verboseCompile;
     JCheckBox verboseUpload;
+    JCheckBox generateMakefile;
     JCheckBox useSpacesForTabs;
     JCheckBox visibleTabs;
     JCheckBox checkNewVersion;
@@ -121,11 +122,7 @@ public class Preferences {
 
     JTabbedPane tabs;
 
-    JTextField pluginsLocationField;
-    JTextField cacheLocationField;
-    JTextField boardsLocationField;
-    JTextField coresLocationField;
-    JTextField compilersLocationField;
+    JTextField dataLocationField;
     JCheckBox  createBackups;
     JTextField backupNumber;
 
@@ -365,7 +362,7 @@ public class Preferences {
 
 
     static protected void init() {
-        properties = new PropertyFile(Base.getSettingsFile("preferences.txt"), Base.getContentFile("lib/preferences.txt"));
+        properties = new PropertyFile(Base.getDataFile("preferences.txt"), Base.getContentFile("lib/preferences.txt"));
     }
 
 
@@ -988,118 +985,22 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Plugins Location"));
+        lab = new JLabel(Translate.t("Data Location"));
         p.add(lab, c);
         c.gridy++;
         c.gridwidth = 1;
-        pluginsLocationField = new JTextField(40);
-        pluginsLocationField.setEditable(false);
-        p.add(pluginsLocationField, c);
+        dataLocationField = new JTextField(40);
+        dataLocationField.setEditable(false);
+        p.add(dataLocationField, c);
         c.gridx = 1;
         but = new JButton(Translate.t("Select Folder..."));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                File dflt = new File(pluginsLocationField.getText());
-                File file = Base.selectFolder("Select new plugins location", dflt, dialog);
+                File dflt = new File(dataLocationField.getText());
+                File file = Base.selectFolder("Select new data location", dflt, dialog);
 
                 if(file != null) {
-                    pluginsLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Cache Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        cacheLocationField = new JTextField(40);
-        cacheLocationField.setEditable(false);
-        p.add(cacheLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(cacheLocationField.getText());
-                File file = Base.selectFolder("Select new cache location", dflt, dialog);
-
-                if(file != null) {
-                    cacheLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Boards Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        boardsLocationField = new JTextField(40);
-        boardsLocationField.setEditable(false);
-        p.add(boardsLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(boardsLocationField.getText());
-                File file = Base.selectFolder("Select new boards location", dflt, dialog);
-
-                if(file != null) {
-                    boardsLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Cores Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        coresLocationField = new JTextField(40);
-        coresLocationField.setEditable(false);
-        p.add(coresLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(coresLocationField.getText());
-                File file = Base.selectFolder("Select new cores location", dflt, dialog);
-
-                if(file != null) {
-                    coresLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Compilers Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        compilersLocationField = new JTextField(40);
-        compilersLocationField.setEditable(false);
-        p.add(compilersLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(compilersLocationField.getText());
-                File file = Base.selectFolder("Select new compilers location", dflt, dialog);
-
-                if(file != null) {
-                    compilersLocationField.setText(file.getAbsolutePath());
+                    dataLocationField.setText(file.getAbsolutePath());
                 }
             }
         });
@@ -1110,29 +1011,7 @@ public class Preferences {
         c.gridwidth = 1;
         lab = new JLabel(Translate.t("Changing these settings will require a restart of the IDE."));
         p.add(lab, c);
-        c.gridx = 1;
-        c.gridheight = 2;
-
-        but = new JButton(Translate.t("Select All..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(compilersLocationField.getText());
-                File file = Base.selectFolder("Select new location for all items", dflt, dialog);
-
-                if(file != null) {
-                    pluginsLocationField.setText(new File(file, "plugins").getAbsolutePath());
-                    cacheLocationField.setText(new File(file, "cache").getAbsolutePath());
-                    boardsLocationField.setText(new File(file, "boards").getAbsolutePath());
-                    coresLocationField.setText(new File(file, "cores").getAbsolutePath());
-                    compilersLocationField.setText(new File(file, "compilers").getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-
-        c.gridheight = 1;
         c.gridy++;
-
         c.gridx = 0;
         c.gridwidth = 1;
         lab = new JLabel(Translate.t("You will also have to reinstall any plugins, boards, cores and compilers."));
@@ -1220,6 +1099,13 @@ public class Preferences {
             new JCheckBox(Translate.t("Verbose output during upload"));
         p.add(verboseUpload, c);
 
+        c.gridx = 0;
+        c.gridwidth = 2;
+        c.gridy++;
+        generateMakefile =
+            new JCheckBox(Translate.t("Regenerate Makefile each compile (core support required)"));
+        p.add(generateMakefile, c);
+
 
     }
 
@@ -1255,6 +1141,7 @@ public class Preferences {
         Base.preferences.setBoolean("export.save_hex", saveHex.isSelected());
         Base.preferences.setBoolean("compiler.disable_prototypes", disablePrototypes.isSelected());
         Base.preferences.setBoolean("compiler.combine_ino", combineIno.isSelected());
+        Base.preferences.setBoolean("compiler.generate_makefile", generateMakefile.isSelected());
         Base.preferences.setBoolean("compiler.verbose", verboseCompile.isSelected());
         Base.preferences.setBoolean("export.verbose", verboseUpload.isSelected());
         Base.preferences.setBoolean("version.enabled", createBackups.isSelected());
@@ -1290,11 +1177,7 @@ public class Preferences {
         Base.preferences.set("editor.external.command", externalEditorField.getText());
         Base.preferences.set("console.font", consoleFontField.getText());
 
-        Base.preferences.set("location.plugins", pluginsLocationField.getText());
-        Base.preferences.set("location.cache", cacheLocationField.getText());
-        Base.preferences.set("location.boards", boardsLocationField.getText());
-        Base.preferences.set("location.cores", coresLocationField.getText());
-        Base.preferences.set("location.compilers", compilersLocationField.getText());
+        Base.preferences.set("location.data", dataLocationField.getText());
 
         String value = (String)selectedTheme.getSelectedItem();
         String laf = themes.get(value);
@@ -1373,6 +1256,7 @@ public class Preferences {
         saveLss.setSelected(Base.preferences.getBoolean("export.save_lss"));
         disablePrototypes.setSelected(Base.preferences.getBoolean("compiler.disable_prototypes"));
         combineIno.setSelected(Base.preferences.getBoolean("compiler.combine_ino"));
+        generateMakefile.setSelected(Base.preferences.getBoolean("compiler.generate_makefile"));
         verboseCompile.setSelected(Base.preferences.getBoolean("compiler.verbose"));
         verboseUpload.setSelected(Base.preferences.getBoolean("export.verbose"));
 
@@ -1382,11 +1266,7 @@ public class Preferences {
 
         sketchbookLocationField.setText(Base.preferences.get("sketchbook.path"));
 
-        pluginsLocationField.setText(Base.getUserPluginsFolder().getAbsolutePath());
-        cacheLocationField.setText(Base.getUserCacheFolder().getAbsolutePath());
-        boardsLocationField.setText(Base.getUserBoardsFolder().getAbsolutePath());
-        coresLocationField.setText(Base.getUserCoresFolder().getAbsolutePath());
-        compilersLocationField.setText(Base.getUserCompilersFolder().getAbsolutePath());
+        dataLocationField.setText(Base.getDataFolder().getAbsolutePath());
 
         if(autoAssociateBox != null) {
             autoAssociateBox.  setSelected(Base.preferences.getBoolean("platform.auto_file_type_associations"));

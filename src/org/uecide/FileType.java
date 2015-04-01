@@ -91,6 +91,7 @@ public class FileType {
         fileTypeList.put("hex", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("cfg", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("ini", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
+        fileTypeList.put("map", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("txt", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("dat", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("md", new FileTypeInfo(FileType.DOCUMENT, "org.uecide.editors.markdown", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-markdown", GROUP_DOCS));

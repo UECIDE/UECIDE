@@ -650,7 +650,7 @@ public class Library implements Comparable {
         // And now we have our new repo-based libraries.  First scan
         // a list of categories and their folders:
 
-        File repoLibs = Base.getSettingsFile("libraries");
+        File repoLibs = Base.getDataFile("libraries");
         if (!repoLibs.exists()) {
             repoLibs.mkdirs();
         }

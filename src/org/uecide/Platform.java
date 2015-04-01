@@ -86,7 +86,7 @@ public class Platform {
     }
 
 
-    public File getSettingsFolder() throws Exception {
+    public File getSettingsFolder() {
         try {
             // otherwise make a .uecide directory int the user's home dir
             File home = new File(System.getProperty("user.home"));
@@ -114,7 +114,7 @@ public class Platform {
 
     public void setSettingsFolderEnvironmentVariable() {
         String ev = System.getenv("UECIDE");
-        File fn = Base.getSettingsFolder();
+        File fn = Base.getDataFolder();
         String fp = fn.getAbsolutePath();
 
         if(ev == null || !(ev.equals(fp))) {
@@ -172,7 +172,6 @@ public class Platform {
             } catch(Exception e) {
                 e.printStackTrace();
             }
-
         }
     }
 

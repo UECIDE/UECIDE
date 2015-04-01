@@ -562,12 +562,12 @@ System.err.println(sexy.length());
         });
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        if(Base.preferences.getBoolean("editor.fullscreen")) {
-            isFullScreen = true;
-            this.dispose();
-            setUndecorated(true);
-            setExtendedState(JFrame.MAXIMIZED_BOTH);
-        }
+//        if(Base.preferences.getBoolean("editor.fullscreen")) {
+//            isFullScreen = true;
+//            this.dispose();
+//            setUndecorated(true);
+//            setExtendedState(JFrame.MAXIMIZED_BOTH);
+//        }
 
         this.pack();
         this.setVisible(true);
@@ -3105,13 +3105,13 @@ System.err.println(sexy.length());
         editMenu.addSeparator();
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_MID);
         editMenu.addSeparator();
-        item = new JMenuItem("Toggle Full Screen");
-        item.setAccelerator(KeyStroke.getKeyStroke("F11"));
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                toggleFullScreen();
-            }
-        });
+//        item = new JMenuItem("Toggle Full Screen");
+//        item.setAccelerator(KeyStroke.getKeyStroke("F11"));
+//        item.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                toggleFullScreen();
+//            }
+//        });
 
         Base.setFont(item, "menu.entry");
         editMenu.add(item);
@@ -3388,7 +3388,7 @@ System.err.println(sexy.length());
         item = new JMenuItem("Open data folder");
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.openURL(Base.getSettingsFolder().getAbsolutePath());
+                Base.openURL(Base.getDataFolder().getAbsolutePath());
             }
         });
         Base.setFont(item, "menu.entry");
@@ -4968,42 +4968,42 @@ System.err.println(sexy.length());
         }
     }
 
-    public boolean isFullScreen = false;
-    public void toggleFullScreen() {
-        if(!isFullScreen) {
-            this.dispose();
-            setUndecorated(true);
-            setExtendedState(JFrame.MAXIMIZED_BOTH);
-            this.pack();
-            this.setVisible(true);
-            isFullScreen = true;
-            Base.preferences.setBoolean("editor.fullscreen", true);
-            Base.preferences.saveDelay();
-        } else {
-            int width = Base.preferences.getInteger("editor.window.width");
-
-            if(width < Base.preferences.getInteger("editor.window.width.min")) {
-                width = Base.preferences.getInteger("editor.window.width.min");
-            }
-
-            int height = Base.preferences.getInteger("editor.window.height");
-
-            if(height < Base.preferences.getInteger("editor.window.height.min")) {
-                height = Base.preferences.getInteger("editor.window.height.min");
-            }
-
-            this.dispose();
-            setUndecorated(false);
-            setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));
-            setSize(new Dimension(width, height));
-            setExtendedState(JFrame.NORMAL);
-            this.pack();
-            this.setVisible(true);
-            isFullScreen = false;
-            Base.preferences.setBoolean("editor.fullscreen", false);
-            Base.preferences.saveDelay();
-        }
-    }
+//    public boolean isFullScreen = false;
+//    public void toggleFullScreen() {
+//        if(!isFullScreen) {
+//            this.dispose();
+//            setUndecorated(true);
+//            setExtendedState(JFrame.MAXIMIZED_BOTH);
+//            this.pack();
+//            this.setVisible(true);
+//            isFullScreen = true;
+//            Base.preferences.setBoolean("editor.fullscreen", true);
+//            Base.preferences.saveDelay();
+//        } else {
+//            int width = Base.preferences.getInteger("editor.window.width");
+//
+//            if(width < Base.preferences.getInteger("editor.window.width.min")) {
+//                width = Base.preferences.getInteger("editor.window.width.min");
+//            }
+//
+//            int height = Base.preferences.getInteger("editor.window.height");
+//
+//            if(height < Base.preferences.getInteger("editor.window.height.min")) {
+//                height = Base.preferences.getInteger("editor.window.height.min");
+//            }
+//
+//            this.dispose();
+//            setUndecorated(false);
+//            setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));
+//            setSize(new Dimension(width, height));
+//            setExtendedState(JFrame.NORMAL);
+//            this.pack();
+//            this.setVisible(true);
+//            isFullScreen = false;
+//            Base.preferences.setBoolean("editor.fullscreen", false);
+//            Base.preferences.saveDelay();
+//        }
+//    }
 
     void urlClicked(String url) {
         Pattern p = Pattern.compile("^uecide://error/(\\d+)/(.*)$");

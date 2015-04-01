@@ -173,7 +173,7 @@ public class Platform extends org.uecide.Platform {
     }
 
     public void setSettingsFolderEnvironmentVariable() {
-        File settingsFolder = Base.getSettingsFolder();
+        File settingsFolder = Base.getDataFolder();
         String variablePath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, "Environment", "UECIDE");
 
         if(variablePath == null || !(variablePath.equals(settingsFolder.getAbsolutePath()))) {

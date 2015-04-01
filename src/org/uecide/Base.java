@@ -248,10 +248,12 @@ public class Base implements AptPercentageListener {
 
         cli.addParameter("version", "", Boolean.class, "Display the UECIDE version number");
 
-        cli.process(args);
+        String[] argv = cli.process(args);
 
         headless = cli.isSet("headless");
         boolean loadLastSketch = cli.isSet("last-sketch");
+
+        boolean doExit = false;
 
         if (cli.isSet("mkmf")) {
             headless = true;
@@ -321,7 +323,7 @@ public class Base implements AptPercentageListener {
 
         initPlatform();
 
-        preferences = new PropertyFile(getSettingsFile("preferences.txt"), "/org/uecide/config/preferences.txt");
+        preferences = new PropertyFile(getDataFile("preferences.txt"), "/org/uecide/config/preferences.txt");
         preferences.setPlatformAutoOverride(true);
 
         platform.setSettingsFolderEnvironmentVariable();
@@ -331,7 +333,7 @@ public class Base implements AptPercentageListener {
             PluginManager pm = new PluginManager();
             APT apt = pm.getApt();
             apt.update();
-            System.exit(0);
+            doExit = true;
         }
 
         if (cli.isSet("upgrade")) {
@@ -344,7 +346,7 @@ public class Base implements AptPercentageListener {
                 apt.upgradePackage(p);
                 System.out.println("...done.");
             }
-            System.exit(0);
+            doExit = true;
         }
 
         if (cli.isSet("install")) {
@@ -353,21 +355,21 @@ public class Base implements AptPercentageListener {
             String packageName = cli.getString("install");
             if (packageName == null) {
                 System.err.println("Please specify a package to install");
-                System.exit(10);
+                doExit = true;
             }
 
             Package p = apt.getPackage(packageName);
             if (p == null) {
                 System.err.println("Unable to find package " + packageName);
                 System.err.println("Try using --search to find the package.");
-                System.exit(10);
+                doExit = true;
             }
 
             System.out.print("Installing " + p.getName() + "...");
             p.attachPercentageListener(this);
             apt.installPackage(p);
             System.out.println("...done.");
-            System.exit(0);
+            doExit = true;
         }
             
         if (cli.isSet("remove")) {
@@ -376,14 +378,14 @@ public class Base implements AptPercentageListener {
             String packageName = cli.getString("remove");
             if (packageName == null) {
                 System.err.println("Please specify a package to uninstall");
-                System.exit(10);
+                doExit = true;
             }
 
             Package p = apt.getPackage(packageName);
             if (p == null) {
                 System.err.println("Unable to find package " + packageName);
                 System.err.println("Try using --search to find the package.");
-                System.exit(10);
+                doExit = true;
             }
 
             System.out.print("Uninstalling " + p.getName() + "...");
@@ -394,9 +396,9 @@ public class Base implements AptPercentageListener {
             } else {
                 System.err.println("");
                 System.err.println(ret);
-                System.exit(10);
+                doExit = true;
             }
-            System.exit(0);
+            doExit = true;
         }
 
         if (cli.isSet("list")) {
@@ -439,7 +441,7 @@ public class Base implements AptPercentageListener {
                 System.out.println("  " + p.getDescriptionLineOne());
 
             }
-            System.exit(0);
+            doExit = true;
         }
                 
         if (cli.isSet("search")) {
@@ -486,17 +488,18 @@ public class Base implements AptPercentageListener {
                 }
 
             }
+            doExit = true;
+        }
+
+        if (doExit) {
             System.exit(0);
         }
-                
-
-
 
         Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
         Debug.setSize(new Dimension(preferences.getInteger("debug.window.width"), preferences.getInteger("debug.window.height")));
 
         ArrayList<String> bundledPlugins = getResourcesFromJarFile(getJarLocation(), "org/uecide/bundles/plugins/", ".jar");
-        File upf = getUserPluginsFolder();
+        File upf = getPluginsFolder();
 
         for(String s : bundledPlugins) {
             String fn = s.substring(s.lastIndexOf("/") + 1);
@@ -528,7 +531,7 @@ public class Base implements AptPercentageListener {
 
         // Now we reload the theme data with user overrides
         // (we didn't know where they were before)
-        theme = new Theme(getSettingsFile("theme.txt"), "/org/uecide/config/theme.txt");
+        theme = new Theme(getDataFile("theme.txt"), "/org/uecide/config/theme.txt");
         theme.setPlatformAutoOverride(true);
 
         if(!headless) {
@@ -670,11 +673,8 @@ public class Base implements AptPercentageListener {
         loadBoards();
 
         if (cli.isSet("mkmf")) {
-            for(int i = 0; i < args.length; i++) {
-                String path = args[i];
-                if (path.startsWith("--")) {
-                    continue;
-                }
+            for(int i = 0; i < argv.length; i++) {
+                String path = argv[i];
                 if (path.equals(".")) {
                     path = System.getProperty("user.dir");
                 }
@@ -733,12 +733,8 @@ public class Base implements AptPercentageListener {
         boolean opened = false;
 
         // Check if any files were passed in on the command line
-        for(int i = 0; i < args.length; i++) {
-            String path = args[i];
-
-            if(path.startsWith("--")) {
-                continue;
-            }
+        for(int i = 0; i < argv.length; i++) {
+            String path = argv[i];
 
             // Fix a problem with systems that use a non-ASCII languages. Paths are
             // being passed in with 8.3 syntax, which makes the sketch loader code
@@ -746,7 +742,7 @@ public class Base implements AptPercentageListener {
             // http://dev.processing.org/bugs/show_bug.cgi?id=1089
             if(isWindows()) {
                 try {
-                    File file = new File(args[i]);
+                    File file = new File(argv[i]);
                     path = file.getCanonicalPath();
                 } catch(IOException e) {
                     error(e);
@@ -1039,11 +1035,7 @@ public class Base implements AptPercentageListener {
     /*! Load all the compilers into the main compilers list */
     public static void loadCompilers() {
         compilers.clear();
-        loadCompilersFromFolder(getSystemCompilersFolder());
-
-        if(getUserCompilersFolder() != getSystemCompilersFolder()) {
-            loadCompilersFromFolder(getUserCompilersFolder());
-        }
+        loadCompilersFromFolder(getCompilersFolder());
     }
 
     /*! Load any compilers found in the specified folder */
@@ -1089,11 +1081,7 @@ public class Base implements AptPercentageListener {
     /*! Load all the cores into the main cores list */
     public static void loadCores() {
         cores.clear();
-        loadCoresFromFolder(getSystemCoresFolder());
-
-        if(getUserCoresFolder() != getSystemCoresFolder()) {
-            loadCoresFromFolder(getUserCoresFolder());
-        }
+        loadCoresFromFolder(getCoresFolder());
     }
 
     /*! Load any cores found in the specified folder */
@@ -1130,11 +1118,7 @@ public class Base implements AptPercentageListener {
     /*! Load all the boards into the main boards list */
     public static void loadBoards() {
         boards.clear();
-        loadBoardsFromFolder(getSystemBoardsFolder());
-
-        if(getUserBoardsFolder() != getSystemBoardsFolder()) {
-            loadBoardsFromFolder(getUserBoardsFolder());
-        }
+        loadBoardsFromFolder(getBoardsFolder());
     }
 
     /*! Load any boards found in the specified folder */
@@ -1329,54 +1313,6 @@ public class Base implements AptPercentageListener {
         return isLinux() || isFreeBSD() || isMacOS();
     }
 
-    // .................................................................
-
-    public static File getSettingsFolder() {
-        File settingsFolder = null;
-
-        if(overrideSettingsFolder != null) {
-            settingsFolder = new File(overrideSettingsFolder);
-
-            if(!settingsFolder.exists()) {
-                settingsFolder.mkdirs();
-            }
-
-            return settingsFolder;
-        }
-
-        try {
-            settingsFolder = platform.getSettingsFolder();
-        } catch(Exception e) {
-            showError(Translate.t("Problem getting data folder"),
-                      Translate.t("Error getting the data folder."), e);
-            error(e);
-            return null;
-        }
-
-        if(!settingsFolder.exists()) {
-            if(!settingsFolder.mkdirs()) {
-                showError(Translate.t("Settings issues"),
-                          Translate.t("Cannot run because I could not create a folder to store your settings."), null);
-                return null;
-            }
-        }
-
-        return settingsFolder;
-    }
-
-
-    /**
-    * Convenience method to get a File object for the specified filename inside
-    * the settings folder.
-    * For now, only used by Preferences to get the preferences.txt file.
-    * @param filename A file inside the settings folder.
-    * @return filename wrapped as a File object inside the settings folder
-    */
-    public static File getSettingsFile(String filename) {
-        return new File(getSettingsFolder(), filename);
-    }
-
-
     /**
     * Get the path to the platform's temporary folder, by creating
     * a temporary temporary file and getting its parent folder.
@@ -1432,20 +1368,8 @@ public class Base implements AptPercentageListener {
         return getContentFile("hardware");
     }
 
-    public static File getSystemLibrariesFolder() {
-        return getContentFile("libraries");
-    }
-
-    public static String getHardwarePath() {
-        return getHardwareFolder().getAbsolutePath();
-    }
-
     public static File getSketchbookFolder() {
         return new File(preferences.get("sketchbook.path"));
-    }
-
-    public static File getSketchbookHardwareFolder() {
-        return new File(getSketchbookFolder(), "hardware");
     }
 
     protected File getDefaultSketchbookFolder() {
@@ -1454,10 +1378,6 @@ public class Base implements AptPercentageListener {
         try {
             sketchbookFolder = platform.getDefaultSketchbookFolder();
         } catch(Exception e) { }
-
-        if(sketchbookFolder == null) {
-            sketchbookFolder = promptSketchbookLocation();
-        }
 
         // create the folder if it doesn't exist already
         boolean result = true;
@@ -1473,34 +1393,6 @@ public class Base implements AptPercentageListener {
 
         return sketchbookFolder;
     }
-
-
-    /**
-    * Check for a new sketchbook location.
-    */
-    static protected File promptSketchbookLocation() {
-        File folder = null;
-
-        folder = new File(System.getProperty("user.home"), "sketchbook");
-
-        if(!folder.exists()) {
-            folder.mkdirs();
-            return folder;
-        }
-
-        String prompt = Translate.t("Select (or create new) folder for sketches...");
-        folder = Base.selectFolder(prompt, null, null);
-
-        if(folder == null) {
-            System.exit(0);
-        }
-
-        return folder;
-    }
-
-
-    // .................................................................
-
 
     /**
     * Implements the cross-platform headache of opening URLs
@@ -2123,7 +2015,7 @@ public class Base implements AptPercentageListener {
     }
 
     public static void loadPlugins() {
-        File folder = getUserPluginsFolder();
+        File folder = getPluginsFolder();
         Debug.message("Loading plugins from " + folder);
         File[] files = folder.listFiles();
         if (files != null) {
@@ -2302,146 +2194,42 @@ public class Base implements AptPercentageListener {
         return temp;
     }
 
-    static public File getUserCacheFolder() {
-        File uf = preferences.getFile("location.cache");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
+    static public File getDataFolder() {
+        File out = null;
+        if (overrideSettingsFolder != null) {
+            out = new File(overrideSettingsFolder);
+        } else {
+            if ((preferences != null) && (preferences.getFile("location.data") != null)) {
+                out = preferences.getFile("location.data");
+            } else {
+                out = platform.getSettingsFolder();
             }
-
-            return uf;
         }
-
-        File f = getSettingsFile("cache");
-
-        if(!f.exists()) {
-            f.mkdirs();
+        if (!out.exists()) {
+            out.mkdirs();
         }
-
-        return f;
+        return out;
+    }
+    
+    static public File getDataFolder(String dir) {
+        File out = new File(getDataFolder(), dir);
+        if (!out.exists()) {
+            out.mkdirs();
+        }
+        return out;
     }
 
-
-    static public File getUserCoresFolder() {
-        File uf = preferences.getFile("location.cores");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
-            }
-
-            return uf;
-        }
-
-        File f = getSettingsFile("cores");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
+    static public File getDataFile(String file) {
+        return new File(getDataFolder(), file);
     }
-
-    static public File getSystemCoresFolder() {
-        return new File(getHardwareFolder(), "cores");
-    }
-
-    static public File getUserBoardsFolder() {
-        File uf = preferences.getFile("location.boards");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
-            }
-
-            return uf;
-        }
-
-        File f = getSettingsFile("boards");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    static public File getSystemBoardsFolder() {
-        return new File(getHardwareFolder(), "boards");
-    }
-
-    static public File getSystemThemesFolder() {
-        return new File(getHardwareFolder(), "themes");
-    }
-
-    static public File getUserThemesFolder() {
-        File tf = preferences.getFile("location.themes");
-
-        if(tf != null) {
-            if(!tf.exists()) {
-                tf.mkdirs();
-            }
-
-            return tf;
-        }
-
-        File f = getSettingsFile("themes");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    static public File getUserPluginsFolder() {
-        File uf = preferences.getFile("location.plugins");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
-            }
-
-            return uf;
-        }
-
-        File f = getSettingsFile("plugins");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    static public File getSystemPluginsFolder() {
-        return getContentFile("plugins");
-    }
-
-    static public File getUserCompilersFolder() {
-        File uf = preferences.getFile("location.compilers");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
-            }
-
-            return uf;
-        }
-
-        File f = getSettingsFile("compilers");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    static public File getSystemCompilersFolder() {
-        return new File(getHardwareFolder(), "compilers");
-    }
+    
+    static public File getCacheFolder() { return getDataFolder("cache"); }
+    static public File getCoresFolder() { return getDataFolder("cores"); }
+    static public File getBoardsFolder() { return getDataFolder("boards"); }
+    static public File getThemesFolder() { return getDataFolder("themes"); }
+    static public File getPluginsFolder() { return getDataFolder("plugins"); }
+    static public File getCompilersFolder() { return getDataFolder("compilers"); }
+    static public File getLibrariesFolder() { return getDataFolder("libraries"); }
 
     static public void errorReport(Thread t, Throwable e) {
         showError("Uncaught Exception", "An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")\n" +
@@ -2794,7 +2582,7 @@ public class Base implements AptPercentageListener {
     }
 
     public static void loadThemes() {
-        File tf = getUserThemesFolder();
+        File tf = getThemesFolder();
         File[] files = tf.listFiles();
 
         for(File f : files) {
