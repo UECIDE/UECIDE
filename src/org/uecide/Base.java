@@ -141,6 +141,8 @@ public class Base implements AptPercentageListener {
 
     public static HashMap<Object, DiscoveredBoard> discoveredBoards = new HashMap<Object, DiscoveredBoard>();
 
+    public static boolean onlineMode = true;
+
     /*! Get a Board from the internal boards list by its short name. */
     public static Board getBoard(String name) {
         return boards.get(name);
@@ -245,6 +247,8 @@ public class Base implements AptPercentageListener {
         cli.addParameter("force-local-build", "", Boolean.class, "Force compilation within sketch folder");
         cli.addParameter("force-save-hex", "", Boolean.class, "Force saving HEX file to sketch folder");
         cli.addParameter("force-join-files", "", Boolean.class, "Force joining INO and PDE files into single CPP file");
+        cli.addParameter("online", "", Boolean.class, "Force online mode");
+        cli.addParameter("offline", "", Boolean.class, "Force offline mode");
 
         cli.addParameter("version", "", Boolean.class, "Display the UECIDE version number");
 
@@ -328,6 +332,17 @@ public class Base implements AptPercentageListener {
 
         platform.setSettingsFolderEnvironmentVariable();
 
+        if (preferences.getBoolean("network.offline")) {
+            setOfflineMode();
+        }
+
+        if (cli.isSet("online")) {
+            setOnlineMode();
+        }
+
+        if (cli.isSet("offline")) {
+            setOfflineMode();
+        }
         
         if (cli.isSet("update")) {
             PluginManager pm = new PluginManager();
@@ -2029,7 +2044,7 @@ public class Base implements AptPercentageListener {
                 }
             }
 
-            Reflections pluginReflections = new Reflections("");
+            Reflections pluginReflections = new Reflections("org.uecide.plugin");
             try {
                 Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
                 Debug.message(pluginClasses.toString());
@@ -2524,13 +2539,30 @@ public class Base implements AptPercentageListener {
             in.close();
             return new Version(data);
         } catch(Exception e) {
-            error(e);
+            // Unable to get new version details - return nothing.
+            // Also switch to offline mode since there was an error.
+            onlineMode = false;
         }
 
         return null;
     }
 
+    public static boolean isOnline() {
+        return onlineMode;
+    }
+
+    public static void setOnlineMode() {
+        onlineMode = true;
+    }
+
+    public static void setOfflineMode() {
+        onlineMode = false;
+    }
+
     public boolean isNewVersionAvailable() {
+        if (!isOnline()) {
+            return false;
+        }
         int time = (int)(System.currentTimeMillis() / 1000L);
         Base.preferences.setInteger("version.lastcheck", time);
 

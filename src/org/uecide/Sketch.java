@@ -2352,15 +2352,18 @@ public class Sketch implements MessageConsumer {
         settings.put("includes", generateIncludes());
         settings.put("filename", sketchName);
 
-        if (!Base.preferences.getBoolean("dialogs.hide.missinglibraries")) {
+        if ((!Base.preferences.getBoolean("dialogs.hide.missinglibraries")) && (Base.isOnline())) {
             if (editor != null) {
                 if (unknownLibraries.size() > 0) {
                     PluginManager pm = new PluginManager();
                     HashMap<String, Package> foundPackages = new HashMap<String, Package>();
                     for (String l : unknownLibraries) {
-                        Package p = pm.findLibraryByInclude(getCore(), l);
-                        if (p != null) {
-                            foundPackages.put(l, p);
+                        File sketchHeader = new File(sketchFolder, l);
+                        if (!sketchHeader.exists()) {
+                            Package p = pm.findLibraryByInclude(getCore(), l);
+                            if (p != null) {
+                                foundPackages.put(l, p);
+                            }
                         }
                     }
 
@@ -2577,7 +2580,7 @@ public class Sketch implements MessageConsumer {
         setCompilingProgress(70);
 
         if(!compileHEX()) {
-            error("Failed converting to HEX filee");
+            error("Failed converting to HEX file");
             return false;
         }
 
@@ -2585,7 +2588,16 @@ public class Sketch implements MessageConsumer {
             Base.preferences.getBoolean("export.save_hex") || Base.cli.isSet("force-save-hex")) 
             && !parentIsProtected()) {
             try {
-                Base.copyFile(new File(buildFolder, sketchName + ".hex"), new File(sketchFolder, sketchName + ".hex"));
+                String exeSuffix = props.get("exe.extension");
+                if (exeSuffix == null) {
+                    exeSuffix = ".hex";
+                }
+                File dest = new File(sketchFolder, sketchName + exeSuffix);
+                Base.copyFile(new File(buildFolder, sketchName + exeSuffix), dest);
+                if (dest.exists()) {
+                    dest.setExecutable(true);
+                }
+                
 
                 if(editor != null) {
                     editor.updateFilesTree();
