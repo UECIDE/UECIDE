@@ -3074,6 +3074,20 @@ System.err.println(sexy.length());
 
 
         fileMenu.addSeparator();
+        JCheckBoxMenuItem cbitem = new JCheckBoxMenuItem("Online");
+        cbitem.setState(Base.isOnline());
+        cbitem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JCheckBoxMenuItem s = (JCheckBoxMenuItem)e.getSource();
+                if (s.getState()) {
+                    Base.setOnlineMode();
+                } else {    
+                    Base.setOfflineMode();
+                }
+            }
+        });
+        fileMenu.add(cbitem);
+        
         item = new JMenuItem(Translate.t("Preferences"));
         item.setAccelerator(KeyStroke.getKeyStroke("ctrl-,"));
         item.addActionListener(new ActionListener() {
