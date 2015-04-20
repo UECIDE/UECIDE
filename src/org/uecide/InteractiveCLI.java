@@ -41,7 +41,11 @@ public class InteractiveCLI implements AptPercentageListener {
             }
             String[] boardNames = brdList.toArray(new String[0]);
 
-            String family = _loadedSketch.getBoard().getFamily();
+            String family = "none";
+            Board b = _loadedSketch.getBoard();
+            if (b != null) {
+                family = _loadedSketch.getBoard().getFamily();
+            }
 
             ArrayList<String> corList = new ArrayList<String>();
             for (Core c : Base.cores.values()) {
@@ -86,7 +90,7 @@ public class InteractiveCLI implements AptPercentageListener {
                         new NullCompletor()
                     }
                 ),
-                new SimpleCompletor(new String[] { "ls", "quit", "compile", "make", "upload", "info", "purge", "rescan" }),
+                new SimpleCompletor(new String[] { "ls", "quit", "compile", "make", "upload", "info", "purge", "rescan", "pkg-update", "help" }),
                 new ArgumentCompletor(
                     new Completor[] {
                         new SimpleCompletor("pkg-install"),
@@ -137,6 +141,13 @@ public class InteractiveCLI implements AptPercentageListener {
                 ),
                 new ArgumentCompletor(
                     new Completor[] {
+                        new SimpleCompletor("port"),
+                        new SimpleCompletor(Serial.getPortList().toArray(new String[0])),
+                        new NullCompletor()
+                    }
+                ),
+                new ArgumentCompletor(
+                    new Completor[] {
                         new SimpleCompletor(new String[] { "verbose" }),
                         new SimpleCompletor(new String[] { "on", "off" }),
                         new NullCompletor()
@@ -175,6 +186,7 @@ public class InteractiveCLI implements AptPercentageListener {
             _reader = new ConsoleReader();
 
             updateComplete(); 
+            info();
 
             while ((line = _reader.readLine(genPrompt() + "> ")) != null) {
                 line = line.trim();
@@ -209,6 +221,9 @@ public class InteractiveCLI implements AptPercentageListener {
                     } else {
                         System.out.println("Usage: vi <filename>");
                     }
+                }
+                if (args[0].equals("pkg-update")) {
+                    _apt.update();
                 }
                 if (args[0].equals("pkg-install")) {
                     if (args.length >= 2) {
@@ -265,11 +280,7 @@ public class InteractiveCLI implements AptPercentageListener {
                 }
                 if (args[0].equals("info")) {
                     if (_loadedSketch != null) {
-                        System.out.println("Board:      " + _loadedSketch.getBoard().getName() + " (" + _loadedSketch.getBoard() + ")");
-                        System.out.println("Core:       " + _loadedSketch.getCore().getName() + " (" + _loadedSketch.getCore() + ")");
-                        System.out.println("Compiler:   " + _loadedSketch.getCompiler().getName() + " (" + _loadedSketch.getCompiler() + ")");
-                        System.out.println("Programmer: " + _loadedSketch.getProgrammer());
-                        System.out.println("Port:       " + _loadedSketch.getSerialPort());
+                        info();
                     }
                 }
                 if (args[0].equals("board")) {
@@ -306,6 +317,15 @@ public class InteractiveCLI implements AptPercentageListener {
                         }
                     } else {
                         System.out.println("Usage: programmer <name>");
+                    }
+                }
+                if (args[0].equals("port")) {
+                    if (args.length == 2) {
+                        if (_loadedSketch != null) {
+                            _loadedSketch.setSerialPort(args[1]);
+                        }
+                    } else {
+                        System.out.println("Usage: port <name>");
                     }
                 }
                 if (args[0].equals("list")) {
@@ -355,6 +375,7 @@ public class InteractiveCLI implements AptPercentageListener {
                         if (ok) {
                             System.out.println("Loading " + f.getAbsolutePath());
                             _loadedSketch = new Sketch(f);
+                            info();
                         }
                     }
                 }
@@ -430,7 +451,7 @@ public class InteractiveCLI implements AptPercentageListener {
 
     public void updatePercentage(Package p, int pct) {
         if (pct > 100) pct = 100;
-        System.out.print("\r" + p.getName() + " ... " + pct + "%   ");
+        System.out.print("\r" + p.getName() + " ... " + pct + "%" + Character.toString((char)27) + "[0K");
     }
 
     public void rescanEverything() {
@@ -447,6 +468,34 @@ public class InteractiveCLI implements AptPercentageListener {
         Editor.updateAllEditors();
         Editor.selectAllEditorBoards();
 
+    }
+
+    public void info() {
+        if (_loadedSketch.getBoard() == null) {
+            System.out.println("Board:      No Board Selected!!!");
+        } else {
+            System.out.println("Board:      " + _loadedSketch.getBoard().getName() + " (" + _loadedSketch.getBoard() + ")");
+        }
+        if (_loadedSketch.getCore() == null) {
+            System.out.println("Core:       No Core Selected!!!");
+        } else {
+            System.out.println("Core:       " + _loadedSketch.getCore().getName() + " (" + _loadedSketch.getCore() + ")");
+        }
+        if (_loadedSketch.getCompiler() == null) {
+            System.out.println("Compiler:   No Compiler Selected!!!");
+        } else {
+            System.out.println("Compiler:   " + _loadedSketch.getCompiler().getName() + " (" + _loadedSketch.getCompiler() + ")");
+        }
+        if (_loadedSketch.getProgrammer() == null) {
+            System.out.println("Programmer: No Programmer Selected!!!");
+        } else {
+            System.out.println("Programmer: " + _loadedSketch.getProgrammer());
+        }
+        if (_loadedSketch.getSerialPort() == null) {
+            System.out.println("Port:       No Port Selected!!!");
+        } else {
+            System.out.println("Port:       " + _loadedSketch.getSerialPort());
+        }
     }
 
 }

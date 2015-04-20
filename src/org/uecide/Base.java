@@ -1412,6 +1412,11 @@ public class Base implements AptPercentageListener {
     }
 
     public static File getSketchbookFolder() {
+        String sbPath = preferences.get("sketchbook.path");
+        if (sbPath == null) {
+            preferences.setFile("sketchbook.path", platform.getDefaultSketchbookFolder());
+            return platform.getDefaultSketchbookFolder();
+        }
         return new File(preferences.get("sketchbook.path"));
     }
 
@@ -2279,6 +2284,10 @@ public class Base implements AptPercentageListener {
     }
 
     static public void broken(Thread t, Throwable e) {
+        if (headless) {
+            e.printStackTrace();
+            return;
+        }
         try {
             if (Base.preferences.getBoolean("crash.noreport") == false) {
                 CrashReporter rep = new CrashReporter(e);
