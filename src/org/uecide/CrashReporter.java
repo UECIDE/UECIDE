@@ -72,7 +72,6 @@ public class CrashReporter {
         StringBuilder sb = new StringBuilder();
         sb.append("OS: " + Base.getOSFullName() + "\n");
         sb.append("Version: " + Base.systemVersion + "\n");
-        sb.append("Build: " + Base.BUILDNO + "\n");
 
         sb.append("Exception: \n");
         StringWriter sw = new StringWriter();

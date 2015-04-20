@@ -87,8 +87,6 @@ public class Base implements AptPercentageListener {
 
     public static int REVISION = 23;
     public static String RELEASE = "release";
-    public static int BUILDNO = 0;
-    public static String BUILDER = "";
 
     public static String iconSet = defaultIconSet;
 
@@ -252,6 +250,8 @@ public class Base implements AptPercentageListener {
 
         cli.addParameter("version", "", Boolean.class, "Display the UECIDE version number");
 
+        cli.addParameter("cli", "", Boolean.class, "Enter CLI mode");
+
         String[] argv = cli.process(args);
 
         headless = cli.isSet("headless");
@@ -306,8 +306,6 @@ public class Base implements AptPercentageListener {
 
             systemVersion = new Version(manifestContents.getValue("Version"));
             REVISION = Integer.parseInt(manifestContents.getValue("Compiled"));
-            BUILDNO = Integer.parseInt(manifestContents.getValue("Build"));
-            BUILDER = manifestContents.getValue("Built-By");
 
             RELEASE = manifestContents.getValue("Release");;
 
@@ -317,7 +315,7 @@ public class Base implements AptPercentageListener {
         }
 
         if (cli.isSet("version")) {
-            System.out.println("UECIDE Version " + systemVersion + " build " + BUILDNO);
+            System.out.println("UECIDE Version " + systemVersion);
             System.exit(0);
         }
 
@@ -507,6 +505,36 @@ public class Base implements AptPercentageListener {
         }
 
         if (doExit) {
+            System.exit(0);
+        }
+
+        if (cli.isSet("cli")) {
+            headless = true;
+            platform.init(this);
+            compilers = new TreeMap<String, Compiler>();
+            cores = new TreeMap<String, Core>();
+            boards = new TreeMap<String, Board>();
+            plugins = new TreeMap<String, Class<?>>();
+            pluginInstances = new ArrayList<Plugin>();
+
+            Serial.updatePortList();
+            Serial.fillExtraPorts();
+
+            System.out.print("Loading compilers...");
+            loadCompilers();
+            System.out.println("done");
+            System.out.print("Loading cores...");
+            loadCores();
+            System.out.println("done");
+            System.out.print("Loading boards...");
+            loadBoards();
+            System.out.println("done");
+            System.out.print("Loading libraries...");
+            gatherLibraries();
+            System.out.println("done");
+
+            InteractiveCLI icli = new InteractiveCLI(argv);
+            icli.run();
             System.exit(0);
         }
 
@@ -2004,8 +2032,6 @@ public class Base implements AptPercentageListener {
 
     public static void handleSystemInfo() {
         Editor.broadcast(Translate.t("Version: ") + systemVersion + "\n");
-        Editor.broadcast(Translate.t("Build Number: ") + BUILDNO + "\n");
-        Editor.broadcast(Translate.t("Built By: ") + BUILDER + "\n");
 
         Editor.broadcast(Translate.t("Installed plugins") + ":\n");
 

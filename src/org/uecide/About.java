@@ -149,7 +149,6 @@ public class About {
 
         s.append("<h1>" + Base.theme.get("product.cap") + "</h1>");
         s.append("<h4>Version " + Base.systemVersion + "</h4>");
-        s.append("<h4>Build number " + Base.BUILDNO + "</h4>");
         s.append("<br/>");
         s.append("<h4>Contributors:</h4><ul>");
 
