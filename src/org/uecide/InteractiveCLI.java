@@ -237,6 +237,7 @@ public class InteractiveCLI implements AptPercentageListener {
                                 System.out.println();
                             }
                         }
+                        updateComplete(); 
                         rescanEverything();
                     }
                 }
@@ -249,6 +250,7 @@ public class InteractiveCLI implements AptPercentageListener {
                             p.attachPercentageListener(this);
                             System.out.println(_apt.uninstallPackage(p, false));
                         }
+                        updateComplete(); 
                         rescanEverything();
                     }
                 }
@@ -287,6 +289,7 @@ public class InteractiveCLI implements AptPercentageListener {
                     if (args.length == 2) {
                         if (_loadedSketch != null) {
                             _loadedSketch.setBoard(args[1]);
+                            updateComplete(); 
                         }
                     } else {
                         System.out.println("Usage: board <name>");
@@ -296,6 +299,7 @@ public class InteractiveCLI implements AptPercentageListener {
                     if (args.length == 2) {
                         if (_loadedSketch != null) {
                             _loadedSketch.setCore(args[1]);
+                            updateComplete(); 
                         }
                     } else {
                         System.out.println("Usage: core <name>");
@@ -375,13 +379,11 @@ public class InteractiveCLI implements AptPercentageListener {
                         if (ok) {
                             System.out.println("Loading " + f.getAbsolutePath());
                             _loadedSketch = new Sketch(f);
+                            updateComplete(); 
                             info();
                         }
                     }
                 }
-
-                updateComplete(); 
-
             }
         } catch (Exception e) {
             e.printStackTrace();

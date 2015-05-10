@@ -629,7 +629,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public File createBuildFolder() {
-        if(Base.preferences.getBoolean("compiler.buildinsketch") || Base.cli.isSet("force-local-build")) {
+        if(Base.preferences.getBoolean("compiler.buildinsketch") || Base.cli.isSet("force-local-build") || Base.cli.isSet("cli")) {
             if(!parentIsProtected()) {
                 File f = new File(sketchFolder, "build");
 
@@ -2585,7 +2585,7 @@ public class Sketch implements MessageConsumer {
         }
 
         if((
-            Base.preferences.getBoolean("export.save_hex") || Base.cli.isSet("force-save-hex")) 
+            Base.preferences.getBoolean("export.save_hex") || Base.cli.isSet("force-save-hex") || Base.cli.isSet("cli")) 
             && !parentIsProtected()) {
             try {
                 String exeSuffix = props.get("exe.extension");
@@ -3755,6 +3755,10 @@ public class Sketch implements MessageConsumer {
                 } catch(Exception e) {
                     error("Syntax error in " + key + " at line " + lineno);
                     error(ld);
+                    if (script.keyExists("fail")) {
+                        String failKey = String.format("%s.fail", key);
+                        executeKey(failKey);
+                    }
                     return false;
                 }
             }
@@ -3767,6 +3771,10 @@ public class Sketch implements MessageConsumer {
                 if(epos == -1) {
                     error("Syntax error in " + key + " at line " + lineno);
                     error(ld);
+                    if (script.keyExists("fail")) {
+                        String failKey = String.format("%s.fail", key);
+                        executeKey(failKey);
+                    }
                     return false;
                 }
 
@@ -3778,20 +3786,36 @@ public class Sketch implements MessageConsumer {
             }
 
             if(ld.equals("fail")) {
+                if (script.keyExists("fail")) {
+                    String failKey = String.format("%s.fail", key);
+                    executeKey(failKey);
+                }
                 return false;
             }
 
             if(ld.equals("end")) {
+                if (script.keyExists("end")) {
+                    String endKey = String.format("%s.end", key);
+                    executeKey(endKey);
+                }
                 return true;
             }
 
             boolean res = executeKey(lk, env);
 
             if(!res) {
+                if (script.keyExists("fail")) {
+                    String failKey = String.format("%s.fail", key);
+                    executeKey(failKey);
+                }
                 return false;
             }
 
             lineno++;
+        }
+        if (script.keyExists("end")) {
+            String endKey = String.format("%s.end", key);
+            executeKey(endKey);
         }
 
         return true;
