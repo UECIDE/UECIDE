@@ -266,6 +266,9 @@ public class Platform {
 
             if (flav.equals("debian")) {
                 String v = p.get("VERSION");
+                if (v == null) {
+                    v = "unknown";
+                }
                 Pattern pat = Pattern.compile("\\d+\\s+\\((.*)\\)");
                 Matcher m = pat.matcher(v);
                 if (m.find()) {
@@ -273,6 +276,9 @@ public class Platform {
                 }
             } else if (flav.equals("ubuntu")) {
                 String v = p.get("VERSION");
+                if (v == null) {
+                    v = "unknown";
+                }
                 Pattern pat = Pattern.compile(",\\s+([^\\s]+)\\s+.+");
                 Matcher m = pat.matcher(v);
                 if (m.find()) {
