@@ -2323,6 +2323,8 @@ System.err.println(sexy.length());
 
     String mBuffer = "";
     public void messageStream(String msg) {
+        console.append(msg, Console.BODY);
+/*
         mBuffer += msg;
         int nlpos = mBuffer.lastIndexOf("\n");
 
@@ -2349,10 +2351,13 @@ System.err.println(sexy.length());
         } else {
             mBuffer = bits[bits.length - 1];
         }
+*/
     }
 
     String wBuffer = "";
     public void warningStream(String msg) {
+        console.append(msg, Console.WARNING);
+/*
         wBuffer += msg;
         int nlpos = wBuffer.lastIndexOf("\n");
 
@@ -2379,10 +2384,13 @@ System.err.println(sexy.length());
         } else {
             wBuffer = bits[bits.length - 1];
         }
+*/
     }
 
     String eBuffer = "";
     public void errorStream(String msg) {
+        console.append(msg, Console.ERROR);
+/*
         eBuffer += msg;
         int nlpos = eBuffer.lastIndexOf("\n");
 
@@ -2409,6 +2417,7 @@ System.err.println(sexy.length());
         } else {
             eBuffer = bits[bits.length - 1];
         }
+*/
     }
 
 

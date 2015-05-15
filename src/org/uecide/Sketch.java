@@ -2630,49 +2630,51 @@ public class Sketch implements MessageConsumer {
     public boolean compileSize() {
         PropertyFile props = mergeAllProperties();
 
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
+        if (props.get("compile.size") != null) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
 
-        heading("Memory usage");
+            heading("Memory usage");
 
-        redirectChannel(1, pw);
-        executeKey("compile.size", "compile.size.environment");
-        unredirectChannel(1);
+            redirectChannel(1, pw);
+            executeKey("compile.size", "compile.size.environment");
+            unredirectChannel(1);
 
-        String reg = props.get("compiler.size.regex", "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
-        int tpos = props.getInteger("compiler.size.text", 1);
-        int rpos = props.getInteger("compiler.size.rodata", 0);
-        int dpos = props.getInteger("compiler.size.data", 2);
-        int bpos = props.getInteger("compiler.size.bss", 3);
-        String[] lines = sw.toString().split("\n");
-        Pattern p = Pattern.compile(reg);
-        int textSize = 0;
-        int rodataSize = 0;
-        int dataSize = 0;
-        int bssSize = 0;
-        for (String line : lines) {
+            String reg = props.get("compiler.size.regex", "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
+            int tpos = props.getInteger("compiler.size.text", 1);
+            int rpos = props.getInteger("compiler.size.rodata", 0);
+            int dpos = props.getInteger("compiler.size.data", 2);
+            int bpos = props.getInteger("compiler.size.bss", 3);
+            String[] lines = sw.toString().split("\n");
+            Pattern p = Pattern.compile(reg);
+            int textSize = 0;
+            int rodataSize = 0;
+            int dataSize = 0;
+            int bssSize = 0;
+            for (String line : lines) {
 
-            try {
-                Matcher m = p.matcher(line);
-                if (m.find()) {
-                    if (tpos > 0) {
-                        textSize = Integer.parseInt(m.group(tpos));
+                try {
+                    Matcher m = p.matcher(line);
+                    if (m.find()) {
+                        if (tpos > 0) {
+                            textSize = Integer.parseInt(m.group(tpos));
+                        }
+                        if (rpos > 0) {
+                            rodataSize = Integer.parseInt(m.group(rpos));
+                        }
+                        if (dpos > 0) {
+                            dataSize = Integer.parseInt(m.group(dpos));
+                        }
+                        if (bpos > 0) {
+                            bssSize = Integer.parseInt(m.group(bpos));
+                        }
                     }
-                    if (rpos > 0) {
-                        rodataSize = Integer.parseInt(m.group(rpos));
-                    }
-                    if (dpos > 0) {
-                        dataSize = Integer.parseInt(m.group(dpos));
-                    }
-                    if (bpos > 0) {
-                        bssSize = Integer.parseInt(m.group(bpos));
-                    }
+                } catch (Exception e) {
                 }
-            } catch (Exception e) {
             }
+            bullet("Program size: " + (textSize + dataSize + rodataSize) + " bytes");
+            bullet("Memory size: " + (bssSize + dataSize) + " bytes");
         }
-        bullet("Program size: " + (textSize + dataSize + rodataSize) + " bytes");
-        bullet("Memory size: " + (bssSize + dataSize) + " bytes");
         return true;
     }
 
@@ -3525,11 +3527,12 @@ public class Sketch implements MessageConsumer {
         while(isProcessRunning(runningProcess)) {
             try {
                 while(in.available() > 0) {
-                    int i = in.read(tmp, 0, 20);
+                    int i = in.read(tmp, 0, 1024);
 
                     if(i < 0)break;
 
-                    messageStream(new String(tmp, 0, i));
+                    String s = new String(tmp, 0, i);
+                    messageStream(s);
                 }
 
                 while(err.available() > 0) {
@@ -4034,6 +4037,11 @@ public class Sketch implements MessageConsumer {
 
     String mBuffer = "";
     public void messageStream(String msg) {
+        if(editor != null && stdoutRedirect == null) {
+            editor.messageStream(msg);
+            return;
+        }
+
         mBuffer += msg;
         int nlpos = mBuffer.lastIndexOf("\n");
 

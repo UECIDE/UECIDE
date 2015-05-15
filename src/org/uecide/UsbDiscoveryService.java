@@ -50,9 +50,11 @@ public class UsbDiscoveryService extends Service {
         listener = new UsbServicesListener() {
             public void usbDeviceAttached(UsbServicesEvent evt) {
                 deviceAttached(evt.getUsbDevice());
+                System.err.println("USB Add");
             }
             public void usbDeviceDetached(UsbServicesEvent evt) {
                 deviceDetached(evt.getUsbDevice());
+                System.err.println("USB Del");
             }
         
         };
