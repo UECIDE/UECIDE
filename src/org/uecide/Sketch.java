@@ -182,8 +182,26 @@ public class Sketch implements MessageConsumer {
         String fn = path.getName().toLowerCase();
 
         if(fn.endsWith(".ino") || fn.endsWith(".pde")) {
+            String pathName = path.getName();
+
+            File oldPath = path;
+
+            String inoName = pathName.substring(0, pathName.length() - 4);
             path = path.getParentFile();
+            if (!path.getName().equals(inoName)) {
+                if (Base.yesno("Import Sketch?", "This sketch file isn't in a properly named sketch folder.\nImport this sketch into your sketchbook area?")) {
+                    File sb = new File(Base.getSketchbookFolder(), inoName);
+                    sb.mkdirs();
+                    File inof = new File(sb, inoName + ".ino");
+                    Base.copyFile(oldPath, inof);
+                    path = sb;
+                }
+            } else {
+                path = createUntitledSketch();
+            }
         }
+
+
 
         sketchFolder = path;
         sketchName = sketchFolder.getName();

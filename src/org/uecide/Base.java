@@ -3038,4 +3038,11 @@ public class Base implements AptPercentageListener {
             }
         }
     }
+
+    public static boolean yesno(String title, String question) {
+        if (!headless) {
+            return JOptionPane.showOptionDialog(null, question, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.YES_OPTION;
+        }
+        return false;
+    }
 }
