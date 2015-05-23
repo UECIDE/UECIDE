@@ -303,7 +303,8 @@ public class PluginManager implements PropertyChangeListener
             list.add(re);
         }
 
-        repoManager.setContentPane(sb);
+        repoContainer.add(sb, BorderLayout.CENTER);
+        repoManager.add(repoContainer);
         repoManager.pack();
         repoManager.setSize(new Dimension(500, 300));
         repoManager.setLocationRelativeTo(frame);
