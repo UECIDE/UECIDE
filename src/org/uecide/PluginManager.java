@@ -20,9 +20,6 @@ import say.swing.*;
 import org.json.simple.*;
 import java.beans.*;
 
-import uk.co.majenko.apt.*;
-import uk.co.majenko.apt.Package;
-
 import org.markdown4j.Markdown4jProcessor;
 
 public class PluginManager implements PropertyChangeListener
@@ -45,6 +42,9 @@ public class PluginManager implements PropertyChangeListener
     DefaultTreeModel treeModel;
     JButton upgradeButton;
     boolean terminateEverything = false;
+
+    JMenuBar menuBar;
+    JMenu fileMenu;
 
     Editor editor;
 
@@ -197,15 +197,152 @@ public class PluginManager implements PropertyChangeListener
 
     }
 
+    class RepoEntry extends JPanel {
+        PropertyFile props;
+        String key;
+        JCheckBox enabled;
+        JLabel nameLabel;
+        JTextArea descLabel;
+        JLabel locLabel;
+        JLabel flagLabel;
+
+        RepoEntry(PropertyFile p, String k) {
+            key = k;
+            props = p;
+
+
+            setLayout(new BorderLayout());
+            JPanel inner = new JPanel();
+            inner.setOpaque(false);
+            inner.setLayout(new BorderLayout());
+            inner.setBorder(new EmptyBorder(4, 4, 4, 4));
+
+            enabled = new JCheckBox();
+            add(enabled, BorderLayout.WEST);
+
+            nameLabel = new JLabel(props.get("name"));
+            inner.add(nameLabel, BorderLayout.NORTH);
+
+            if (!props.get("country").equals("NONE")) {
+                flagLabel = new JLabel(props.get("country"));
+                flagLabel.setIcon(Base.getIcon("flags", props.get("country").toLowerCase(), 16));
+                add(flagLabel, BorderLayout.EAST);
+            }
+
+            descLabel = new JTextArea(props.get("description"));
+            descLabel.setLineWrap(true);
+            descLabel.setWrapStyleWord(true);
+            descLabel.setEditable(false);
+            descLabel.setOpaque(false);
+            inner.add(descLabel, BorderLayout.CENTER);
+
+            add(inner, BorderLayout.CENTER);
+
+            Font f = nameLabel.getFont();
+            nameLabel.setFont(new Font(f.getName(), Font.BOLD, f.getSize()));
+
+            setBorder(BorderFactory.createLineBorder(new Color(180, 180, 180), 1));
+
+            enabled.setSelected(apt.hasSource(props.get("url"), props.get("codename")));
+
+            enabled.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (enabled.isSelected()) {
+                        apt.addSource(props.get("url"), props.get("codename"), getCleanOSName(), props.get("sections").split("::"));
+                    } else {
+                        apt.removeSource(props.get("url"), props.get("codename"));
+                    }
+                    apt.saveSources();
+                }
+            });
+        }
+
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            int w = getWidth();
+            int h = getHeight();
+            Color color1 = Color.WHITE;
+            Color color2 = new Color(215, 225, 255);
+            GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+            g2d.setPaint(gp);
+            g2d.fillRect(0, 0, w, h);
+        }
+
+    }
+
+    public void openRepoManager() {
+        JDialog repoManager = new JDialog(frame, JDialog.ModalityType.APPLICATION_MODAL);
+        repoManager.setTitle("Available Repositories");
+        JPanel repoContainer = new JPanel();
+        repoContainer.setLayout(new BorderLayout());
+
+        JPanel list = new JPanel();
+        list.setLayout(new BoxLayout(list, BoxLayout.PAGE_AXIS));
+
+        JScrollPane sb = new JScrollPane(list,
+            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        repoContainer.add(sb, BorderLayout.CENTER);
+
+        File dd = Base.getDataFolder();
+        File reps = new File(dd, "apt/db/repositories.db");
+        if (!reps.exists()) {
+            Base.copyResourceToFile("/org/uecide/config/repositories.db", reps);
+        }
+
+        PropertyFile props = new PropertyFile(reps);
+
+        for (String key : props.childKeys()) {
+            PropertyFile pf = props.getChildren(key);
+            RepoEntry re = new RepoEntry(pf, key);
+            list.add(re);
+        }
+
+        repoManager.setContentPane(sb);
+        repoManager.pack();
+        repoManager.setSize(new Dimension(500, 300));
+        repoManager.setLocationRelativeTo(frame);
+        repoManager.setVisible(true);
+    }
+
     public void openWindow(Editor ed) {
         editor = ed; 
 
         frame = new JDialog(editor, JDialog.ModalityType.APPLICATION_MODAL);
+        frame.setTitle("Plugin Manager");
         mainContainer = new JPanel();
         mainContainer.setLayout(new BorderLayout());
         frame.add(mainContainer);
 
         terminateEverything = false;
+
+        menuBar = new JMenuBar();
+
+        fileMenu = new JMenu("File");
+        menuBar.add(fileMenu);
+        frame.add(menuBar, BorderLayout.NORTH);
+
+        JMenuItem repoMenu = new JMenuItem("Repositories");
+        fileMenu.add(repoMenu);
+        repoMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                openRepoManager();
+            }
+        });
+
+        JMenuItem closeMenu = new JMenuItem("Close");
+        fileMenu.add(closeMenu);
+        closeMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                askCloseWindow();
+            }
+        });
+        
 
         upper = new JPanel();
         lower = new JPanel();
@@ -764,6 +901,12 @@ public class PluginManager implements PropertyChangeListener
         fullNodeCount += addSectionToTree(compilersNode, "compilers");
         if (compilersNode.getChildCount() > 0) {
             treeRoot.add(compilersNode);
+        }
+
+        DefaultMutableTreeNode systemNode = new DefaultMutableTreeNode("System");
+        fullNodeCount += addSectionToTree(systemNode, "extra");
+        if (systemNode.getChildCount() > 0) {
+            treeRoot.add(systemNode);
         }
 
         treeModel.nodeStructureChanged(treeRoot);

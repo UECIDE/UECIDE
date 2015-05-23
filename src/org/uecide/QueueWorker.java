@@ -20,9 +20,6 @@ import java.awt.event.*;
 import say.swing.*;
 import org.json.simple.*;
 
-import uk.co.majenko.apt.AptPercentageListener;
-import uk.co.majenko.apt.Package;
-
 public abstract class QueueWorker extends SwingWorker<Void, Long> implements AptPercentageListener {
     Object userObject = null;
     String taskCommand = null;

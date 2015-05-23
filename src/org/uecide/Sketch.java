@@ -60,9 +60,6 @@ import org.uecide.Compiler;
 
 import javax.script.*;
 
-import uk.co.majenko.apt.*;
-import uk.co.majenko.apt.Package;
-
 /**
  * The sketch class is the heart of the IDE.  It manages not only what files a
  * sketch consists of, but also deals with compilation of the sketch and uploading

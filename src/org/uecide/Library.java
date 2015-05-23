@@ -719,7 +719,7 @@ public class Library implements Comparable {
         return null;
     }
 
-    public static TreeSet<String> getLibraryCategories() {
+    public synchronized static TreeSet<String> getLibraryCategories() {
         TreeSet<String> cats = new TreeSet<String>();
 
         for(String cat : categoryNames.keySet()) {

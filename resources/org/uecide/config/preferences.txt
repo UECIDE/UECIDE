@@ -271,3 +271,5 @@ service.usbdiscoveryservice.autostart=true
 service.changedfileservice.autostart=true
 
 repository.0=http://repo.uecide.org/uecide::uecide::boards,cores,compilers,plugins,extra,libraries
+repository.1=res://org/uecide/dist::uecide::boards,cores,compilers,plugins,extra,libraries
+

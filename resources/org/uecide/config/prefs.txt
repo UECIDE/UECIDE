@@ -1,0 +1,101 @@
+# Compiler settings
+
+compiler.name=Compiler
+compiler.type=group
+
+compiler.buildinsketch.type=checkbox
+compiler.buildinsketch.name=Compile the sketch in the sketch folder
+compiler.buildinsketch.default=false
+
+compiler.disableline.type=checkbox
+compiler.disableline.name=Disable insertion of #line numbering (useful for debugging)
+compiler.disableline.default=false
+
+compiler.generate_lss.type=checkbox
+compiler.generate_lss.name=Generate assembly listing (requires core support)
+compiler.generate_lss.default=false
+
+compiler.disable_prototypes.type=checkbox
+compiler.disable_prototypes.name=Disable generation of function prototypes
+compiler.disable_prototypes.default=false
+
+compiler.combine_ino.type=checkbox
+compiler.combine_ino.name=Combine all .INO and .PDE files into a single .CPP file
+compiler.combine_ino.default=true
+
+compiler.generate_makefile.type=checkbox
+compiler.generate_makefile.name==Generate / update a Makefile each compile (core support required)
+compiler.generate_makefile.default=false
+
+compiler.verbose.type=checkbox
+compiler.verbose.name=Verbose output during compile
+compiler.verbose.default=false
+
+compiler.purge.type=checkbox
+compiler.purge.name=Purge project on every build
+compiler.purge.default=false
+
+compiler.save_hex.type=checkbox
+compiler.save_hex.name=Save compiled output to sketch folder
+compiler.save_hex.default=false
+
+compiler.save_lss.type=checkbox
+compiler.save_lss.name=Save generated LSS file to sketch folder
+compiler.save_lss.depends=compiler.generate_lss
+compiler.save_lss.default=false
+
+# Upload settings
+
+upload.name=Upload
+upload.type=group
+
+upload.verbose.type=checkbox
+upload.verbose.name=Verbose output during upload
+upload.verbose.default=false
+
+# Editor settings
+
+editor.name=Editor
+editor.type=group
+
+editor.keepfindopen.type=checkbox
+editor.keepfindopen.name=Keep find panel open
+editor.keepfindopen.default=false
+
+editor.subtoolbar_hidden.type=checkbox
+editor.subtoolbar_hidden.name=Hide secondary toolbar
+editor.subtoolbar_hidden.default=false
+
+editor.autosave.type=checkbox
+editor.autosave.name=Automatically save sketch before each build
+editor.autosave.default=false
+
+editor.versions.type=range
+editor.versions.name=Number of backup versions of your sketch to keep
+editor.versions.default=0
+editor.versions.min=0
+editor.versions.max=100
+
+editor.font.type=font
+editor.font.name=Editor font
+editor.font.default=Monospaced,plain,12
+
+# Editor -> Tabs settings
+
+editor.tabs.type=group
+editor.tabs.name=Tabs
+
+editor.tabs.show.type=checkbox
+editor.tabs.show.name=Display tabs
+editor.tabs.show.default=false
+
+editor.tabs.size.type=range
+editor.tabs.size.name=Tab size
+editor.tabs.size.default=5
+editor.tabs.size.min=1
+editor.tabs.size.max=8
+
+editor.tabs.expands.type=checkbox
+editor.tabs.expand.name=Expand tabs into spaces
+editor.tabs.expand.default=false
+

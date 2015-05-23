@@ -1,0 +1,15 @@
+master.name=Main UECIDE Repository
+master.description=The master repository for the core UECIDE system
+master.country=GB
+master.url=http://repo.uecide.org/uecide
+master.codename=uecide
+master.sections=boards::cores::compilers::plugins::extra::libraries
+
+internal.name=Internal distribution repository
+internal.description=Special repository internal to the UECIDE software used for initial software installation.
+internal.country=GB
+internal.url=res://org/uecide/dist
+internal.codename=uecide
+internal.sections=boards::cores::compilers::plugins::extra::libraries
+
+

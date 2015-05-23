@@ -43,9 +43,6 @@ import org.uecide.plugin.*;
 import org.uecide.builtin.BuiltinCommand;
 import org.uecide.varcmd.VariableCommand;
 
-import uk.co.majenko.apt.*;
-import uk.co.majenko.apt.Package;
-
 import java.lang.reflect.*;
 
 import java.util.regex.*;
@@ -441,8 +438,8 @@ public class Base implements AptPercentageListener {
 
                 String name = p.getName();
                 Package instPack = apt.getInstalledPackage(p.getName());
-                uk.co.majenko.apt.Version avail = p.getVersion();
-                uk.co.majenko.apt.Version inst = null;
+                Version avail = p.getVersion();
+                Version inst = null;
                 String msg = "";
                 if (instPack != null) {
                     inst = instPack.getVersion();
@@ -485,8 +482,8 @@ public class Base implements AptPercentageListener {
 
                 String name = p.getName();
                 Package instPack = apt.getInstalledPackage(p.getName());
-                uk.co.majenko.apt.Version avail = p.getVersion();
-                uk.co.majenko.apt.Version inst = null;
+                Version avail = p.getVersion();
+                Version inst = null;
                 String msg = "";
                 if (instPack != null) {
                     inst = instPack.getVersion();
@@ -2497,7 +2494,7 @@ public class Base implements AptPercentageListener {
         return new ImageIcon(loc);
     }
 
-    public boolean copyResourceToFile(String res, File dest) {
+    public static boolean copyResourceToFile(String res, File dest) {
         try {
             InputStream from = Base.class.getResourceAsStream(res);
             OutputStream to =

@@ -570,7 +570,6 @@ System.err.println(sexy.length());
 //        }
 
         this.pack();
-        this.setVisible(true);
 
         setSize(width, height);
         setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));
@@ -646,6 +645,7 @@ System.err.println(sexy.length());
                 b.setBorderPainted(false);
             }
         }
+        this.setVisible(true);
 
     }
 
@@ -978,18 +978,20 @@ System.err.println(sexy.length());
 
         File[] buildFiles = dir.listFiles();
 
-        Arrays.sort(buildFiles);
+        if (buildFiles != null) {
+            Arrays.sort(buildFiles);
 
-        for(File file : buildFiles) {
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(file.getName());
-            node.setUserObject(file);
+            for(File file : buildFiles) {
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(file.getName());
+                node.setUserObject(file);
 
-            if(file.isDirectory()) {
-                addFileTreeToNode(node, file);
+                if(file.isDirectory()) {
+                    addFileTreeToNode(node, file);
+                }
+
+                treenode.add(node);
             }
-
-            treenode.add(node);
-        };
+        }
     }
 
 
@@ -3108,10 +3110,9 @@ System.err.println(sexy.length());
         Base.setFont(item, "menu.entry");
         fileMenu.add(item);
 
-
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_BOTTOM);
 
-        item = new JMenuItem(Translate.t("Quit"));
+        item = new JMenuItem("Quit");
         item.setAccelerator(KeyStroke.getKeyStroke("alt Q"));
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

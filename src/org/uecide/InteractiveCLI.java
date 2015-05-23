@@ -4,8 +4,6 @@ import jline.*;
 import java.io.*;
 import java.util.*;
 import java.lang.*;
-import uk.co.majenko.apt.*;
-import uk.co.majenko.apt.Package;
 
 public class InteractiveCLI implements AptPercentageListener {
     String[] _argv;
