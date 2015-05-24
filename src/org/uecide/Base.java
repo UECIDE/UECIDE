@@ -2381,6 +2381,7 @@ public class Base implements AptPercentageListener {
         Thread thr = new Thread() {
             public void run() {
 
+                Editor.lockAll();
                 Editor.bulletAll("Updating serial ports...");
 
                 Serial.updatePortList();
@@ -2395,6 +2396,7 @@ public class Base implements AptPercentageListener {
                 Editor.bulletAll("Update complete.");
                 Editor.updateAllEditors();
                 Editor.selectAllEditorBoards();
+                Editor.unlockAll();
             }
         };
         thr.start();

@@ -304,6 +304,7 @@ public class markdown extends JPanel implements EditorBase {
 
         scrollPane = new RTextScrollPane(textArea);
         toolbar = new JToolBar();
+        toolbar.setFloatable(false);
         toolbar.setVisible(!Base.preferences.getBoolean("editor.subtoolbar.hidden"));
         this.add(toolbar, BorderLayout.NORTH);
 

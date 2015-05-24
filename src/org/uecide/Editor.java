@@ -295,13 +295,11 @@ public class Editor extends JFrame {
         if (loadedSketch.getCore() != null) {
             manroot = loadedSketch.getCore().getManual();
         }
-        manualPane = new Browser(manroot);
-        manualScroll = new JScrollPane();
-        manualScroll.setViewportView(manualPane);
 
         leftRightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, projectPanel, editorPanel);
-        manualSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, manualScroll);
+        manualSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, null);
         topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, manualSplit, consolePanel);
+//        loadManual(manroot);
 
 /*
 String sexy = null;
@@ -311,7 +309,9 @@ System.err.println(sexy.length());
         leftRightSplit.setOneTouchExpandable(true);
         topBottomSplit.setOneTouchExpandable(true);
 
-        manualScroll.setVisible(false);
+        if (manualScroll != null) {
+            manualScroll.setVisible(false);
+        }
 
         leftRightSplit.setContinuousLayout(true);
         topBottomSplit.setContinuousLayout(true);
@@ -345,46 +345,9 @@ System.err.println(sexy.length());
         toolbar = new JToolBar();
         treeToolBar = new JToolBar();
 
-        toolbar.addHierarchyListener(new HierarchyListener() {
-            public void hierarchyChanged(HierarchyEvent e) {
-                Window window = SwingUtilities.getWindowAncestor(toolbar);
-
-                if(window == Editor.this) {
-                    if(e.getChangeFlags() == HierarchyEvent.PARENT_CHANGED) {
-
-                        JPanel pan = (JPanel)e.getChangedParent();
-
-                        BorderLayout layout = (BorderLayout)pan.getLayout();
-
-                        if(toolbar == layout.getLayoutComponent(BorderLayout.NORTH)) {
-                            Base.preferences.set("editor.toolbar.position", "n");
-                            Base.preferences.saveDelay();
-                        }
-
-                        if(toolbar == layout.getLayoutComponent(BorderLayout.SOUTH)) {
-                            Base.preferences.set("editor.toolbar.position", "s");
-                            Base.preferences.saveDelay();
-                        }
-
-                        if(toolbar == layout.getLayoutComponent(BorderLayout.EAST)) {
-                            Base.preferences.set("editor.toolbar.position", "e");
-                            Base.preferences.saveDelay();
-                        }
-
-                        if(toolbar == layout.getLayoutComponent(BorderLayout.WEST)) {
-                            Base.preferences.set("editor.toolbar.position", "w");
-                            Base.preferences.saveDelay();
-                        }
-                    }
-                } else {
-                    if(e.getChangeFlags() == HierarchyEvent.PARENT_CHANGED) {
-                        Base.preferences.set("editor.toolbar.position", "f");
-                        Base.preferences.saveDelay();
-                    }
-                }
-            }
-        });
-
+        treeToolBar.setFloatable(false);
+        toolbar.setFloatable(false);
+        
         statusText = new JLabel("");
         statusProgress = new JProgressBar();
 
@@ -516,15 +479,6 @@ System.err.println(sexy.length());
         addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
 
         toolbar.addSeparator();
-        Editor.addToolbarButton(toolbar, "apps", "manual", "Manual", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (manualScroll.isVisible()) {
-                    hideManual();
-                } else {
-                    showManual();
-                }
-            }
-        });
 
         menuBar = new JMenuBar();
         Base.setFont(menuBar, "menu.bar");
@@ -659,11 +613,39 @@ System.err.println(sexy.length());
         Base.preferences.saveDelay();
     }
 
+    public void loadManual(File f) {
+        if (f == null) {
+            return;
+        }
+        loadManual(f.getAbsolutePath());
+    }
+
+    public void loadManual(String f) {
+        if (f == null) {
+            return;
+        }
+        if (f.endsWith(".pdf")) {
+            Base.openURL(f);
+        } else {
+            manualPane = new Browser(new File(f));
+            manualPane.setRoot(loadedSketch.getCore().getManual());
+            manualPane.home();
+            manualScroll = new JScrollPane();
+            manualScroll.setViewportView(manualPane);
+            manualSplit.setRightComponent(manualScroll);
+            showManual();
+        }
+    }
+
     public void showManual() {
         if (loadedSketch == null) {
             return;
         }
         if (loadedSketch.getCore() == null) {
+            return;
+        }
+
+        if (manualScroll == null) {
             return;
         }
         manualScroll.setVisible(true);
@@ -672,8 +654,6 @@ System.err.println(sexy.length());
         Base.preferences.setBoolean("manual.split.visible", true);
         manualSplit.setDividerLocation(w - spos);
         Base.preferences.saveDelay();
-        manualPane.setRoot(loadedSketch.getCore().getManual());
-        manualPane.home();
     }
 
     class FileCellRenderer implements TreeCellRenderer {
@@ -3346,6 +3326,47 @@ System.err.println(sexy.length());
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
 
+        if (loadedSketch.getBoard() != null) {
+            if (loadedSketch.getBoard().getManual() != null) {
+                item = new JMenuItem("Manual for " + loadedSketch.getBoard().toString());
+                item.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        loadManual(loadedSketch.getBoard().getManual());
+                    }
+                });
+                Base.setFont(item, "menu.entry");
+                helpMenu.add(item);
+            }
+        }
+
+        if (loadedSketch.getCore() != null) {
+            if (loadedSketch.getCore().getManual() != null) {
+                item = new JMenuItem("Manual for " + loadedSketch.getCore().toString());
+                item.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        loadManual(loadedSketch.getCore().getManual());
+                    }
+                });
+                Base.setFont(item, "menu.entry");
+                helpMenu.add(item);
+            }
+        }
+
+        if (loadedSketch.getCompiler() != null) {
+            if (loadedSketch.getCompiler().getManual() != null) {
+                item = new JMenuItem("Manual for " + loadedSketch.getCompiler().toString());
+                item.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        loadManual(loadedSketch.getCompiler().getManual());
+                    }
+                });
+                Base.setFont(item, "menu.entry");
+                helpMenu.add(item);
+            }
+        }
+
+
+
         PropertyFile links = Base.theme.getChildren("links");
 
         for(String link : links.childKeys()) {
@@ -3504,8 +3525,7 @@ System.err.println(sexy.length());
             for(Object k : discoveredBoard.properties.keySet()) {
                 loadedSketch.put("mdns." + (String)k, discoveredBoard.properties.get((String)k));
             }
-            manualPane.setRoot(loadedSketch.getCore().getManual());
-            manualPane.home();
+            //loadManual(loadedSketch.getCore().getManual());
         }
     }
 
@@ -3634,11 +3654,10 @@ System.err.println(sexy.length());
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setBoard(e.getActionCommand());
-                    Core c = loadedSketch.getCore();
-                    if (c != null) {
-                        manualPane.setRoot(c.getManual());
-                    }
-                    manualPane.home();
+//                    Core c = loadedSketch.getCore();
+//                    if (c != null) {
+//                        loadManual(c.getManual());
+//                    }
                 }
             });
             item.setActionCommand(board.getName());
@@ -3678,8 +3697,7 @@ System.err.println(sexy.length());
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setCore(e.getActionCommand());
-                    manualPane.setRoot(loadedSketch.getCore().getManual());
-                    manualPane.home();
+//                    loadManual(loadedSketch.getCore().getManual());
                 }
             });
             item.setActionCommand(core.getName());
@@ -4353,6 +4371,26 @@ System.err.println(sexy.length());
         }
     }
 
+    public static void lockAll() {
+        for (Editor e : editorList) {
+            e.lock();
+        }
+    }
+
+    public static void unlockAll() {
+        for (Editor e : editorList) {
+            e.unlock();
+        }
+    }
+
+    public void lock() {
+        setEnabled(false);
+    }
+
+    public void unlock() {
+        setEnabled(true);
+    }
+
     public static void bulletAll(String msg) {
         for (Editor e : editorList) {
             e.bullet(msg);
@@ -4382,8 +4420,7 @@ System.err.println(sexy.length());
 
         if(eb != null) {
             loadedSketch.setBoard(eb);
-            manualPane.setRoot(loadedSketch.getCore().getManual());
-            manualPane.home();
+//            loadManual(loadedSketch.getCore().getManual());
         }
     }
 
@@ -5045,5 +5082,7 @@ System.err.println(sexy.length());
             }
         }
     }
+
+    
 }
 

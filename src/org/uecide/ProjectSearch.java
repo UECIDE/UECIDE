@@ -38,12 +38,99 @@ public class ProjectSearch {
 
     JTextField searchTerm;
 
+    class SearchResult extends JButton {
+        File file;
+        public File getFile() { return file; }
+
+        String term;
+        public String getTerm() { return term; }
+
+        String data;
+        public String getData() { return data; }
+
+        int line;
+        public int getLine() { return line; }
+
+        SearchResult(File f, String t, String d, int l) {
+            file = f;
+            term = t;
+            data = d;
+            line = l;
+
+            setLayout(new BorderLayout());
+
+            JLabel top = new JLabel(file.getName() + " line " + line);
+            add(top, BorderLayout.NORTH);
+
+            String o = data.replace("<", "&lt;");
+            o = o.replace(">", "&gt;");
+            o = o.replaceAll("(?i)" + term, "<u>$0</u>");
+
+            JTextPane descLabel = new JTextPane() {
+                @Override
+                public synchronized void addMouseListener(MouseListener l) {
+                }
+
+                @Override
+                public synchronized void addMouseMotionListener(
+                        MouseMotionListener l) {
+                }
+
+                @Override
+                public synchronized void addMouseWheelListener(
+                        MouseWheelListener l) {
+                }
+
+                @Override
+                public void addNotify() {
+                    disableEvents(AWTEvent.MOUSE_EVENT_MASK | 
+                            AWTEvent.MOUSE_MOTION_EVENT_MASK | 
+                            AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+                    super.addNotify();
+                }
+            };
+            descLabel.setFocusable(false);
+            descLabel.setRequestFocusEnabled(false);
+            descLabel.setContentType("text/html");
+            descLabel.setText("<html><body><pre>" + o + "</pre></body></html>");
+  //          descLabel.setLineWrap(true);
+  //          descLabel.setWrapStyleWord(true);
+            descLabel.setEditable(false);
+            descLabel.setOpaque(false);
+            add(descLabel, BorderLayout.CENTER);
+
+            setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180), 1),
+                BorderFactory.createEmptyBorder(4, 4, 4, 4)
+            ));
+
+            Font fn = top.getFont();
+            top.setFont(new Font(fn.getName(), Font.BOLD, fn.getSize()));
+
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            int w = getWidth();
+            int h = getHeight();
+            Color color1 = Color.WHITE;
+            Color color2 = new Color(215, 225, 255);
+            GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+            g2d.setPaint(gp);
+            g2d.fillRect(0, 0, w, h);
+        }
+
+    }
+
     public ProjectSearch(Editor e) {
         editor = e;
         mainContainer = new JPanel();
         mainContainer.setLayout(new BorderLayout());
         JToolBar tb = new JToolBar();
-        searchTerm = new JTextField();
+        searchTerm = new JTextField("", 20);
         tb.add(searchTerm);
         JButton searchButton = new JButton("Search");
 
@@ -68,68 +155,26 @@ public class ProjectSearch {
         mainContainer.add(scroll, BorderLayout.CENTER);
 
 
-        text = new JTextPane();
-        text.setContentType("text/html");
-        text.setEditable(false);
-        text.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        String theme = Base.preferences.get("theme.selected", "default");
-        theme = "theme." + theme + ".";
-        text.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
+        JPanel list = new JPanel();
+        list.setLayout(new BoxLayout(list, BoxLayout.PAGE_AXIS));
 
-        text.addHyperlinkListener(new HyperlinkListener() {
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    if (e.getDescription().startsWith("uecide://goto/")) {
-                        Pattern p = Pattern.compile("^uecide://goto/(\\d+)/(.*)$");
-                        Matcher m = p.matcher(e.getDescription());
-                        if (m.find()) {
+//                            File f = new File(m.group(2));
+//                            int line = 0;
+//                            try {
+//                                line = Integer.parseInt(m.group(1));
+//                            } catch (Exception ee) {
+//                            }
+//                            if (line > 0) {
+//                                int tab = editor.openOrSelectFile(f);
+//                                if (tab >= 0) {
+//                                    EditorBase eb = editor.getTab(tab);
+//                                    eb.gotoLine(line-1);
+//                                    eb.requestFocus();
+//                                }
+//                            }
+//                        }
 
-                            File f = new File(m.group(2));
-                            int line = 0;
-                            try {
-                                line = Integer.parseInt(m.group(1));
-                            } catch (Exception ee) {
-                            }
-                            if (line > 0) {
-                                int tab = editor.openOrSelectFile(f);
-                                if (tab >= 0) {
-                                    EditorBase eb = editor.getTab(tab);
-                                    eb.gotoLine(line-1);
-                                    eb.requestFocus();
-                                }
-                            }
-                        }
-                        return;
-                    }
-
-                    if (e.getURL() != null) {
-                        Base.openURL(e.getURL().toString());
-                    }
-                }
-            }
-        });
-
-
-        kit = new HTMLEditorKit();
-        text.setEditorKit(kit);
-        StyleSheet css = kit.getStyleSheet();
-
-        css.addRule("body {" + Base.theme.get(theme + "search.body", Base.theme.get("theme.default.search.body")) + "}");
-        css.addRule("span.term {" + Base.theme.get(theme + "search.term", Base.theme.get("theme.default.search.error")) + "}");
-        css.addRule("a {" + Base.theme.get(theme + "search.a", Base.theme.get("theme.default.search.a")) + "}");
-        css.addRule("ul {" + Base.theme.get(theme + "search.ul", Base.theme.get("theme.default.search.ul")) + "}");
-        css.addRule("ol {" + Base.theme.get(theme + "search.ol", Base.theme.get("theme.default.search.ol")) + "}");
-        css.addRule("li {" + Base.theme.get(theme + "search.li", Base.theme.get("theme.default.search.li")) + "}");
-        css.addRule("h1 {" + Base.theme.get(theme + "search.h1", Base.theme.get("theme.default.search.h1")) + "}");
-        css.addRule("h2 {" + Base.theme.get(theme + "search.h2", Base.theme.get("theme.default.search.h2")) + "}");
-        css.addRule("h3 {" + Base.theme.get(theme + "search.h3", Base.theme.get("theme.default.search.h3")) + "}");
-        css.addRule("h4 {" + Base.theme.get(theme + "search.h4", Base.theme.get("theme.default.search.h4")) + "}");
-        doc = (HTMLDocument)kit.createDefaultDocument();
-        text.setDocument(doc);
-        text.setCaretPosition(0);
-        clearText();
-
-        scroll.setViewportView(text);
+        scroll.setViewportView(list);
 
         //mainContainer.pack();
         editor.attachPanelAsTab("Search Project", mainContainer);
@@ -155,12 +200,23 @@ public class ProjectSearch {
 
 
     public void doSearch() {
+
+        for(int i = 0; i < editor.getTabCount(); i++) {
+            EditorBase eb = editor.getTab(i);
+
+            if(eb != null) {
+                eb.clearHighlights();
+                eb.removeFlagGroup(0x1000); // Error flags
+                eb.removeFlagGroup(0x1001); // Warning flags
+            }
+        }
+
         String theme = Base.preferences.get("theme.selected", "default");
         theme = "theme." + theme + ".";
         String term = searchTerm.getText().toLowerCase();
-        clearText();
+        JPanel list = new JPanel();
+        list.setLayout(new BoxLayout(list, BoxLayout.PAGE_AXIS));
         for(File f : editor.loadedSketch.sketchFiles) {
-            StringBuilder chunk = new StringBuilder();
             int tab = editor.getTabByFile(f);
             EditorBase eb = null;
             if (tab > -1) {
@@ -169,9 +225,6 @@ public class ProjectSearch {
 
             String[] content = loadFileLines(f);
             boolean foundText = false;
-
-            chunk.append("<h3>" + f.getName() + "</h3>");
-            chunk.append("<table><tr><th>Line</th><th>Content</th></tr>");
 
             int lineno = 0;
             ArrayList<Integer> finds = new ArrayList<Integer>();
@@ -185,16 +238,24 @@ public class ProjectSearch {
                         eb.highlightLine(lineno - 1, Base.theme.getColor(theme + "editor.searchall.bgcolor"));
                     }
 
-                    String rep = line.replaceAll("(?i)(" + term + ")", "<span class='term'>$1</span>");
-
-                    chunk.append("<hr><td><a href='uecide://goto/" + lineno + "/" + f.getAbsolutePath() + "'>" + lineno + "</a></td><td>" + rep + "</td></tr>");
+                    SearchResult res = new SearchResult(f, term, line, lineno);
+                    res.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            SearchResult r = (SearchResult)e.getSource();
+                            if (r.getLine() > 0) {
+                                int tab = editor.openOrSelectFile(r.getFile());
+                                if (tab >= 0) {
+                                    EditorBase eb = editor.getTab(tab);
+                                    eb.gotoLine(r.getLine()-1);
+                                    eb.requestFocus();
+                                }
+                            }
+                        }
+                    });
+                    list.add(res);
                 }
             }
-
-            if(foundText) {
-                chunk.append("</table>");
-                appendToText(chunk.toString());
-            }
+            scroll.setViewportView(list);
         }
     }
 

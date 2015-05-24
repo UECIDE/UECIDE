@@ -204,7 +204,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
             }
         } else {
             clearPage();
-            setText(craftPage("<h1>Manual not available</h1><p>The manual is not available for this core.</p>"));
+            setText(craftPage("<h1>Not Found</h1><p>The file requested could not be found.</p>"));
         }
 
         try {
