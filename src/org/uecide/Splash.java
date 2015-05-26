@@ -109,6 +109,11 @@ public class Splash extends Window {
     }
 
     @Override
+    public void update(Graphics g) {
+        paint(g);
+    }
+
+    @Override
     public void paint(Graphics g) {
         int x = 0;
         int y = 0;
