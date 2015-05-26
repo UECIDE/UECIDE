@@ -237,4 +237,8 @@ public class Debug {
         }
     }
 
+    public static String getText() {
+        return debugText.toString();
+    }
+
 }

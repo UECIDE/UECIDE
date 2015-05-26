@@ -64,6 +64,7 @@ public class CrashReporter {
         if (n == 2) {
             frame = new JDialog(null, JDialog.ModalityType.APPLICATION_MODAL);
             reportError();
+//            frame.setSize(400, 500);
             frame.setVisible(true);
         }
     }
@@ -73,64 +74,53 @@ public class CrashReporter {
         sb.append("OS: " + Base.getOSFullName() + "\n");
         sb.append("Version: " + Base.systemVersion + "\n");
 
-        sb.append("Exception: \n");
+        sb.append("\n\n=== EXCEPTION START ===\n\n");
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         exception.printStackTrace(pw);
         String o = sw.toString();
         sb.append(o);
+        sb.append("\n\n=== EXCEPTION END ===\n\n");
+        sb.append("\n\n=== DEBUG LOG START ===\n\n");
+        sb.append(Debug.getText());
+        sb.append("\n\n=== DEBUG LOG END ===\n\n");
 
         JPanel reportPanel = new JPanel();
 
         reportPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        reportPanel.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        reportPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.anchor = GridBagConstraints.LINE_START;
+        reportPanel.setLayout(new BoxLayout(reportPanel, BoxLayout.PAGE_AXIS));
 
         JLabel lab = new JLabel("Your name: ");
-        lab.setAlignmentX(Component.LEFT_ALIGNMENT);
-        lab.setHorizontalAlignment(SwingConstants.LEFT);
-        reportPanel.add(lab, c);
-        c.gridy++;
+        reportPanel.add(lab);
+
         final JTextField yourName = new JTextField(40);
-        reportPanel.add(yourName, c);
-        c.gridy++;
+        reportPanel.add(yourName);
 
         lab = new JLabel("Your Email: ");
-        lab.setAlignmentX(Component.LEFT_ALIGNMENT);
-        lab.setHorizontalAlignment(SwingConstants.LEFT);
-        reportPanel.add(lab,c);
-        c.gridy++;
+        reportPanel.add(lab);
+
         final JTextField yourEmail = new JTextField(40);
-        reportPanel.add(yourEmail,c);
-        c.gridy++;
+        reportPanel.add(yourEmail);
 
         lab = new JLabel("Text of the report:");
-        lab.setAlignmentX(Component.LEFT_ALIGNMENT);
-        lab.setHorizontalAlignment(SwingConstants.LEFT);
-        reportPanel.add(lab,c);
-        c.gridy++;
-        final JTextArea reportBody = new JTextArea(10,40);
+        reportPanel.add(lab);
+
+        final JTextArea reportBody = new JTextArea(10, 50);
+        reportBody.setLineWrap(true);
+        reportBody.setWrapStyleWord(true);
         reportBody.setText(sb.toString());
         reportBody.setEditable(false);
-        reportPanel.add(reportBody,c);
-        c.gridy++;
+        JScrollPane rbs = new JScrollPane(reportBody);
+        reportPanel.add(rbs);
         
         lab = new JLabel("Your comments:");
-        lab.setAlignmentX(Component.LEFT_ALIGNMENT);
-        lab.setHorizontalAlignment(SwingConstants.LEFT);
-        reportPanel.add(lab,c);
-        c.gridy++;
-        final JTextArea reportComments = new JTextArea(10, 40);
-        reportPanel.add(reportComments,c);
-        c.gridy++;
+        reportPanel.add(lab);
+        
+        final JTextArea reportComments = new JTextArea(10, 50);
+        reportComments.setLineWrap(true);
+        reportComments.setWrapStyleWord(true);
+        JScrollPane rcs = new JScrollPane(reportComments);
+        reportPanel.add(rcs);
         
 
         JPanel bb = new JPanel();
@@ -196,10 +186,11 @@ public class CrashReporter {
         });
         bb.add(can);
 
-        reportPanel.add(bb, c);
+        reportPanel.add(bb);
         
         frame.setContentPane(reportPanel);
         frame.pack();
+//        frame.setSize(400, 500);
     
         
     }

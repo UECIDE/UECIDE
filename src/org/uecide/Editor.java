@@ -301,10 +301,13 @@ public class Editor extends JFrame {
         topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, manualSplit, consolePanel);
 //        loadManual(manroot);
 
-/*
-String sexy = null;
-System.err.println(sexy.length());
-*/
+
+// Uncomment these two lines to force a NullPointer exception to test
+// the creash reporting system
+
+//String forcedCrash = null;
+//System.err.println(forcedCrash.length());
+
         manualSplit.setOneTouchExpandable(false);
         leftRightSplit.setOneTouchExpandable(true);
         topBottomSplit.setOneTouchExpandable(true);
