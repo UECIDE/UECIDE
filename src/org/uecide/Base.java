@@ -2086,6 +2086,20 @@ public class Base implements AptPercentageListener {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+            pluginReflections = new Reflections("com.ardublock");
+            try {
+                Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
+                Debug.message(pluginClasses.toString());
+                for (Class<? extends Plugin> c : pluginClasses) {
+                    Debug.message("Found plugin class " + c.getName());
+                    if (c.getName().equals("org.uecide.plugin.PluginManager")) {
+                        continue;
+                    }
+                    plugins.put(c.getName(), c);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

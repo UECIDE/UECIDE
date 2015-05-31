@@ -232,7 +232,7 @@ public class Editor extends JFrame {
                 Plugin p = (Plugin)(ctor.newInstance(new Object[] { this }));
                 plugins.add(p);
             } catch(Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
         }
 
@@ -806,7 +806,7 @@ public class Editor extends JFrame {
                                 }
                             } catch(AbstractMethodError e) {
                             } catch(Exception e) {
-                                error(e);
+//                                error(e);
                             }
                         }
 
@@ -3764,7 +3764,7 @@ public class Editor extends JFrame {
                 plugin.populateContextMenu(menu, filterFlags, node);
             } catch(AbstractMethodError e) {
             } catch(Exception e) {
-                error(e);
+//                error(e);
             }
         }
     }
@@ -3775,7 +3775,7 @@ public class Editor extends JFrame {
                 plugin.populateMenu(menu, filterFlags);
             } catch(AbstractMethodError e) {
             } catch(Exception e) {
-                error(e);
+//                error(e);
             }
         }
     }
@@ -3786,7 +3786,7 @@ public class Editor extends JFrame {
                 plugin.addToolbarButtons(tb, filterFlags);
             } catch(AbstractMethodError e) {
             } catch(Exception e) {
-                error(e);
+//                error(e);
             }
         }
     }
@@ -4331,7 +4331,7 @@ public class Editor extends JFrame {
             try {
                 plugin.releasePort(portName);
             } catch(Exception e) {
-                Base.error(e);
+//                Base.error(e);
             }
         }
     }
@@ -5027,7 +5027,7 @@ public class Editor extends JFrame {
                 plugin.catchEvent(event);
             } catch(AbstractMethodError e) {
             } catch(Exception e) {
-                error(e);
+//                error(e);
             }
         }
     }
