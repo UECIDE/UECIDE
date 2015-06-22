@@ -186,22 +186,32 @@ public class Sketch implements MessageConsumer {
             String inoName = pathName.substring(0, pathName.length() - 4);
             path = path.getParentFile();
             if (!path.getName().equals(inoName)) {
-                if (Base.yesno("Import Sketch?", "This sketch file isn't in a properly named sketch folder.\nImport this sketch into your sketchbook area?")) {
-                    File sb = new File(Base.getSketchbookFolder(), inoName);
-                    sb.mkdirs();
-                    File inof = new File(sb, inoName + ".ino");
-                    Base.copyFile(oldPath, inof);
-                    path = sb;
+                File nsf = new File(path, path.getName() + ".ino");
+                if (!nsf.exists()) {
+                    nsf = new File(path, path.getName() + ".pde");
+                    if (!nsf.exists()) {
+                        if (Base.yesno("Import Sketch?", "This sketch file isn't in a properly named sketch folder.\nImport this sketch into your sketchbook area?")) {
+                            File sb = new File(Base.getSketchbookFolder(), inoName);
+                            sb.mkdirs();
+                            File inof = new File(sb, inoName + ".ino");
+                            Base.copyFile(oldPath, inof);
+                            path = sb;
+                        } else {
+                            path = createUntitledSketch();
+                            sketchFolder = path;
+                            sketchName = sketchFolder.getName();
+                            path.mkdirs();
+                            createBlankFile(path.getName() + ".ino");
+                            inoName = path.getName();
+                        }
+                    }
                 }
-            } else {
-                path = createUntitledSketch();
             }
         }
 
-
-
         sketchFolder = path;
         sketchName = sketchFolder.getName();
+
         loadSketchFromFolder(path);
         buildFolder = createBuildFolder();
     }
@@ -1448,22 +1458,25 @@ public class Sketch implements MessageConsumer {
                 nextChar = data.charAt(cpos + 1);
             }
 
-            // If the last character was a \ then we'll just skip the next character since we
-            // really don't care what it is.
-            if (inEscape) {
-                out.append(thisChar);
-                cpos++;
-                inEscape = false;
-                continue;
-            }
-
-            // If we're not currently escaped and we get a \ then start escaping.
-            if (thisChar == '\\') {
-                out.append(thisChar);
-                inEscape = true;
-                cpos++;
-                continue;
-            }
+//            // If the last character was a \ then we'll just skip the next character since we
+//            // really don't care what it is.
+//            if (inEscape) {
+//                out.append(thisChar);
+//                cpos++;
+//                inEscape = false;
+//                continue;
+//            }
+//
+//            // If we're not currently escaped and we get a \ then start escaping. Don't escape inside
+//            // comments.
+//            if (thisChar == '\\') {
+//                out.append(thisChar);
+//                if (!inSingleComment && !inMultiComment) {
+//                    inEscape = true;
+//                }
+//                cpos++;
+//                continue;
+//            }
 
             // If we're currently in a string then keep moving on until the end of the string.
             // If we hit the closing quote we still want to move on since it'll start a new

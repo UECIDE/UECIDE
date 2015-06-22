@@ -1282,7 +1282,7 @@ public class Editor extends JFrame {
                 loadedSketch.rescanFileTree();
                 updateTree();
             } catch(Exception ee) {
-                ee.printStackTrace();
+//                ee.printStackTrace();
             }
 
             return true;
@@ -1390,6 +1390,9 @@ public class Editor extends JFrame {
             public void run() {
                     
                 TreePath[] saved = saveTreeState(sketchContentTree);
+                if (saved == null) {
+                    return;
+                }
 
                 DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
                 treeSource.removeAllChildren();
@@ -1529,6 +1532,9 @@ public class Editor extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TreePath[] saved = saveTreeState(sketchContentTree);
+                if (saved == null) {
+                    return;
+                }
                 treeDocs.removeAllChildren();
                 DefaultMutableTreeNode node;
 
@@ -1552,6 +1558,9 @@ public class Editor extends JFrame {
 
     public void refreshTreeModel() {
         TreePath[] saved = saveTreeState(sketchContentTree);
+        if (saved == null) {
+            return;
+        }
         treeModel.nodeStructureChanged(treeSource);
         treeModel.nodeStructureChanged(treeHeaders);
         treeModel.nodeStructureChanged(treeLibraries);
@@ -1565,6 +1574,9 @@ public class Editor extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TreePath[] saved = saveTreeState(sketchContentTree);
+                if (saved == null) {
+                    return;
+                }
                 treeHeaders.removeAllChildren();
                 DefaultMutableTreeNode node;
 
@@ -1590,6 +1602,9 @@ public class Editor extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TreePath[] saved = saveTreeState(sketchContentTree);
+                if (saved == null) {
+                    return;
+                }
 //                treeLibraries.removeAllChildren();
                 HashMap<String, Library>libList = loadedSketch.getLibraries();
                 
@@ -1621,6 +1636,9 @@ public class Editor extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TreePath[] saved = saveTreeState(sketchContentTree);
+                if (saved == null) {
+                    return;
+                }
                 treeBinaries.removeAllChildren();
                 File bins = loadedSketch.getBinariesFolder();
                 DefaultMutableTreeNode node;
@@ -1649,6 +1667,9 @@ public class Editor extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TreePath[] saved = saveTreeState(sketchContentTree);
+                if (saved == null) {
+                    return;
+                }
                 treeOutput.removeAllChildren();
                 addFileTreeToNode(treeOutput, loadedSketch.getBuildFolder());
                 treeModel.nodeStructureChanged(treeOutput);
@@ -1663,6 +1684,9 @@ public class Editor extends JFrame {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TreePath[] saved = saveTreeState(sketchFilesTree);
+                if (saved == null) {
+                    return;
+                }
                 filesTreeRoot.removeAllChildren();
                 filesTreeRoot.setUserObject(loadedSketch.getFolder());
                 addFileTreeToNode(filesTreeRoot, loadedSketch.getFolder());
@@ -3517,7 +3541,6 @@ public class Editor extends JFrame {
         }
 
         public void actionPerformed(ActionEvent e) {
-            System.err.println(discoveredBoard.toString());
             loadedSketch.setBoard(discoveredBoard.board);
             loadedSketch.setPort(discoveredBoard.location);
 
@@ -4498,7 +4521,6 @@ public class Editor extends JFrame {
     }
 
     public static void refreshAllEditors() {
-        System.err.println("Refresh called!");
         for(Editor e : editorList) {
             e.refreshEditors();
         }
@@ -4823,6 +4845,12 @@ public class Editor extends JFrame {
     }
 
     public TreePath[] getPaths(JTree tree) {
+        if (tree == null) {
+            return null;
+        }
+        if (tree.getModel() == null) {
+            return null;
+        }
         TreeNode root = (TreeNode) tree.getModel().getRoot();
         ArrayList<TreePath> list = new ArrayList<TreePath>();
         getPaths(tree, new TreePath(root), list);
@@ -4845,6 +4873,9 @@ public class Editor extends JFrame {
 
     public TreePath[] saveTreeState(JTree tree) {
         TreePath[] allPaths = getPaths(tree);
+        if (allPaths == null) {
+            return null;
+        }
         ArrayList<TreePath> openPaths = new ArrayList<TreePath>();
 
         for(TreePath path : allPaths) {
@@ -4859,6 +4890,9 @@ public class Editor extends JFrame {
     public TreePath findPathByStrings(JTree tree, TreePath path) {
         Object[] pathComponents = path.getPath();
         TreePath[] allPaths = getPaths(tree);
+        if (allPaths == null) {
+            return null;
+        }
 
         for(TreePath testPath : allPaths) {
             Object[] testComponents = testPath.getPath();
@@ -4889,6 +4923,9 @@ public class Editor extends JFrame {
 
     public void restoreTreeState(JTree tree, TreePath[] savedState) {
         TreePath[] allPaths = getPaths(tree);
+        if (allPaths == null) {
+            return;
+        }
 
         for(TreePath path : savedState) {
             TreePath foundPath = findPathByStrings(tree, path);

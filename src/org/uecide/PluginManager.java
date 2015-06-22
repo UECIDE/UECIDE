@@ -14,7 +14,9 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.table.*;
 import javax.swing.tree.*;
+import javax.imageio.*;
 import java.awt.*;
+import java.awt.image.*;
 import java.awt.event.*;
 import say.swing.*;
 import org.json.simple.*;
@@ -103,7 +105,7 @@ public class PluginManager implements PropertyChangeListener
     JComboBox familySelector;
     JCheckBox onlyUninstalled;
     JTextField searchBox;
-    JTextPane infoBrowser;
+    JImageTextPane infoBrowser;
     JScrollPane infoScroller;
 
     JButton localInstallButton;
@@ -148,6 +150,20 @@ public class PluginManager implements PropertyChangeListener
         String[] descLines = descString.split("\n");
         String heading = descLines[0];
         String longDesc = "";
+
+        String imageData = pe.get("Image");
+        if (imageData != null) {
+            try {
+                byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(imageData);
+                BufferedImage img = ImageIO.read(new ByteArrayInputStream(binary));
+                infoBrowser.setBackgroundImage(img);
+                
+            } catch (Exception e) {
+            }
+        } else {
+            infoBrowser.setBackgroundImage(null);
+        }
+
         for (int i = 1; i < descLines.length; i++) {
             String dl = descLines[i];
             if (dl.startsWith(" ")) {
@@ -455,7 +471,7 @@ public class PluginManager implements PropertyChangeListener
         topsection.add(optionsBox, BorderLayout.CENTER);
 
         upper.add(topsection, BorderLayout.NORTH);
-        infoBrowser = new JTextPane();
+        infoBrowser = new JImageTextPane();
         infoBrowser.setContentType("text/html");
         infoBrowser.setEditable(false);
 
