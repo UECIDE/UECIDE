@@ -4396,7 +4396,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public TreeMap<String, String> getOptionNames(String group) {
-        TreeMap<String, String> out = new TreeMap<String, String>();
+        TreeMap<String, String> out = new TreeMap<String, String>(new NaturalOrderComparator());
         PropertyFile props = mergeAllProperties();
 
         if (group.contains("@")) {
