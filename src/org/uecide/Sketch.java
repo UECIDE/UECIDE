@@ -3891,20 +3891,21 @@ public class Sketch implements MessageConsumer {
 
         if(uploadType == null) uploadType = "serial";
 
+        int progbaud = 9600;
 
         if(uploadType.equals("serial")) {
 
             boolean dtr = props.getBoolean("upload." + programmer + ".dtr");
             boolean rts = props.getBoolean("upload." + programmer + ".rts");
 
-            int progbaud = 9600;
             String br = props.get("upload.speed");
 
             if(br != null) {
+                br = parseString(br);
                 try {
-                    progbaud = props.getInteger("upload.speed");
+                    progbaud = Integer.parseInt(br);
                 } catch(Exception e) {
-                    error(e);
+                    progbaud = 115200;
                 }
             }
 
@@ -3934,17 +3935,6 @@ public class Sketch implements MessageConsumer {
 
             boolean dtr = props.getBoolean("upload." + programmer + ".dtr");
             boolean rts = props.getBoolean("upload." + programmer + ".rts");
-
-            int progbaud = 9600;
-            String br = props.get("upload.speed");
-
-            if(br != null) {
-                try {
-                    progbaud = props.getInteger("upload.speed");
-                } catch(Exception e) {
-                    error(e);
-                }
-            }
 
             if (!performSerialReset(dtr, rts, progbaud)) {
                 return false;
