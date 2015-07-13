@@ -413,7 +413,7 @@ public class Editor extends JFrame {
         projectTabs.add(treePanel, "Project");
         projectTabs.add(filesPanel, "Files");
 
-        String theme = Base.preferences.get("theme.selected", "default");
+        String theme = Base.preferences.get("theme.editor", "default");
         theme = "theme." + theme + ".";
 
         sketchContentTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
@@ -663,7 +663,7 @@ public class Editor extends JFrame {
         DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
-            String theme = Base.preferences.get("theme.selected", "default");
+            String theme = Base.preferences.get("theme.editor", "default");
             theme = "theme." + theme + ".";
 
             Color textColor = Base.theme.getColor(theme + "editor.fgcolor");
@@ -4968,7 +4968,7 @@ public class Editor extends JFrame {
             return;
         }
 
-        if(Base.preferences.getBoolean("editor.autosave")) {
+        if(Base.preferences.getBoolean("editor.save.automatic")) {
             if(!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
                 saveAllTabs();
             }
@@ -4987,7 +4987,7 @@ public class Editor extends JFrame {
             return;
         }
 
-        if(Base.preferences.getBoolean("editor.autosave")) {
+        if(Base.preferences.getBoolean("editor.save.automatic")) {
             if(!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
                 saveAllTabs();
             }

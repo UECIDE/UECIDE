@@ -211,7 +211,7 @@ public class ProjectSearch {
             }
         }
 
-        String theme = Base.preferences.get("theme.selected", "default");
+        String theme = Base.preferences.get("theme.editor", "default");
         theme = "theme." + theme + ".";
         String term = searchTerm.getText().toLowerCase();
         JPanel list = new JPanel();

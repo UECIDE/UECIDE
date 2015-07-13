@@ -1,7 +1,7 @@
 # Compiler settings
 
 compiler.name=Compiler
-compiler.type=group
+compiler.type=section
 
 compiler.buildinsketch.type=checkbox
 compiler.buildinsketch.name=Compile the sketch in the sketch folder
@@ -24,12 +24,16 @@ compiler.combine_ino.name=Combine all .INO and .PDE files into a single .CPP fil
 compiler.combine_ino.default=true
 
 compiler.generate_makefile.type=checkbox
-compiler.generate_makefile.name==Generate / update a Makefile each compile (core support required)
+compiler.generate_makefile.name=Generate / update a Makefile each compile (core support required)
 compiler.generate_makefile.default=false
 
-compiler.verbose.type=checkbox
-compiler.verbose.name=Verbose output during compile
-compiler.verbose.default=false
+compiler.verbose_compile.type=checkbox
+compiler.verbose_compile.name=Verbose output during compile
+compiler.verbose_compile.default=false
+
+compiler.verbose_upload.type=checkbox
+compiler.verbose_upload.name=Verbose output during upload
+compiler.verbose_upload.default=false
 
 compiler.purge.type=checkbox
 compiler.purge.name=Purge project on every build
@@ -44,58 +48,118 @@ compiler.save_lss.name=Save generated LSS file to sketch folder
 compiler.save_lss.depends=compiler.generate_lss
 compiler.save_lss.default=false
 
-# Upload settings
-
-upload.name=Upload
-upload.type=group
-
-upload.verbose.type=checkbox
-upload.verbose.name=Verbose output during upload
-upload.verbose.default=false
-
 # Editor settings
 
 editor.name=Editor
-editor.type=group
+editor.type=section
 
-editor.keepfindopen.type=checkbox
-editor.keepfindopen.name=Keep find panel open
-editor.keepfindopen.default=false
+editor.dialog.name=Dialogs
+editor.dialog.type=section
 
-editor.subtoolbar_hidden.type=checkbox
-editor.subtoolbar_hidden.name=Hide secondary toolbar
-editor.subtoolbar_hidden.default=false
+editor.external.name=External
+editor.external.type=section
 
-editor.autosave.type=checkbox
-editor.autosave.name=Automatically save sketch before each build
-editor.autosave.default=false
+editor.find.name=Find & Replace
+editor.find.type=section
 
-editor.versions.type=range
-editor.versions.name=Number of backup versions of your sketch to keep
-editor.versions.default=0
-editor.versions.min=0
-editor.versions.max=100
+editor.save.name=Save
+editor.save.type=section
 
-editor.font.type=font
-editor.font.name=Editor font
-editor.font.default=Monospaced,plain,12
-
-# Editor -> Tabs settings
-
-editor.tabs.type=group
 editor.tabs.name=Tabs
+editor.tabs.type=section
 
-editor.tabs.show.type=checkbox
-editor.tabs.show.name=Display tabs
-editor.tabs.show.default=false
+editor.toolbars.name=Toolbars
+editor.toolbars.type=section
 
+
+editor.dialog.crash.name=Enable crash reporter
+editor.dialog.crash.type=checkbox
+editor.dialog.crash.default=true
+
+editor.dialog.missinglibs.name=Suggest installing missing libraries
+editor.dialog.missinglibs.type=checkbox
+editor.dialog.missinglibs.default=true
+
+editor.external.command.name=External editor command
+editor.external.command.type=string
+editor.external.command.default=
+
+editor.find.keep.name=Keep Find & Replace permanantly open
+editor.find.keep.type=checkbox
+editor.find.keep.default=false
+
+editor.save.auto.name=Automatically save sketch before each compile
+editor.save.auto.type=checkbox
+editor.save.auto.default=false
+
+editor.save.version.name=Save backup versions of your sketch
+editor.save.version.type=checkbox
+editor.save.version.default=false
+
+editor.save.version_num.name=Number of backup copies to save
+editor.save.version_num.type=range
+editor.save.version_num.min=1
+editor.save.version_num.max=10
+editor.save.version_num.default=1
+
+editor.tabs.expand.name=Editor uses spaces for tabs
+editor.tabs.expand.type=checkbox
+editor.tabs.expand.default=true
+
+editor.tabs.size.name=Number of spaces to use for a tab
 editor.tabs.size.type=range
-editor.tabs.size.name=Tab size
-editor.tabs.size.default=5
 editor.tabs.size.min=1
-editor.tabs.size.max=8
+editor.tabs.size.max=10
+editor.tabs.size.default=4
 
-editor.tabs.expands.type=checkbox
-editor.tabs.expand.name=Expand tabs into spaces
-editor.tabs.expand.default=false
+editor.tabs.show.name=Show tabs and indents
+editor.tabs.show.type=checkbox
+editor.tabs.show.default=false;
 
+editor.toolbars.sub_hidden.name=Hide the secondary editor toolbar
+editor.toolbars.sub_hidden.type=checkbox
+editor.toolbars.sub_hidden.default=false
+
+editor.version_check.name=Check for a new version at startup
+editor.version_check.type=checkbox
+editor.version_check.default=true
+
+theme.name=Theme
+theme.type=section
+
+theme.editor.name=Editor Theme
+theme.editor.type=dropdown
+theme.editor.options.script=/org/uecide/scripts/getEditorThemes.js
+
+theme.icons.name=Icon Theme
+theme.icons.type=dropdown
+theme.icons.options.script=/org/uecide/scripts/getIconThemes.js
+
+theme.window.name=Window Theme
+theme.window.type=dropdown
+theme.window.options.script=/org/uecide/scripts/getWindowThemes.js
+
+theme.window_system.name=Use system decorator
+theme.window_system.type=checkbox
+theme.window_system.default=false
+
+theme.fonts.name=Fonts
+theme.fonts.type=section
+
+theme.fonts.editor.name=Editor font
+theme.fonts.editor.type=fontselect
+theme.fonts.editor.default=Monospaced,plain,12
+
+theme.fonts.console.name=Console font
+theme.fonts.console.type=fontselect
+theme.fonts.console.default=Monospaced,plain,12
+
+
+locations.name=Locations
+locations.type=section
+
+locations.data.name=Data location
+locations.data.type=dirselect
+
+locations.sketchbook.name=Sketchbook location
+locations.sketchbook.type=dirselect

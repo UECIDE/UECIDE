@@ -40,6 +40,8 @@ import java.util.zip.*;
 import java.util.jar.*;
 import org.uecide.plugin.*;
 
+import javax.script.*;
+
 import org.uecide.builtin.BuiltinCommand;
 import org.uecide.varcmd.VariableCommand;
 
@@ -133,6 +135,8 @@ public class Base implements AptPercentageListener {
     public static PropertyFile preferences;
     public static PropertyFile session = new PropertyFile();
     public static Theme theme;
+
+    public static PropertyFile preferencesTree = new PropertyFile();
 
     public static HashMap<Object, DiscoveredBoard> discoveredBoards = new HashMap<Object, DiscoveredBoard>();
 
@@ -292,6 +296,9 @@ public class Base implements AptPercentageListener {
                 headless = true;
             }
         }
+
+        String javaHome = System.getProperty("java.home");
+        System.err.println(javaHome);
 
         try {
             File f = getJarLocation();
@@ -530,6 +537,9 @@ public class Base implements AptPercentageListener {
             gatherLibraries();
             System.out.println("done");
 
+            buildPreferencesTree();
+            loadPreferencesTree("/org/uecide/config/prefs.txt");
+
             InteractiveCLI icli = new InteractiveCLI(argv);
             icli.run();
             System.exit(0);
@@ -596,13 +606,13 @@ public class Base implements AptPercentageListener {
                     awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
                 }
 
-                String laf = Base.preferences.get("editor.laf");
+                String laf = Base.preferences.get("theme.window");
 
                 if(laf == null) {
-                    laf = Base.preferences.getPlatformSpecific("editor.laf.default");
+                    laf = Base.preferences.getPlatformSpecific("theme.window.default");
 
                     if(laf != null) {
-                        Base.preferences.set("editor.laf", laf);
+                        Base.preferences.set("theme.window", laf);
                     }
                 }
 
@@ -636,7 +646,7 @@ public class Base implements AptPercentageListener {
 
                     if(laf.startsWith("com.jtattoo.plaf.")) {
                         Properties props = new Properties();
-                        props.put("windowDecoration", Base.preferences.getBoolean("editor.laf.decorator") ? "off" : "on");
+                        props.put("windowDecoration", Base.preferences.getBoolean("theme.window_system") ? "off" : "on");
                         props.put("logoString", "UECIDE");
                         props.put("textAntiAliasing", "on");
 
@@ -669,14 +679,14 @@ public class Base implements AptPercentageListener {
         toolsFolder = getContentFile("tools");
 
         // Get the sketchbook path, and make sure it's set properly
-        String sketchbookPath = preferences.get("sketchbook.path");
+        String sketchbookPath = preferences.get("locations.sketchbook");
 
 //        Translate.load("swedish");
 
         // If no path is set, get the default sketchbook folder for this platform
         if(sketchbookPath == null) {
             File defaultFolder = getDefaultSketchbookFolder();
-            preferences.set("sketchbook.path", defaultFolder.getAbsolutePath());
+            preferences.set("locations.sketchbook", defaultFolder.getAbsolutePath());
             sketchbookPath = defaultFolder.getAbsolutePath();
         }
 
@@ -754,17 +764,20 @@ public class Base implements AptPercentageListener {
 
         loadIconSets();
 
-        if (preferences.get("editor.icons") != null) {
-            if (iconSets.get(preferences.get("editor.icons")) == null) {
+        if (preferences.get("theme.icons") != null) {
+            if (iconSets.get(preferences.get("theme.icons")) == null) {
                 iconSet = defaultIconSet;
             } else {
-                iconSet = preferences.get("editor.icons");
+                iconSet = preferences.get("theme.icons");
             }
         }
 
         if(!headless) splashScreen.setMessage("Loading Libraries...", 70);
 
         gatherLibraries();
+
+        buildPreferencesTree();
+        loadPreferencesTree("/org/uecide/config/prefs.txt");
 
         initMRU();
 
@@ -1409,12 +1422,12 @@ public class Base implements AptPercentageListener {
     }
 
     public static File getSketchbookFolder() {
-        String sbPath = preferences.get("sketchbook.path");
+        String sbPath = preferences.get("locations.sketchbook");
         if (sbPath == null) {
-            preferences.setFile("sketchbook.path", platform.getDefaultSketchbookFolder());
+            preferences.setFile("locations.sketchbook", platform.getDefaultSketchbookFolder());
             return platform.getDefaultSketchbookFolder();
         }
-        return new File(preferences.get("sketchbook.path"));
+        return new File(preferences.get("locations.sketchbook"));
     }
 
     protected File getDefaultSketchbookFolder() {
@@ -2256,8 +2269,8 @@ public class Base implements AptPercentageListener {
         if (overrideSettingsFolder != null) {
             out = new File(overrideSettingsFolder);
         } else {
-            if ((preferences != null) && (preferences.getFile("location.data") != null)) {
-                out = preferences.getFile("location.data");
+            if ((preferences != null) && (preferences.getFile("locations.data") != null)) {
+                out = preferences.getFile("locations.data");
             } else {
                 out = platform.getSettingsFolder();
             }
@@ -2300,7 +2313,7 @@ public class Base implements AptPercentageListener {
             return;
         }
         try {
-            if (Base.preferences.getBoolean("crash.noreport") == false) {
+            if (Base.preferences.getBoolean("editor.dialog.crash") == true) {
                 CrashReporter rep = new CrashReporter(e);
             }
             e.printStackTrace();
@@ -2614,7 +2627,7 @@ public class Base implements AptPercentageListener {
         int time = (int)(System.currentTimeMillis() / 1000L);
         Base.preferences.setInteger("version.lastcheck", time);
 
-        if(Base.preferences.getBoolean("version.check")) {
+        if(Base.preferences.getBoolean("editor.version_check")) {
             Version newVersion = getLatestVersion();
 
             if(newVersion == null) {
@@ -2973,7 +2986,7 @@ public class Base implements AptPercentageListener {
 
     public static void setFont(JComponent comp, String key) {
 
-        String themekey = preferences.get("theme.selected", "default");
+        String themekey = preferences.get("theme.editor", "default");
         themekey = "theme." + themekey + ".";
 
         String fontData = preferences.get(key);
@@ -3057,5 +3070,155 @@ public class Base implements AptPercentageListener {
             return JOptionPane.showOptionDialog(null, question, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.YES_OPTION;
         }
         return false;
+    }
+
+    public static void buildPreferencesTree() {
+        preferencesTree = new PropertyFile();
+
+        System.err.println("Gathering preferences...");
+
+        for(Compiler c : compilers.values()) {
+            preferencesTree.mergeData(c.getProperties().getChildren("prefs"));
+        }
+
+        for(Core c : cores.values()) {
+            PropertyFile pf = c.getProperties();
+            PropertyFile cf = pf.getChildren("prefs");
+            cf.debugDump();
+            preferencesTree.mergeData(cf);
+        }
+
+        for(Board c : boards.values()) {
+            preferencesTree.mergeData(c.getProperties().getChildren("prefs"));
+        }
+
+        preferencesTree.debugDump();
+    }
+
+    public static void registerPreference(String key, String type, String name, String def) {
+        registerPreference(key, type, name, def, null);
+    }
+        
+    public static void registerPreference(String key, String type, String name, String def, String plat) {
+        preferencesTree.set(key + ".type", type);
+        preferencesTree.set(key + ".name", name);
+        if (plat == null) {
+            preferencesTree.set(key + ".default", def);
+        } else {
+            preferencesTree.set(key + ".default." + plat, def);
+        }
+    }
+
+    public static void loadPreferencesTree(String res) {
+        PropertyFile pf = new PropertyFile(res);
+        preferencesTree.mergeData(pf);
+    }
+
+    public static Object executeJavaScript(String resource, String function, Object[] args) {
+        Object ret = null;
+        try {
+            ScriptEngineManager manager = new ScriptEngineManager();
+            ScriptEngine engine = manager.getEngineByName("JavaScript");
+
+            String script = getResourceAsString(resource);
+
+            if (script == null) { return null; }
+            if (script.equals("")) { return null; }
+
+            engine.eval(script);
+
+            Invocable inv = (Invocable)engine;
+            ret = inv.invokeFunction(function, args);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    public static String getResourceAsString(String resource) {
+        String out = "";
+        try {
+            InputStream from = Base.class.getResourceAsStream(resource);
+            byte[] buffer = new byte[16 * 1024];
+            int bytesRead;
+
+            StringBuilder sb = new StringBuilder();
+
+            String line = null;
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(from));
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+                sb.append("\n");
+            }
+
+            out = sb.toString();
+
+            from.close();
+            from = null;
+        } catch(Exception e) {
+            error(e);
+        }
+        return out;
+    }
+
+    public static HashMap<String, String> getLookAndFeelList() {
+        HashMap<String, String>themes = new HashMap<String, String>();
+        UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
+
+        for(UIManager.LookAndFeelInfo info : lafInfo) {
+            themes.put(info.getClassName(), info.getName());
+        }
+
+        // JTattoo collection
+        themes.put("com.jtattoo.plaf.acryl.AcrylLookAndFeel",          "Acryl");
+        themes.put("com.jtattoo.plaf.aero.AeroLookAndFeel",            "Aero");
+        themes.put("com.jtattoo.plaf.aluminium.AluminiumLookAndFeel",  "Aluminium");
+        themes.put("com.jtattoo.plaf.bernstein.BernsteinLookAndFeel",  "Bernstein");
+        themes.put("com.jtattoo.plaf.fast.FastLookAndFeel",            "Fast");
+        themes.put("com.jtattoo.plaf.graphite.GraphiteLookAndFeel",    "Graphite");
+        themes.put("com.jtattoo.plaf.hifi.HiFiLookAndFeel",            "HiFi");
+        themes.put("com.jtattoo.plaf.luna.LunaLookAndFeel",            "Luna");
+        themes.put("com.jtattoo.plaf.mcwin.McWinLookAndFeel",          "McWin");
+        themes.put("com.jtattoo.plaf.mint.MintLookAndFeel",            "Mint");
+        themes.put("com.jtattoo.plaf.noire.NoireLookAndFeel",          "Noire");
+        themes.put("com.jtattoo.plaf.smart.SmartLookAndFeel",          "Smart");
+
+        // The fifesoft Windows LaF collection is only available on Windows.
+        if(Base.isWindows()) {
+            themes.put("org.fife.plaf.Office2003.Office2003LookAndFeel", "Office 2003");
+            themes.put("org.fife.plaf.OfficeXP.OfficeXPLookAndFeel","Office XP");
+            themes.put("org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel", "Visual Studio 2005");
+        }
+
+        themes.put("com.birosoft.liquid.LiquidLookAndFeel", "Liquid");
+
+        // TinyLAF collection
+
+        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+
+        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+            String themeName = td.getName();
+
+            if(themeName.equals("")) {
+                continue;
+            }
+
+            themes.put("de.muntjak.tinylookandfeel.TinyLookAndFeel;" + themeName, "Tiny: " + themeName);
+        }
+
+        return themes;
+
+    }
+
+    public static HashMap<String, String> getIconSets() {
+        HashMap<String, String> hash = new HashMap<String, String>();
+
+        for (String i : iconSets.keySet()) {
+            hash.put(i, i);
+        }
+        return hash;
     }
 }

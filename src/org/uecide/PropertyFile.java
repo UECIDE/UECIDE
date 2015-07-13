@@ -819,4 +819,10 @@ public class PropertyFile {
         }
         return null;
     }
+
+    public void debugDump() {
+        for (String prop : properties.stringPropertyNames()) {
+            System.err.println(prop + " = " + properties.get(prop));
+        }        
+    }
 }

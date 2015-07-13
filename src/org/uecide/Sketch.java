@@ -1906,8 +1906,8 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        if(Base.preferences.getBoolean("version.enabled")) {
-            int numToSave = Base.preferences.getInteger("version.keep");
+        if(Base.preferences.getBoolean("editor.save.version")) {
+            int numToSave = Base.preferences.getInteger("editor.save.version_num");
             File versionsFolder = new File(sketchFolder, "backup");
 
             if(!versionsFolder.exists()) {
@@ -2380,7 +2380,7 @@ public class Sketch implements MessageConsumer {
         settings.put("includes", generateIncludes());
         settings.put("filename", sketchName);
 
-        if ((!Base.preferences.getBoolean("dialogs.hide.missinglibraries")) && (Base.isOnline())) {
+        if ((Base.preferences.getBoolean("editor.dialog.missinglibs")) && (Base.isOnline())) {
             if (editor != null) {
                 if (unknownLibraries.size() > 0) {
                     PluginManager pm = new PluginManager();
@@ -2433,7 +2433,7 @@ public class Sketch implements MessageConsumer {
                         int n = JOptionPane.showOptionDialog(editor, panel, "Missing Libraries", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 
                         if (cb.isSelected()) {
-                            Base.preferences.setBoolean("dialogs.hide.missinglibraries", true);
+                            Base.preferences.setBoolean("editor.dialog.missinglibs", false);
                         }
 
                         if (n == 1) {
@@ -3981,7 +3981,7 @@ public class Sketch implements MessageConsumer {
             return;
         }
 
-        String theme = Base.preferences.get("theme.selected", "default");
+        String theme = Base.preferences.get("theme.editor", "default");
         theme = "theme." + theme + ".";
         PropertyFile props = mergeAllProperties();
 
