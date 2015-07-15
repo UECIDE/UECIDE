@@ -4,13 +4,13 @@ import org.uecide.*;
 import java.io.*;
 
 public class cp implements BuiltinCommand {
-    Sketch sketch;
+    Context ctx;
 
-    public boolean main(Sketch sktch, String[] arg) {
-        sketch = sktch;
+    public boolean main(Context c, String[] arg) {
+        ctx = c;
 
         if (arg.length < 2) {
-            sketch.error("Usage: __builtin_cp::[file::[file::[file...]]]::[dest]");
+            ctx.error("Usage: __builtin_cp::[file::[file::[file...]]]::[dest]");
             return false;
         }
 

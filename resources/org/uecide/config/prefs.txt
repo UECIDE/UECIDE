@@ -28,7 +28,7 @@ compiler.generate_makefile.name=Generate / update a Makefile each compile (core 
 compiler.generate_makefile.default=false
 
 compiler.verbose_compile.type=checkbox
-compiler.verbose_compile.name=Verbose output during compile
+compiler.verbose_compile.name=Verbose command execution
 compiler.verbose_compile.default=false
 
 compiler.verbose_upload.type=checkbox

@@ -3,8 +3,8 @@ package org.uecide.varcmd;
 import org.uecide.*;
 
 public class vc_select implements VariableCommand {
-    public String main(Sketch sketch, String args) {
-        PropertyFile props = sketch.mergeAllProperties();
+    public String main(Context context, String args) {
+        PropertyFile props = context.getMerged();
         String[] keys = props.childKeysOf(args);
         String out = "";
         for (String k : keys) {

@@ -57,6 +57,8 @@ public class PropertyFile {
     File userFile;
     boolean doPlatformOverride = false;
 
+    Properties embedded;
+
     /*! Create a new PropertyFile from a file on disk.  All properties are loaded and stored from the file. */
     public PropertyFile(File user) {
         this(user, (File)null);
@@ -73,6 +75,7 @@ public class PropertyFile {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(user), "UTF-8"));
             properties = new Properties();
+            embedded = new Properties();
 
             if(br != null) {
                 loadProperties(properties, br);
@@ -103,6 +106,7 @@ public class PropertyFile {
 
             br.close();
             properties = new Properties(defaultProperties);
+            embedded = new Properties();
 
             if(user != null) {
                 if(user.exists()) {
@@ -143,6 +147,7 @@ public class PropertyFile {
         }
 
         properties = new Properties(defaultProperties);
+        embedded = new Properties();
 
         if(user != null) {
             if(user.exists()) {
@@ -164,6 +169,7 @@ public class PropertyFile {
         userFile = null;
         defaultProperties = new Properties();
         properties = new Properties();
+        embedded = new Properties();
     }
 
     /*! Create a new PropertyFile from a set of properties stored in a TreeMap<String, String> object. */
@@ -171,6 +177,7 @@ public class PropertyFile {
         userFile = null;
         defaultProperties = new Properties();
         properties = new Properties();
+        embedded = new Properties();
         mergeData(data);
     }
 
@@ -179,6 +186,7 @@ public class PropertyFile {
         userFile = null;
         defaultProperties = new Properties();
         properties = new Properties();
+        embedded = new Properties();
         mergeData(pf);
     }
 
@@ -232,8 +240,18 @@ public class PropertyFile {
                     String v = properties.getProperty(k);
                     pw.println(k + "=" + v);
                 }
+
+                for (String embfile : embedded.stringPropertyNames()) {
+                    pw.println("@begin file=" + embfile + " format=javascript");
+                    pw.println(embedded.getProperty(embfile));
+                    pw.println("@end");
+                    pw.println();
+                }
+
                 pw.close();
                 w.close();
+
+
                 Debug.message("Saved property file " + userFile.getAbsolutePath());
             } catch(Exception e) {
                 Base.error(e);
@@ -705,13 +723,17 @@ public class PropertyFile {
         if (data == null) {
             return null;
         }
-        return Base.parseString(data, this, null);
+        Context ctx = new Context();
+        ctx.mergeSettings(this);
+        return ctx.parseString(data);
     }
 
     public void fullyParseFile() {
+        Context ctx = new Context();
+        ctx.mergeSettings(this);
         for (String key : properties.stringPropertyNames()) {
             String data = get(key);
-            data = Base.parseString(data, this, null);
+            data = ctx.parseString(data);
             set(key, data);
         }
     }
@@ -719,8 +741,8 @@ public class PropertyFile {
     public boolean loadProperties(Properties p, BufferedReader r) {
         String line;
         Pattern keyval = Pattern.compile("^([^=\\s]+)\\s*=\\s*(.*)$");
-        Pattern filename = Pattern.compile("file\\s*=\\s*([^\\s])+");
-        Pattern format = Pattern.compile("format\\s*=\\s*([^\\s])+");
+        Pattern filename = Pattern.compile("file\\s*=\\s*([^\\s]+)");
+        Pattern format = Pattern.compile("format\\s*=\\s*([^\\s]+)");
         try {
             while ((line = r.readLine()) != null) {
                 line = line.trim();
@@ -749,7 +771,27 @@ public class PropertyFile {
                                 }
                             }
                         }
+                    } else if (line.startsWith("@begin ")) {
+                        Matcher fnmatch = filename.matcher(line);
+                        Matcher fmtmatch = format.matcher(line);
+                        if (fnmatch.find()) {
+                            String fn = fnmatch.group(1);
+                            String fmt = "javascript";
+                            if (fmtmatch.find()) {
+                                fmt = fmtmatch.group(1);
+                            }
+                            StringBuilder sb = new StringBuilder();
+                            while ((line = r.readLine()) != null) {
+                                if (line.startsWith("@end")) {
+                                    break;
+                                }
+                                sb.append(line);
+                                sb.append("\n");
+                            }
+                            embedded.put(fn, sb.toString());
+                        }
                     }
+                        
                     continue;
                 }
                 while (line.endsWith("\\")) {
@@ -824,5 +866,9 @@ public class PropertyFile {
         for (String prop : properties.stringPropertyNames()) {
             System.err.println(prop + " = " + properties.get(prop));
         }        
+    }
+
+    public String getScript(String name) {
+        return embedded.getProperty(name);
     }
 }

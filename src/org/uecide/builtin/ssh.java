@@ -20,12 +20,12 @@ public class ssh  implements BuiltinCommand {
     String host;
     String user;
 
-    public boolean main(Sketch sketch, String[] arg) {
+    public boolean main(Context ctx, String[] arg) {
         try {
             JSch jsch = new JSch();
 
             if(arg.length != 2) {
-                sketch.error("Usage: __builtin_ssh user@host command");
+                ctx.error("Usage: __builtin_ssh user@host command");
                 return false;
             }
 
@@ -60,15 +60,15 @@ public class ssh  implements BuiltinCommand {
                     password = null;
                     Base.preferences.unset("ssh." + host + "." + user);
                     Base.session.unset("ssh." + host + "." + user);
-                    sketch.error("Authentication failed");
+                    ctx.error("Authentication failed");
                     session.disconnect();
                     return false;
                 } else {
-                    Base.error(e);
+                    ctx.error(e);
                     return false;
                 }
             } catch(Exception e) {
-                Base.error(e);
+                ctx.error(e);
                 return false;
             }
 
@@ -95,7 +95,7 @@ public class ssh  implements BuiltinCommand {
 
                     if(i < 0)break;
 
-                    sketch.messageStream(new String(tmp, 0, i));
+                    ctx.messageStream(new String(tmp, 0, i));
                 }
 
                 while(err.available() > 0) {
@@ -103,7 +103,7 @@ public class ssh  implements BuiltinCommand {
 
                     if(i < 0)break;
 
-                    sketch.errorStream(new String(tmp, 0, i));
+                    ctx.errorStream(new String(tmp, 0, i));
                 }
 
                 if(channel.isClosed()) {
@@ -120,7 +120,7 @@ public class ssh  implements BuiltinCommand {
             channel.disconnect();
             session.disconnect();
         } catch(Exception e) {
-            Base.error(e);
+            ctx.error(e);
         }
 
         return true;
@@ -143,5 +143,4 @@ public class ssh  implements BuiltinCommand {
 
         return passwordField.getText();
     }
-
 }

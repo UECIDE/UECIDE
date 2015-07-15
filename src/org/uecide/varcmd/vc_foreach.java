@@ -3,7 +3,7 @@ package org.uecide.varcmd;
 import org.uecide.*;
 
 public class vc_foreach implements VariableCommand {
-    public String main(Sketch sketch, String args) {
+    public String main(Context sketch, String args) {
         int commaPos = args.indexOf(',');
 
         if(commaPos > 0) {

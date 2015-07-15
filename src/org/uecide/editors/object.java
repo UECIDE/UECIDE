@@ -67,9 +67,9 @@ public class object extends text {
         StringWriter sw = new StringWriter();
         sketch.redirectChannel(0, sw);
         String cmd = "${objdump}::-t::${object.filename}";
-        sketch.settings.put("object.filename", f.getAbsolutePath());
-        String out = sketch.parseString(cmd);
-        sketch.executeCommand(out);
+        sketch.getContext().set("object.filename", f.getAbsolutePath());
+        String out = sketch.getContext().parseString(cmd);
+        sketch.getContext().executeCommand(out);
         sketch.unredirectChannel(0);
 
         textArea.setText(sw.toString());

@@ -66,6 +66,9 @@ import javax.script.*;
  * the sketch to a target board.
  */
 public class Sketch implements MessageConsumer {
+
+    public Context ctx;
+
     public String sketchName;       // The name of the sketch
     public File sketchFolder;       // Where the sketch is
     public Editor editor = null;    // The editor window the sketch is loaded in
@@ -77,11 +80,6 @@ public class Sketch implements MessageConsumer {
     public float percentageMultiplier = 1.0f;
 
     boolean isUntitled;             // Whether or not the sketch has been named
-
-    // These are used to redirect stdout and stderr from commands
-    // so that they can be processed and displayed appropriately.
-    Writer stdoutRedirect = null;
-    Writer stderrRedirect = null;
 
     // These are all the plugins selected for this sketch in order to compile
     // the sketch and upload it.
@@ -97,14 +95,13 @@ public class Sketch implements MessageConsumer {
 
     Process runningProcess = null;
 
-    // This lot is what the sketch consists of - the list of files, libraries, settings, parameters etc.
+    // This lot is what the sketch consists of - the list of files, libraries, parameters etc.
     public ArrayList<File> sketchFiles = new ArrayList<File>();
 
     public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
     public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
     public ArrayList<String> unknownLibraries = new ArrayList<String>();
 
-    public TreeMap<String, String> settings = new TreeMap<String, String>();
     public TreeMap<String, String> parameters = new TreeMap<String, String>();
 
     TreeMap<String, String> selectedOptions = new TreeMap<String, String>();
@@ -156,12 +153,22 @@ public class Sketch implements MessageConsumer {
         lineComments = new HashMap<File, HashMap<Integer, String>>();
     }
 
+    public Sketch() {
+        // This is only for dummy use. We don't want to do ANYTHING!
+        ctx = new Context();
+        ctx.setSketch(this);
+    }
+
     public Sketch(String path) {
         this(new File(path));
+        ctx = new Context();
+        ctx.setSketch(this);
     }
 
     public Sketch(File path) {
         uuid = UUID.randomUUID().toString();
+        ctx = new Context();
+        ctx.setSketch(this);
 
         isUntitled = false;
 
@@ -251,6 +258,8 @@ public class Sketch implements MessageConsumer {
             return;
         }
 
+        ctx.setBoard(board);
+
         selectedBoard = board;
         selectedBoardName = selectedBoard.getName();
         Base.preferences.set("board", board.getName());
@@ -285,8 +294,8 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setSettings() {
-        settings.put("sketch.name", getName());
-        settings.put("sketch.path", getFolder().getAbsolutePath());
+        ctx.set("sketch.name", getName());
+        ctx.set("sketch.path", getFolder().getAbsolutePath());
     }
 
     public void setCore(Core core) {
@@ -294,6 +303,8 @@ public class Sketch implements MessageConsumer {
         if(core == null) {
             return;
         }
+
+        ctx.setCore(core);
 
         selectedCore = core;
         Base.preferences.set("board." + selectedBoard.getName() + ".core", core.getName());
@@ -335,6 +346,8 @@ public class Sketch implements MessageConsumer {
             return;
         }
 
+        ctx.setCompiler(compiler);
+
         selectedCompiler = compiler;
         if (selectedBoard == null) {
             return;
@@ -360,7 +373,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public TreeMap<String, String> getProgrammerList() {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         TreeMap<String, String> out = new TreeMap<String, String>();
 
         String[] spl = props.getArray("sketch.upload");
@@ -369,7 +382,7 @@ public class Sketch implements MessageConsumer {
             Arrays.sort(spl);
 
             for(String pn : spl) {
-                String name = parseString(props.get("upload." + pn + ".name"));
+                String name = ctx.parseString(props.get("upload." + pn + ".name"));
                 out.put(pn, name);
             }
         }
@@ -481,6 +494,7 @@ public class Sketch implements MessageConsumer {
     void attachToEditor(Editor e) {
         editor = e;
         editor.setTitle(Base.theme.get("product.cap") + " | " + sketchName);
+        ctx.setEditor(e);
     }
 
 
@@ -1240,7 +1254,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public synchronized boolean prepare() {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
 
         if(getBoard() == null) {
             error(Translate.w("You have no board selected.  You must select a board before you can compile your sketch.", 80, "\n"));
@@ -1368,7 +1382,7 @@ public class Sketch implements MessageConsumer {
         try {
             for(File f : cleanedFiles.keySet()) {
                 if(FileType.getType(f) == FileType.SKETCH) {
-                    String ext = parseString(props.get("build.extension"));
+                    String ext = ctx.parseString(props.get("build.extension"));
 
                     if(ext == null) {
                         ext = "cpp";
@@ -1388,7 +1402,7 @@ public class Sketch implements MessageConsumer {
 
                     if(props.get("core.header") != null) {
                         boolean gotHeader = false;
-                        String hdr = parseString(props.get("core.header"));
+                        String hdr = ctx.parseString(props.get("core.header"));
                         String[] lines = cleanedFiles.get(f).split("\n");
                         Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
                         for (String l : lines) {
@@ -1698,14 +1712,9 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean upload() {
-        PropertyFile props = mergeAllProperties();
-        if (props.get("upload.precmd") != null) {
-            executeKey("upload.precmd");
-        }
+        ctx.executeKey("upload.precmd");
         boolean ret = programFile(getProgrammer(), sketchName);
-        if (props.get("upload.postcmd") != null) {
-            executeKey("upload.postcmd");
-        }
+        ctx.executeKey("upload.postcmd");
         return ret;
     }
 
@@ -1979,7 +1988,7 @@ public class Sketch implements MessageConsumer {
     public ArrayList<String> getIncludePaths() {
         ArrayList<String> libFiles = new ArrayList<String>();
 
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
 
         libFiles.add(buildFolder.getAbsolutePath());
         libFiles.add(getBoard().getFolder().getAbsolutePath());
@@ -1987,7 +1996,7 @@ public class Sketch implements MessageConsumer {
 
         for(String key : props.childKeysOf("compiler.library")) {
             String coreLibName = key.substring(17);
-            String libPaths = parseString(props.get(key));
+            String libPaths = ctx.parseString(props.get(key));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 String[] libPathsArray = libPaths.split("::");
@@ -2004,7 +2013,7 @@ public class Sketch implements MessageConsumer {
 
         for(String key : props.childKeysOf("core.library")) {
             String coreLibName = key.substring(13);
-            String libPaths = parseString(props.get(key));
+            String libPaths = ctx.parseString(props.get(key));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 String[] libPathsArray = libPaths.split("::");
@@ -2021,7 +2030,7 @@ public class Sketch implements MessageConsumer {
 
         for(String key : props.childKeysOf("board.library")) {
             String coreLibName = key.substring(14);
-            String libPaths = parseString(props.get(key));
+            String libPaths = ctx.parseString(props.get(key));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
                 String[] libPathsArray = libPaths.split("::");
@@ -2123,42 +2132,6 @@ public class Sketch implements MessageConsumer {
         return !canWrite;
     }
 
-    public void redirectChannel(int c, Writer pw) {
-        if(c <= 1) {
-            stdoutRedirect = pw;
-        }
-
-        if(c == 2) {
-            stderrRedirect = pw;
-        }
-    }
-
-    public void unredirectChannel(int c) {
-        if(c <= 1) {
-            if(stdoutRedirect != null) {
-                try {
-                    stdoutRedirect.flush();
-                    stdoutRedirect.close();
-                } catch(Exception e) {
-                }
-
-                stdoutRedirect = null;
-            }
-        }
-
-        if(c == 2) {
-            if(stderrRedirect != null) {
-                try {
-                    stderrRedirect.flush();
-                    stderrRedirect.close();
-                } catch(Exception e) {
-                }
-
-                stderrRedirect = null;
-            }
-        }
-    }
-
     public void needPurge() {
         doPrePurge = true;
     }
@@ -2257,15 +2230,15 @@ public class Sketch implements MessageConsumer {
     }
 
     public TreeMap<String, ArrayList<File>> getCoreLibs() {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         TreeMap<String, ArrayList<File>> libs = new TreeMap<String, ArrayList<File>>();
 
         for(String coreLibName : props.childKeysOf("compiler.library")) {
             ArrayList<File> files = new ArrayList<File>();
-            String libPaths = parseString(props.get("compiler.library." + coreLibName));
+            String libPaths = ctx.parseString(props.get("compiler.library." + coreLibName));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
-                libPaths = parseString(libPaths);
+                libPaths = ctx.parseString(libPaths);
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
@@ -2282,10 +2255,10 @@ public class Sketch implements MessageConsumer {
 
         for(String coreLibName : props.childKeysOf("core.library")) {
             ArrayList<File> files = new ArrayList<File>();
-            String libPaths = parseString(props.get("core.library." + coreLibName));
+            String libPaths = ctx.parseString(props.get("core.library." + coreLibName));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
-                libPaths = parseString(libPaths);
+                libPaths = ctx.parseString(libPaths);
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
@@ -2302,10 +2275,10 @@ public class Sketch implements MessageConsumer {
 
         for(String coreLibName : props.childKeysOf("board.library")) {
             ArrayList<File> files = new ArrayList<File>();
-            String libPaths = parseString(props.get("board.library." + coreLibName));
+            String libPaths = ctx.parseString(props.get("board.library." + coreLibName));
 
             if(libPaths != null && !(libPaths.trim().equals(""))) {
-                libPaths = parseString(libPaths);
+                libPaths = ctx.parseString(libPaths);
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
@@ -2350,16 +2323,14 @@ public class Sketch implements MessageConsumer {
         
         long startTime = System.currentTimeMillis();
 
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         clearLineComments();
 
         if (props.getBoolean("purge")) {
             doPrePurge = true;
         }
 
-        if (props.get("compile.precmd") != null) {
-            executeKey("compile.precmd");
-        }
+        ctx.executeKey("compile.precmd");
 
         if(editor != null) {
             for(int i = 0; i < editor.getTabCount(); i++) {
@@ -2377,8 +2348,8 @@ public class Sketch implements MessageConsumer {
 
         // Step one, we need to build a generic set of includes:
 
-        settings.put("includes", generateIncludes());
-        settings.put("filename", sketchName);
+        ctx.set("includes", generateIncludes());
+        ctx.set("filename", sketchName);
 
         if ((Base.preferences.getBoolean("editor.dialog.missinglibs")) && (Base.isOnline())) {
             if (editor != null) {
@@ -2445,7 +2416,7 @@ public class Sketch implements MessageConsumer {
                                 installLibrary(pm.getApt(), p, true);
                             }
                             Base.rescanLibraries();
-                            settings.put("includes", generateIncludes());
+                            ctx.set("includes", generateIncludes());
                         }
                     }
                 }
@@ -2457,10 +2428,10 @@ public class Sketch implements MessageConsumer {
             Base.removeDir(getCacheFolder());
         }
 
-        settings.put("option.flags", getFlags("flags"));
-        settings.put("option.cflags", getFlags("cflags"));
-        settings.put("option.cppflags", getFlags("cppflags"));
-        settings.put("option.ldflags", getFlags("ldflags"));
+        ctx.set("option.flags", getFlags("flags"));
+        ctx.set("option.cflags", getFlags("cflags"));
+        ctx.set("option.cppflags", getFlags("cppflags"));
+        ctx.set("option.ldflags", getFlags("ldflags"));
 
         String libPaths = "";
         String libNames = "";
@@ -2474,17 +2445,17 @@ public class Sketch implements MessageConsumer {
             }
             libPaths += lib.getFolder().getAbsolutePath();
             libNames += lib.getName();
-            settings.put("library." + lib.getName() + ".path", lib.getFolder().getAbsolutePath());
+            ctx.set("library." + lib.getName() + ".path", lib.getFolder().getAbsolutePath());
         }
 
-        settings.put("library.paths", libPaths);
-        settings.put("library.names", libNames);
+        ctx.set("library.paths", libPaths);
+        ctx.set("library.names", libNames);
 
-        settings.put("build.path", buildFolder.getAbsolutePath());
+        ctx.set("build.path", buildFolder.getAbsolutePath());
 
 
-        if (props.keyExists("compile.script.0")) {
-            return executeKey("compile.script");
+        if (props.keyExists("compile.script")) {
+            return ctx.executeKey("compile.script");
         }
 
         // Copy any specified files from the compiler, core or board folders
@@ -2492,7 +2463,7 @@ public class Sketch implements MessageConsumer {
         // executable needs certain DLL files to be in the current working
         // directory (which is the build folder).
 
-        String precopy = parseString(props.getPlatformSpecific("compile.precopy"));
+        String precopy = ctx.parseString(props.getPlatformSpecific("compile.precopy"));
 
         if(precopy != null) {
             Debug.message("Copying files...");
@@ -2575,15 +2546,19 @@ public class Sketch implements MessageConsumer {
 
                 boolean result = false;
 
+                String output = "";
+
                 try {
-                    redirectChannel(1, new PrintWriter(redirectTo));
+                    ctx.startBuffer();
                     result = compileLSS();
-                    unredirectChannel(1);
+                    output = ctx.endBuffer();
+                    PrintWriter pw = new PrintWriter(redirectTo);
+                    pw.print(output);
+                    pw.close();
+
                 } catch(Exception e) {
                     result = false;
                 }
-
-                unredirectChannel(1);
 
                 if(!result) {
                     error("Failed generating listing");
@@ -2646,34 +2621,29 @@ public class Sketch implements MessageConsumer {
 
         compileSize();
 
-            long endTime = System.currentTimeMillis();
-            double compileTime = (double)(endTime - startTime) / 1000d;
-            bullet("Compilation took " + compileTime + " seconds");
-        if (props.get("compile.postcmd") != null) {
-            executeKey("compile.postcmd");
-        }
+        long endTime = System.currentTimeMillis();
+        double compileTime = (double)(endTime - startTime) / 1000d;
+        bullet("Compilation took " + compileTime + " seconds");
+        ctx.executeKey("compile.postcmd");
         return true;
     }
 
     public boolean compileSize() {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
 
         if (props.get("compile.size") != null) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-
             heading("Memory usage");
 
-            redirectChannel(1, pw);
-            executeKey("compile.size", "compile.size.environment");
-            unredirectChannel(1);
+            ctx.startBuffer();
+            ctx.executeKey("compile.size");
+            String output = ctx.endBuffer();
 
             String reg = props.get("compiler.size.regex", "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
             int tpos = props.getInteger("compiler.size.text", 1);
             int rpos = props.getInteger("compiler.size.rodata", 0);
             int dpos = props.getInteger("compiler.size.data", 2);
             int bpos = props.getInteger("compiler.size.bss", 3);
-            String[] lines = sw.toString().split("\n");
+            String[] lines = output.split("\n");
             Pattern p = Pattern.compile(reg);
             int textSize = 0;
             int rodataSize = 0;
@@ -2716,98 +2686,6 @@ public class Sketch implements MessageConsumer {
         return true;
     }
 
-    // This is the main entry point for any execution.  Pass it a key
-    // and it will find said key, identify it as a script or a command
-    // and do any string replacements.
-
-    public boolean executeKey(String key) {
-        return executeKey(key, null);
-    }
-
-    public boolean executeKey(String key, String envkey) {
-        PropertyFile props = mergeAllProperties();
-
-        String os = Base.getOSName();
-        String arch = Base.getOSArch();
-
-        // Now if all those failed then it might be a script.  Look for
-        // a .0 entry point for the script.
-
-        String env = null;
-
-        if(envkey != null) {
-            env = props.get(envkey);
-
-            if(env != null) {
-                env = parseString(env);
-            }
-        }
-
-        if(props.keyExists(key + ".0")) {
-            return executeScript(key, env);
-        }
-
-        // First look for an os and arch specific command
-        String foundData = props.get(key + "." + os + "_" + arch);
-
-        if(foundData != null) {
-            return executeCommand(parseString(foundData), env);
-        }
-
-        // Now look for just an os specific one
-        foundData = props.get(key + "." + os);
-
-        if(foundData != null) {
-            return executeCommand(parseString(foundData), env);
-        }
-
-        // And finally a generic command.
-        foundData = props.get(key);
-
-        if(foundData != null) {
-            return executeCommand(parseString(foundData), env);
-        }
-
-
-        return false;
-    }
-
-    public String parseString(String in) {
-        PropertyFile tokens = mergeAllProperties();
-        if (in == null) {
-            return null;
-        }
-
-        if (getCompiler() != null) {
-            tokens.set("compiler.root", getCompiler().getFolder().getAbsolutePath());
-        }
-        if (getCore() != null) {
-            tokens.set("core.root", getCore().getFolder().getAbsolutePath());
-        }
-        if (getBoard() != null) {
-            tokens.set("board.root", getBoard().getFolder().getAbsolutePath());
-        }
-        tokens.set("cache.root", getCacheFolder().getAbsolutePath());
-        if(Base.preferences.getBoolean("export.verbose")) {
-            tokens.set("verbose", tokens.get("upload." + getProgrammer() + ".verbose"));
-        } else {
-            tokens.set("verbose", tokens.get("upload." + getProgrammer() + ".quiet"));
-        }
-        if(Base.isWindows()) {
-            tokens.set("port.base", getSerialPort());
-            tokens.set("port", "\\\\.\\" + getSerialPort());
-        } else {
-            String sp = getSerialPort();
-            if (sp != null) {
-                tokens.set("port.base", sp.substring(sp.lastIndexOf('/') + 1));
-                tokens.set("port", sp);
-            }
-        }
-        tokens.set("ip", getNetworkPortIP());
-
-        return Base.parseString(in, tokens, this);
-    }
-
     private File compileFile(File src) {
         return compileFile(src, buildFolder);
     }
@@ -2823,33 +2701,26 @@ public class Sketch implements MessageConsumer {
             return null;
         }
 
-        PropertyFile props = mergeAllProperties();
-
-        String env = null;
+        PropertyFile props = ctx.getMerged();
 
         if(fileName.endsWith(".cpp")) {
             recipe = "compile.cpp";
-            env = "compile.cpp.environment";
         }
 
         if(fileName.endsWith(".cxx")) {
             recipe = "compile.cpp";
-            env = "compile.cpp.environment";
         }
 
         if(fileName.endsWith(".cc")) {
             recipe = "compile.cpp";
-            env = "compile.cpp.environment";
         }
 
         if(fileName.endsWith(".c")) {
             recipe = "compile.c";
-            env = "compile.c.environment";
         }
 
         if(fileName.endsWith(".S")) {
             recipe = "compile.S";
-            env = "compile.S.environment";
         }
 
         if(recipe == null) {
@@ -2858,7 +2729,7 @@ public class Sketch implements MessageConsumer {
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-        String objExt = parseString(props.get("compiler.object","o"));
+        String objExt = ctx.parseString(props.get("compiler.object","o"));
         File dest = new File(fileBuildFolder, fileName + "." +objExt);
 
         if(dest.exists()) {
@@ -2867,11 +2738,11 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        settings.put("build.path", fileBuildFolder.getAbsolutePath());
-        settings.put("source.name", src.getAbsolutePath());
-        settings.put("object.name", dest.getAbsolutePath());
+        ctx.set("build.path", fileBuildFolder.getAbsolutePath());
+        ctx.set("source.name", src.getAbsolutePath());
+        ctx.set("object.name", dest.getAbsolutePath());
 
-        if(!executeKey(recipe, env)) {
+        if(!ctx.executeKey(recipe)) {
             return null;
         }
 
@@ -2913,10 +2784,10 @@ public class Sketch implements MessageConsumer {
 
     public boolean compileCore() {
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
 
         if (props.get("compile.stub") != null) {
-            String mainStub = parseString(props.get("compile.stub"));
+            String mainStub = ctx.parseString(props.get("compile.stub"));
             String[] bits = mainStub.split("::");
             for (String stubFile : bits) {
                 File mainStubFile = new File(stubFile);
@@ -2943,12 +2814,12 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean compileCore(ArrayList<File> core, String name) {
-        PropertyFile props = mergeAllProperties();
-        String prefix = parseString(props.get("compiler.library.prefix","lib"));
-        String suffix = parseString(props.get("compiler.library", "a"));
+        PropertyFile props = ctx.getMerged();
+        String prefix = ctx.parseString(props.get("compiler.library.prefix","lib"));
+        String suffix = ctx.parseString(props.get("compiler.library", "a"));
         File archive = getCacheFile(prefix + name + "." + suffix);
 
-        settings.put("library", archive.getAbsolutePath());
+        ctx.set("library", archive.getAbsolutePath());
 
         long archiveDate = 0;
 
@@ -2980,8 +2851,8 @@ public class Sketch implements MessageConsumer {
                     return false;
                 }
 
-                settings.put("object.name", out.getAbsolutePath());
-                boolean ok = executeKey("compile.ar", "compile.ar.environment");
+                ctx.set("object.name", out.getAbsolutePath());
+                boolean ok = ctx.executeKey("compile.ar");
 
                 if(!ok) {
                     out.delete();
@@ -2998,27 +2869,27 @@ public class Sketch implements MessageConsumer {
     }
 
     public void put(String k, String v) {
-        settings.put(k, v);
+        ctx.set(k, v);
     }
 
     public String get(String k) {
-        return settings.get(k);
+        return ctx.get(k);
     }
 
     public String getArchiveName(Library lib) {
-        PropertyFile props = mergeAllProperties();
-        String prefix = parseString(props.get("compiler.library.prefix","lib"));
-        String suffix = parseString(props.get("compiler.library", "a"));
+        PropertyFile props = ctx.getMerged();
+        String prefix = ctx.parseString(props.get("compiler.library.prefix","lib"));
+        String suffix = ctx.parseString(props.get("compiler.library", "a"));
         return prefix + lib.getLinkName() + "." + suffix;
     }
 
     public boolean compileLibrary(Library lib) {
         File archive = getCacheFile(getArchiveName(lib));  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         bullet2(lib.toString());
 
-        settings.put("library", archive.getAbsolutePath());
+        ctx.set("library", archive.getAbsolutePath());
 
         long archiveDate = 0;
 
@@ -3031,8 +2902,8 @@ public class Sketch implements MessageConsumer {
 
         ArrayList<File> fileList = lib.getSourceFiles(this);
 
-        String origIncs = settings.get("includes");
-        settings.put("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
+        String origIncs = ctx.get("includes");
+        ctx.set("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
 
         int fileCount = fileList.size();
 
@@ -3054,8 +2925,8 @@ public class Sketch implements MessageConsumer {
                     return false;
                 }
 
-                settings.put("object.name", out.getAbsolutePath());
-                boolean ok = executeKey("compile.ar", "compile.ar.environment");
+                ctx.set("object.name", out.getAbsolutePath());
+                boolean ok = ctx.executeKey("compile.ar");
 
                 if(!ok) {
                     purgeLibrary(lib);
@@ -3085,7 +2956,7 @@ public class Sketch implements MessageConsumer {
             editor.updateOutputTree();
         }
 
-        settings.put("includes", origIncs);
+        ctx.set("includes", origIncs);
         lib.setCompiledPercent(100);
 
         if(editor != null) {
@@ -3097,12 +2968,12 @@ public class Sketch implements MessageConsumer {
         return true;
     }
 
-    private List<File> convertFiles(File dest, List<File> sources) {
-        List<File> objectPaths = new ArrayList<File>();
-        PropertyFile props = mergeAllProperties();
+    private ArrayList<File> convertFiles(File dest, ArrayList<File> sources) {
+        ArrayList<File> objectPaths = new ArrayList<File>();
+        PropertyFile props = ctx.getMerged();
 
-        settings.put("build.path", dest.getAbsolutePath());
-        String objExt = parseString(props.get("compiler.object","o"));
+        ctx.set("build.path", dest.getAbsolutePath());
+        String objExt = ctx.parseString(props.get("compiler.object","o"));
 
         for(File file : sources) {
             File objectFile = new File(dest, file.getName() + "." + objExt);
@@ -3129,10 +3000,10 @@ public class Sketch implements MessageConsumer {
             File destFile = new File(destObjects, file.getName());
             Base.copyFile(file, destFile);
 
-            settings.put("source.name", sp);
-            settings.put("object.name", objectFile.getAbsolutePath());
+            ctx.set("source.name", sp);
+            ctx.set("object.name", objectFile.getAbsolutePath());
 
-            if(!executeKey("compile.bin", "compile.bin.environment"))
+            if(!ctx.executeKey("compile.bin"))
                 return null;
 
             if(!objectFile.exists())
@@ -3142,23 +3013,21 @@ public class Sketch implements MessageConsumer {
         return objectPaths;
     }
 
-    private List<File> compileFiles(File dest, List<File> sSources, List<File> cSources, List<File> cppSources) {
+    private ArrayList<File> compileFileList(File dest, ArrayList<File> sources, String key) {
+        ArrayList<File> objectPaths = new ArrayList<File>();
+        PropertyFile props = ctx.getMerged();
 
-        List<File> objectPaths = new ArrayList<File>();
-        PropertyFile props = mergeAllProperties();
+        ctx.set("build.path", dest.getAbsolutePath());
+        String objExt = ctx.parseString(props.get("compiler.object","o"));
 
-        settings.put("build.path", dest.getAbsolutePath());
-        String objExt = parseString(props.get("compiler.object","o"));
-
-        for(File file : sSources) {
+        for(File file : sources) {
             String fileName = file.getName();
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
             File objectFile = new File(dest, fileName + "." + objExt);
-            //File objectFile = new File(dest, baseName + "." + objExt);
             objectPaths.add(objectFile);
 
-            settings.put("source.name", file.getAbsolutePath());
-            settings.put("object.name", objectFile.getAbsolutePath());
+            ctx.set("source.name", file.getAbsolutePath());
+            ctx.set("object.name", objectFile.getAbsolutePath());
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
                 if(Base.preferences.getBoolean("compiler.verbose")) {
@@ -3168,62 +3037,35 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!executeKey("compile.S", "compile.S.environment"))
+            if(!ctx.executeKey(key))
                 return null;
 
             if(!objectFile.exists())
                 return null;
         }
+        return objectPaths;
+    }
 
-        for(File file : cSources) {
-            String fileName = file.getName();
-            String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, fileName + "." + objExt);
-            //File objectFile = new File(dest, baseName + "." + objExt);
-            objectPaths.add(objectFile);
+    private ArrayList<File> compileFiles(File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources) {
 
-            settings.put("source.name", file.getAbsolutePath());
-            settings.put("object.name", objectFile.getAbsolutePath());
+        ArrayList<File> objectPaths = new ArrayList<File>();
+        PropertyFile props = ctx.getMerged();
 
-            if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if(Base.preferences.getBoolean("compiler.verbose")) {
-                    bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
-                }
+        ctx.set("build.path", dest.getAbsolutePath());
+        String objExt = ctx.parseString(props.get("compiler.object","o"));
 
-                continue;
-            }
+        ArrayList<File> sObjects = compileFileList(dest, sSources, "compile.S");
+        if (sObjects == null) { return null; }
 
-            if(!executeKey("compile.c", "compile.c.environment"))
-                return null;
+        ArrayList<File> cObjects = compileFileList(dest, cSources, "compile.c");
+        if (cObjects == null) { return null; }
 
-            if(!objectFile.exists())
-                return null;
-        }
+        ArrayList<File> cppObjects = compileFileList(dest, cppSources, "compile.cpp");
+        if (cppObjects == null) { return null; }
 
-        for(File file : cppSources) {
-            String fileName = file.getName();
-            String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, fileName + "." + objExt);
-            //File objectFile = new File(dest, baseName + "." + objExt);
-            objectPaths.add(objectFile);
-
-            settings.put("source.name", file.getAbsolutePath());
-            settings.put("object.name", objectFile.getAbsolutePath());
-
-            if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if(Base.preferences.getBoolean("compiler.verbose")) {
-                    bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
-                }
-
-                continue;
-            }
-
-            if(!executeKey("compile.cpp", "compile.cpp.environment"))
-                return null;
-
-            if(!objectFile.exists())
-                return null;
-        }
+        objectPaths.addAll(sObjects);
+        objectPaths.addAll(cObjects);
+        objectPaths.addAll(cppObjects);
 
         return objectPaths;
     }
@@ -3231,7 +3073,7 @@ public class Sketch implements MessageConsumer {
     private ArrayList<File> compileSketch() {
         ArrayList<File> sf = new ArrayList<File>();
 
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
 
         // We can only do this if the core supports binary conversions
         if(props.get("compile.bin") != null) {
@@ -3240,7 +3082,7 @@ public class Sketch implements MessageConsumer {
             if(obj.exists()) {
                 File buf = new File(buildFolder, "objects");
                 buf.mkdirs();
-                List<File> uf = convertFiles(buildFolder, findFilesInFolder(obj, null, true));
+                ArrayList<File> uf = convertFiles(buildFolder, findFilesInFolder(obj, null, true));
 
                 if(uf != null) {
                     sf.addAll(uf);
@@ -3248,7 +3090,7 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        ArrayList<File> compiledFiles = (ArrayList<File>) compileFiles(
+        ArrayList<File> compiledFiles = compileFiles(
                                             buildFolder,
                                             findFilesInFolder(buildFolder, "S", false),
                                             findFilesInFolder(buildFolder, "c", false),
@@ -3261,7 +3103,7 @@ public class Sketch implements MessageConsumer {
             return null;
         }
 
-        String boardFiles = parseString(props.get("build.files"));
+        String boardFiles = ctx.parseString(props.get("build.files"));
 
         if(boardFiles != null) {
             if(!boardFiles.equals("")) {
@@ -3302,7 +3144,7 @@ public class Sketch implements MessageConsumer {
         if(suf.exists()) {
             File buf = new File(buildFolder, "utility");
             buf.mkdirs();
-            List<File> uf = compileFiles(
+            ArrayList<File> uf = compileFiles(
                                 buf,
                                 findFilesInFolder(suf, "S", true),
                                 findFilesInFolder(suf, "c", true),
@@ -3363,12 +3205,12 @@ public class Sketch implements MessageConsumer {
     }
 
     private boolean compileLink(List<File> objectFiles) {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
 
         String objectFileList = "";
 
-        settings.put("libraries.path", getCacheFolder().getAbsolutePath());
+        ctx.set("libraries.path", getCacheFolder().getAbsolutePath());
 
         String neverInclude = props.get("neverinclude");
 
@@ -3400,230 +3242,50 @@ public class Sketch implements MessageConsumer {
             }
 
             if(aFile.exists() && inc) {
-                settings.put("library", lib.getLinkName());
-                liblist += "::" + parseString(liboption);
+                ctx.set("library", lib.getLinkName());
+                liblist += "::" + ctx.parseString(liboption);
             }
         }
 
         for(String libName : coreLibs.keySet()) {
-            settings.put("library", "Core_" + libName);
-            liblist += "::" + parseString(liboption);
+            ctx.set("library", "Core_" + libName);
+            liblist += "::" + ctx.parseString(liboption);
         }
 
-        settings.put("libraries", liblist);
+        ctx.set("libraries", liblist);
 
         for(File file : objectFiles) {
             objectFileList = objectFileList + file.getAbsolutePath() + "::";
         }
 
-        settings.put("build.path", buildFolder.getAbsolutePath());
-        settings.put("object.filelist", objectFileList);
+        ctx.set("build.path", buildFolder.getAbsolutePath());
+        ctx.set("object.filelist", objectFileList);
 
-        return executeKey("compile.link", "compile.link.environment");
+        return ctx.executeKey("compile.link");
     }
 
     private boolean compileEEP() {
-        PropertyFile props = mergeAllProperties();
-        if (props.get("compile.eep") == null) {
+        PropertyFile props = ctx.getMerged();
+        if (!props.keyExists("compile.eep")) {
             return true;
         }
-        return executeKey("compile.eep", "compile.eep.environment");
+        return ctx.executeKey("compile.eep");
     }
 
     private boolean compileLSS() {
-        PropertyFile props = mergeAllProperties();
-        if (props.get("compile.lss") == null) {
+        PropertyFile props = ctx.getMerged();
+        if (!props.keyExists("compile.lss")) {
             return true;
         }
-        return executeKey("compile.lss", "compile.lss.environment");
+        return ctx.executeKey("compile.lss");
     }
 
     private boolean compileHEX() {
-        PropertyFile props = mergeAllProperties();
-        if (props.get("compile.hex") == null) {
+        PropertyFile props = ctx.getMerged();
+        if (!props.keyExists("compile.hex")) {
             return true;
         }
-        return executeKey("compile.hex", "compile.hex.environment");
-    }
-
-    public boolean runSystemCommand(String command) {
-        return runSystemCommand(command, null);
-    }
-
-    public boolean runSystemCommand(String command, String incEnv) {
-        PropertyFile props = mergeAllProperties();
-
-        if(command == null) {
-            return true;
-        }
-
-        String[] commandArray = command.split("::");
-        List<String> stringList = new ArrayList<String>();
-
-        for(String string : commandArray) {
-            string = string.trim();
-
-            if(string != null && string.length() > 0) {
-                stringList.add(string);
-            }
-        }
-
-        stringList.set(0, stringList.get(0).replace("//", "/"));
-
-        ProcessBuilder process = new ProcessBuilder(stringList);
-
-//        process.redirectOutput(ProcessBuilder.Redirect.PIPE);
-//        process.redirectError(ProcessBuilder.Redirect.PIPE);
-        if(buildFolder != null) {
-            process.directory(buildFolder);
-        }
-
-        Map<String, String> environment = process.environment();
-
-//        String pathvar = "PATH";
-//        if (Base.isWindows()) {
-//            pathvar = "Path";
-//        }
-
-//        String paths = all.get("path");
-//        if (paths != null) {
-//            for (String p : paths.split("::")) {
-//                String oPath = environment.get(pathvar);
-//                if (oPath == null) {
-//                    oPath = System.getenv(pathvar);
-//                }
-//                environment.put(pathvar, oPath + File.pathSeparator + parseString(p));
-//            }
-//        }
-//
-        String env = parseString(props.get("environment"));
-
-        if(env != null) {
-            for(String ev : env.split("::")) {
-                String[] bits = ev.split("=");
-
-                if(bits.length == 2) {
-                    environment.put(bits[0], parseString(bits[1]));
-                }
-            }
-        }
-
-        if(incEnv != null) {
-            for(String ev : incEnv.split("::")) {
-                String[] bits = ev.split("=");
-
-                if(bits.length == 2) {
-                    environment.put(bits[0], parseString(bits[1]));
-                }
-            }
-        }
-
-        StringBuilder sb = new StringBuilder();
-
-        for(String component : stringList) {
-            sb.append(component);
-            sb.append(" ");
-        }
-
-        Debug.message("Execute: " + sb.toString());
-
-        if(Base.preferences.getBoolean("compiler.verbose")) {
-            command(sb.toString());
-        }
-
-        try {
-            runningProcess = process.start();
-        } catch(Exception e) {
-            error(e);
-            return false;
-        }
-
-        Base.processes.add(runningProcess);
-
-//        MessageSiphon in = new MessageSiphon(runningProcess.getInputStream(), this);
-//        MessageSiphon err = new MessageSiphon(runningProcess.getErrorStream(), this);
-//        in.setChannel(0);
-//        err.setChannel(2);
-        InputStream in = runningProcess.getInputStream();
-        InputStream err = runningProcess.getErrorStream();
-        boolean running = true;
-        int result = -1;
-
-        byte[] tmp = new byte[1024];
-
-
-        while(isProcessRunning(runningProcess)) {
-            try {
-                while(in.available() > 0) {
-                    int i = in.read(tmp, 0, 1024);
-
-                    if(i < 0)break;
-
-                    String s = new String(tmp, 0, i);
-                    messageStream(s);
-                }
-
-                while(err.available() > 0) {
-                    int i = err.read(tmp, 0, 20);
-
-                    if(i < 0)break;
-
-                    errorStream(new String(tmp, 0, i));
-                }
-                Thread.sleep(1);
-
-            } catch(Exception ignored) {
-                Base.error(ignored);
-            }
-        }
-
-            try {
-                while(in.available() > 0) {
-                    int i = in.read(tmp, 0, 20);
-
-                    if(i < 0)break;
-
-                    messageStream(new String(tmp, 0, i));
-                }
-
-                while(err.available() > 0) {
-                    int i = err.read(tmp, 0, 20);
-
-                    if(i < 0)break;
-
-                    errorStream(new String(tmp, 0, i));
-                }
-
-            } catch(Exception ignored) {
-                if (ignored.getMessage().equals("Stream closed")) {
-                    error("Cancelled");
-                } else {
-                    Base.error(ignored);
-                }
-            }
-
-        result = runningProcess.exitValue();
-
-        Base.processes.remove(runningProcess);
-
-        if(result == 0) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public static boolean isProcessRunning(Process process) 
-    {
-        try 
-        {
-            process.exitValue();
-            return false;
-        } 
-        catch(IllegalThreadStateException e) 
-        {
-            return true;
-        }
+        return ctx.executeKey("compile.hex");
     }
 
     public boolean isUntitled() {
@@ -3657,36 +3319,6 @@ public class Sketch implements MessageConsumer {
         Base.removeDescendants(buildFolder);
     }
 
-    // Merge all the layers into one single property file
-    // class.  This will be the compiler, then the core, then
-    // the board, then the pragmas and finally the run-time settings.
-
-    public PropertyFile mergeAllProperties() {
-        PropertyFile total = new PropertyFile();
-
-        if(getCompiler() != null) {
-            total.mergeData(getCompiler().getProperties());
-        }
-
-        if(getCore() != null) {
-            total.mergeData(getCore().getProperties());
-        }
-
-        if(getBoard() != null) {
-            total.mergeData(getBoard().getProperties());
-        }
-
-        if(parameters != null) {
-            total.mergeData(parameters);
-        }
-
-        if(settings != null) {
-            total.mergeData(settings);
-        }
-
-        return total;
-    }
-
     public void about() {
         bullet("Sketch folder: " + sketchFolder.getAbsolutePath());
         bullet("Selected board: " + getBoard().getName());
@@ -3701,175 +3333,23 @@ public class Sketch implements MessageConsumer {
         return importedLibraries;
     }
 
-    public boolean runBuiltinCommand(String commandline) {
-        try {
-            String[] split = commandline.split("::");
-            int argc = split.length - 1;
-
-            String cmdName = split[0];
-
-            String[] arg = new String[argc];
-
-            for(int i = 0; i < argc; i++) {
-                arg[i] = split[i + 1];
-            }
-
-            if(!cmdName.startsWith("__builtin_")) {
-                return false;
-            }
-
-            cmdName = cmdName.substring(10);
-            Class<?> c = Class.forName("org.uecide.builtin." + cmdName);
-
-            Constructor<?> ctor = c.getConstructor();
-            BuiltinCommand  p = (BuiltinCommand)(ctor.newInstance());
-
-            if(c == null) {
-                return false;
-            }
-
-            Class<?>[] param_types = new Class<?>[2];
-            param_types[0] = Sketch.class;
-            param_types[1] = String[].class;
-            Method m = c.getMethod("main", param_types);
-
-            Object[] args = new Object[2];
-            args[0] = this;
-            args[1] = arg;
-
-            return (Boolean)m.invoke(p, args);
-
-
-        } catch(Exception e) {
-            Base.error(e);
-        }
-
-        return false;
-    }
-
-    public boolean executeCommand(String command) {
-        return executeCommand(command, null);
-    }
-
-    public boolean executeCommand(String command, String environment) {
-        if(command.startsWith("__builtin_")) {
-            return runBuiltinCommand(command);
-        } else {
-            return runSystemCommand(command, environment);
-        }
-    }
-
-    public boolean executeScript(String key) {
-        return executeScript(key, null);
-    }
-
-    public boolean executeScript(String key, String env) {
-        PropertyFile props = mergeAllProperties();
-        PropertyFile script = props.getChildren(key);
-        Set<Object>lines = script.keySet();
-        int lineno = 0;
-
-        while(script.keyExists(Integer.toString(lineno))) {
-            String lk = String.format("%s.%d", key, lineno);
-            String linekey = props.keyForOS(lk);
-            String ld = props.get(linekey);
-
-            ld = ld.trim();
-
-            if(ld.startsWith("goto::")) {
-                ld = parseString(ld);
-                String num = ld.substring(6);
-
-                try {
-                    lineno = Integer.parseInt(num);
-                    continue;
-                } catch(Exception e) {
-                    error("Syntax error in " + key + " at line " + lineno);
-                    error(ld);
-                    if (script.keyExists("fail")) {
-                        String failKey = String.format("%s.fail", key);
-                        executeKey(failKey);
-                    }
-                    return false;
-                }
-            }
-
-            if(ld.startsWith("set::")) {
-                ld = parseString(ld);
-                String param = ld.substring(5);
-                int epos = param.indexOf("=");
-
-                if(epos == -1) {
-                    error("Syntax error in " + key + " at line " + lineno);
-                    error(ld);
-                    if (script.keyExists("fail")) {
-                        String failKey = String.format("%s.fail", key);
-                        executeKey(failKey);
-                    }
-                    return false;
-                }
-
-                String kk = param.substring(0, epos);
-                String vv = param.substring(epos + 1);
-                settings.put(kk, vv);
-                lineno++;
-                continue;
-            }
-
-            if(ld.equals("fail")) {
-                if (script.keyExists("fail")) {
-                    String failKey = String.format("%s.fail", key);
-                    executeKey(failKey);
-                }
-                return false;
-            }
-
-            if(ld.equals("end")) {
-                if (script.keyExists("end")) {
-                    String endKey = String.format("%s.end", key);
-                    executeKey(endKey);
-                }
-                return true;
-            }
-
-            boolean res = executeKey(lk, env);
-
-            if(!res) {
-                if (script.keyExists("fail")) {
-                    String failKey = String.format("%s.fail", key);
-                    executeKey(failKey);
-                }
-                return false;
-            }
-
-            lineno++;
-        }
-        if (script.keyExists("end")) {
-            String endKey = String.format("%s.end", key);
-            executeKey(endKey);
-        }
-
-        return true;
-    }
-
     public boolean programFile(String programmer, String file) {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         heading("Uploading firmware...");
 
-        settings.put("filename", file);
+        ctx.set("filename", file);
 
         if (props.get("upload." + programmer + ".message") != null) {
-            message(parseString(props.get("upload." + programmer + ".message")));
+            message(ctx.parseString(props.get("upload." + programmer + ".message")));
         }
 
         if(props.get("upload." + programmer + ".using") != null) {
             if(props.get("upload." + programmer + ".using").equals("script")) {
-                return executeScript("upload." + programmer + ".script");
+                return ctx.executeKey("upload." + programmer + ".script");
             }
         }
 
         String cmdKey = null;
-        String envKey = null;
 
         if(props.keyExists("upload." + programmer + ".command")) {
             cmdKey = "upload." + programmer + ".command";
@@ -3877,15 +3357,10 @@ public class Sketch implements MessageConsumer {
             cmdKey = "upload." + programmer + ".script";
         }
 
-        if(props.keyExists("upload." + programmer + ".environment")) {
-            envKey = "upload." + programmer + ".environment";
-        }
-
         if(cmdKey == null) {
             error("Unable to get a suitable upload command");
             return false;
         }
-
 
         String uploadType = props.get("upload." + programmer + ".using");
 
@@ -3901,7 +3376,7 @@ public class Sketch implements MessageConsumer {
             String br = props.get("upload.speed");
 
             if(br != null) {
-                br = parseString(br);
+                br = ctx.parseString(br);
                 try {
                     progbaud = Integer.parseInt(br);
                 } catch(Exception e) {
@@ -3928,7 +3403,7 @@ public class Sketch implements MessageConsumer {
 
         bullet("Uploading...");
         
-        boolean res = executeKey(cmdKey, envKey);
+        boolean res = ctx.executeKey(cmdKey);
         percentageFilter = null;
 
         if(uploadType.equals("serial")) {
@@ -3959,7 +3434,7 @@ public class Sketch implements MessageConsumer {
      **************************************************************************/
 
     public boolean isWarningMessage(String s) {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         String wRec = props.get("compiler.warning");
         int wFilename = props.getInteger("compiler.warning.filename", 1);
         int wLine = props.getInteger("compiler.warning.line", 2);
@@ -3983,7 +3458,7 @@ public class Sketch implements MessageConsumer {
 
         String theme = Base.preferences.get("theme.editor", "default");
         theme = "theme." + theme + ".";
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
 
         String eRec = props.get("compiler.error");
         int eFilename = props.getInteger("compiler.error.filename", 1);
@@ -4055,7 +3530,7 @@ public class Sketch implements MessageConsumer {
 
     String mBuffer = "";
     public void messageStream(String msg) {
-        if(editor != null && stdoutRedirect == null) {
+        if(editor != null) {
             editor.messageStream(msg);
             return;
         }
@@ -4233,15 +3708,6 @@ public class Sketch implements MessageConsumer {
             s += "\n";
         }
 
-        if(stdoutRedirect != null) {
-            try {
-                stdoutRedirect.write(s);
-            } catch(Exception e) {
-            }
-
-            return;
-        }
-
         if(editor != null) {
             editor.message(s);
         } else {
@@ -4254,15 +3720,6 @@ public class Sketch implements MessageConsumer {
 
         if(!s.endsWith("\n")) {
             s += "\n";
-        }
-
-        if(stdoutRedirect != null) {
-            try {
-                stdoutRedirect.write(s);
-            } catch(Exception e) {
-            }
-
-            return;
         }
 
         if(editor != null) {
@@ -4281,15 +3738,6 @@ public class Sketch implements MessageConsumer {
 
         if(!s.endsWith("\n")) {
             s += "\n";
-        }
-
-        if(stderrRedirect != null) {
-            try {
-                stderrRedirect.write(s);
-            } catch(Exception e) {
-            }
-
-            return;
         }
 
         if(editor != null) {
@@ -4314,7 +3762,7 @@ public class Sketch implements MessageConsumer {
      **************************************************************************/
 
     public String getOption(String opt) {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         PropertyFile opts = Base.preferences.getChildren("board." + selectedBoard.getName() + ".options");
         String optval = opts.get(opt);
 
@@ -4339,7 +3787,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public void setOption(String opt, String val) {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         Base.preferences.set("board." + selectedBoard.getName() + ".options." + opt, val);
         Base.preferences.save();
 
@@ -4363,7 +3811,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public TreeMap<String, String> getOptionGroups() {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
 
         String[] options = props.childKeysOf("options");
         TreeMap<String, String> out = new TreeMap<String, String>();
@@ -4387,7 +3835,7 @@ public class Sketch implements MessageConsumer {
 
     public TreeMap<String, String> getOptionNames(String group) {
         TreeMap<String, String> out = new TreeMap<String, String>(new NaturalOrderComparator());
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
 
         if (group.contains("@")) {
             String bits[] = group.split("@");
@@ -4433,7 +3881,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public String getFlags(String type) {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         PropertyFile opts = Base.preferences.getChildren("board." + selectedBoard.getName() + ".options");
         TreeMap<String, String> options = getOptionGroups();
 
@@ -4491,18 +3939,18 @@ public class Sketch implements MessageConsumer {
     }
 
     public void precompileLibrary(Library lib) {
-        settings.put("includes", generateIncludes());
-        settings.put("filename", sketchName);
+        ctx.set("includes", generateIncludes());
+        ctx.set("filename", sketchName);
 
         if(doPrePurge) {
             doPrePurge = false;
             Base.removeDir(getCacheFolder());
         }
 
-        settings.put("option.flags", getFlags("flags"));
-        settings.put("option.cflags", getFlags("cflags"));
-        settings.put("option.cppflags", getFlags("cppflags"));
-        settings.put("option.ldflags", getFlags("ldflags"));
+        ctx.set("option.flags", getFlags("flags"));
+        ctx.set("option.cflags", getFlags("cflags"));
+        ctx.set("option.cppflags", getFlags("cppflags"));
+        ctx.set("option.ldflags", getFlags("ldflags"));
 
         compileLibrary(lib);
     }
@@ -4584,11 +4032,7 @@ public class Sketch implements MessageConsumer {
 
     public void requestTermination() {
         terminateExecution = true;
-
-        if(runningProcess != null) {
-            runningProcess.destroy();
-            Base.processes.remove(runningProcess);
-        }
+        ctx.killRunningProcess();
     }
 
     public boolean generateSarFile(File archiveFile) {
@@ -4875,7 +4319,7 @@ public class Sketch implements MessageConsumer {
             String[] lines = template.split("\n");
             PrintWriter out = new PrintWriter(output);
             for (String line : lines) {
-                String parsed = parseString(line);
+                String parsed = ctx.parseString(line);
                 out.println(parsed);
             }
             out.close();
@@ -4885,11 +4329,23 @@ public class Sketch implements MessageConsumer {
     }
 
     public void generateMakefile() {
-        PropertyFile props = mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         if (props.get("makefile.template") != null) {
-            String template = Base.getFileAsString(new File(parseString(props.get("makefile.template"))));
+            String template = Base.getFileAsString(new File(ctx.parseString(props.get("makefile.template"))));
             File out = new File(sketchFolder, "Makefile");
             generateFileFromTemplate(template.toString(), out);
         }
+    }
+
+    public Context getContext() {
+        return ctx;
+    }
+
+    public PropertyFile mergeAllProperties() {
+        return ctx.getMerged();
+    }
+
+    public String parseString(String s) {
+        return ctx.parseString(s);
     }
 }

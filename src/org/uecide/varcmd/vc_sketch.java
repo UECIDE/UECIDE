@@ -3,12 +3,12 @@ package org.uecide.varcmd;
 import org.uecide.*;
 
 public class vc_sketch implements VariableCommand {
-    public String main(Sketch sketch, String args) {
+    public String main(Context ctx, String args) {
         if (args.equals("root")) {
-            return sketch.getFolder().getAbsolutePath();
+            return ctx.getSketch().getFolder().getAbsolutePath();
         }
         if (args.equals("name")) {
-            return sketch.getName();
+            return ctx.getSketch().getName();
         }
         return "[ERR]";
     }

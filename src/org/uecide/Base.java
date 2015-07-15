@@ -197,6 +197,9 @@ public class Base implements AptPercentageListener {
     }
 
 
+    public static HashMap<String, String> settings = new HashMap<String, String>();
+
+
     public static boolean autoCompile = false;
     public static boolean autoProgram = false;
     public static String presetPort = null;
@@ -296,9 +299,6 @@ public class Base implements AptPercentageListener {
                 headless = true;
             }
         }
-
-        String javaHome = System.getProperty("java.home");
-        System.err.println(javaHome);
 
         try {
             File f = getJarLocation();
@@ -540,6 +540,8 @@ public class Base implements AptPercentageListener {
             buildPreferencesTree();
             loadPreferencesTree("/org/uecide/config/prefs.txt");
 
+            runInitScripts();
+
             InteractiveCLI icli = new InteractiveCLI(argv);
             icli.run();
             System.exit(0);
@@ -779,6 +781,8 @@ public class Base implements AptPercentageListener {
         buildPreferencesTree();
         loadPreferencesTree("/org/uecide/config/prefs.txt");
 
+        runInitScripts();
+
         initMRU();
 
         if(!headless) splashScreen.setMessage("Opening Editor...", 80);
@@ -891,13 +895,9 @@ public class Base implements AptPercentageListener {
         Class sysclass = URLClassLoader.class;
 
         try {
-            Debug.message("...1");
             Method method = sysclass.getDeclaredMethod("addURL", parameters);
-            Debug.message("...2");
             method.setAccessible(true);
-            Debug.message("...3");
             method.invoke(sysloader, new Object[]{u});
-            Debug.message("...4");
         } catch (Throwable ex) {
             Base.error(ex);
         }
@@ -3075,8 +3075,6 @@ public class Base implements AptPercentageListener {
     public static void buildPreferencesTree() {
         preferencesTree = new PropertyFile();
 
-        System.err.println("Gathering preferences...");
-
         for(Compiler c : compilers.values()) {
             preferencesTree.mergeData(c.getProperties().getChildren("prefs"));
         }
@@ -3084,15 +3082,12 @@ public class Base implements AptPercentageListener {
         for(Core c : cores.values()) {
             PropertyFile pf = c.getProperties();
             PropertyFile cf = pf.getChildren("prefs");
-            cf.debugDump();
             preferencesTree.mergeData(cf);
         }
 
         for(Board c : boards.values()) {
             preferencesTree.mergeData(c.getProperties().getChildren("prefs"));
         }
-
-        preferencesTree.debugDump();
     }
 
     public static void registerPreference(String key, String type, String name, String def) {
@@ -3220,5 +3215,31 @@ public class Base implements AptPercentageListener {
             hash.put(i, i);
         }
         return hash;
+    }
+
+    // This little routine works through each and every board, core and compiler and
+    // runs any "init.script.*" lines.
+    public static void runInitScripts() {
+        for (Board b : boards.values()) {
+            if (b.get("init.script.0") != null) {
+                Context ctx = new Context();
+                ctx.setBoard(b);
+                ctx.executeKey("init.script");
+            }
+        }
+        for (Core c : cores.values()) {
+            if (c.get("init.script.0") != null) {
+                Context ctx = new Context();
+                ctx.setCore(c);
+                ctx.executeKey("init.script");
+            }
+        }
+        for (Compiler c : compilers.values()) {
+            if (c.get("init.script.0") != null) {
+                Context ctx = new Context();
+                ctx.setCompiler(c);
+                ctx.executeKey("init.script");
+            }
+        }
     }
 }

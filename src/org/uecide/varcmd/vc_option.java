@@ -3,7 +3,7 @@ package org.uecide.varcmd;
 import org.uecide.*;
 
 public class vc_option implements VariableCommand {
-    public String main(Sketch sketch, String args) {
+    public String main(Context ctx, String args) {
 
         String[] bits = args.split("\\.");
 
@@ -13,14 +13,14 @@ public class vc_option implements VariableCommand {
 
         String opt = bits[0];
         String key = bits[1];
-        String optval = sketch.getOption(opt);
+        String optval = ctx.getSketch().getOption(opt);
 
         if (optval == null) {
             return "ERR2";
         }
 
         String val = "options." + opt + "." + optval + "." + key;
-        PropertyFile props = sketch.mergeAllProperties();
+        PropertyFile props = ctx.getMerged();
         String retval = props.get(val);
         if (retval == null) {
             return "ERR3";

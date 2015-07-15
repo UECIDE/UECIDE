@@ -4,7 +4,7 @@ import org.uecide.*;
 import java.util.Random;
 
 public class vc_random implements VariableCommand {
-    public String main(Sketch sketch, String args) {
+    public String main(Context sketch, String args) {
         String[] bits = args.split(",");
         if (bits.length != 2) {
             return "ERR";

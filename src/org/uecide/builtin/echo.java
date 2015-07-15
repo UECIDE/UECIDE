@@ -3,7 +3,7 @@ package org.uecide.builtin;
 import org.uecide.*;
 
 public class echo implements BuiltinCommand {
-    public boolean main(Sketch sketch, String[] arg) {
+    public boolean main(Context ctx, String[] arg) {
         StringBuilder sb = new StringBuilder();
 
         for(String s : arg) {
@@ -11,7 +11,7 @@ public class echo implements BuiltinCommand {
             sb.append(" ");
         }
 
-        sketch.message(sb.toString());
+        ctx.message(sb.toString());
         return true;
     }
 }

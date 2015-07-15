@@ -5,7 +5,7 @@ import java.io.File;
 import java.util.UUID;
 
 public class vc_uecide implements VariableCommand {
-    public String main(Sketch sketch, String args) {
+    public String main(Context sketch, String args) {
         if (args.equals("name")) {
             return Base.theme.get("product");
         }

@@ -362,8 +362,8 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         </exec>
     </target>
 
-    <target name="single-exe" depends="build">
-        <launch4j configFile="UECIDE-l4j.xml" outfile="UECIDE-Single-${version}.exe" />
+    <target name="bundle" depends="build">
+        <launch4j configFile="UECIDE-l4j.xml" outfile="uecide-${version}-bundle.exe" />
     </target>
 
 </project>

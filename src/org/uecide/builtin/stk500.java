@@ -10,7 +10,7 @@ public class stk500 implements BuiltinCommand {
     SerialPort port = null;
     String portName = null;
     int baudRate = 115200;
-    Sketch sketch;
+    Context ctx;
     int sequence = 0;
     boolean connected = false;
     int timeout = 1000;
@@ -46,10 +46,10 @@ public class stk500 implements BuiltinCommand {
 
     public static long pageSize = 256;
 
-    public boolean main(Sketch sktch, String[] args) {
-        sketch = sktch;
+    public boolean main(Context c, String[] args) {
+        Context ctx = c;
         if (args.length != 3) {
-            sketch.error("Usage: __builtin_stk500::port::baud::filename");
+            ctx.error("Usage: __builtin_stk500::port::baud::filename");
             return false;
         }
         portName = args[0];
@@ -61,36 +61,36 @@ public class stk500 implements BuiltinCommand {
         try {
             baudRate = Integer.parseInt(brd);
         } catch (Exception e) {
-            Base.error(e);
+            ctx.error(e);
         }
 
         if(loadHexFile(new File(fle))) {
-            sketch.message("File loaded");
+            ctx.message("File loaded");
         } else {
-            sketch.error("Unable to load file " + fle);
+            ctx.error("Unable to load file " + fle);
             return false;
         }
 
         if (!connect(1000)) {
-            sketch.error("Unable to connect");
+            ctx.error("Unable to connect");
             return false;
         }
 
         String dn = getDeviceName();
         if(dn != null) {
-            sketch.message("Connected to " + dn);
+            ctx.message("Connected to " + dn);
         }
 
         if(enterProgMode()) {
-            sketch.message("Entered programming mode");
+            ctx.message("Entered programming mode");
         }
 
         if(uploadProgram()) {
-            sketch.message("Upload complete");
+            ctx.message("Upload complete");
         }
 
         if(leaveProgMode()) {
-            sketch.message("Left programming mode");
+            ctx.message("Left programming mode");
         }
 
         disconnect();
@@ -116,7 +116,7 @@ public class stk500 implements BuiltinCommand {
             port.setDTR(false);
             port.setRTS(false);
         } catch(Exception e) {
-            Base.error(e);
+            ctx.error(e);
         }
 
         connected = false;
@@ -130,7 +130,7 @@ public class stk500 implements BuiltinCommand {
         sequence = 0;
 
         if(port == null) {
-            sketch.error("Unable to open port " + portName);
+            ctx.error("Unable to open port " + portName);
             return false;
         }
 
@@ -143,7 +143,7 @@ public class stk500 implements BuiltinCommand {
             port.setDTR(true);
             port.setRTS(true);
         } catch(Exception e) {
-            Base.error(e);
+            ctx.error(e);
         }
 
         int tries = 10;
@@ -157,7 +157,7 @@ public class stk500 implements BuiltinCommand {
         if(tries == 0) {
             connected = false;
 
-            sketch.error("Connection timed out");
+            ctx.error("Connection timed out");
 
             Serial.closePort(port);
             return false;
@@ -208,14 +208,6 @@ public class stk500 implements BuiltinCommand {
 
     public int[] sendCommand(int[] command) {
 
-//        System.out.print("STK500V2: stk500v2_command(");
-//        for (int i : command) {
-//            System.out.print(String.format("0x%02x ", i & 0xFF));
-//        }
-//        System.out.print(", ");
-//        System.out.print(command.length);
-//        System.out.println(")");
-
         try {
             int checksum = 0;
             port.writeByte((byte)0x1B);
@@ -262,7 +254,7 @@ public class stk500 implements BuiltinCommand {
             return out;
 
         } catch(Exception e) {
-            Base.error(e);
+            ctx.error(e);
             return null;
         }
     }
@@ -337,7 +329,9 @@ public class stk500 implements BuiltinCommand {
         for(Long start : memChunks.keySet()) {
 
             int perc = currentChunk * 100 / numberOfChunks;
-            sketch.setCompilingProgress(perc);
+            if (ctx.getSketch() != null) {
+                ctx.getSketch().setCompilingProgress(perc);
+            }
 
             currentChunk ++;
 
@@ -347,7 +341,7 @@ public class stk500 implements BuiltinCommand {
                 offset = start;
 
                 if(!loadAddress(currentAddress)) {
-                    Base.error(String.format("Load Address failed at address 0x%08x", currentAddress));
+                    ctx.error(String.format("Load Address failed at address 0x%08x", currentAddress));
                     return false;
                 }
 
@@ -360,21 +354,6 @@ public class stk500 implements BuiltinCommand {
                 loadAddress(start - offset);
                 currentAddress = start;
             }
-/*
-                } else {
-                    int[] page = newPage();
-
-                    while(currentAddress != start) {
-
-                        if(!uploadPage(page)) {
-                            return false;
-                        }
-
-                        currentAddress += page.length;
-                    }
-                }
-            }
-*/
 
             int[] chunk = memChunks.get(start);
 
@@ -408,12 +387,12 @@ public class stk500 implements BuiltinCommand {
         int[] rv = sendCommand(message);
 
         if(rv == null) {
-            Base.error("Upload failed");
+            ctx.error("Upload failed");
             return false;
         }
 
         if(rv[1] != STATUS_CMD_OK) {
-            Base.error("Upload failed");
+            ctx.error("Upload failed");
             return false;
         }
 
@@ -511,12 +490,12 @@ public class stk500 implements BuiltinCommand {
         int[] rv = sendCommand(new int[] { CMD_LEAVE_PROGMODE_ISP, 1, 1});
 
         if(rv == null) {
-            Base.error("Timeout leaving programming mode!");
+            ctx.error("Timeout leaving programming mode!");
             return false;
         }
 
         if(rv[1] != STATUS_CMD_OK) {
-            Base.error("Error leaving programming mode!");
+            ctx.error("Error leaving programming mode!");
             return false;
         }
 
@@ -736,7 +715,7 @@ public class stk500 implements BuiltinCommand {
 
             br.close();
         } catch(Exception e) {
-            Base.error(e);
+            ctx.error(e);
             return false;
         }
 

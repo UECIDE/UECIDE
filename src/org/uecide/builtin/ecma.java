@@ -10,21 +10,21 @@ public class ecma implements BuiltinCommand {
     PipedReader stde_pr;
     PipedWriter stde_pw;
     boolean running = true;
-    Sketch sketch;
-    public boolean main(Sketch sktch, String[] arg) {
-        sketch = sktch;
+    Context ctx;
+    public boolean main(Context c, String[] arg) {
+        ctx = c;
         if (arg.length < 1) {
-            sketch.error("Usage: __builtin_ecma::filename.js[::arg::arg...]");
+            ctx.error("Usage: __builtin_ecma::filename.js[::arg::arg...]");
             return false;
         }
 
         try {
             ScriptEngineManager manager = new ScriptEngineManager();
             ScriptEngine engine = manager.getEngineByName("JavaScript");
-            engine.put("sketch", sketch);
+            engine.put("context", ctx);
             File f = new File(arg[0]);
             if (!f.exists()) {
-                sketch.error("File not found");
+                ctx.error("File not found");
                 return false;
             }
             StringBuilder sb = new StringBuilder();
@@ -67,7 +67,7 @@ public class ecma implements BuiltinCommand {
                         try {
                             while (stdo_pr.ready()) {
                                 int i = stdo_pr.read(tmp, 0, 20);
-                                sketch.messageStream(new String(tmp, 0, i));
+                                ctx.messageStream(new String(tmp, 0, i));
                             }
                         } catch (Exception ex) {
                         }
@@ -83,7 +83,7 @@ public class ecma implements BuiltinCommand {
                         try {
                             while (stde_pr.ready()) {
                                 int i = stde_pr.read(tmp, 0, 20);
-                                sketch.messageStream(new String(tmp, 0, i));
+                                ctx.messageStream(new String(tmp, 0, i));
                                 System.err.print(new String(tmp, 0, i));
                             }
                         } catch (Exception ex) {
@@ -101,8 +101,9 @@ public class ecma implements BuiltinCommand {
             running = false;
             return ret;
         } catch (Exception e) {
-            sketch.error(e);
+            ctx.error(e);
         }
         return false;
     }
+
 }

@@ -3,13 +3,14 @@ package org.uecide.builtin;
 import org.uecide.*;
 
 public class push implements BuiltinCommand {
-    public boolean main(Sketch sketch, String[] arg) {
+    public boolean main(Context ctx, String[] arg) {
         if (arg.length != 2) {
-            sketch.error("Usage: __builtin_push::variable::value");
+            ctx.error("Usage: __builtin_push::variable::value");
             return false;
         }
 
-        String val = sketch.settings.get(arg[0]);
+        String val = null;
+        val = ctx.get(arg[0]);
         if (val == null) {
             val = "";
         }
@@ -20,7 +21,7 @@ public class push implements BuiltinCommand {
 
         val += arg[1];
 
-        sketch.settings.put(arg[0], val);
+        ctx.set(arg[0], val);
         return true;
     }
 }

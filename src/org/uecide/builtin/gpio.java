@@ -4,7 +4,7 @@ import org.uecide.*;
 import java.io.*;
 
 public class gpio implements BuiltinCommand {
-    public boolean main(Sketch sketch, String[] arg) {
+    public boolean main(Context ctx, String[] arg) {
         try {
             int pin = Integer.parseInt(arg[0]);
             String command = arg[1];

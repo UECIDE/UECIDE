@@ -3,12 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 
 public class foreach implements BuiltinCommand {
-    public boolean main(Sketch sketch, String[] arg) {
+    public boolean main(Context ctx, String[] arg) {
         if (arg.length != 3) {
             for (String a : arg) {
                 System.err.print("foreach: " + a);
             }
-            sketch.error("Usage: __builtin_foreach::item,item,item...::variable::script");
+            ctx.error("Usage: __builtin_foreach::item,item,item...::variable::script");
             return false;
         }
 
@@ -18,8 +18,8 @@ public class foreach implements BuiltinCommand {
 
         for (String item : items) {
             item = item.trim();
-            sketch.settings.put(variable, item);
-            if(!sketch.executeScript(target)) {
+            ctx.set(variable, item);
+            if(!ctx.executeKey(target)) {
                 return false;
             }
         }

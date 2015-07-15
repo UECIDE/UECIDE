@@ -1892,8 +1892,8 @@ public class Editor extends JFrame {
                             public void actionPerformed(ActionEvent e) {
                                 String cmd = Base.preferences.get("editor.external.command");
                                 String fn = e.getActionCommand();
-                                loadedSketch.settings.put("filename", fn);
-                                String c = loadedSketch.parseString(cmd);
+                                loadedSketch.getContext().set("filename", fn);
+                                String c = loadedSketch.getContext().parseString(cmd);
                                 Base.exec(c.split("::"));
                             }
                         });
@@ -2175,8 +2175,8 @@ public class Editor extends JFrame {
                                 public void actionPerformed(ActionEvent e) {
                                     String cmd = Base.preferences.get("editor.external.command");
                                     String fn = e.getActionCommand();
-                                    loadedSketch.settings.put("filename", fn);
-                                    String c = loadedSketch.parseString(cmd);
+                                    loadedSketch.getContext().set("filename", fn);
+                                    String c = loadedSketch.getContext().parseString(cmd);
                                     Base.exec(c.split("::"));
                                 }
                             });
@@ -2302,7 +2302,7 @@ public class Editor extends JFrame {
             return null;
         }
 
-        return loadedSketch.getBoard();
+        return loadedSketch.getContext().getBoard();
     }
 
     public Core getCore() {
@@ -2310,7 +2310,7 @@ public class Editor extends JFrame {
             return null;
         }
 
-        return loadedSketch.getCore();
+        return loadedSketch.getContext().getCore();
     }
 
     public Compiler getCompiler() {
@@ -2318,7 +2318,7 @@ public class Editor extends JFrame {
             return null;
         }
 
-        return loadedSketch.getCompiler();
+        return loadedSketch.getContext().getCompiler();
     }
 
     public String getSketchName() {
@@ -2558,11 +2558,11 @@ public class Editor extends JFrame {
         StringBuilder sb = new StringBuilder();
 
         sb.append("<html><b>Board: </b><i>");
-        sb.append((loadedSketch.getBoard() != null ? loadedSketch.getBoard() : "None"));
+        sb.append((loadedSketch.getContext().getBoard() != null ? loadedSketch.getContext().getBoard() : "None"));
         sb.append("</i> <b>Core: </b><i>");
-        sb.append((loadedSketch.getCore() != null ? loadedSketch.getCore() : "None"));
+        sb.append((loadedSketch.getContext().getCore() != null ? loadedSketch.getContext().getCore() : "None"));
         sb.append("</i> <b>Compiler: </b><i>");
-        sb.append((loadedSketch.getCompiler() != null ? loadedSketch.getCompiler() : "None"));
+        sb.append((loadedSketch.getContext().getCompiler() != null ? loadedSketch.getContext().getCompiler() : "None"));
         sb.append("</i> <b>Port: </b><i>");
         sb.append((loadedSketch.getProgramPort() != null ? loadedSketch.getProgramPort() : "None"));
         sb.append("</i></html>");
@@ -2997,15 +2997,15 @@ public class Editor extends JFrame {
 
         submenu = new JMenu(Translate.t("Examples"));
 
-        if(loadedSketch.getCore() != null) {
-            if (loadedSketch.getCompiler() != null) {
-                addSketchesFromFolder(submenu, loadedSketch.getCompiler().getExamplesFolder());
+        if(loadedSketch.getContext().getCore() != null) {
+            if (loadedSketch.getContext().getCompiler() != null) {
+                addSketchesFromFolder(submenu, loadedSketch.getContext().getCompiler().getExamplesFolder());
             }
-            if (loadedSketch.getCore() != null) {
-                addSketchesFromFolder(submenu, loadedSketch.getCore().getExamplesFolder());
+            if (loadedSketch.getContext().getCore() != null) {
+                addSketchesFromFolder(submenu, loadedSketch.getContext().getCore().getExamplesFolder());
             }
-            if (loadedSketch.getBoard() != null) {
-                addSketchesFromFolder(submenu, loadedSketch.getBoard().getExamplesFolder());
+            if (loadedSketch.getContext().getBoard() != null) {
+                addSketchesFromFolder(submenu, loadedSketch.getContext().getBoard().getExamplesFolder());
             }
 
             submenu.addSeparator();
@@ -3013,9 +3013,9 @@ public class Editor extends JFrame {
 
             TreeSet<String> catNames = Library.getLibraryCategories();
 
-            if (loadedSketch.getCore() != null) {
+            if (loadedSketch.getContext().getCore() != null) {
                 for(String group : catNames) {
-                    TreeSet<Library>libs = Library.getLibraries(group, loadedSketch.getCore().getName());
+                    TreeSet<Library>libs = Library.getLibraries(group, loadedSketch.getContext().getCore().getName());
 
                     if(libs != null && libs.size() > 0) {
                         JMenu top = new JMenu(Library.getCategoryName(group));
@@ -3353,12 +3353,12 @@ public class Editor extends JFrame {
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
 
-        if (loadedSketch.getBoard() != null) {
-            if (loadedSketch.getBoard().getManual() != null) {
-                item = new JMenuItem("Manual for " + loadedSketch.getBoard().toString());
+        if (loadedSketch.getContext().getBoard() != null) {
+            if (loadedSketch.getContext().getBoard().getManual() != null) {
+                item = new JMenuItem("Manual for " + loadedSketch.getContext().getBoard().toString());
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        loadManual(loadedSketch.getBoard().getManual());
+                        loadManual(loadedSketch.getContext().getBoard().getManual());
                     }
                 });
                 Base.setFont(item, "menu.entry");
@@ -3366,12 +3366,12 @@ public class Editor extends JFrame {
             }
         }
 
-        if (loadedSketch.getCore() != null) {
-            if (loadedSketch.getCore().getManual() != null) {
-                item = new JMenuItem("Manual for " + loadedSketch.getCore().toString());
+        if (loadedSketch.getContext().getCore() != null) {
+            if (loadedSketch.getContext().getCore().getManual() != null) {
+                item = new JMenuItem("Manual for " + loadedSketch.getContext().getCore().toString());
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        loadManual(loadedSketch.getCore().getManual());
+                        loadManual(loadedSketch.getContext().getCore().getManual());
                     }
                 });
                 Base.setFont(item, "menu.entry");
@@ -3379,12 +3379,12 @@ public class Editor extends JFrame {
             }
         }
 
-        if (loadedSketch.getCompiler() != null) {
-            if (loadedSketch.getCompiler().getManual() != null) {
-                item = new JMenuItem("Manual for " + loadedSketch.getCompiler().toString());
+        if (loadedSketch.getContext().getCompiler() != null) {
+            if (loadedSketch.getContext().getCompiler().getManual() != null) {
+                item = new JMenuItem("Manual for " + loadedSketch.getContext().getCompiler().toString());
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        loadManual(loadedSketch.getCompiler().getManual());
+                        loadManual(loadedSketch.getContext().getCompiler().getManual());
                     }
                 });
                 Base.setFont(item, "menu.entry");
@@ -3409,7 +3409,7 @@ public class Editor extends JFrame {
             helpMenu.add(item);
         }
 
-        links = loadedSketch.mergeAllProperties().getChildren("links");
+        links = loadedSketch.getContext().getMerged().getChildren("links");
 
         for(String link : links.childKeys()) {
             String iname = links.get(link + ".name");
@@ -3549,9 +3549,9 @@ public class Editor extends JFrame {
             }
 
             for(Object k : discoveredBoard.properties.keySet()) {
-                loadedSketch.put("mdns." + (String)k, discoveredBoard.properties.get((String)k));
+                loadedSketch.getContext().set("mdns." + (String)k, discoveredBoard.properties.get((String)k));
             }
-            //loadManual(loadedSketch.getCore().getManual());
+            //loadManual(loadedSketch.getContext().getCore().getManual());
         }
     }
 
@@ -3657,8 +3657,8 @@ public class Editor extends JFrame {
             JMenuItem item = new JRadioButtonMenuItem(board.getDescription());
             boardMenuButtonGroup.add(item);
 
-            if(loadedSketch.getBoard() != null) {
-                if(loadedSketch.getBoard().equals(board)) {
+            if(loadedSketch.getContext().getBoard() != null) {
+                if(loadedSketch.getContext().getBoard().equals(board)) {
                     item.setSelected(true);
                 }
             }
@@ -3680,7 +3680,7 @@ public class Editor extends JFrame {
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setBoard(e.getActionCommand());
-//                    Core c = loadedSketch.getCore();
+//                    Core c = loadedSketch.getContext().getCore();
 //                    if (c != null) {
 //                        loadManual(c.getManual());
 //                    }
@@ -3694,7 +3694,7 @@ public class Editor extends JFrame {
 
     public void populateCoresMenu(JMenu menu) {
         ButtonGroup coreGroup = new ButtonGroup();
-        Board board = loadedSketch.getBoard();
+        Board board = loadedSketch.getContext().getBoard();
         ArrayList<Core> coreList = new ArrayList<Core>();
 
         for(Core core : Base.cores.values()) {
@@ -3710,8 +3710,8 @@ public class Editor extends JFrame {
             JMenuItem item = new JRadioButtonMenuItem(core.toString());
             coreGroup.add(item);
 
-            if(loadedSketch.getCore() != null) {
-                item.setSelected(loadedSketch.getCore().equals(core));
+            if(loadedSketch.getContext().getCore() != null) {
+                item.setSelected(loadedSketch.getContext().getCore().equals(core));
             }
 
             ImageIcon i = core.getIcon(16);
@@ -3735,7 +3735,7 @@ public class Editor extends JFrame {
 
     public void populateCompilersMenu(JMenu menu) {
         ButtonGroup compilerGroup = new ButtonGroup();
-        Core core = loadedSketch.getCore();
+        Core core = loadedSketch.getContext().getCore();
         ArrayList<Compiler> compilerList = new ArrayList<Compiler>();
 
         if(core == null) {
@@ -3754,7 +3754,7 @@ public class Editor extends JFrame {
         for(Compiler compiler : compilers) {
             JMenuItem item = new JRadioButtonMenuItem(compiler.getName());
             compilerGroup.add(item);
-            item.setSelected(loadedSketch.getCompiler().equals(compiler));
+            item.setSelected(loadedSketch.getContext().getCompiler().equals(compiler));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setCompiler(e.getActionCommand());
@@ -4325,7 +4325,7 @@ public class Editor extends JFrame {
     public void populateLibrariesMenu(JComponent menu) {
         JMenuItem item;
 
-        Core thisCore = loadedSketch.getCore();
+        Core thisCore = loadedSketch.getContext().getCore();
 
         if(thisCore == null) {
             return;

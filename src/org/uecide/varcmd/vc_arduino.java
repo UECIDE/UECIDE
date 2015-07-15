@@ -7,7 +7,7 @@ public class vc_arduino implements VariableCommand {
 
     public static HashMap<String, PropertyFile> propCache = new HashMap<String, PropertyFile>();
 
-    public String main(Sketch sketch, String args) {
+    public String main(Context sketch, String args) {
         String[] bits = args.split(",");
         if (bits.length != 2) {
             return "ERR";

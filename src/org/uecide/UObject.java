@@ -289,4 +289,8 @@ public class UObject implements Comparable {
     public File getKeywords() {
         return new File(getFolder(), get("keywords", "keywords.txt"));
     }
+
+    public String getScript(String name) {
+        return _properties.getScript(name);
+    }
 }

@@ -4,7 +4,7 @@ import org.uecide.*;
 import java.io.File;
 
 public class vc_find implements VariableCommand {
-    public String main(Sketch sketch, String args) {
+    public String main(Context sketch, String args) {
         int commaPos = args.indexOf(',');
 
         if(commaPos > 0) {
