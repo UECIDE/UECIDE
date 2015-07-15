@@ -58,6 +58,7 @@ public class PropertyFile {
     boolean doPlatformOverride = false;
 
     Properties embedded;
+    HashMap<String, String>embeddedTypes;
 
     /*! Create a new PropertyFile from a file on disk.  All properties are loaded and stored from the file. */
     public PropertyFile(File user) {
@@ -76,6 +77,7 @@ public class PropertyFile {
             BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(user), "UTF-8"));
             properties = new Properties();
             embedded = new Properties();
+            embeddedTypes = new HashMap<String, String>();
 
             if(br != null) {
                 loadProperties(properties, br);
@@ -107,6 +109,7 @@ public class PropertyFile {
             br.close();
             properties = new Properties(defaultProperties);
             embedded = new Properties();
+            embeddedTypes = new HashMap<String, String>();
 
             if(user != null) {
                 if(user.exists()) {
@@ -148,6 +151,7 @@ public class PropertyFile {
 
         properties = new Properties(defaultProperties);
         embedded = new Properties();
+        embeddedTypes = new HashMap<String, String>();
 
         if(user != null) {
             if(user.exists()) {
@@ -170,6 +174,7 @@ public class PropertyFile {
         defaultProperties = new Properties();
         properties = new Properties();
         embedded = new Properties();
+        embeddedTypes = new HashMap<String, String>();
     }
 
     /*! Create a new PropertyFile from a set of properties stored in a TreeMap<String, String> object. */
@@ -178,6 +183,7 @@ public class PropertyFile {
         defaultProperties = new Properties();
         properties = new Properties();
         embedded = new Properties();
+        embeddedTypes = new HashMap<String, String>();
         mergeData(data);
     }
 
@@ -187,6 +193,7 @@ public class PropertyFile {
         defaultProperties = new Properties();
         properties = new Properties();
         embedded = new Properties();
+        embeddedTypes = new HashMap<String, String>();
         mergeData(pf);
     }
 
@@ -242,7 +249,8 @@ public class PropertyFile {
                 }
 
                 for (String embfile : embedded.stringPropertyNames()) {
-                    pw.println("@begin file=" + embfile + " format=javascript");
+                    String type = embeddedTypes.get(embfile);
+                    pw.println("@begin file=" + embfile + " format=type");
                     pw.println(embedded.getProperty(embfile));
                     pw.println("@end");
                     pw.println();
@@ -789,6 +797,7 @@ public class PropertyFile {
                                 sb.append("\n");
                             }
                             embedded.put(fn, sb.toString());
+                            embeddedTypes.put(fn, fmt);
                         }
                     }
                         
@@ -868,7 +877,12 @@ public class PropertyFile {
         }        
     }
 
-    public String getScript(String name) {
+    public String getEmbedded(String name) {
         return embedded.getProperty(name);
+    }
+
+    public byte[] getEmbeddedBinary(String name) {
+        byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(getEmbedded(name));
+        return binary;
     }
 }

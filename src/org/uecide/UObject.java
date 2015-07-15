@@ -290,7 +290,7 @@ public class UObject implements Comparable {
         return new File(getFolder(), get("keywords", "keywords.txt"));
     }
 
-    public String getScript(String name) {
-        return _properties.getScript(name);
+    public String getEmbedded(String name) {
+        return _properties.getEmbedded(name);
     }
 }

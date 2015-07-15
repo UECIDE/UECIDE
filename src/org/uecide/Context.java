@@ -94,17 +94,17 @@ public class Context {
             return getFileAsString(uri.substring(5));
         }
         if (uri.startsWith("compiler:")) {
-            return compiler.getScript(uri.substring(9));
+            return compiler.getEmbedded(uri.substring(9));
         }
         if (uri.startsWith("core:")) {
-            return core.getScript(uri.substring(5));
+            return core.getEmbedded(uri.substring(5));
         }
         if (uri.startsWith("board:")) {
-            return board.getScript(uri.substring(6));
+            return board.getEmbedded(uri.substring(6));
         }
         if (uri.startsWith("merged:")) {
             PropertyFile pf = getMerged();
-            return pf.getScript(uri.substring(7));
+            return pf.getEmbedded(uri.substring(7));
         }
         return null;
     }
@@ -364,7 +364,7 @@ public class Context {
                 for (Object o : args) {
                     String s = o.toString();
                     if (!argstr.equals("")) {
-                        argstr += " ";
+                        argstr += ", ";
                     }
                     argstr += s;
                 }
