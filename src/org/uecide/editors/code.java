@@ -114,7 +114,7 @@ public class code extends JPanel implements EditorBase {
             findPanel = new JPanel();
             findPanel.setLayout(new BoxLayout(findPanel, BoxLayout.LINE_AXIS));
 
-            if(Base.preferences.getBoolean("editor.find.keep") == false) {
+            if(Preferences.getBoolean("editor.find.keep") == false) {
                 findPanel.add(findCloseButton);
             }
 
@@ -273,7 +273,7 @@ public class code extends JPanel implements EditorBase {
         scrollPane = new RTextScrollPane(textArea);
         toolbar = new JToolBar();
         toolbar.setFloatable(false);
-        toolbar.setVisible(!Base.preferences.getBoolean("editor.toolbars.sub_hidden"));
+        toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden"));
         this.add(toolbar, BorderLayout.NORTH);
 
         Editor.addToolbarButton(toolbar, "actions", "copy", "Copy", new ActionListener() {
@@ -329,7 +329,7 @@ public class code extends JPanel implements EditorBase {
             loadFile(f);
         }
 
-        if(Base.preferences.getBoolean("editor.find.keep")) {
+        if(Preferences.getBoolean("editor.find.keep")) {
             openFindPanel();
         }
 
@@ -349,22 +349,22 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void refreshSettings() {
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
-        boolean external = Base.preferences.getBoolean("editor.external");
+        boolean external = Preferences.getBoolean("editor.external");
         textArea.setEditable(!external);
         textArea.setCodeFoldingEnabled(true);
         textArea.setAntiAliasingEnabled(true);
         textArea.setMarkOccurrences(true);
 
-        if(Base.preferences.get("editor.tabs.size") != null) {
-            textArea.setTabSize(Base.preferences.getInteger("editor.tabs.size"));
+        if(Preferences.get("editor.tabs.size") != null) {
+            textArea.setTabSize(Preferences.getInteger("editor.tabs.size"));
         } else {
             textArea.setTabSize(4);
         }
 
-        textArea.setTabsEmulated(Base.preferences.getBoolean("editor.tabs.expand"));
-        textArea.setPaintTabLines(Base.preferences.getBoolean("editor.tabs.show"));
+        textArea.setTabsEmulated(Preferences.getBoolean("editor.tabs.expand"));
+        textArea.setPaintTabLines(Preferences.getBoolean("editor.tabs.show"));
 
         scrollPane.setFoldIndicatorEnabled(true);
         scrollPane.setIconRowHeaderEnabled(true);
@@ -372,7 +372,7 @@ public class code extends JPanel implements EditorBase {
         textArea.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
 
         textArea.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
-        textArea.setFont(Base.preferences.getFont("theme.fonts.editor"));
+        textArea.setFont(Preferences.getFont("theme.fonts.editor"));
 
         gutter = scrollPane.getGutter();
 
@@ -568,7 +568,7 @@ public class code extends JPanel implements EditorBase {
 
     public void applyThemeSettings() {
 
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
         // Annotations
         applyThemeFGColor(SyntaxScheme.ANNOTATION,                      theme + "editor.annotation.fgcolor");

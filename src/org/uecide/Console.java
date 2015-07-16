@@ -48,7 +48,7 @@ public class Console extends JTextPane {
 
         setDocument(document);
         setEditable(false);
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
         Color bgColor = Base.theme.getColor(theme + "console.color");
 
@@ -58,7 +58,7 @@ public class Console extends JTextPane {
     }   
 
     void setStyle(MutableAttributeSet set, String name) {
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
         Color bgColor = Base.theme.getColor(theme + "console.color");
 
@@ -75,7 +75,7 @@ public class Console extends JTextPane {
     }
 
     Color getColor(String name) {
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
 
         Color color = Base.theme.getColor(theme + "console.output.color");
@@ -86,7 +86,7 @@ public class Console extends JTextPane {
     }
 
     Font getFont(String name) {
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
 
         Font font = Base.theme.getFont(theme + "theme.fonts.console");
@@ -97,7 +97,7 @@ public class Console extends JTextPane {
     }
 
     int getIndent(String name) {
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
 
         int indent = Base.theme.getInteger(theme + "console.indent", 5);

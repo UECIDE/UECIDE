@@ -31,7 +31,6 @@
 package org.uecide;
 
 import org.uecide.debug.*;
-import org.uecide.preproc.*;
 import org.uecide.editors.*;
 import org.uecide.plugin.*;
 import org.uecide.builtin.BuiltinCommand;
@@ -262,8 +261,8 @@ public class Sketch implements MessageConsumer {
 
         selectedBoard = board;
         selectedBoardName = selectedBoard.getName();
-        Base.preferences.set("board", board.getName());
-        String boardsCore = Base.preferences.get("board." + selectedBoard.getName() + ".core");
+        Preferences.set("board", board.getName());
+        String boardsCore = Preferences.get("board." + selectedBoard.getName() + ".core");
         Core core = null;
 
         if(boardsCore != null) {
@@ -307,8 +306,8 @@ public class Sketch implements MessageConsumer {
         ctx.setCore(core);
 
         selectedCore = core;
-        Base.preferences.set("board." + selectedBoard.getName() + ".core", core.getName());
-        String boardsCompiler = Base.preferences.get("board." + selectedBoard.getName() + ".compiler");
+        Preferences.set("board." + selectedBoard.getName() + ".core", core.getName());
+        String boardsCompiler = Preferences.get("board." + selectedBoard.getName() + ".compiler");
 
         Compiler compiler = null;
 
@@ -353,8 +352,8 @@ public class Sketch implements MessageConsumer {
             return;
         }
 
-        Base.preferences.set("board." + selectedBoard.getName() + ".compiler", compiler.getName());
-        String programmer = Base.preferences.get("board." + selectedBoard.getName() + ".programmer");
+        Preferences.set("board." + selectedBoard.getName() + ".compiler", compiler.getName());
+        String programmer = Preferences.get("board." + selectedBoard.getName() + ".programmer");
 
         if(programmer == null) {
             TreeMap<String, String> pl = getProgrammerList();
@@ -393,9 +392,8 @@ public class Sketch implements MessageConsumer {
     public void setProgrammer(String programmer) {
         if(programmer == null || programmer.equals("")) return;
 
-        Base.preferences.set("board." + selectedBoard.getName() + ".programmer", programmer);
+        Preferences.set("board." + selectedBoard.getName() + ".programmer", programmer);
         selectedProgrammer = programmer;
-        Base.preferences.saveDelay();
 
         if(editor != null) editor.updateAll();
     }
@@ -458,12 +456,11 @@ public class Sketch implements MessageConsumer {
 
         if(selectedBoard != null) {
             if(selectedNetworkPort == null) {
-                Base.preferences.unset("board." + selectedBoard.getName() + ".ip");
+                Preferences.unset("board." + selectedBoard.getName() + ".ip");
             } else {
-                Base.preferences.set("board." + selectedBoard.getName() + ".ip", selectedNetworkPort.toString());
+                Preferences.set("board." + selectedBoard.getName() + ".ip", selectedNetworkPort.toString());
             }
 
-            Base.preferences.saveDelay();
         }
 
         if(editor != null) editor.updateAll();
@@ -475,9 +472,8 @@ public class Sketch implements MessageConsumer {
         selectedSerialPort = p;
 
         if(selectedBoard != null) {
-            Base.preferences.set("board." + selectedBoard.getName() + ".port", selectedSerialPort);
+            Preferences.set("board." + selectedBoard.getName() + ".port", selectedSerialPort);
             setNetworkPort((InetAddress)null);
-            Base.preferences.saveDelay();
         }
 
         if(editor != null) editor.updateAll();
@@ -617,11 +613,11 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        setBoard(Base.preferences.get("board"));
+        setBoard(Preferences.get("board"));
 
         if(selectedBoard != null) {
-            setSerialPort(Base.preferences.get("board." + selectedBoard.getName() + ".port"));
-            setNetworkPort(Base.preferences.get("board." + selectedBoard.getName() + ".ip"));
+            setSerialPort(Preferences.get("board." + selectedBoard.getName() + ".port"));
+            setNetworkPort(Preferences.get("board." + selectedBoard.getName() + ".ip"));
         } else {
             setSerialPort(null);
         }
@@ -668,7 +664,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public File createBuildFolder() {
-        if(Base.preferences.getBoolean("compiler.buildinsketch") || Base.cli.isSet("force-local-build") || Base.cli.isSet("cli")) {
+        if(Preferences.getBoolean("compiler.buildinsketch") || Base.cli.isSet("force-local-build") || Base.cli.isSet("cli")) {
             if(!parentIsProtected()) {
                 File f = new File(sketchFolder, "build");
 
@@ -1266,13 +1262,13 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        if(Base.preferences.getBoolean("export.delete_target_folder")) {
+        if(Preferences.getBoolean("compiler.purge")) {
             cleanBuild();
         }
 
         updateLibraryList();
 
-        if (Base.preferences.getBoolean("compiler.generate_makefile")) {
+        if (Preferences.getBoolean("compiler.generate_makefile")) {
             if (props.get("makefile.template") != null) {
                 generateMakefile();
             }
@@ -1281,11 +1277,11 @@ public class Sketch implements MessageConsumer {
         // We now have the data.  Now, if we're combining files, we shall do it
         // in this map.
 
-        if(Base.preferences.getBoolean("compiler.combine_ino") || Base.cli.isSet("force-join-files")) {
+        if(Preferences.getBoolean("compiler.combine_ino") || Base.cli.isSet("force-join-files")) {
             File mainFile = getMainFile();
             StringBuilder out = new StringBuilder();
 
-            if(!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + mainFile.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
+            if(!Preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + mainFile.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
 
             out.append(cleanedFiles.get(mainFile));
 
@@ -1296,7 +1292,7 @@ public class Sketch implements MessageConsumer {
                     if(f != mainFile) {
                         String data = cleanedFiles.get(f);
 
-                        if(!Base.preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
+                        if(!Preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
 
                         out.append(data);
                         cleanedFiles.remove(f);
@@ -1336,14 +1332,14 @@ public class Sketch implements MessageConsumer {
                 StringBuilder munged = new StringBuilder();
 
                 for(String l : cleanedFiles.get(f).split("\n")) {
-                    if(!Base.preferences.getBoolean("compiler.disable_prototypes")) {
+                    if(!Preferences.getBoolean("compiler.disable_prototypes")) {
                         if(l.trim().startsWith(firstFunction)) {
                             for(String func : funcs.values()) {
                                 func = func.replaceAll("=[^,)]+", "");
                                 munged.append(func + ";\n");
                             }
 
-                            if(!Base.preferences.getBoolean("compiler.disableline")) munged.append("#line " + line + " \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
+                            if(!Preferences.getBoolean("compiler.disableline")) munged.append("#line " + line + " \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
                         }
                     }
 
@@ -1419,8 +1415,8 @@ public class Sketch implements MessageConsumer {
                         }
                     }
 
-                    if(!Base.preferences.getBoolean("compiler.combine_ino") || Base.cli.isSet("force-join-files")) {
-                        if(!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
+                    if(!Preferences.getBoolean("compiler.combine_ino") || Base.cli.isSet("force-join-files")) {
+                        if(!Preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
                     }
 
                     pw.write(cleanedFiles.get(f));
@@ -1436,7 +1432,7 @@ public class Sketch implements MessageConsumer {
                     pw.write(" * FILE THIS FILE IS GENERATED FROM!!!             *\n");
                     pw.write(" ***************************************************/\n");
 
-                    if(!Base.preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
+                    if(!Preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
 
                     pw.write(cleanedFiles.get(f));
                     pw.close();
@@ -1766,7 +1762,7 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean build() {
-        if(Base.preferences.getBoolean("editor.external")) {
+        if(Preferences.getBoolean("editor.external.command")) {
             //reloadAllFiles();
         }
 
@@ -1915,8 +1911,8 @@ public class Sketch implements MessageConsumer {
             return false;
         }
 
-        if(Base.preferences.getBoolean("editor.save.version")) {
-            int numToSave = Base.preferences.getInteger("editor.save.version_num");
+        if(Preferences.getBoolean("editor.save.version")) {
+            int numToSave = Preferences.getInteger("editor.save.version_num");
             File versionsFolder = new File(sketchFolder, "backup");
 
             if(!versionsFolder.exists()) {
@@ -2351,7 +2347,7 @@ public class Sketch implements MessageConsumer {
         ctx.set("includes", generateIncludes());
         ctx.set("filename", sketchName);
 
-        if ((Base.preferences.getBoolean("editor.dialog.missinglibs")) && (Base.isOnline())) {
+        if ((Preferences.getBoolean("editor.dialog.missinglibs")) && (Base.isOnline())) {
             if (editor != null) {
                 if (unknownLibraries.size() > 0) {
                     PluginManager pm = new PluginManager();
@@ -2404,7 +2400,7 @@ public class Sketch implements MessageConsumer {
                         int n = JOptionPane.showOptionDialog(editor, panel, "Missing Libraries", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 
                         if (cb.isSelected()) {
-                            Base.preferences.setBoolean("editor.dialog.missinglibs", false);
+                            Preferences.setBoolean("editor.dialog.missinglibs", false);
                         }
 
                         if (n == 1) {
@@ -2537,7 +2533,7 @@ public class Sketch implements MessageConsumer {
 
 
         if(props.get("compile.lss") != null) {
-            if(Base.preferences.getBoolean("compiler.generate_lss")) {
+            if(Preferences.getBoolean("compiler.generate_lss")) {
                 File redirectTo = new File(buildFolder, sketchName + ".lss");
 
                 if(redirectTo.exists()) {
@@ -2565,7 +2561,7 @@ public class Sketch implements MessageConsumer {
                     return false;
                 }
 
-                if(Base.preferences.getBoolean("export.save_lss") && !parentIsProtected()) {
+                if(Preferences.getBoolean("compiler.save_lss") && !parentIsProtected()) {
                     try {
                         Base.copyFile(new File(buildFolder, sketchName + ".lss"), new File(sketchFolder, sketchName + ".lss"));
 
@@ -2588,7 +2584,7 @@ public class Sketch implements MessageConsumer {
         }
 
         if((
-            Base.preferences.getBoolean("export.save_hex") || Base.cli.isSet("force-save-hex") || Base.cli.isSet("cli")) 
+            Preferences.getBoolean("compiler.save_hex") || Base.cli.isSet("force-save-hex") || Base.cli.isSet("cli")) 
             && !parentIsProtected()) {
             try {
                 String exeSuffix = props.get("exe.extension");
@@ -2980,7 +2976,7 @@ public class Sketch implements MessageConsumer {
             objectPaths.add(objectFile);
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if(Base.preferences.getBoolean("compiler.verbose")) {
+                if(Preferences.getBoolean("compiler.verbose_compile")) {
                     bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
                 }
 
@@ -3030,7 +3026,7 @@ public class Sketch implements MessageConsumer {
             ctx.set("object.name", objectFile.getAbsolutePath());
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if(Base.preferences.getBoolean("compiler.verbose")) {
+                if(Preferences.getBoolean("compiler.verbose_compile")) {
                     bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
                 }
 
@@ -3456,7 +3452,7 @@ public class Sketch implements MessageConsumer {
             return;
         }
 
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
         PropertyFile props = ctx.getMerged();
 
@@ -3788,8 +3784,7 @@ public class Sketch implements MessageConsumer {
 
     public void setOption(String opt, String val) {
         PropertyFile props = ctx.getMerged();
-        Base.preferences.set("board." + selectedBoard.getName() + ".options." + opt, val);
-        Base.preferences.save();
+        Preferences.set("board." + selectedBoard.getName() + ".options." + opt, val);
 
         if (opt.contains("@")) {
             String bits[] = opt.split("@");
@@ -3833,6 +3828,7 @@ public class Sketch implements MessageConsumer {
         return out;
     }
 
+    @SuppressWarnings("unchecked")
     public TreeMap<String, String> getOptionNames(String group) {
         TreeMap<String, String> out = new TreeMap<String, String>(new NaturalOrderComparator());
         PropertyFile props = ctx.getMerged();

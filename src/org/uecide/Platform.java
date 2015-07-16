@@ -178,7 +178,7 @@ public class Platform {
 
     public void openURL(String url) {
         try {
-            String launcher = Base.preferences.get("launcher");
+            String launcher = Base.session.get("launcher");
 
             if(launcher != null) {
                 Runtime.getRuntime().exec(new String[] { launcher, url });
@@ -192,13 +192,13 @@ public class Platform {
 
 
     public boolean openFolderAvailable() {
-        return Base.preferences.get("launcher") != null;
+        return Base.session.get("launcher") != null;
     }
 
 
     public void openFolder(File file) {
         try {
-            String launcher = Base.preferences.get("launcher");
+            String launcher = Base.session.get("launcher");
 
             if(launcher != null) {
                 String folder = file.getAbsolutePath();

@@ -359,7 +359,7 @@ public class Context {
                 return false;
             }
 
-            if (Base.preferences.getBoolean("compiler.verbose_compile")) {
+            if (Preferences.getBoolean("compiler.verbose_compile")) {
                 String argstr = "";
                 for (Object o : args) {
                     String s = o.toString();
@@ -616,7 +616,7 @@ public class Context {
             }
 
             cmdName = cmdName.substring(10);
-            if (Base.preferences.getBoolean("compiler.verbose_compile")) {
+            if (Preferences.getBoolean("compiler.verbose_compile")) {
                 String argstr = "";
                 for (String s : arg) {
                     if (!argstr.equals("")) {
@@ -687,7 +687,7 @@ public class Context {
         }
 
         Debug.message("Execute: " + sb.toString());
-        if (Base.preferences.getBoolean("compiler.verbose_compile")) {
+        if (Preferences.getBoolean("compiler.verbose_compile")) {
             command(sb.toString());
         }
 

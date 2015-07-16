@@ -1255,6 +1255,7 @@ public class Preferences implements TreeSelectionListener {
 //        dialog.pack();
     }
 
+    @SuppressWarnings("unchecked")
     public Box addPreferenceEntry(String key) {
 
         final String fkey = key;
@@ -1519,6 +1520,92 @@ public class Preferences implements TreeSelectionListener {
             return false;
         }
     }
+
+    // Interface to the global preferences.  These will first check the user's preferences
+    // file for the value and if not found then will get the value from the .default entry
+    // for the key in the preferences tree.
+
+    public static String get(String key) {
+        String data = Base.preferences.get(key);
+        if (data == null) {
+            data = Base.preferencesTree.get(key + ".default");
+        }
+        return data;
+    }
+
+    public static String[] getArray(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return null;
+        }
+        return data.split("::");
+    }
+
+    public static Boolean getBoolean(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return false;
+        }
+        data = data.toLowerCase();
+        if (data.startsWith("y") || data.startsWith("t")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static Color getColor(String key) {
+        Color parsed = Color.GRAY;
+        String s = get(key);
+
+        if((s != null) && (s.indexOf("#") == 0)) {
+            try {
+                parsed = new Color(Integer.parseInt(s.substring(1), 16));
+            } catch(Exception e) { }
+        }
+
+        return parsed;
+    }
+
+    public static File getFile(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return null;
+        }
+        return new File(data);
+    }
+
+    public static Font getFont(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return Base.preferences.stringToFont("Monospaced,plain,12");
+        }
+        return Base.preferences.stringToFont(data);
+    }
+
+    public static Integer getInteger(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return 0;
+        }
+        int val = 0;
+        try {
+            val = Integer.parseInt(data);
+        } catch (Exception e) {
+        }
+        return val;
+    }
+
+    public static void set(String key, String value) { Base.preferences.set(key, value); Base.preferences.saveDelay(); }
+    public static void setBoolean(String key, Boolean value) { Base.preferences.setBoolean(key, value); Base.preferences.saveDelay(); }
+    public static void setColor(String key, Color value) { Base.preferences.setColor(key, value); Base.preferences.saveDelay(); }
+    public static void setFile(String key, File value) { Base.preferences.setFile(key, value); Base.preferences.saveDelay(); }
+    public static void setFile(String key, Font value) { Base.preferences.setFont(key, value); Base.preferences.saveDelay(); }
+    public static void setInteger(String key, int value) { Base.preferences.setInteger(key, value); Base.preferences.saveDelay(); }
+
+    public static void save() { Base.preferences.save(); }
+
+    public static void unset(String key) { Base.preferences.unset(key); Base.preferences.saveDelay(); }
+        
 }
 
 

@@ -342,9 +342,9 @@ public class InteractiveCLI implements AptPercentageListener {
                 if (args[0].equals("verbose")) {
                     if (args.length == 2) {
                         if (args[1].equals("on")) {
-                            Base.preferences.setBoolean("compiler.verbose", true);
+                            Preferences.setBoolean("compiler.verbose_compile", true);
                         } else if (args[1].equals("off")) {
-                            Base.preferences.setBoolean("compiler.verbose", false);
+                            Preferences.setBoolean("compiler.verbose_compile", false);
                         }
                     }
                 }
@@ -386,7 +386,7 @@ public class InteractiveCLI implements AptPercentageListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Base.preferences.save();
+        Preferences.save();
     }
 
     String genPrompt() {

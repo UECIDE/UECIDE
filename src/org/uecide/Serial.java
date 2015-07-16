@@ -349,12 +349,12 @@ public class Serial {
     static public void fillExtraPorts() {
         int pnum = 0;
         clearExtraPorts();
-        String pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
+        String pname = Preferences.get("serial.ports." + Integer.toString(pnum));
 
         while(pname != null) {
             addExtraPort(pname);
             pnum++;
-            pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
+            pname = Preferences.get("serial.ports." + Integer.toString(pnum));
         }
     }
 

@@ -66,7 +66,7 @@ public class Platform extends org.uecide.Platform {
     public void openURL(String url) {
         try {
             if(openFolderAvailable()) {
-                String launcher = Base.preferences.get("launcher");
+                String launcher = Base.session.get("launcher");
 
                 if(launcher != null) {
                     Runtime.getRuntime().exec(new String[] { launcher, url });
@@ -79,7 +79,7 @@ public class Platform extends org.uecide.Platform {
 
 
     public boolean openFolderAvailable() {
-        if(Base.preferences.get("launcher") != null) {
+        if(Base.session.get("launcher") != null) {
             return true;
         }
 
@@ -87,7 +87,7 @@ public class Platform extends org.uecide.Platform {
         try {
             Process p = Runtime.getRuntime().exec(new String[] { "xdg-open" });
             p.waitFor();
-            Base.preferences.set("launcher", "xdg-open");
+            Base.session.set("launcher", "xdg-open");
             return true;
         } catch(Exception e) { }
 
@@ -95,7 +95,7 @@ public class Platform extends org.uecide.Platform {
         try {
             Process p = Runtime.getRuntime().exec(new String[] { "gnome-open" });
             p.waitFor();
-            Base.preferences.set("launcher", "gnome-open");
+            Base.session.set("launcher", "gnome-open");
             return true;
         } catch(Exception e) { }
 
@@ -103,7 +103,7 @@ public class Platform extends org.uecide.Platform {
         try {
             Process p = Runtime.getRuntime().exec(new String[] { "kde-open" });
             p.waitFor();
-            Base.preferences.set("launcher", "kde-open");
+            Base.session.set("launcher", "kde-open");
             return true;
         } catch(Exception e) { }
 
@@ -114,7 +114,7 @@ public class Platform extends org.uecide.Platform {
     public void openFolder(File file) {
         try {
             if(openFolderAvailable()) {
-                String lunch = Base.preferences.get("launcher");
+                String lunch = Base.session.get("launcher");
 
                 try {
                     String[] params = new String[] { lunch, file.getAbsolutePath() };

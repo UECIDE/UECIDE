@@ -100,7 +100,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
     }
 
     public void refreshTheme() {
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
 
         for (String t : tags) {
@@ -129,7 +129,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
     }
 
     public String craftPage(String content) {
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
         StringBuilder sb = new StringBuilder();
 

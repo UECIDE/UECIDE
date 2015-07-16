@@ -125,12 +125,12 @@ public class Debug {
 
         if(Base.preferences != null) {
             win.setSize(new Dimension(
-                            Base.preferences.getInteger("debug.window.width"),
-                            Base.preferences.getInteger("debug.window.height")
+                            Preferences.getInteger("debug.window.width"),
+                            Preferences.getInteger("debug.window.height")
                         ));
             win.setLocation(new Point(
-                                Base.preferences.getInteger("debug.window.x"),
-                                Base.preferences.getInteger("debug.window.y")
+                                Preferences.getInteger("debug.window.x"),
+                                Preferences.getInteger("debug.window.y")
                             ));
         } else {
             win.setSize(new Dimension(400, 400));
@@ -142,15 +142,13 @@ public class Debug {
         win.addComponentListener(new ComponentListener() {
             public void componentMoved(ComponentEvent e) {
                 Point windowPos = e.getComponent().getLocation(null);
-                Base.preferences.setInteger("debug.window.x", windowPos.x);
-                Base.preferences.setInteger("debug.window.y", windowPos.y);
-                Base.preferences.saveDelay();
+                Preferences.setInteger("debug.window.x", windowPos.x);
+                Preferences.setInteger("debug.window.y", windowPos.y);
             }
             public void componentResized(ComponentEvent e) {
                 Dimension windowSize = e.getComponent().getSize(null);
-                Base.preferences.setInteger("debug.window.width", windowSize.width);
-                Base.preferences.setInteger("debug.window.height", windowSize.height);
-                Base.preferences.saveDelay();
+                Preferences.setInteger("debug.window.width", windowSize.width);
+                Preferences.setInteger("debug.window.height", windowSize.height);
             }
             public void componentHidden(ComponentEvent e) {
             }
@@ -173,12 +171,11 @@ public class Debug {
 
         if(Base.preferences != null) {
             Dimension d = win.getSize();
-            Base.preferences.setInteger("debug.window.width", d.width);
-            Base.preferences.setInteger("debug.window.height", d.height);
+            Preferences.setInteger("debug.window.width", d.width);
+            Preferences.setInteger("debug.window.height", d.height);
             Point p = win.getLocation();
-            Base.preferences.setInteger("debug.window.x", p.x);
-            Base.preferences.setInteger("debug.window.y", p.y);
-            Base.preferences.save();
+            Preferences.setInteger("debug.window.x", p.x);
+            Preferences.setInteger("debug.window.y", p.y);
         }
 
         win.dispose();

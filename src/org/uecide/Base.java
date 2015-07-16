@@ -608,15 +608,7 @@ public class Base implements AptPercentageListener {
                     awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
                 }
 
-                String laf = Base.preferences.get("theme.window");
-
-                if(laf == null) {
-                    laf = Base.preferences.getPlatformSpecific("theme.window.default");
-
-                    if(laf != null) {
-                        Base.preferences.set("theme.window", laf);
-                    }
-                }
+                String laf = Preferences.get("theme.window");
 
                 try {
                     UIManager.setLookAndFeel(laf);
@@ -648,7 +640,7 @@ public class Base implements AptPercentageListener {
 
                     if(laf.startsWith("com.jtattoo.plaf.")) {
                         Properties props = new Properties();
-                        props.put("windowDecoration", Base.preferences.getBoolean("theme.window_system") ? "off" : "on");
+                        props.put("windowDecoration", Preferences.getBoolean("theme.window_system") ? "off" : "on");
                         props.put("logoString", "UECIDE");
                         props.put("textAntiAliasing", "on");
 
@@ -889,6 +881,7 @@ public class Base implements AptPercentageListener {
     }
     
     /*! Attempt to add a jar file as a URL to the system class loader */
+    @SuppressWarnings("unchecked")
     public static void addURL(URL u) {
         final Class[] parameters = new Class[]{URL.class}; 
         URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
@@ -1961,15 +1954,9 @@ public class Base implements AptPercentageListener {
             File dead = new File(dir, files[i]);
 
             if(!dead.isDirectory()) {
-                if(!preferences.getBoolean("compiler.save_build_files")) {
-                    if(!dead.delete()) {
-                        // temporarily disabled
-                        error(Translate.t("Could not delete %1", dead.getName()));
-                    }
-                }
+                dead.delete();
             } else {
                 removeDir(dead);
-                //dead.delete();
             }
         }
     }
@@ -2313,7 +2300,7 @@ public class Base implements AptPercentageListener {
             return;
         }
         try {
-            if (Base.preferences.getBoolean("editor.dialog.crash") == true) {
+            if (Preferences.getBoolean("editor.dialog.crash") == true) {
                 CrashReporter rep = new CrashReporter(e);
             }
             e.printStackTrace();
@@ -2625,9 +2612,9 @@ public class Base implements AptPercentageListener {
             return false;
         }
         int time = (int)(System.currentTimeMillis() / 1000L);
-        Base.preferences.setInteger("version.lastcheck", time);
+        Preferences.setInteger("version.lastcheck", time);
 
-        if(Base.preferences.getBoolean("editor.version_check")) {
+        if(Preferences.getBoolean("editor.version_check")) {
             Version newVersion = getLatestVersion();
 
             if(newVersion == null) {
@@ -2647,7 +2634,7 @@ public class Base implements AptPercentageListener {
     // Is it time to check the version?  Was the last version check
     // more than 3 hours ago?
     public boolean isTimeToCheckVersion() {
-        int lastCheck = Base.preferences.getInteger("version.lastcheck");
+        int lastCheck = Preferences.getInteger("version.lastcheck");
         int time = (int)(System.currentTimeMillis() / 1000L);
 
         if(time > (lastCheck + (3 * 60 * 60))) {

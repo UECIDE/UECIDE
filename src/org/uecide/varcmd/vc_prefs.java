@@ -5,6 +5,6 @@ import java.io.File;
 
 public class vc_prefs implements VariableCommand {
     public String main(Context sketch, String args) {
-        return Base.preferences.get(args);
+        return Preferences.get(args);
     }
 }

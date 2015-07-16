@@ -271,25 +271,8 @@ public class Editor extends JFrame {
 
         editorPanel.add(editorTabs, BorderLayout.CENTER);
 
-        int width = Base.preferences.getInteger("editor.window.width");
-
-        if (width <= 0) {
-            width = Base.preferences.getInteger("editor.window.width.default");
-        }
-
-        if(width < Base.preferences.getInteger("editor.window.width.min")) {
-            width = Base.preferences.getInteger("editor.window.width.min");
-        }
-
-        int height = Base.preferences.getInteger("editor.window.height");
-
-        if (height <= 0) {
-            height = Base.preferences.getInteger("editor.window.height.default");
-        }
-
-        if(height < Base.preferences.getInteger("editor.window.height.min")) {
-            height = Base.preferences.getInteger("editor.window.height.min");
-        }
+        int width = Preferences.getInteger("editor.window.width");
+        int height = Preferences.getInteger("editor.window.height");
 
         File manroot = null;
         if (loadedSketch.getCore() != null) {
@@ -323,13 +306,13 @@ public class Editor extends JFrame {
         topBottomSplit.setResizeWeight(1D);
         manualSplit.setResizeWeight(1D);
 
-        int dividerSize = Base.preferences.getInteger("editor.manual.split", width - 250);
+        int dividerSize = Preferences.getInteger("editor.layout.split_manual");
         manualSplit.setDividerLocation(dividerSize);
 
-        dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
+        dividerSize = Preferences.getInteger("editor.layout.split_console");
         topBottomSplit.setDividerLocation(dividerSize);
 
-        dividerSize = Base.preferences.getInteger("editor.tree.split", 150);
+        dividerSize = Preferences.getInteger("editor.layout.split_tree");
         leftRightSplit.setDividerLocation(dividerSize);
 
         this.add(topBottomSplit, BorderLayout.CENTER);
@@ -364,7 +347,7 @@ public class Editor extends JFrame {
         Font labelFont = statusText.getFont();
         statusText.setFont(new Font(labelFont.getName(), Font.PLAIN, 12));
 
-        String tbPos = Base.preferences.get("editor.toolbar.position");
+        String tbPos = Preferences.get("editor.toolbars.position");
 
         if((tbPos == null) || tbPos.equals("f") || tbPos.equals("n")) {
             this.add(toolbar, BorderLayout.NORTH);
@@ -413,7 +396,7 @@ public class Editor extends JFrame {
         projectTabs.add(treePanel, "Project");
         projectTabs.add(filesPanel, "Files");
 
-        String theme = Base.preferences.get("theme.editor", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
 
         sketchContentTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
@@ -519,32 +502,23 @@ public class Editor extends JFrame {
         });
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-//        if(Base.preferences.getBoolean("editor.fullscreen")) {
-//            isFullScreen = true;
-//            this.dispose();
-//            setUndecorated(true);
-//            setExtendedState(JFrame.MAXIMIZED_BOTH);
-//        }
-
         this.pack();
 
         setSize(width, height);
-        setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));
+        setLocation(Preferences.getInteger("editor.window.x"), Preferences.getInteger("editor.window.y"));
         setProgress(0);
         updateAll();
 
         addComponentListener(new ComponentListener() {
             public void componentMoved(ComponentEvent e) {
                 Point windowPos = e.getComponent().getLocation(null);
-                Base.preferences.setInteger("editor.window.x", windowPos.x);
-                Base.preferences.setInteger("editor.window.y", windowPos.y);
-                Base.preferences.saveDelay();
+                Preferences.setInteger("editor.window.x", windowPos.x);
+                Preferences.setInteger("editor.window.y", windowPos.y);
             }
             public void componentResized(ComponentEvent e) {
                 Dimension windowSize = e.getComponent().getSize(null);
-                Base.preferences.setInteger("editor.window.width", windowSize.width);
-                Base.preferences.setInteger("editor.window.height", windowSize.height);
-                Base.preferences.saveDelay();
+                Preferences.setInteger("editor.window.width", windowSize.width);
+                Preferences.setInteger("editor.window.height", windowSize.height);
             }
             public void componentHidden(ComponentEvent e) {
             }
@@ -553,10 +527,10 @@ public class Editor extends JFrame {
         });
 
         openOrSelectFile(loadedSketch.getMainFile());
-        dividerSize = Base.preferences.getInteger("editor.divider.split", height - 250);
+        dividerSize = Preferences.getInteger("editor.layout.split_console");
         topBottomSplit.setDividerLocation(dividerSize);
 
-        dividerSize = Base.preferences.getInteger("editor.tree.split", 150);
+        dividerSize = Preferences.getInteger("editor.layout.split_tree");
         leftRightSplit.setDividerLocation(dividerSize);
 
         // We want to do this last as the previous SETs trigger this change listener.
@@ -565,8 +539,7 @@ public class Editor extends JFrame {
             new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent e) {
                     int pos = (Integer)(e.getNewValue());
-                    Base.preferences.setInteger("editor.manual.split", pos);
-                    Base.preferences.saveDelay();
+                    Preferences.setInteger("editor.layout.split_manual", pos);
                 }
             }
         );
@@ -575,8 +548,7 @@ public class Editor extends JFrame {
             new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent e) {
                     int pos = (Integer)(e.getNewValue());
-                    Base.preferences.setInteger("editor.tree.split", pos);
-                    Base.preferences.saveDelay();
+                    Preferences.setInteger("editor.layout.split_tree", pos);
                 }
             }
         );
@@ -585,13 +557,12 @@ public class Editor extends JFrame {
             new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent e) {
                     int pos = (Integer)(e.getNewValue());
-                    Base.preferences.setInteger("editor.divider.split", pos);
-                    Base.preferences.saveDelay();
+                    Preferences.setInteger("editor.layout.split_console", pos);
                 }
             }
         );
 
-        if (Base.preferences.getBoolean("manual.split.visible")) {
+        if (Preferences.getBoolean("editor.lauout.visible_manual")) {
             showManual();
         }
 
@@ -610,10 +581,9 @@ public class Editor extends JFrame {
         manualScroll.setVisible(false);
         int w = getSize().width;
         int spos = w - manualSplit.getDividerLocation();
-        Base.preferences.setInteger("manual.split.position", spos);
-        Base.preferences.setBoolean("manual.split.visible", false);
+        Preferences.setInteger("editor.layout.split_manual", spos);
+        Preferences.setBoolean("editor.layout.visible_manual", false);
         manualSplit.setDividerLocation(1D);
-        Base.preferences.saveDelay();
     }
 
     public void loadManual(File f) {
@@ -653,17 +623,16 @@ public class Editor extends JFrame {
         }
         manualScroll.setVisible(true);
         int w = getSize().width;
-        int spos = Base.preferences.getInteger("manual.split.position", 200);
-        Base.preferences.setBoolean("manual.split.visible", true);
+        int spos = Preferences.getInteger("editor.layout.split_manual");
+        Preferences.setBoolean("editor.layout.visible_manual", true);
         manualSplit.setDividerLocation(w - spos);
-        Base.preferences.saveDelay();
     }
 
     class FileCellRenderer implements TreeCellRenderer {
         DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
-            String theme = Base.preferences.get("theme.editor", "default");
+            String theme = Preferences.get("theme.editor");
             theme = "theme." + theme + ".";
 
             Color textColor = Base.theme.getColor(theme + "editor.fgcolor");
@@ -1002,8 +971,6 @@ public class Editor extends JFrame {
         sketchContentTree.expandPath(new TreePath(treeSource.getPath()));
 
         treeScroll.setViewportView(sketchContentTree);
-        Font font        = Base.preferences.getFont("tree.font");
-        sketchContentTree.setFont(font);
         sketchContentTree.addMouseListener(new TreeMouseListener());
 
         filesTreeRoot = new DefaultMutableTreeNode(loadedSketch.getName());
@@ -1509,6 +1476,7 @@ public class Editor extends JFrame {
         }
     };
 
+    @SuppressWarnings("unchecked")
     public void sort2(DefaultMutableTreeNode parent) {
         int n = parent.getChildCount();
         for(int i=0;i< n-1;i++) {
@@ -1883,14 +1851,14 @@ public class Editor extends JFrame {
                 } else if(o.getUserObject().getClass().equals(File.class)) {
                     File thisFile = (File)o.getUserObject();
 
-                    String ee = Base.preferences.get("editor.external.command");
+                    String ee = Preferences.get("editor.external.command");
 
                     if(ee != null && !ee.equals("")) {
                         JMenuItem openExternal = new JMenuItem("Open in external editor");
                         openExternal.setActionCommand(thisFile.getAbsolutePath());
                         openExternal.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
-                                String cmd = Base.preferences.get("editor.external.command");
+                                String cmd = Preferences.get("editor.external.command");
                                 String fn = e.getActionCommand();
                                 loadedSketch.getContext().set("filename", fn);
                                 String c = loadedSketch.getContext().parseString(cmd);
@@ -2166,14 +2134,14 @@ public class Editor extends JFrame {
                         Base.setFont(unzipItem, "menu.entry");
                         menu.add(unzipItem);
                     } else {
-                        String ee = Base.preferences.get("editor.external.command");
+                        String ee = Preferences.get("editor.external.command");
 
                         if(ee != null && !ee.equals("")) {
                             JMenuItem openExternal = new JMenuItem("Open in external editor");
                             openExternal.setActionCommand(thisFile.getAbsolutePath());
                             openExternal.addActionListener(new ActionListener() {
                                 public void actionPerformed(ActionEvent e) {
-                                    String cmd = Base.preferences.get("editor.external.command");
+                                    String cmd = Preferences.get("editor.external.command");
                                     String fn = e.getActionCommand();
                                     loadedSketch.getContext().set("filename", fn);
                                     String c = loadedSketch.getContext().parseString(cmd);
@@ -2851,7 +2819,7 @@ public class Editor extends JFrame {
 
     public boolean askCloseWindow() {
 
-        Base.preferences.save();
+        Preferences.save();
 
         if(editorList.size() == 1) {
             if(Base.isMacOS()) {
@@ -2885,7 +2853,7 @@ public class Editor extends JFrame {
         this.dispose();
 
         if(Editor.shouldQuit()) {
-            Base.preferences.save();
+            Preferences.save();
             System.exit(0);
         }
 
@@ -3124,7 +3092,7 @@ public class Editor extends JFrame {
         item.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if(Editor.closeAllEditors()) {
-                    Base.preferences.save();
+                    Preferences.save();
                     System.exit(0);
                 }
             }
@@ -3136,13 +3104,6 @@ public class Editor extends JFrame {
         editMenu.addSeparator();
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_MID);
         editMenu.addSeparator();
-//        item = new JMenuItem("Toggle Full Screen");
-//        item.setAccelerator(KeyStroke.getKeyStroke("F11"));
-//        item.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                toggleFullScreen();
-//            }
-//        });
 
         Base.setFont(item, "menu.entry");
         editMenu.add(item);
@@ -4968,7 +4929,7 @@ public class Editor extends JFrame {
             return;
         }
 
-        if(Base.preferences.getBoolean("editor.save.automatic")) {
+        if(Preferences.getBoolean("editor.save.automatic")) {
             if(!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
                 saveAllTabs();
             }
@@ -4987,7 +4948,7 @@ public class Editor extends JFrame {
             return;
         }
 
-        if(Base.preferences.getBoolean("editor.save.automatic")) {
+        if(Preferences.getBoolean("editor.save.automatic")) {
             if(!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
                 saveAllTabs();
             }
@@ -5064,47 +5025,9 @@ public class Editor extends JFrame {
                 plugin.catchEvent(event);
             } catch(AbstractMethodError e) {
             } catch(Exception e) {
-//                error(e);
             }
         }
     }
-
-//    public boolean isFullScreen = false;
-//    public void toggleFullScreen() {
-//        if(!isFullScreen) {
-//            this.dispose();
-//            setUndecorated(true);
-//            setExtendedState(JFrame.MAXIMIZED_BOTH);
-//            this.pack();
-//            this.setVisible(true);
-//            isFullScreen = true;
-//            Base.preferences.setBoolean("editor.fullscreen", true);
-//            Base.preferences.saveDelay();
-//        } else {
-//            int width = Base.preferences.getInteger("editor.window.width");
-//
-//            if(width < Base.preferences.getInteger("editor.window.width.min")) {
-//                width = Base.preferences.getInteger("editor.window.width.min");
-//            }
-//
-//            int height = Base.preferences.getInteger("editor.window.height");
-//
-//            if(height < Base.preferences.getInteger("editor.window.height.min")) {
-//                height = Base.preferences.getInteger("editor.window.height.min");
-//            }
-//
-//            this.dispose();
-//            setUndecorated(false);
-//            setLocation(Base.preferences.getInteger("editor.window.x"), Base.preferences.getInteger("editor.window.y"));
-//            setSize(new Dimension(width, height));
-//            setExtendedState(JFrame.NORMAL);
-//            this.pack();
-//            this.setVisible(true);
-//            isFullScreen = false;
-//            Base.preferences.setBoolean("editor.fullscreen", false);
-//            Base.preferences.saveDelay();
-//        }
-//    }
 
     void urlClicked(String url) {
         Pattern p = Pattern.compile("^uecide://error/(\\d+)/(.*)$");

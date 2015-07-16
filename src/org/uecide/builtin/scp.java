@@ -34,7 +34,7 @@ public class scp implements BuiltinCommand {
             JSch jsch = new JSch();
             session = jsch.getSession(user, host, 22);
 
-            String password = Base.preferences.get("ssh." + host + "." + user);
+            String password = Preferences.get("ssh." + host + "." + user);
 
             if(password == null) {
                 password = Base.session.get("ssh." + host + "." + user);
@@ -57,7 +57,7 @@ public class scp implements BuiltinCommand {
             } catch(JSchException e) {
                 if(e.getMessage().equals("Auth fail")) {
                     password = null;
-                    Base.preferences.unset("ssh." + host + "." + user);
+                    Preferences.unset("ssh." + host + "." + user);
                     Base.session.unset("ssh." + host + "." + user);
                     ctx.error("Authentication failed");
                     session.disconnect();
@@ -233,8 +233,7 @@ public class scp implements BuiltinCommand {
         }
 
         if(save.isSelected()) {
-            Base.preferences.set("ssh." + host + "." + user, passwordField.getText());
-            Base.preferences.saveDelay();
+            Preferences.set("ssh." + host + "." + user, passwordField.getText());
         }
 
         return passwordField.getText();

@@ -130,6 +130,7 @@ theme.type=section
 theme.editor.name=Editor Theme
 theme.editor.type=dropdown
 theme.editor.options.script=/org/uecide/scripts/getEditorThemes.js
+theme.editor.default=default
 
 theme.icons.name=Icon Theme
 theme.icons.type=dropdown
@@ -154,7 +155,6 @@ theme.fonts.console.name=Console font
 theme.fonts.console.type=fontselect
 theme.fonts.console.default=Monospaced,plain,12
 
-
 locations.name=Locations
 locations.type=section
 
@@ -163,3 +163,71 @@ locations.data.type=dirselect
 
 locations.sketchbook.name=Sketchbook location
 locations.sketchbook.type=dirselect
+
+debug.name=Debug
+debug.type=section
+debug.window.name=Layout
+debug.window.type=section
+
+debug.window.width.name=Window Width
+debug.window.width.type=string
+debug.window.width.default=600
+
+debug.window.height.name=Window Height
+debug.window.height.type=string
+debug.window.height.default=400
+
+debug.window.x.name=Window X Position
+debug.window.x.type=string
+debug.window.x.default=100
+
+debug.window.y.name=Window Y Position
+debug.window.y.type=string
+debug.window.y.default=100
+
+
+editor.layout.name=Layout
+editor.layout.type=section
+
+editor.layout.split_console.name=Console Split Position
+editor.layout.split_console.type=string
+editor.layout.split_console.default=200
+
+editor.layout.split_manual.name=Manual Split Position
+editor.layout.split_manual.type=string
+editor.layout.split_manual.default=400
+
+editor.layout.split_tree.name=Tree Split Position
+editor.layout.split_tree.type=string
+editor.layout.split_tree.default=200
+
+editor.layout.visible_manual.name=Manual Visible
+editor.layout.visible_manual.type=checkbox
+editor.layout.visible_manual.default=false
+
+
+editor.window.name=Window
+editor.window.type=section
+
+editor.window.width.name=Window Width
+editor.window.width.type=string
+editor.window.width.default=700
+
+editor.window.height.name=Window Height
+editor.window.height.type=string
+editor.window.height.default=500
+
+editor.window.x.name=Window X Position
+editor.window.x.type=string
+editor.window.x.default=0
+
+editor.window.y.name=Window Y Position
+editor.window.y.type=string
+editor.window.y.default=0
+
+network.name=Network
+network.type=section
+
+network.offline.name=Work in offline mode
+network.offline.type=checkbox
+network.offline.default=false

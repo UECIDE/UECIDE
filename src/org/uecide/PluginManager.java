@@ -74,8 +74,8 @@ public class PluginManager implements PropertyChangeListener
                 PrintWriter pw = new PrintWriter(sourcesFile);
                 int i = 0;
                 String key = "repository." + i;
-                while (Base.preferences.get(key) != null) {
-                    String repo = Base.preferences.get(key);
+                while (Preferences.get(key) != null) {
+                    String repo = Preferences.get(key);
                     String parts[] = repo.split("::");
                     String url = parts[0];
                     String codename = parts[1];

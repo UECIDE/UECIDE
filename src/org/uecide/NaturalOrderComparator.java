@@ -165,6 +165,7 @@ public class NaturalOrderComparator implements Comparator
         }
     }
 
+    @SuppressWarnings("unchecked") 
     public static void main(String[] args)
     {
         String[] strings = new String[] { "1-2", "1-02", "1-20", "10-20", "fred", "jane", "pic01",
