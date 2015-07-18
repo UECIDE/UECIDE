@@ -312,6 +312,18 @@ public class PropertyFile {
         return null;
     }
 
+    // Get the platform specific flavour of a key if it exists.
+    public String getPlatformSpecificKey(String attribute) {
+        String k = attribute + "." + Base.getOSFullName();
+        String t = properties.getProperty(k);
+
+        if(t != null) {
+            return k.trim();
+        }
+
+        return attribute;
+    }
+
     /*! Get a String[] array value from the specified key.  A String array is internally
      *  stored as a single String with each element separated by :: 
      */

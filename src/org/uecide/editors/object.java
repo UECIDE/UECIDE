@@ -70,7 +70,7 @@ public class object extends text {
         String cmd = "${objdump}::-t::${object.filename}";
         ctx.set("object.filename", f.getAbsolutePath());
         String out = ctx.parseString(cmd);
-        ctx.executeCommand(out);
+        ctx.executeCommand(out, null);
         String output = ctx.endBuffer();
 
         textArea.setText(output);

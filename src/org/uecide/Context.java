@@ -299,11 +299,13 @@ public class Context {
 
     // Command and script execution
 
-
     // Execute a key as a script in whatever way is needed.
 
     public boolean executeKey(String key) {
         PropertyFile props = getMerged();
+    
+        // If there is a platform specific version of the key then we should switch to that instead.
+        key = props.getPlatformSpecificKey(key);
 
         // If the key is just a plain key and starts with a URI indicator then run it as a javascript file
         if (props.get(key) != null) {
@@ -332,7 +334,7 @@ public class Context {
 
         // Otherwise try and run it as a command (either built in or system).
         if (props.get(key) != null) {
-            return executeCommand(parseString(props.get(key)));
+            return executeCommand(parseString(props.get(key)), parseString(props.get(key + ".environment")));
         }
     
         return false;
@@ -385,11 +387,11 @@ public class Context {
     }
 
 
-    public boolean executeCommand(String command) {
+    public boolean executeCommand(String command, String env) {
         if(command.startsWith("__builtin_")) {
             return runBuiltinCommand(command);
         } else {
-            return runSystemCommand(command);
+            return runSystemCommand(command, env);
         }
     }
 
@@ -657,7 +659,8 @@ public class Context {
 
 
 
-    public boolean runSystemCommand(String command) {
+    public boolean runSystemCommand(String command, String env) {
+        PropertyFile props = getMerged();
 
         if(command == null) {
             return true;
@@ -678,6 +681,21 @@ public class Context {
 
         ProcessBuilder process = new ProcessBuilder(stringList);
         runningProcess = null;
+
+        if (env != null) {
+            Map<String, String> environment = process.environment();
+            for(String ev : env.split("::")) {
+                String[] bits = ev.split("=");
+
+                if(bits.length == 2) {
+                    environment.put(bits[0], parseString(bits[1]));
+                }
+            }
+        }
+
+        if (props.get("build.path") != null) {
+            process.directory(props.getFile("build.path"));
+        }
 
         StringBuilder sb = new StringBuilder();
 

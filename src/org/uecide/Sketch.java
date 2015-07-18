@@ -160,8 +160,6 @@ public class Sketch implements MessageConsumer {
 
     public Sketch(String path) {
         this(new File(path));
-        ctx = new Context();
-        ctx.setSketch(this);
     }
 
     public Sketch(File path) {
@@ -470,6 +468,8 @@ public class Sketch implements MessageConsumer {
         if(p == null || p.equals("")) return;
 
         selectedSerialPort = p;
+
+        ctx.set("port", p);
 
         if(selectedBoard != null) {
             Preferences.set("board." + selectedBoard.getName() + ".port", selectedSerialPort);
