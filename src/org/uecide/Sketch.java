@@ -78,6 +78,9 @@ public class Sketch implements MessageConsumer {
     public String percentageFilter = null;
     public float percentageMultiplier = 1.0f;
 
+    public String percentageCharacter = null;
+    public int percentageCharacterCount = 0;
+
     boolean isUntitled;             // Whether or not the sketch has been named
 
     // These are all the plugins selected for this sketch in order to compile
@@ -87,8 +90,7 @@ public class Sketch implements MessageConsumer {
     String selectedBoardName = null;
     Compiler selectedCompiler = null;
     String selectedProgrammer = null;
-    String selectedSerialPort = null;
-    InetAddress selectedNetworkPort = null;
+    CommunicationPort selectedDevice = null;
 
     boolean terminateExecution = false;
 
@@ -257,6 +259,8 @@ public class Sketch implements MessageConsumer {
 
         ctx.setBoard(board);
 
+        System.err.println("Selecting board " + board);
+
         selectedBoard = board;
         selectedBoardName = selectedBoard.getName();
         Preferences.set("board", board.getName());
@@ -303,6 +307,8 @@ public class Sketch implements MessageConsumer {
 
         ctx.setCore(core);
 
+        System.err.println("Selecting core " + core);
+
         selectedCore = core;
         Preferences.set("board." + selectedBoard.getName() + ".core", core.getName());
         String boardsCompiler = Preferences.get("board." + selectedBoard.getName() + ".compiler");
@@ -344,6 +350,8 @@ public class Sketch implements MessageConsumer {
         }
 
         ctx.setCompiler(compiler);
+
+        System.err.println("Selecting compiler " + compiler);
 
         selectedCompiler = compiler;
         if (selectedBoard == null) {
@@ -396,95 +404,28 @@ public class Sketch implements MessageConsumer {
         if(editor != null) editor.updateAll();
     }
 
-    public InetAddress getNetworkPort() {
-        return selectedNetworkPort;
+    public CommunicationPort getDevice() {
+        return selectedDevice;
     }
 
-    public String getNetworkPortIP() {
-        if(selectedNetworkPort == null) {
-            return null;
-        }
-
-        byte[] ip = selectedNetworkPort.getAddress();
-        return String.format("%d.%d.%d.%d",
-                             (int)ip[0] & 0xFF,
-                             (int)ip[1] & 0xFF,
-                             (int)ip[2] & 0xFF,
-                             (int)ip[3] & 0xFF);
-    }
-
-    public String getSerialPort() {
-        return selectedSerialPort;
-    }
-
-    public void setPort(Object port) {
-        if(port instanceof SerialPort) {
-            SerialPort sp = (SerialPort)port;
-            setSerialPort(sp.getPortName());
-            return;
-        }
-
-        if(port instanceof InetAddress) {
-            InetAddress ip = (InetAddress)port;
-            setNetworkPort(ip);
-            return;
-        }
-    }
-
-    public void setNetworkPort(String ip) {
-        if(ip == null) {
-            setNetworkPort((InetAddress)null);
-        } else {
-            try {
-                if(ip.startsWith("/")) {
-                    ip = ip.substring(1);
-                }
-
-                InetAddress nip = InetAddress.getByName(ip);
-                setNetworkPort(nip);
-            } catch(Exception e) {
-                Base.error(e);
-                setNetworkPort((InetAddress)null);
+    public void setDevice(String name) {
+        for (CommunicationPort dev : Base.communicationPorts) {
+            if (dev.toString().equals(name)) {
+                setDevice(dev);
+                return;
             }
         }
     }
 
-    public void setNetworkPort(InetAddress ip) {
-        selectedNetworkPort = ip;
-
-        if(selectedBoard != null) {
-            if(selectedNetworkPort == null) {
-                Preferences.unset("board." + selectedBoard.getName() + ".ip");
-            } else {
-                Preferences.set("board." + selectedBoard.getName() + ".ip", selectedNetworkPort.toString());
-            }
-
+    public void setDevice(CommunicationPort dev) {
+        selectedDevice = dev;
+        ctx.setDevice(dev);
+        if (editor != null) {
+            editor.updateAll();
         }
-
-        if(editor != null) editor.updateAll();
-    }
-
-    public void setSerialPort(String p) {
-        if(p == null || p.equals("")) return;
-
-        selectedSerialPort = p;
-
-        ctx.set("port", p);
-
-        if(selectedBoard != null) {
-            Preferences.set("board." + selectedBoard.getName() + ".port", selectedSerialPort);
-            setNetworkPort((InetAddress)null);
+        if (getBoard() != null) {
+            Preferences.set("board." + getBoard().getName() + ".port", getDevice().toString());
         }
-
-        if(editor != null) editor.updateAll();
-    }
-
-    public String getProgramPort() {
-        String ip = getNetworkPortIP();
-        if (ip != null) {
-            return ip;
-        }
-        return getSerialPort();
     }
 
     void attachToEditor(Editor e) {
@@ -616,10 +557,36 @@ public class Sketch implements MessageConsumer {
         setBoard(Preferences.get("board"));
 
         if(selectedBoard != null) {
-            setSerialPort(Preferences.get("board." + selectedBoard.getName() + ".port"));
-            setNetworkPort(Preferences.get("board." + selectedBoard.getName() + ".ip"));
+            System.err.println("Selecting port " + Preferences.get("board." + selectedBoard.getName() + ".port"));
+            String portName = Preferences.get("board." + selectedBoard.getName() + ".port");
+
+            if (portName == null) {
+                return;
+            }
+
+
+            CommunicationPort p = null;
+
+            for (CommunicationPort dev : Base.communicationPorts) {
+                if (dev.toString().equals(portName)) {
+                    p = dev;
+                    break;
+                }
+            }
+
+            if (p == null) {
+                // Let's add a missing device - it can always be removed later.
+                if (portName.startsWith("ssh://")) {
+                    p = new SSHCommunicationPort(portName, selectedBoard);
+                    Base.communicationPorts.add(p);
+                } else {
+                    p = new SerialCommunicationPort(portName);
+                }
+            }
+
+            setDevice(p);
         } else {
-            setSerialPort(null);
+            setDevice((CommunicationPort)null);
         }
 
         configFile = new PropertyFile(new File(folder, "sketch.cfg"));
@@ -1468,26 +1435,6 @@ public class Sketch implements MessageConsumer {
                 nextChar = data.charAt(cpos + 1);
             }
 
-//            // If the last character was a \ then we'll just skip the next character since we
-//            // really don't care what it is.
-//            if (inEscape) {
-//                out.append(thisChar);
-//                cpos++;
-//                inEscape = false;
-//                continue;
-//            }
-//
-//            // If we're not currently escaped and we get a \ then start escaping. Don't escape inside
-//            // comments.
-//            if (thisChar == '\\') {
-//                out.append(thisChar);
-//                if (!inSingleComment && !inMultiComment) {
-//                    inEscape = true;
-//                }
-//                cpos++;
-//                continue;
-//            }
-
             // If we're currently in a string then keep moving on until the end of the string.
             // If we hit the closing quote we still want to move on since it'll start a new
             // string otherwise.
@@ -1715,49 +1662,46 @@ public class Sketch implements MessageConsumer {
     }
 
     public boolean performSerialReset(boolean dtr, boolean rts, int speed) {
+        ctx.bullet("Resetting board.");
         try {
-            SerialPort serialPort = Serial.requestPort(getSerialPort(), speed);
-
-            if(serialPort == null) {
-                error("Unable to lock serial port for board reset");
-                return false;
+            CommunicationPort port = ctx.getDevice();
+            if (port instanceof SerialCommunicationPort) {
+                SerialCommunicationPort sport = (SerialCommunicationPort)port;
+                if (!sport.openPort()) {
+                    ctx.error("Error: " + sport.getLastError());
+                    return false;
+                }
+                Thread.sleep(100);
+                sport.setDTR(dtr);
+                sport.setRTS(rts);
+                Thread.sleep(100);
+                sport.setDTR(false);
+                sport.setRTS(false);
+                sport.closePort();
+                Thread.sleep(100);
             }
-
-            bullet("Resetting board...");
-            serialPort.setDTR(dtr);
-            serialPort.setRTS(dtr);
-            Thread.sleep(1000);
-            serialPort.setDTR(false);
-            serialPort.setRTS(false);
-            Serial.closePort(serialPort);
-            System.gc();
-        } catch(Exception e) {
-            error(e);
+        } catch (Exception e) {
+            ctx.error(e);
             return false;
         }
-
-        System.gc();
         return true;
     }
 
     public boolean performBaudBasedReset(int b) {
+        ctx.bullet("Resetting board.");
         try {
-            SerialPort serialPort = Serial.requestPort(getSerialPort(), b);
-
-            if(serialPort == null) {
-                error("Unable to lock serial port");
+            CommunicationPort port = ctx.getDevice();
+            if (!port.openPort()) {
+                ctx.error("Error: " + port.getLastError());
                 return false;
             }
-
-            Thread.sleep(1000);
-            Serial.closePort(serialPort);
-            System.gc();
-            Thread.sleep(1500);
-        } catch(Exception e) {
-            error(e);
+            port.setSpeed(b);
+            Thread.sleep(100);
+            port.closePort();
+        } catch (Exception e) {
+            ctx.error(e);
             return false;
         }
-
         return true;
     }
 
@@ -2451,7 +2395,7 @@ public class Sketch implements MessageConsumer {
 
 
         if (props.keyExists("compile.script")) {
-            return ctx.executeKey("compile.script");
+            return (Boolean)ctx.executeKey("compile.script");
         }
 
         // Copy any specified files from the compiler, core or board folders
@@ -2666,6 +2610,15 @@ public class Sketch implements MessageConsumer {
                 } catch (Exception e) {
                 }
             }
+
+            ctx.set("size.text", textSize + "");
+            ctx.set("size.data", dataSize + "");
+            ctx.set("size.rodata", rodataSize + "");
+            ctx.set("size.bss", bssSize + "");
+
+            ctx.set("size.flash", (textSize + dataSize + rodataSize) + "");
+            ctx.set("size.ram", (bssSize + dataSize) + "");
+
             bullet("Program size: " + (textSize + dataSize + rodataSize) + " bytes");
             bullet("Memory size: " + (bssSize + dataSize) + " bytes");
         }
@@ -2738,7 +2691,7 @@ public class Sketch implements MessageConsumer {
         ctx.set("source.name", src.getAbsolutePath());
         ctx.set("object.name", dest.getAbsolutePath());
 
-        if(!ctx.executeKey(recipe)) {
+        if(!(Boolean)ctx.executeKey(recipe)) {
             return null;
         }
 
@@ -2848,7 +2801,7 @@ public class Sketch implements MessageConsumer {
                 }
 
                 ctx.set("object.name", out.getAbsolutePath());
-                boolean ok = ctx.executeKey("compile.ar");
+                boolean ok = (Boolean)ctx.executeKey("compile.ar");
 
                 if(!ok) {
                     out.delete();
@@ -2922,7 +2875,7 @@ public class Sketch implements MessageConsumer {
                 }
 
                 ctx.set("object.name", out.getAbsolutePath());
-                boolean ok = ctx.executeKey("compile.ar");
+                boolean ok = (Boolean)ctx.executeKey("compile.ar");
 
                 if(!ok) {
                     purgeLibrary(lib);
@@ -2999,7 +2952,7 @@ public class Sketch implements MessageConsumer {
             ctx.set("source.name", sp);
             ctx.set("object.name", objectFile.getAbsolutePath());
 
-            if(!ctx.executeKey("compile.bin"))
+            if(!(Boolean)ctx.executeKey("compile.bin"))
                 return null;
 
             if(!objectFile.exists())
@@ -3033,7 +2986,7 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!ctx.executeKey(key))
+            if(!(Boolean)ctx.executeKey(key))
                 return null;
 
             if(!objectFile.exists())
@@ -3257,7 +3210,7 @@ public class Sketch implements MessageConsumer {
         ctx.set("build.path", buildFolder.getAbsolutePath());
         ctx.set("object.filelist", objectFileList);
 
-        return ctx.executeKey("compile.link");
+        return (Boolean)ctx.executeKey("compile.link");
     }
 
     private boolean compileEEP() {
@@ -3265,7 +3218,7 @@ public class Sketch implements MessageConsumer {
         if (!props.keyExists("compile.eep")) {
             return true;
         }
-        return ctx.executeKey("compile.eep");
+        return (Boolean)ctx.executeKey("compile.eep");
     }
 
     private boolean compileLSS() {
@@ -3273,7 +3226,7 @@ public class Sketch implements MessageConsumer {
         if (!props.keyExists("compile.lss")) {
             return true;
         }
-        return ctx.executeKey("compile.lss");
+        return (Boolean)ctx.executeKey("compile.lss");
     }
 
     private boolean compileHEX() {
@@ -3281,7 +3234,7 @@ public class Sketch implements MessageConsumer {
         if (!props.keyExists("compile.hex")) {
             return true;
         }
-        return ctx.executeKey("compile.hex");
+        return (Boolean)ctx.executeKey("compile.hex");
     }
 
     public boolean isUntitled() {
@@ -3329,6 +3282,61 @@ public class Sketch implements MessageConsumer {
         return importedLibraries;
     }
 
+    class programContextListener implements ContextListener {
+
+        String pctFormat = null;
+        String pctChar = null;
+        float pctMultiply = 1.0f;
+        int pctCount = 0;
+
+        public programContextListener(String format, String chr, float mul) {
+            pctFormat = format;
+            pctChar = chr;
+            pctMultiply = mul;
+            pctCount = 0;
+        }
+
+        public void contextMessage(String m) {
+            process(m);
+        }
+
+        public void contextWarning(String m) {
+            process(m);
+        }
+
+        public void contextError(String m) {
+            process(m);
+        }
+
+        void process(String s) {
+            if (pctChar != null) {
+                String[] chars = s.split("(?!^)");
+                for (String c : chars) {
+                    if (c.equals(pctChar)) {
+                        pctCount++;
+                    } else {
+                        pctCount = 0;
+                    }
+                    setCompilingProgress((int)((float)pctCount * pctMultiply));
+                }
+            }
+
+            if (pctFormat != null) {
+                Pattern p = Pattern.compile(pctFormat);
+                Matcher m = p.matcher(s);
+                if (m.find()) {
+                    try {
+                        String ps = m.group(1);
+                        float perc = Float.parseFloat(ps);
+                        setCompilingProgress((int)(perc * pctMultiply));
+                    } catch (Exception e) {
+                        Base.error(e);
+                    }
+                }
+            }
+        }
+    }
+
     public boolean programFile(String programmer, String file) {
         PropertyFile props = ctx.getMerged();
         heading("Uploading firmware...");
@@ -3341,7 +3349,7 @@ public class Sketch implements MessageConsumer {
 
         if(props.get("upload." + programmer + ".using") != null) {
             if(props.get("upload." + programmer + ".using").equals("script")) {
-                return ctx.executeKey("upload." + programmer + ".script");
+                return (Boolean)ctx.executeKey("upload." + programmer + ".script");
             }
         }
 
@@ -3390,17 +3398,26 @@ public class Sketch implements MessageConsumer {
             }
         }
 
-        percentageFilter = props.get("upload." + programmer + ".percent");
+        percentageFilter = ctx.parseString(props.get("upload." + programmer + ".percent"));
+        percentageCharacter = ctx.parseString(props.get("upload." + programmer + ".percent.character"));
+        percentageCharacterCount = 0;
+
         try {
-            percentageMultiplier = Float.parseFloat(props.get("upload." + programmer + ".percent.multiply"));
+            percentageMultiplier = Float.parseFloat(ctx.parseString(props.get("upload." + programmer + ".percent.multiply")));
         } catch (Exception ee) {
             percentageMultiplier = 1.0f;
         }
 
         bullet("Uploading...");
-        
-        boolean res = ctx.executeKey(cmdKey);
+
+        if (percentageFilter != null || percentageCharacter != null) {
+            ctx.addContextListener(new programContextListener(percentageFilter, percentageCharacter, percentageMultiplier));
+        }
+
+        boolean res = (Boolean)ctx.executeKey(cmdKey);
         percentageFilter = null;
+        percentageCharacter = null;
+        ctx.removeContextListener();
 
         if(uploadType.equals("serial")) {
 
@@ -3685,6 +3702,18 @@ public class Sketch implements MessageConsumer {
     public void message(String s) {
         flagError(s);
 
+        if (percentageCharacter != null) {
+            String[] chars = s.split("(?!^)");
+            for (String c : chars) {
+                if (c.equals(percentageCharacter)) {
+                    percentageCharacterCount++;
+                } else {
+                    percentageCharacterCount = 0;
+                }
+                setCompilingProgress((int)((float)percentageCharacterCount * percentageMultiplier));
+            }
+        }
+
         if (percentageFilter != null) {
             Pattern p = Pattern.compile(percentageFilter);
             Matcher m = p.matcher(s);
@@ -3732,6 +3761,32 @@ public class Sketch implements MessageConsumer {
         }
         flagError(s);
 
+        if (percentageCharacter != null) {
+            String[] chars = s.split("(?!^)");
+            for (String c : chars) {
+                if (c.equals(percentageCharacter)) {
+                    percentageCharacterCount++;
+                } else {
+                    percentageCharacterCount = 0;
+                }
+                setCompilingProgress((int)((float)percentageCharacterCount * percentageMultiplier));
+            }
+        }
+
+        if (percentageFilter != null) {
+            Pattern p = Pattern.compile(percentageFilter);
+            Matcher m = p.matcher(s);
+            if (m.find()) {
+                try {
+                    String ps = m.group(1);
+                    float perc = Float.parseFloat(ps);
+                    setCompilingProgress((int)(perc * percentageMultiplier));
+                    return;
+                } catch (Exception e) {
+                    Base.error(e);
+                }
+            }
+        }
         if(!s.endsWith("\n")) {
             s += "\n";
         }
@@ -4149,7 +4204,7 @@ public class Sketch implements MessageConsumer {
 
         if(configFile.get("port") != null) {
             Debug.message("Port: " + configFile.get("port"));
-            setSerialPort(configFile.get("port"));
+            setDevice(configFile.get("port"));
         }
 
         if(configFile.get("programmer") != null) {
@@ -4301,6 +4356,9 @@ public class Sketch implements MessageConsumer {
     }
 
     public ImageIcon getIcon() {
+        if (configFile == null) {
+            return null;
+        }
         if ((configFile.get("icon") != null) && !(configFile.get("icon").equals(""))) {
             File iconFile = new File(sketchFolder, configFile.get("icon"));
             if (iconFile.exists()) {

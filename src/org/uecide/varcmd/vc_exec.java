@@ -4,7 +4,7 @@ import org.uecide.*;
 
 public class vc_exec implements VariableCommand {
     public String main(Context sketch, String args) {
-        if(sketch.executeKey(args)) {
+        if((Boolean)sketch.executeKey(args)) {
             return "true";
         }
 

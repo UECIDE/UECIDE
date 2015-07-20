@@ -129,20 +129,22 @@ theme.type=section
 
 theme.editor.name=Editor Theme
 theme.editor.type=dropdown
-theme.editor.options.script=/org/uecide/scripts/getEditorThemes.js
+theme.editor.options.script=res:/org/uecide/scripts/getEditorThemes.js::run
 theme.editor.default=default
 
 theme.icons.name=Icon Theme
 theme.icons.type=dropdown
-theme.icons.options.script=/org/uecide/scripts/getIconThemes.js
+theme.icons.options.script=res:/org/uecide/scripts/getIconThemes.js::run
+theme.icons.default=Gnomic
 
 theme.window.name=Window Theme
 theme.window.type=dropdown
-theme.window.options.script=/org/uecide/scripts/getWindowThemes.js
+theme.window.options.script=res:/org/uecide/scripts/getWindowThemes.js::run
+theme.window.default=com.jtattoo.plaf.luna.LunaLookAndFeel
 
 theme.window_system.name=Use system decorator
 theme.window_system.type=checkbox
-theme.window_system.default=false
+theme.window_system.default=true
 
 theme.fonts.name=Fonts
 theme.fonts.type=section

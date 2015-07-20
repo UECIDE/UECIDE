@@ -142,6 +142,8 @@ public class Base implements AptPercentageListener {
 
     public static boolean onlineMode = true;
 
+    public static ArrayList<CommunicationPort> communicationPorts = new ArrayList<CommunicationPort>();
+
     /*! Get a Board from the internal boards list by its short name. */
     public static Board getBoard(String name) {
         return boards.get(name);
@@ -333,6 +335,7 @@ public class Base implements AptPercentageListener {
         preferences.setPlatformAutoOverride(true);
 
         platform.setSettingsFolderEnvironmentVariable();
+
 
         if (preferences.getBoolean("network.offline")) {
             setOfflineMode();
@@ -538,7 +541,6 @@ public class Base implements AptPercentageListener {
             System.out.println("done");
 
             buildPreferencesTree();
-            loadPreferencesTree("/org/uecide/config/prefs.txt");
 
             runInitScripts();
 
@@ -549,37 +551,6 @@ public class Base implements AptPercentageListener {
 
         Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
         Debug.setSize(new Dimension(preferences.getInteger("debug.window.width"), preferences.getInteger("debug.window.height")));
-
-        ArrayList<String> bundledPlugins = getResourcesFromJarFile(getJarLocation(), "org/uecide/bundles/plugins/", ".jar");
-        File upf = getPluginsFolder();
-
-        for(String s : bundledPlugins) {
-            String fn = s.substring(s.lastIndexOf("/") + 1);
-            File dest = new File(upf, fn);
-
-            if(!dest.exists()) {
-                System.err.println("Installing " + fn);
-                copyResourceToFile("/" + s, dest);
-                continue;
-            }
-
-            try {
-                JarFile jf = new JarFile(dest);
-                Manifest manifest = jf.getManifest();
-                Attributes manifestContents = manifest.getMainAttributes();
-                Version oldVersion = new Version(manifestContents.getValue("Version"));
-                String bv = getBundleVersion("/" + s);
-                Version newVersion = new Version(bv);
-
-
-                if(newVersion.compareTo(oldVersion) > 0) {
-                    System.err.println("Upgrading your version of " + fn + " to " + bv);
-                    copyResourceToFile("/" + s, dest);
-                }
-            } catch(Exception e) {
-                error(e);
-            }
-        }
 
         // Now we reload the theme data with user overrides
         // (we didn't know where they were before)
@@ -596,73 +567,19 @@ public class Base implements AptPercentageListener {
             splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
         }
 
+        
+
+        if (!headless) splashScreen.setMessage("Package Manager...", 15);
+        initPackageManager();
+
+
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-
-        try {
-            if(!headless) {
-                if(isUnix()) {
-                    Toolkit xToolkit = Toolkit.getDefaultToolkit();
-                    java.lang.reflect.Field awtAppClassNameField =
-                        xToolkit.getClass().getDeclaredField("awtAppClassName");
-                    awtAppClassNameField.setAccessible(true);
-                    awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
-                }
-
-                String laf = Preferences.get("theme.window");
-
-                try {
-                    UIManager.setLookAndFeel(laf);
-                } catch (Exception badLaf) {
-                    System.err.println("Unable to set LAF");
-                }
-
-
-                if(laf != null) {
-                    String lafTheme = "";
-
-                    if(laf.indexOf(";") > -1) {
-                        lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
-                        laf = laf.substring(0, laf.lastIndexOf(";"));
-                    }
-
-                    if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
-                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-                        URI themeURI = null;
-
-                        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-                            if(td.getName().equals(lafTheme)) {
-                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
-                                break;
-                            }
-                        }
-                    }
-
-
-                    if(laf.startsWith("com.jtattoo.plaf.")) {
-                        Properties props = new Properties();
-                        props.put("windowDecoration", Preferences.getBoolean("theme.window_system") ? "off" : "on");
-                        props.put("logoString", "UECIDE");
-                        props.put("textAntiAliasing", "on");
-
-                        Class<?> cls = Class.forName(laf);
-                        Class[] cArg = new Class[1];
-                        cArg[0] = Properties.class;
-                        Method mth = cls.getMethod("setCurrentTheme", cArg);
-                        mth.invoke(cls, props);
-                    }
-
-                }
-            }
-
-        } catch(Exception e) {
-            error(e);
-        }
 
         // Create a location for untitled sketches
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
-        if(!headless) splashScreen.setMessage("Loading Application...", 20);
+        if(!headless) splashScreen.setMessage("Application...", 20);
 
         platform.init(this);
 
@@ -699,20 +616,20 @@ public class Base implements AptPercentageListener {
         Serial.updatePortList();
         Serial.fillExtraPorts();
 
-        if(!headless) splashScreen.setMessage("Loading Themes...", 25);
+        if(!headless) splashScreen.setMessage("Themes...", 25);
 
         loadThemes();
         theme.fullyParseFile();
 
-        if(!headless) splashScreen.setMessage("Loading Compilers...", 30);
+        if(!headless) splashScreen.setMessage("Compilers...", 30);
 
         loadCompilers();
 
-        if(!headless) splashScreen.setMessage("Loading Cores...", 40);
+        if(!headless) splashScreen.setMessage("Cores...", 40);
 
         loadCores();
 
-        if(!headless) splashScreen.setMessage("Loading Boards...", 50);
+        if(!headless) splashScreen.setMessage("Boards...", 50);
 
         loadBoards();
 
@@ -724,7 +641,7 @@ public class Base implements AptPercentageListener {
                 }
                 Sketch s = new Sketch(path);
                 if(presetPort != null) {
-                    s.setSerialPort(presetPort);
+                    s.setDevice(presetPort);
                 }
 
                 if(presetBoard != null) {
@@ -752,7 +669,7 @@ public class Base implements AptPercentageListener {
             System.exit(0);
         }
 
-        if(!headless) splashScreen.setMessage("Loading Plugins...", 60);
+        if(!headless) splashScreen.setMessage("Plugins...", 60);
 
         loadPlugins();
 
@@ -766,18 +683,20 @@ public class Base implements AptPercentageListener {
             }
         }
 
-        if(!headless) splashScreen.setMessage("Loading Libraries...", 70);
+        if(!headless) splashScreen.setMessage("Libraries...", 70);
 
         gatherLibraries();
 
         buildPreferencesTree();
-        loadPreferencesTree("/org/uecide/config/prefs.txt");
+
 
         runInitScripts();
 
         initMRU();
 
-        if(!headless) splashScreen.setMessage("Opening Editor...", 80);
+        if(!headless) splashScreen.setMessage("Editor...", 80);
+
+        setLookAndFeel();
 
         boolean opened = false;
 
@@ -916,7 +835,7 @@ public class Base implements AptPercentageListener {
         }
 
         if(presetPort != null) {
-            s.setSerialPort(presetPort);
+            s.setDevice(presetPort);
         }
 
         if(presetBoard != null) {
@@ -2162,6 +2081,8 @@ public class Base implements AptPercentageListener {
     }
 
     public static void applyPreferences() {
+        setLookAndFeel();
+        Editor.updateLookAndFeel();
     }
 
     public static void reloadPlugins() {
@@ -2407,6 +2328,7 @@ public class Base implements AptPercentageListener {
                 rescanBoards();
                 rescanPlugins();
                 rescanLibraries();
+                buildPreferencesTree();
                 Editor.bulletAll("Update complete.");
                 Editor.updateAllEditors();
                 Editor.selectAllEditorBoards();
@@ -3063,18 +2985,29 @@ public class Base implements AptPercentageListener {
         preferencesTree = new PropertyFile();
 
         for(Compiler c : compilers.values()) {
-            preferencesTree.mergeData(c.getProperties().getChildren("prefs"));
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "compiler:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
         }
 
         for(Core c : cores.values()) {
-            PropertyFile pf = c.getProperties();
-            PropertyFile cf = pf.getChildren("prefs");
-            preferencesTree.mergeData(cf);
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "core:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
         }
 
         for(Board c : boards.values()) {
-            preferencesTree.mergeData(c.getProperties().getChildren("prefs"));
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "board:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
         }
+        loadPreferencesTree("/org/uecide/config/prefs.txt");
     }
 
     public static void registerPreference(String key, String type, String name, String def) {
@@ -3227,6 +3160,120 @@ public class Base implements AptPercentageListener {
                 ctx.setCompiler(c);
                 ctx.executeKey("init.script");
             }
+        }
+    }
+
+    // If the package manager hasn't been configured then 
+    // configure it, do an update, and then install the base packages.
+
+    public static void initPackageManager() {
+        try {
+            File aptFolder = getDataFolder("apt");
+            if (!aptFolder.exists()) {
+                aptFolder.mkdirs();
+            }
+            File cacheFolder = new File(aptFolder, "cache");
+            if (!cacheFolder.exists()) {
+                cacheFolder.mkdirs();
+            }
+            File dbFolder = new File(aptFolder, "db");
+            if (!dbFolder.exists()) {
+                dbFolder.mkdirs();
+            }
+            File packagesFolder = new File(dbFolder, "packages");
+            if (!packagesFolder.exists()) {
+                packagesFolder.mkdirs();
+            }
+
+            File sourcesFile = new File(dbFolder, "sources.db");
+            if (!sourcesFile.exists()) {
+                PrintWriter pw = new PrintWriter(sourcesFile);
+                pw.println("deb res://org/uecide/dist uecide boards cores compilers plugins extra libraries");
+                pw.close();
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                apt.update();
+                Package[] packages = apt.getPackages();
+                for (Package p : packages) {
+                    apt.installPackage(p);
+                    System.err.println("Installing " + p);
+                }
+                apt.save();
+
+                PropertyFile props = new PropertyFile(new File(dbFolder, "repositories.db"));
+                apt.addSource(props.get("master.url"), props.get("master.codename"), pm.getCleanOSName(), props.get("master.sections").split("::"));
+                apt.saveSources();
+                apt.update();
+                apt.save();
+            }
+
+        } catch (Exception e) {
+            error(e);
+        }
+
+    }
+
+    public static void setLookAndFeel() {
+        try {
+            if(!headless) {
+                if(isUnix()) {
+                    Toolkit xToolkit = Toolkit.getDefaultToolkit();
+                    java.lang.reflect.Field awtAppClassNameField =
+                        xToolkit.getClass().getDeclaredField("awtAppClassName");
+                    awtAppClassNameField.setAccessible(true);
+                    awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
+                }
+
+                String laf = Preferences.get("theme.window");
+
+                System.err.println("Loading look and feel " + laf);
+
+                try {
+                    UIManager.setLookAndFeel(laf);
+                } catch (Exception badLaf) {
+                    System.err.println("Unable to set LAF");
+                }
+
+
+                if(laf != null) {
+                    String lafTheme = "";
+
+                    if(laf.indexOf(";") > -1) {
+                        lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
+                        laf = laf.substring(0, laf.lastIndexOf(";"));
+                    }
+
+                    if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
+                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+                        URI themeURI = null;
+
+                        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+                            if(td.getName().equals(lafTheme)) {
+                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
+                                break;
+                            }
+                        }
+                    }
+
+
+                    if(laf.startsWith("com.jtattoo.plaf.")) {
+                        Properties props = new Properties();
+                        props.put("windowDecoration", Preferences.getBoolean("theme.window_system") ? "off" : "on");
+                        props.put("logoString", "UECIDE");
+                        props.put("textAntiAliasing", "on");
+
+                        Class<?> cls = Class.forName(laf);
+                        Class[] cArg = new Class[1];
+                        cArg[0] = Properties.class;
+                        Method mth = cls.getMethod("setCurrentTheme", cArg);
+                        mth.invoke(cls, props);
+                    }
+
+                }
+            }
+
+        } catch(Exception e) {
+            error(e);
         }
     }
 }

@@ -2531,8 +2531,8 @@ public class Editor extends JFrame {
         sb.append((loadedSketch.getContext().getCore() != null ? loadedSketch.getContext().getCore() : "None"));
         sb.append("</i> <b>Compiler: </b><i>");
         sb.append((loadedSketch.getContext().getCompiler() != null ? loadedSketch.getContext().getCompiler() : "None"));
-        sb.append("</i> <b>Port: </b><i>");
-        sb.append((loadedSketch.getProgramPort() != null ? loadedSketch.getProgramPort() : "None"));
+        sb.append("</i> <b>Device: </b><i>");
+        sb.append((loadedSketch.getDevice() != null ? loadedSketch.getDevice().getName() : "None"));
         sb.append("</i></html>");
         statusText.setText(sb.toString());
         statusText.setOpaque(false);
@@ -3236,7 +3236,7 @@ public class Editor extends JFrame {
         Base.setFont(optionsMenu, "menu.entry");
         hardwareMenu.add(optionsMenu);
 
-        serialPortsMenu = new JMenu("Serial Port");
+        serialPortsMenu = new JMenu("Device");
         populateSerialMenu(serialPortsMenu);
         serialPortsMenu.addMenuListener(new MenuListener() {
             public void menuSelected(MenuEvent e) {
@@ -3251,19 +3251,19 @@ public class Editor extends JFrame {
         Base.setFont(serialPortsMenu, "menu.entry");
         hardwareMenu.add(serialPortsMenu);
 
-        discoveredBoardsMenu = new JMenu("Discovered Boards");
-        populateDiscoveredBoardsMenu(discoveredBoardsMenu);
-        discoveredBoardsMenu.addMenuListener(new MenuListener() {
-            public void menuSelected(MenuEvent e) {
-                populateDiscoveredBoardsMenu(discoveredBoardsMenu);
-            }
-            public void menuCanceled(MenuEvent e) {
-            }
-            public void menuDeselected(MenuEvent e) {
-            }
-        });
-        Base.setFont(discoveredBoardsMenu, "menu.entry");
-        hardwareMenu.add(discoveredBoardsMenu);
+//        discoveredBoardsMenu = new JMenu("Discovered Boards");
+//        populateDiscoveredBoardsMenu(discoveredBoardsMenu);
+//        discoveredBoardsMenu.addMenuListener(new MenuListener() {
+//            public void menuSelected(MenuEvent e) {
+//                populateDiscoveredBoardsMenu(discoveredBoardsMenu);
+//            }
+//            public void menuCanceled(MenuEvent e) {
+//            }
+//            public void menuDeselected(MenuEvent e) {
+//            }
+//        });
+//        Base.setFont(discoveredBoardsMenu, "menu.entry");
+//        hardwareMenu.add(discoveredBoardsMenu);
 
 
 
@@ -3465,83 +3465,121 @@ public class Editor extends JFrame {
         }
     }
 
+    class JSerialMenuItem extends JRadioButtonMenuItem {
+        CommunicationPort port = null;
+        String name = null;
+
+        public JSerialMenuItem(CommunicationPort p) {
+            super(p.getName());
+            port = p;
+        }
+
+        public CommunicationPort getPort() {
+            return port;
+        }
+    }
+
     public void populateSerialMenu(JMenu menu) {
         menu.removeAll();
         ButtonGroup portGroup = new ButtonGroup();
-        ArrayList<String> ports = Serial.getPortList();
 
-        for(String port : ports) {
-            String pn = Serial.getName(port);
-            JMenuItem item = null;
 
-            if(pn != null & !pn.equals("")) {
-                item = new JRadioButtonMenuItem(port + ": " + pn);
-            } else {
-                item = new JRadioButtonMenuItem(port);
-            }
-
+        for (CommunicationPort port : Base.communicationPorts) {
+            JMenuItem item = new JSerialMenuItem(port);
             portGroup.add(item);
-            item.setSelected(port.equals(loadedSketch.getSerialPort()));
+            item.setSelected(port == loadedSketch.getDevice()); // .toString().equals(loadedSketch.getSerialPort()));
+
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    loadedSketch.setSerialPort(e.getActionCommand());
+                    JSerialMenuItem i = (JSerialMenuItem)(e.getSource());
+                    System.err.println("You selected " + i.getPort().getName());
+                    loadedSketch.setDevice(i.getPort());
+                    if (i.getPort().getBoard() != null) {
+                        loadedSketch.setBoard(i.getPort().getBoard());
+                        updateAll();
+                    }
                 }
             });
-            item.setActionCommand(port);
             Base.setFont(item, "menu.entry");
             menu.add(item);
         }
+
+
+
+//        ArrayList<String> ports = Serial.getPortList();
+//
+//        for(String port : ports) {
+//            String pn = Serial.getName(port);
+//            JMenuItem item = null;
+//
+//            if(pn != null & !pn.equals("")) {
+//                item = new JRadioButtonMenuItem(port + ": " + pn);
+//            } else {
+//                item = new JRadioButtonMenuItem(port);
+//            }
+//
+//            portGroup.add(item);
+//            item.setSelected(port.equals(loadedSketch.getSerialPort()));
+//            item.addActionListener(new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    loadedSketch.setSerialPort(e.getActionCommand());
+//                }
+//            });
+//            item.setActionCommand(port);
+//            Base.setFont(item, "menu.entry");
+//            menu.add(item);
+//        }
     }
 
-    public class DiscoveredBoardAction extends AbstractAction {
-        DiscoveredBoard discoveredBoard;
+//    public class DiscoveredBoardAction extends AbstractAction {
+//        DiscoveredBoard discoveredBoard;
+//
+//        public DiscoveredBoardAction(DiscoveredBoard b) {
+//            super(b.toString());
+//            discoveredBoard = b;
+//        }
+//
+//        public void actionPerformed(ActionEvent e) {
+//            loadedSketch.setBoard(discoveredBoard.board);
+//            loadedSketch.setPort(discoveredBoard.location);
+//
+//            if(discoveredBoard.programmer != null) {
+//                loadedSketch.setProgrammer(discoveredBoard.programmer);
+//            }
+//
+//            for(Object k : discoveredBoard.properties.keySet()) {
+//                loadedSketch.getContext().set("mdns." + (String)k, discoveredBoard.properties.get((String)k));
+//            }
+//            //loadManual(loadedSketch.getContext().getCore().getManual());
+//        }
+//    }
 
-        public DiscoveredBoardAction(DiscoveredBoard b) {
-            super(b.toString());
-            discoveredBoard = b;
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            loadedSketch.setBoard(discoveredBoard.board);
-            loadedSketch.setPort(discoveredBoard.location);
-
-            if(discoveredBoard.programmer != null) {
-                loadedSketch.setProgrammer(discoveredBoard.programmer);
-            }
-
-            for(Object k : discoveredBoard.properties.keySet()) {
-                loadedSketch.getContext().set("mdns." + (String)k, discoveredBoard.properties.get((String)k));
-            }
-            //loadManual(loadedSketch.getContext().getCore().getManual());
-        }
-    }
-
-    public void populateDiscoveredBoardsMenu(JMenu menu) {
-        menu.removeAll();
-        ButtonGroup portGroup = new ButtonGroup();
-
-        for(Object ob : Base.discoveredBoards.keySet()) {
-            DiscoveredBoard b = Base.discoveredBoards.get(ob);
-
-            JMenuItem item = new JMenuItem(new DiscoveredBoardAction(b));
-            ImageIcon i = b.board.getIcon(16);
-
-            if(i == null) {
-                Core c = b.board.getCore();
-
-                if(c != null) {
-                    i = c.getIcon(16);
-                }
-            }
-
-            if(i != null) {
-                item.setIcon(i);
-            }
-
-            Base.setFont(item, "menu.entry");
-            menu.add(item);
-        }
-    }
+//    public void populateDiscoveredBoardsMenu(JMenu menu) {
+//        menu.removeAll();
+//        ButtonGroup portGroup = new ButtonGroup();
+//
+//        for(Object ob : Base.discoveredBoards.keySet()) {
+//            DiscoveredBoard b = Base.discoveredBoards.get(ob);
+//
+//            JMenuItem item = new JMenuItem(new DiscoveredBoardAction(b));
+//            ImageIcon i = b.board.getIcon(16);
+//
+//            if(i == null) {
+//                Core c = b.board.getCore();
+//
+//                if(c != null) {
+//                    i = c.getIcon(16);
+//                }
+//            }
+//
+//            if(i != null) {
+//                item.setIcon(i);
+//            }
+//
+//            Base.setFont(item, "menu.entry");
+//            menu.add(item);
+//        }
+//    }
 
     public String[] getBoardGroups() {
         ArrayList<String> out = new ArrayList<String>();
@@ -3781,9 +3819,9 @@ public class Editor extends JFrame {
         setStatus();
     }
 
-    public String getSerialPort() {
-        return loadedSketch.getSerialPort();
-    }
+//    public String getSerialPort() {
+//        return loadedSketch.getSerialPort();
+//    }
 
     public void message(String s, int c) {
         if(c == 2) {

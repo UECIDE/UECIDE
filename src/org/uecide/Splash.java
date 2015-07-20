@@ -33,6 +33,7 @@ package org.uecide;
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
+import java.awt.font.*;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -54,7 +55,7 @@ import java.util.zip.ZipInputStream;
  * general interaction with the system (launching URLs, loading
  * files and images, etc) that comes from that.
  */
-public class Splash extends Window {
+public class Splash extends JDialog { //Window {
     BufferedImage image;
 
     String message = "";
@@ -64,24 +65,14 @@ public class Splash extends Window {
     int w;
     int h;
 
-    public Splash(int x, int y, int sw, int sh) {
-        super((Window) null);
-        init(x, y, sw, sh);
-    }
-
     public Splash() {
-        super((Window) null);
-        init(0, 0, 0, 0);
-    }
-
-    public void init(int sx, int sy, int sw, int sh) {
         try {
             URL loc = Splash.class.getResource("/org/uecide/icons/about.png");
             image = ImageIO.read(loc);
             w = image.getWidth();
             h = image.getHeight();
-            int x = 0;
-            int y = 0;
+
+            setUndecorated(true);
 
             GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
             GraphicsDevice[] devices = g.getScreenDevices();
@@ -91,17 +82,13 @@ public class Splash extends Window {
                 devices[0].getDisplayMode().getHeight()
             );
 
-            if(sw == 0) {
-                sw = screen.width;
-            }
+            int sw = screen.width;
+            int sh = screen.height;
 
-            if(sh == 0) {
-                sh = screen.height;
-            }
-
-            x = sx + (sw - w) / 2;
-            y = sy + (sh - h) / 2;
-            setBounds(x, y, w, h);
+            int x = (sw / 2) - (w / 2);
+            int y = (sh / 2) - (h / 2);
+            setSize(new Dimension(w, h));
+            setLocation(new Point(x, y));
             setVisible(true);
         } catch(Exception e) {
             Base.error(e);
@@ -156,15 +143,29 @@ public class Splash extends Window {
             g2.setFont(Base.theme.getFont("splash.message.font"));
         }
 
+        int barHeight = 20;
+
+        Rectangle bounds = getStringBounds(g2, message);
+
+        int sw = bounds.width;
+        mx = w / 2 - sw / 2;
+        my = h - (barHeight/2) + (bounds.height/2);
+
+        g2.setColor(new Color(50, 0, 0));
+        g2.fillRect(0, h - barHeight, w , h - 1);
+        g2.setColor(new Color(150, 0, 0));
+        g2.fillRect(0, h - barHeight, (int)(((float)percent / 100.0) * (float)w) , h - 1);
+
         if(Base.theme.get("splash.message.color") != null) {
             g2.setColor(Base.theme.getColor("splash.message.color"));
+        } else {
+            g2.setColor(Color.white);
         }
-
         g2.drawString(message, mx, my);
 
         if(bx == -1) {
-            FontMetrics fm = g2.getFontMetrics();
-            int sw = fm.stringWidth(betaMessage);
+            bounds = getStringBounds(g2, betaMessage);
+            sw = bounds.width;
             bx = w / 2 - sw / 2;
         }
 
@@ -178,8 +179,6 @@ public class Splash extends Window {
 
         g2.drawString(betaMessage, bx, by);
 
-        g2.setColor(new Color(200, 0, 00));
-        g2.fillRect(0, h - 4, (int)(((float)percent / 100.0) * (float)w) , h - 1);
         g.drawImage(temp, 0, 0, null);
     }
 
@@ -221,5 +220,11 @@ public class Splash extends Window {
     }
 
     public void enableScrollContributors(int x, int y) {
+    }
+
+    private Rectangle getStringBounds(Graphics2D g2, String str) {
+        FontRenderContext frc = g2.getFontRenderContext();
+        GlyphVector gv = g2.getFont().createGlyphVector(frc, str);
+        return gv.getPixelBounds(null, 0, 0);
     }
 }

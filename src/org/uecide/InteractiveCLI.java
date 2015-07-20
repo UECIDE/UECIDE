@@ -324,7 +324,7 @@ public class InteractiveCLI implements AptPercentageListener {
                 if (args[0].equals("port")) {
                     if (args.length == 2) {
                         if (_loadedSketch != null) {
-                            _loadedSketch.setSerialPort(args[1]);
+                            _loadedSketch.setDevice(args[1]);
                         }
                     } else {
                         System.out.println("Usage: port <name>");
@@ -491,10 +491,10 @@ public class InteractiveCLI implements AptPercentageListener {
         } else {
             System.out.println("Programmer: " + _loadedSketch.getProgrammer());
         }
-        if (_loadedSketch.getSerialPort() == null) {
+        if (_loadedSketch.getDevice() == null) {
             System.out.println("Port:       No Port Selected!!!");
         } else {
-            System.out.println("Port:       " + _loadedSketch.getSerialPort());
+            System.out.println("Port:       " + _loadedSketch.getDevice().getName());
         }
     }
 

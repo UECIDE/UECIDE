@@ -402,6 +402,17 @@ public class Preferences implements TreeSelectionListener {
         buttonLine.add(cancelButton);
         buttonLine.add(okButton);
 
+        for(Class<?> pluginClass : Base.plugins.values()) {
+            try {
+                Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
+                if (getPreferencesTree != null) {
+                    PropertyFile pf = (PropertyFile)(getPreferencesTree.invoke(null));
+                    Base.preferencesTree.mergeData(pf);
+                }
+            } catch (Exception e) {
+            }
+        }
+
         JPanel advancedSettings = new JPanel(new GridBagLayout());
         JPanel librarySettings = new JPanel(new GridBagLayout());
         JPanel treeSettings = new JPanel(); //new GridBagLayout());
@@ -439,49 +450,8 @@ public class Preferences implements TreeSelectionListener {
 
         // handle window closing commands for ctrl/cmd-W or hitting ESC.
 
-//    pane.addKeyListener(new KeyAdapter() {
-//        public void keyPressed(KeyEvent e) {
-//          KeyStroke wc = Editor.WINDOW_CLOSE_KEYSTROKE;
-//          if ((e.getKeyCode() == KeyEvent.VK_ESCAPE) ||
-//              (KeyStroke.getKeyStrokeForEvent(e).equals(wc))) {
-//            disposeFrame();
-//          }
-//        }
-//      });
-
-        for(Class<?> pluginClass : Base.plugins.values()) {
-            try {
-                Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
-                if (getPreferencesTree != null) {
-                    PropertyFile pf = (PropertyFile)(getPreferencesTree.invoke(null));
-                    Base.preferencesTree.mergeData(pf);
-                }
-            } catch (Exception e) {
-            }
-            try {
-                Method populatePreferences = pluginClass.getMethod("populatePreferences", JPanel.class);
-                Method getPreferencesTitle = pluginClass.getMethod("getPreferencesTitle");
-
-                if(getPreferencesTitle == null || populatePreferences == null) {
-                    continue;
-                }
-
-                String title = (String)(getPreferencesTitle.invoke(null));
-
-                if(title != null) {
-                    JPanel pluginSettings = new JPanel(new GridBagLayout());
-                    pluginSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-                    populatePreferences.invoke(null, pluginSettings);
-                    tabs.add(title, pluginSettings);
-                }
-            } catch(Exception e) {
-                //e.printStackTrace();
-                //Base.error(e);
-            }
-        }
 
         dialog.pack();
-//        dialog.setSize(700, 500);
         if (editor != null) dialog.setLocationRelativeTo(editor);
 
     }
@@ -1022,8 +992,8 @@ public class Preferences implements TreeSelectionListener {
      */
     protected void applyFrame() {
         Base.preferences.mergeData(changedPrefs);
-        Base.applyPreferences();
         Base.preferences.save();
+        Base.applyPreferences();
         Base.cleanAndScanAllSettings();
         Editor.refreshAllEditors();
     }
@@ -1473,11 +1443,28 @@ public class Preferences implements TreeSelectionListener {
         } else if (type.equals("dropdown")) {
             b.add(new JLabel(name + ": "));
 
-            HashMap<String, String> options = new HashMap<String, String>();;
+            HashMap<String, String> options = new HashMap<String, String>();
+
 
             if (Base.preferencesTree.get(key + ".options.script") != null) {
-                    Object hash = Base.executeJavaScript(Base.preferencesTree.get(key + ".options.script"), "run", null);
+                String source = Base.preferencesTree.getSource(key + ".options.script");
+                Context ctx = new Context();;
+                System.err.println("Source for " + key + " = " + source);
+                ctx.mergeSettings(Base.preferencesTree);
+                String keyToExecute = key + ".options.script";
+                if (source != null) {
+                    if (source.startsWith("board:")) { ctx.setBoard(Base.boards.get(source.substring(6))); } 
+                    if (source.startsWith("core:")) { ctx.setCore(Base.cores.get(source.substring(5))); } 
+                    if (source.startsWith("compiler:")) { ctx.setCompiler(Base.compilers.get(source.substring(9))); } 
+                    keyToExecute = "prefs." + keyToExecute;
+                }
+
+                ctx.debugDump();
+                
+                Object hash = ctx.executeKey(keyToExecute);
+                if (hash instanceof HashMap) {
                     options = (HashMap<String, String>)hash;
+                }
             }
 
             ArrayList<KVPair> kvlist = new ArrayList<KVPair>();
@@ -1488,6 +1475,20 @@ public class Preferences implements TreeSelectionListener {
             KVPair opList[] = kvlist.toArray(new KVPair[0]);
             Arrays.sort(opList);
             JComboBox cb = new JComboBox(opList);
+
+            for (KVPair op : opList) {
+                if (op.getKey().equals(get(key))) {
+                    cb.setSelectedItem(op);
+                }
+            }
+
+            cb.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JComboBox widget = (JComboBox)e.getSource();
+                    KVPair data = (KVPair)widget.getSelectedItem();
+                    changedPrefs.set(fkey, data.getKey());
+                }
+            });
             b.add(cb);
         } else {
             b.add(new JLabel(name + ": "));

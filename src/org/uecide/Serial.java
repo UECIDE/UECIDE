@@ -275,6 +275,43 @@ public class Serial {
             names = getPortListDefault();
         }
 
+        ArrayList<CommunicationPort> toAdd = new ArrayList<CommunicationPort>();
+        ArrayList<CommunicationPort> toRemove = new ArrayList<CommunicationPort>();
+
+        for (CommunicationPort port : Base.communicationPorts) {
+            if (port instanceof SerialCommunicationPort) {
+                String name = port.toString();
+                if (names.indexOf(name) == -1) {
+                    System.err.println("Removing " + port);
+                    toRemove.add(port);
+                }
+            }
+        }
+
+        for (String name : names) {
+            boolean found = false;
+            for (CommunicationPort port : Base.communicationPorts) {
+                if (port instanceof SerialCommunicationPort) {
+                    String pname = port.toString();
+                    if (pname.equals(name)) {
+                        found = true;
+                    }
+                }
+            }
+            if (found == false) {
+                System.err.println("Adding " + name);
+                toAdd.add(new SerialCommunicationPort(name));
+            }
+        }
+
+        for (CommunicationPort port : toRemove) {
+            Base.communicationPorts.remove(port);
+        }
+
+        for (CommunicationPort port : toAdd) {
+            Base.communicationPorts.add(port);
+        }
+
         if (Base.isUnix()) {
             for(String p : extraPorts) {
                 if(names.indexOf(p) == -1) {
@@ -310,15 +347,15 @@ public class Serial {
             }
         }
 
-        ArrayList<String>toRemove = new ArrayList<String>();
+        ArrayList<String>toRemoveb = new ArrayList<String>();
 
         for(String port : serialPorts.keySet()) {
             if(names.indexOf(port) == -1) {
-                toRemove.add(port);
+                toRemoveb.add(port);
             }
         }
 
-        for(String port : toRemove) {
+        for(String port : toRemoveb) {
             serialPorts.remove(port);
         }
     }

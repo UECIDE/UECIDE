@@ -11,7 +11,7 @@ public class exec implements BuiltinCommand {
 
         String key = arg[0];
 
-        return ctx.executeKey(key);
+        return (Boolean)ctx.executeKey(key);
 
     }
 }

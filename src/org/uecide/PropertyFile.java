@@ -52,13 +52,14 @@ import java.util.Timer;
  */
 public class PropertyFile {
 
-    Properties defaultProperties;
-    Properties properties;
+    TreeMap<String, String> defaultProperties;
+    TreeMap<String, String> properties;
+    TreeMap<String, String> embedded;
+    TreeMap<String, String> embeddedTypes;
+    TreeMap<String, String> sources;
+
     File userFile;
     boolean doPlatformOverride = false;
-
-    Properties embedded;
-    HashMap<String, String>embeddedTypes;
 
     /*! Create a new PropertyFile from a file on disk.  All properties are loaded and stored from the file. */
     public PropertyFile(File user) {
@@ -75,9 +76,10 @@ public class PropertyFile {
 
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(user), "UTF-8"));
-            properties = new Properties();
-            embedded = new Properties();
-            embeddedTypes = new HashMap<String, String>();
+            properties = new TreeMap<String, String>();
+            embedded = new TreeMap<String, String>();
+            embeddedTypes = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
 
             if(br != null) {
                 loadProperties(properties, br);
@@ -99,7 +101,7 @@ public class PropertyFile {
 
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(defaults), "UTF-8"));
-            defaultProperties = new Properties();
+            defaultProperties = new TreeMap<String, String>();
 
             if(br != null) {
                 loadProperties(defaultProperties, br);
@@ -107,9 +109,10 @@ public class PropertyFile {
             }
 
             br.close();
-            properties = new Properties(defaultProperties);
-            embedded = new Properties();
-            embeddedTypes = new HashMap<String, String>();
+            properties = new TreeMap<String, String>(defaultProperties);
+            embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+            embeddedTypes = new TreeMap<String, String>();
 
             if(user != null) {
                 if(user.exists()) {
@@ -133,7 +136,7 @@ public class PropertyFile {
 
         userFile = user;
 
-        defaultProperties = new Properties();
+        defaultProperties = new TreeMap<String, String>();
 
         if(defaults != null) {
             if(defaults.exists()) {
@@ -149,9 +152,10 @@ public class PropertyFile {
             }
         }
 
-        properties = new Properties(defaultProperties);
-        embedded = new Properties();
-        embeddedTypes = new HashMap<String, String>();
+        properties = new TreeMap<String, String>(defaultProperties);
+        embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+        embeddedTypes = new TreeMap<String, String>();
 
         if(user != null) {
             if(user.exists()) {
@@ -171,29 +175,32 @@ public class PropertyFile {
     /*! Create a new empty PropertyFile. */
     public PropertyFile() {
         userFile = null;
-        defaultProperties = new Properties();
-        properties = new Properties();
-        embedded = new Properties();
-        embeddedTypes = new HashMap<String, String>();
+        defaultProperties = new TreeMap<String, String>();
+        properties = new TreeMap<String, String>();
+        embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+        embeddedTypes = new TreeMap<String, String>();
     }
 
     /*! Create a new PropertyFile from a set of properties stored in a TreeMap<String, String> object. */
     public PropertyFile(TreeMap<String, String>data) {
         userFile = null;
-        defaultProperties = new Properties();
-        properties = new Properties();
-        embedded = new Properties();
-        embeddedTypes = new HashMap<String, String>();
+        defaultProperties = new TreeMap<String, String>();
+        properties = new TreeMap<String, String>();
+        embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+        embeddedTypes = new TreeMap<String, String>();
         mergeData(data);
     }
 
     /*! Create a new PropertyFile from the contents of an existing PropertyFile. */
     public PropertyFile(PropertyFile pf) {
         userFile = null;
-        defaultProperties = new Properties();
-        properties = new Properties();
-        embedded = new Properties();
-        embeddedTypes = new HashMap<String, String>();
+        defaultProperties = new TreeMap<String, String>();
+        properties = new TreeMap<String, String>();
+        embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+        embeddedTypes = new TreeMap<String, String>();
         mergeData(pf);
     }
 
@@ -214,9 +221,13 @@ public class PropertyFile {
             return;
         }
 
-        for(String key : pf.getProperties().stringPropertyNames()) {
-            set(key, pf.getProperties().getProperty(key));
+        for(String key : pf.getProperties().keySet()) {
+            set(key, pf.getProperties().get(key));
+            setSource(key, pf.getSource(key));
         }
+
+        embeddedTypes.putAll(pf.getEmbeddedTypes());
+        embedded.putAll(pf.getEmbeddedMap());
     }
 
     /*! Merge the data from an existing PropertyFile into this PropertyFile prepending *prefix* on to each key. */
@@ -229,8 +240,9 @@ public class PropertyFile {
             prefix += ".";
         }
 
-        for(String key : pf.getProperties().stringPropertyNames()) {
-            set(prefix + key, pf.getProperties().getProperty(key));
+        for(String key : pf.getProperties().keySet()) {
+            set(prefix + key, pf.getProperties().get(key));
+            setSource(prefix + key, pf.getSource(key));
         }
     }
 
@@ -244,14 +256,14 @@ public class PropertyFile {
                 FileWriter w = new FileWriter(userFile);
                 PrintWriter pw = new PrintWriter(w);
                 for (String k : keylist) {
-                    String v = properties.getProperty(k);
+                    String v = properties.get(k);
                     pw.println(k + "=" + v);
                 }
 
-                for (String embfile : embedded.stringPropertyNames()) {
+                for (String embfile : embedded.keySet()) {
                     String type = embeddedTypes.get(embfile);
                     pw.println("@begin file=" + embfile + " format=type");
-                    pw.println(embedded.getProperty(embfile));
+                    pw.println(embedded.get(embfile));
                     pw.println("@end");
                     pw.println();
                 }
@@ -291,19 +303,19 @@ public class PropertyFile {
      *  key.*os* and finally the plain key by itself.
      */
     public String getPlatformSpecific(String attribute) {
-        String t = properties.getProperty(attribute + "." + Base.getOSFullName());
+        String t = properties.get(attribute + "." + Base.getOSFullName());
 
         if(t != null) {
             return t.trim();
         }
 
-        t = properties.getProperty(attribute + "." + Base.getOSName());
+        t = properties.get(attribute + "." + Base.getOSName());
 
         if(t != null) {
             return t.trim();
         }
 
-        t  = properties.getProperty(attribute);
+        t  = properties.get(attribute);
 
         if(t != null) {
             return t.trim();
@@ -315,7 +327,14 @@ public class PropertyFile {
     // Get the platform specific flavour of a key if it exists.
     public String getPlatformSpecificKey(String attribute) {
         String k = attribute + "." + Base.getOSFullName();
-        String t = properties.getProperty(k);
+        String t = properties.get(k);
+
+        if(t != null) {
+            return k.trim();
+        }
+
+        k = attribute + "." + Base.getOSName();
+        t = properties.get(k);
 
         if(t != null) {
             return k.trim();
@@ -333,7 +352,7 @@ public class PropertyFile {
         if(doPlatformOverride) {
             rawData = getPlatformSpecific(attribute);
         } else {
-            rawData = properties.getProperty(attribute);
+            rawData = properties.get(attribute);
         }
 
         if(rawData == null) {
@@ -364,7 +383,7 @@ public class PropertyFile {
             return getPlatformSpecific(attribute);
         }
 
-        String t = properties.getProperty(attribute);
+        String t = properties.get(attribute);
 
         if(t != null) {
             return t.trim();
@@ -375,7 +394,7 @@ public class PropertyFile {
 
     /*! Get the default value for a key rather than the user over-ridden value. */
     public String getDefault(String attribute) {
-        String t = defaultProperties.getProperty(attribute);
+        String t = defaultProperties.get(attribute);
 
         if(t != null) {
             return t.trim();
@@ -394,7 +413,7 @@ public class PropertyFile {
             return;
         }
 
-        properties.setProperty(attribute, value);
+        properties.put(attribute, value);
     }
 
     /*! Unset a key. If a default exists that value will now be the current value. */
@@ -585,7 +604,7 @@ public class PropertyFile {
     }
 
     /*! Return the internal Properties object used to store the data */
-    public Properties getProperties() {
+    public TreeMap<String, String> getProperties() {
         return properties;
     }
 
@@ -600,7 +619,7 @@ public class PropertyFile {
     public TreeMap<String, String> toTreeMap(boolean ps) {
         TreeMap<String, String> map = new TreeMap<String, String>();
 
-        for(String name : properties.stringPropertyNames()) {
+        for(String name : properties.keySet()) {
             if(ps) {
                 if(name.endsWith("." + Base.getOSFullName())) {
                     name = name.substring(0, name.length() - Base.getOSFullName().length() - 1);
@@ -612,7 +631,7 @@ public class PropertyFile {
 
                 map.put(name, getPlatformSpecific(name));
             } else {
-                map.put(name, properties.getProperty(name));
+                map.put(name, properties.get(name));
             }
         }
 
@@ -628,7 +647,7 @@ public class PropertyFile {
                     // want to muller the old properties, so we load them into a fresh
                     // properties object and only replace the old ones with the new if it
                     // is all successful.
-                    Properties newProperties = new Properties(defaultProperties);
+                    TreeMap<String, String> newProperties = new TreeMap<String, String>(defaultProperties);
                     FileInputStream fis = new FileInputStream(user);
                     BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
                     loadProperties(properties, r);
@@ -654,9 +673,9 @@ public class PropertyFile {
             path += ".";
         }
 
-        for(String key : properties.stringPropertyNames()) {
+        for(String key : properties.keySet()) {
             if(key.startsWith(path)) {
-                subset.set(key.substring(path.length()), properties.getProperty(key));
+                subset.set(key.substring(path.length()), properties.get(key));
             }
         }
 
@@ -673,7 +692,7 @@ public class PropertyFile {
     public String[] childKeys() {
         ArrayList<String> keys = new ArrayList<String>();
 
-        for(String key : properties.stringPropertyNames()) {
+        for(String key : properties.keySet()) {
             String[] bits = key.split("\\.");
 
             if(keys.indexOf(bits[0]) == -1) {
@@ -698,8 +717,12 @@ public class PropertyFile {
     }
 
     /*! Return a full Set of the keys in the user data. */
-    public Set<Object> keySet() {
-        return properties.keySet();
+    public ArrayList<String> keySet() {
+        ArrayList<String> ks = new ArrayList<String>();
+        for (Object ob : properties.keySet()) {
+            ks.add((String)ob);
+        }
+        return ks;
     }
 
     /*! Find if a key exists, either as an entry in its
@@ -751,14 +774,14 @@ public class PropertyFile {
     public void fullyParseFile() {
         Context ctx = new Context();
         ctx.mergeSettings(this);
-        for (String key : properties.stringPropertyNames()) {
+        for (String key : properties.keySet()) {
             String data = get(key);
             data = ctx.parseString(data);
             set(key, data);
         }
     }
 
-    public boolean loadProperties(Properties p, BufferedReader r) {
+    public boolean loadProperties(TreeMap<String, String> p, BufferedReader r) {
         String line;
         Pattern keyval = Pattern.compile("^([^=\\s]+)\\s*=\\s*(.*)$");
         Pattern filename = Pattern.compile("file\\s*=\\s*([^\\s]+)");
@@ -884,17 +907,35 @@ public class PropertyFile {
     }
 
     public void debugDump() {
-        for (String prop : properties.stringPropertyNames()) {
-            System.err.println(prop + " = " + properties.get(prop));
+        for (String prop : properties.keySet()) {
+            String source = sources.get(prop);
+            System.err.println(prop + " = " + properties.get(prop) + " (" + source + ")");
         }        
     }
 
     public String getEmbedded(String name) {
-        return embedded.getProperty(name);
+        return embedded.get(name);
     }
 
     public byte[] getEmbeddedBinary(String name) {
         byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(getEmbedded(name));
         return binary;
     }
+
+    public void setSource(String k, String s) {
+        sources.put(k, s);
+    }
+
+    public String getSource(String k) {
+        return sources.get(k);
+    }
+
+    public TreeMap<String, String> getEmbeddedMap() {
+        return embedded;
+    }
+    public TreeMap<String, String> getEmbeddedTypes() {
+        return embeddedTypes;
+    }
+
+
 }

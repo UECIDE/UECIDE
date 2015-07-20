@@ -84,6 +84,7 @@ public class UObject implements Comparable {
                 }
 
                 _properties = new PropertyFile(_configFile);
+                updateSources();
                 _name = get("name");
 
                 if(_name == null) {
@@ -292,5 +293,11 @@ public class UObject implements Comparable {
 
     public String getEmbedded(String name) {
         return _properties.getEmbedded(name);
+    }
+
+    public void updateSources() {
+        for (String prop : _properties.keySet()) {
+            _properties.setSource(prop, _name);
+        }
     }
 }

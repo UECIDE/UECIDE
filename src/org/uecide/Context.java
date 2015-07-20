@@ -21,6 +21,9 @@ public class Context {
     Compiler compiler = null;
     Sketch sketch = null;
     Editor editor = null;
+    CommunicationPort port = null;
+
+    ContextListener listener = null;
 
     StringBuilder buffer = null;
 
@@ -36,11 +39,20 @@ public class Context {
 
     // At least one of these should be called to configure the context:
 
-    public void setBoard(Board b) { board = b; }
-    public void setCore(Core c) { core = c; }
-    public void setCompiler(Compiler c) { compiler = c; }
+    public void setBoard(Board b) { board = b; System.err.println("setBoard(" + board + ")"); }
+    public void setCore(Core c) { core = c; System.err.println("setCore(" + core + ")"); }
+    public void setCompiler(Compiler c) { compiler = c; System.err.println("setCompiler(" + compiler + ")"); }
     public void setSketch(Sketch s) { sketch = s; }
     public void setEditor(Editor e) { editor = e; }
+    public void setDevice(CommunicationPort p) { 
+        port = p; 
+        if (port != null) {
+            set("port", port.getProgrammingPort());
+            set("port.base", port.getBaseName());
+            set("ip", port.getProgrammingAddress());
+        }
+
+    }
 
     // Getters for all the above.
 
@@ -49,6 +61,7 @@ public class Context {
     public Compiler getCompiler() { return compiler; }
     public Sketch getSketch() { return sketch; }
     public Editor getEditor() { return editor; }
+    public CommunicationPort getDevice() { return port; }
 
 
     // Settings can be manipulated with these:
@@ -152,42 +165,54 @@ public class Context {
     }
 
     public void error(String e) {
-        if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.error(e);
-            return;
+        if (listener != null) {
+            listener.contextError(e);
+        } else {
+            if (!e.endsWith("\n")) { e += "\n"; }
+            if (editor != null) {
+                editor.error(e);
+                return;
+            }
+            if (sketch != null) {
+                sketch.error(e);
+                return;
+            }
+            System.err.print(e);
         }
-        if (sketch != null) {
-            sketch.error(e);
-            return;
-        }
-        System.err.print(e);
     }
 
     public void warning(String e) {
-        if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.warning(e);
-            return;
+        if (listener != null) {
+            listener.contextWarning(e);
+        } else {
+            if (!e.endsWith("\n")) { e += "\n"; }
+            if (editor != null) {
+                editor.warning(e);
+                return;
+            }
+            if (sketch != null) {
+                sketch.warning(e);
+                return;
+            }
+            System.out.print(e);
         }
-        if (sketch != null) {
-            sketch.warning(e);
-            return;
-        }
-        System.out.print(e);
     }
         
     public void message(String e) {
-        if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.message(e);
-            return;
+        if (listener != null) {
+            listener.contextMessage(e);
+        } else {
+            if (!e.endsWith("\n")) { e += "\n"; }
+            if (editor != null) {
+                editor.message(e);
+                return;
+            }
+            if (sketch != null) {
+                sketch.message(e);
+                return;
+            }
+            System.out.print(e);
         }
-        if (sketch != null) {
-            sketch.message(e);
-            return;
-        }
-        System.out.print(e);
     }
 
     public void link(String e) {
@@ -260,39 +285,51 @@ public class Context {
     }
         
     public void errorStream(String e) {
-        if (editor != null) {
-            editor.errorStream(e);
-            return;
+        if  (listener != null) {
+            listener.contextError(e);
+        } else {
+            if (editor != null) {
+                editor.errorStream(e);
+                return;
+            }
+            if (sketch != null) {
+                sketch.errorStream(e);
+                return;
+            }
+            System.err.print(e);
         }
-        if (sketch != null) {
-            sketch.errorStream(e);
-            return;
-        }
-        System.err.print(e);
     }
 
     public void warningStream(String e) {
-        if (editor != null) {
-            editor.warningStream(e);
-            return;
+        if  (listener != null) {
+            listener.contextWarning(e);
+        } else {
+            if (editor != null) {
+                editor.warningStream(e);
+                return;
+            }
+            if (sketch != null) {
+                sketch.warningStream(e);
+                return;
+            }
+            System.out.print(e);
         }
-        if (sketch != null) {
-            sketch.warningStream(e);
-            return;
-        }
-        System.out.print(e);
     }
         
     public void messageStream(String e) {
-        if (editor != null) {
-            editor.messageStream(e);
-            return;
+        if  (listener != null) {
+            listener.contextMessage(e);
+        } else {
+            if (editor != null) {
+                editor.messageStream(e);
+                return;
+            }
+            if (sketch != null) {
+                sketch.messageStream(e);
+                return;
+            }
+            System.out.print(e);
         }
-        if (sketch != null) {
-            sketch.messageStream(e);
-            return;
-        }
-        System.out.print(e);
     }
         
 
@@ -301,7 +338,8 @@ public class Context {
 
     // Execute a key as a script in whatever way is needed.
 
-    public boolean executeKey(String key) {
+    public Object executeKey(String key) {
+        System.err.println("executeKey(" + key + ")");
         PropertyFile props = getMerged();
     
         // If there is a platform specific version of the key then we should switch to that instead.
@@ -319,7 +357,9 @@ public class Context {
                 val[0].startsWith("board:") || 
                 val[0].startsWith("merged:")
             ) {
+                System.err.println("Script key value: " + val[0]);
                 String script = getResource(val[0]);
+                System.err.println("Script: " + script);
                 String function = val[1];
                 String[] args = Arrays.copyOfRange(val, 2, val.length);
 
@@ -336,15 +376,15 @@ public class Context {
         if (props.get(key) != null) {
             return executeCommand(parseString(props.get(key)), parseString(props.get(key + ".environment")));
         }
-    
+
         return false;
     }
 
-    public boolean executeJavaScript(String script, String function, Object[] args) {
+    public Object executeJavaScript(String script, String function, Object[] args) {
         if (function == null) {
             return false;
         }
-        boolean ret = false;
+        Object ret = false;
         try {
             ScriptEngineManager manager = new ScriptEngineManager();
             ScriptEngine engine = manager.getEngineByName("JavaScript");
@@ -374,9 +414,9 @@ public class Context {
             }
 
             if (args == null) {
-                ret = (Boolean)(inv.invokeFunction(function));
+                ret = inv.invokeFunction(function);
             } else {
-                ret = (Boolean)(inv.invokeFunction(function, args));
+                ret = inv.invokeFunction(function, args);
             }
 
         } catch (Exception e) {
@@ -387,7 +427,7 @@ public class Context {
     }
 
 
-    public boolean executeCommand(String command, String env) {
+    public Object executeCommand(String command, String env) {
         if(command.startsWith("__builtin_")) {
             return runBuiltinCommand(command);
         } else {
@@ -396,11 +436,13 @@ public class Context {
     }
 
 
-    public boolean executeUScript(String key) {
+    public Object executeUScript(String key) {
         PropertyFile props = getMerged();
         PropertyFile script = props.getChildren(key);
-        Set<Object>lines = script.keySet();
+        ArrayList<String>lines = script.keySet();
         int lineno = 0;
+
+        Object res = false;
 
         while(script.keyExists(Integer.toString(lineno))) {
             String lk = String.format("%s.%d", key, lineno);
@@ -437,7 +479,7 @@ public class Context {
                     error(ld);
                     if (script.keyExists("fail")) {
                         String failKey = String.format("%s.fail", key);
-                        executeKey(failKey);
+                        res = executeKey(failKey);
                     }
                     return false;
                 }
@@ -452,7 +494,7 @@ public class Context {
             if(ld.equals("fail")) {
                 if (script.keyExists("fail")) {
                     String failKey = String.format("%s.fail", key);
-                    executeKey(failKey);
+                    res = executeKey(failKey);
                 }
                 return false;
             }
@@ -460,29 +502,31 @@ public class Context {
             if(ld.equals("end")) {
                 if (script.keyExists("end")) {
                     String endKey = String.format("%s.end", key);
-                    executeKey(endKey);
+                    res = executeKey(endKey);
                 }
-                return true;
+                return res;
             }
 
-            boolean res = executeKey(lk);
+            res = executeKey(lk);
 
-            if(!res) {
-                if (script.keyExists("fail")) {
-                    String failKey = String.format("%s.fail", key);
-                    executeKey(failKey);
+            if (res instanceof Boolean) {
+                if((Boolean)res == false) {
+                    if (script.keyExists("fail")) {
+                        String failKey = String.format("%s.fail", key);
+                        res = executeKey(failKey);
+                    }
+                    return false;
                 }
-                return false;
             }
 
             lineno++;
         }
         if (script.keyExists("end")) {
             String endKey = String.format("%s.end", key);
-            executeKey(endKey);
+            res = executeKey(endKey);
         }
 
-        return true;
+        return res;
     }
 
 
@@ -600,7 +644,7 @@ public class Context {
         return "";
     }
 
-    public boolean runBuiltinCommand(String commandline) {
+    public Object runBuiltinCommand(String commandline) {
         try {
             String[] split = commandline.split("::");
             int argc = split.length - 1;
@@ -647,7 +691,7 @@ public class Context {
             args[0] = this;
             args[1] = arg;
 
-            return (Boolean)m.invoke(p, args);
+            return m.invoke(p, args);
 
 
         } catch(Exception e) {
@@ -659,8 +703,10 @@ public class Context {
 
 
 
-    public boolean runSystemCommand(String command, String env) {
+    public Object runSystemCommand(String command, String env) {
         PropertyFile props = getMerged();
+
+        Object res;
 
         if(command == null) {
             return true;
@@ -712,6 +758,7 @@ public class Context {
         try {
             runningProcess = process.start();
         } catch(Exception e) {
+            error("Unable to start process");
             error(e);
             return false;
         }
@@ -826,5 +873,18 @@ public class Context {
         String b = buffer.toString();
         buffer = null;
         return b;
+    }
+
+    public void addContextListener(ContextListener l) {
+        listener = l;
+    }
+
+    public void removeContextListener() {
+        listener = null;
+    }
+
+    public void debugDump() {
+        PropertyFile pf = getMerged();
+        pf.debugDump();
     }
 }

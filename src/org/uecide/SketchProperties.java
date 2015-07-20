@@ -200,7 +200,7 @@ public class SketchProperties extends JDialog {
         ((JTextField)(fields.get("board"))).setText(sketch.getBoard().getName());
         ((JTextField)(fields.get("core"))).setText(sketch.getCore().getName());
         ((JTextField)(fields.get("compiler"))).setText(sketch.getCompiler().getName());
-        ((JTextField)(fields.get("port"))).setText(sketch.getSerialPort());
+        ((JTextField)(fields.get("port"))).setText(sketch.getDevice().toString());
         ((JTextField)(fields.get("programmer"))).setText(sketch.getProgrammer());
     }
 

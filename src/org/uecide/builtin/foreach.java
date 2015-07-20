@@ -19,7 +19,7 @@ public class foreach implements BuiltinCommand {
         for (String item : items) {
             item = item.trim();
             ctx.set(variable, item);
-            if(!ctx.executeKey(target)) {
+            if(!(Boolean)ctx.executeKey(target)) {
                 return false;
             }
         }
