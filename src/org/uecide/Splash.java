@@ -75,21 +75,19 @@ public class Splash extends JDialog { //Window {
             setUndecorated(true);
 
             GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            GraphicsDevice[] devices = g.getScreenDevices();
 
-            Dimension screen = new Dimension(
-                devices[0].getDisplayMode().getWidth(),
-                devices[0].getDisplayMode().getHeight()
-            );
+            GraphicsDevice device = g.getDefaultScreenDevice();
+            Rectangle screen = device.getDefaultConfiguration().getBounds();
 
-            int sw = screen.width;
-            int sh = screen.height;
+            System.err.println("Screen dimensions: " + screen);
 
-            int x = (sw / 2) - (w / 2);
-            int y = (sh / 2) - (h / 2);
+            int x = (screen.width / 2) - (w / 2);
+            int y = (screen.height / 2) - (h / 2);
             setSize(new Dimension(w, h));
-            setLocation(new Point(x, y));
             setVisible(true);
+            Point winLoc = new Point(screen.x + x, screen.y + y);
+            System.err.println("Placing splash at " + winLoc);
+            setLocation(winLoc);
         } catch(Exception e) {
             Base.error(e);
         }
