@@ -103,8 +103,6 @@ public class Sketch implements MessageConsumer {
     public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
     public ArrayList<String> unknownLibraries = new ArrayList<String>();
 
-    public TreeMap<String, String> parameters = new TreeMap<String, String>();
-
     TreeMap<String, String> selectedOptions = new TreeMap<String, String>();
 
     HashMap<File, HashMap<Integer, String>> functionList = new HashMap<File, HashMap<Integer, String>>();
@@ -1279,7 +1277,6 @@ public class Sketch implements MessageConsumer {
 
         Pattern pragma = Pattern.compile("^#pragma\\s+parameter\\s+([^=]+)\\s*=\\s*(.*)\\s*$");
         Pattern paramsplit = Pattern.compile("(?:\"[^\"]*\"|[^\\s\"])+");
-        parameters = new TreeMap<String, String>();
 
         for(File f : cleanedFiles.keySet()) {
             if(FileType.getType(f) == FileType.SKETCH) {
@@ -1325,7 +1322,7 @@ public class Sketch implements MessageConsumer {
                             parms += part.group(0);
                         }
 
-                        parameters.put(mtch.group(1), parms);
+                        ctx.set(mtch.group(1), parms);
                     }
 
                     munged.append(l + "\n");
@@ -1560,7 +1557,7 @@ public class Sketch implements MessageConsumer {
                         munged += value.charAt(i);
                     }
 
-                    parameters.put(key, munged);
+                    ctx.set(key, munged);
                 }
 
                 continue;
@@ -1691,13 +1688,25 @@ public class Sketch implements MessageConsumer {
         ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
-            if (!port.openPort()) {
-                ctx.error("Error: " + port.getLastError());
-                return false;
+            if (port instanceof SerialCommunicationPort) {
+                SerialCommunicationPort sport = (SerialCommunicationPort)port;
+                if (!sport.openPort()) {
+                    ctx.error("Error: " + sport.getLastError());
+                    return false;
+                }
+                sport.setDTR(true);
+                sport.setRTS(true);
+                Thread.sleep(100);
+                if (!sport.setSpeed(b)) {
+                    ctx.error("Error: " + sport.getLastError());
+                }
+                Thread.sleep(100);
+                sport.setDTR(false);
+                sport.setRTS(false);
+                sport.closePort();
+                System.gc();
+                Thread.sleep(1000);
             }
-            port.setSpeed(b);
-            Thread.sleep(100);
-            port.closePort();
         } catch (Exception e) {
             ctx.error(e);
             return false;
@@ -2264,6 +2273,8 @@ public class Sketch implements MessageConsumer {
         long startTime = System.currentTimeMillis();
 
         PropertyFile props = ctx.getMerged();
+
+        ctx.set("cache.root", getCacheFolder().getAbsolutePath());
         clearLineComments();
 
         if (props.getBoolean("purge")) {
@@ -3992,6 +4003,7 @@ public class Sketch implements MessageConsumer {
     public void precompileLibrary(Library lib) {
         ctx.set("includes", generateIncludes());
         ctx.set("filename", sketchName);
+        ctx.set("cache.root", getCacheFolder().getAbsolutePath());
 
         if(doPrePurge) {
             doPrePurge = false;

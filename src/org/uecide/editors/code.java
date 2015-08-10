@@ -924,6 +924,8 @@ public class code extends JPanel implements EditorBase {
     public void reloadFile() {
         int cp = textArea.getCaretPosition();
         textArea.setText(sketch.getFileContent(file, true));
+        int len = textArea.getText().length();
+        if (cp > len) cp = len;
         try {
             textArea.setCaretPosition(cp);
         } catch (Exception e) {
@@ -1064,7 +1066,12 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void setCursorPosition(int pos) {
-        textArea.setCaretPosition(pos);
+        int len = textArea.getText().length();
+        if (pos > len) pos = len;
+        try {
+            textArea.setCaretPosition(pos);
+        } catch (Exception e) {
+        }
     }
 
     public int getCursorPosition() {

@@ -107,28 +107,43 @@ public class Console extends JTextPane {
         return indent;
     }
 
+    void doAppendString(String message, MutableAttributeSet type) {
+        try {
+            String[] chars = message.split("(?!^)");
+            for (String c : chars) {
+                if (c.equals("\010")) {
+                    document.remove(document.getEndPosition().getOffset()-1, 1);
+                } else {
+                    document.appendString(c, type);
+                }
+            }
+            document.insertAll();
+            setCaretPosition(document.getLength());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     void append(String message, int type) {
         if (type == BODY) {
-            document.appendString(message, body);
+            doAppendString(message, body);
         } else if (type == WARNING) {
-            document.appendString(message, warning);
+            doAppendString(message, warning);
         } else if (type == ERROR) {
-            document.appendString(message, error);
+            doAppendString(message, error);
         } else if (type == HEADING) {
-            document.appendString(message, heading);
+            doAppendString(message, heading);
         } else if (type == COMMAND) {
-            document.appendString(message, command);
+            doAppendString(message, command);
         } else if (type == BULLET) {
-            document.appendString("\u2022 " + message, bullet);
+            doAppendString("\u2022 " + message, bullet);
         } else if (type == BULLET2) {
-            document.appendString("\u2023 " + message, bullet2);
+            doAppendString("\u2023 " + message, bullet2);
         } else if (type == LINK) {
             String[] chunks = message.split("\\|");
             link.addAttribute(LINK_ATTRIBUTE, new URLLinkAction(chunks[0]));
-            document.appendString(chunks[1], link);
+            doAppendString(chunks[1], link);
         }
-        document.insertAll();
-        setCaretPosition(document.getLength());
     }
 
     void clear() {

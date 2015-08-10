@@ -27,9 +27,13 @@ public class Context {
 
     StringBuilder buffer = null;
 
+    boolean bufferError = false;
+
     PropertyFile settings = null;
 
     Process runningProcess = null;
+
+    PropertyFile savedSettings = null;
 
     // Make a new empty context.
 
@@ -339,7 +343,6 @@ public class Context {
     // Execute a key as a script in whatever way is needed.
 
     public Object executeKey(String key) {
-        System.err.println("executeKey(" + key + ")");
         PropertyFile props = getMerged();
     
         // If there is a platform specific version of the key then we should switch to that instead.
@@ -794,7 +797,17 @@ public class Context {
 
                     if(i < 0)break;
 
-                    errorStream(new String(tmp, 0, i));
+                    String line = new String(tmp, 0, i);
+
+                    if (bufferError) {
+                        if (buffer != null) {
+                            buffer.append(line);
+                        } else {                        
+                            errorStream(line);
+                        }
+                    } else {
+                        errorStream(line);
+                    }
                 }
                 Thread.sleep(1);
 
@@ -823,7 +836,17 @@ public class Context {
 
                 if(i < 0)break;
 
-                errorStream(new String(tmp, 0, i));
+                String line = new String(tmp, 0, i);
+
+                if (bufferError) {
+                    if (buffer != null) {
+                        buffer.append(line);
+                    } else {                        
+                        errorStream(line);
+                    }
+                } else {
+                    errorStream(line);
+                }
             }
 
         } catch(Exception ignored) {
@@ -866,6 +889,11 @@ public class Context {
     }
 
     public void startBuffer() {
+        startBuffer(false);
+    }
+
+    public void startBuffer(boolean be) {
+        bufferError = be;
         buffer = new StringBuilder();
     }
 
@@ -886,5 +914,14 @@ public class Context {
     public void debugDump() {
         PropertyFile pf = getMerged();
         pf.debugDump();
+    }
+
+    public void snapshot() {
+        savedSettings = settings;
+        settings = new PropertyFile();
+    }
+
+    public void rollback() {
+        settings = savedSettings;
     }
 }
