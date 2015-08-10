@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 <project name="UECIDE Core" default="build">
 
+    <property name="launch4j.dir" location="launch4j" />
+
+    <taskdef name="launch4j"
+        classname="net.sf.launch4j.ant.Launch4jTask"
+        classpath="${launch4j.dir}/launch4j.jar
+            :${launch4j.dir}/lib/xstream.jar" />
+
     <property file="version.plist"/>
     <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar">
         <and>
@@ -37,7 +44,7 @@
         </delete>
     </target>
 
-    <target name="compile" description="Compile" depends="build_number, git_contributors">
+    <target name="compile" description="Compile" depends="git_contributors">
         <mkdir dir="bin" />
         <path id="class.path">
             <fileset dir="lib">
@@ -77,36 +84,15 @@
                 <attribute name="Main-Class" value="org.uecide.Base" />
                 <attribute name="Class-Path" value="uecide.jar" />
                 <attribute name="Version" value="${version}" />
-                <attribute name="Build" value="${build.number}" />
                 <attribute name="Compiled" value="${TODAY}" />
                 <attribute name="Release" value="${mode}" />
             </manifest>
         </jar>
         <chmod perm="0755" file="uecide.jar" />
-        <copy file="uecide.jar" tofile="uecide-${build.number}.jar" />
     </target>
 
     <target name="test_git"><available file=".git" property="git.available" /></target>
 
-    <target name="saved_build_number" unless="git.available">
-        <propertycopy property="build.number" from="saved.build.number" />
-    </target>
-
-    <target name="build_number" depends="test_git, git_build_number, saved_build_number">
-        <echo>UECIDE build number ${build.number}</echo>
-    </target>
-
-    <target name="git_build_number" depends="test_git" if="git.available">
-        <exec outputproperty="build.number" executable="git">
-            <arg value="rev-list" />
-            <arg value="HEAD" />
-            <arg value="--count" />
-        </exec>
-        <propertyfile file="version.plist">
-            <entry key="saved.build.number" value="${build.number}" />
-        </propertyfile>
-    </target>
-    
     <target name="git_contributors" depends="test_git" if="git.available">
         <exec output="resources/org/uecide/contributors.txt" executable="git">
             <arg value="shortlog" />
@@ -374,6 +360,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <arg value="push" />
             <arg value="--tags" />
         </exec>
+    </target>
+
+    <target name="bundle" depends="build">
+        <launch4j configFile="UECIDE-l4j.xml" outfile="uecide-${version}-bundle.exe" />
     </target>
 
 </project>

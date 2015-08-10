@@ -114,7 +114,7 @@ public class code extends JPanel implements EditorBase {
             findPanel = new JPanel();
             findPanel.setLayout(new BoxLayout(findPanel, BoxLayout.LINE_AXIS));
 
-            if(Base.preferences.getBoolean("editor.keepfindopen") == false) {
+            if(Preferences.getBoolean("editor.find.keep") == false) {
                 findPanel.add(findCloseButton);
             }
 
@@ -272,7 +272,8 @@ public class code extends JPanel implements EditorBase {
 
         scrollPane = new RTextScrollPane(textArea);
         toolbar = new JToolBar();
-        toolbar.setVisible(!Base.preferences.getBoolean("editor.subtoolbar.hidden"));
+        toolbar.setFloatable(false);
+        toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden"));
         this.add(toolbar, BorderLayout.NORTH);
 
         Editor.addToolbarButton(toolbar, "actions", "copy", "Copy", new ActionListener() {
@@ -328,7 +329,7 @@ public class code extends JPanel implements EditorBase {
             loadFile(f);
         }
 
-        if(Base.preferences.getBoolean("editor.keepfindopen")) {
+        if(Preferences.getBoolean("editor.find.keep")) {
             openFindPanel();
         }
 
@@ -348,22 +349,22 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void refreshSettings() {
-        String theme = Base.preferences.get("theme.selected", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
-        boolean external = Base.preferences.getBoolean("editor.external");
+        boolean external = Preferences.getBoolean("editor.external");
         textArea.setEditable(!external);
         textArea.setCodeFoldingEnabled(true);
         textArea.setAntiAliasingEnabled(true);
         textArea.setMarkOccurrences(true);
 
-        if(Base.preferences.get("editor.tabsize") != null) {
-            textArea.setTabSize(Base.preferences.getInteger("editor.tabsize"));
+        if(Preferences.get("editor.tabs.size") != null) {
+            textArea.setTabSize(Preferences.getInteger("editor.tabs.size"));
         } else {
             textArea.setTabSize(4);
         }
 
-        textArea.setTabsEmulated(Base.preferences.getBoolean("editor.expandtabs"));
-        textArea.setPaintTabLines(Base.preferences.getBoolean("editor.showtabs"));
+        textArea.setTabsEmulated(Preferences.getBoolean("editor.tabs.expand"));
+        textArea.setPaintTabLines(Preferences.getBoolean("editor.tabs.show"));
 
         scrollPane.setFoldIndicatorEnabled(true);
         scrollPane.setIconRowHeaderEnabled(true);
@@ -371,7 +372,7 @@ public class code extends JPanel implements EditorBase {
         textArea.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
 
         textArea.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
-        textArea.setFont(Base.preferences.getFont("editor.font"));
+        textArea.setFont(Preferences.getFont("theme.fonts.editor"));
 
         gutter = scrollPane.getGutter();
 
@@ -567,7 +568,7 @@ public class code extends JPanel implements EditorBase {
 
     public void applyThemeSettings() {
 
-        String theme = Base.preferences.get("theme.selected", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
         // Annotations
         applyThemeFGColor(SyntaxScheme.ANNOTATION,                      theme + "editor.annotation.fgcolor");
@@ -923,8 +924,14 @@ public class code extends JPanel implements EditorBase {
     public void reloadFile() {
         int cp = textArea.getCaretPosition();
         textArea.setText(sketch.getFileContent(file, true));
-        textArea.setCaretPosition(cp);
-        //   scrollTo(0);
+        int len = textArea.getText().length();
+        if (cp > len) cp = len;
+        try {
+            textArea.setCaretPosition(cp);
+        } catch (Exception e) {
+            textArea.setCaretPosition(0);
+            scrollTo(0);
+        }
         setModified(false);
     }
 
@@ -1059,7 +1066,12 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void setCursorPosition(int pos) {
-        textArea.setCaretPosition(pos);
+        int len = textArea.getText().length();
+        if (pos > len) pos = len;
+        try {
+            textArea.setCaretPosition(pos);
+        } catch (Exception e) {
+        }
     }
 
     public int getCursorPosition() {

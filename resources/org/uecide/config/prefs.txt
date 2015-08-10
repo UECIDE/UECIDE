@@ -1,0 +1,235 @@
+# Compiler settings
+
+compiler.name=Compiler
+compiler.type=section
+
+compiler.buildinsketch.type=checkbox
+compiler.buildinsketch.name=Compile the sketch in the sketch folder
+compiler.buildinsketch.default=false
+
+compiler.disableline.type=checkbox
+compiler.disableline.name=Disable insertion of #line numbering (useful for debugging)
+compiler.disableline.default=false
+
+compiler.generate_lss.type=checkbox
+compiler.generate_lss.name=Generate assembly listing (requires core support)
+compiler.generate_lss.default=false
+
+compiler.disable_prototypes.type=checkbox
+compiler.disable_prototypes.name=Disable generation of function prototypes
+compiler.disable_prototypes.default=false
+
+compiler.combine_ino.type=checkbox
+compiler.combine_ino.name=Combine all .INO and .PDE files into a single .CPP file
+compiler.combine_ino.default=true
+
+compiler.generate_makefile.type=checkbox
+compiler.generate_makefile.name=Generate / update a Makefile each compile (core support required)
+compiler.generate_makefile.default=false
+
+compiler.verbose_compile.type=checkbox
+compiler.verbose_compile.name=Verbose command execution
+compiler.verbose_compile.default=false
+
+compiler.verbose_upload.type=checkbox
+compiler.verbose_upload.name=Verbose output during upload
+compiler.verbose_upload.default=false
+
+compiler.purge.type=checkbox
+compiler.purge.name=Purge project on every build
+compiler.purge.default=false
+
+compiler.save_hex.type=checkbox
+compiler.save_hex.name=Save compiled output to sketch folder
+compiler.save_hex.default=false
+
+compiler.save_lss.type=checkbox
+compiler.save_lss.name=Save generated LSS file to sketch folder
+compiler.save_lss.depends=compiler.generate_lss
+compiler.save_lss.default=false
+
+# Editor settings
+
+editor.name=Editor
+editor.type=section
+
+editor.dialog.name=Dialogs
+editor.dialog.type=section
+
+editor.external.name=External
+editor.external.type=section
+
+editor.find.name=Find & Replace
+editor.find.type=section
+
+editor.save.name=Save
+editor.save.type=section
+
+editor.tabs.name=Tabs
+editor.tabs.type=section
+
+editor.toolbars.name=Toolbars
+editor.toolbars.type=section
+
+
+editor.dialog.crash.name=Enable crash reporter
+editor.dialog.crash.type=checkbox
+editor.dialog.crash.default=true
+
+editor.dialog.missinglibs.name=Suggest installing missing libraries
+editor.dialog.missinglibs.type=checkbox
+editor.dialog.missinglibs.default=true
+
+editor.external.command.name=External editor command
+editor.external.command.type=string
+editor.external.command.default=
+
+editor.find.keep.name=Keep Find & Replace permanantly open
+editor.find.keep.type=checkbox
+editor.find.keep.default=false
+
+editor.save.auto.name=Automatically save sketch before each compile
+editor.save.auto.type=checkbox
+editor.save.auto.default=false
+
+editor.save.version.name=Save backup versions of your sketch
+editor.save.version.type=checkbox
+editor.save.version.default=false
+
+editor.save.version_num.name=Number of backup copies to save
+editor.save.version_num.type=range
+editor.save.version_num.min=1
+editor.save.version_num.max=10
+editor.save.version_num.default=1
+
+editor.tabs.expand.name=Editor uses spaces for tabs
+editor.tabs.expand.type=checkbox
+editor.tabs.expand.default=true
+
+editor.tabs.size.name=Number of spaces to use for a tab
+editor.tabs.size.type=range
+editor.tabs.size.min=1
+editor.tabs.size.max=10
+editor.tabs.size.default=4
+
+editor.tabs.show.name=Show tabs and indents
+editor.tabs.show.type=checkbox
+editor.tabs.show.default=false;
+
+editor.toolbars.sub_hidden.name=Hide the secondary editor toolbar
+editor.toolbars.sub_hidden.type=checkbox
+editor.toolbars.sub_hidden.default=false
+
+editor.version_check.name=Check for a new version at startup
+editor.version_check.type=checkbox
+editor.version_check.default=true
+
+theme.name=Theme
+theme.type=section
+
+theme.editor.name=Editor Theme
+theme.editor.type=dropdown
+theme.editor.options.script=res:/org/uecide/scripts/getEditorThemes.js::run
+theme.editor.default=default
+
+theme.icons.name=Icon Theme
+theme.icons.type=dropdown
+theme.icons.options.script=res:/org/uecide/scripts/getIconThemes.js::run
+theme.icons.default=Gnomic
+
+theme.window.name=Window Theme
+theme.window.type=dropdown
+theme.window.options.script=res:/org/uecide/scripts/getWindowThemes.js::run
+theme.window.default=com.jtattoo.plaf.luna.LunaLookAndFeel
+
+theme.window_system.name=Use system decorator
+theme.window_system.type=checkbox
+theme.window_system.default=true
+
+theme.fonts.name=Fonts
+theme.fonts.type=section
+
+theme.fonts.editor.name=Editor font
+theme.fonts.editor.type=fontselect
+theme.fonts.editor.default=Monospaced,plain,12
+
+theme.fonts.console.name=Console font
+theme.fonts.console.type=fontselect
+theme.fonts.console.default=Monospaced,plain,12
+
+locations.name=Locations
+locations.type=section
+
+locations.data.name=Data location
+locations.data.type=dirselect
+
+locations.sketchbook.name=Sketchbook location
+locations.sketchbook.type=dirselect
+
+debug.name=Debug
+debug.type=section
+debug.window.name=Layout
+debug.window.type=section
+
+debug.window.width.name=Window Width
+debug.window.width.type=string
+debug.window.width.default=600
+
+debug.window.height.name=Window Height
+debug.window.height.type=string
+debug.window.height.default=400
+
+debug.window.x.name=Window X Position
+debug.window.x.type=string
+debug.window.x.default=100
+
+debug.window.y.name=Window Y Position
+debug.window.y.type=string
+debug.window.y.default=100
+
+
+editor.layout.name=Layout
+editor.layout.type=section
+
+editor.layout.split_console.name=Console Split Position
+editor.layout.split_console.type=string
+editor.layout.split_console.default=200
+
+editor.layout.split_manual.name=Manual Split Position
+editor.layout.split_manual.type=string
+editor.layout.split_manual.default=400
+
+editor.layout.split_tree.name=Tree Split Position
+editor.layout.split_tree.type=string
+editor.layout.split_tree.default=200
+
+editor.layout.visible_manual.name=Manual Visible
+editor.layout.visible_manual.type=checkbox
+editor.layout.visible_manual.default=false
+
+
+editor.window.name=Window
+editor.window.type=section
+
+editor.window.width.name=Window Width
+editor.window.width.type=string
+editor.window.width.default=700
+
+editor.window.height.name=Window Height
+editor.window.height.type=string
+editor.window.height.default=500
+
+editor.window.x.name=Window X Position
+editor.window.x.type=string
+editor.window.x.default=0
+
+editor.window.y.name=Window Y Position
+editor.window.y.type=string
+editor.window.y.default=0
+
+network.name=Network
+network.type=section
+
+network.offline.name=Work in offline mode
+network.offline.type=checkbox
+network.offline.default=false

@@ -42,11 +42,57 @@ import java.lang.reflect.Method;
 
 import java.awt.*;
 import javax.swing.*;
+import java.lang.management.*;
 
 public class Serial {
     static ArrayList<String> extraPorts = new ArrayList<String>();
     static String[] portList;
     static HashMap<String, SerialPort> serialPorts = new HashMap<String, SerialPort>();
+
+    public static boolean waitLock(String name) {
+        if (Base.isLinux()) {
+            int timeout = 1000;
+            String bn = new File(name).getName();
+            File lock = new File("/var/lock/", "LCK.." + bn);
+            while (lock.exists()) {
+                timeout--;
+                if (timeout == 0) {
+                    Debug.message("Timeout waiting for lock to clear");
+                    return false;
+                }
+                try {
+                    Thread.sleep(1);
+                } catch (Exception e) {
+                }
+            }
+        }
+        return true;
+    }
+
+    public static void lockPort(String name) {
+        if (Base.isLinux()) {
+            String bn = new File(name).getName();
+            File lock = new File("/var/lock/", "LCK.." + bn);
+            String procName = ManagementFactory.getRuntimeMXBean().getName();
+            String[] bits = procName.split("@");
+            try {
+                PrintWriter pw = new PrintWriter(lock);
+                pw.println(bits[0]);
+                pw.close();
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public static void unlockPort(String name) {
+        if (Base.isLinux()) {
+            String bn = new File(name).getName();
+            File lock = new File("/var/lock/", "LCK.." + bn);
+            if (lock.exists()) {
+                lock.delete();
+            }
+        }
+    }
 
     public static SerialPort requestPort(String name) {
 
@@ -70,7 +116,13 @@ public class Serial {
                 port.purgePort(1);
                 port.purgePort(2);
                 port.closePort();
+                unlockPort(name);
                 Debug.message("Purged and closed " + name);
+            } else {
+                if (!waitLock(name)) {
+                    Base.error("Timeout waiting for lock on port");
+                    return null;
+                }
             }
 
             Editor.releasePorts(name);
@@ -82,6 +134,9 @@ public class Serial {
                 Base.error(e);
             }
 
+            // If we're on linux then check for a lock on the port:
+
+
             port.openPort();
             Debug.message("Re-opened port");
 
@@ -89,6 +144,8 @@ public class Serial {
                 JOptionPane.showMessageDialog(new Frame(), "The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.", "Port didn't open", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
+
+            lockPort(name);
 
             return port;
 
@@ -109,10 +166,12 @@ public class Serial {
             return;
 
         try {
-            Debug.message("Purged port");
             p.purgePort(1);
             p.purgePort(2);
+            p.setDTR(false);
+            p.setRTS(false);
             p.closePort();
+            unlockPort(p.getPortName());
             Debug.message("Port closed OK");
         } catch(Exception e) {
             Base.error(e);
@@ -216,6 +275,43 @@ public class Serial {
             names = getPortListDefault();
         }
 
+        ArrayList<CommunicationPort> toAdd = new ArrayList<CommunicationPort>();
+        ArrayList<CommunicationPort> toRemove = new ArrayList<CommunicationPort>();
+
+        for (CommunicationPort port : Base.communicationPorts) {
+            if (port instanceof SerialCommunicationPort) {
+                String name = port.toString();
+                if (names.indexOf(name) == -1) {
+                    System.err.println("Removing " + port);
+                    toRemove.add(port);
+                }
+            }
+        }
+
+        for (String name : names) {
+            boolean found = false;
+            for (CommunicationPort port : Base.communicationPorts) {
+                if (port instanceof SerialCommunicationPort) {
+                    String pname = port.toString();
+                    if (pname.equals(name)) {
+                        found = true;
+                    }
+                }
+            }
+            if (found == false) {
+                System.err.println("Adding " + name);
+                toAdd.add(new SerialCommunicationPort(name));
+            }
+        }
+
+        for (CommunicationPort port : toRemove) {
+            Base.communicationPorts.remove(port);
+        }
+
+        for (CommunicationPort port : toAdd) {
+            Base.communicationPorts.add(port);
+        }
+
         if (Base.isUnix()) {
             for(String p : extraPorts) {
                 if(names.indexOf(p) == -1) {
@@ -251,15 +347,15 @@ public class Serial {
             }
         }
 
-        ArrayList<String>toRemove = new ArrayList<String>();
+        ArrayList<String>toRemoveb = new ArrayList<String>();
 
         for(String port : serialPorts.keySet()) {
             if(names.indexOf(port) == -1) {
-                toRemove.add(port);
+                toRemoveb.add(port);
             }
         }
 
-        for(String port : toRemove) {
+        for(String port : toRemoveb) {
             serialPorts.remove(port);
         }
     }
@@ -290,12 +386,12 @@ public class Serial {
     static public void fillExtraPorts() {
         int pnum = 0;
         clearExtraPorts();
-        String pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
+        String pname = Preferences.get("serial.ports." + Integer.toString(pnum));
 
         while(pname != null) {
             addExtraPort(pname);
             pnum++;
-            pname = Base.preferences.get("serial.ports." + Integer.toString(pnum));
+            pname = Preferences.get("serial.ports." + Integer.toString(pnum));
         }
     }
 

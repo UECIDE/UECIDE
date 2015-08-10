@@ -86,7 +86,7 @@ public class Platform {
     }
 
 
-    public File getSettingsFolder() throws Exception {
+    public File getSettingsFolder() {
         try {
             // otherwise make a .uecide directory int the user's home dir
             File home = new File(System.getProperty("user.home"));
@@ -114,7 +114,7 @@ public class Platform {
 
     public void setSettingsFolderEnvironmentVariable() {
         String ev = System.getenv("UECIDE");
-        File fn = Base.getSettingsFolder();
+        File fn = Base.getDataFolder();
         String fp = fn.getAbsolutePath();
 
         if(ev == null || !(ev.equals(fp))) {
@@ -172,14 +172,13 @@ public class Platform {
             } catch(Exception e) {
                 e.printStackTrace();
             }
-
         }
     }
 
 
     public void openURL(String url) {
         try {
-            String launcher = Base.preferences.get("launcher");
+            String launcher = Base.session.get("launcher");
 
             if(launcher != null) {
                 Runtime.getRuntime().exec(new String[] { launcher, url });
@@ -193,13 +192,13 @@ public class Platform {
 
 
     public boolean openFolderAvailable() {
-        return Base.preferences.get("launcher") != null;
+        return Base.session.get("launcher") != null;
     }
 
 
     public void openFolder(File file) {
         try {
-            String launcher = Base.preferences.get("launcher");
+            String launcher = Base.session.get("launcher");
 
             if(launcher != null) {
                 String folder = file.getAbsolutePath();
@@ -267,6 +266,9 @@ public class Platform {
 
             if (flav.equals("debian")) {
                 String v = p.get("VERSION");
+                if (v == null) {
+                    v = "unknown";
+                }
                 Pattern pat = Pattern.compile("\\d+\\s+\\((.*)\\)");
                 Matcher m = pat.matcher(v);
                 if (m.find()) {
@@ -274,6 +276,9 @@ public class Platform {
                 }
             } else if (flav.equals("ubuntu")) {
                 String v = p.get("VERSION");
+                if (v == null) {
+                    v = "unknown";
+                }
                 Pattern pat = Pattern.compile(",\\s+([^\\s]+)\\s+.+");
                 Matcher m = pat.matcher(v);
                 if (m.find()) {

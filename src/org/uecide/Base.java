@@ -40,9 +40,10 @@ import java.util.zip.*;
 import java.util.jar.*;
 import org.uecide.plugin.*;
 
+import javax.script.*;
+
 import org.uecide.builtin.BuiltinCommand;
 import org.uecide.varcmd.VariableCommand;
-
 
 import java.lang.reflect.*;
 
@@ -77,7 +78,7 @@ import org.reflections.scanners.*;
  *  location for application data, and a selection of useful
  *  helper functions.
  */
-public class Base {
+public class Base implements AptPercentageListener {
 
     public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
 
@@ -85,8 +86,6 @@ public class Base {
 
     public static int REVISION = 23;
     public static String RELEASE = "release";
-    public static int BUILDNO = 0;
-    public static String BUILDER = "";
 
     public static String iconSet = defaultIconSet;
 
@@ -137,7 +136,13 @@ public class Base {
     public static PropertyFile session = new PropertyFile();
     public static Theme theme;
 
+    public static PropertyFile preferencesTree = new PropertyFile();
+
     public static HashMap<Object, DiscoveredBoard> discoveredBoards = new HashMap<Object, DiscoveredBoard>();
+
+    public static boolean onlineMode = true;
+
+    public static ArrayList<CommunicationPort> communicationPorts = new ArrayList<CommunicationPort>();
 
     /*! Get a Board from the internal boards list by its short name. */
     public static Board getBoard(String name) {
@@ -194,6 +199,9 @@ public class Base {
     }
 
 
+    public static HashMap<String, String> settings = new HashMap<String, String>();
+
+
     public static boolean autoCompile = false;
     public static boolean autoProgram = false;
     public static String presetPort = null;
@@ -227,10 +235,39 @@ public class Base {
         cli.addParameter("purge", "", Boolean.class, "Purge the cache files");
         cli.addParameter("help", "", Boolean.class, "This help text");
 
-        cli.process(args);
+        cli.addParameter("update", "", Boolean.class, "Update the APT repositories");
+        cli.addParameter("install", "package", String.class, "Install a package");
+        cli.addParameter("remove", "package", String.class, "Uninstall a package");
+        cli.addParameter("upgrade", "", Boolean.class, "Upgrade all packages");
+        cli.addParameter("search", "term", String.class, "Search packages for a term");
+        cli.addParameter("list", "", Boolean.class, "List packages");
+        cli.addParameter("section", "name", String.class, "Restrict to just one section");
+        cli.addParameter("group", "name", String.class, "Restrict to just one group");
+        cli.addParameter("subgroup", "name", String.class, "Restrict to just one subgroup");
+        cli.addParameter("family", "name", String.class, "Restrict to just one family");
+        cli.addParameter("force", "", Boolean.class, "Force an operation to succeed");
+
+        cli.addParameter("mkmf", "", Boolean.class, "Generate a Makefile for a sketch");
+        cli.addParameter("force-local-build", "", Boolean.class, "Force compilation within sketch folder");
+        cli.addParameter("force-save-hex", "", Boolean.class, "Force saving HEX file to sketch folder");
+        cli.addParameter("force-join-files", "", Boolean.class, "Force joining INO and PDE files into single CPP file");
+        cli.addParameter("online", "", Boolean.class, "Force online mode");
+        cli.addParameter("offline", "", Boolean.class, "Force offline mode");
+
+        cli.addParameter("version", "", Boolean.class, "Display the UECIDE version number");
+
+        cli.addParameter("cli", "", Boolean.class, "Enter CLI mode");
+
+        String[] argv = cli.process(args);
 
         headless = cli.isSet("headless");
         boolean loadLastSketch = cli.isSet("last-sketch");
+
+        boolean doExit = false;
+
+        if (cli.isSet("mkmf")) {
+            headless = true;
+        }
 
         Debug.setVerbose(cli.isSet("verbose"));
         if (cli.isSet("debug")) {
@@ -275,8 +312,6 @@ public class Base {
 
             systemVersion = new Version(manifestContents.getValue("Version"));
             REVISION = Integer.parseInt(manifestContents.getValue("Compiled"));
-            BUILDNO = Integer.parseInt(manifestContents.getValue("Build"));
-            BUILDER = manifestContents.getValue("Built-By");
 
             RELEASE = manifestContents.getValue("Release");;
 
@@ -285,54 +320,241 @@ public class Base {
             error(e);
         }
 
+        if (cli.isSet("version")) {
+            System.out.println("UECIDE Version " + systemVersion);
+            System.exit(0);
+        }
+
         // Get the initial basic theme data
         theme = new Theme("/org/uecide/config/theme.txt");
         theme.setPlatformAutoOverride(true);
 
         initPlatform();
 
-        preferences = new PropertyFile(getSettingsFile("preferences.txt"), "/org/uecide/config/preferences.txt");
+        preferences = new PropertyFile(getDataFile("preferences.txt"), "/org/uecide/config/preferences.txt");
         preferences.setPlatformAutoOverride(true);
 
         platform.setSettingsFolderEnvironmentVariable();
 
+
+        if (preferences.getBoolean("network.offline")) {
+            setOfflineMode();
+        }
+
+        if (cli.isSet("online")) {
+            setOnlineMode();
+        }
+
+        if (cli.isSet("offline")) {
+            setOfflineMode();
+        }
+        
+        if (cli.isSet("update")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            apt.update();
+            doExit = true;
+        }
+
+        if (cli.isSet("upgrade")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            Package[] pl = apt.getUpgradeList();
+            for (Package p : pl) {
+                System.out.print("Upgrading " + p.getName() + "...");
+                p.attachPercentageListener(this);
+                apt.upgradePackage(p);
+                System.out.println("...done.");
+            }
+            doExit = true;
+        }
+
+        if (cli.isSet("install")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            String packageName = cli.getString("install");
+            if (packageName == null) {
+                System.err.println("Please specify a package to install");
+                doExit = true;
+            }
+
+            Package p = apt.getPackage(packageName);
+            if (p == null) {
+                System.err.println("Unable to find package " + packageName);
+                System.err.println("Try using --search to find the package.");
+                doExit = true;
+            }
+
+            System.out.print("Installing " + p.getName() + "...");
+            p.attachPercentageListener(this);
+            apt.installPackage(p);
+            System.out.println("...done.");
+            doExit = true;
+        }
+            
+        if (cli.isSet("remove")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            String packageName = cli.getString("remove");
+            if (packageName == null) {
+                System.err.println("Please specify a package to uninstall");
+                doExit = true;
+            }
+
+            Package p = apt.getPackage(packageName);
+            if (p == null) {
+                System.err.println("Unable to find package " + packageName);
+                System.err.println("Try using --search to find the package.");
+                doExit = true;
+            }
+
+            System.out.print("Uninstalling " + p.getName() + "...");
+            p.attachPercentageListener(this);
+            String ret = apt.uninstallPackage(p, cli.isSet("force"));
+            if (ret == null) {
+                System.out.println("...done.");
+            } else {
+                System.err.println("");
+                System.err.println(ret);
+                doExit = true;
+            }
+            doExit = true;
+        }
+
+        if (cli.isSet("list")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            Package[] pkgs = apt.getPackages();
+            String format = "%-50s %10s %10s %s";
+            System.out.println(String.format(format, "Package", "Installed", "Available", ""));
+            ArrayList<Package> out = new ArrayList<Package>();
+            for (Package p : pkgs) {
+                if (cli.isSet("section")) {
+                    if (p.get("Section") == null) { continue; }
+                    if (!p.get("Section").equals(cli.getString("section"))) { continue; }
+                }
+                if (cli.isSet("family")) {
+                    if (p.get("Family") == null) { continue; }
+                    if (!p.get("Family").equals(cli.getString("family"))) { continue; }
+                }
+                if (cli.isSet("group")) {
+                    if (p.get("Group") == null) { continue; }
+                    if (!p.get("Group").equals(cli.getString("group"))) { continue; }
+                }
+                if (cli.isSet("subgroup")) {
+                    if (p.get("Subgroup") == null) { continue; }
+                    if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
+                }
+
+                String name = p.getName();
+                Package instPack = apt.getInstalledPackage(p.getName());
+                Version avail = p.getVersion();
+                Version inst = null;
+                String msg = "";
+                if (instPack != null) {
+                    inst = instPack.getVersion();
+                    if (avail.compareTo(inst) > 0) {
+                        msg = "UPDATE!";
+                    }
+                }
+                System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+                System.out.println("  " + p.getDescriptionLineOne());
+
+            }
+            doExit = true;
+        }
+                
+        if (cli.isSet("search")) {
+            PluginManager pm = new PluginManager();
+            APT apt = pm.getApt();
+            Package[] pkgs = apt.getPackages();
+            String format = "%-50s %10s %10s %s";
+            System.out.println(String.format(format, "Package", "Installed", "Available", ""));
+            ArrayList<Package> out = new ArrayList<Package>();
+            String term = cli.getString("search").toLowerCase();
+            for (Package p : pkgs) {
+                if (cli.isSet("section")) {
+                    if (p.get("Section") == null) { continue; }
+                    if (!p.get("Section").equals(cli.getString("section"))) { continue; }
+                }
+                if (cli.isSet("family")) {
+                    if (p.get("Family") == null) { continue; }
+                    if (!p.get("Family").equals(cli.getString("family"))) { continue; }
+                }
+                if (cli.isSet("group")) {
+                    if (p.get("Group") == null) { continue; }
+                    if (!p.get("Group").equals(cli.getString("group"))) { continue; }
+                }
+                if (cli.isSet("subgroup")) {
+                    if (p.get("Subgroup") == null) { continue; }
+                    if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
+                }
+
+                String name = p.getName();
+                Package instPack = apt.getInstalledPackage(p.getName());
+                Version avail = p.getVersion();
+                Version inst = null;
+                String msg = "";
+                if (instPack != null) {
+                    inst = instPack.getVersion();
+                    if (avail.compareTo(inst) > 0) {
+                        msg = "UPDATE!";
+                    }
+                }
+                String comp = p.getName() + " " + p.getDescription();
+                if (comp.toLowerCase().contains(term)) {
+                    System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+                    System.out.println("  " + p.getDescriptionLineOne());
+                }
+
+            }
+            doExit = true;
+        }
+
+        if (doExit) {
+            System.exit(0);
+        }
+
+        if (cli.isSet("cli")) {
+            headless = true;
+            platform.init(this);
+            compilers = new TreeMap<String, Compiler>();
+            cores = new TreeMap<String, Core>();
+            boards = new TreeMap<String, Board>();
+            plugins = new TreeMap<String, Class<?>>();
+            pluginInstances = new ArrayList<Plugin>();
+
+            Serial.updatePortList();
+            Serial.fillExtraPorts();
+
+            System.out.print("Loading compilers...");
+            loadCompilers();
+            System.out.println("done");
+            System.out.print("Loading cores...");
+            loadCores();
+            System.out.println("done");
+            System.out.print("Loading boards...");
+            loadBoards();
+            System.out.println("done");
+            System.out.print("Loading libraries...");
+            gatherLibraries();
+            System.out.println("done");
+
+            buildPreferencesTree();
+
+            runInitScripts();
+
+            InteractiveCLI icli = new InteractiveCLI(argv);
+            icli.run();
+            System.exit(0);
+        }
+
         Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
         Debug.setSize(new Dimension(preferences.getInteger("debug.window.width"), preferences.getInteger("debug.window.height")));
 
-        ArrayList<String> bundledPlugins = getResourcesFromJarFile(getJarLocation(), "org/uecide/bundles/plugins/", ".jar");
-        File upf = getUserPluginsFolder();
-
-        for(String s : bundledPlugins) {
-            String fn = s.substring(s.lastIndexOf("/") + 1);
-            File dest = new File(upf, fn);
-
-            if(!dest.exists()) {
-                System.err.println("Installing " + fn);
-                copyResourceToFile("/" + s, dest);
-                continue;
-            }
-
-            try {
-                JarFile jf = new JarFile(dest);
-                Manifest manifest = jf.getManifest();
-                Attributes manifestContents = manifest.getMainAttributes();
-                Version oldVersion = new Version(manifestContents.getValue("Version"));
-                String bv = getBundleVersion("/" + s);
-                Version newVersion = new Version(bv);
-
-
-                if(newVersion.compareTo(oldVersion) > 0) {
-                    System.err.println("Upgrading your version of " + fn + " to " + bv);
-                    copyResourceToFile("/" + s, dest);
-                }
-            } catch(Exception e) {
-                error(e);
-            }
-        }
-
         // Now we reload the theme data with user overrides
         // (we didn't know where they were before)
-        theme = new Theme(getSettingsFile("theme.txt"), "/org/uecide/config/theme.txt");
+        theme = new Theme(getDataFile("theme.txt"), "/org/uecide/config/theme.txt");
         theme.setPlatformAutoOverride(true);
 
         if(!headless) {
@@ -345,76 +567,19 @@ public class Base {
             splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
         }
 
+        
+
+        if (!headless) splashScreen.setMessage("Package Manager...", 15);
+        initPackageManager();
+
+
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-
-        try {
-            if(!headless) {
-                if(isUnix()) {
-                    Toolkit xToolkit = Toolkit.getDefaultToolkit();
-                    java.lang.reflect.Field awtAppClassNameField =
-                        xToolkit.getClass().getDeclaredField("awtAppClassName");
-                    awtAppClassNameField.setAccessible(true);
-                    awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
-                }
-
-                String laf = Base.preferences.get("editor.laf");
-
-                UIManager.setLookAndFeel(laf);
-
-                if(laf == null) {
-                    laf = Base.preferences.getPlatformSpecific("editor.laf.default");
-
-                    if(laf != null) {
-                        Base.preferences.set("editor.laf", laf);
-                    }
-                }
-
-                if(laf != null) {
-                    String lafTheme = "";
-
-                    if(laf.indexOf(";") > -1) {
-                        lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
-                        laf = laf.substring(0, laf.lastIndexOf(";"));
-                    }
-
-                    if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
-                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-                        URI themeURI = null;
-
-                        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-                            if(td.getName().equals(lafTheme)) {
-                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
-                                break;
-                            }
-                        }
-                    }
-
-
-                    if(laf.startsWith("com.jtattoo.plaf.")) {
-                        Properties props = new Properties();
-                        props.put("windowDecoration", Base.preferences.getBoolean("editor.laf.decorator") ? "off" : "on");
-                        props.put("logoString", "UECIDE");
-                        props.put("textAntiAliasing", "on");
-
-                        Class<?> cls = Class.forName(laf);
-                        Class[] cArg = new Class[1];
-                        cArg[0] = Properties.class;
-                        Method mth = cls.getMethod("setCurrentTheme", cArg);
-                        mth.invoke(cls, props);
-                    }
-
-                }
-            }
-
-        } catch(Exception e) {
-            error(e);
-        }
 
         // Create a location for untitled sketches
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
-        if(!headless) splashScreen.setMessage("Loading Application...", 20);
+        if(!headless) splashScreen.setMessage("Application...", 20);
 
         platform.init(this);
 
@@ -425,14 +590,14 @@ public class Base {
         toolsFolder = getContentFile("tools");
 
         // Get the sketchbook path, and make sure it's set properly
-        String sketchbookPath = preferences.get("sketchbook.path");
+        String sketchbookPath = preferences.get("locations.sketchbook");
 
 //        Translate.load("swedish");
 
         // If no path is set, get the default sketchbook folder for this platform
         if(sketchbookPath == null) {
             File defaultFolder = getDefaultSketchbookFolder();
-            preferences.set("sketchbook.path", defaultFolder.getAbsolutePath());
+            preferences.set("locations.sketchbook", defaultFolder.getAbsolutePath());
             sketchbookPath = defaultFolder.getAbsolutePath();
         }
 
@@ -451,54 +616,93 @@ public class Base {
         Serial.updatePortList();
         Serial.fillExtraPorts();
 
-        if(!headless) splashScreen.setMessage("Loading Themes...", 25);
+        if(!headless) splashScreen.setMessage("Themes...", 25);
 
         loadThemes();
         theme.fullyParseFile();
 
-        if(!headless) splashScreen.setMessage("Loading Compilers...", 30);
+        if(!headless) splashScreen.setMessage("Compilers...", 30);
 
         loadCompilers();
 
-        if(!headless) splashScreen.setMessage("Loading Cores...", 40);
+        if(!headless) splashScreen.setMessage("Cores...", 40);
 
         loadCores();
 
-        if(!headless) splashScreen.setMessage("Loading Boards...", 50);
+        if(!headless) splashScreen.setMessage("Boards...", 50);
 
         loadBoards();
 
-        if(!headless) splashScreen.setMessage("Loading Plugins...", 60);
+        if (cli.isSet("mkmf")) {
+            for(int i = 0; i < argv.length; i++) {
+                String path = argv[i];
+                if (path.equals(".")) {
+                    path = System.getProperty("user.dir");
+                }
+                Sketch s = new Sketch(path);
+                if(presetPort != null) {
+                    s.setDevice(presetPort);
+                }
+
+                if(presetBoard != null) {
+                    s.setBoard(presetBoard);
+                }
+
+                if(presetCore != null) {
+                    s.setCore(presetCore);
+                }
+
+                if(presetCompiler != null) {
+                    s.setCompiler(presetCompiler);
+                }
+
+                if(presetProgrammer != null) {
+                    s.setProgrammer(presetProgrammer);
+                }
+
+                if (purgeCache) {
+                    s.purgeCache();
+                }
+
+                s.generateMakefile();
+            }
+            System.exit(0);
+        }
+
+        if(!headless) splashScreen.setMessage("Plugins...", 60);
 
         loadPlugins();
 
         loadIconSets();
 
-        if (preferences.get("editor.icons") != null) {
-            if (iconSets.get(preferences.get("editor.icons")) == null) {
+        if (preferences.get("theme.icons") != null) {
+            if (iconSets.get(preferences.get("theme.icons")) == null) {
                 iconSet = defaultIconSet;
             } else {
-                iconSet = preferences.get("editor.icons");
+                iconSet = preferences.get("theme.icons");
             }
         }
 
-        if(!headless) splashScreen.setMessage("Loading Libraries...", 70);
+        if(!headless) splashScreen.setMessage("Libraries...", 70);
 
         gatherLibraries();
 
+        buildPreferencesTree();
+
+
+        runInitScripts();
+
         initMRU();
 
-        if(!headless) splashScreen.setMessage("Opening Editor...", 80);
+        if(!headless) splashScreen.setMessage("Editor...", 80);
+
+        setLookAndFeel();
 
         boolean opened = false;
 
         // Check if any files were passed in on the command line
-        for(int i = 0; i < args.length; i++) {
-            String path = args[i];
-
-            if(path.startsWith("--")) {
-                continue;
-            }
+        for(int i = 0; i < argv.length; i++) {
+            String path = argv[i];
 
             // Fix a problem with systems that use a non-ASCII languages. Paths are
             // being passed in with 8.3 syntax, which makes the sketch loader code
@@ -506,11 +710,15 @@ public class Base {
             // http://dev.processing.org/bugs/show_bug.cgi?id=1089
             if(isWindows()) {
                 try {
-                    File file = new File(args[i]);
+                    File file = new File(argv[i]);
                     path = file.getCanonicalPath();
                 } catch(IOException e) {
                     error(e);
                 }
+            }
+
+            if (path.equals(".")) {
+                path = System.getProperty("user.dir");
             }
 
             File p = new File(path);
@@ -540,13 +748,16 @@ public class Base {
             synchronized (Editor.editorList) {
                 if(boards.size() == 0) {
                     showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                        Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0));
                 } else if(cores.size() == 0) {
                     showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                    Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0));
                 } else if(compilers.size() == 0) {
                     showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                    Editor.editorList.get(0).launchPlugin(plugins.get("org.uecide.plugin.PluginManager"));
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0));
                 }
             }
         }
@@ -589,19 +800,16 @@ public class Base {
     }
     
     /*! Attempt to add a jar file as a URL to the system class loader */
+    @SuppressWarnings("unchecked")
     public static void addURL(URL u) {
         final Class[] parameters = new Class[]{URL.class}; 
         URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         Class sysclass = URLClassLoader.class;
 
         try {
-            Debug.message("...1");
             Method method = sysclass.getDeclaredMethod("addURL", parameters);
-            Debug.message("...2");
             method.setAccessible(true);
-            Debug.message("...3");
             method.invoke(sysloader, new Object[]{u});
-            Debug.message("...4");
         } catch (Throwable ex) {
             Base.error(ex);
         }
@@ -627,7 +835,7 @@ public class Base {
         }
 
         if(presetPort != null) {
-            s.setSerialPort(presetPort);
+            s.setDevice(presetPort);
         }
 
         if(presetBoard != null) {
@@ -792,11 +1000,7 @@ public class Base {
     /*! Load all the compilers into the main compilers list */
     public static void loadCompilers() {
         compilers.clear();
-        loadCompilersFromFolder(getSystemCompilersFolder());
-
-        if(getUserCompilersFolder() != getSystemCompilersFolder()) {
-            loadCompilersFromFolder(getUserCompilersFolder());
-        }
+        loadCompilersFromFolder(getCompilersFolder());
     }
 
     /*! Load any compilers found in the specified folder */
@@ -826,11 +1030,13 @@ public class Base {
                 File cfile = new File(cdir, "compiler.txt");
 
                 if(cfile.exists()) {
-                    Debug.message("    Loading core " + cfile.getAbsolutePath());
+                    Debug.message("    Loading compiler " + cfile.getAbsolutePath());
                     Compiler newCompiler = new Compiler(cdir);
 
                     if(newCompiler.isValid()) {
                         compilers.put(newCompiler.getName(), newCompiler);
+                    } else {    
+                        Debug.message("    ==> IS NOT VALID!!!");
                     }
                 }
             }
@@ -840,11 +1046,7 @@ public class Base {
     /*! Load all the cores into the main cores list */
     public static void loadCores() {
         cores.clear();
-        loadCoresFromFolder(getSystemCoresFolder());
-
-        if(getUserCoresFolder() != getSystemCoresFolder()) {
-            loadCoresFromFolder(getUserCoresFolder());
-        }
+        loadCoresFromFolder(getCoresFolder());
     }
 
     /*! Load any cores found in the specified folder */
@@ -870,6 +1072,8 @@ public class Base {
 
                     if(newCore.isValid()) {
                         cores.put(newCore.getName(), newCore);
+                    } else {    
+                        Debug.message("    ==> IS NOT VALID!!!");
                     }
                 }
             }
@@ -879,11 +1083,7 @@ public class Base {
     /*! Load all the boards into the main boards list */
     public static void loadBoards() {
         boards.clear();
-        loadBoardsFromFolder(getSystemBoardsFolder());
-
-        if(getUserBoardsFolder() != getSystemBoardsFolder()) {
-            loadBoardsFromFolder(getUserBoardsFolder());
-        }
+        loadBoardsFromFolder(getBoardsFolder());
     }
 
     /*! Load any boards found in the specified folder */
@@ -1078,54 +1278,6 @@ public class Base {
         return isLinux() || isFreeBSD() || isMacOS();
     }
 
-    // .................................................................
-
-    public static File getSettingsFolder() {
-        File settingsFolder = null;
-
-        if(overrideSettingsFolder != null) {
-            settingsFolder = new File(overrideSettingsFolder);
-
-            if(!settingsFolder.exists()) {
-                settingsFolder.mkdirs();
-            }
-
-            return settingsFolder;
-        }
-
-        try {
-            settingsFolder = platform.getSettingsFolder();
-        } catch(Exception e) {
-            showError(Translate.t("Problem getting data folder"),
-                      Translate.t("Error getting the data folder."), e);
-            error(e);
-            return null;
-        }
-
-        if(!settingsFolder.exists()) {
-            if(!settingsFolder.mkdirs()) {
-                showError(Translate.t("Settings issues"),
-                          Translate.t("Cannot run because I could not create a folder to store your settings."), null);
-                return null;
-            }
-        }
-
-        return settingsFolder;
-    }
-
-
-    /**
-    * Convenience method to get a File object for the specified filename inside
-    * the settings folder.
-    * For now, only used by Preferences to get the preferences.txt file.
-    * @param filename A file inside the settings folder.
-    * @return filename wrapped as a File object inside the settings folder
-    */
-    public static File getSettingsFile(String filename) {
-        return new File(getSettingsFolder(), filename);
-    }
-
-
     /**
     * Get the path to the platform's temporary folder, by creating
     * a temporary temporary file and getting its parent folder.
@@ -1181,20 +1333,13 @@ public class Base {
         return getContentFile("hardware");
     }
 
-    public static File getSystemLibrariesFolder() {
-        return getContentFile("libraries");
-    }
-
-    public static String getHardwarePath() {
-        return getHardwareFolder().getAbsolutePath();
-    }
-
     public static File getSketchbookFolder() {
-        return new File(preferences.get("sketchbook.path"));
-    }
-
-    public static File getSketchbookHardwareFolder() {
-        return new File(getSketchbookFolder(), "hardware");
+        String sbPath = preferences.get("locations.sketchbook");
+        if (sbPath == null) {
+            preferences.setFile("locations.sketchbook", platform.getDefaultSketchbookFolder());
+            return platform.getDefaultSketchbookFolder();
+        }
+        return new File(preferences.get("locations.sketchbook"));
     }
 
     protected File getDefaultSketchbookFolder() {
@@ -1203,10 +1348,6 @@ public class Base {
         try {
             sketchbookFolder = platform.getDefaultSketchbookFolder();
         } catch(Exception e) { }
-
-        if(sketchbookFolder == null) {
-            sketchbookFolder = promptSketchbookLocation();
-        }
 
         // create the folder if it doesn't exist already
         boolean result = true;
@@ -1222,34 +1363,6 @@ public class Base {
 
         return sketchbookFolder;
     }
-
-
-    /**
-    * Check for a new sketchbook location.
-    */
-    static protected File promptSketchbookLocation() {
-        File folder = null;
-
-        folder = new File(System.getProperty("user.home"), "sketchbook");
-
-        if(!folder.exists()) {
-            folder.mkdirs();
-            return folder;
-        }
-
-        String prompt = Translate.t("Select (or create new) folder for sketches...");
-        folder = Base.selectFolder(prompt, null, null);
-
-        if(folder == null) {
-            System.exit(0);
-        }
-
-        return folder;
-    }
-
-
-    // .................................................................
-
 
     /**
     * Implements the cross-platform headache of opening URLs
@@ -1760,15 +1873,9 @@ public class Base {
             File dead = new File(dir, files[i]);
 
             if(!dead.isDirectory()) {
-                if(!preferences.getBoolean("compiler.save_build_files")) {
-                    if(!dead.delete()) {
-                        // temporarily disabled
-                        error(Translate.t("Could not delete %1", dead.getName()));
-                    }
-                }
+                dead.delete();
             } else {
                 removeDir(dead);
-                //dead.delete();
             }
         }
     }
@@ -1846,8 +1953,6 @@ public class Base {
 
     public static void handleSystemInfo() {
         Editor.broadcast(Translate.t("Version: ") + systemVersion + "\n");
-        Editor.broadcast(Translate.t("Build Number: ") + BUILDNO + "\n");
-        Editor.broadcast(Translate.t("Built By: ") + BUILDER + "\n");
 
         Editor.broadcast(Translate.t("Installed plugins") + ":\n");
 
@@ -1872,29 +1977,48 @@ public class Base {
     }
 
     public static void loadPlugins() {
-        File folder = getUserPluginsFolder();
+        File folder = getPluginsFolder();
         Debug.message("Loading plugins from " + folder);
         File[] files = folder.listFiles();
-        for (File f : files) {
-            Debug.message("  Loading " + f);
-            try {
-                URL u = f.toURI().toURL();
-                addURL(u);
-            } catch (Exception ex) {
-                error(ex);
+        if (files != null) {
+            for (File f : files) {
+                Debug.message("  Loading " + f);
+                try {
+                    URL u = f.toURI().toURL();
+                    addURL(u);
+                } catch (Exception ex) {
+                    error(ex);
+                }
             }
-        }
 
-        Reflections pluginReflections = new Reflections("");
-        try {
-            Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
-            Debug.message(pluginClasses.toString());
-            for (Class<? extends Plugin> c : pluginClasses) {
-                Debug.message("Found plugin class " + c.getName());
-                plugins.put(c.getName(), c);
+            Reflections pluginReflections = new Reflections("org.uecide.plugin");
+            try {
+                Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
+                Debug.message(pluginClasses.toString());
+                for (Class<? extends Plugin> c : pluginClasses) {
+                    Debug.message("Found plugin class " + c.getName());
+                    if (c.getName().equals("org.uecide.plugin.PluginManager")) {
+                        continue;
+                    }
+                    plugins.put(c.getName(), c);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            pluginReflections = new Reflections("com.ardublock");
+            try {
+                Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
+                Debug.message(pluginClasses.toString());
+                for (Class<? extends Plugin> c : pluginClasses) {
+                    Debug.message("Found plugin class " + c.getName());
+                    if (c.getName().equals("org.uecide.plugin.PluginManager")) {
+                        continue;
+                    }
+                    plugins.put(c.getName(), c);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -1957,6 +2081,8 @@ public class Base {
     }
 
     public static void applyPreferences() {
+        setLookAndFeel();
+        Editor.updateLookAndFeel();
     }
 
     public static void reloadPlugins() {
@@ -2046,146 +2172,42 @@ public class Base {
         return temp;
     }
 
-    static public File getUserCacheFolder() {
-        File uf = preferences.getFile("location.cache");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
+    static public File getDataFolder() {
+        File out = null;
+        if (overrideSettingsFolder != null) {
+            out = new File(overrideSettingsFolder);
+        } else {
+            if ((preferences != null) && (preferences.getFile("locations.data") != null)) {
+                out = preferences.getFile("locations.data");
+            } else {
+                out = platform.getSettingsFolder();
             }
-
-            return uf;
         }
-
-        File f = getSettingsFile("cache");
-
-        if(!f.exists()) {
-            f.mkdirs();
+        if (!out.exists()) {
+            out.mkdirs();
         }
-
-        return f;
+        return out;
+    }
+    
+    static public File getDataFolder(String dir) {
+        File out = new File(getDataFolder(), dir);
+        if (!out.exists()) {
+            out.mkdirs();
+        }
+        return out;
     }
 
-
-    static public File getUserCoresFolder() {
-        File uf = preferences.getFile("location.cores");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
-            }
-
-            return uf;
-        }
-
-        File f = getSettingsFile("cores");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
+    static public File getDataFile(String file) {
+        return new File(getDataFolder(), file);
     }
-
-    static public File getSystemCoresFolder() {
-        return new File(getHardwareFolder(), "cores");
-    }
-
-    static public File getUserBoardsFolder() {
-        File uf = preferences.getFile("location.boards");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
-            }
-
-            return uf;
-        }
-
-        File f = getSettingsFile("boards");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    static public File getSystemBoardsFolder() {
-        return new File(getHardwareFolder(), "boards");
-    }
-
-    static public File getSystemThemesFolder() {
-        return new File(getHardwareFolder(), "themes");
-    }
-
-    static public File getUserThemesFolder() {
-        File tf = preferences.getFile("location.themes");
-
-        if(tf != null) {
-            if(!tf.exists()) {
-                tf.mkdirs();
-            }
-
-            return tf;
-        }
-
-        File f = getSettingsFile("themes");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    static public File getUserPluginsFolder() {
-        File uf = preferences.getFile("location.plugins");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
-            }
-
-            return uf;
-        }
-
-        File f = getSettingsFile("plugins");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    static public File getSystemPluginsFolder() {
-        return getContentFile("plugins");
-    }
-
-    static public File getUserCompilersFolder() {
-        File uf = preferences.getFile("location.compilers");
-
-        if(uf != null) {
-            if(!uf.exists()) {
-                uf.mkdirs();
-            }
-
-            return uf;
-        }
-
-        File f = getSettingsFile("compilers");
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        return f;
-    }
-
-    static public File getSystemCompilersFolder() {
-        return new File(getHardwareFolder(), "compilers");
-    }
+    
+    static public File getCacheFolder() { return getDataFolder("cache"); }
+    static public File getCoresFolder() { return getDataFolder("cores"); }
+    static public File getBoardsFolder() { return getDataFolder("boards"); }
+    static public File getThemesFolder() { return getDataFolder("themes"); }
+    static public File getPluginsFolder() { return getDataFolder("plugins"); }
+    static public File getCompilersFolder() { return getDataFolder("compilers"); }
+    static public File getLibrariesFolder() { return getDataFolder("libraries"); }
 
     static public void errorReport(Thread t, Throwable e) {
         showError("Uncaught Exception", "An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")\n" +
@@ -2194,8 +2216,12 @@ public class Base {
     }
 
     static public void broken(Thread t, Throwable e) {
+        if (headless) {
+            e.printStackTrace();
+            return;
+        }
         try {
-            if (Base.preferences.getBoolean("crash.noreport") == false) {
+            if (Preferences.getBoolean("editor.dialog.crash") == true) {
                 CrashReporter rep = new CrashReporter(e);
             }
             e.printStackTrace();
@@ -2290,6 +2316,7 @@ public class Base {
         Thread thr = new Thread() {
             public void run() {
 
+                Editor.lockAll();
                 Editor.bulletAll("Updating serial ports...");
 
                 Serial.updatePortList();
@@ -2301,9 +2328,11 @@ public class Base {
                 rescanBoards();
                 rescanPlugins();
                 rescanLibraries();
+                buildPreferencesTree();
                 Editor.bulletAll("Update complete.");
                 Editor.updateAllEditors();
                 Editor.selectAllEditorBoards();
+                Editor.unlockAll();
             }
         };
         thr.start();
@@ -2403,7 +2432,7 @@ public class Base {
         return new ImageIcon(loc);
     }
 
-    public boolean copyResourceToFile(String res, File dest) {
+    public static boolean copyResourceToFile(String res, File dest) {
         try {
             InputStream from = Base.class.getResourceAsStream(res);
             OutputStream to =
@@ -2480,17 +2509,34 @@ public class Base {
             in.close();
             return new Version(data);
         } catch(Exception e) {
-            error(e);
+            // Unable to get new version details - return nothing.
+            // Also switch to offline mode since there was an error.
+            onlineMode = false;
         }
 
         return null;
     }
 
-    public boolean isNewVersionAvailable() {
-        int time = (int)(System.currentTimeMillis() / 1000L);
-        Base.preferences.setInteger("version.lastcheck", time);
+    public static boolean isOnline() {
+        return onlineMode;
+    }
 
-        if(Base.preferences.getBoolean("version.check")) {
+    public static void setOnlineMode() {
+        onlineMode = true;
+    }
+
+    public static void setOfflineMode() {
+        onlineMode = false;
+    }
+
+    public boolean isNewVersionAvailable() {
+        if (!isOnline()) {
+            return false;
+        }
+        int time = (int)(System.currentTimeMillis() / 1000L);
+        Preferences.setInteger("version.lastcheck", time);
+
+        if(Preferences.getBoolean("editor.version_check")) {
             Version newVersion = getLatestVersion();
 
             if(newVersion == null) {
@@ -2510,7 +2556,7 @@ public class Base {
     // Is it time to check the version?  Was the last version check
     // more than 3 hours ago?
     public boolean isTimeToCheckVersion() {
-        int lastCheck = Base.preferences.getInteger("version.lastcheck");
+        int lastCheck = Preferences.getInteger("version.lastcheck");
         int time = (int)(System.currentTimeMillis() / 1000L);
 
         if(time > (lastCheck + (3 * 60 * 60))) {
@@ -2538,7 +2584,7 @@ public class Base {
     }
 
     public static void loadThemes() {
-        File tf = getUserThemesFolder();
+        File tf = getThemesFolder();
         File[] files = tf.listFiles();
 
         for(File f : files) {
@@ -2732,14 +2778,10 @@ public class Base {
             mid = out.substring(iStart + 2, iEnd);
 
             if(mid.indexOf(":") > -1) {
-         //       if (sketch != null) {
-                    String command = mid.substring(0, mid.indexOf(":"));
-                    String param = mid.substring(mid.indexOf(":") + 1);
+                String command = mid.substring(0, mid.indexOf(":"));
+                String param = mid.substring(mid.indexOf(":") + 1);
 
-                    mid = runFunctionVariable(sketch, command, param);
-//                } else {
-//                    mid = "[context error]";
-//                }
+                mid = runFunctionVariable(sketch, command, param);
             } else {
                 String tmid = tokens.get(mid);
 
@@ -2834,8 +2876,6 @@ public class Base {
     public static void loadIconSets() {
         iconSets = new HashMap<String, PropertyFile>();
 
-        System.err.println("Loading icon sets...");      
-
         Reflections reflections = new Reflections(new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage("org.uecide"))
                 .setScanners(new ResourcesScanner()));
@@ -2846,10 +2886,394 @@ public class Base {
         for (String icon : icons) {
             PropertyFile pf = new PropertyFile("/" + icon);
             if (pf.get("name") != null) {
-                System.err.println("Icon file " + icon + " = " + pf.get("name"));
                 iconSets.put(pf.get("name"), pf);
             }
         }
     }
 
+    // Set a font on a component using the newer style font specification
+
+    public static void setFont(JComponent comp, String key) {
+
+        String themekey = preferences.get("theme.editor", "default");
+        themekey = "theme." + themekey + ".";
+
+        String fontData = preferences.get(key);
+        if (fontData == null) {
+            fontData = theme.get(themekey + key);
+        }
+        if (fontData == null) {
+            return;
+        }
+
+        String[] bits = fontData.split(",");
+
+        Font f = comp.getFont();
+        Color fg = comp.getForeground();
+
+        // Work through each "bit" of the font and decide what it represents, then
+        // set the font data accordingly.
+        
+        for (String bit : bits) {
+            bit = bit.trim();
+
+            // Is it just a number?  If so it represents the size.
+            if (bit.matches("^\\d+$")) {
+                int size = 10;
+                try {
+                    size = Integer.parseInt(bit);
+                } catch (Exception ex) {
+                }
+                f = new Font(f.getFamily(), f.getStyle(), size);
+                continue;
+            }
+
+            // Now look for the style of the font
+            if (bit.equals("plain")) {
+                f = new Font(f.getFamily(), Font.PLAIN, f.getSize());
+                continue;
+            }
+            if (bit.equals("bold")) {
+                f = new Font(f.getFamily(), Font.BOLD, f.getSize());
+                continue;
+            }
+            if (bit.equals("italic")) {
+                f = new Font(f.getFamily(), Font.ITALIC, f.getSize());
+                continue;
+            }
+            if (bit.equals("bolditalic")) {
+                f = new Font(f.getFamily(), Font.BOLD | Font.ITALIC, f.getSize());
+                continue;
+            }
+
+            // Check for a colour starting with a #
+            if (bit.startsWith("#")) {
+                try {
+                    fg = new Color(Integer.parseInt(bit.substring(1), 16));
+                } catch(Exception ex) { 
+                }
+                continue;
+            }
+
+            // Anything else must be the name.
+            f = new Font(bit, f.getStyle(), f.getSize());
+        }
+
+        comp.setFont(f);
+        comp.setForeground(fg);
+
+    }
+
+    int lastPct = -1;
+    public void updatePercentage(Package p, int pct) {
+        if ((pct % 10) == 0) {
+            if (pct != lastPct) {
+                lastPct = pct;
+                System.out.print("+");
+            }
+        }
+    }
+
+    public static boolean yesno(String title, String question) {
+        if (!headless) {
+            return JOptionPane.showOptionDialog(null, question, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.YES_OPTION;
+        }
+        return false;
+    }
+
+    public static void buildPreferencesTree() {
+        preferencesTree = new PropertyFile();
+
+        for(Compiler c : compilers.values()) {
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "compiler:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
+        }
+
+        for(Core c : cores.values()) {
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "core:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
+        }
+
+        for(Board c : boards.values()) {
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "board:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
+        }
+        loadPreferencesTree("/org/uecide/config/prefs.txt");
+    }
+
+    public static void registerPreference(String key, String type, String name, String def) {
+        registerPreference(key, type, name, def, null);
+    }
+        
+    public static void registerPreference(String key, String type, String name, String def, String plat) {
+        preferencesTree.set(key + ".type", type);
+        preferencesTree.set(key + ".name", name);
+        if (plat == null) {
+            preferencesTree.set(key + ".default", def);
+        } else {
+            preferencesTree.set(key + ".default." + plat, def);
+        }
+    }
+
+    public static void loadPreferencesTree(String res) {
+        PropertyFile pf = new PropertyFile(res);
+        preferencesTree.mergeData(pf);
+    }
+
+    public static Object executeJavaScript(String resource, String function, Object[] args) {
+        Object ret = null;
+        try {
+            ScriptEngineManager manager = new ScriptEngineManager();
+            ScriptEngine engine = manager.getEngineByName("JavaScript");
+
+            String script = getResourceAsString(resource);
+
+            if (script == null) { return null; }
+            if (script.equals("")) { return null; }
+
+            engine.eval(script);
+
+            Invocable inv = (Invocable)engine;
+            ret = inv.invokeFunction(function, args);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    public static String getResourceAsString(String resource) {
+        String out = "";
+        try {
+            InputStream from = Base.class.getResourceAsStream(resource);
+            byte[] buffer = new byte[16 * 1024];
+            int bytesRead;
+
+            StringBuilder sb = new StringBuilder();
+
+            String line = null;
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(from));
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+                sb.append("\n");
+            }
+
+            out = sb.toString();
+
+            from.close();
+            from = null;
+        } catch(Exception e) {
+            error(e);
+        }
+        return out;
+    }
+
+    public static HashMap<String, String> getLookAndFeelList() {
+        HashMap<String, String>themes = new HashMap<String, String>();
+        UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
+
+        for(UIManager.LookAndFeelInfo info : lafInfo) {
+            themes.put(info.getClassName(), info.getName());
+        }
+
+        // JTattoo collection
+        themes.put("com.jtattoo.plaf.acryl.AcrylLookAndFeel",          "Acryl");
+        themes.put("com.jtattoo.plaf.aero.AeroLookAndFeel",            "Aero");
+        themes.put("com.jtattoo.plaf.aluminium.AluminiumLookAndFeel",  "Aluminium");
+        themes.put("com.jtattoo.plaf.bernstein.BernsteinLookAndFeel",  "Bernstein");
+        themes.put("com.jtattoo.plaf.fast.FastLookAndFeel",            "Fast");
+        themes.put("com.jtattoo.plaf.graphite.GraphiteLookAndFeel",    "Graphite");
+        themes.put("com.jtattoo.plaf.hifi.HiFiLookAndFeel",            "HiFi");
+        themes.put("com.jtattoo.plaf.luna.LunaLookAndFeel",            "Luna");
+        themes.put("com.jtattoo.plaf.mcwin.McWinLookAndFeel",          "McWin");
+        themes.put("com.jtattoo.plaf.mint.MintLookAndFeel",            "Mint");
+        themes.put("com.jtattoo.plaf.noire.NoireLookAndFeel",          "Noire");
+        themes.put("com.jtattoo.plaf.smart.SmartLookAndFeel",          "Smart");
+
+        // The fifesoft Windows LaF collection is only available on Windows.
+        if(Base.isWindows()) {
+            themes.put("org.fife.plaf.Office2003.Office2003LookAndFeel", "Office 2003");
+            themes.put("org.fife.plaf.OfficeXP.OfficeXPLookAndFeel","Office XP");
+            themes.put("org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel", "Visual Studio 2005");
+        }
+
+        themes.put("com.birosoft.liquid.LiquidLookAndFeel", "Liquid");
+
+        // TinyLAF collection
+
+        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+
+        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+            String themeName = td.getName();
+
+            if(themeName.equals("")) {
+                continue;
+            }
+
+            themes.put("de.muntjak.tinylookandfeel.TinyLookAndFeel;" + themeName, "Tiny: " + themeName);
+        }
+
+        return themes;
+
+    }
+
+    public static HashMap<String, String> getIconSets() {
+        HashMap<String, String> hash = new HashMap<String, String>();
+
+        for (String i : iconSets.keySet()) {
+            hash.put(i, i);
+        }
+        return hash;
+    }
+
+    // This little routine works through each and every board, core and compiler and
+    // runs any "init.script.*" lines.
+    public static void runInitScripts() {
+        for (Board b : boards.values()) {
+            if (b.get("init.script.0") != null) {
+                Context ctx = new Context();
+                ctx.setBoard(b);
+                ctx.executeKey("init.script");
+            }
+        }
+        for (Core c : cores.values()) {
+            if (c.get("init.script.0") != null) {
+                Context ctx = new Context();
+                ctx.setCore(c);
+                ctx.executeKey("init.script");
+            }
+        }
+        for (Compiler c : compilers.values()) {
+            if (c.get("init.script.0") != null) {
+                Context ctx = new Context();
+                ctx.setCompiler(c);
+                ctx.executeKey("init.script");
+            }
+        }
+    }
+
+    // If the package manager hasn't been configured then 
+    // configure it, do an update, and then install the base packages.
+
+    public static void initPackageManager() {
+        try {
+            File aptFolder = getDataFolder("apt");
+            if (!aptFolder.exists()) {
+                aptFolder.mkdirs();
+            }
+            File cacheFolder = new File(aptFolder, "cache");
+            if (!cacheFolder.exists()) {
+                cacheFolder.mkdirs();
+            }
+            File dbFolder = new File(aptFolder, "db");
+            if (!dbFolder.exists()) {
+                dbFolder.mkdirs();
+            }
+            File packagesFolder = new File(dbFolder, "packages");
+            if (!packagesFolder.exists()) {
+                packagesFolder.mkdirs();
+            }
+
+            File sourcesFile = new File(dbFolder, "sources.db");
+            if (!sourcesFile.exists()) {
+                PrintWriter pw = new PrintWriter(sourcesFile);
+                pw.println("deb res://org/uecide/dist uecide boards cores compilers plugins extra libraries");
+                pw.close();
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                apt.update();
+                Package[] packages = apt.getPackages();
+                for (Package p : packages) {
+                    apt.installPackage(p);
+                    System.err.println("Installing " + p);
+                }
+                apt.save();
+
+                PropertyFile props = new PropertyFile(new File(dbFolder, "repositories.db"));
+                apt.addSource(props.get("master.url"), props.get("master.codename"), pm.getCleanOSName(), props.get("master.sections").split("::"));
+                apt.saveSources();
+                apt.update();
+                apt.save();
+            }
+
+        } catch (Exception e) {
+            error(e);
+        }
+
+    }
+
+    public static void setLookAndFeel() {
+        try {
+            if(!headless) {
+                if(isUnix()) {
+                    Toolkit xToolkit = Toolkit.getDefaultToolkit();
+                    java.lang.reflect.Field awtAppClassNameField =
+                        xToolkit.getClass().getDeclaredField("awtAppClassName");
+                    awtAppClassNameField.setAccessible(true);
+                    awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
+                }
+
+                String laf = Preferences.get("theme.window");
+
+                System.err.println("Loading look and feel " + laf);
+
+                try {
+                    UIManager.setLookAndFeel(laf);
+                } catch (Exception badLaf) {
+                    System.err.println("Unable to set LAF");
+                }
+
+
+                if(laf != null) {
+                    String lafTheme = "";
+
+                    if(laf.indexOf(";") > -1) {
+                        lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
+                        laf = laf.substring(0, laf.lastIndexOf(";"));
+                    }
+
+                    if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
+                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
+                        URI themeURI = null;
+
+                        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
+                            if(td.getName().equals(lafTheme)) {
+                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
+                                break;
+                            }
+                        }
+                    }
+
+
+                    if(laf.startsWith("com.jtattoo.plaf.")) {
+                        Properties props = new Properties();
+                        props.put("windowDecoration", Preferences.getBoolean("theme.window_system") ? "off" : "on");
+                        props.put("logoString", "UECIDE");
+                        props.put("textAntiAliasing", "on");
+
+                        Class<?> cls = Class.forName(laf);
+                        Class[] cArg = new Class[1];
+                        cArg[0] = Properties.class;
+                        Method mth = cls.getMethod("setCurrentTheme", cArg);
+                        mth.invoke(cls, props);
+                    }
+
+                }
+            }
+
+        } catch(Exception e) {
+            error(e);
+        }
+    }
 }

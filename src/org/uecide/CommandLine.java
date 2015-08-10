@@ -18,7 +18,7 @@ public class CommandLine {
         parameterComments.put(key, comment);
     }
 
-    public void process(String[] args) {
+    public String[] process(String[] args) {
         parameterValues = new HashMap<String, Object>();
         extraValues = new ArrayList<String>();
 
@@ -86,6 +86,7 @@ public class CommandLine {
                 extraValues.add(arg);
             }
         }
+        return extraValues.toArray(new String[0]);
     }
 
     public void help() {

@@ -64,15 +64,16 @@ public class object extends text {
     public boolean loadFile(File f) {
         file = f;
 
-        StringWriter sw = new StringWriter();
-        sketch.redirectChannel(0, sw);
-        String cmd = "${objdump}::-t::${object.filename}";
-        sketch.settings.put("object.filename", f.getAbsolutePath());
-        String out = sketch.parseString(cmd);
-        sketch.executeCommand(out);
-        sketch.unredirectChannel(0);
+        Context ctx = sketch.getContext();
 
-        textArea.setText(sw.toString());
+        ctx.startBuffer();
+        String cmd = "${objdump}::-t::${object.filename}";
+        ctx.set("object.filename", f.getAbsolutePath());
+        String out = ctx.parseString(cmd);
+        ctx.executeCommand(out, null);
+        String output = ctx.endBuffer();
+
+        textArea.setText(output);
 
         textArea.setCaretPosition(0);
         scrollTo(0);

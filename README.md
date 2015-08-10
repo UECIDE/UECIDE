@@ -117,3 +117,8 @@ with the prefixes:
     bob@computer:~/UECIDE/build$ ant windows-dist
 
 
+
+Build Status
+============
+
+* Travis: ![Build Status](https://api.travis-ci.org/UECIDE/UECIDE.svg)

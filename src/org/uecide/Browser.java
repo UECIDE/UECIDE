@@ -100,7 +100,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
     }
 
     public void refreshTheme() {
-        String theme = Base.preferences.get("theme.selected", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
 
         for (String t : tags) {
@@ -129,7 +129,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
     }
 
     public String craftPage(String content) {
-        String theme = Base.preferences.get("theme.selected", "default");
+        String theme = Preferences.get("theme.editor");
         theme = "theme." + theme + ".";
         StringBuilder sb = new StringBuilder();
 
@@ -204,7 +204,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
             }
         } else {
             clearPage();
-            setText(craftPage("<h1>Manual not available</h1><p>The manual is not available for this core.</p>"));
+            setText(craftPage("<h1>Not Found</h1><p>The file requested could not be found.</p>"));
         }
 
         try {

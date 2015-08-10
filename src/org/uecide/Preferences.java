@@ -41,14 +41,19 @@ import java.net.URI;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.*;
+
+import javax.swing.tree.*;
+
+import org.json.simple.*;
+import org.json.simple.parser.*;
+
 
 import say.swing.*;
 
 import de.muntjak.tinylookandfeel.*;
 
-public class Preferences {
+public class Preferences implements TreeSelectionListener {
 
     // prompt text stuff
 
@@ -92,23 +97,10 @@ public class Preferences {
     int wide, high;
 
     JTextField sketchbookLocationField;
-    JCheckBox exportSeparateBox;
-    JCheckBox deletePreviousBox;
-    JCheckBox compileInSketchFolder;
-    JCheckBox disableLineNumbers;
-    JCheckBox memoryOverrideBox;
-    JTextField memoryField;
     JTextField externalEditorField;
     JTextField editorFontField;
     JTextField consoleFontField;
     JCheckBox autoAssociateBox;
-    JCheckBox saveHex;
-    JCheckBox saveLss;
-    JCheckBox createLss;
-    JCheckBox disablePrototypes;
-    JCheckBox combineIno;
-    JCheckBox verboseCompile;
-    JCheckBox verboseUpload;
     JCheckBox useSpacesForTabs;
     JCheckBox visibleTabs;
     JCheckBox checkNewVersion;
@@ -121,11 +113,7 @@ public class Preferences {
 
     JTabbedPane tabs;
 
-    JTextField pluginsLocationField;
-    JTextField cacheLocationField;
-    JTextField boardsLocationField;
-    JTextField coresLocationField;
-    JTextField compilersLocationField;
+    JTextField dataLocationField;
     JCheckBox  createBackups;
     JTextField backupNumber;
 
@@ -136,11 +124,17 @@ public class Preferences {
     JComboBox selectedIconTheme;
     JCheckBox useSystemDecorator;
 
+    ScrollablePanel advancedTreeBody;
+
+    JCheckBox dlgMissingLibraries;
+
     JList extraPortList;
     DefaultListModel extraPortListModel = new DefaultListModel();
     JTextField portInput;
 
     public static TreeMap<String, String>themes;
+
+    PropertyFile changedPrefs = new PropertyFile();
 
     JTable libraryLocationTable;
     class LibraryDetail {
@@ -149,7 +143,7 @@ public class Preferences {
         public String path;
     };
 
-    class KVPair {
+    class KVPair implements Comparable {
         String key;
         String value;
 
@@ -168,6 +162,11 @@ public class Preferences {
 
         public String getValue() {
             return value;
+        }
+
+        public int compareTo(Object b) {
+            KVPair bo = (KVPair)b;
+            return value.compareTo(bo.getValue());
         }
     }
 
@@ -362,7 +361,7 @@ public class Preferences {
 
 
     static protected void init() {
-        properties = new PropertyFile(Base.getSettingsFile("preferences.txt"), Base.getContentFile("lib/preferences.txt"));
+        properties = new PropertyFile(Base.getDataFile("preferences.txt"), Base.getContentFile("lib/preferences.txt"));
     }
 
 
@@ -403,25 +402,29 @@ public class Preferences {
         buttonLine.add(cancelButton);
         buttonLine.add(okButton);
 
-        JPanel mainSettings = new JPanel(new GridBagLayout());
-        JPanel advancedSettings = new JPanel(new GridBagLayout());
-        JPanel locationSettings = new JPanel(new GridBagLayout());
-        JPanel librarySettings = new JPanel(new GridBagLayout());
+        for(Class<?> pluginClass : Base.plugins.values()) {
+            try {
+                Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
+                if (getPreferencesTree != null) {
+                    PropertyFile pf = (PropertyFile)(getPreferencesTree.invoke(null));
+                    Base.preferencesTree.mergeData(pf);
+                }
+            } catch (Exception e) {
+            }
+        }
 
-        mainSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
+        JPanel advancedSettings = new JPanel(new GridBagLayout());
+        JPanel librarySettings = new JPanel(new GridBagLayout());
+        JPanel treeSettings = new JPanel(); //new GridBagLayout());
+
         advancedSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-        locationSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
         librarySettings.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        tabs.add(Translate.t("Editor"), mainSettings);
-        tabs.add(Translate.t("Compiler"), advancedSettings);
-        tabs.add(Translate.t("Locations"), locationSettings);
         tabs.add(Translate.t("Libraries"), librarySettings);
+        tabs.add(Translate.t("Advanced"), treeSettings);
 
-        populateEditorSettings(mainSettings);
-        populateCompilerSettings(advancedSettings);
-        populateLocationSettings(locationSettings);
         populateLibrarySettings(librarySettings);
+        populateAdvancedSettings(treeSettings);
 
         if(Base.isPosix()) {
             JPanel serialSettings = new JPanel(new GridBagLayout());
@@ -447,47 +450,69 @@ public class Preferences {
 
         // handle window closing commands for ctrl/cmd-W or hitting ESC.
 
-//    pane.addKeyListener(new KeyAdapter() {
-//        public void keyPressed(KeyEvent e) {
-//          KeyStroke wc = Editor.WINDOW_CLOSE_KEYSTROKE;
-//          if ((e.getKeyCode() == KeyEvent.VK_ESCAPE) ||
-//              (KeyStroke.getKeyStrokeForEvent(e).equals(wc))) {
-//            disposeFrame();
-//          }
-//        }
-//      });
-
-        for(Class<?> pluginClass : Base.plugins.values()) {
-            try {
-                Method populatePreferences = pluginClass.getMethod("populatePreferences", JPanel.class);
-                Method getPreferencesTitle = pluginClass.getMethod("getPreferencesTitle");
-
-                if(getPreferencesTitle == null || populatePreferences == null) {
-                    continue;
-                }
-
-                String title = (String)(getPreferencesTitle.invoke(null));
-
-                if(title != null) {
-                    JPanel pluginSettings = new JPanel(new GridBagLayout());
-                    pluginSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-                    populatePreferences.invoke(null, pluginSettings);
-                    tabs.add(title, pluginSettings);
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
-                //Base.error(e);
-            }
-        }
 
         dialog.pack();
-
-        Dimension size = dialog.getSize();
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         if (editor != null) dialog.setLocationRelativeTo(editor);
-//        dialog.setLocation((screen.width - size.width) / 2,
-//                           (screen.height - size.height) / 2);
 
+    }
+
+    class PrefTreeEntry {
+        String key;
+        String name;
+    
+        PrefTreeEntry(String k, String n) {
+            key = k;
+            name = n;
+        }
+        
+        public String getName() { return name; }
+        public String getKey() { return key; }
+        public String toString() { return name; }
+    }
+
+    public void populateAdvancedSettings(JPanel p) {
+        p.setLayout(new BorderLayout());
+
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Preferences");
+        DefaultTreeModel treeModel = new DefaultTreeModel(root);
+
+        JTree tree = new JTree(treeModel);
+        advancedTreeBody = new ScrollablePanel();
+        advancedTreeBody.setLayout(new GridBagLayout());
+
+        
+        JScrollPane tscroll = new JScrollPane(tree);
+        JScrollPane bscroll = new JScrollPane(advancedTreeBody, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tscroll, bscroll);
+
+        advancedTreeBody.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        populatePreferencesTree(root, Base.preferencesTree, null);
+
+        tree.expandPath(new TreePath(root.getPath()));
+        tree.setRootVisible(false);
+
+        p.add(split, BorderLayout.CENTER);
+        tree.addTreeSelectionListener(this);
+    }
+
+    public void populatePreferencesTree(DefaultMutableTreeNode root, PropertyFile pf, String parents) {
+
+        for (String prop : pf.childKeys()) {
+            if (pf.keyExists(prop + ".type")) {
+                if (pf.get(prop + ".type").equals("section")) {
+                    String par = prop;
+                    if (parents != null) {
+                        par = parents + "." + prop;
+                    }
+                    PrefTreeEntry pe = new PrefTreeEntry(par, pf.get(prop + ".name"));
+                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(pe);
+                    root.add(node);
+                    populatePreferencesTree(node, pf.getChildren(prop), par);
+                }
+            }
+        }
     }
 
     public void populateSerialSettings(JPanel p) {
@@ -666,7 +691,7 @@ public class Preferences {
                             UIManager.setLookAndFeel(laf);
                             SwingUtilities.updateComponentTreeUI(dialog);
                             Base.updateLookAndFeel();
-                            dialog.pack();
+//                            dialog.pack();
                             if (editor != null) dialog.setLocationRelativeTo(editor);
                             
                         } catch(Exception ignored) {
@@ -676,7 +701,7 @@ public class Preferences {
             }
         });
 
-        String currentLaf = Base.preferences.get("editor.laf");
+        String currentLaf = Base.preferences.get("theme.window");
 
         for(String k : keys) {
             if(themes.get(k).equals(currentLaf)) {
@@ -690,7 +715,7 @@ public class Preferences {
 
         useSystemDecorator = new JCheckBox(Translate.t("Use System Decorator"));
         p.add(useSystemDecorator, c);
-        useSystemDecorator.setSelected(Base.preferences.getBoolean("editor.laf.decorator"));
+        useSystemDecorator.setSelected(Base.preferences.getBoolean("theme.window_system"));
 
         useSystemDecorator.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -724,7 +749,6 @@ public class Preferences {
                                 props.put("logoString", "UECIDE");
                                 props.put("textAntiAliasing", "on");
 
-                                System.err.println(props.toString());
 
                                 Class<?> cls = Class.forName(laf);
                                 Class[] cArg = new Class[1];
@@ -736,7 +760,7 @@ public class Preferences {
                             UIManager.setLookAndFeel(laf);
                             SwingUtilities.updateComponentTreeUI(dialog);
                             Base.updateLookAndFeel();
-                            dialog.pack();
+//                            dialog.pack();
                             if (editor != null) dialog.setLocationRelativeTo(editor);
                         } catch(Exception ignored) {
                         }
@@ -761,7 +785,7 @@ public class Preferences {
         for(String t : themes.keySet()) {
             KVPair kv = new KVPair(t, themes.get(t));
 
-            if(t.equals(Base.preferences.get("theme.selected", "default"))) {
+            if(t.equals(Base.preferences.get("theme.editor", "default"))) {
                 selectedPair = kv;
             }
 
@@ -837,7 +861,7 @@ public class Preferences {
         editorFontField.setEditable(false);
         p.add(editorFontField, c);
 
-        editorFontField.setText(Base.preferences.get("editor.font"));
+        editorFontField.setText(Base.preferences.get("theme.fonts.editor"));
 
         JButton selectEditorFont = new JButton(Translate.t("Select Font..."));
         c.gridx = 2;
@@ -871,7 +895,7 @@ public class Preferences {
         consoleFontField.setEditable(false);
         p.add(consoleFontField, c);
 
-        consoleFontField.setText(Base.preferences.get("console.font"));
+        consoleFontField.setText(Base.preferences.get("theme.fonts.console"));
 
         JButton selectConsoleFont = new JButton(Translate.t("Select Font..."));
         c.gridx = 2;
@@ -899,76 +923,6 @@ public class Preferences {
             p.add(autoAssociateBox, c);
         }
 
-        c.gridx = 0;
-        c.gridy++;
-        useSpacesForTabs = new JCheckBox(Translate.t("Editor uses spaces for tabs"));
-        p.add(useSpacesForTabs, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        visibleTabs = new JCheckBox(Translate.t("Show tabs and indents"));
-        p.add(visibleTabs, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 1;
-        label = new JLabel("Number of spaces to use for a tab:");
-        p.add(label, c);
-        c.gridx++;
-        tabSize = new JTextField(5);
-        p.add(tabSize, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        keepFindOpen = new JCheckBox(Translate.t("Keep Find & Replace permanantly open"));
-        p.add(keepFindOpen, c);
-        keepFindOpen.setSelected(Base.preferences.getBoolean("editor.keepfindopen"));
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        createBackups = new JCheckBox(Translate.t("Create backup copies of your sketch as you save"));
-        p.add(createBackups, c);
-        createBackups.setSelected(Base.preferences.getBoolean("version.enabled"));
-
-        c.gridx = 0;
-        c.gridwidth = 1;
-        c.gridy++;
-        label = new JLabel(Translate.t("Number of backup copies to keep:"));
-        p.add(label, c);
-        c.gridx++;
-        backupNumber = new JTextField(5);
-        backupNumber.setText(Integer.toString(Base.preferences.getInteger("version.keep")));
-        p.add(backupNumber, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        hideSecondaryToolbar = new JCheckBox(Translate.t("Hide the secondary editor toolbar"));
-        p.add(hideSecondaryToolbar, c);
-        hideSecondaryToolbar.setSelected(Base.preferences.getBoolean("editor.subtoolbar.hidden"));
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        checkNewVersion = new JCheckBox(Translate.t("Check for new version on startup"));
-        p.add(checkNewVersion, c);
-        checkNewVersion.setSelected(Base.preferences.getBoolean("version.check"));
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        autoSave = new JCheckBox(Translate.t("Automatically save sketch before compile"));
-        p.add(autoSave, c);
-        autoSave.setSelected(Base.preferences.getBoolean("editor.autosave"));
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        crashReport = new JCheckBox(Translate.t("Disable crash reporter"));
-        p.add(crashReport, c);
-        crashReport.setSelected(Base.preferences.getBoolean("crash.noreport"));
     }
 
     public void populateLocationSettings(JPanel p) {
@@ -981,118 +935,22 @@ public class Preferences {
 
         c.gridx = 0;
         c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Plugins Location"));
+        lab = new JLabel(Translate.t("Data Location"));
         p.add(lab, c);
         c.gridy++;
         c.gridwidth = 1;
-        pluginsLocationField = new JTextField(40);
-        pluginsLocationField.setEditable(false);
-        p.add(pluginsLocationField, c);
+        dataLocationField = new JTextField(40);
+        dataLocationField.setEditable(false);
+        p.add(dataLocationField, c);
         c.gridx = 1;
         but = new JButton(Translate.t("Select Folder..."));
         but.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                File dflt = new File(pluginsLocationField.getText());
-                File file = Base.selectFolder("Select new plugins location", dflt, dialog);
+                File dflt = new File(dataLocationField.getText());
+                File file = Base.selectFolder("Select new data location", dflt, dialog);
 
                 if(file != null) {
-                    pluginsLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Cache Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        cacheLocationField = new JTextField(40);
-        cacheLocationField.setEditable(false);
-        p.add(cacheLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(cacheLocationField.getText());
-                File file = Base.selectFolder("Select new cache location", dflt, dialog);
-
-                if(file != null) {
-                    cacheLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Boards Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        boardsLocationField = new JTextField(40);
-        boardsLocationField.setEditable(false);
-        p.add(boardsLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(boardsLocationField.getText());
-                File file = Base.selectFolder("Select new boards location", dflt, dialog);
-
-                if(file != null) {
-                    boardsLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Cores Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        coresLocationField = new JTextField(40);
-        coresLocationField.setEditable(false);
-        p.add(coresLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(coresLocationField.getText());
-                File file = Base.selectFolder("Select new cores location", dflt, dialog);
-
-                if(file != null) {
-                    coresLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Compilers Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        compilersLocationField = new JTextField(40);
-        compilersLocationField.setEditable(false);
-        p.add(compilersLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(compilersLocationField.getText());
-                File file = Base.selectFolder("Select new compilers location", dflt, dialog);
-
-                if(file != null) {
-                    compilersLocationField.setText(file.getAbsolutePath());
+                    dataLocationField.setText(file.getAbsolutePath());
                 }
             }
         });
@@ -1103,29 +961,7 @@ public class Preferences {
         c.gridwidth = 1;
         lab = new JLabel(Translate.t("Changing these settings will require a restart of the IDE."));
         p.add(lab, c);
-        c.gridx = 1;
-        c.gridheight = 2;
-
-        but = new JButton(Translate.t("Select All..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(compilersLocationField.getText());
-                File file = Base.selectFolder("Select new location for all items", dflt, dialog);
-
-                if(file != null) {
-                    pluginsLocationField.setText(new File(file, "plugins").getAbsolutePath());
-                    cacheLocationField.setText(new File(file, "cache").getAbsolutePath());
-                    boardsLocationField.setText(new File(file, "boards").getAbsolutePath());
-                    coresLocationField.setText(new File(file, "cores").getAbsolutePath());
-                    compilersLocationField.setText(new File(file, "compilers").getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-
-        c.gridheight = 1;
         c.gridy++;
-
         c.gridx = 0;
         c.gridwidth = 1;
         lab = new JLabel(Translate.t("You will also have to reinstall any plugins, boards, cores and compilers."));
@@ -1133,89 +969,6 @@ public class Preferences {
         c.gridy++;
 
     }
-
-    public void populateCompilerSettings(JPanel p) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 2;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-
-        compileInSketchFolder =
-            new JCheckBox(Translate.t("Compile the sketch in the sketch folder"));
-        compileInSketchFolder.setSelected(Base.preferences.getBoolean("compiler.buildinsketch"));
-        p.add(compileInSketchFolder, c);
-
-        c.gridy++;
-
-        disableLineNumbers =
-            new JCheckBox(Translate.t("Disable insertion of #line numbering (useful for debugging)"));
-        disableLineNumbers.setSelected(Base.preferences.getBoolean("compiler.disableline"));
-        p.add(disableLineNumbers, c);
-
-        c.gridy++;
-
-        deletePreviousBox =
-            new JCheckBox(Translate.t("Remove old build folder before each build"));
-        p.add(deletePreviousBox, c);
-
-        c.gridy++;
-
-        saveHex =
-            new JCheckBox(Translate.t("Save HEX file to sketch folder"));
-        p.add(saveHex, c);
-
-        c.gridy++;
-        createLss =
-            new JCheckBox(Translate.t("Generate assembly listing (requires core support)"));
-        createLss.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                saveLss.setEnabled(createLss.isSelected());
-            }
-        });
-        p.add(createLss, c);
-
-        c.gridy++;
-        c.gridwidth = 1;
-        c.weightx = 0.1;
-        p.add(Box.createHorizontalGlue(), c);
-        c.gridx = 1;
-        c.weightx = 0.9;
-        saveLss =
-            new JCheckBox(Translate.t("Save assembly listing to sketch folder"));
-        p.add(saveLss, c);
-
-        c.gridy++;
-        c.gridx = 0;
-        c.gridwidth = 2;
-
-        disablePrototypes =
-            new JCheckBox(Translate.t("Disable adding of function prototypes"));
-        p.add(disablePrototypes, c);
-
-        c.gridy++;
-        combineIno =
-            new JCheckBox(Translate.t("Combine all INO/PDE files into one CPP file"));
-        p.add(combineIno, c);
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        c.gridy++;
-        verboseCompile =
-            new JCheckBox(Translate.t("Verbose output during compile"));
-        p.add(verboseCompile, c);
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        c.gridy++;
-        verboseUpload =
-            new JCheckBox(Translate.t("Verbose output during upload"));
-        p.add(verboseUpload, c);
-
-
-    }
-
 
     public Dimension getPreferredSize() {
         return new Dimension(wide, high);
@@ -1238,170 +991,15 @@ public class Preferences {
      * then send a message to the editor saying that it's time to do the same.
      */
     protected void applyFrame() {
-        // put each of the settings into the table
-
-        Base.preferences.setBoolean("compiler.buildinsketch", compileInSketchFolder.isSelected());
-        Base.preferences.setBoolean("compiler.disableline", disableLineNumbers.isSelected());
-        Base.preferences.setBoolean("export.delete_target_folder", deletePreviousBox.isSelected());
-        Base.preferences.setBoolean("compiler.generate_lss", createLss.isSelected());
-        Base.preferences.setBoolean("export.save_lss", saveLss.isSelected());
-        Base.preferences.setBoolean("export.save_hex", saveHex.isSelected());
-        Base.preferences.setBoolean("compiler.disable_prototypes", disablePrototypes.isSelected());
-        Base.preferences.setBoolean("compiler.combine_ino", combineIno.isSelected());
-        Base.preferences.setBoolean("compiler.verbose", verboseCompile.isSelected());
-        Base.preferences.setBoolean("export.verbose", verboseUpload.isSelected());
-        Base.preferences.setBoolean("version.enabled", createBackups.isSelected());
-        Base.preferences.setBoolean("editor.keepfindopen", keepFindOpen.isSelected());
-        Base.preferences.set("version.keep", backupNumber.getText());
-        Base.preferences.setBoolean("editor.subtoolbar.hidden", hideSecondaryToolbar.isSelected());
-        Base.preferences.setBoolean("version.check", checkNewVersion.isSelected());
-        Base.preferences.setBoolean("editor.autosave", autoSave.isSelected());
-        Base.preferences.setBoolean("crash.noreport", crashReport.isSelected());
-
-        Base.preferences.setBoolean("editor.expandtabs", useSpacesForTabs.isSelected());
-        Base.preferences.setBoolean("editor.showtabs", visibleTabs.isSelected());
-        Base.preferences.set("editor.tabsize", tabSize.getText());
-        Base.preferences.set("theme.selected", ((KVPair)selectedEditorTheme.getSelectedItem()).getKey());
-
-        Base.preferences.set("editor.icons", (String)selectedIconTheme.getSelectedItem());
-        Base.iconSet = (String)selectedIconTheme.getSelectedItem();
-
-        File f = new File(sketchbookLocationField.getText());
-
-        if(!f.exists()) {
-            f.mkdirs();
-        }
-
-        Base.preferences.setFile("sketchbook.path", f);
-
-//    setBoolean("sketchbook.closing_last_window_quits",
-//               closingLastQuitsBox.isSelected());
-        //setBoolean("sketchbook.prompt", sketchPromptBox.isSelected());
-        //setBoolean("sketchbook.auto_clean", sketchCleanBox.isSelected());
-
-        Base.preferences.set("editor.font", editorFontField.getText());
-        Base.preferences.set("editor.external.command", externalEditorField.getText());
-        Base.preferences.set("console.font", consoleFontField.getText());
-
-        Base.preferences.set("location.plugins", pluginsLocationField.getText());
-        Base.preferences.set("location.cache", cacheLocationField.getText());
-        Base.preferences.set("location.boards", boardsLocationField.getText());
-        Base.preferences.set("location.cores", coresLocationField.getText());
-        Base.preferences.set("location.compilers", compilersLocationField.getText());
-
-        String value = (String)selectedTheme.getSelectedItem();
-        String laf = themes.get(value);
-        Base.preferences.set("editor.laf", laf);
-        Base.preferences.setBoolean("editor.laf.decorator", useSystemDecorator.isSelected());
-
-        if(autoAssociateBox != null) {
-            Base.preferences.setBoolean("platform.auto_file_type_associations", autoAssociateBox.isSelected());
-        }
-
-        for(Class<?> pluginClass : Base.plugins.values()) {
-            try {
-                Method savePreferences = pluginClass.getMethod("savePreferences");
-
-                if(savePreferences == null) {
-                    continue;
-                }
-
-                savePreferences.invoke(null);
-            } catch(Exception e) {
-            }
-        }
-
-        if(Base.isPosix()) {
-            int i = 0;
-            String pref = Base.preferences.get("serial.ports." + Integer.toString(i));
-
-            while(pref != null) {
-                Base.preferences.unset("serial.ports." + Integer.toString(i));
-                i++;
-                pref = Base.preferences.get("serial.ports." + Integer.toString(i));
-            }
-
-            i = 0;
-
-            for(Enumeration en = extraPortListModel.elements(); en.hasMoreElements();) {
-                String s = (String)en.nextElement();
-                Base.preferences.set("serial.ports." + Integer.toString(i), s);
-                i++;
-            }
-
-            Serial.fillExtraPorts();
-        }
-
-        for(String k : Base.preferences.childKeysOf("library")) {
-            Debug.message("Removing library entry " + k);
-            Base.preferences.unset("library." + k + ".name");
-            Base.preferences.unset("library." + k + ".path");
-        }
-
-        for(int i = 0; i < libraryLocationModel.getRowCount(); i++) {
-            String k = (String)libraryLocationModel.getValueAt(i, 0);
-            k = k.toLowerCase();
-            k = k.replaceAll(" ", "_");
-            Base.preferences.set("library." + k + ".name", (String)libraryLocationModel.getValueAt(i, 1));
-            Base.preferences.set("library." + k + ".path", (String)libraryLocationModel.getValueAt(i, 2));
-            Debug.message("Adding library entry " + k);
-        }
-
-        Base.applyPreferences();
+        Base.preferences.mergeData(changedPrefs);
         Base.preferences.save();
+        Base.applyPreferences();
         Base.cleanAndScanAllSettings();
         Editor.refreshAllEditors();
     }
 
 
     protected void showFrame() {
-
-        // set all settings entry boxes to their actual status
-        deletePreviousBox.setSelected(Base.preferences.getBoolean("export.delete_target_folder"));
-        saveHex.setSelected(Base.preferences.getBoolean("export.save_hex"));
-        createLss.setSelected(Base.preferences.getBoolean("compiler.generate_lss"));
-        saveLss.setEnabled(Base.preferences.getBoolean("compiler.generate_lss"));
-        saveLss.setSelected(Base.preferences.getBoolean("export.save_lss"));
-        disablePrototypes.setSelected(Base.preferences.getBoolean("compiler.disable_prototypes"));
-        combineIno.setSelected(Base.preferences.getBoolean("compiler.combine_ino"));
-        verboseCompile.setSelected(Base.preferences.getBoolean("compiler.verbose"));
-        verboseUpload.setSelected(Base.preferences.getBoolean("export.verbose"));
-
-        useSpacesForTabs.setSelected(Base.preferences.getBoolean("editor.expandtabs"));
-        visibleTabs.setSelected(Base.preferences.getBoolean("editor.showtabs"));
-        tabSize.setText(Base.preferences.get("editor.tabsize") == null ? "4" : Base.preferences.get("editor.tabsize"));
-
-        sketchbookLocationField.setText(Base.preferences.get("sketchbook.path"));
-
-        pluginsLocationField.setText(Base.getUserPluginsFolder().getAbsolutePath());
-        cacheLocationField.setText(Base.getUserCacheFolder().getAbsolutePath());
-        boardsLocationField.setText(Base.getUserBoardsFolder().getAbsolutePath());
-        coresLocationField.setText(Base.getUserCoresFolder().getAbsolutePath());
-        compilersLocationField.setText(Base.getUserCompilersFolder().getAbsolutePath());
-
-        if(autoAssociateBox != null) {
-            autoAssociateBox.  setSelected(Base.preferences.getBoolean("platform.auto_file_type_associations"));
-        }
-
-        if(Base.isPosix()) {
-            ArrayList<String> pl = Serial.getExtraPorts();
-
-            extraPortListModel.clear();
-
-            for(String port : pl) {
-                extraPortListModel.addElement(port);
-            }
-        }
-
-        int i = 0;
-
-        for(String k : Base.preferences.childKeysOf("library")) {
-            libraryLocationModel.setValueAt(k, i, 0);
-            libraryLocationModel.setValueAt(Base.preferences.get("library." + k + ".name"), i, 1);
-            libraryLocationModel.setValueAt(Base.preferences.get("library." + k + ".path"), i, 2);
-            i++;
-        }
-
         dialog.setVisible(true);
     }
 
@@ -1569,5 +1167,447 @@ public class Preferences {
             }
         }
     }
+
+    public void populateDialogSettings(JPanel p) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+
+        p.add(new JLabel("Enable or disable different popup dialogs here."), c);
+
+        c.gridy++;
+
+        dlgMissingLibraries = new JCheckBox("Suggest installing missing libraries");
+        dlgMissingLibraries.setSelected(Base.preferences.getBoolean("editor.dialog.missinglibs"));
+        p.add(dlgMissingLibraries, c);
+        
+    }
+
+    public void valueChanged(TreeSelectionEvent e) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)(e.getPath().getLastPathComponent());
+        PrefTreeEntry pe = (PrefTreeEntry)(node.getUserObject());
+
+        PropertyFile pf = Base.preferencesTree.getChildren(pe.getKey());
+        advancedTreeBody.removeAll();
+        advancedTreeBody.setBorder(new EmptyBorder(15, 15, 15, 15));
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+
+        ArrayList<Box> blist = new ArrayList<Box>();
+        int size = 0;
+        for (String pref : pf.childKeys()) {
+            if (pf.keyExists(pref + ".type")) {
+                Box b = addPreferenceEntry(pe.getKey() + "." + pref);
+                if (b != null) {
+                    Dimension s = b.getPreferredSize();
+                    size += s.height;
+                    advancedTreeBody.add(b, c);
+                    c.gridy++;
+                }
+            }
+        }
+
+        Dimension s1 = advancedTreeBody.getPreferredSize();
+        advancedTreeBody.setSize(new Dimension(size, s1.width));
+
+        advancedTreeBody.validate();
+        advancedTreeBody.repaint();
+//        dialog.pack();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Box addPreferenceEntry(String key) {
+
+        final String fkey = key;
+        Box b = Box.createHorizontalBox();
+        b.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        String type = Base.preferencesTree.get(key + ".type");
+        if (type == null) {
+            return null;
+        }
+
+        String name = Base.preferencesTree.get(key + ".name");
+        if (name == null) {
+            return null;
+        }
+
+        // Load the default setting
+        String def = Base.preferencesTree.getPlatformSpecific(key + ".default");
+        if (def == null) {
+            def = "";
+        }
+
+        // Override it with our saved preference
+        String value = Base.preferences.get(key);
+        if (value == null) {
+            value = def;
+        }
+
+        // Override it again with whatever we have already edited
+        String preset = changedPrefs.get(fkey);
+        if (preset != null) {
+            value = preset;
+        }
+
+        if (type.equals("section")) {
+            return null;
+        } else if (type.equals("dirselect")) {
+            b.add(new JLabel(name + ": "));
+            final JTextField f = new JTextField();
+            f.setText(value);
+
+            f.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                }
+            });
+
+            f.addKeyListener(new KeyListener() {
+                public void keyReleased(KeyEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                }
+
+                public void keyPressed(KeyEvent e) {
+                }
+
+                public void keyTyped(KeyEvent e) {
+                }
+            });
+
+            b.add(f);
+            JButton btn = new JButton("Select...");
+            btn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JFileChooser fc = new JFileChooser();
+                    fc.setDialogType(JFileChooser.OPEN_DIALOG);
+                    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    fc.setCurrentDirectory(new File(f.getText()));
+                    fc.setDialogTitle("Select Directory");
+                    int n = fc.showDialog(dialog, "Select");
+                    if (n == JFileChooser.APPROVE_OPTION) {
+                        f.setText(fc.getSelectedFile().getAbsolutePath());
+                        changedPrefs.set(fkey, f.getText());
+                    }
+                }
+            });
+            b.add(btn);
+        } else if (type.equals("fileselect")) {
+            b.add(new JLabel(name + ": "));
+            final JTextField f = new JTextField();
+            f.setText(value);
+
+            f.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                }
+            });
+
+            f.addKeyListener(new KeyListener() {
+                public void keyReleased(KeyEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                }
+
+                public void keyPressed(KeyEvent e) {
+                }
+
+                public void keyTyped(KeyEvent e) {
+                }
+            });
+
+            b.add(f);
+            JButton btn = new JButton("Select...");
+            btn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JFileChooser fc = new JFileChooser();
+                    fc.setDialogType(JFileChooser.OPEN_DIALOG);
+                    fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                    fc.setCurrentDirectory(new File(f.getText()));
+                    fc.setDialogTitle("Select File");
+                    int n = fc.showDialog(dialog, "Select");
+                    if (n == JFileChooser.APPROVE_OPTION) {
+                        f.setText(fc.getSelectedFile().getAbsolutePath());
+                        changedPrefs.set(fkey, f.getText());
+                    }
+                }
+            });
+            b.add(btn);
+        } else if (type.equals("fontselect")) {
+            b.add(new JLabel(name + ": "));
+            final JTextField f = new JTextField();
+            f.setText(value);
+
+            f.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                }
+            });
+
+            f.addKeyListener(new KeyListener() {
+                public void keyReleased(KeyEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                }
+
+                public void keyPressed(KeyEvent e) {
+                }
+
+                public void keyTyped(KeyEvent e) {
+                }
+            });
+
+            b.add(f);
+            JButton btn = new JButton("Select...");
+            btn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+
+
+                    JFontChooser fc = new JFontChooser();
+                    fc.setSelectedFont(stringToFont(f.getText()));
+                    int res = fc.showDialog(dialog);
+
+                    if(res == JFontChooser.OK_OPTION) {
+                        Font fnt = fc.getSelectedFont();
+                        changedPrefs.setFont(fkey, fnt);
+                        f.setText(fontToString(fnt));
+                    }
+                }
+            });
+            b.add(btn);
+        } else if (type.equals("string")) {
+            b.add(new JLabel(name + ": "));
+            final JTextField f = new JTextField();
+            f.setText(value);
+
+            f.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                }
+            });
+
+            f.addKeyListener(new KeyListener() {
+                public void keyReleased(KeyEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                }
+
+                public void keyPressed(KeyEvent e) {
+                }
+
+                public void keyTyped(KeyEvent e) {
+                }
+            });
+            b.add(f);
+        } else if (type.equals("checkbox")) {
+            JCheckBox cb = new JCheckBox(name);
+            cb.setSelected(value.equals("true"));
+            cb.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JCheckBox ecb = (JCheckBox)e.getSource();
+                    changedPrefs.setBoolean(fkey, ecb.isSelected());
+                }
+            });
+            b.add(cb);
+        } else if (type.equals("range")) {
+            b.add(new JLabel(name + ": "));
+            final int vmin = Base.preferencesTree.getInteger(key + ".min");
+            final int vmax = Base.preferencesTree.getInteger(key + ".max");
+            int ival = vmin;
+            try {
+                ival = Integer.parseInt(value);
+            } catch (Exception ee) {
+                ival = vmin;
+            }
+                
+            final JSpinner sb = new JSpinner(new SpinnerNumberModel(
+                ival, vmin, vmax, 1
+            ));
+
+            sb.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent e) {
+                    int val = (Integer)sb.getValue();
+                    changedPrefs.setInteger(fkey, val);
+                }
+            });
+
+
+            b.add(sb);
+        } else if (type.equals("dropdown")) {
+            b.add(new JLabel(name + ": "));
+
+            HashMap<String, String> options = new HashMap<String, String>();
+
+
+            if (Base.preferencesTree.get(key + ".options.script") != null) {
+                String source = Base.preferencesTree.getSource(key + ".options.script");
+                Context ctx = new Context();;
+                System.err.println("Source for " + key + " = " + source);
+                ctx.mergeSettings(Base.preferencesTree);
+                String keyToExecute = key + ".options.script";
+                if (source != null) {
+                    if (source.startsWith("board:")) { ctx.setBoard(Base.boards.get(source.substring(6))); } 
+                    if (source.startsWith("core:")) { ctx.setCore(Base.cores.get(source.substring(5))); } 
+                    if (source.startsWith("compiler:")) { ctx.setCompiler(Base.compilers.get(source.substring(9))); } 
+                    keyToExecute = "prefs." + keyToExecute;
+                }
+
+                ctx.debugDump();
+                
+                Object hash = ctx.executeKey(keyToExecute);
+                if (hash instanceof HashMap) {
+                    options = (HashMap<String, String>)hash;
+                }
+            }
+
+            ArrayList<KVPair> kvlist = new ArrayList<KVPair>();
+            for (String k : options.keySet()) {
+                KVPair kv = new KVPair(k, options.get(k));
+                kvlist.add(kv);
+            }
+            KVPair opList[] = kvlist.toArray(new KVPair[0]);
+            Arrays.sort(opList);
+            JComboBox cb = new JComboBox(opList);
+
+            for (KVPair op : opList) {
+                if (op.getKey().equals(get(key))) {
+                    cb.setSelectedItem(op);
+                }
+            }
+
+            cb.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JComboBox widget = (JComboBox)e.getSource();
+                    KVPair data = (KVPair)widget.getSelectedItem();
+                    changedPrefs.set(fkey, data.getKey());
+                }
+            });
+            b.add(cb);
+        } else {
+            b.add(new JLabel(name + ": "));
+            b.add(new JLabel(value));
+        }
+
+        b.setBorder(new EmptyBorder(2, 2, 2, 2));
+
+        return b;
+    }
+
+    class ScrollablePanel extends JPanel implements Scrollable {
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+           return 10;
+        }
+
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return ((orientation == SwingConstants.VERTICAL) ? visibleRect.height : visibleRect.width) - 10;
+        }
+
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
+    }
+
+    // Interface to the global preferences.  These will first check the user's preferences
+    // file for the value and if not found then will get the value from the .default entry
+    // for the key in the preferences tree.
+
+    public static String get(String key) {
+        String data = Base.preferences.get(key);
+        if (data == null) {
+            data = Base.preferencesTree.get(key + ".default");
+        }
+        return data;
+    }
+
+    public static String[] getArray(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return null;
+        }
+        return data.split("::");
+    }
+
+    public static Boolean getBoolean(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return false;
+        }
+        data = data.toLowerCase();
+        if (data.startsWith("y") || data.startsWith("t")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static Color getColor(String key) {
+        Color parsed = Color.GRAY;
+        String s = get(key);
+
+        if((s != null) && (s.indexOf("#") == 0)) {
+            try {
+                parsed = new Color(Integer.parseInt(s.substring(1), 16));
+            } catch(Exception e) { }
+        }
+
+        return parsed;
+    }
+
+    public static File getFile(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return null;
+        }
+        return new File(data);
+    }
+
+    public static Font getFont(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return Base.preferences.stringToFont("Monospaced,plain,12");
+        }
+        return Base.preferences.stringToFont(data);
+    }
+
+    public static Integer getInteger(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return 0;
+        }
+        int val = 0;
+        try {
+            val = Integer.parseInt(data);
+        } catch (Exception e) {
+        }
+        return val;
+    }
+
+    public static void set(String key, String value) { Base.preferences.set(key, value); Base.preferences.saveDelay(); }
+    public static void setBoolean(String key, Boolean value) { Base.preferences.setBoolean(key, value); Base.preferences.saveDelay(); }
+    public static void setColor(String key, Color value) { Base.preferences.setColor(key, value); Base.preferences.saveDelay(); }
+    public static void setFile(String key, File value) { Base.preferences.setFile(key, value); Base.preferences.saveDelay(); }
+    public static void setFile(String key, Font value) { Base.preferences.setFont(key, value); Base.preferences.saveDelay(); }
+    public static void setInteger(String key, int value) { Base.preferences.setInteger(key, value); Base.preferences.saveDelay(); }
+
+    public static void save() { Base.preferences.save(); }
+
+    public static void unset(String key) { Base.preferences.unset(key); Base.preferences.saveDelay(); }
+        
 }
+
+
 

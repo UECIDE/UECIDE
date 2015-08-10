@@ -67,8 +67,8 @@ public class About {
         info.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         info.setEditable(false);
-        info.setBackground(new Color(0, 0, 0));
-        info.setForeground(new Color(0, 255, 0));
+//        info.setBackground(new Color(0, 0, 0));
+//        info.setForeground(new Color(0, 255, 0));
         Font f = info.getFont();
 
         info.addHyperlinkListener(new HyperlinkListener() {
@@ -87,9 +87,9 @@ public class About {
         info.setEditorKit(kit);
         StyleSheet css = kit.getStyleSheet();
 
-        css.addRule("body {color: #88ff88; font-family: Arial,Helvetica,Sans-Serif;}");
-        css.addRule("a {color: #88ffff;}");
-        css.addRule("a:visited {color: #00aaaa;}");
+//        css.addRule("body {color: #88ff88; font-family: Arial,Helvetica,Sans-Serif;}");
+//        css.addRule("a {color: #88ffff;}");
+//        css.addRule("a:visited {color: #00aaaa;}");
         Document doc = kit.createDefaultDocument();
         info.setDocument(doc);
 
@@ -149,7 +149,6 @@ public class About {
 
         s.append("<h1>" + Base.theme.get("product.cap") + "</h1>");
         s.append("<h4>Version " + Base.systemVersion + "</h4>");
-        s.append("<h4>Build number " + Base.BUILDNO + "</h4>");
         s.append("<br/>");
         s.append("<h4>Contributors:</h4><ul>");
 

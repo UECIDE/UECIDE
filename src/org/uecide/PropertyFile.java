@@ -52,8 +52,12 @@ import java.util.Timer;
  */
 public class PropertyFile {
 
-    Properties defaultProperties;
-    Properties properties;
+    TreeMap<String, String> defaultProperties;
+    TreeMap<String, String> properties;
+    TreeMap<String, String> embedded;
+    TreeMap<String, String> embeddedTypes;
+    TreeMap<String, String> sources;
+
     File userFile;
     boolean doPlatformOverride = false;
 
@@ -71,12 +75,15 @@ public class PropertyFile {
         userFile = null;
 
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(user)));
-            properties = new Properties();
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(user), "UTF-8"));
+            properties = new TreeMap<String, String>();
+            embedded = new TreeMap<String, String>();
+            embeddedTypes = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
 
             if(br != null) {
-                //loadProperties(properties, br);
-                properties.load(br);
+                loadProperties(properties, br);
+//                properties.load(br);
             }
 
             br.close();
@@ -93,23 +100,27 @@ public class PropertyFile {
         userFile = user;
 
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(defaults)));
-            defaultProperties = new Properties();
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(defaults), "UTF-8"));
+            defaultProperties = new TreeMap<String, String>();
 
             if(br != null) {
-//                loadProperties(defaultProperties, br);
-                defaultProperties.load(br);
+                loadProperties(defaultProperties, br);
+//                defaultProperties.load(br);
             }
 
             br.close();
-            properties = new Properties(defaultProperties);
+            properties = new TreeMap<String, String>(defaultProperties);
+            embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+            embeddedTypes = new TreeMap<String, String>();
 
             if(user != null) {
                 if(user.exists()) {
-                    BufferedReader r = new BufferedReader(new FileReader(user));
-//                    loadProperties(properties, r);
-                    properties.load(r);
+                    FileInputStream fis = new FileInputStream(user);
+                    BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    loadProperties(properties, r);
                     r.close();
+                    fis.close();
                 }
             }
         } catch(Exception e) {
@@ -125,30 +136,35 @@ public class PropertyFile {
 
         userFile = user;
 
-        defaultProperties = new Properties();
+        defaultProperties = new TreeMap<String, String>();
 
         if(defaults != null) {
             if(defaults.exists()) {
                 try {
-                    BufferedReader r = new BufferedReader(new FileReader(defaults));
-//                    loadProperties(defaultProperties, r);
-                    defaultProperties.load(r);
+                    FileInputStream fis = new FileInputStream(defaults);
+                    BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    loadProperties(properties, r);
                     r.close();
+                    fis.close();
                 } catch(Exception e) {
                     Base.error(e);
                 }
             }
         }
 
-        properties = new Properties(defaultProperties);
+        properties = new TreeMap<String, String>(defaultProperties);
+        embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+        embeddedTypes = new TreeMap<String, String>();
 
         if(user != null) {
             if(user.exists()) {
                 try {
-                    BufferedReader r = new BufferedReader(new FileReader(user));
-//                    loadProperties(properties, r);
-                    properties.load(r);
+                    FileInputStream fis = new FileInputStream(user);
+                    BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    loadProperties(properties, r);
                     r.close();
+                    fis.close();
                 } catch(Exception e) {
                     Base.error(e);
                 }
@@ -159,23 +175,32 @@ public class PropertyFile {
     /*! Create a new empty PropertyFile. */
     public PropertyFile() {
         userFile = null;
-        defaultProperties = new Properties();
-        properties = new Properties();
+        defaultProperties = new TreeMap<String, String>();
+        properties = new TreeMap<String, String>();
+        embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+        embeddedTypes = new TreeMap<String, String>();
     }
 
     /*! Create a new PropertyFile from a set of properties stored in a TreeMap<String, String> object. */
     public PropertyFile(TreeMap<String, String>data) {
         userFile = null;
-        defaultProperties = new Properties();
-        properties = new Properties();
+        defaultProperties = new TreeMap<String, String>();
+        properties = new TreeMap<String, String>();
+        embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+        embeddedTypes = new TreeMap<String, String>();
         mergeData(data);
     }
 
     /*! Create a new PropertyFile from the contents of an existing PropertyFile. */
     public PropertyFile(PropertyFile pf) {
         userFile = null;
-        defaultProperties = new Properties();
-        properties = new Properties();
+        defaultProperties = new TreeMap<String, String>();
+        properties = new TreeMap<String, String>();
+        embedded = new TreeMap<String, String>();
+            sources = new TreeMap<String, String>();
+        embeddedTypes = new TreeMap<String, String>();
         mergeData(pf);
     }
 
@@ -196,9 +221,13 @@ public class PropertyFile {
             return;
         }
 
-        for(String key : pf.getProperties().stringPropertyNames()) {
-            set(key, pf.getProperties().getProperty(key));
+        for(String key : pf.getProperties().keySet()) {
+            set(key, pf.getProperties().get(key));
+            setSource(key, pf.getSource(key));
         }
+
+        embeddedTypes.putAll(pf.getEmbeddedTypes());
+        embedded.putAll(pf.getEmbeddedMap());
     }
 
     /*! Merge the data from an existing PropertyFile into this PropertyFile prepending *prefix* on to each key. */
@@ -211,8 +240,9 @@ public class PropertyFile {
             prefix += ".";
         }
 
-        for(String key : pf.getProperties().stringPropertyNames()) {
-            set(prefix + key, pf.getProperties().getProperty(key));
+        for(String key : pf.getProperties().keySet()) {
+            set(prefix + key, pf.getProperties().get(key));
+            setSource(prefix + key, pf.getSource(key));
         }
     }
 
@@ -220,17 +250,28 @@ public class PropertyFile {
     public void save() {
         if(userFile != null) {
             try {
-                Properties saveProps = new Properties() {
-                    @Override
+                String[] keylist = properties.keySet().toArray(new String[0]);
+                Arrays.sort(keylist);
 
-                    public synchronized Enumeration<Object> keys() {
-                        return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-                    }
-                };
-                saveProps.putAll(properties);
                 FileWriter w = new FileWriter(userFile);
-                saveProps.store(w, null);
+                PrintWriter pw = new PrintWriter(w);
+                for (String k : keylist) {
+                    String v = properties.get(k);
+                    pw.println(k + "=" + v);
+                }
+
+                for (String embfile : embedded.keySet()) {
+                    String type = embeddedTypes.get(embfile);
+                    pw.println("@begin file=" + embfile + " format=type");
+                    pw.println(embedded.get(embfile));
+                    pw.println("@end");
+                    pw.println();
+                }
+
+                pw.close();
                 w.close();
+
+
                 Debug.message("Saved property file " + userFile.getAbsolutePath());
             } catch(Exception e) {
                 Base.error(e);
@@ -262,25 +303,44 @@ public class PropertyFile {
      *  key.*os* and finally the plain key by itself.
      */
     public String getPlatformSpecific(String attribute) {
-        String t = properties.getProperty(attribute + "." + Base.getOSFullName());
+        String t = properties.get(attribute + "." + Base.getOSFullName());
 
         if(t != null) {
             return t.trim();
         }
 
-        t = properties.getProperty(attribute + "." + Base.getOSName());
+        t = properties.get(attribute + "." + Base.getOSName());
 
         if(t != null) {
             return t.trim();
         }
 
-        t  = properties.getProperty(attribute);
+        t  = properties.get(attribute);
 
         if(t != null) {
             return t.trim();
         }
 
         return null;
+    }
+
+    // Get the platform specific flavour of a key if it exists.
+    public String getPlatformSpecificKey(String attribute) {
+        String k = attribute + "." + Base.getOSFullName();
+        String t = properties.get(k);
+
+        if(t != null) {
+            return k.trim();
+        }
+
+        k = attribute + "." + Base.getOSName();
+        t = properties.get(k);
+
+        if(t != null) {
+            return k.trim();
+        }
+
+        return attribute;
     }
 
     /*! Get a String[] array value from the specified key.  A String array is internally
@@ -292,7 +352,7 @@ public class PropertyFile {
         if(doPlatformOverride) {
             rawData = getPlatformSpecific(attribute);
         } else {
-            rawData = properties.getProperty(attribute);
+            rawData = properties.get(attribute);
         }
 
         if(rawData == null) {
@@ -323,7 +383,7 @@ public class PropertyFile {
             return getPlatformSpecific(attribute);
         }
 
-        String t = properties.getProperty(attribute);
+        String t = properties.get(attribute);
 
         if(t != null) {
             return t.trim();
@@ -334,7 +394,7 @@ public class PropertyFile {
 
     /*! Get the default value for a key rather than the user over-ridden value. */
     public String getDefault(String attribute) {
-        String t = defaultProperties.getProperty(attribute);
+        String t = defaultProperties.get(attribute);
 
         if(t != null) {
             return t.trim();
@@ -353,7 +413,7 @@ public class PropertyFile {
             return;
         }
 
-        properties.setProperty(attribute, value);
+        properties.put(attribute, value);
     }
 
     /*! Unset a key. If a default exists that value will now be the current value. */
@@ -544,7 +604,7 @@ public class PropertyFile {
     }
 
     /*! Return the internal Properties object used to store the data */
-    public Properties getProperties() {
+    public TreeMap<String, String> getProperties() {
         return properties;
     }
 
@@ -559,7 +619,7 @@ public class PropertyFile {
     public TreeMap<String, String> toTreeMap(boolean ps) {
         TreeMap<String, String> map = new TreeMap<String, String>();
 
-        for(String name : properties.stringPropertyNames()) {
+        for(String name : properties.keySet()) {
             if(ps) {
                 if(name.endsWith("." + Base.getOSFullName())) {
                     name = name.substring(0, name.length() - Base.getOSFullName().length() - 1);
@@ -571,7 +631,7 @@ public class PropertyFile {
 
                 map.put(name, getPlatformSpecific(name));
             } else {
-                map.put(name, properties.getProperty(name));
+                map.put(name, properties.get(name));
             }
         }
 
@@ -587,11 +647,12 @@ public class PropertyFile {
                     // want to muller the old properties, so we load them into a fresh
                     // properties object and only replace the old ones with the new if it
                     // is all successful.
-                    Properties newProperties = new Properties(defaultProperties);
-                    BufferedReader r = new BufferedReader(new FileReader(user));
-//                    loadProperties(newProperties, r);
-                    newProperties.load(r);
+                    TreeMap<String, String> newProperties = new TreeMap<String, String>(defaultProperties);
+                    FileInputStream fis = new FileInputStream(user);
+                    BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+                    loadProperties(properties, r);
                     r.close();
+                    fis.close();
                     properties = newProperties;
                 } catch(Exception e) {
                     Base.error(e);
@@ -612,9 +673,9 @@ public class PropertyFile {
             path += ".";
         }
 
-        for(String key : properties.stringPropertyNames()) {
+        for(String key : properties.keySet()) {
             if(key.startsWith(path)) {
-                subset.set(key.substring(path.length()), properties.getProperty(key));
+                subset.set(key.substring(path.length()), properties.get(key));
             }
         }
 
@@ -631,7 +692,7 @@ public class PropertyFile {
     public String[] childKeys() {
         ArrayList<String> keys = new ArrayList<String>();
 
-        for(String key : properties.stringPropertyNames()) {
+        for(String key : properties.keySet()) {
             String[] bits = key.split("\\.");
 
             if(keys.indexOf(bits[0]) == -1) {
@@ -656,8 +717,12 @@ public class PropertyFile {
     }
 
     /*! Return a full Set of the keys in the user data. */
-    public Set<Object> keySet() {
-        return properties.keySet();
+    public ArrayList<String> keySet() {
+        ArrayList<String> ks = new ArrayList<String>();
+        for (Object ob : properties.keySet()) {
+            ks.add((String)ob);
+        }
+        return ks;
     }
 
     /*! Find if a key exists, either as an entry in its
@@ -701,22 +766,26 @@ public class PropertyFile {
         if (data == null) {
             return null;
         }
-        return Base.parseString(data, this, null);
+        Context ctx = new Context();
+        ctx.mergeSettings(this);
+        return ctx.parseString(data);
     }
 
     public void fullyParseFile() {
-        for (String key : properties.stringPropertyNames()) {
+        Context ctx = new Context();
+        ctx.mergeSettings(this);
+        for (String key : properties.keySet()) {
             String data = get(key);
-            data = Base.parseString(data, this, null);
+            data = ctx.parseString(data);
             set(key, data);
         }
     }
 
-    public boolean loadProperties(Properties p, BufferedReader r) {
+    public boolean loadProperties(TreeMap<String, String> p, BufferedReader r) {
         String line;
         Pattern keyval = Pattern.compile("^([^=\\s]+)\\s*=\\s*(.*)$");
-        Pattern filename = Pattern.compile("file\\s*=\\s*([^\\s])+");
-        Pattern format = Pattern.compile("format\\s*=\\s*([^\\s])+");
+        Pattern filename = Pattern.compile("file\\s*=\\s*([^\\s]+)");
+        Pattern format = Pattern.compile("format\\s*=\\s*([^\\s]+)");
         try {
             while ((line = r.readLine()) != null) {
                 line = line.trim();
@@ -734,10 +803,39 @@ public class PropertyFile {
                                 fmt = fmtmatch.group(1);
                             }
                             if (fmt.equals("propertyfile")) {
+                                PropertyFile apf = new PropertyFile(fn);
+                                for (Object k : apf.keySet()) {
+                                    p.put((String)k, apf.get((String)k));
+                                }
                             } else if (fmt.equals("arduino")) {
+                                PropertyFile apf = parseArduinoFile(fn);
+                                for (Object k : apf.keySet()) {
+                                    p.put((String)k, apf.get((String)k));
+                                }
                             }
                         }
+                    } else if (line.startsWith("@begin ")) {
+                        Matcher fnmatch = filename.matcher(line);
+                        Matcher fmtmatch = format.matcher(line);
+                        if (fnmatch.find()) {
+                            String fn = fnmatch.group(1);
+                            String fmt = "javascript";
+                            if (fmtmatch.find()) {
+                                fmt = fmtmatch.group(1);
+                            }
+                            StringBuilder sb = new StringBuilder();
+                            while ((line = r.readLine()) != null) {
+                                if (line.startsWith("@end")) {
+                                    break;
+                                }
+                                sb.append(line);
+                                sb.append("\n");
+                            }
+                            embedded.put(fn, sb.toString());
+                            embeddedTypes.put(fn, fmt);
+                        }
                     }
+                        
                     continue;
                 }
                 while (line.endsWith("\\")) {
@@ -752,11 +850,6 @@ public class PropertyFile {
                 if (kvm.find()) {
                     String k = kvm.group(1);
                     String v = kvm.group(2);
-                    v = v.replace("\\#", "#");
-                    v = v.replace("\\\\", "\\");
-                    if (k.contains("color")) {
-                        System.err.println("[" + k + "] = [" + v + "]");
-                    }
                     p.put(k,v);
                 }
             }
@@ -812,4 +905,37 @@ public class PropertyFile {
         }
         return null;
     }
+
+    public void debugDump() {
+        for (String prop : properties.keySet()) {
+            String source = sources.get(prop);
+            System.err.println(prop + " = " + properties.get(prop) + " (" + source + ")");
+        }        
+    }
+
+    public String getEmbedded(String name) {
+        return embedded.get(name);
+    }
+
+    public byte[] getEmbeddedBinary(String name) {
+        byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(getEmbedded(name));
+        return binary;
+    }
+
+    public void setSource(String k, String s) {
+        sources.put(k, s);
+    }
+
+    public String getSource(String k) {
+        return sources.get(k);
+    }
+
+    public TreeMap<String, String> getEmbeddedMap() {
+        return embedded;
+    }
+    public TreeMap<String, String> getEmbeddedTypes() {
+        return embeddedTypes;
+    }
+
+
 }

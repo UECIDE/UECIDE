@@ -30,7 +30,6 @@
 
 package org.uecide;
 
-import org.uecide.preproc.*;
 import java.util.regex.*;
 
 
@@ -619,8 +618,8 @@ public class Library implements Comparable {
 
         // And finally let's work through the categories.
         for(String k : Base.preferences.childKeysOf("library")) {
-            String cName = Base.preferences.get("library." + k + ".name");
-            String cPath = Base.preferences.get("library." + k + ".path");
+            String cName = Preferences.get("library." + k + ".name");
+            String cPath = Preferences.get("library." + k + ".path");
 
             if(cName != null && cPath != null) {
                 File f = new File(cPath);
@@ -635,9 +634,8 @@ public class Library implements Comparable {
 
         if(foundCats == 0) {
             File f = new File(Base.getSketchbookFolder(), "libraries");
-            Base.preferences.set("library.contrib.name", "Contributed");
-            Base.preferences.setFile("library.contrib.path", f);
-            Base.preferences.saveDelay();
+            Preferences.set("library.contrib.name", "Contributed");
+            Preferences.setFile("library.contrib.path", f);
 
             if(!f.exists()) {
                 f.mkdirs();
@@ -645,6 +643,21 @@ public class Library implements Comparable {
 
             setCategoryName("cat:contrib", "Contributed");
             loadLibrariesFromFolder(f, "cat:contrib");
+        }
+
+        // And now we have our new repo-based libraries.  First scan
+        // a list of categories and their folders:
+
+        File repoLibs = Base.getDataFile("libraries");
+        if (!repoLibs.exists()) {
+            repoLibs.mkdirs();
+        }
+        File[] subcats = repoLibs.listFiles();
+        for (File subcat : subcats) {
+            if ((!subcat.getName().startsWith(".")) && (subcat.isDirectory())) {
+                setCategoryName("repo:" + subcat.getName(), subcat.getName());
+                loadLibrariesFromFolder(subcat, "repo:" + subcat.getName());
+            }
         }
     }
 
@@ -704,7 +717,7 @@ public class Library implements Comparable {
         return null;
     }
 
-    public static TreeSet<String> getLibraryCategories() {
+    public synchronized static TreeSet<String> getLibraryCategories() {
         TreeSet<String> cats = new TreeSet<String>();
 
         for(String cat : categoryNames.keySet()) {
@@ -718,7 +731,7 @@ public class Library implements Comparable {
         String[] bits = group.split(":");
 
         if(bits[0].equals("cat")) {
-            return Base.preferences.getFile("library." + bits[1] + ".path");
+            return Preferences.getFile("library." + bits[1] + ".path");
         }
 
         if(bits[0].equals("core")) {

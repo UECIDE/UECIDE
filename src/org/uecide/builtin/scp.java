@@ -10,7 +10,10 @@ public class scp implements BuiltinCommand {
     String host;
     String user;
 
-    public boolean main(Sketch sketch, String[] arg) {
+    Context ctx;
+
+    public boolean main(Context c, String[] arg) {
+        ctx = c;
         if(arg.length != 2) {
             System.err.println("usage: __builtin_scp file1 user@remotehost:file2");
             return false;
@@ -31,7 +34,7 @@ public class scp implements BuiltinCommand {
             JSch jsch = new JSch();
             session = jsch.getSession(user, host, 22);
 
-            String password = Base.preferences.get("ssh." + host + "." + user);
+            String password = Preferences.get("ssh." + host + "." + user);
 
             if(password == null) {
                 password = Base.session.get("ssh." + host + "." + user);
@@ -41,7 +44,7 @@ public class scp implements BuiltinCommand {
                 password = askPassword();
 
                 if(password == null) {
-                    sketch.error("Unable to log in without a password");
+                    ctx.error("Unable to log in without a password");
                     return false;
                 }
             }
@@ -54,17 +57,17 @@ public class scp implements BuiltinCommand {
             } catch(JSchException e) {
                 if(e.getMessage().equals("Auth fail")) {
                     password = null;
-                    Base.preferences.unset("ssh." + host + "." + user);
+                    Preferences.unset("ssh." + host + "." + user);
                     Base.session.unset("ssh." + host + "." + user);
-                    sketch.error("Authentication failed");
+                    ctx.error("Authentication failed");
                     session.disconnect();
                     return false;
                 } else {
-                    Base.error(e);
+                    ctx.error(e);
                     return false;
                 }
             } catch(Exception e) {
-                Base.error(e);
+                ctx.error(e);
                 return false;
             }
 
@@ -85,7 +88,7 @@ public class scp implements BuiltinCommand {
             channel.connect();
 
             if(checkAck(in) != 0) {
-                sketch.error("Channel open failed");
+                ctx.error("Channel open failed");
                 session.disconnect();
                 return false;
             }
@@ -101,7 +104,7 @@ public class scp implements BuiltinCommand {
                 out.flush();
 
                 if(checkAck(in) != 0) {
-                    sketch.error("Timestamp failed");
+                    ctx.error("Timestamp failed");
                     session.disconnect();
                     return false;
                 }
@@ -122,7 +125,7 @@ public class scp implements BuiltinCommand {
             out.flush();
 
             if(checkAck(in) != 0) {
-                sketch.error("Remote open failed");
+                ctx.error("Remote open failed");
                 session.disconnect();
                 return false;
             }
@@ -143,7 +146,7 @@ public class scp implements BuiltinCommand {
                 fis.close();
                 fis = null;
             } catch(Exception e) {
-                sketch.error("Copy failed: " + e.getMessage());
+                ctx.error("Copy failed: " + e.getMessage());
                 session.disconnect();
 
                 try {
@@ -159,7 +162,7 @@ public class scp implements BuiltinCommand {
             out.flush();
 
             if(checkAck(in) != 0) {
-                sketch.error("Flush failed");
+                ctx.error("Flush failed");
                 session.disconnect();
                 return false;
             }
@@ -175,7 +178,7 @@ public class scp implements BuiltinCommand {
                 session.disconnect();
             }
 
-            sketch.error("Copy failed: " + e.getMessage());
+            ctx.error("Copy failed: " + e.getMessage());
 
             System.out.println(e);
 
@@ -230,12 +233,10 @@ public class scp implements BuiltinCommand {
         }
 
         if(save.isSelected()) {
-            Base.preferences.set("ssh." + host + "." + user, passwordField.getText());
-            Base.preferences.saveDelay();
+            Preferences.set("ssh." + host + "." + user, passwordField.getText());
         }
 
         return passwordField.getText();
     }
-
 
 }

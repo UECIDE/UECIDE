@@ -41,6 +41,7 @@ import javax.swing.*;
 import java.util.regex.*;
 
 import org.uecide.Base;
+import org.uecide.Preferences;
 import org.uecide.PropertyFile;
 import org.uecide.windows.Registry.REGISTRY_ROOT_KEY;
 
@@ -94,13 +95,13 @@ public class Platform extends org.uecide.Platform {
                                         DOC + "\\shell\\open\\command", "");
 
             if(knownCommand == null) {
-                if(Base.preferences.getBoolean("platform.auto_file_type_associations")) {
+                if(Preferences.getBoolean("platform.auto_file_type_associations")) {
                     setAssociations();
                 }
 
             } else if(!knownCommand.equals(openCommand)) {
                 // If the value is set differently, just change the registry setting.
-                if(Base.preferences.getBoolean("platform.auto_file_type_associations")) {
+                if(Preferences.getBoolean("platform.auto_file_type_associations")) {
                     setAssociations();
                 }
             }
@@ -137,7 +138,7 @@ public class Platform extends org.uecide.Platform {
                 // hooray!
 
             } else {
-                Base.preferences.setBoolean("platform.auto_file_type_associations", false);
+                Preferences.setBoolean("platform.auto_file_type_associations", false);
             }
         } catch(Exception e) {
             Base.error(e);
@@ -173,7 +174,7 @@ public class Platform extends org.uecide.Platform {
     }
 
     public void setSettingsFolderEnvironmentVariable() {
-        File settingsFolder = Base.getSettingsFolder();
+        File settingsFolder = Base.getDataFolder();
         String variablePath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, "Environment", "UECIDE");
 
         if(variablePath == null || !(variablePath.equals(settingsFolder.getAbsolutePath()))) {

@@ -20,7 +20,7 @@ public class UsbDiscoveryService extends Service {
     UsbServicesListener listener = null;
 
     public UsbDiscoveryService() {
-        setInterval(1000); // Irelevant for this service really.
+        setInterval(5000); // Irelevant for this service really.
         setName("USB Device Discovery");
     }
 
@@ -50,9 +50,11 @@ public class UsbDiscoveryService extends Service {
         listener = new UsbServicesListener() {
             public void usbDeviceAttached(UsbServicesEvent evt) {
                 deviceAttached(evt.getUsbDevice());
+                System.err.println("USB Add");
             }
             public void usbDeviceDetached(UsbServicesEvent evt) {
                 deviceDetached(evt.getUsbDevice());
+                System.err.println("USB Del");
             }
         
         };

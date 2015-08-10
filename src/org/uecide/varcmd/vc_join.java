@@ -4,7 +4,7 @@ import org.uecide.*;
 import java.io.File;
 
 public class vc_join implements VariableCommand {
-    public String main(Sketch sketch, String args) {
+    public String main(Context sketch, String args) {
         int comma = args.indexOf(",");
         if (comma == -1) {
             return "[syntax error]";

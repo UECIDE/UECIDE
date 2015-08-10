@@ -1,16 +1,14 @@
 Source: uecide
-Section: beta
+Section: embedded
 Priority: extra
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
 Build-Depends: debhelper, javahelper, ant
 Standards-Version: 3.9.3
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: git://git.debian.org/collab-maint/uecide.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/uecide.git;a=summary
+Homepage: http://uecide.org
 
 Package: uecide
 Architecture: all
-Depends: ${java:Depends}, ${misc:Depends}
+Depends: openjdk-7-jdk
 Recommends: ${java:Recommends}
 Description: Universal Embedded Computing IDE
  One IDE to rule them all, one IDE to find them.

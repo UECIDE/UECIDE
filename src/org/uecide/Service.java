@@ -95,12 +95,11 @@ public abstract class Service implements Runnable {
     }
 
     public boolean isAutoStart() {
-        return Base.preferences.getBoolean("service." + getKey() + ".autostart");
+        return Preferences.getBoolean("service." + getKey() + ".autostart");
     }
 
     public void setAutoStart(boolean b) {
-        Base.preferences.setBoolean("service." + getKey() + ".autostart", b);
-        Base.preferences.saveDelay();
+        Preferences.setBoolean("service." + getKey() + ".autostart", b);
     }
 
     public abstract void setup();

@@ -6,7 +6,7 @@ import java.io.*;
 // Given a folder, list all the files with a given extension within that folder.
 
 public class vc_files implements VariableCommand {
-    public String main(Sketch sketch, String args) {
+    public String main(Context sketch, String args) {
         int commaPos = args.indexOf(',');
 
         String path = args;

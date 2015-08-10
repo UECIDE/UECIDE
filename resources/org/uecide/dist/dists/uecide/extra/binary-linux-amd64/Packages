@@ -1,0 +1,34 @@
+Package: uecide-families
+Version: 1.0.4
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 35
+Homepage: http://uecide.org
+Priority: extra
+Section: extra
+Filename: pool/extra/u/uecide-families/uecide-families_1.0.4_all.deb
+Size: 2650
+SHA256: 7ce4b5c22aec7fb3aa151d7d6cf0bed04263fbecb98ea3c277560c3c09e0262a
+SHA1: 75e6a91ef89ae5fa8c9cf3199434e5ba2b35211c
+MD5sum: ea08611307a9ecf16b8c52f0577e9316
+Description: Family grouping control
+ Family grouping control
+Family: pic32
+
+Package: uecide-repositories
+Version: 1.0.1
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 36
+Homepage: http://uecide.org
+Priority: extra
+Section: extra
+Filename: pool/extra/u/uecide-repositories/uecide-repositories_1.0.1_all.deb
+Size: 2724
+SHA256: d1ca569c0f595d3052d43db8165c50763a8da9150849384c169e1ffbc6fbcf19
+SHA1: 11854ea4ac2a93c9f4102b649f85a529eaf53803
+MD5sum: 85c16192fe572c7bffc4771118516a72
+Description: Repository List
+ The list of available UECIDE repositories
+Family: pic32
+
