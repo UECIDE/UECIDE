@@ -35,6 +35,8 @@ public class Context {
 
     PropertyFile savedSettings = null;
 
+    DataStreamParser parser = null;
+
     // Make a new empty context.
 
     public Context() {
@@ -773,42 +775,64 @@ public class Context {
         boolean running = true;
         int result = -1;
 
-        byte[] tmp = new byte[1024];
+        byte[] tmp = new byte[1];
 
+
+        String outline = "";
+        String errline = "";
 
         while(isProcessRunning(runningProcess)) {
             try {
                 while(in.available() > 0) {
-                    int i = in.read(tmp, 0, 1024);
+                    int i = in.read(tmp, 0, 1);
 
                     if(i < 0)break;
                     
-                    String line = new String(tmp, 0, i);
+                    String inch = new String(tmp, 0, i);
+                    if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
+                        outline += inch;
+                    }
 
-                    if (buffer != null) {
-                        buffer.append(line);
-                    } else {                        
-                        messageStream(line);
+                    if (inch.equals("\n")) {
+                        if (parser != null) {
+                            outline = parser.parseStreamMessage(this, outline);
+                        }
+                        if (buffer != null) {
+                            buffer.append(outline);
+                        } else {                        
+                            messageStream(outline);
+                        }
+                        outline = "";
                     }
                 }
 
                 while(err.available() > 0) {
-                    int i = err.read(tmp, 0, 20);
+                    int i = err.read(tmp, 0, 1);
 
                     if(i < 0)break;
+                    
+                    String inch = new String(tmp, 0, i);
+                    if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
+                        errline += inch;
+                    }
 
-                    String line = new String(tmp, 0, i);
-
-                    if (bufferError) {
-                        if (buffer != null) {
-                            buffer.append(line);
-                        } else {                        
-                            errorStream(line);
+                    if (inch.equals("\n")) {
+                        if (parser != null) {
+                            errline = parser.parseStreamError(this, errline);
                         }
-                    } else {
-                        errorStream(line);
+                        if (bufferError) {
+                            if (buffer != null) {
+                                buffer.append(errline);
+                            } else {                        
+                                errorStream(errline);
+                            }
+                        } else {
+                            errorStream(errline);
+                        }
+                        errline = "";
                     }
                 }
+
                 Thread.sleep(1);
 
             } catch(Exception ignored) {
@@ -818,34 +842,78 @@ public class Context {
 
         try {
             while(in.available() > 0) {
-                int i = in.read(tmp, 0, 20);
+                int i = in.read(tmp, 0, 1);
 
                 if(i < 0)break;
+                
+                String inch = new String(tmp, 0, i);
+                if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
+                    outline += inch;
+                }
 
-                String line = new String(tmp, 0, i);
+                if (inch.equals("\n")) {
+                    if (parser != null) {
+                        outline = parser.parseStreamMessage(this, outline);
+                    }
+                    if (buffer != null) {
+                        buffer.append(outline);
+                    } else {                        
+                        messageStream(outline);
+                    }
+                    outline = "";
+                }
+            }
 
+            if (!outline.equals("")) {
+                if (parser != null) {
+                    outline = parser.parseStreamMessage(this, outline);
+                }
                 if (buffer != null) {
-                    buffer.append(line);
+                    buffer.append(outline);
                 } else {                        
-                    messageStream(line);
+                    messageStream(outline);
                 }
             }
 
             while(err.available() > 0) {
-                int i = err.read(tmp, 0, 20);
+                int i = err.read(tmp, 0, 1);
 
                 if(i < 0)break;
+                
+                String inch = new String(tmp, 0, i);
+                if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
+                    errline += inch;
+                }
 
-                String line = new String(tmp, 0, i);
+                if (inch.equals("\n")) {
+                    if (parser != null) {
+                        errline = parser.parseStreamError(this, errline);
+                    }
+                    if (bufferError) {
+                        if (buffer != null) {
+                            buffer.append(errline);
+                        } else {                        
+                            errorStream(errline);
+                        }
+                    } else {
+                        errorStream(errline);
+                    }
+                    errline = "";
+                }
+            }
 
+            if (!errline.equals("")) {
+                if (parser != null) {
+                    errline = parser.parseStreamError(this, errline);
+                }
                 if (bufferError) {
                     if (buffer != null) {
-                        buffer.append(line);
+                        buffer.append(errline);
                     } else {                        
-                        errorStream(line);
+                        errorStream(errline);
                     }
                 } else {
-                    errorStream(line);
+                    errorStream(errline);
                 }
             }
 
@@ -923,5 +991,13 @@ public class Context {
 
     public void rollback() {
         settings = savedSettings;
+    }
+
+    public void addDataStreamParser(DataStreamParser p) {
+        parser = p;
+    }
+
+    public void removeDataStreamParser() {
+        parser = null;
     }
 }

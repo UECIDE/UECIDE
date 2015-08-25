@@ -1389,6 +1389,12 @@ public class Editor extends JFrame {
                                     node.add(fe);
                                 }
                             }
+                            EditorBase eb = null;
+                            int tab = getTabByFile(f);
+                            if (tab != -1) {
+                                eb = getTab(tab);
+                                eb.removeFlagGroup(0x2000);
+                            }
 
                             ArrayList<TodoEntry> todo = loadedSketch.todo(f);
                             if (todo != null && todo.size() > 0) {
@@ -1396,13 +1402,6 @@ public class Editor extends JFrame {
                                 FlaggedList noteList = new FlaggedList(FlaggedList.Green, "Notes");
                                 FlaggedList todoList = new FlaggedList(FlaggedList.Yellow, "To Do");
                                 FlaggedList fixmeList = new FlaggedList(FlaggedList.Red, "Fix Me");
-
-                                EditorBase eb = null;
-                                int tab = getTabByFile(f);
-                                if (tab != -1) {
-                                    eb = getTab(tab);
-                                    eb.removeFlagGroup(0x2000);
-                                }
 
                                 DefaultMutableTreeNode noteEntries = new DefaultMutableTreeNode(noteList);
                                 DefaultMutableTreeNode todoEntries = new DefaultMutableTreeNode(todoList);

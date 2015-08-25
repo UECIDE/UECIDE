@@ -2651,6 +2651,8 @@ public class Sketch implements MessageConsumer {
     }
 
     private File compileFile(File src, File fileBuildFolder) {
+    
+System.err.println("Compile " + src.getAbsolutePath() + " to " + fileBuildFolder.getAbsolutePath());
 
         String fileName = src.getName();
         String recipe = null;
@@ -2702,9 +2704,30 @@ public class Sketch implements MessageConsumer {
         ctx.set("source.name", src.getAbsolutePath());
         ctx.set("object.name", dest.getAbsolutePath());
 
+        ctx.addDataStreamParser(new DataStreamParser() {
+            public String parseStreamMessage(Context ctx, String m) {
+                if (parseLineForWarningMessage(ctx, m)) {
+                    return "";
+                }
+                return m;
+            }
+            public String parseStreamError(Context ctx, String m) {
+                if (parseLineForErrorMessage(ctx, m)) {
+                    return "";
+                }
+                if (parseLineForWarningMessage(ctx, m)) {
+                    return "";
+                }
+                return m;
+            }
+        });
+
+        String output = "";
         if(!(Boolean)ctx.executeKey(recipe)) {
+            ctx.removeDataStreamParser();
             return null;
         }
+        ctx.removeDataStreamParser();
 
         if(!dest.exists()) {
             return null;
@@ -2980,6 +3003,24 @@ public class Sketch implements MessageConsumer {
         ctx.set("build.path", dest.getAbsolutePath());
         String objExt = ctx.parseString(props.get("compiler.object","o"));
 
+        ctx.addDataStreamParser(new DataStreamParser() {
+            public String parseStreamMessage(Context ctx, String m) {
+                if (parseLineForWarningMessage(ctx, m)) {
+                    return "";
+                }
+                return m;
+            }
+            public String parseStreamError(Context ctx, String m) {
+                if (parseLineForErrorMessage(ctx, m)) {
+                    return "";
+                }
+                if (parseLineForWarningMessage(ctx, m)) {
+                    return "";
+                }
+                return m;
+            }
+        });
+
         for(File file : sources) {
             String fileName = file.getName();
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
@@ -2997,11 +3038,15 @@ public class Sketch implements MessageConsumer {
                 continue;
             }
 
-            if(!(Boolean)ctx.executeKey(key))
+            if(!(Boolean)ctx.executeKey(key)) {
+                ctx.removeDataStreamParser();
                 return null;
+            }
 
-            if(!objectFile.exists())
+            if(!objectFile.exists()) {
+                ctx.removeDataStreamParser();
                 return null;
+            }
         }
         return objectPaths;
     }
@@ -4414,4 +4459,69 @@ public class Sketch implements MessageConsumer {
     public String parseString(String s) {
         return ctx.parseString(s);
     }
+
+    public boolean parseLineForErrorMessage(Context ctx, String mess) {
+        PropertyFile props = ctx.getMerged();
+        Pattern p = Pattern.compile(props.get("compiler.error"));
+        Matcher m = p.matcher(mess);
+        if (m.find()) {
+            File errorFile = new File(m.group(1));
+            int errorLineNumber = Integer.parseInt(m.group(2));
+            if (editor != null) {
+                try {
+                    String theme = Preferences.get("theme.editor");
+                    int tabNumber = editor.getTabByFile(errorFile);
+
+                    if(tabNumber > -1) {
+                        EditorBase eb = editor.getTab(tabNumber);
+                        String ecol = "theme." + theme + ".editor.compile.error.bgcolor";
+                        String ecoldata = Base.theme.get(ecol);
+                        eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(ecol));
+                        eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "fixme", 16), 0x1000);
+                    }
+
+                    link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Error at line " + errorLineNumber + " in file " + errorFile.getName());
+
+                } catch (Exception execpt) {
+                }
+            }
+            ctx.bullet2(m.group(3));
+            setLineComment(errorFile, errorLineNumber, m.group(3));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean parseLineForWarningMessage(Context ctx, String mess) {
+        PropertyFile props = ctx.getMerged();
+        Pattern p = Pattern.compile(props.get("compiler.warning"));
+        Matcher m = p.matcher(mess);
+        if (m.find()) {
+            File errorFile = new File(m.group(1));
+            int errorLineNumber = Integer.parseInt(m.group(2));
+            if (editor != null) {
+                try {
+                    String theme = Preferences.get("theme.editor");
+                    int tabNumber = editor.getTabByFile(errorFile);
+
+                    if(tabNumber > -1) {
+                        EditorBase eb = editor.getTab(tabNumber);
+                        String ecol = "theme." + theme + ".editor.compile.warning.bgcolor";
+                        String ecoldata = Base.theme.get(ecol);
+                        eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(ecol));
+                        eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "todo", 16), 0x1001);
+                    }
+
+                    link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Warning at line " + errorLineNumber + " in file " + errorFile.getName());
+
+                } catch (Exception execpt) {
+                }
+            }
+            ctx.warning(m.group(3));
+            setLineComment(errorFile, errorLineNumber, m.group(3));
+            return true;
+        }
+        return false;
+    }
+
 }
