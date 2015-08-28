@@ -1731,7 +1731,7 @@ public class Editor extends JFrame {
                 // If the user object is a string then it must be one of the logical groups.  Work out
                 // which one by what the string says.
 
-                if(o.getUserObject().getClass().equals(String.class)) {
+                if(o.getUserObject() instanceof String) {
                     String s = (String)o.getUserObject();
 
                     if(s.equals(loadedSketch.getName())) {
@@ -1847,7 +1847,7 @@ public class Editor extends JFrame {
 
                     // Otherwise, if the user object is a File, then it must be one of the entries in one
                     // of the groups, except the libraries group.
-                } else if(o.getUserObject().getClass().equals(File.class)) {
+                } else if(o.getUserObject() instanceof File) {
                     File thisFile = (File)o.getUserObject();
 
                     String ee = Preferences.get("editor.external.command");
@@ -1957,7 +1957,7 @@ public class Editor extends JFrame {
 
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_MID, o);
 
-                    if(p.getUserObject().getClass().equals(String.class)) {
+                    if(p.getUserObject() instanceof String) {
                         String ptext = (String)p.getUserObject();
 
                         if(ptext.equals("Binaries")) {
@@ -1987,7 +1987,7 @@ public class Editor extends JFrame {
                     // Otherwise it might be a library.  This generates the menu entries for a
                     // library object.
 
-                } else if(o.getUserObject().getClass().equals(Library.class)) {
+                } else if(o.getUserObject() instanceof Library) {
                     final Library lib = (Library)(o.getUserObject());
                     JMenuItem item = new JMenuItem("Delete cached archive");
                     item.setEnabled(loadedSketch.libraryIsCompiled(lib));
@@ -2050,6 +2050,14 @@ public class Editor extends JFrame {
                         menu.add(item);
                     }
 
+                    item = new JMenuItem("Open library location");
+                    item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            Base.openFolder(lib.getFolder());
+                        }
+                    });
+                    menu.add(item);
+
                     menu.show(sketchContentTree, e.getX(), e.getY());
                 }
 
@@ -2060,7 +2068,7 @@ public class Editor extends JFrame {
                 if(e.getClickCount() == 2) {
                     DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
 
-                    if(o.getUserObject().getClass().equals(File.class)) {
+                    if(o.getUserObject() instanceof File) {
                         File sf = (File)o.getUserObject();
                         openOrSelectFile(sf);
                     }
@@ -2091,7 +2099,7 @@ public class Editor extends JFrame {
                 DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
                 DefaultMutableTreeNode p = (DefaultMutableTreeNode)o.getParent();
 
-                if(o.getUserObject().getClass().equals(File.class)) {
+                if(o.getUserObject() instanceof File) {
                     File thisFile = (File)o.getUserObject();
                     JPopupMenu menu = new JPopupMenu();
 
@@ -2252,7 +2260,7 @@ public class Editor extends JFrame {
                 if(e.getClickCount() == 2) {
                     DefaultMutableTreeNode o = (DefaultMutableTreeNode)selPath.getLastPathComponent();
 
-                    if(o.getUserObject().getClass().equals(File.class)) {
+                    if(o.getUserObject() instanceof File) {
                         File sf = (File)o.getUserObject();
                         String cl = FileType.getEditor(sf);
 
@@ -2413,6 +2421,10 @@ public class Editor extends JFrame {
         }
 
         console.append(msg, Console.LINK);
+    }
+
+    public void parsedMessage(String msg) {
+        console.appendParsed(msg);
     }
 
     public void command(String msg) {

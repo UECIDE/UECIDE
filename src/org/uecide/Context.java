@@ -221,6 +221,19 @@ public class Context {
         }
     }
 
+    public void parsedMessage(String e) {
+        if (editor != null) {
+            editor.parsedMessage(e);
+            return;
+        }
+        if (sketch != null) {
+            sketch.parsedMessage(e);
+            return;
+        }
+        System.out.print(e);
+    }
+
+
     public void link(String e) {
         if (!e.endsWith("\n")) { e += "\n"; }
         if (editor != null) {
@@ -918,10 +931,13 @@ public class Context {
             }
 
         } catch(Exception ignored) {
-            if (ignored.getMessage().equals("Stream closed")) {
-                error("Cancelled");
-            } else {
-                error(ignored);
+            String igm = ignored.getMessage();
+            if (igm != null) {
+                if (igm.equals("Stream closed")) {
+                    error("Cancelled");
+                } else {
+                    error(ignored);
+                }
             }
         }
 

@@ -5,6 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import java.util.regex.*;
 
 public class Console extends JTextPane {
     MutableAttributeSet body = new SimpleAttributeSet();
@@ -143,6 +144,70 @@ public class Console extends JTextPane {
             String[] chunks = message.split("\\|");
             link.addAttribute(LINK_ATTRIBUTE, new URLLinkAction(chunks[0]));
             doAppendString(chunks[1], link);
+        }
+    }
+
+    // Parse a string for sub-types and append each chunk
+    // to the console with the right type.  Pass the chunks through
+    // append() to do the formatting.  Chunks are plain text (body),
+    // or {\type text...} to embed a certain type inside the text
+    public void appendParsed(String message) {
+
+        Pattern pat = Pattern.compile("\\{\\\\(\\w+)\\s*(.*)\\}");
+
+        int openBracketLocation = message.indexOf("{\\");
+        
+        // No open sequence means there's no parsing to do - just
+        // append the text as BODY and leave it at that.
+        if (openBracketLocation == -1) {
+            append(message, BODY);
+            return;
+        }
+
+        while (openBracketLocation >= 0) {
+            String leftChunk = message.substring(0, openBracketLocation);
+            String rightChunk = message.substring(openBracketLocation);
+            int closeBracketLocation = rightChunk.indexOf("}");
+            if (closeBracketLocation == -1) { 
+                // Oops - something went wrong! No close bracket!
+                System.err.println("Badly formatted message: " + message);
+                return;
+            }
+            String block = rightChunk.substring(0, closeBracketLocation + 1);
+            String remainder = rightChunk.substring(closeBracketLocation + 1);
+
+            if (!leftChunk.equals("")) {
+                append(leftChunk, BODY);
+            }
+
+            Matcher m = pat.matcher(block);
+            if (m.find()) {
+                String type = m.group(1);
+                String text = m.group(2);
+                if (type.equals("body")) {
+                    append(text, BODY);
+                } else if (type.equals("warning")) {
+                    append(text, WARNING);
+                } else if (type.equals("error")) {
+                    append(text, ERROR);
+                } else if (type.equals("command")) {
+                    append(text, COMMAND);
+                } else if (type.equals("heading")) {
+                    append(text, HEADING);
+                } else if (type.equals("bullet")) {
+                    append(text, BULLET);
+                } else if (type.equals("bullet2")) {
+                    append(text, BULLET2);
+                } else if (type.equals("link")) {
+                    append(text, LINK);
+                }
+            }
+            
+            message = remainder;
+            openBracketLocation = message.indexOf("{\\");
+        }
+        if (!message.equals("")) {
+            append(message, BODY);
         }
     }
 

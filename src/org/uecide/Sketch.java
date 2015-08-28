@@ -257,8 +257,6 @@ public class Sketch implements MessageConsumer {
 
         ctx.setBoard(board);
 
-        System.err.println("Selecting board " + board);
-
         selectedBoard = board;
         selectedBoardName = selectedBoard.getName();
         Preferences.set("board", board.getName());
@@ -305,8 +303,6 @@ public class Sketch implements MessageConsumer {
 
         ctx.setCore(core);
 
-        System.err.println("Selecting core " + core);
-
         selectedCore = core;
         Preferences.set("board." + selectedBoard.getName() + ".core", core.getName());
         String boardsCompiler = Preferences.get("board." + selectedBoard.getName() + ".compiler");
@@ -348,8 +344,6 @@ public class Sketch implements MessageConsumer {
         }
 
         ctx.setCompiler(compiler);
-
-        System.err.println("Selecting compiler " + compiler);
 
         selectedCompiler = compiler;
         if (selectedBoard == null) {
@@ -555,7 +549,6 @@ public class Sketch implements MessageConsumer {
         setBoard(Preferences.get("board"));
 
         if(selectedBoard != null) {
-            System.err.println("Selecting port " + Preferences.get("board." + selectedBoard.getName() + ".port"));
             String portName = Preferences.get("board." + selectedBoard.getName() + ".port");
 
             if (portName == null) {
@@ -2500,7 +2493,7 @@ public class Sketch implements MessageConsumer {
                 String output = "";
 
                 try {
-                    ctx.startBuffer();
+                    ctx.startBuffer(true);
                     result = compileLSS();
                     output = ctx.endBuffer();
                     PrintWriter pw = new PrintWriter(redirectTo);
@@ -2652,8 +2645,6 @@ public class Sketch implements MessageConsumer {
 
     private File compileFile(File src, File fileBuildFolder) {
     
-System.err.println("Compile " + src.getAbsolutePath() + " to " + fileBuildFolder.getAbsolutePath());
-
         String fileName = src.getName();
         String recipe = null;
 
@@ -4480,12 +4471,25 @@ System.err.println("Compile " + src.getAbsolutePath() + " to " + fileBuildFolder
                         eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "fixme", 16), 0x1000);
                     }
 
-                    link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Error at line " + errorLineNumber + " in file " + errorFile.getName());
+                    String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
+
+                    if (containsFile(errorFile)) {
+                        String errmess = String.format(
+                            "{\\bullet}{\\error Error at }{\\link %s|line %d in file %s}{\\error :}\n",
+                                linkUrl, errorLineNumber, errorFile.getName());
+
+                        ctx.parsedMessage(errmess);
+
+                    } else {
+                        ctx.parsedMessage("{\\bullet}{\\error Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
+                    }
 
                 } catch (Exception execpt) {
                 }
+            } else {
+                ctx.error("Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":");
             }
-            ctx.bullet2(m.group(3));
+            ctx.parsedMessage("{\\bullet2}{\\error " + m.group(3) + "}\n");
             setLineComment(errorFile, errorLineNumber, m.group(3));
             return true;
         }
@@ -4511,17 +4515,42 @@ System.err.println("Compile " + src.getAbsolutePath() + " to " + fileBuildFolder
                         eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(ecol));
                         eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "todo", 16), 0x1001);
                     }
+                    String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
 
-                    link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Warning at line " + errorLineNumber + " in file " + errorFile.getName());
+                    if (containsFile(errorFile)) {
+                        String errmess = String.format(
+                            "{\\bullet}{\\warning Warning at }{\\link %s|line %d in file %s}{\\warning :}\n",
+                                linkUrl, errorLineNumber, errorFile.getName());
+
+                        ctx.parsedMessage(errmess);
+
+                    } else {
+                        ctx.parsedMessage("{\\bullet}{\\warning Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
+                    }
 
                 } catch (Exception execpt) {
                 }
+            } else {
+                ctx.warning("Warning at line " + errorLineNumber + " in file " + errorFile.getName() + ":");
             }
-            ctx.warning(m.group(3));
+            ctx.parsedMessage("{\\bullet2}{\\warning " + m.group(3) + "}\n");
             setLineComment(errorFile, errorLineNumber, m.group(3));
             return true;
         }
         return false;
+    }
+
+    public boolean containsFile(File f) {
+        for (File q : sketchFiles) {
+            if (q.getAbsolutePath().equals(f.getAbsolutePath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void parsedMessage(String e) {
+        System.out.print(e);
     }
 
 }

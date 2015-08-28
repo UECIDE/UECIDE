@@ -181,15 +181,22 @@ public class PluginManager implements PropertyChangeListener
             longDesc += "Usage:\n";
             longDesc += "------\n";
             longDesc += "    #include <" + pe.get("Provides").replace("-UL-","_") + ">\n";
+        }
 
-            longDesc += "\n\n----\n\n";
-            longDesc += "Available: ";
-            longDesc += pe.getVersion();
-            Package ipe = apt.getInstalledPackage(pe.getName());
-            if (ipe != null) {
-                longDesc += " Installed: ";
-                longDesc += ipe.getVersion();
-            }
+        longDesc += "\n\n----\n\n";
+        longDesc += "* Available: ";
+        longDesc += pe.getVersion();
+        longDesc += "\n";
+        Package ipe = apt.getInstalledPackage(pe.getName());
+        if (ipe != null) {
+            longDesc += "* Installed: ";
+            longDesc += ipe.getVersion();
+            longDesc += "\n";
+        }
+        if (pe.get("Softwareversion") != null) {
+            longDesc += "* Content Version: ";
+            longDesc += pe.get("Softwareversion");
+            longDesc += "\n";
         }
 
         try {
