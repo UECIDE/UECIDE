@@ -380,6 +380,10 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         setResizable(true);
         setLayout(new BorderLayout());
         setModalityType(ModalityType.APPLICATION_MODAL);
+        JPanel outer = new JPanel();
+
+        outer.setBorder(new EmptyBorder(10, 10, 10, 10));
+        outer.setLayout(new BorderLayout());
 
         Box buttonLine = Box.createHorizontalBox();
         buttonLine.add(Box.createHorizontalGlue());
@@ -401,7 +405,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         buttonLine.add(cancelButton);
         buttonLine.add(okButton);
 
-        add(buttonLine, BorderLayout.SOUTH);
+        outer.add(buttonLine, BorderLayout.SOUTH);
 
         for(Class<?> pluginClass : Base.plugins.values()) {
             try {
@@ -416,13 +420,15 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
         JPanel treeSettings = new JPanel();
         populateAdvancedSettings(treeSettings);
-        add(treeSettings, BorderLayout.CENTER);
+        outer.add(treeSettings, BorderLayout.CENTER);
 
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 disposeFrame();
             }
         });
+
+        add(outer, BorderLayout.CENTER);
 
         ActionListener disposer = new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
