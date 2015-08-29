@@ -771,13 +771,17 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                     keyToExecute = "prefs." + keyToExecute;
                 }
 
-                ctx.debugDump();
-                
                 Object hash = ctx.executeKey(keyToExecute);
                 if (hash instanceof HashMap) {
                     options = (HashMap<String, String>)hash;
                 }
 
+            } else {
+                PropertyFile opts = Base.preferencesTree.getChildren(key + ".options");
+                String[] keys = opts.childKeys();
+                for (String k : keys) {
+                    options.put(k, opts.get(k));
+                }
             }
 
             ArrayList<KVPair> kvlist = new ArrayList<KVPair>();

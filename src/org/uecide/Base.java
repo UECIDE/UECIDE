@@ -3002,6 +3002,21 @@ public class Base implements AptPercentageListener {
             }
             preferencesTree.mergeData(prefs);
         }
+
+        for (String p : plugins.keySet()) {
+            try {
+                Class<?> plg = plugins.get(p);
+                Method m = plg.getMethod("getPreferencesTree");
+                Object[] foo = null;
+                PropertyFile prefs = (PropertyFile)m.invoke(null, foo);
+                for (String k : prefs.keySet()) {
+                    prefs.setSource(k, "plugin:" + p);
+                }
+                preferencesTree.mergeData(prefs);
+            } catch (Exception e) {
+            }
+        }
+
         loadPreferencesTree("/org/uecide/config/prefs.txt");
     }
 
