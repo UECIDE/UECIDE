@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -419,6 +419,18 @@ public class PropertyFile {
     /*! Unset a key. If a default exists that value will now be the current value. */
     public void unset(String attribute) {
         properties.remove(attribute);
+    }
+
+    /*! Remove a key and any children of that key */
+    public void removeAll(String key) {
+        properties.remove(key);
+        String[] keys = properties.keySet().toArray(new String[0]);
+        for (String thiskey : keys) {
+            if (thiskey.startsWith(key + ".")) {
+                System.err.println("Removing key " + thiskey);
+                properties.remove(thiskey);
+            }
+        }
     }
 
     /*! Get a boolean value from a key.  The value is true if it is stored as one of:

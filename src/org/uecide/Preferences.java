@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -53,7 +53,7 @@ import say.swing.*;
 
 import de.muntjak.tinylookandfeel.*;
 
-public class Preferences implements TreeSelectionListener {
+public class Preferences extends JDialog implements TreeSelectionListener {
 
     // prompt text stuff
 
@@ -93,7 +93,6 @@ public class Preferences implements TreeSelectionListener {
 
     // gui elements
 
-    JFrame dialog;
     int wide, high;
 
     JTextField sketchbookLocationField;
@@ -364,25 +363,25 @@ public class Preferences implements TreeSelectionListener {
         properties = new PropertyFile(Base.getDataFile("preferences.txt"), Base.getContentFile("lib/preferences.txt"));
     }
 
+    public Dimension getMinimumSize() {
+        return new Dimension(700, 500);
+    }
+
+    public Dimension getPreferredSize() {
+        return new Dimension(700, 500);
+    }
 
     public Preferences(Editor ed) {
         editor = ed;
 
         // setup dialog for the prefs
 
-        dialog = new JFrame("Preferences");
-        dialog.setResizable(false);
+        setTitle("Preferences");
+        setResizable(true);
+        setLayout(new BorderLayout());
+        setModalityType(ModalityType.APPLICATION_MODAL);
 
-        Container pane = dialog.getContentPane();
-        pane.setLayout(new BorderLayout());
-
-        Box outerBox = Box.createVerticalBox();
-        pane.add(outerBox);
-
-        tabs = new JTabbedPane();
-        outerBox.add(tabs);
         Box buttonLine = Box.createHorizontalBox();
-        outerBox.add(buttonLine);
         buttonLine.add(Box.createHorizontalGlue());
 
         JButton cancelButton = new JButton(Translate.t("Cancel"));
@@ -402,6 +401,8 @@ public class Preferences implements TreeSelectionListener {
         buttonLine.add(cancelButton);
         buttonLine.add(okButton);
 
+        add(buttonLine, BorderLayout.SOUTH);
+
         for(Class<?> pluginClass : Base.plugins.values()) {
             try {
                 Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
@@ -413,27 +414,11 @@ public class Preferences implements TreeSelectionListener {
             }
         }
 
-        JPanel advancedSettings = new JPanel(new GridBagLayout());
-        JPanel librarySettings = new JPanel(new GridBagLayout());
-        JPanel treeSettings = new JPanel(); //new GridBagLayout());
-
-        advancedSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-        librarySettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-
-        tabs.add(Translate.t("Libraries"), librarySettings);
-        tabs.add(Translate.t("Advanced"), treeSettings);
-
-        populateLibrarySettings(librarySettings);
+        JPanel treeSettings = new JPanel();
         populateAdvancedSettings(treeSettings);
+        add(treeSettings, BorderLayout.CENTER);
 
-        if(Base.isPosix()) {
-            JPanel serialSettings = new JPanel(new GridBagLayout());
-            serialSettings.setBorder(new EmptyBorder(5, 5, 5, 5));
-            tabs.add(Translate.t("Serial"), serialSettings);
-            populateSerialSettings(serialSettings);
-        }
-
-        dialog.addWindowListener(new WindowAdapter() {
+        addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 disposeFrame();
             }
@@ -444,16 +429,14 @@ public class Preferences implements TreeSelectionListener {
                 disposeFrame();
             }
         };
-        Base.registerWindowCloseKeys(dialog.getRootPane(), disposer);
-        Base.setIcon(dialog);
-
+        Base.registerWindowCloseKeys(getRootPane(), disposer);
+//        Base.setIcon(this);
 
         // handle window closing commands for ctrl/cmd-W or hitting ESC.
 
-
-        dialog.pack();
-        if (editor != null) dialog.setLocationRelativeTo(editor);
-
+        pack();
+        if (editor != null) setLocationRelativeTo(editor);
+        setVisible(true);
     }
 
     class PrefTreeEntry {
@@ -515,474 +498,12 @@ public class Preferences implements TreeSelectionListener {
         }
     }
 
-    public void populateSerialSettings(JPanel p) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 3;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0;
-
-        JLabel label = new JLabel("Extra serial ports:");
-        p.add(label, c);
-        c.gridy++;
-
-        extraPortList = new JList(extraPortListModel);
-
-        JScrollPane jsp = new JScrollPane(extraPortList);
-
-        p.add(jsp, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        portInput = new JTextField("/dev/");
-        p.add(portInput, c);
-
-        c.weightx = 0.2;
-        c.gridx++;
-        JButton add = new JButton("Add");
-        add.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String t = portInput.getText();
-
-                if(!t.startsWith("/dev/")) {
-                    return;
-                }
-
-                for(Enumeration en = extraPortListModel.elements(); en.hasMoreElements();) {
-                    String s = (String)en.nextElement();
-
-                    if(s.equals(t)) {
-                        return;
-                    }
-                }
-
-                extraPortListModel.addElement(t);
-                portInput.setText("/dev/");
-            }
-        });
-        p.add(add, c);
-
-        c.weightx = 0.2;
-        c.gridx++;
-        JButton del = new JButton("Delete");
-        del.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int sel = extraPortList.getSelectedIndex();
-
-                while(sel >= 0) {
-                    extraPortListModel.remove(sel);
-                    sel = extraPortList.getSelectedIndex();
-                }
-            }
-        });
-        p.add(del, c);
-
-    }
-
-    public void populateEditorSettings(JPanel p) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 3;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-
-        JLabel label;
-        JButton button;
-
-        c.gridwidth = 1;
-        label = new JLabel("Window theme:");
-        p.add(label, c);
-        c.gridx = 1;
-        c.gridwidth = 1;
-
-
-        themes = new TreeMap<String, String>();
-        UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
-
-        for(UIManager.LookAndFeelInfo info : lafInfo) {
-            themes.put(info.getName(), info.getClassName());
-        }
-
-        // JTattoo collection
-        themes.put("Acryl",     "com.jtattoo.plaf.acryl.AcrylLookAndFeel");
-        themes.put("Aero",      "com.jtattoo.plaf.aero.AeroLookAndFeel");
-        themes.put("Aluminium", "com.jtattoo.plaf.aluminium.AluminiumLookAndFeel");
-        themes.put("Bernstein", "com.jtattoo.plaf.bernstein.BernsteinLookAndFeel");
-        themes.put("Fast",      "com.jtattoo.plaf.fast.FastLookAndFeel");
-        themes.put("Graphite",  "com.jtattoo.plaf.graphite.GraphiteLookAndFeel");
-        themes.put("HiFi",      "com.jtattoo.plaf.hifi.HiFiLookAndFeel");
-        themes.put("Luna",      "com.jtattoo.plaf.luna.LunaLookAndFeel");
-        themes.put("McWin",     "com.jtattoo.plaf.mcwin.McWinLookAndFeel");
-        themes.put("Mint",      "com.jtattoo.plaf.mint.MintLookAndFeel");
-        themes.put("Noire",     "com.jtattoo.plaf.noire.NoireLookAndFeel");
-        themes.put("Smart",     "com.jtattoo.plaf.smart.SmartLookAndFeel");
-
-        // The fifesoft Windows LaF collection is only available on Windows.
-        if(Base.isWindows()) {
-            themes.put("Office 2003", "org.fife.plaf.Office2003.Office2003LookAndFeel");
-            themes.put("Office XP", "org.fife.plaf.OfficeXP.OfficeXPLookAndFeel");
-            themes.put("Visual Studio 2005", "org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel");
-        }
-
-        themes.put("Liquid",    "com.birosoft.liquid.LiquidLookAndFeel");
-
-        // TinyLAF collection
-
-        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-
-        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-            String themeName = td.getName();
-
-            if(themeName.equals("")) {
-                continue;
-            }
-
-            themes.put("Tiny: " + themeName, "de.muntjak.tinylookandfeel.TinyLookAndFeel;" + themeName);
-        }
-
-        String[] keys = themes.keySet().toArray(new String[0]);
-        Arrays.sort(keys);
-
-
-        selectedTheme = new JComboBox(keys);
-        selectedTheme.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        try {
-                            String value = (String)selectedTheme.getSelectedItem();
-                            String laf = themes.get(value);
-                            String lafTheme = "";
-
-                            if(laf.indexOf(";") > -1) {
-                                lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
-                                laf = laf.substring(0, laf.lastIndexOf(";"));
-                            }
-
-                            if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
-
-                                de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-                                URI themeURI = null;
-
-                                for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-                                    if(td.getName().equals(lafTheme)) {
-                                        de.muntjak.tinylookandfeel.Theme.loadTheme(td);
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if(laf.startsWith("com.jtattoo.plaf.")) {
-                                Properties props = new Properties();
-                                props.put("windowDecoration", useSystemDecorator.isSelected() ? "on" : "off");
-                                props.put("logoString", "UECIDE");
-                                props.put("textAntiAliasing", "on");
-
-                                Class<?> cls = Class.forName(laf);
-                                Class[] cArg = new Class[1];
-                                cArg[0] = Properties.class;
-                                Method mth = cls.getMethod("setCurrentTheme", cArg);
-                                mth.invoke(cls, props);
-                            } else {
-                            }
-
-                            UIManager.setLookAndFeel(laf);
-                            SwingUtilities.updateComponentTreeUI(dialog);
-                            Base.updateLookAndFeel();
-//                            dialog.pack();
-                            if (editor != null) dialog.setLocationRelativeTo(editor);
-                            
-                        } catch(Exception ignored) {
-                        }
-                    }
-                });
-            }
-        });
-
-        String currentLaf = Base.preferences.get("theme.window");
-
-        for(String k : keys) {
-            if(themes.get(k).equals(currentLaf)) {
-                selectedTheme.setSelectedItem(k);
-            }
-        }
-
-        p.add(selectedTheme, c);
-
-        c.gridx = 2;
-
-        useSystemDecorator = new JCheckBox(Translate.t("Use System Decorator"));
-        p.add(useSystemDecorator, c);
-        useSystemDecorator.setSelected(Base.preferences.getBoolean("theme.window_system"));
-
-        useSystemDecorator.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        String value = (String)selectedTheme.getSelectedItem();
-                        String laf = themes.get(value);
-                        String lafTheme = "";
-
-                        if(laf.indexOf(";") > -1) {
-                            lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
-                            laf = laf.substring(0, laf.lastIndexOf(";"));
-                        }
-
-                        try {
-                            if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
-                                de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-                                URI themeURI = null;
-
-                                for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-                                    if(td.getName().equals(lafTheme)) {
-                                        de.muntjak.tinylookandfeel.Theme.loadTheme(td);
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if(laf.startsWith("com.jtattoo.plaf.")) {
-                                Properties props = new Properties();
-                                props.put("windowDecoration", useSystemDecorator.isSelected() ? "off" : "on");
-                                props.put("logoString", "UECIDE");
-                                props.put("textAntiAliasing", "on");
-
-
-                                Class<?> cls = Class.forName(laf);
-                                Class[] cArg = new Class[1];
-                                cArg[0] = Properties.class;
-                                Method mth = cls.getMethod("setCurrentTheme", cArg);
-                                mth.invoke(cls, props);
-                            }
-
-                            UIManager.setLookAndFeel(laf);
-                            SwingUtilities.updateComponentTreeUI(dialog);
-                            Base.updateLookAndFeel();
-//                            dialog.pack();
-                            if (editor != null) dialog.setLocationRelativeTo(editor);
-                        } catch(Exception ignored) {
-                        }
-                    }
-                });
-            }
-        });
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 1;
-        label = new JLabel("Editor Theme:");
-        p.add(label, c);
-        c.gridwidth = 1;
-        c.gridx = 1;
-
-
-        ArrayList<KVPair> tlist = new ArrayList<KVPair>();
-        HashMap<String, String> themes = Base.getThemeList();
-        KVPair selectedPair = null;
-
-        for(String t : themes.keySet()) {
-            KVPair kv = new KVPair(t, themes.get(t));
-
-            if(t.equals(Base.preferences.get("theme.editor", "default"))) {
-                selectedPair = kv;
-            }
-
-            tlist.add(kv);
-        }
-
-        KVPair[] tarr = tlist.toArray(new KVPair[tlist.size()]);
-        selectedEditorTheme = new JComboBox(tarr);
-        selectedEditorTheme.setSelectedItem(selectedPair);
-
-        p.add(selectedEditorTheme, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 1;
-        label = new JLabel("Icon Theme:");
-        p.add(label, c);
-        c.gridwidth = 1;
-        c.gridx = 1;
-
-        selectedIconTheme = new JComboBox(Base.iconSets.keySet().toArray(new String[0]));
-        selectedIconTheme.setSelectedItem(Base.iconSet);
-
-        p.add(selectedIconTheme, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        label = new JLabel("Sketchbook location:");
-        p.add(label, c);
-        c.gridwidth = 2;
-        c.gridy++;
-        sketchbookLocationField = new JTextField(40);
-        p.add(sketchbookLocationField, c);
-
-        sketchbookLocationField.setEditable(false);
-        button = new JButton(PROMPT_BROWSE);
-        button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(sketchbookLocationField.getText());
-                File file = Base.selectFolder("Select new sketchbook location", dflt, dialog);
-
-                if(file != null) {
-                    sketchbookLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        c.gridx = 2;
-        c.gridwidth = 1;
-        p.add(button, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        label = new JLabel("External editor command: ");
-        p.add(label, c);
-
-        c.gridy++;
-        c.gridwidth = 2;
-        externalEditorField = new JTextField(40);
-        externalEditorField.setText(Base.preferences.get("editor.external.command"));
-        p.add(externalEditorField, c);
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-        label = new JLabel("Editor font: ");
-        p.add(label, c);
-
-        c.gridy++;
-        c.gridwidth = 2;
-        editorFontField = new JTextField(40);
-        editorFontField.setEditable(false);
-        p.add(editorFontField, c);
-
-        editorFontField.setText(Base.preferences.get("theme.fonts.editor"));
-
-        JButton selectEditorFont = new JButton(Translate.t("Select Font..."));
-        c.gridx = 2;
-        c.gridwidth = 1;
-        p.add(selectEditorFont, c);
-
-        final Container parent = p;
-        selectEditorFont.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFontChooser fc = new JFontChooser();
-                fc.setSelectedFont(stringToFont(editorFontField.getText()));
-                int res = fc.showDialog(parent);
-
-                if(res == JFontChooser.OK_OPTION) {
-                    Font f = fc.getSelectedFont();
-                    editorFontField.setText(Preferences.fontToString(f));
-                }
-            }
-        });
-
-        c.gridx = 0;
-        c.gridy++;
-        c.gridwidth = 3;
-
-        label = new JLabel("Console font: ");
-        p.add(label, c);
-        c.gridy++;
-        c.gridwidth = 2;
-
-        consoleFontField = new JTextField(40);
-        consoleFontField.setEditable(false);
-        p.add(consoleFontField, c);
-
-        consoleFontField.setText(Base.preferences.get("theme.fonts.console"));
-
-        JButton selectConsoleFont = new JButton(Translate.t("Select Font..."));
-        c.gridx = 2;
-        c.gridwidth = 1;
-        p.add(selectConsoleFont, c);
-
-        selectConsoleFont.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFontChooser fc = new JFontChooser();
-                fc.setSelectedFont(stringToFont(consoleFontField.getText()));
-                int res = fc.showDialog(parent);
-
-                if(res == JFontChooser.OK_OPTION) {
-                    Font f = fc.getSelectedFont();
-                    consoleFontField.setText(Preferences.fontToString(f));
-                }
-            }
-        });
-        c.gridx = 0;
-
-        if(Base.isWindows()) {
-            c.gridy++;
-            autoAssociateBox =
-                new JCheckBox("Automatically associate .pde files with " + Base.theme.get("product.cap"));
-            p.add(autoAssociateBox, c);
-        }
-
-    }
-
-    public void populateLocationSettings(JPanel p) {
-        JLabel lab;
-        JButton but;
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridheight = 1;
-        c.gridy = 0;
-
-        c.gridx = 0;
-        c.gridwidth = 2;
-        lab = new JLabel(Translate.t("Data Location"));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridwidth = 1;
-        dataLocationField = new JTextField(40);
-        dataLocationField.setEditable(false);
-        p.add(dataLocationField, c);
-        c.gridx = 1;
-        but = new JButton(Translate.t("Select Folder..."));
-        but.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                File dflt = new File(dataLocationField.getText());
-                File file = Base.selectFolder("Select new data location", dflt, dialog);
-
-                if(file != null) {
-                    dataLocationField.setText(file.getAbsolutePath());
-                }
-            }
-        });
-        p.add(but, c);
-        c.gridy++;
-
-        c.gridx = 0;
-        c.gridwidth = 1;
-        lab = new JLabel(Translate.t("Changing these settings will require a restart of the IDE."));
-        p.add(lab, c);
-        c.gridy++;
-        c.gridx = 0;
-        c.gridwidth = 1;
-        lab = new JLabel(Translate.t("You will also have to reinstall any plugins, boards, cores and compilers."));
-        p.add(lab, c);
-        c.gridy++;
-
-    }
-
-    public Dimension getPreferredSize() {
-        return new Dimension(wide, high);
-    }
-
-
-    // .................................................................
-
 
     /**
      * Close the window after an OK or Cancel.
      */
     protected void disposeFrame() {
-        dialog.dispose();
+        dispose();
     }
 
 
@@ -991,6 +512,19 @@ public class Preferences implements TreeSelectionListener {
      * then send a message to the editor saying that it's time to do the same.
      */
     protected void applyFrame() {
+
+        // Two special areas need to have any old subkeys removed - the port list and the library list.
+
+        PropertyFile sub = changedPrefs.getChildren("editor.serial.ports");
+        if (sub.size() > 0) {
+            Base.preferences.removeAll("editor.serial.ports");
+        }
+
+        sub = changedPrefs.getChildren("locations.library");
+        if (sub.size() > 0) {
+            Base.preferences.removeAll("locations.library");
+        }
+
         Base.preferences.mergeData(changedPrefs);
         Base.preferences.save();
         Base.applyPreferences();
@@ -998,235 +532,8 @@ public class Preferences implements TreeSelectionListener {
         Editor.refreshAllEditors();
     }
 
-
-    protected void showFrame() {
-        dialog.setVisible(true);
-    }
-
-
-    private void populateLibrarySettings(JPanel p) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 3;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0;
-
-        JLabel label = new JLabel(Translate.t("Categorized Library Locations"));
-        p.add(label, c);
-        c.gridy++;
-
-
-        libraryLocationTable = new JTable(libraryLocationModel);
-        JScrollPane jsp = new JScrollPane(libraryLocationTable);
-        p.add(jsp, c);
-        c.gridy++;
-        c.gridwidth = 1;
-
-        libraryLocationTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent event) {
-                int row = libraryLocationTable.getSelectedRow();
-
-                if(row >= 0) {
-                    deleteSelectedLibraryEntry.setEnabled(true);
-                } else {
-                    deleteSelectedLibraryEntry.setEnabled(false);
-                }
-            }
-        });
-
-        deleteSelectedLibraryEntry = new JButton(Translate.t("Delete selected entry"));
-        deleteSelectedLibraryEntry.setEnabled(false);
-        deleteSelectedLibraryEntry.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                int row = libraryLocationTable.getSelectedRow();
-
-                if(row >= 0) {
-                    libraryLocationModel.deleteRow(row);
-                }
-
-                row = libraryLocationTable.getSelectedRow();
-
-                if(row >= 0) {
-                    deleteSelectedLibraryEntry.setEnabled(true);
-                } else {
-                    deleteSelectedLibraryEntry.setEnabled(false);
-                }
-            }
-        });
-        c.gridx = 0;
-        p.add(deleteSelectedLibraryEntry, c);
-
-        JButton addDir = new JButton(Translate.t("Add subfolders"));
-        addDir.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addLibrarySubFolders();
-            }
-        });
-        c.gridx = 1;
-        p.add(addDir, c);
-        JButton addNewRow = new JButton(Translate.t("Add new entry"));
-        addNewRow.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                addLibraryEntry();
-            }
-        });
-        c.gridx = 2;
-        p.add(addNewRow, c);
-    }
-
-    public void addLibraryEntry() {
-        JFileChooser fc = new JFileChooser();
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int r = fc.showOpenDialog(dialog);
-
-        if(r == JFileChooser.APPROVE_OPTION) {
-            File dir = fc.getSelectedFile();
-
-            if(!dir.isDirectory()) {
-                return;
-            }
-
-            String name = dir.getName();
-            String code = "";
-
-            for(int i = 0; i < name.length(); i++) {
-                char c = name.charAt(i);
-
-                if(c >= 'a' && c <= 'z') {
-                    code += c;
-                } else if(c >= 'A' && c <= 'Z') {
-                    code += Character.toLowerCase(c);
-                } else if(c >= '0' && c <= '9') {
-                    code += c;
-                }
-            }
-
-            if(code.equals("")) {
-                Random rng = new Random();
-                code += (char)(rng.nextInt(26) + 'a');
-                code += (char)(rng.nextInt(26) + 'a');
-                code += (char)(rng.nextInt(26) + 'a');
-                code += (char)(rng.nextInt(26) + 'a');
-                code += (char)(rng.nextInt(26) + 'a');
-                code += (char)(rng.nextInt(26) + 'a');
-                code += (char)(rng.nextInt(26) + 'a');
-                code += (char)(rng.nextInt(26) + 'a');
-            }
-
-            libraryLocationModel.addNewRow(code, name, dir.getAbsolutePath());
-        }
-    }
-
-    public void addLibrarySubFolders() {
-        JFileChooser fc = new JFileChooser();
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int r = fc.showOpenDialog(dialog);
-
-        if(r == JFileChooser.APPROVE_OPTION) {
-            File dir = fc.getSelectedFile();
-
-            if(!dir.isDirectory()) {
-                return;
-            }
-
-            File[] files = dir.listFiles();
-
-            for(File file : files) {
-                if(file.isDirectory()) {
-                    String name = file.getName();
-                    String code = "";
-
-                    for(int i = 0; i < name.length(); i++) {
-                        char c = name.charAt(i);
-
-                        if(c >= 'a' && c <= 'z') {
-                            code += c;
-                        } else if(c >= 'A' && c <= 'Z') {
-                            code += Character.toLowerCase(c);
-                        } else if(c >= '0' && c <= '9') {
-                            code += c;
-                        }
-                    }
-
-                    if(code.equals("")) {
-                        Random rng = new Random();
-                        code += (char)(rng.nextInt(26) + 'a');
-                        code += (char)(rng.nextInt(26) + 'a');
-                        code += (char)(rng.nextInt(26) + 'a');
-                        code += (char)(rng.nextInt(26) + 'a');
-                        code += (char)(rng.nextInt(26) + 'a');
-                        code += (char)(rng.nextInt(26) + 'a');
-                        code += (char)(rng.nextInt(26) + 'a');
-                        code += (char)(rng.nextInt(26) + 'a');
-                    }
-
-                    libraryLocationModel.addNewRow(code, name, file.getAbsolutePath());
-                }
-            }
-        }
-    }
-
-    public void populateDialogSettings(JPanel p) {
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0;
-
-        p.add(new JLabel("Enable or disable different popup dialogs here."), c);
-
-        c.gridy++;
-
-        dlgMissingLibraries = new JCheckBox("Suggest installing missing libraries");
-        dlgMissingLibraries.setSelected(Base.preferences.getBoolean("editor.dialog.missinglibs"));
-        p.add(dlgMissingLibraries, c);
-        
-    }
-
-    public void valueChanged(TreeSelectionEvent e) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)(e.getPath().getLastPathComponent());
-        PrefTreeEntry pe = (PrefTreeEntry)(node.getUserObject());
-
-        PropertyFile pf = Base.preferencesTree.getChildren(pe.getKey());
-        advancedTreeBody.removeAll();
-        advancedTreeBody.setBorder(new EmptyBorder(15, 15, 15, 15));
-        GridBagConstraints c = new GridBagConstraints();
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0;
-
-        ArrayList<Box> blist = new ArrayList<Box>();
-        int size = 0;
-        for (String pref : pf.childKeys()) {
-            if (pf.keyExists(pref + ".type")) {
-                Box b = addPreferenceEntry(pe.getKey() + "." + pref);
-                if (b != null) {
-                    Dimension s = b.getPreferredSize();
-                    size += s.height;
-                    advancedTreeBody.add(b, c);
-                    c.gridy++;
-                }
-            }
-        }
-
-        Dimension s1 = advancedTreeBody.getPreferredSize();
-        advancedTreeBody.setSize(new Dimension(size, s1.width));
-
-        advancedTreeBody.validate();
-        advancedTreeBody.repaint();
-//        dialog.pack();
-    }
-
     @SuppressWarnings("unchecked")
-    public Box addPreferenceEntry(String key) {
+    public Box addPreferenceEntry(final String key) {
 
         final String fkey = key;
         Box b = Box.createHorizontalBox();
@@ -1294,7 +601,7 @@ public class Preferences implements TreeSelectionListener {
                     fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                     fc.setCurrentDirectory(new File(f.getText()));
                     fc.setDialogTitle("Select Directory");
-                    int n = fc.showDialog(dialog, "Select");
+                    int n = fc.showDialog(Preferences.this, "Select");
                     if (n == JFileChooser.APPROVE_OPTION) {
                         f.setText(fc.getSelectedFile().getAbsolutePath());
                         changedPrefs.set(fkey, f.getText());
@@ -1334,7 +641,7 @@ public class Preferences implements TreeSelectionListener {
                     fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                     fc.setCurrentDirectory(new File(f.getText()));
                     fc.setDialogTitle("Select File");
-                    int n = fc.showDialog(dialog, "Select");
+                    int n = fc.showDialog(Preferences.this, "Select");
                     if (n == JFileChooser.APPROVE_OPTION) {
                         f.setText(fc.getSelectedFile().getAbsolutePath());
                         changedPrefs.set(fkey, f.getText());
@@ -1373,7 +680,7 @@ public class Preferences implements TreeSelectionListener {
 
                     JFontChooser fc = new JFontChooser();
                     fc.setSelectedFont(stringToFont(f.getText()));
-                    int res = fc.showDialog(dialog);
+                    int res = fc.showDialog(Preferences.this);
 
                     if(res == JFontChooser.OK_OPTION) {
                         Font fnt = fc.getSelectedFont();
@@ -1449,7 +756,6 @@ public class Preferences implements TreeSelectionListener {
             if (Base.preferencesTree.get(key + ".options.script") != null) {
                 String source = Base.preferencesTree.getSource(key + ".options.script");
                 Context ctx = new Context();;
-                System.err.println("Source for " + key + " = " + source);
                 ctx.mergeSettings(Base.preferencesTree);
                 String keyToExecute = key + ".options.script";
                 if (source != null) {
@@ -1465,6 +771,7 @@ public class Preferences implements TreeSelectionListener {
                 if (hash instanceof HashMap) {
                     options = (HashMap<String, String>)hash;
                 }
+
             }
 
             ArrayList<KVPair> kvlist = new ArrayList<KVPair>();
@@ -1490,6 +797,73 @@ public class Preferences implements TreeSelectionListener {
                 }
             });
             b.add(cb);
+        } else if (type.equals("liblist")) {
+            JPanel p = new JPanel();
+            p.setLayout(new BorderLayout());
+            final LibraryLocationList liblist = new LibraryLocationList();
+
+            PropertyFile items = changedPrefs.getChildren(key);
+
+            if (items.size() == 0) {
+                items = Base.preferences.getChildren(key);
+            }
+
+            String[] subKeys = items.childKeys();
+            for (String subKey : subKeys) {
+                String itemName = items.get(subKey + ".name");
+                String itemPath = items.get(subKey + ".path");
+                liblist.addLibraryLocation(itemName, itemPath);
+            }
+
+            liblist.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    HashMap<String, String> list = liblist.getLibraryList();
+                    for (String k : list.keySet()) {
+                        String libName = k.trim();
+                        String libPath = list.get(k);
+                        String libCode = libName.toLowerCase().replaceAll("\\s+","");
+
+                        changedPrefs.set(key + "." + libCode + ".name", libName);
+                        changedPrefs.set(key + "." + libCode + ".path", libPath);
+                    }
+                }
+            });
+
+            p.add(new JLabel(name + ":"), BorderLayout.NORTH);
+            p.add(liblist, BorderLayout.CENTER);
+            b.add(p);
+        } else if (type.equals("portlist")) {
+            JPanel p = new JPanel();
+            p.setLayout(new BorderLayout());
+            final PortList portlist = new PortList();
+
+            PropertyFile items = changedPrefs.getChildren(key);
+
+            if (items.size() == 0) {
+                items = Base.preferences.getChildren(key);
+            }
+
+            String[] subKeys = items.childKeys();
+            for (String subKey : subKeys) {
+                String itemName = items.get(subKey);
+                portlist.addPort(itemName);
+            }
+
+            portlist.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    ArrayList<String> list = portlist.getPortList();
+                    int i = 0;
+                    for (String k : list) {
+                        String libName = k.trim();
+                        changedPrefs.set(key + "." + i, k);
+                        i++;
+                    }
+                }
+            });
+
+            p.add(new JLabel(name + ":"), BorderLayout.NORTH);
+            p.add(portlist, BorderLayout.CENTER);
+            b.add(p);
         } else {
             b.add(new JLabel(name + ": "));
             b.add(new JLabel(value));
@@ -1607,6 +981,42 @@ public class Preferences implements TreeSelectionListener {
 
     public static void unset(String key) { Base.preferences.unset(key); Base.preferences.saveDelay(); }
         
+    public void valueChanged(TreeSelectionEvent e) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)(e.getPath().getLastPathComponent());
+        PrefTreeEntry pe = (PrefTreeEntry)(node.getUserObject());
+
+        PropertyFile pf = Base.preferencesTree.getChildren(pe.getKey());
+        advancedTreeBody.removeAll();
+        advancedTreeBody.setBorder(new EmptyBorder(15, 15, 15, 15));
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1.0;
+
+        ArrayList<Box> blist = new ArrayList<Box>();
+        int size = 0;
+        for (String pref : pf.childKeys()) {
+            if (pf.keyExists(pref + ".type")) {
+                Box b = addPreferenceEntry(pe.getKey() + "." + pref);
+                if (b != null) {
+                    Dimension s = b.getPreferredSize();
+                    size += s.height;
+                    advancedTreeBody.add(b, c);
+                    c.gridy++;
+                }
+            }
+        }
+
+        Dimension s1 = advancedTreeBody.getPreferredSize();
+        advancedTreeBody.setSize(new Dimension(size, s1.width));
+
+        advancedTreeBody.validate();
+        advancedTreeBody.repaint();
+    }
 }
 
 

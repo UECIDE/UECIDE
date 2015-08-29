@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -96,9 +96,6 @@ public class Base implements AptPercentageListener {
     static Platform platform;
 
     static private boolean headless;
-
-    // A single instance of the preferences window
-    static Preferences preferencesFrame;
 
     // these are static because they're used by Sketch
     static private File examplesFolder;
@@ -258,6 +255,8 @@ public class Base implements AptPercentageListener {
 
         cli.addParameter("cli", "", Boolean.class, "Enter CLI mode");
 
+        cli.addParameter("preferences", "", Boolean.class, "Display preferences dialog");
+
         String[] argv = cli.process(args);
 
         headless = cli.isSet("headless");
@@ -335,7 +334,6 @@ public class Base implements AptPercentageListener {
         preferences.setPlatformAutoOverride(true);
 
         platform.setSettingsFolderEnvironmentVariable();
-
 
         if (preferences.getBoolean("network.offline")) {
             setOfflineMode();
@@ -525,7 +523,6 @@ public class Base implements AptPercentageListener {
             pluginInstances = new ArrayList<Plugin>();
 
             Serial.updatePortList();
-            Serial.fillExtraPorts();
 
             System.out.print("Loading compilers...");
             loadCompilers();
@@ -697,6 +694,14 @@ public class Base implements AptPercentageListener {
         if(!headless) splashScreen.setMessage("Editor...", 80);
 
         setLookAndFeel();
+
+        if (cli.isSet("preferences")) {
+            splashScreen.setMessage("Complete", 100);
+            splashScreen.dispose();
+            Preferences p = new Preferences(null);
+            preferences.save();
+            System.exit(0);
+        }
 
         boolean opened = false;
 
@@ -1200,16 +1205,6 @@ public class Base implements AptPercentageListener {
     public static void gatherLibraries() {
         Library.loadLibraries();
     }
-
-    /**
-    * Show the Preferences window.
-    */
-    public static void handlePrefs() {
-        if(preferencesFrame == null) preferencesFrame = new Preferences(null);
-
-        preferencesFrame.showFrame();
-    }
-
 
     public static Platform getPlatform() {
         return platform;
@@ -3225,8 +3220,6 @@ public class Base implements AptPercentageListener {
                 }
 
                 String laf = Preferences.get("theme.window");
-
-                System.err.println("Loading look and feel " + laf);
 
                 try {
                     UIManager.setLookAndFeel(laf);

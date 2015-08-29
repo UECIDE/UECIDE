@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -79,14 +79,11 @@ public class Splash extends JDialog { //Window {
             GraphicsDevice device = g.getDefaultScreenDevice();
             Rectangle screen = device.getDefaultConfiguration().getBounds();
 
-            System.err.println("Screen dimensions: " + screen);
-
             int x = (screen.width / 2) - (w / 2);
             int y = (screen.height / 2) - (h / 2);
             setSize(new Dimension(w, h));
             setVisible(true);
             Point winLoc = new Point(screen.x + x, screen.y + y);
-            System.err.println("Placing splash at " + winLoc);
             setLocation(winLoc);
         } catch(Exception e) {
             Base.error(e);

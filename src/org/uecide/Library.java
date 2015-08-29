@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -617,14 +617,15 @@ public class Library implements Comparable {
         int foundCats = 0;
 
         // And finally let's work through the categories.
-        for(String k : Base.preferences.childKeysOf("library")) {
-            String cName = Preferences.get("library." + k + ".name");
-            String cPath = Preferences.get("library." + k + ".path");
 
-            if(cName != null && cPath != null) {
+        PropertyFile liblocs = Base.preferences.getChildren("locations.library");
+
+        for (String k : liblocs.childKeys()) {
+            String cName = liblocs.get(k + ".name");
+            String cPath = liblocs.get(k + ".path");
+            if (cName != null && cPath != null) {
                 File f = new File(cPath);
-
-                if(f.exists() && f.isDirectory()) {
+                if (f.exists() && f.isDirectory()) {
                     setCategoryName("cat:" + k, cName);
                     loadLibrariesFromFolder(f, "cat:" + k);
                     foundCats++;
@@ -634,15 +635,15 @@ public class Library implements Comparable {
 
         if(foundCats == 0) {
             File f = new File(Base.getSketchbookFolder(), "libraries");
-            Preferences.set("library.contrib.name", "Contributed");
-            Preferences.setFile("library.contrib.path", f);
+            Preferences.set("locations.library.contributed.name", "Contributed");
+            Preferences.setFile("locations.library.contributed.path", f);
 
             if(!f.exists()) {
                 f.mkdirs();
             }
 
-            setCategoryName("cat:contrib", "Contributed");
-            loadLibrariesFromFolder(f, "cat:contrib");
+            setCategoryName("cat:contributed", "Contributed");
+            loadLibrariesFromFolder(f, "cat:contributed");
         }
 
         // And now we have our new repo-based libraries.  First scan
@@ -731,7 +732,7 @@ public class Library implements Comparable {
         String[] bits = group.split(":");
 
         if(bits[0].equals("cat")) {
-            return Preferences.getFile("library." + bits[1] + ".path");
+            return Preferences.getFile("locations.library." + bits[1] + ".path");
         }
 
         if(bits[0].equals("core")) {

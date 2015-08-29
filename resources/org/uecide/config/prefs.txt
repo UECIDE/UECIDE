@@ -166,6 +166,9 @@ locations.data.type=dirselect
 locations.sketchbook.name=Sketchbook location
 locations.sketchbook.type=dirselect
 
+locations.library.name=Library locations
+locations.library.type=liblist
+
 debug.name=Debug
 debug.type=section
 debug.window.name=Layout
@@ -233,3 +236,9 @@ network.type=section
 network.offline.name=Work in offline mode
 network.offline.type=checkbox
 network.offline.default=false
+
+editor.serial.name=Serial
+editor.serial.type=section
+
+editor.serial.port.type=portlist
+editor.serial.port.name=Additional Ports

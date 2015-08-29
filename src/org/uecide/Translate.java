@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -127,7 +127,6 @@ public class Translate {
         String j = translations.get(i);
 
         if(j == null) {
-            //          System.err.println("Unhandled translation: \"" + i + "\"");
             j = i;
         }
 

@@ -24,7 +24,6 @@
 package org.uecide.plugin;
 
 import org.uecide.*;
-import org.uecide.debug.*;
 import org.uecide.editors.*;
 import java.awt.*;
 import java.awt.event.*;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -91,12 +91,7 @@ public class ThinkDifferent implements ApplicationListener {
 
 
     public void handlePreferences(ApplicationEvent ae) {
-        if(base != null) {
-            base.handlePrefs();
-            ae.setHandled(true);
-        } else {
-            System.err.println("handlePreferences: Base instance detached from listener");
-        }
+        Preferences p = new Preferences(null);
     }
 
 

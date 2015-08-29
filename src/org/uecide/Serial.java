@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -29,8 +29,6 @@
  */
 
 package org.uecide;
-
-import org.uecide.debug.MessageConsumer;
 
 //import gnu.io.*;
 import jssc.*;
@@ -267,6 +265,8 @@ public class Serial {
     public static void updatePortList() {
         ArrayList<String>names = null;
 
+        fillExtraPorts();
+
         if(Base.isLinux()) {
             names = getPortListLinux();
         } else if(Base.isMacOS()) {
@@ -278,11 +278,12 @@ public class Serial {
         ArrayList<CommunicationPort> toAdd = new ArrayList<CommunicationPort>();
         ArrayList<CommunicationPort> toRemove = new ArrayList<CommunicationPort>();
 
+        names.addAll(extraPorts);
+
         for (CommunicationPort port : Base.communicationPorts) {
             if (port instanceof SerialCommunicationPort) {
                 String name = port.toString();
                 if (names.indexOf(name) == -1) {
-                    System.err.println("Removing " + port);
                     toRemove.add(port);
                 }
             }
@@ -299,7 +300,6 @@ public class Serial {
                 }
             }
             if (found == false) {
-                System.err.println("Adding " + name);
                 toAdd.add(new SerialCommunicationPort(name));
             }
         }
@@ -386,12 +386,11 @@ public class Serial {
     static public void fillExtraPorts() {
         int pnum = 0;
         clearExtraPorts();
-        String pname = Preferences.get("serial.ports." + Integer.toString(pnum));
 
-        while(pname != null) {
+        PropertyFile sub = Base.preferences.getChildren("editor.serial.port");
+        for (String k : sub.keySet()) {
+            String pname = sub.get(k);
             addExtraPort(pname);
-            pnum++;
-            pname = Preferences.get("serial.ports." + Integer.toString(pnum));
         }
     }
 

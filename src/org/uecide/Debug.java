@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -55,7 +55,6 @@ import org.fife.ui.rtextarea.*;
 
 import java.lang.reflect.Method;
 
-import org.uecide.debug.*;
 
 public class Debug {
 

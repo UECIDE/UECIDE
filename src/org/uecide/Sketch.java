@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -30,7 +30,6 @@
 
 package org.uecide;
 
-import org.uecide.debug.*;
 import org.uecide.editors.*;
 import org.uecide.plugin.*;
 import org.uecide.builtin.BuiltinCommand;
@@ -64,7 +63,7 @@ import javax.script.*;
  * sketch consists of, but also deals with compilation of the sketch and uploading
  * the sketch to a target board.
  */
-public class Sketch implements MessageConsumer {
+public class Sketch {
 
     public Context ctx;
 

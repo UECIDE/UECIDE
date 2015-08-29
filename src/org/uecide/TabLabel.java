@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -31,7 +31,6 @@
 package org.uecide;
 
 import org.uecide.plugin.*;
-import org.uecide.debug.*;
 import org.uecide.editors.*;
 
 import java.awt.*;

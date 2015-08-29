@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -31,7 +31,6 @@
 package org.uecide;
 
 import org.uecide.plugin.*;
-import org.uecide.debug.*;
 import org.uecide.editors.*;
 
 import java.awt.*;
@@ -2915,6 +2914,26 @@ public class Editor extends JFrame {
         }
     }
 
+    public JMenuItem createMenuEntry(String name, Character shortcut, int mods, ActionListener action) {
+        return createMenuEntry(name, shortcut, mods, action, null);
+    }
+
+    public JMenuItem createMenuEntry(String name, Character shortcut, int mods, ActionListener action, String command) {
+        JMenuItem menuItem = new JMenuItem(name);
+        if (shortcut != null) {
+            int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcut, modifiers | mods));
+        }
+        if (action != null) {
+            menuItem.addActionListener(action);
+        }
+        if (command != null) {
+            menuItem.setActionCommand(command);
+        }
+        Base.setFont(menuItem, "menu.entry");
+        return menuItem;
+    }
+
     public void updateMenus() {
         fileMenu.removeAll();
         editMenu.removeAll();
@@ -2923,41 +2942,29 @@ public class Editor extends JFrame {
         toolsMenu.removeAll();
         helpMenu.removeAll();
 
-        JMenuItem item;
         JMenu submenu;
         int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-        item = new JMenuItem(Translate.t("New"));
-        item.setAccelerator(KeyStroke.getKeyStroke('N', modifiers));
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
-        item.addActionListener(new ActionListener() {
+        fileMenu.add(createMenuEntry("New", 'N', 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.handleNew();
             }
-        });
+        }));
 
-
-        item = new JMenuItem(Translate.t("Open..."));
-        item.setAccelerator(KeyStroke.getKeyStroke('O', modifiers));
-        item.addActionListener(new ActionListener() {
+        fileMenu.add(createMenuEntry("Open...", 'O', 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleOpenPrompt();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
+        }));
 
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_TOP);
 
-        submenu = new JMenu(Translate.t("Recent Sketches"));
-        Base.setFont(submenu, "menu.entry");
-        fileMenu.add(submenu);
+        JMenu recentSketchesMenu = new JMenu(Translate.t("Recent Sketches"));
+        Base.setFont(recentSketchesMenu, "menu.entry");
+        fileMenu.add(recentSketchesMenu);
 
         for(File m : Base.MRUList) {
-            item = new JMenuItem(m.getName());
-            item.setToolTipText(m.getAbsolutePath());
-            item.addActionListener(new ActionListener() {
+            JMenuItem recentitem = createMenuEntry(m.getName(), null, 0, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String path = e.getActionCommand();
 
@@ -2968,26 +2975,27 @@ public class Editor extends JFrame {
                     }
                 }
             });
-            item.setActionCommand(m.getAbsolutePath());
-            Base.setFont(item, "menu.entry");
-            submenu.add(item);
+
+            recentitem.setToolTipText(m.getAbsolutePath());
+            recentitem.setActionCommand(m.getAbsolutePath());
+            recentSketchesMenu.add(recentitem);
         }
 
 
-        submenu = new JMenu(Translate.t("Examples"));
+        JMenu examplesMenu = new JMenu(Translate.t("Examples"));
 
         if(loadedSketch.getContext().getCore() != null) {
             if (loadedSketch.getContext().getCompiler() != null) {
-                addSketchesFromFolder(submenu, loadedSketch.getContext().getCompiler().getExamplesFolder());
+                addSketchesFromFolder(examplesMenu, loadedSketch.getContext().getCompiler().getExamplesFolder());
             }
             if (loadedSketch.getContext().getCore() != null) {
-                addSketchesFromFolder(submenu, loadedSketch.getContext().getCore().getExamplesFolder());
+                addSketchesFromFolder(examplesMenu, loadedSketch.getContext().getCore().getExamplesFolder());
             }
             if (loadedSketch.getContext().getBoard() != null) {
-                addSketchesFromFolder(submenu, loadedSketch.getContext().getBoard().getExamplesFolder());
+                addSketchesFromFolder(examplesMenu, loadedSketch.getContext().getBoard().getExamplesFolder());
             }
 
-            submenu.addSeparator();
+            examplesMenu.addSeparator();
 
 
             TreeSet<String> catNames = Library.getLibraryCategories();
@@ -3009,68 +3017,50 @@ public class Editor extends JFrame {
                         }
 
                         Base.setFont(top, "menu.entry");
-                        submenu.add(top);
+                        examplesMenu.add(top);
                     }
                 }
             }
         }
 
-        Base.setFont(submenu, "menu.entry");
-        fileMenu.add(submenu);
+        Base.setFont(examplesMenu, "menu.entry");
+        fileMenu.add(examplesMenu);
 
         fileMenu.addSeparator();
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_MID);
 
-        item = new JMenuItem(Translate.t("Close"));
-        item.setAccelerator(KeyStroke.getKeyStroke('W', modifiers));
-        item.addActionListener(new ActionListener() {
+        fileMenu.add(createMenuEntry("Close", 'W', 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 askCloseWindow();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
+        }));
 
-        item = new JMenuItem(Translate.t("Save"));
-        item.setAccelerator(KeyStroke.getKeyStroke('S', modifiers));
-        item.addActionListener(new ActionListener() {
+        fileMenu.add(createMenuEntry("Save", 'S', 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveAllTabs();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
+        }));
 
-        item = new JMenuItem(Translate.t("Save As..."));
-        item.setAccelerator(KeyStroke.getKeyStroke('S', modifiers | ActionEvent.SHIFT_MASK));
-        item.addActionListener(new ActionListener() {
+        fileMenu.add(createMenuEntry("Save As...", 'S', ActionEvent.SHIFT_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveAs();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
+        }));
 
-        item = new JMenuItem(Translate.t("Export as SAR..."));
-        item.addActionListener(new ActionListener() {
+        fileMenu.add(createMenuEntry("Export as SAR...", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 exportSar();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
+        }));
 
-        item = new JMenuItem(Translate.t("Import SAR..."));
-        item.addActionListener(new ActionListener() {
+        fileMenu.add(createMenuEntry("Import SAR...", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 importSar();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
-
+        }));
 
         fileMenu.addSeparator();
+
         JCheckBoxMenuItem cbitem = new JCheckBoxMenuItem("Online");
         cbitem.setState(Base.isOnline());
         cbitem.addActionListener(new ActionListener() {
@@ -3084,41 +3074,29 @@ public class Editor extends JFrame {
             }
         });
         fileMenu.add(cbitem);
-        
-        item = new JMenuItem(Translate.t("Preferences"));
-        item.setAccelerator(KeyStroke.getKeyStroke("ctrl-,"));
-        item.addActionListener(new ActionListener() {
+
+        fileMenu.add(createMenuEntry("Preferences", '-', ActionEvent.CTRL_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Preferences prefs = new Preferences(Editor.this);
-                prefs.showFrame();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
+        }));
 
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_BOTTOM);
 
-        item = new JMenuItem("Quit");
-        item.setAccelerator(KeyStroke.getKeyStroke("alt Q"));
-        item.addActionListener(new ActionListener() {
+
+        fileMenu.add(createMenuEntry("Quit", 'Q', 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if(Editor.closeAllEditors()) {
                     Preferences.save();
                     System.exit(0);
                 }
             }
-        });
-        Base.setFont(item, "menu.entry");
-        fileMenu.add(item);
+        }));
 
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_TOP);
         editMenu.addSeparator();
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_MID);
         editMenu.addSeparator();
-
-        Base.setFont(item, "menu.entry");
-        editMenu.add(item);
-
         addMenuChunk(editMenu, Plugin.MENU_EDIT | Plugin.MENU_BOTTOM);
 
         ActionListener createNewAction = new ActionListener() {
@@ -3127,119 +3105,82 @@ public class Editor extends JFrame {
             }
         };
 
-        item = new JMenuItem(Translate.t("Compile"));
-        item.setAccelerator(KeyStroke.getKeyStroke('R', modifiers));
-        item.addActionListener(new ActionListener() {
+        sketchMenu.add(createMenuEntry("Compile", 'R', 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 compile();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        sketchMenu.add(item);
+        }));
         
-        item = new JMenuItem(Translate.t("Compile and Program"));
-        item.setAccelerator(KeyStroke.getKeyStroke('U', modifiers));
-        item.addActionListener(new ActionListener() {
+        sketchMenu.add(createMenuEntry("Compile and Program", 'U', 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 program();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        sketchMenu.add(item);
+        }));
         
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_TOP);
         sketchMenu.addSeparator();
 
-        submenu = new JMenu("Create new");
-        item = new JMenuItem("Sketch file (.ino)");
-        item.setActionCommand("ino");
-        item.addActionListener(createNewAction);
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("C++ file");
-        item.setActionCommand("cpp");
-        item.addActionListener(createNewAction);
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("C file");
-        item.setActionCommand("c");
-        item.addActionListener(createNewAction);
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("Header file");
-        item.setActionCommand("h");
-        item.addActionListener(createNewAction);
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("Assembly file");
-        item.setActionCommand("S");
-        item.addActionListener(createNewAction);
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("Library");
-        item.setActionCommand("lib");
-        item.addActionListener(createNewAction);
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        Base.setFont(submenu, "menu.entry");
-        sketchMenu.add(submenu);
+        JMenu createSubmenu = new JMenu("Create new");
+        createSubmenu.add(createMenuEntry("Sketch file (.ino)", null, 0, createNewAction, "ino"));
+        createSubmenu.add(createMenuEntry("C++ file", null, 0, createNewAction, "cpp"));
+        createSubmenu.add(createMenuEntry("C file", null, 0, createNewAction, "c"));
+        createSubmenu.add(createMenuEntry("Header file", null, 0, createNewAction, "h"));
+        createSubmenu.add(createMenuEntry("Assembly file", null, 0, createNewAction, "S"));
+        createSubmenu.add(createMenuEntry("Library", null, 0, createNewAction, "lib"));
+        sketchMenu.add(createSubmenu);
 
+        JMenu importSubmenu = new JMenu("Import file");
+        importSubmenu.add(createMenuEntry("Source file", null, 0, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        }));
+        importSubmenu.add(createMenuEntry("Header file", null, 0, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        }));
+        importSubmenu.add(createMenuEntry("Binary file", null, 0, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        }));
+        sketchMenu.add(importSubmenu);
 
-        submenu = new JMenu("Import file");
-        item = new JMenuItem("Source file");
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("Header file");
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("Binary file");
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        Base.setFont(submenu, "menu.entry");
-        sketchMenu.add(submenu);
-
-        submenu = new JMenu("Libraries");
-        item = new JMenuItem("Install library archive...");
-        item.addActionListener(new ActionListener() {
+        JMenu librariesSubmenu = new JMenu("Libraries");
+        librariesSubmenu.add(createMenuEntry("Install library archive...", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 installLibraryArchive();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        submenu.addSeparator();
-        populateLibrariesMenu(submenu);
-        Base.setFont(submenu, "menu.entry");
-        sketchMenu.add(submenu);
+        }));
+
+        librariesSubmenu.addSeparator();
+        populateLibrariesMenu(librariesSubmenu);
+        Base.setFont(librariesSubmenu, "menu.entry");
+        sketchMenu.add(librariesSubmenu);
 
 
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_MID);
         sketchMenu.addSeparator();
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_BOTTOM);
 
-        item = new JMenuItem("Sketch properties...");
-        item.addActionListener(new ActionListener() {
+        sketchMenu.add(createMenuEntry("Sketch properties...", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new SketchProperties(Editor.this, loadedSketch);
             }
-        });
-        Base.setFont(item, "menu.entry");
-        sketchMenu.add(item);
+        }));
 
-        submenu = new JMenu("Boards");
-        populateBoardsMenu(submenu);
-        Base.setFont(submenu, "menu.entry");
-        hardwareMenu.add(submenu);
+        JMenu boardsSubmenu = new JMenu("Boards");
+        populateBoardsMenu(boardsSubmenu);
+        Base.setFont(boardsSubmenu, "menu.entry");
+        hardwareMenu.add(boardsSubmenu);
 
-        submenu = new JMenu("Cores");
-        populateCoresMenu(submenu);
-        Base.setFont(submenu, "menu.entry");
-        hardwareMenu.add(submenu);
+        JMenu coresSubmenu = new JMenu("Cores");
+        populateCoresMenu(coresSubmenu);
+        Base.setFont(coresSubmenu, "menu.entry");
+        hardwareMenu.add(coresSubmenu);
 
-        submenu = new JMenu("Compilers");
-        populateCompilersMenu(submenu);
-        Base.setFont(submenu, "menu.entry");
-        hardwareMenu.add(submenu);
+        JMenu compilersSubmenu = new JMenu("Compilers");
+        populateCompilersMenu(compilersSubmenu);
+        Base.setFont(compilersSubmenu, "menu.entry");
+        hardwareMenu.add(compilersSubmenu);
 
         optionsMenu = new JMenu("Options");
         populateOptionsMenu(optionsMenu);
@@ -3262,26 +3203,10 @@ public class Editor extends JFrame {
         Base.setFont(serialPortsMenu, "menu.entry");
         hardwareMenu.add(serialPortsMenu);
 
-//        discoveredBoardsMenu = new JMenu("Discovered Boards");
-//        populateDiscoveredBoardsMenu(discoveredBoardsMenu);
-//        discoveredBoardsMenu.addMenuListener(new MenuListener() {
-//            public void menuSelected(MenuEvent e) {
-//                populateDiscoveredBoardsMenu(discoveredBoardsMenu);
-//            }
-//            public void menuCanceled(MenuEvent e) {
-//            }
-//            public void menuDeselected(MenuEvent e) {
-//            }
-//        });
-//        Base.setFont(discoveredBoardsMenu, "menu.entry");
-//        hardwareMenu.add(discoveredBoardsMenu);
-
-
-
-        submenu = new JMenu("Programmers");
-        populateProgrammersMenu(submenu);
-        Base.setFont(submenu, "menu.entry");
-        hardwareMenu.add(submenu);
+        JMenu programmersSubmenu = new JMenu("Programmers");
+        populateProgrammersMenu(programmersSubmenu);
+        Base.setFont(programmersSubmenu, "menu.entry");
+        hardwareMenu.add(programmersSubmenu);
 
         addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_TOP);
         hardwareMenu.addSeparator();
@@ -3289,156 +3214,119 @@ public class Editor extends JFrame {
         hardwareMenu.addSeparator();
         addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_BOTTOM);
 
-        item = new JMenuItem("Plugin Manager");
-        item.addActionListener(new ActionListener() {
+        toolsMenu.add(createMenuEntry("Plugin Manager", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 PluginManager pm = new PluginManager();
                 pm.openWindow(Editor.this);
             }
-        });
-        toolsMenu.add(item);
-
+        }));
 
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_TOP);
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_MID);
-        item = new JMenuItem("Service Manager");
-        item.addActionListener(new ActionListener() {
+
+        toolsMenu.add(createMenuEntry("Service Manager", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 ServiceManager.open(Editor.this);
             }
-        });
-        Base.setFont(item, "menu.entry");
-        toolsMenu.add(item);
+        }));
 
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_BOTTOM);
 
-        item = new JMenuItem("About " + Base.theme.get("product.cap"));
-        item.addActionListener(new ActionListener() {
+        helpMenu.add(createMenuEntry("About " + Base.theme.get("product.cap"), null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleAbout();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        helpMenu.add(item);
+        }));
+
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
 
         if (loadedSketch.getContext().getBoard() != null) {
             if (loadedSketch.getContext().getBoard().getManual() != null) {
-                item = new JMenuItem("Manual for " + loadedSketch.getContext().getBoard().toString());
-                item.addActionListener(new ActionListener() {
+                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getBoard().toString(), null, 0, new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         loadManual(loadedSketch.getContext().getBoard().getManual());
                     }
-                });
-                Base.setFont(item, "menu.entry");
-                helpMenu.add(item);
+                }));
             }
         }
 
         if (loadedSketch.getContext().getCore() != null) {
             if (loadedSketch.getContext().getCore().getManual() != null) {
-                item = new JMenuItem("Manual for " + loadedSketch.getContext().getCore().toString());
-                item.addActionListener(new ActionListener() {
+                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getCore().toString(), null, 0, new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         loadManual(loadedSketch.getContext().getCore().getManual());
                     }
-                });
-                Base.setFont(item, "menu.entry");
-                helpMenu.add(item);
+                }));
             }
         }
 
         if (loadedSketch.getContext().getCompiler() != null) {
             if (loadedSketch.getContext().getCompiler().getManual() != null) {
-                item = new JMenuItem("Manual for " + loadedSketch.getContext().getCompiler().toString());
-                item.addActionListener(new ActionListener() {
+                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getCompiler().toString(), null, 0, new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         loadManual(loadedSketch.getContext().getCompiler().getManual());
                     }
-                });
-                Base.setFont(item, "menu.entry");
-                helpMenu.add(item);
+                }));
             }
         }
-
 
 
         PropertyFile links = Base.theme.getChildren("links");
 
         for(String link : links.childKeys()) {
-            item = new JMenuItem(links.get(link + ".name"));
-            item.setActionCommand(links.get(link + ".url"));
-            item.addActionListener(new ActionListener() {
+            helpMenu.add(createMenuEntry(links.get(link + ".name"), null, 0, (new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String link = e.getActionCommand();
                     Base.openURL(link);
                 }
-            });
-            Base.setFont(item, "menu.entry");
-            helpMenu.add(item);
+            }), links.get(link + ".url")));
         }
 
         links = loadedSketch.getContext().getMerged().getChildren("links");
 
         for(String link : links.childKeys()) {
-            String iname = links.get(link + ".name");
-
-            if(iname != null) {
-                item = new JMenuItem(iname);
-                item.setActionCommand(links.get(link + ".url"));
-                item.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        String link = e.getActionCommand();
-                        Base.openURL(link);
-                    }
-                });
-                Base.setFont(item, "menu.entry");
-                helpMenu.add(item);
-            }
+            helpMenu.add(createMenuEntry(links.get(link + ".name"), null, 0, (new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String link = e.getActionCommand();
+                    Base.openURL(link);
+                }
+            }), links.get(link + ".url")));
         }
 
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_MID);
         helpMenu.addSeparator();
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
-        submenu = new JMenu("Debug");
+        JMenu debugSubmenu = new JMenu("Debug");
 
-        item = new JMenuItem("Debug Console");
-        item.addActionListener(new ActionListener() {
+        debugSubmenu.add(createMenuEntry("Debug Console", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Debug.show();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("Rebuild internal structures");
-        item.addActionListener(new ActionListener() {
+        }));
+
+        debugSubmenu.add(createMenuEntry("Rebuild internal structures", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.cleanAndScanAllSettings();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("Purge cache files");
-        item.addActionListener(new ActionListener() {
+        }));
+
+        debugSubmenu.add(createMenuEntry("Purge cache files", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 loadedSketch.purgeCache();
             }
-        });
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        item = new JMenuItem("Open data folder");
-        item.addActionListener(new ActionListener() {
+        }));
+
+        debugSubmenu.add(createMenuEntry("Open data folder", null, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.openURL(Base.getDataFolder().getAbsolutePath());
             }
-        });
-        Base.setFont(item, "menu.entry");
-        submenu.add(item);
-        Base.setFont(submenu, "menu.entry");
-        helpMenu.add(submenu);
+        }));
+
+        Base.setFont(debugSubmenu, "menu.entry");
+        helpMenu.add(debugSubmenu);
 
     }
 
@@ -3503,7 +3391,6 @@ public class Editor extends JFrame {
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     JSerialMenuItem i = (JSerialMenuItem)(e.getSource());
-                    System.err.println("You selected " + i.getPort().getName());
                     loadedSketch.setDevice(i.getPort());
                     if (i.getPort().getBoard() != null) {
                         loadedSketch.setBoard(i.getPort().getBoard());
@@ -3516,81 +3403,7 @@ public class Editor extends JFrame {
         }
 
 
-
-//        ArrayList<String> ports = Serial.getPortList();
-//
-//        for(String port : ports) {
-//            String pn = Serial.getName(port);
-//            JMenuItem item = null;
-//
-//            if(pn != null & !pn.equals("")) {
-//                item = new JRadioButtonMenuItem(port + ": " + pn);
-//            } else {
-//                item = new JRadioButtonMenuItem(port);
-//            }
-//
-//            portGroup.add(item);
-//            item.setSelected(port.equals(loadedSketch.getSerialPort()));
-//            item.addActionListener(new ActionListener() {
-//                public void actionPerformed(ActionEvent e) {
-//                    loadedSketch.setSerialPort(e.getActionCommand());
-//                }
-//            });
-//            item.setActionCommand(port);
-//            Base.setFont(item, "menu.entry");
-//            menu.add(item);
-//        }
     }
-
-//    public class DiscoveredBoardAction extends AbstractAction {
-//        DiscoveredBoard discoveredBoard;
-//
-//        public DiscoveredBoardAction(DiscoveredBoard b) {
-//            super(b.toString());
-//            discoveredBoard = b;
-//        }
-//
-//        public void actionPerformed(ActionEvent e) {
-//            loadedSketch.setBoard(discoveredBoard.board);
-//            loadedSketch.setPort(discoveredBoard.location);
-//
-//            if(discoveredBoard.programmer != null) {
-//                loadedSketch.setProgrammer(discoveredBoard.programmer);
-//            }
-//
-//            for(Object k : discoveredBoard.properties.keySet()) {
-//                loadedSketch.getContext().set("mdns." + (String)k, discoveredBoard.properties.get((String)k));
-//            }
-//            //loadManual(loadedSketch.getContext().getCore().getManual());
-//        }
-//    }
-
-//    public void populateDiscoveredBoardsMenu(JMenu menu) {
-//        menu.removeAll();
-//        ButtonGroup portGroup = new ButtonGroup();
-//
-//        for(Object ob : Base.discoveredBoards.keySet()) {
-//            DiscoveredBoard b = Base.discoveredBoards.get(ob);
-//
-//            JMenuItem item = new JMenuItem(new DiscoveredBoardAction(b));
-//            ImageIcon i = b.board.getIcon(16);
-//
-//            if(i == null) {
-//                Core c = b.board.getCore();
-//
-//                if(c != null) {
-//                    i = c.getIcon(16);
-//                }
-//            }
-//
-//            if(i != null) {
-//                item.setIcon(i);
-//            }
-//
-//            Base.setFont(item, "menu.entry");
-//            menu.add(item);
-//        }
-//    }
 
     public String[] getBoardGroups() {
         ArrayList<String> out = new ArrayList<String>();
@@ -3690,10 +3503,6 @@ public class Editor extends JFrame {
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setBoard(e.getActionCommand());
-//                    Core c = loadedSketch.getContext().getCore();
-//                    if (c != null) {
-//                        loadManual(c.getManual());
-//                    }
                 }
             });
             item.setActionCommand(board.getName());

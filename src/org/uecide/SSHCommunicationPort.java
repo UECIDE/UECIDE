@@ -1,3 +1,33 @@
+/*
+ * Copyright (c) 2015, Majenko Technologies
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or
+ *   other materials provided with the distribution.
+ * 
+ * * Neither the name of Majenko Technologies nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.uecide;
 
 import jssc.*;
@@ -178,9 +208,7 @@ public class SSHCommunicationPort implements CommunicationPort {
 
     public boolean openPort() {
         try {
-            System.err.println("Port: " + portname);
             port = Integer.parseInt(portname);
-            System.err.println("Opening SSH connection to " + username + "@" + hostname + ":" + port);
             JSch jsch = new JSch();
             session = jsch.getSession(username, hostname, port);
             String password = Preferences.get("ssh." + hostname + "." + username);
@@ -199,7 +227,6 @@ public class SSHCommunicationPort implements CommunicationPort {
             session.setPassword(password);
             session.setConfig("StrictHostKeyChecking", "no");
 
-            System.err.println("Trying to connect...");
             try {
                 session.connect();
             } catch(JSchException e) {
@@ -223,7 +250,6 @@ public class SSHCommunicationPort implements CommunicationPort {
                 return false;
             }
 
-            System.err.println("Connected");
             Base.session.set("ssh." + hostname + "." + username, password);
 
             String command = board.get("ssh.console.command");
@@ -238,7 +264,6 @@ public class SSHCommunicationPort implements CommunicationPort {
 
             readThread.start();
 
-            System.err.println("Connecting channel...");
             channel.connect();
         } catch (Exception ex) {
             lastError = ex.getMessage();
@@ -246,7 +271,6 @@ public class SSHCommunicationPort implements CommunicationPort {
             System.err.println(lastError);
             return false;
         }
-        System.err.println("All done");
         return true;
     }
 
