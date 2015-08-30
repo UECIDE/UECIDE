@@ -1,3450 +1,824 @@
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added Makefile generation and some extra force flags
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 6 Mar 2015 18:50:12 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed arm apt name
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 5 Mar 2015 23:00:26 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped Version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 5 Mar 2015 11:44:48 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added command line options to manipulate APT repositories and packages
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 5 Mar 2015 11:44:30 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Separated library and core build files from sketch build files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 26 Feb 2015 13:05:52 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added apt
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 24 Feb 2015 21:55:35 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Locked editor based services from running during compilation
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 24 Feb 2015 21:30:53 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 24 Feb 2015 11:22:07 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved plugin manager into core Added missing library identification and installation Created markdown editor with realtime preview
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 24 Feb 2015 11:21:05 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added missing markdown processor jar
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 16 Feb 2015 18:04:37 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Working on new repo system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 15 Feb 2015 11:32:03 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rolled back custom parser for property files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 31 Jan 2015 18:46:19 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 24 Jan 2015 19:20:23 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed escape bug in property file. Updated jgit. Added cloning to GitLink
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 24 Jan 2015 15:50:56 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added Arduino config file parsing vc
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 23 Jan 2015 00:42:29 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 Jan 2015 16:18:05 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added library options system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 Jan 2015 15:59:14 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Implemented icon sets
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 16 Jan 2015 22:06:38 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 15 Jan 2015 14:22:53 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added random number VC and added UUID to UECIDE VC.
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 14 Jan 2015 01:58:54 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Complete overhaul of icon system. Added purge pragma parameter
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 13 Jan 2015 16:30:34 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed return value on headless compile or upload failure
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 11 Jan 2015 16:37:43 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 11 Jan 2015 13:38:05 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added per-sketch icon support
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 11 Jan 2015 12:14:51 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed UTF-8 saving in OS X
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 9 Jan 2015 19:16:52 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added full support for recursive .git finding
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 1 Jan 2015 22:20:55 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added recursive .git finding
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 1 Jan 2015 21:57:07 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Hardened some functions with limits
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 1 Jan 2015 21:29:43 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added toolbar icon and line drawing support
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 1 Jan 2015 19:19:48 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rewrote protocol to flexible stack based system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 1 Jan 2015 12:34:50 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added commands to set size and colour of LCD screen
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Dec 2014 23:34:07 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made the window and widget resizable
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Dec 2014 21:27:48 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added virtual LCD plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Dec 2014 19:39:50 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made extra ports override real ports when the extra is a symlink
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Dec 2014 20:04:28 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Dec 2014 17:08:19 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added pre- and post-commands to compile and upload
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 25 Dec 2014 21:08:55 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 24 Dec 2014 16:21:52 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added grapher to repo
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Dec 2014 02:25:19 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added grapher to repo
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Dec 2014 02:24:43 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added descriptions to plugins
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Dec 2014 02:22:00 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added parsing to more strings in Sketch
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Dec 2014 13:21:36 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added Variable Command for getting selected options data
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Dec 2014 11:54:18 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Incided jgit into the core
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 13 Dec 2014 19:47:08 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved status line
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 13 Dec 2014 12:23:06 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated stub to find all jre8 releases
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 4 Dec 2014 23:48:22 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed windows exe packaging
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 4 Dec 2014 22:31:28 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added menu entries and keyboard shortcuts for compile and upload
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 3 Dec 2014 18:30:35 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed crash reports
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 3 Dec 2014 15:05:47 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 3 Dec 2014 00:34:22 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed XP launch, and some cosmetics
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 3 Dec 2014 00:32:33 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed dependency version restrictions for launchpad
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Dec 2014 15:07:41 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added ant as build depend
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Dec 2014 12:18:02 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Debianized package
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Dec 2014 11:55:29 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added windows and osx version probing
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Nov 2014 23:55:39 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed prefs open in MacOSX
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Nov 2014 19:07:52 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Nov 2014 18:48:23 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added option to disable crash reporter
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Nov 2014 18:48:07 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed some null pointer errors
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Nov 2014 18:37:56 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added OS version data and moved varfuncs to base
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Nov 2014 18:24:41 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed compilation when main header is manually included
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 27 Nov 2014 17:46:35 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixing concurrent modifications
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 13 Nov 2014 22:31:43 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fix compilation for newer JNA
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 26 Oct 2014 16:13:12 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed library naming problem
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 15 Sep 2014 16:01:37 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Build enhancements to support more compilers
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 15 Sep 2014 00:28:03 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rebuilt console without HTML
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 9 Sep 2014 19:07:40 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added source for windows stub
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 29 Aug 2014 17:10:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bundled new plugin manager;
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 29 Aug 2014 13:32:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated jna, added native java support on windows
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 29 Aug 2014 13:31:27 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed exe loader stub at last!
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 29 Aug 2014 12:16:53 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Switched to using a batch file to load windows version for now until a better stub can be crafted
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 29 Aug 2014 12:02:08 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed windows and mac boot stubs
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 27 Aug 2014 10:17:04 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Remove autoformat bundle
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 26 Aug 2014 23:41:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added new bundles of plugins
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 26 Aug 2014 23:40:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added keyword.txt handling
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 26 Aug 2014 22:20:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 26 Aug 2014 12:07:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed a subtle bug in lib include selection
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 23 Aug 2014 17:58:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 22 Aug 2014 22:23:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed OS X application file permissions
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 22 Aug 2014 22:18:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 22 Aug 2014 00:26:42 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Finally fixed wandering tree entries
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 22 Aug 2014 00:25:03 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed windows slowness
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 21 Aug 2014 09:48:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added code page handling
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 21 Aug 2014 00:47:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added gutter flags
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 20 Aug 2014 17:24:56 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Stopped the function list from bouncing around so much
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 20 Aug 2014 00:32:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added note/todo/fixme parsing and task lists
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 20 Aug 2014 00:18:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Tidy up of the build process
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 19 Aug 2014 22:49:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 19 Aug 2014 14:08:09 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed sketch libraries
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 19 Aug 2014 13:37:47 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 18 Aug 2014 15:06:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.8alpha19) unstable; urgency=low 
+
+  * Released beta
+  * Gradually cleaning up the prefs system
+  * Added environment handling, and fixed double-context creation in sketches
+  * Overhaul of communications systems
+  * Fixed splash screen to middle of default screen in multiheaded environment
+  * Added some new builtins
+  * Fixed version conflict
+  * Fixed error and warning message flagging and todo list clearing
+  * Added parsable message strings
+  * Updated and added missing licenses
+  * Removed redundant files
+  * Added library list and port list widgets for preferences
+  * Re-added debug files used by some plugins
+  * Added border to preferences window
+  * Fixed plugin preferences default loading
+  * Added configurable reset delays
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 15 Jul 2015 23:57:11 +0100
+
+uecide (0.8.7z9) unstable; urgency=low 
 
   * Upgrade RSTA
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 16 Aug 2014 16:50:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
+  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
+  * Fixed sketch libraries
+  * Bumped version
+  * Tidy up of the build process
+  * Added note/todo/fixme parsing and task lists
+  * Stopped the function list from bouncing around so much
+  * Added gutter flags
+  * Added code page handling
+  * Fixed windows slowness
+  * Finally fixed wandering tree entries
+  * Bumped version
+  * Fixed OS X application file permissions
+  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
+  * Fixed a subtle bug in lib include selection
+  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
+  * Added keyword.txt handling
+  * Added new bundles of plugins
+  * Remove autoformat bundle
+  * Fixed windows and mac boot stubs
+  * Switched to using a batch file to load windows version for now until a better stub can be crafted
+  * Fixed exe loader stub at last!
+  * Updated jna, added native java support on windows
+  * Bundled new plugin manager;
+  * Added source for windows stub
+  * Rebuilt console without HTML
+  * Build enhancements to support more compilers
+  * Fixed library naming problem
+  * Fix compilation for newer JNA
+  * Fixing concurrent modifications
+  * Fixed compilation when main header is manually included
+  * Added OS version data and moved varfuncs to base
+  * Two new varfunc categories - os and uecide. OS contains the os name,
+  * version, flavour and arch.  UECIDE contains the UECIDE version and
+  * the product name.
+  * The string parsing routines and the varfuncs have been moved completely to
+  * the Base object so they can be used from other places such as plugins without
+  * any sketch being available.  The plugin manager now uses it for filling
+  * in the arguments to the plugin URL.
+  * Fixed some null pointer errors
+  * Added option to disable crash reporter
+  * Updated version
+  * Fixed prefs open in MacOSX
+  * Added windows and osx version probing
+  * Debianized package
+  * Added ant as build depend
+  * Removed dependency version restrictions for launchpad
+  * Fixed XP launch, and some cosmetics
+  * The &diams; messages have been replaced with proper "bullet" calls to clean
+  * up the display a little.
+  * The UECIDE.exe program has been recompiled under XP instead of Windows 7
+  * so it will run in everyting from XP upwards now (it was failing in XP
+  * before).
+  * Updated version
+  * Fixed crash reports
+  * Added menu entries and keyboard shortcuts for compile and upload
+  * Fixed windows exe packaging
+  * Updated stub to find all jre8 releases
+  * Improved status line
+  * The status line has been made more informative, and styled nicely with
+  * HTML.  The browser has had to have all stylesheet generation removed
+  * as the HTML support in Java is useless.  The browser sill seems to
+  * function normally at this stage though.
+  * Incided jgit into the core
+  * Added Variable Command for getting selected options data
+  * Added parsing to more strings in Sketch
+  * Added descriptions to plugins
+  * Added grapher to repo
+  * Added grapher to repo
+  * Bumped version
+  * Added pre- and post-commands to compile and upload
+  * Bumped version
+  * Made extra ports override real ports when the extra is a symlink
+  * Added virtual LCD plugin
+  * Made the window and widget resizable
+  * Added commands to set size and colour of LCD screen
+  * Rewrote protocol to flexible stack based system
+  * Added toolbar icon and line drawing support
+  * Hardened some functions with limits
+  * Added recursive .git finding
+  * Added full support for recursive .git finding
+  * Fixed UTF-8 saving in OS X
+  * Added per-sketch icon support
+  * Bumped version
+  * Fixed return value on headless compile or upload failure
+  * Complete overhaul of icon system. Added purge pragma parameter
+  * Added random number VC and added UUID to UECIDE VC.
+  * Bumped version
+  * Implemented icon sets
+  * Added library options system
+  * Bumped version
+  * Added Arduino config file parsing vc
+  * Fixed escape bug in property file. Updated jgit. Added cloning to GitLink
+  * Bumped version
+  * Rolled back custom parser for property files
+  * Working on new repo system
+  * Added missing markdown processor jar
+  * Moved plugin manager into core
+  * Added missing library identification and installation
+  * Created markdown editor with realtime preview
+  * Bumped version
+  * Locked editor based services from running during compilation
+  * Added apt
+  * Separated library and core build files from sketch build files
+  * Added command line options to manipulate APT repositories and packages
+  * Bumped Version
+  * Fixed arm apt name
+  * Added Makefile generation and some extra force flags
+  * Added . as valid sketch name for mkmf
+  * Added version flag
+  * Forced apt update before library installation
+  * Numerous bug fixes. Setting to recreate makefile each compile
+  * Added offline mode
+  * Added online/offline option to file menu
+  * Added interactive CLI system
+  * Fixed some headless cli bugs with new install
+  * Added GPIO control, delay, and linux serial lock files
+  * Fixed unknown version in debian testing
+  * Made command input stream unbuffered at last
+  * Made console unbuffered
+  * Fixed ant deps error
+  * Added script tag
+  * Added build status
+  * Updated version
+  * Moved APT into core and added repository handling
+  * Added missing archive files
+  * Moved repo list into BorderLayout panel
+  * Improved manual handling and project search facility
+  * Improved crash reporter
+  * Bumped version
+  * Fixed splash screen flickering
+  * Added support for adublock URI
+  * Fixed crash at startup with .ino file parameter
+  * Bumped version
+  * Added launch4j config
+  * Added missing launch4j files
+  * Fixed ordering of option menu
+  * Fixed bug with varcmd in baud rate setting
+  * New preferences tree system
+  * New Context system for messaging and execution
+  * Overhaul of scripting and command systems
+  * Better javascript integration
+  * Some more builtin commands for file writing and jar loading
+  * Fixed broken redirection for object editor
+  * Added embedded binary support
   * Bumped version
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sat, 16 Aug 2014 15:55:56 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added new required libraries
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 16 Aug 2014 15:54:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z8) unstable; urgency=low 
 
   * Added services and migrated some threads and timers to the service infrastructure
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 16 Aug 2014 15:53:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed MRU initialize bug
+  * Added new required libraries
+  * Bumped version
 
  -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 11:34:19 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z7) unstable; urgency=low 
 
-  * Released version 0.8.7z7
+  * Fixed MRU initialize bug
 
  -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 10:46:11 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made all plugin commands non-static and added javascript engine
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 10:41:13 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved command line handling
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 14 Aug 2014 11:29:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved crash reporting system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 23:00:50 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z6) unstable; urgency=low 
 
   * Sorted function list alphabetically
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 20:20:31 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed tree update collision bug
+  * Improved crash reporting system
+  * Improved command line handling
+  * Made all plugin commands non-static and added javascript engine
+  * Released version 0.8.7z7
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 19:34:57 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z5) unstable; urgency=low 
 
-  * Added crash reporter
+  * Fixed tree update collision bug
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 13:46:17 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z4) unstable; urgency=low 
 
-  * Added manual browser
+  * Added crash reporter
 
  -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Aug 2014 20:55:42 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z3) unstable; urgency=low 
 
-  * Caught possible NullPointer exception in sketch loading
+  * Added manual browser
 
  -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Aug 2014 13:58:02 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z25) unstable; urgency=low 
+
+  * Added manual browser
+  * Added crash reporter
+  * Fixed tree update collision bug
+  * Sorted function list alphabetically
+  * Improved crash reporting system
+  * Improved command line handling
+  * Made all plugin commands non-static and added javascript engine
+  * Released version 0.8.7z7
+  * Fixed MRU initialize bug
+  * Added services and migrated some threads and timers to the service infrastructure
+  * Added new required libraries
+  * Bumped version
+  * Upgrade RSTA
+  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
+  * Fixed sketch libraries
+  * Bumped version
+  * Tidy up of the build process
+  * Added note/todo/fixme parsing and task lists
+  * Stopped the function list from bouncing around so much
+  * Added gutter flags
+  * Added code page handling
+  * Fixed windows slowness
+  * Finally fixed wandering tree entries
+  * Bumped version
+  * Fixed OS X application file permissions
+  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
+  * Fixed a subtle bug in lib include selection
+  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
+  * Added keyword.txt handling
+  * Added new bundles of plugins
+  * Remove autoformat bundle
+  * Fixed windows and mac boot stubs
+  * Switched to using a batch file to load windows version for now until a better stub can be crafted
+  * Fixed exe loader stub at last!
+  * Updated jna, added native java support on windows
+  * Bundled new plugin manager;
+  * Added source for windows stub
+  * Rebuilt console without HTML
+  * Build enhancements to support more compilers
+  * Fixed library naming problem
+  * Fix compilation for newer JNA
+  * Fixing concurrent modifications
+  * Fixed compilation when main header is manually included
+  * Added OS version data and moved varfuncs to base
+  * Two new varfunc categories - os and uecide. OS contains the os name,
+  * version, flavour and arch.  UECIDE contains the UECIDE version and
+  * the product name.
+  * The string parsing routines and the varfuncs have been moved completely to
+  * the Base object so they can be used from other places such as plugins without
+  * any sketch being available.  The plugin manager now uses it for filling
+  * in the arguments to the plugin URL.
+  * Fixed some null pointer errors
+  * Added option to disable crash reporter
+  * Updated version
+  * Fixed prefs open in MacOSX
+  * Added windows and osx version probing
+  * Debianized package
+  * Added ant as build depend
+  * Removed dependency version restrictions for launchpad
+  * Fixed XP launch, and some cosmetics
+  * The &diams; messages have been replaced with proper "bullet" calls to clean
+  * up the display a little.
+  * The UECIDE.exe program has been recompiled under XP instead of Windows 7
+  * so it will run in everyting from XP upwards now (it was failing in XP
+  * before).
+  * Updated version
+  * Fixed crash reports
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 03 Dec 2014 15:05:47 +0000
+
+uecide (0.8.7z24) unstable; urgency=low 
+
+  * Fixed crash reports
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 03 Dec 2014 00:34:22 +0000
+
+uecide (0.8.7z23-1) unstable; urgency=low 
+
+  * Debianized package
+  * Added ant as build depend
+  * Removed dependency version restrictions for launchpad
+  * Fixed XP launch, and some cosmetics
+  * The &diams; messages have been replaced with proper "bullet" calls to clean
+  * up the display a little.
+  * The UECIDE.exe program has been recompiled under XP instead of Windows 7
+  * so it will run in everyting from XP upwards now (it was failing in XP
+  * before).
+  * Updated version
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Nov 2014 23:55:39 +0000
+
+uecide (0.8.7z2) unstable; urgency=low 
 
   * Added context menu to console
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 23:46:43 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed typo in console CSS
+  * Caught possible NullPointer exception in sketch loading
+  * Added manual browser
+  * Added crash reporter
+  * Fixed tree update collision bug
+  * Sorted function list alphabetically
+  * Improved crash reporting system
+  * Improved command line handling
+  * Made all plugin commands non-static and added javascript engine
+  * Released version 0.8.7z7
+  * Fixed MRU initialize bug
+  * Added services and migrated some threads and timers to the service infrastructure
+  * Added new required libraries
+  * Bumped version
+  * Upgrade RSTA
+  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
+  * Fixed sketch libraries
+  * Bumped version
+  * Tidy up of the build process
+  * Added note/todo/fixme parsing and task lists
+  * Stopped the function list from bouncing around so much
+  * Added gutter flags
+  * Added code page handling
+  * Fixed windows slowness
+  * Finally fixed wandering tree entries
+  * Bumped version
+  * Fixed OS X application file permissions
+  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
+  * Fixed a subtle bug in lib include selection
+  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
+  * Added keyword.txt handling
+  * Added new bundles of plugins
+  * Remove autoformat bundle
+  * Fixed windows and mac boot stubs
+  * Switched to using a batch file to load windows version for now until a better stub can be crafted
+  * Fixed exe loader stub at last!
+  * Updated jna, added native java support on windows
+  * Bundled new plugin manager;
+  * Added source for windows stub
+  * Rebuilt console without HTML
+  * Build enhancements to support more compilers
+  * Fixed library naming problem
+  * Fix compilation for newer JNA
+  * Fixing concurrent modifications
+  * Fixed compilation when main header is manually included
+  * Added OS version data and moved varfuncs to base
+  * Two new varfunc categories - os and uecide. OS contains the os name,
+  * version, flavour and arch.  UECIDE contains the UECIDE version and
+  * the product name.
+  * The string parsing routines and the varfuncs have been moved completely to
+  * the Base object so they can be used from other places such as plugins without
+  * any sketch being available.  The plugin manager now uses it for filling
+  * in the arguments to the plugin URL.
+  * Fixed some null pointer errors
+  * Added option to disable crash reporter
+  * Updated version
+  * Fixed prefs open in MacOSX
+  * Added windows and osx version probing
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 19:29:55 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z17) unstable; urgency=low 
 
+  * Added context menu to console
+  * Caught possible NullPointer exception in sketch loading
+  * Added manual browser
+  * Added crash reporter
+  * Fixed tree update collision bug
+  * Sorted function list alphabetically
+  * Improved crash reporting system
+  * Improved command line handling
+  * Made all plugin commands non-static and added javascript engine
+  * Released version 0.8.7z7
+  * Fixed MRU initialize bug
+  * Added services and migrated some threads and timers to the service infrastructure
+  * Added new required libraries
+  * Bumped version
+  * Upgrade RSTA
+  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
+  * Fixed sketch libraries
+  * Bumped version
+  * Tidy up of the build process
+  * Added note/todo/fixme parsing and task lists
+  * Stopped the function list from bouncing around so much
+  * Added gutter flags
+  * Added code page handling
+  * Fixed windows slowness
+  * Finally fixed wandering tree entries
+  * Bumped version
+  * Fixed OS X application file permissions
+  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
+  * Fixed a subtle bug in lib include selection
+  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
+  * Added keyword.txt handling
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 26 Aug 2014 22:20:25 +0100
+
+uecide (0.8.7z16) unstable; urgency=low 
+
+  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
+  * Added keyword.txt handling
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 23 Aug 2014 17:58:51 +0100
+
+uecide (0.8.7z15) unstable; urgency=low 
+
+  * Fixed OS X application file permissions
+  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
+  * Fixed a subtle bug in lib include selection
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Fri, 22 Aug 2014 00:26:42 +0100
+
+uecide (0.8.7z14) unstable; urgency=low 
+
+  * Fixed windows slowness
+  * Finally fixed wandering tree entries
   * Bumped version
 
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 18:50:21 +0100
+ -- Matt Jenkins <matt@majenko.co.uk>  Thu, 21 Aug 2014 00:47:41 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z13) unstable; urgency=low 
 
-  * Changed console to HTML
+  * Added code page handling
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 20 Aug 2014 17:24:56 +0100
+
+uecide (0.8.7z12) unstable; urgency=low 
+
+  * Stopped the function list from bouncing around so much
+  * Added gutter flags
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 20 Aug 2014 00:18:05 +0100
+
+uecide (0.8.7z11) unstable; urgency=low 
+
+  * Tidy up of the build process
+  * Added note/todo/fixme parsing and task lists
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 19 Aug 2014 14:08:09 +0100
+
+uecide (0.8.7z10) unstable; urgency=low 
+
+  * Fixed sketch libraries
+  * Bumped version
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 18 Aug 2014 15:06:10 +0100
+
+uecide (0.8.7z1) unstable; urgency=low 
+
+  * Bumped version
+  * Fixed typo in console CSS
+  * Added context menu to console
+  * Caught possible NullPointer exception in sketch loading
+  * Added manual browser
+  * Added crash reporter
+  * Fixed tree update collision bug
+  * Sorted function list alphabetically
+  * Improved crash reporting system
+  * Improved command line handling
+  * Made all plugin commands non-static and added javascript engine
+  * Released version 0.8.7z7
+  * Fixed MRU initialize bug
+  * Added services and migrated some threads and timers to the service infrastructure
+  * Added new required libraries
+  * Bumped version
+  * Upgrade RSTA
+  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 18:48:01 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added theme importer plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 15:58:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added third party library list and made About box HTML
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 15:56:04 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7z) unstable; urgency=low 
 
   * Backed out property file loader
+  * Added third party library list and made About box HTML
+  * Added theme importer plugin
+  * Changed console to HTML
 
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Aug 2014 21:50:21 +0100
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 09 Aug 2014 20:04:59 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7y) unstable; urgency=low 
 
   * Reverted propertyfile loader update
 
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Aug 2014 20:04:59 +0100
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 09 Aug 2014 18:11:07 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed release
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Aug 2014 18:11:07 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.7x) unstable; urgency=low 
 
   * Added USB javax source
+  * Fixed release
 
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Aug 2014 18:10:28 +0100
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 09 Aug 2014 17:41:25 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added USB support, property file includes, etc
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Aug 2014 17:41:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added USB HID device detection
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 8 Aug 2014 22:03:49 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Big cleanup, plus better handling for 1.5.x libraries
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 8 Aug 2014 19:30:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made ssh and scp forget the password on authentication failure
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 8 Aug 2014 16:27:26 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added preferred programmer selection to network discovery service
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 8 Aug 2014 15:52:45 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed serial terminal method crash in OS X java 1.6_15
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 8 Aug 2014 15:37:42 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added goto/set/fail/end special functions to script
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 8 Aug 2014 14:20:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rewritten command execution routines
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 8 Aug 2014 12:52:45 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed null pointer in non-sketch upload
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 8 Aug 2014 09:48:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improvements to script system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 7 Aug 2014 21:02:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 6 Aug 2014 22:01:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed too many open files bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 6 Aug 2014 22:00:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added jmdns library
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 6 Aug 2014 21:03:53 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added Jsch library
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 6 Aug 2014 21:02:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Cleaned up error output
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 6 Aug 2014 20:58:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added network ssh uploading
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 6 Aug 2014 20:32:55 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed plugin not-installed version bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 3 Aug 2014 14:50:43 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved full screen with menu
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 3 Aug 2014 10:34:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:UECIDE/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 3 Aug 2014 10:06:40 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed border painting control from toolbar buttons
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 3 Aug 2014 10:06:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added full screen mode
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 3 Aug 2014 09:26:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 2 Aug 2014 22:50:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added office laf jar
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 2 Aug 2014 22:23:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added tinylaf jar
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 2 Aug 2014 22:23:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added extra LAFs and some fixes to themes
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 2 Aug 2014 22:22:47 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added selectable editor themes
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 2 Aug 2014 14:29:57 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added experimental tree merge routine
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 1 Aug 2014 16:08:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 1 Aug 2014 15:07:14 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added auto-refresh of function list. Added documentation and markdown section
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 1 Aug 2014 14:54:49 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed new repo problem
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 1 Aug 2014 00:51:07 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added revert to last commit on files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 31 Jul 2014 22:51:47 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 31 Jul 2014 21:44:12 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added git ignore
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 31 Jul 2014 21:43:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added new stub for icon overlay
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 31 Jul 2014 21:43:20 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated launch4j for trusty
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 31 Jul 2014 01:56:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Embedded executables
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 30 Jul 2014 17:37:38 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed old system plugins folder code
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 30 Jul 2014 13:06:38 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added ASM labels with corresponding .ent sections to tree function list
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 30 Jul 2014 12:15:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added template plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 29 Jul 2014 23:28:43 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed missing asm files in tree
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 29 Jul 2014 23:22:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed sketch properties saving
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 28 Jul 2014 14:39:15 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added function list in project tree
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 27 Jul 2014 22:52:43 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed nested comment stripping
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 27 Jul 2014 20:20:16 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added bracket adding options
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 27 Jul 2014 16:00:09 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added Artistic Style plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 27 Jul 2014 15:08:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed Save As path breaking
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 27 Jul 2014 13:16:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Forced opened files to be java.io.File class
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 27 Jul 2014 12:08:38 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed library install bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 27 Jul 2014 10:59:13 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Properly fixed windows compile #line problem
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 27 Jul 2014 01:09:17 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added elf inspector
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 26 Jul 2014 22:40:31 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added error flagging
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 26 Jul 2014 21:43:04 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added project search. Fixed windows file path #line issue
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 26 Jul 2014 16:14:53 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 26 Jul 2014 11:09:07 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added plugin callbacks to context menus
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 26 Jul 2014 11:08:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed debian package lint problem
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 26 Jul 2014 11:07:21 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Released version 0.8.7a
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 23 Jul 2014 22:00:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 21 Jul 2014 15:50:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved facilties for debugging sketches
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 21 Jul 2014 15:50:06 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added improved about box
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 19 Jul 2014 14:56:03 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added open data folder debug entry
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 18 Jul 2014 15:53:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated bundled serial terminal
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 18 Jul 2014 10:42:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fix bug in serial terminal for width > 80 characters
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 18 Jul 2014 10:40:52 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rememberd last opened folder in import file. Added https and ftp to windows URL open handling
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 16 Jul 2014 10:35:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rememberd last opened folder in import file. Added https and ftp to windows URL open handling
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 16 Jul 2014 10:15:08 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge pull request #39 from TCWORLD/master
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 16 Jul 2014 09:56:14 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Corrected "Open In OS"
-
- -- Tom Carpenter <strange_orange_fish@hotmail.com>  Wed, 16 Jul 2014 00:39:45 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Changed version url for new site layout
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 15 Jul 2014 11:09:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 14 Jul 2014 17:08:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Ported copy for forum plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 14 Jul 2014 16:40:06 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bundled autoformat
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 14 Jul 2014 16:22:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Ported AutoFormat plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 14 Jul 2014 16:18:02 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated plugin manager
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 14 Jul 2014 10:57:59 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made plugin manager modal
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 14 Jul 2014 10:57:31 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated download URL for new site layout
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 13 Jul 2014 23:42:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated patch to r
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 13 Jul 2014 23:39:43 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed stellaris compilation bugs
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 13 Jul 2014 23:38:02 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added sketch properties system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 13 Jul 2014 19:52:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added sketch properties system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 13 Jul 2014 19:51:13 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Saved console split position as offset from top instead of bottom
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 12 Jul 2014 22:58:13 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed lib-local header file issue in library recursion
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 12 Jul 2014 11:16:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed Open in OS in Windows
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 12 Jul 2014 00:44:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed library compilation crashing in windows due to rogue :
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 12 Jul 2014 00:25:52 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 11 Jul 2014 23:30:02 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added tools for opening files and folders externally
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 11 Jul 2014 23:29:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge pull request #36 from UECIDE/complete_rebuild
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 11 Jul 2014 01:30:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * New support files URL
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 11 Jul 2014 00:47:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed old plugins crashing new version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 11 Jul 2014 00:42:17 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed NullPointerException when no core installed
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 10 Jul 2014 17:04:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 10 Jul 2014 16:58:23 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed disappearing output messages problem
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 10 Jul 2014 16:53:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved library storage to Library class
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 10 Jul 2014 15:25:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added option to disable version check. Limited version checking to 3 hourly at most
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 9 Jul 2014 11:27:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added updated version checking
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 9 Jul 2014 11:09:47 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added libraries-within-libraries
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 9 Jul 2014 10:41:08 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Jul 2014 18:36:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed auto opening of plugin manager
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Jul 2014 15:52:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed bad plugin manager tree refresh with no board selected in editor
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Jul 2014 15:47:15 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Jul 2014 14:21:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed PropertyFile file locking issue
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Jul 2014 14:21:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Forced editor menu rebuild on board install/deinstall. Forced complete rebuild on plugin manager close.
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Jul 2014 12:18:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added tooltips to tree
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Jul 2014 12:05:06 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added multiple install/uninstall to pligin manager
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 6 Jul 2014 14:48:23 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added multiple install/uninstall to pligin manager
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 6 Jul 2014 14:48:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 6 Jul 2014 12:28:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Brought main plugins into main tree
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 6 Jul 2014 12:21:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added export local library option
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 5 Jul 2014 23:50:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added export local library option
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 5 Jul 2014 23:50:03 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added library template generator
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 5 Jul 2014 17:42:33 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made complete rebuild a separate thread
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 3 Jul 2014 19:24:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made find loop and added found failed background change
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 3 Jul 2014 18:53:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 2 Jul 2014 18:39:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 2 Jul 2014 15:48:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added import SAR file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 2 Jul 2014 15:47:13 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added export as SAR file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 2 Jul 2014 11:50:28 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added export as SAR file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 2 Jul 2014 11:50:16 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added compile / upload abort button
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 2 Jul 2014 11:21:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added example sketch and localization protection
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 2 Jul 2014 10:48:21 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed editor font bug. Added USB device ident for Linux.
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 29 Jun 2014 20:39:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed serial lock problem
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 23 Jun 2014 18:15:37 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Possible fix to locked port
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 23 Jun 2014 14:55:34 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 23 Jun 2014 14:02:07 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed Save As main file bug, and attempted to fix bluetooth problems
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 23 Jun 2014 13:59:57 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added missing saveTo() function stub
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 22 Jun 2014 19:38:52 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 22 Jun 2014 13:27:28 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added option to hide secondary editor toolbar
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 22 Jun 2014 12:58:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed saveAs empty file bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 22 Jun 2014 12:34:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed rescan all ports on tab change
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 21 Jun 2014 00:45:08 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Various bug fixes
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 20 Jun 2014 00:37:47 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added prefs and theme getters in config file variables
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 8 Jun 2014 18:50:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added simple bitmap viewer
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 5 Jun 2014 11:16:56 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added simple bitmap viewer
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 5 Jun 2014 11:16:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed file save "modified outside" bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 29 May 2014 23:55:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 29 May 2014 13:57:26 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made library utility recursion optional in library.txt file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 29 May 2014 12:23:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Allow headless compilation/upload
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 29 May 2014 12:18:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed DTR reset bug in Windows
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 28 May 2014 23:00:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added file watcher timer to tabs to monitor external file changes
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 28 May 2014 20:03:49 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Switched most hashes to TreeHash.  Fixed some null pointer bugs.  Open new sketch in existing editor if untitled and not modified
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 28 May 2014 19:04:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed plugin install problems
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 27 May 2014 11:22:23 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved library category adding
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 24 May 2014 22:17:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rewritten library installer. Ditched sketchbook libraries folder (made it part of categories)
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 24 May 2014 21:21:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added file tree, drag and drop, and lots more improvements
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 24 May 2014 16:44:12 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed saving of preferences on application exit
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 22 May 2014 23:47:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added build number generation, contributor list generation and sorting of user preferences file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 22 May 2014 23:45:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Cleaned up dir structure, implemented about menu entry
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 21 May 2014 23:35:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed #pragma parameter string space splitting
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 May 2014 23:15:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed virgin installation issues
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 May 2014 22:25:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added "unable to find port" error alert to serial system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 May 2014 21:53:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added new plugin manager bundle
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 May 2014 21:24:50 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'complete_rebuild' of github.com:UECIDE/UECIDE into complete_rebuild
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 May 2014 21:22:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Plugin system work
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 May 2014 21:22:08 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added option to keep find & replace open
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 May 2014 21:14:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * More plugin work and added basic upload support
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 20 May 2014 13:40:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added libraries, and re-worked plugin system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 19 May 2014 21:32:19 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Library compilation meter, plus other cleaning up and progress towards completion
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 18 May 2014 23:26:59 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added code to indent / outdent buttons
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 18 May 2014 19:07:13 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * More progress towards the best IDE ever
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 18 May 2014 17:39:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added new plugin toolbar icon system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 18 May 2014 01:11:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added editor toolbar
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 18 May 2014 00:33:37 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * More work re-writing all the functionality
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 17 May 2014 23:20:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Hidden RSyntaxTextArea build folder
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 17 May 2014 18:29:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed build tree and core tree and just created the tree
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 17 May 2014 18:28:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Massive cleanup of the file structure.  All third party code removed from the main source tree and either placed into auto-updating third party area or placed in lib folder as .jar files.
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 17 May 2014 11:27:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * update version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 17 May 2014 09:52:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.5e) unstable; urgency=low 
 
   * Embarked on a daring resign
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 16 May 2014 22:34:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed compile abort on sketch error
+  * I have started redesigning much of the system from the ground up.  Instead
+  * of patching and tweaking the existing editor code, I decided that I should
+  * just delete it and start from scratch.  It's much cleaner, and does a whole
+  * load more than before.  Or it will when it's finished though.  At the moment
+  * it's so crippled as to be pretty much unusable.  Lots and lots still to do.
+  * update version
+  * Massive cleanup of the file structure.  All third party code removed
+  * from the main source tree and either placed into auto-updating third
+  * party area or placed in lib folder as .jar files.
+  * Removed build tree and core tree and just created the tree
+  * I have done away with the whole split build / core environments and just
+  * got one single build environment, which is the root folder.
+  * Hidden RSyntaxTextArea build folder
+  * More work re-writing all the functionality
+  * Added editor toolbar
+  * Added new plugin toolbar icon system
+  * More progress towards the best IDE ever
+  * Added code to indent / outdent buttons
+  * Library compilation meter, plus other cleaning up and progress towards completion
+  * Added libraries, and re-worked plugin system
+  * More plugin work and added basic upload support
+  * Added option to keep find & replace open
+  * Plugin system work
+  * Merge branch 'complete_rebuild' of github.com:UECIDE/UECIDE into complete_rebuild
+  * Added new plugin manager bundle
+  * Added "unable to find port" error alert to serial system
+  * Fixed virgin installation issues
+  * Fixed #pragma parameter string space splitting
+  * Cleaned up dir structure, implemented about menu entry
+  * Added build number generation, contributor list generation and sorting of user preferences file
+  * Fixed saving of preferences on application exit
+  * Added file tree, drag and drop, and lots more improvements
+  * Rewritten library installer. Ditched sketchbook libraries folder (made it part of categories)
+  * Improved library category adding
+  * Fixed plugin install problems
+  * Switched most hashes to TreeHash.  Fixed some null pointer bugs.  Open new sketch in existing editor if untitled and not modified
+  * Added file watcher timer to tabs to monitor external file changes
+  * Fixed DTR reset bug in Windows
+  * Allow headless compilation/upload
+  * Made library utility recursion optional in library.txt file
+  * Updated version
+  * Fixed file save "modified outside" bug
+  * Added simple bitmap viewer
+  * Added simple bitmap viewer
+  * Added prefs and theme getters in config file variables
+  * Various bug fixes
+  * Fixed rescan all ports on tab change
+  * Fixed saveAs empty file bug
+  * Added option to hide secondary editor toolbar
+  * Updated version
+  * Added missing saveTo() function stub
+  * Fixed Save As main file bug, and attempted to fix bluetooth problems
+  * Updated version
+  * Possible fix to locked port
+  * Fixed serial lock problem
+  * Fixed editor font bug. Added USB device ident for Linux.
+  * Added example sketch and localization protection
+  * Added compile / upload abort button
+  * Added export as SAR file
+  * Added export as SAR file
+  * Added import SAR file
+  * Updated version
+  * Updated version
+  * Made find loop and added found failed background change
+  * Made complete rebuild a separate thread
+  * Added library template generator
+  * Added export local library option
+  * Added export local library option
+  * Brought main plugins into main tree
+  * Updated version
+  * Added multiple install/uninstall to pligin manager
+  * Added multiple install/uninstall to pligin manager
+  * Added tooltips to tree
+  * Forced editor menu rebuild on board install/deinstall. Forced complete rebuild on plugin manager close.
+  * Fixed PropertyFile file locking issue
+  * Updated version
+  * Fixed bad plugin manager tree refresh with no board selected in editor
+  * Fixed auto opening of plugin manager
+  * Updated version
+  * Added libraries-within-libraries
+  * Added updated version checking
+  * Added option to disable version check. Limited version checking to 3 hourly at most
+  * Moved library storage to Library class
+  * Fixed disappearing output messages problem
+  * Updated version
+  * Fixed NullPointerException when no core installed
+  * Fixed old plugins crashing new version
+  * New support files URL
+  * Merge pull request #36 from UECIDE/complete_rebuild
+  * Complete rebuild
+  * Added tools for opening files and folders externally
+  * Updated version
+  * Fixed library compilation crashing in windows due to rogue :
+  * Fixed Open in OS in Windows
+  * Fixed lib-local header file issue in library recursion
+  * Saved console split position as offset from top instead of bottom
+  * Added sketch properties system
+  * Added sketch properties system
+  * Fixed stellaris compilation bugs
+  * Updated patch to r
+  * Updated download URL for new site layout
+  * Made plugin manager modal
+  * Updated plugin manager
+  * Ported AutoFormat plugin
+  * Bundled autoformat
+  * Ported copy for forum plugin
+  * Updated version
+  * Changed version url for new site layout
+  * Corrected "Open In OS"
+  * Made a correction which makes 'Open in OS' work on Windows.
+  * Merge pull request #39 from TCWORLD/master
+  * Corrected "Open In OS" (Issue #37)
+  * Rememberd last opened folder in import file. Added https and ftp to windows URL open handling
+  * Rememberd last opened folder in import file. Added https and ftp to windows URL open handling
+  * Fix bug in serial terminal for width > 80 characters
+  * Updated bundled serial terminal
+  * Added open data folder debug entry
+  * Added improved about box
+  * Improved facilties for debugging sketches
+  * Updated version
+  * Released version 0.8.7a
+  * Fixed debian package lint problem
+  * Added plugin callbacks to context menus
+  * Updated version
+  * Added project search. Fixed windows file path #line issue
+  * Added error flagging
+  * Added elf inspector
+  * Properly fixed windows compile #line problem
+  * Fixed library install bug
+  * Forced opened files to be java.io.File class
+  * Fixed Save As path breaking
+  * Added Artistic Style plugin
+  * Added bracket adding options
+  * Fixed nested comment stripping
+  * Added function list in project tree
+  * Fixed sketch properties saving
+  * Fixed missing asm files in tree
+  * Added template plugin
+  * Added ASM labels with corresponding .ent sections to tree function list
+  * Removed old system plugins folder code
+  * Embedded executables
+  * Updated launch4j for trusty
+  * Added new stub for icon overlay
+  * Added git ignore
+  * Updated version
+  * Added revert to last commit on files
+  * Fixed new repo problem
+  * Added auto-refresh of function list. Added documentation and markdown section
+  * Updated version
+  * Added experimental tree merge routine
+  * Added selectable editor themes
+  * Added extra LAFs and some fixes to themes
+  * Added tinylaf jar
+  * Added office laf jar
+  * Updated version
+  * Added full screen mode
+  * Removed border painting control from toolbar buttons
+  * Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Improved full screen with menu
+  * Fixed plugin not-installed version bug
+  * Added network ssh uploading
+  * Cleaned up error output
+  * Added Jsch library
+  * Added jmdns library
+  * Fixed too many open files bug
+  * Updated version
+  * Improvements to script system
+  * Fixed null pointer in non-sketch upload
+  * Rewritten command execution routines
+  * Added goto/set/fail/end special functions to script
+  * Fixed serial terminal method crash in OS X java 1.6_15
+  * Added preferred programmer selection to network discovery service
+  * Made ssh and scp forget the password on authentication failure
+  * Big cleanup, plus better handling for 1.5.x libraries
+  * Added USB HID device detection
+  * Added USB support, property file includes, etc
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sat, 10 May 2014 18:27:08 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Created basic sketch backup system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 10 May 2014 15:28:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Better default Linux sketchbook location
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 10 May 2014 14:33:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed the windows JRE from the repo
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 May 2014 17:13:19 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:UECIDE/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 May 2014 16:30:28 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added version.plist file generation
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 May 2014 15:01:59 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Porting to FreeBSD
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 May 2014 13:21:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.5d) unstable; urgency=low 
 
   * Removed early jre version
+  * There was a left-over large zip file of JRE 6 for windows hanging
+  * around in the Windows dist folder.  It has been removed.
+  * Porting to FreeBSD
+  * This is the start of an effort to port UECIDE cleanly to FreeBSD, including
+  * the ability to build and package it through the FreeBSD ports system.
+  * Added version.plist file generation
+  * When compiling UECIDE outside of git (say from a downloaded tarball)
+  * the version information is not available.  Now, if it's not being
+  * compiled inside git, the version information is obtained from a
+  * version.plist file.  That file is updated automatically by the
+  * build script when compiled from within git.
+  * Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Removed the windows JRE from the repo
+  * The JRE distribution is now stored online at
+  * http://uecide.org/support/jre-7-windows.zip
+  * This makes tarball downloads of the repository considerably smaller.
+  * The repository will also be pruned to remove the large files
+  * historically too.
+  * Better default Linux sketchbook location
+  * The Linux version now doesn't prompt for a sketchbook location the
+  * first time you start the program.  Instead it now, like the other
+  * platforms, creates a "UECIDE" folder in your documents folder
+  * (/home/foo/Documents/UECIDE) for your sketches.  Of course, if you
+  * already have a sketchbook folder elsewhere set up in the preferences.txt
+  * file, it will keep using that.
+  * Created basic sketch backup system
+  * You now have the option to, when saving your sketch, to create a number
+  * of backup copies.  The number (and the option) to save is in preferences,
+  * and if enabled, it keeps the last N versions of your sketch files in a
+  * "backup" folder inside the sketch.  The backups are named <sketchname>-1
+  * through to <sketchname>-N, with -1 being the most recent copy.  At the
+  * moment it only backs up the files that are able to be edited directly by
+  * the IDE, so doesn't include sketch libraries, binary files, etc.
+  * Fixed compile abort on sketch error
+  * I bug in the compiler system meant that if the sketch (which is compiled
+  * first in the list) has an error the compilation continued right to the end
+  * resulting in the error being lost up the top of the output.  It now aborts
+  * the compilation immediately the sketch compilation fails.
 
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 4 May 2014 22:24:27 +0100
+ -- Matt Jenkins <matt@majenko.co.uk>  Sun, 04 May 2014 19:16:12 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Expand Save As to include all files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 4 May 2014 19:16:12 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added sketch-level libraries
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 4 May 2014 18:58:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added ability to select to use the system dectorator
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 2 May 2014 15:15:20 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Overhaul the UI
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 30 Apr 2014 16:22:14 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.5c) unstable; urgency=low 
 
   * Fixed version display
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 29 Apr 2014 12:14:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Overhaul "external editor" facility
+  * A small unforseen bug in the build script meant that the version string
+  * wasn't obtained properly for the core version.  This only really affected
+  * the display of the version number on the "About" screen, and was purely
+  * cosmetic.
+  * Overhaul the UI
+  * There have been some rather large (yet subtle) changes to the core UI
+  * in this commit.  The open dialog has been changed to a JFileChooser with
+  * custom filtering and icon code, so that sketch folders now display as
+  * a single file with a UECIDE icon - no more browsing to the sketch folder
+  * and then finding the .ino file within it.  Much cleaner.
+  * Also the Look-And-Feel system has been completely rewritten.  You now have
+  * the ability to select your look and feel (with sensible defaults on a per-
+  * operating system basis).  Coupled with that we have now provided a selection
+  * of extra Look-And-Feel archives to select from (some work better on some
+  * systems than others).  We have the JTattoo collection, which gives lots of
+  * very high-quality themes, plus the Liquid KDE theme.  A preferences drop
+  * down list selector has been provided to select the theme you want, and the
+  * theme changes while you're selecting it, so you can see exactly what you'll
+  * get with any one theme.
+  * Added ability to select to use the system dectorator
+  * Some of the LaF themes use their own decorator.  That doesn't always
+  * work properly on all systems as it expects things to be in certain
+  * places.  A checkbox has now been added to the preferences to turn off
+  * the custom decorators and use the system dectorator instead.  By default
+  * now it will use the system dectorator unless specifically told not to.
+  * Also in this commit is a small bug-fix to cure a NullPointerException when
+  * updating editor menus with no core selected (first installation of any
+  * plugins, for instance).
+  * Added sketch-level libraries
+  * It is now possible to place libraries in a "libraries" folder within your
+  * sketch folder.  These libraries are used in preference to any other libraries
+  * with the same name in the system.  In addition the archive names used when
+  * building libraries have been expanded to include the type of library ("core",
+  * "contributed" or "sketch") so that any override libraries in sketches don't
+  * mess up the cached archives for other sketches.
+  * Save As now also copies the contents of the libraries and objects folders
+  * across to the new sketch folder.
+  * Expand Save As to include all files
+  * The Save As routine has now been expanded to copy all files from the
+  * old sketch folder to the new - that is except files that are named
+  * sketchname.*
 
  -- Matt Jenkins <matt@majenko.co.uk>  Mon, 28 Apr 2014 11:38:11 +0100
 
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made better use of the build.number in build scripts
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 26 Apr 2014 10:11:16 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Create and populate FileType class
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 26 Apr 2014 00:59:23 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Obtain version number from git tag
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 25 Apr 2014 23:59:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Automatically set UECIDE environment variable if unset
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 25 Apr 2014 21:32:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Obtain package version number from git tag
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 25 Apr 2014 19:44:49 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
+uecide (0.8.5b) unstable; urgency=low 
 
   * Fixed missing parameter to new format getLibraryCollection()
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 25 Apr 2014 19:31:56 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added library core sub-folder support
+  * Obtain package version number from git tag
+  * Automatically set UECIDE environment variable if unset
+  * External third party scripts and makefiles can now access the UECIDE
+  * environment variable to get the location of the "settings" directory.
+  * This is the directory which contains preferences.txt and also usually
+  * the compilers, boards, etc.  For instance, you could now use something
+  * like:
+  * $ $UECIDE/compilers/pic32-tools/bin/pic32-gcc ....
+  * within a script.
+  * This commit also standardizes the license boilerplate in all .java files
+  * in the main UECIDE core source.
+  * Obtain version number from git tag
+  * Nw we have transitioned to using git tags for marking release points it makes
+  * sense to use those tags themselves for filling in the version number in the
+  * IDE when compiling.  Both the master build and the core build scripts use
+  * the output of "git tag" as the version number instead of getting it from
+  * the version.txt file.
+  * Create and populate FileType class
+  * The new FileType class describes just what can be done with any of a number
+  * of file types.  It is intended to describe to the IDE how different files
+  * can be handled in the IDE - whether they can be edited (and how), what
+  * syntax highlighting to apply to them, etc.  At the moment it only handles
+  * basic information, but eventually it may be expanded to deal with deciding
+  * how a certain file type should be compiled (which recipe to use for it)
+  * etc.  This should make expanding the system to cover other languages in the
+  * future much simpler.
+  * Made better use of the build.number in build scripts
+  * Traditionally the "Build Number" of a package has been the total number
+  * of commits to the git repository since the beginning of time.  That number
+  * is destined to grow rather large, and become a bit meaningless.  This small
+  * change instead uses the number of commits since the most recent tag - that
+  * is, the most recent release version.  That way it's basically the patch
+  * level of the current version.  You can easilly see how many changes there
+  * have been in your copy of the code since the last official release.  In
+  * theory this will always be 0 for publicly released versions, but sometimes
+  * a small post-release-tag tweak will be needed, so may be 1 or 2.  The
+  * number is of more use to developers who share their builds with other
+  * people so that the exact revision number can be determined with ease.
+  * Overhaul "external editor" facility
+  * Since the introduction of a better editor into UECIDE a long time ago the
+  * ability to use an external editor was lost.  This update fixes that by properly
+  * disabling the editor's editing ability when external editor is enabled, and
+  * whenever the compile button is pressed it reloads all the files back into the
+  * IDE before doing anything else.
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 23 Apr 2014 18:04:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Various fixes to new features
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 22 Apr 2014 20:33:57 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added screenshots
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Apr 2014 16:45:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added library categories
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Apr 2014 15:11:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added preference to move libraries folder to custom location
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 7 Apr 2014 10:39:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Remove mac os editor font override
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 5 Apr 2014 16:09:58 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added --datadir=... command line option
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 4 Apr 2014 19:07:50 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved debug console
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 2 Apr 2014 20:55:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added debug console
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Mar 2014 23:13:26 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixing bootloader installation
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 17 Mar 2014 10:26:34 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:UECIDE/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Feb 2014 22:51:31 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved windows data folder to local instead of roaming
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Feb 2014 22:51:24 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed download source
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Feb 2014 22:49:16 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Standardized board/core/compiler objects
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Feb 2014 12:07:52 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added compile.precopy function
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Feb 2014 10:44:02 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rehash of plugin manager
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Feb 2014 20:31:28 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 14 Feb 2014 12:08:33 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added recursion to library utility folder
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 12 Feb 2014 22:10:51 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 12 Feb 2014 10:08:58 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed combined INO error
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 12 Feb 2014 10:08:38 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 6 Feb 2014 12:13:05 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added support for converting binary files into objects and linking them
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 6 Feb 2014 12:09:00 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * New version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 19 Jan 2014 11:40:43 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added forced cache purge setting for options
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 19 Jan 2014 11:40:09 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added forced cache purge setting for options
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 19 Jan 2014 11:37:49 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Expanded options to encompass core and compiler.  Added code to generate flags parameters
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 18 Jan 2014 22:36:41 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added first stages of options menu
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 18 Jan 2014 01:16:43 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 17 Jan 2014 22:43:35 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added board and core manual support
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 17 Jan 2014 22:38:55 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Forced -I parameters to be in same order as #include directives
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 17 Jan 2014 14:38:35 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added import/export SAR file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 12 Jan 2014 01:13:22 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added build number generation
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 9 Jan 2014 13:29:58 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed version information
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 9 Jan 2014 11:22:20 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added sketch utility folder to include list.  Moved version info to separate file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 7 Jan 2014 22:41:16 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 7 Jan 2014 00:22:44 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added sketch folder "utility" folder support
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 6 Jan 2014 23:20:20 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved plugins to separate repo.  Cleaned up for JDK 6
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 5 Jan 2014 17:50:08 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Start of theme selection system.  beginnings of new preprocessing parser
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 5 Jan 2014 15:51:29 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added web tools
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 4 Jan 2014 16:06:13 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Auto-removed parameter pragmas from generated cpp file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 25 Nov 2013 10:21:40 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated property system to better handle platform specific components
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 23 Nov 2013 14:53:09 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Nov 2013 22:44:44 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added bootloader burning menu
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Nov 2013 21:28:17 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Disabled nonexistant ports in serial ports menu
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Nov 2013 13:28:11 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Nov 2013 13:11:27 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added preferences to edit manual port list
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Nov 2013 13:11:09 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added support for manually added serial ports
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Nov 2013 11:56:39 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Protected examples from saving over
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 9 Nov 2013 11:36:09 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Some serial bugfixes
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 7 Nov 2013 19:04:55 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved error reporting
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 7 Nov 2013 16:14:53 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed revalidation from serial terminal
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 7 Nov 2013 15:37:19 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved from RXTXcomm to jSSC
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 4 Nov 2013 20:31:41 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed startup with no core installed bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 4 Nov 2013 13:03:49 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added more editor config settings
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 3 Nov 2013 16:00:17 +0000
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed combined ino error numbering bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 20 Oct 2013 11:46:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added board-level examples. Resolved theme colour conflict
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 15 Oct 2013 10:49:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed library linkage formatting problem
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 13 Oct 2013 11:34:26 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 10 Oct 2013 00:06:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Overhaul of theme settings
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 9 Oct 2013 23:52:31 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved MPIDE theme
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 6 Oct 2013 19:04:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added #pragma parameter neverinclude=Whatever.h to combat unwanted recursed inclusions
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 6 Oct 2013 15:58:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed bug in #pragma parser Corrected loading missing files problem Additional themeing options added for Windows installer
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 6 Oct 2013 14:58:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 5 Oct 2013 23:13:06 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Overhauled tab management
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 5 Oct 2013 23:07:50 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Overhauled library management, implementing recursive library checking
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 5 Oct 2013 16:01:49 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed serial port selection bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 1 Oct 2013 21:36:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed default exception handler
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 17 Sep 2013 10:01:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Update build for saucy
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 17 Sep 2013 10:08:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed stack overflow in preprocessing
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 16 Sep 2013 18:43:14 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed stack overflow in preprocessing
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 16 Sep 2013 18:43:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Stripped all exceptions
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 15 Sep 2013 11:04:37 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added fix for bossav port names
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 12 Sep 2013 19:47:18 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Attempt to fix osx needing jvm7
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 3 Sep 2013 22:39:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed template DMG file;
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 3 Sep 2013 20:51:49 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added support for sub-libraries (LibName_sublib.h)
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 29 Aug 2013 12:23:06 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added boards to prfm build
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 26 Aug 2013 11:41:12 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fix linking of libraries
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 19 Aug 2013 22:25:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * New print system - smaller font
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 17 Aug 2013 17:05:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 16 Aug 2013 17:02:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added path element adding to config files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 16 Aug 2013 17:02:04 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improvements to plugin manager
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 11 Aug 2013 16:58:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added windows installer generation (NSIS)
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 10 Aug 2013 20:28:09 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed for new install location
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 10 Aug 2013 20:13:59 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added support for multiple progammers
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 10 Aug 2013 18:18:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Uninstall before install with upgrades
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 8 Aug 2013 16:49:55 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added default core facility in boards
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 6 Aug 2013 22:14:33 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Preferences to set location of download and cache files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 Aug 2013 20:27:43 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added new parse routines to sketch preparation
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 Aug 2013 15:08:42 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Cleaned up compiler error messages
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 Aug 2013 15:00:13 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added exception to allow libraries consisting of just a header file
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 Aug 2013 14:19:50 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Add error handling to editor Clean up editor code Switch autoformat plugin to use tabs
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 5 Aug 2013 14:04:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Alphabetic sorting of boards menus
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 4 Aug 2013 19:21:16 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 4 Aug 2013 10:01:20 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Reduced memory allocations for Pi host
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 4 Aug 2013 10:00:57 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 3 Aug 2013 11:42:58 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved cdc timeout.  Tweaks to plugin manager.  Set windows to use windows LAF
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 3 Aug 2013 11:42:31 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added leonardo compatible board reboot method
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 2 Aug 2013 14:36:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improvements to plugin manager.  Added cache purge menu entry
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 1 Aug 2013 16:53:16 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Rewrite of plugin manager interface for individual boards
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Jul 2013 23:07:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed publishing
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Jul 2013 23:07:12 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed some plugin manager and compiler bugs
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Jul 2013 11:00:34 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Jul 2013 00:15:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Jul 2013 00:13:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed build for new jar packages
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Jul 2013 00:13:49 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved examples to cores.  Added refresh to plugin manager
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 31 Jul 2013 00:13:17 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Complete rewrite of core system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 30 Jul 2013 21:25:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Set loader for each instance of plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Jul 2013 20:14:59 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Jul 2013 19:51:49 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Deb repro update
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Jul 2013 19:51:40 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made plugin urlloader static
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Jul 2013 19:50:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Linux repro distribution
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Jul 2013 19:18:55 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed sizer output values
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Jul 2013 18:03:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Increased linux memory allocations
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Jul 2013 13:31:03 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved serial debugging
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 27 Jul 2013 11:30:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed build for new online boards names
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 26 Jul 2013 12:10:47 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added code to release serial port in plugins when uploading
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 25 Jul 2013 16:51:07 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed scaling and offset bug in jgrapher
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 25 Jul 2013 15:22:40 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated Version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 22 Jul 2013 22:14:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Adjustment to prototype locations
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 22 Jul 2013 22:14:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Tweaked library order (core last)
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 22 Jul 2013 19:06:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Changed build process to generate proper libraries
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 22 Jul 2013 13:18:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fix indent/outdent menu
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 23:18:27 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed folding on ino/pde files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 22:23:26 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Protected board #pragma against invalid board
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 21:31:09 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed line number colours
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 21:10:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed MRU on sketch open
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 20:40:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated Version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 20:30:04 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed storage of sketchbook path
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 20:29:45 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Changed clean accelerator
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 19:43:37 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed trim bug in properties
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 19:42:14 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated color selector to not use PApplet
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 19:19:47 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added PropertyFile class
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 17:38:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Replaced preferences, theme, board and core stores with Properties objects
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 21 Jul 2013 17:36:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added cflags, cxxflags and ldflags parameters
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Jul 2013 22:03:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed open internal pragma parsing
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Jul 2013 21:13:17 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved compilation feedback
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Jul 2013 20:42:14 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved compilation feedback
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Jul 2013 20:41:56 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made status font bold and light yellow
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Jul 2013 16:39:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Stripped out 100% of processing Combined app and core into single jar Stripped out log4j
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Jul 2013 16:27:45 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Changes to plugin system and menus Added plugin manager plugin Added copy for forum plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 20 Jul 2013 13:29:12 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 22:57:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added #line entries for ino file to cpp conversion
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 22:56:33 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added plugins to upgrade and to installation
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 22:31:02 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved SerialTerminal cut routine
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 21:56:21 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed serial terminal copy repaint
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 21:31:57 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added build failure feedback
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 21:31:23 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed tab rename on Save As bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 18:59:20 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added auto CR to incoming and outgoing serial terminal comms
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 17:19:15 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added line entry for serial terminal Changed status line to display in yellow
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 15:47:19 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added build clean function
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 15:15:31 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added option to turn dynamic numbering on/off Rearranged preferences into editor / compiler sections Fixed bug with saveAs
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 14:31:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed compile after open internal bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 11:45:47 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 11:25:27 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added GC to serial operations Fixed serial terminal already open bug Editor now remembers position and size
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 18 Jul 2013 11:24:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved upgrade build to top of list
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 17 Jul 2013 21:41:56 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Optimized build process to skip unmodified files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 17 Jul 2013 21:34:33 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added core extention #pragma
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 17 Jul 2013 19:39:33 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added option to combine all INO files into one
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 17 Jul 2013 18:01:45 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed memory overflow in stripComments()
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 17 Jul 2013 15:27:52 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * added debug.bat
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 17 Jul 2013 00:02:53 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed lss generation in windows (I hope)
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 17 Jul 2013 00:00:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixing lss generation in windows
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Jul 2013 23:50:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added lss file generation option
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Jul 2013 21:52:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added lite and upgrade targets
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Jul 2013 21:03:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed bugs in preferences Remove monotype requirement from serial font selector Automatic line renumbering when compiled Brightened background of editor to white
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Jul 2013 19:27:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added keywords.txt highlighting support
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Jul 2013 16:51:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added keywords.txt highlighting support
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Jul 2013 16:50:52 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added splash screen class
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Jul 2013 11:28:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added active splash screen Added preference to disable prototypes
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Jul 2013 11:25:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed core adding bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 15 Jul 2013 22:27:38 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 15 Jul 2013 12:45:23 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved build process Added option to copy hex to sketch folder
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 15 Jul 2013 12:44:28 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added local echo to serial terminal
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 15 Jul 2013 10:28:30 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed serial messages.  Cleaned up some redundant code
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 15 Jul 2013 00:00:42 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 14 Jul 2013 23:32:51 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed save-as, modified indictaion and window title
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 14 Jul 2013 23:30:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Bundled updated RXTXserial Uncoupled console from stdout/err
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 14 Jul 2013 20:50:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Forced jre6
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 14 Jul 2013 17:39:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 14 Jul 2013 15:33:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 14 Jul 2013 15:27:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Replaced editor with RSyntaxTextArea Moved compilation to sketch Made system more sketch-centric
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 14 Jul 2013 15:19:58 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Set ignore all files on gitignore in tmp dir
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 11 Jul 2013 12:08:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 22:11:19 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated Version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 22:05:57 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Forced everything to java 1.6
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 22:05:37 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 18:17:40 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 18:12:20 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved preferences system.  Added custom sizes to serial terminal
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 18:11:59 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 14:16:12 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Cleaned up launch4j build for modern mingw32
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 14:11:06 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 01:52:16 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed windows build
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 10 Jul 2013 01:26:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 8 Jul 2013 21:42:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated Version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 8 Jul 2013 21:36:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added image save and pause to grapher Cleaned up some build warnings Added JSON classes Removed pointless CreateFont plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 8 Jul 2013 21:24:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added grapher plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 8 Jul 2013 11:31:09 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 7 Jul 2013 11:05:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 7 Jul 2013 11:04:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed debugging
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 7 Jul 2013 11:01:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added scrollback buffer to Serial Terminal Added copy to Serial Terminal
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 7 Jul 2013 10:59:44 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 6 Jul 2013 21:52:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Changes to plugin system Added basic translation system Replaced serial monitor with serial terminal Added packaging of plugins with dist bundle
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 6 Jul 2013 21:46:54 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Overhaul sub-process execution routines
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 5 Jul 2013 13:06:21 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 4 Jul 2013 22:17:21 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed build error
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 4 Jul 2013 22:13:07 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 4 Jul 2013 17:47:55 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 4 Jul 2013 17:06:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed some major flaws with the Serial object Added support uploader plugin modules
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 4 Jul 2013 17:05:07 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 3 Jul 2013 23:55:56 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added support for non C++ base languages Added support for board-level source files (non #included)
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 3 Jul 2013 23:54:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Jul 2013 15:19:53 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added debian to autobuild
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Jul 2013 15:19:42 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Use fakeroot for debian building
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Jul 2013 15:15:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Overfauled debian packaging
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Jul 2013 15:04:05 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Jul 2013 12:39:23 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Replace sketchbook menu with MRU list
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 1 Jul 2013 12:38:59 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 22:16:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed debugging
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 22:16:14 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed plugins from autobuild
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 22:11:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 22:02:50 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added recursive library support and overhauled the import menu system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 22:02:26 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 18:50:41 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Split plugins off from main application into separate plugins tree
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 18:50:24 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed tool bundling and added mplabx export plugin to autobuild
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 17:06:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 17:05:23 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added cleanup after autobuild
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 17:05:08 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 17:00:13 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improvements to plugin system / Added export to mplab-x plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Jun 2013 16:59:38 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 29 Jun 2013 11:50:55 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Made menus non-static
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 29 Jun 2013 11:50:17 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 29 Jun 2013 11:04:04 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed prev/next tab
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 29 Jun 2013 11:03:03 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Removed debugging
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Jun 2013 22:58:59 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Even more work on the plugins
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Jun 2013 20:38:20 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Internal rebranding processing -> uecide
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Jun 2013 15:34:21 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Reduced plugins to single jar file in plugins dir
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Jun 2013 14:49:39 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Startup cleanup
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Jun 2013 11:23:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added version info to plugins. Moved core version info into pde.jar manifest.
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 28 Jun 2013 10:01:58 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed import library
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 27 Jun 2013 21:05:25 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added wave convertor plugin
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 27 Jun 2013 20:54:40 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed theme initialised too late issue
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 27 Jun 2013 16:45:00 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed Mac branding
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 27 Jun 2013 16:22:22 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed window auto-deselecting in Windows
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 27 Jun 2013 16:00:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Complete rewrite of plugin system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 27 Jun 2013 15:05:15 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Cleaned up menus and started reworking plugin system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Thu, 27 Jun 2013 00:02:58 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 26 Jun 2013 17:19:55 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed tab indent/outdent
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 26 Jun 2013 17:19:29 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Adding TAB input handler
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 26 Jun 2013 16:52:07 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Forced executable permission on all unzipped files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 26 Jun 2013 16:25:04 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added importing of libraries, cores and boards
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 26 Jun 2013 14:15:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved tabs and theme system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 22:53:21 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added support for launchpad boards
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 19:14:43 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added support for launchpad boards
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 19:14:12 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 15:33:33 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Tweaked the tab outlines
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 15:23:35 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Fixed board downloading
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 14:59:38 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 14:40:17 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * New string parser system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 14:39:43 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * New string parser system
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 25 Jun 2013 14:35:56 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added auto build targets
-
- -- Matt Jenkins <matt@autobuild.majenko.co.uk>  Tue, 25 Jun 2013 13:41:40 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 21:15:06 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added upload.using type for serial
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 21:14:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Update README.md
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 21:43:28 +0200
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Improved mac dmg script
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 01:19:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved linux dmg generator to genisoimage
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 00:58:11 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Moved linux dmg generator to genisoimage
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 00:56:55 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added dmg image creation for OS X target
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 00:49:10 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Merge branch 'master' of github.com:majenkotech/UECIDE
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 00:07:52 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added basic zip packaging
-
- -- Matt Jenkins <matt@majenko.co.uk>  Mon, 24 Jun 2013 00:07:46 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added custom OS X icons to theme
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 23 Jun 2013 23:05:36 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Left aligned toolbar icons
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 23 Jun 2013 22:08:04 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Forced executable permission on all core files
-
- -- Matt Jenkins <matt@matt-jenkinss-mac-pro.local>  Sun, 23 Jun 2013 22:01:32 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added tmp build directory
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 23 Jun 2013 18:49:01 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Updated build instruction howto.txt
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 23 Jun 2013 17:48:26 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Update README.md
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 23 Jun 2013 18:22:55 +0200
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Added missing jar files
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 23 Jun 2013 17:17:48 +0100
-
-uecide (0.8.8alpha7) trusty; urgency=low
-
-  * Initial commit
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 23 Jun 2013 16:48:26 +0100
 

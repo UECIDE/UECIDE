@@ -1,3 +1,0 @@
-DESTDIR?=/
-build:
-	ant 

@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+
+use Date::Parse;
+use Date::Format;
+
+my $package = "unknown";
+
+open (CONTROL, "<debian/control");
+while (my $l = <CONTROL>) {
+    chomp($l);
+    if ($l =~ /Source: (.*)/) {
+        $package = $1;
+    }
+}
+close(CONTROL);
+
+my $taglist = "HEAD\n" . `git tag --sort=-refname`;
+$taglist .= "\n";
+
+my @tags = split(/\n/, $taglist);
+
+open(OUT, ">debian/changelog");
+
+my $startTag = shift(@tags);
+while (@tags > 0) {
+    $endTag = shift(@tags);
+    print OUT "$package ($endTag) unstable; urgency=low \n";
+    print OUT "\n";
+    my $commits = `git log --reverse --pretty=format:'%B' $startTag...$endTag`;
+    my @clist = split(/\n/, $commits);
+    foreach my $commit (@clist) {
+        $commit =~ s/^\s+|\s+$//g;
+        if ($commit eq "") {
+            next;
+        }
+        if (substr($commit, 0, 1) ne "*") {
+            $commit = "* " . $commit;
+        }
+        print OUT "  $commit\n";
+    }
+    print OUT "\n";
+    my $when = `git log -1 --format='%ai' $endTag`;
+    chomp($when);
+    $when = str2time($when);
+    $when = time2str("%a, %d %b %Y %H:%M:%S %z", $when);
+    $who = `git log -1 0.8.8alpha19 --pretty=format:'%aN <%aE>'`;
+    chomp($who);
+    print OUT " -- $who  $when\n";
+    print OUT "\n";
+    $startTag = $endTag;
+}
