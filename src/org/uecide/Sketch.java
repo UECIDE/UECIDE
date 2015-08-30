@@ -1650,7 +1650,7 @@ public class Sketch {
         return ret;
     }
 
-    public boolean performSerialReset(boolean dtr, boolean rts, int speed) {
+    public boolean performSerialReset(boolean dtr, boolean rts, int speed, int predelay, int delay, int postdelay) {
         ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
@@ -1660,14 +1660,15 @@ public class Sketch {
                     ctx.error("Error: " + sport.getLastError());
                     return false;
                 }
-                Thread.sleep(100);
+                Thread.sleep(predelay);
                 sport.setDTR(dtr);
                 sport.setRTS(rts);
-                Thread.sleep(100);
+                Thread.sleep(delay);
                 sport.setDTR(false);
                 sport.setRTS(false);
                 sport.closePort();
-                Thread.sleep(100);
+                System.gc();
+                Thread.sleep(postdelay);
             }
         } catch (Exception e) {
             ctx.error(e);
@@ -1676,7 +1677,7 @@ public class Sketch {
         return true;
     }
 
-    public boolean performBaudBasedReset(int b) {
+    public boolean performBaudBasedReset(int b, int predelay, int delay, int postdelay) {
         ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
@@ -1686,18 +1687,18 @@ public class Sketch {
                     ctx.error("Error: " + sport.getLastError());
                     return false;
                 }
+                Thread.sleep(predelay);
                 sport.setDTR(true);
                 sport.setRTS(true);
-                Thread.sleep(100);
                 if (!sport.setSpeed(b)) {
                     ctx.error("Error: " + sport.getLastError());
                 }
-                Thread.sleep(100);
+                Thread.sleep(delay);
                 sport.setDTR(false);
                 sport.setRTS(false);
                 sport.closePort();
                 System.gc();
-                Thread.sleep(1000);
+                Thread.sleep(postdelay);
             }
         } catch (Exception e) {
             ctx.error(e);
@@ -3418,6 +3419,10 @@ public class Sketch {
 
         int progbaud = 9600;
 
+        int predelay = props.getInteger("upload." + programmer  +".reset.predelay", 100);
+        int delay = props.getInteger("upload." + programmer  +".reset.delay", 100);
+        int postdelay = props.getInteger("upload." + programmer  +".reset.postdelay", 100);
+
         if(uploadType.equals("serial")) {
 
             boolean dtr = props.getBoolean("upload." + programmer + ".dtr");
@@ -3434,12 +3439,12 @@ public class Sketch {
                 }
             }
 
-            if (!performSerialReset(dtr, rts, progbaud)) {
+            if (!performSerialReset(dtr, rts, progbaud, predelay, delay, postdelay)) {
                 return false;
             }
         } else if(uploadType.equals("usbcdc")) {
             int baud = props.getInteger("upload." + programmer + ".reset.baud");
-            if (!performBaudBasedReset(baud)) {
+            if (!performBaudBasedReset(baud, predelay, delay, postdelay)) {
                 return false;
             }
         }
@@ -3470,7 +3475,7 @@ public class Sketch {
             boolean dtr = props.getBoolean("upload." + programmer + ".dtr");
             boolean rts = props.getBoolean("upload." + programmer + ".rts");
 
-            if (!performSerialReset(dtr, rts, progbaud)) {
+            if (!performSerialReset(dtr, rts, progbaud, predelay, delay, postdelay)) {
                 return false;
             }
         }
