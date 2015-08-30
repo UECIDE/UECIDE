@@ -2914,23 +2914,23 @@ public class Editor extends JFrame {
         }
     }
 
-    public JMenuItem createMenuEntry(String name, Character shortcut, int mods, ActionListener action) {
+    public JMenuItem createMenuEntry(String name, int shortcut, int mods, ActionListener action) {
         return createMenuEntry(name, shortcut, mods, action, null);
     }
 
-    public JMenuItem createMenuEntry(String name, Character shortcut, int mods, ActionListener action, String command) {
+    public JMenuItem createMenuEntry(String name, int shortcut, int mods, ActionListener action, String command) {
         JMenuItem menuItem = new JMenuItem(name);
-        if (shortcut != null) {
-            int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-            menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcut, modifiers | mods));
-        }
+        Base.setFont(menuItem, "menu.entry");
         if (action != null) {
             menuItem.addActionListener(action);
         }
         if (command != null) {
             menuItem.setActionCommand(command);
         }
-        Base.setFont(menuItem, "menu.entry");
+        if (shortcut != 0) {
+            int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+            menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcut, modifiers | mods));
+        }
         return menuItem;
     }
 
@@ -2945,13 +2945,13 @@ public class Editor extends JFrame {
         JMenu submenu;
         int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-        fileMenu.add(createMenuEntry("New", 'N', 0, new ActionListener() {
+        fileMenu.add(createMenuEntry("New", KeyEvent.VK_N, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.handleNew();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Open...", 'O', 0, new ActionListener() {
+        fileMenu.add(createMenuEntry("Open...", KeyEvent.VK_O, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleOpenPrompt();
             }
@@ -2964,7 +2964,7 @@ public class Editor extends JFrame {
         fileMenu.add(recentSketchesMenu);
 
         for(File m : Base.MRUList) {
-            JMenuItem recentitem = createMenuEntry(m.getName(), null, 0, new ActionListener() {
+            JMenuItem recentitem = createMenuEntry(m.getName(), 0, 0, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String path = e.getActionCommand();
 
@@ -3029,31 +3029,31 @@ public class Editor extends JFrame {
         fileMenu.addSeparator();
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_MID);
 
-        fileMenu.add(createMenuEntry("Close", 'W', 0, new ActionListener() {
+        fileMenu.add(createMenuEntry("Close", KeyEvent.VK_W, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 askCloseWindow();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Save", 'S', 0, new ActionListener() {
+        fileMenu.add(createMenuEntry("Save", KeyEvent.VK_S, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveAllTabs();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Save As...", 'S', ActionEvent.SHIFT_MASK, new ActionListener() {
+        fileMenu.add(createMenuEntry("Save As...", KeyEvent.VK_S, KeyEvent.SHIFT_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveAs();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Export as SAR...", null, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry("Export as SAR...", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 exportSar();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Import SAR...", null, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry("Import SAR...", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 importSar();
             }
@@ -3075,7 +3075,7 @@ public class Editor extends JFrame {
         });
         fileMenu.add(cbitem);
 
-        fileMenu.add(createMenuEntry("Preferences", '-', ActionEvent.CTRL_MASK, new ActionListener() {
+        fileMenu.add(createMenuEntry("Preferences", KeyEvent.VK_MINUS, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Preferences prefs = new Preferences(Editor.this);
             }
@@ -3084,7 +3084,7 @@ public class Editor extends JFrame {
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_BOTTOM);
 
 
-        fileMenu.add(createMenuEntry("Quit", 'Q', 0, new ActionListener() {
+        fileMenu.add(createMenuEntry("Quit", KeyEvent.VK_Q, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if(Editor.closeAllEditors()) {
                     Preferences.save();
@@ -3105,13 +3105,13 @@ public class Editor extends JFrame {
             }
         };
 
-        sketchMenu.add(createMenuEntry("Compile", 'R', 0, new ActionListener() {
+        sketchMenu.add(createMenuEntry("Compile", KeyEvent.VK_R, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 compile();
             }
         }));
         
-        sketchMenu.add(createMenuEntry("Compile and Program", 'U', 0, new ActionListener() {
+        sketchMenu.add(createMenuEntry("Compile and Program", KeyEvent.VK_U, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 program();
             }
@@ -3121,31 +3121,31 @@ public class Editor extends JFrame {
         sketchMenu.addSeparator();
 
         JMenu createSubmenu = new JMenu("Create new");
-        createSubmenu.add(createMenuEntry("Sketch file (.ino)", null, 0, createNewAction, "ino"));
-        createSubmenu.add(createMenuEntry("C++ file", null, 0, createNewAction, "cpp"));
-        createSubmenu.add(createMenuEntry("C file", null, 0, createNewAction, "c"));
-        createSubmenu.add(createMenuEntry("Header file", null, 0, createNewAction, "h"));
-        createSubmenu.add(createMenuEntry("Assembly file", null, 0, createNewAction, "S"));
-        createSubmenu.add(createMenuEntry("Library", null, 0, createNewAction, "lib"));
+        createSubmenu.add(createMenuEntry("Sketch file (.ino)", 0, 0, createNewAction, "ino"));
+        createSubmenu.add(createMenuEntry("C++ file", 0, 0, createNewAction, "cpp"));
+        createSubmenu.add(createMenuEntry("C file", 0, 0, createNewAction, "c"));
+        createSubmenu.add(createMenuEntry("Header file", 0, 0, createNewAction, "h"));
+        createSubmenu.add(createMenuEntry("Assembly file", 0, 0, createNewAction, "S"));
+        createSubmenu.add(createMenuEntry("Library", 0, 0, createNewAction, "lib"));
         sketchMenu.add(createSubmenu);
 
         JMenu importSubmenu = new JMenu("Import file");
-        importSubmenu.add(createMenuEntry("Source file", null, 0, new ActionListener() {
+        importSubmenu.add(createMenuEntry("Source file", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
-        importSubmenu.add(createMenuEntry("Header file", null, 0, new ActionListener() {
+        importSubmenu.add(createMenuEntry("Header file", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
-        importSubmenu.add(createMenuEntry("Binary file", null, 0, new ActionListener() {
+        importSubmenu.add(createMenuEntry("Binary file", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
         sketchMenu.add(importSubmenu);
 
         JMenu librariesSubmenu = new JMenu("Libraries");
-        librariesSubmenu.add(createMenuEntry("Install library archive...", null, 0, new ActionListener() {
+        librariesSubmenu.add(createMenuEntry("Install library archive...", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 installLibraryArchive();
             }
@@ -3161,7 +3161,7 @@ public class Editor extends JFrame {
         sketchMenu.addSeparator();
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_BOTTOM);
 
-        sketchMenu.add(createMenuEntry("Sketch properties...", null, 0, new ActionListener() {
+        sketchMenu.add(createMenuEntry("Sketch properties...", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new SketchProperties(Editor.this, loadedSketch);
             }
@@ -3214,7 +3214,7 @@ public class Editor extends JFrame {
         hardwareMenu.addSeparator();
         addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_BOTTOM);
 
-        toolsMenu.add(createMenuEntry("Plugin Manager", null, 0, new ActionListener() {
+        toolsMenu.add(createMenuEntry("Plugin Manager", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 PluginManager pm = new PluginManager();
                 pm.openWindow(Editor.this);
@@ -3225,7 +3225,7 @@ public class Editor extends JFrame {
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_MID);
 
-        toolsMenu.add(createMenuEntry("Service Manager", null, 0, new ActionListener() {
+        toolsMenu.add(createMenuEntry("Service Manager", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 ServiceManager.open(Editor.this);
             }
@@ -3234,7 +3234,7 @@ public class Editor extends JFrame {
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_BOTTOM);
 
-        helpMenu.add(createMenuEntry("About " + Base.theme.get("product.cap"), null, 0, new ActionListener() {
+        helpMenu.add(createMenuEntry("About " + Base.theme.get("product.cap"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleAbout();
             }
@@ -3245,7 +3245,7 @@ public class Editor extends JFrame {
 
         if (loadedSketch.getContext().getBoard() != null) {
             if (loadedSketch.getContext().getBoard().getManual() != null) {
-                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getBoard().toString(), null, 0, new ActionListener() {
+                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getBoard().toString(), 0, 0, new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         loadManual(loadedSketch.getContext().getBoard().getManual());
                     }
@@ -3255,7 +3255,7 @@ public class Editor extends JFrame {
 
         if (loadedSketch.getContext().getCore() != null) {
             if (loadedSketch.getContext().getCore().getManual() != null) {
-                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getCore().toString(), null, 0, new ActionListener() {
+                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getCore().toString(), 0, 0, new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         loadManual(loadedSketch.getContext().getCore().getManual());
                     }
@@ -3265,7 +3265,7 @@ public class Editor extends JFrame {
 
         if (loadedSketch.getContext().getCompiler() != null) {
             if (loadedSketch.getContext().getCompiler().getManual() != null) {
-                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getCompiler().toString(), null, 0, new ActionListener() {
+                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getCompiler().toString(), 0, 0, new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         loadManual(loadedSketch.getContext().getCompiler().getManual());
                     }
@@ -3277,7 +3277,7 @@ public class Editor extends JFrame {
         PropertyFile links = Base.theme.getChildren("links");
 
         for(String link : links.childKeys()) {
-            helpMenu.add(createMenuEntry(links.get(link + ".name"), null, 0, (new ActionListener() {
+            helpMenu.add(createMenuEntry(links.get(link + ".name"), 0, 0, (new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String link = e.getActionCommand();
                     Base.openURL(link);
@@ -3288,7 +3288,7 @@ public class Editor extends JFrame {
         links = loadedSketch.getContext().getMerged().getChildren("links");
 
         for(String link : links.childKeys()) {
-            helpMenu.add(createMenuEntry(links.get(link + ".name"), null, 0, (new ActionListener() {
+            helpMenu.add(createMenuEntry(links.get(link + ".name"), 0, 0, (new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String link = e.getActionCommand();
                     Base.openURL(link);
@@ -3301,25 +3301,25 @@ public class Editor extends JFrame {
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
         JMenu debugSubmenu = new JMenu("Debug");
 
-        debugSubmenu.add(createMenuEntry("Debug Console", null, 0, new ActionListener() {
+        debugSubmenu.add(createMenuEntry("Debug Console", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Debug.show();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry("Rebuild internal structures", null, 0, new ActionListener() {
+        debugSubmenu.add(createMenuEntry("Rebuild internal structures", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.cleanAndScanAllSettings();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry("Purge cache files", null, 0, new ActionListener() {
+        debugSubmenu.add(createMenuEntry("Purge cache files", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 loadedSketch.purgeCache();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry("Open data folder", null, 0, new ActionListener() {
+        debugSubmenu.add(createMenuEntry("Open data folder", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.openURL(Base.getDataFolder().getAbsolutePath());
             }
