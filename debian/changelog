@@ -16,6 +16,7 @@ uecide (0.8.8alpha19) unstable; urgency=low
   * Added border to preferences window
   * Fixed plugin preferences default loading
   * Added configurable reset delays
+  * Overhauled debian building scripts
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 15 Jul 2015 23:57:11 +0100
 
