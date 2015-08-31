@@ -1,9 +1,14 @@
-uecide (0.8.8alpha20) unstable; urgency=low 
+uecide (0.8.8alpha21) unstable; urgency=low 
 
+  * Fixed broken shortcut keys
+  * Fixed linux packaging error
+  * Fixed broken menu shortcuts
+  * Cleaned up parsed errors to console
+  * Added ANSI codes to parsed console errors and warnings
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Aug 2015 19:09:40 +0100
 
-uecide (0.8.8alpha19) unstable; urgency=low 
+uecide (0.8.8alpha20) unstable; urgency=low 
 
   * Released beta
   * Gradually cleaning up the prefs system
@@ -26,7 +31,7 @@ uecide (0.8.8alpha19) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 15 Jul 2015 23:57:11 +0100
 
-uecide (0.8.7z9) unstable; urgency=low 
+uecide (0.8.8alpha19) unstable; urgency=low 
 
   * Upgrade RSTA
   * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
@@ -177,7 +182,7 @@ uecide (0.8.7z9) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sat, 16 Aug 2014 15:55:56 +0100
 
-uecide (0.8.7z8) unstable; urgency=low 
+uecide (0.8.7z9) unstable; urgency=low 
 
   * Added services and migrated some threads and timers to the service infrastructure
   * Added new required libraries
@@ -185,13 +190,13 @@ uecide (0.8.7z8) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 11:34:19 +0100
 
-uecide (0.8.7z7) unstable; urgency=low 
+uecide (0.8.7z8) unstable; urgency=low 
 
   * Fixed MRU initialize bug
 
  -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 10:46:11 +0100
 
-uecide (0.8.7z6) unstable; urgency=low 
+uecide (0.8.7z7) unstable; urgency=low 
 
   * Sorted function list alphabetically
   * Improved crash reporting system
@@ -201,25 +206,25 @@ uecide (0.8.7z6) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 19:34:57 +0100
 
-uecide (0.8.7z5) unstable; urgency=low 
+uecide (0.8.7z6) unstable; urgency=low 
 
   * Fixed tree update collision bug
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 13:46:17 +0100
 
-uecide (0.8.7z4) unstable; urgency=low 
+uecide (0.8.7z5) unstable; urgency=low 
 
   * Added crash reporter
 
  -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Aug 2014 20:55:42 +0100
 
-uecide (0.8.7z3) unstable; urgency=low 
+uecide (0.8.7z4) unstable; urgency=low 
 
   * Added manual browser
 
  -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Aug 2014 13:58:02 +0100
 
-uecide (0.8.7z25) unstable; urgency=low 
+uecide (0.8.7z3) unstable; urgency=low 
 
   * Added manual browser
   * Added crash reporter
@@ -291,13 +296,13 @@ uecide (0.8.7z25) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 03 Dec 2014 15:05:47 +0000
 
-uecide (0.8.7z24) unstable; urgency=low 
+uecide (0.8.7z25) unstable; urgency=low 
 
   * Fixed crash reports
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 03 Dec 2014 00:34:22 +0000
 
-uecide (0.8.7z23-1) unstable; urgency=low 
+uecide (0.8.7z24) unstable; urgency=low 
 
   * Debianized package
   * Added ant as build depend
@@ -312,7 +317,7 @@ uecide (0.8.7z23-1) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Nov 2014 23:55:39 +0000
 
-uecide (0.8.7z2) unstable; urgency=low 
+uecide (0.8.7z23-1) unstable; urgency=low 
 
   * Added context menu to console
   * Caught possible NullPointer exception in sketch loading
@@ -375,7 +380,7 @@ uecide (0.8.7z2) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 19:29:55 +0100
 
-uecide (0.8.7z17) unstable; urgency=low 
+uecide (0.8.7z2) unstable; urgency=low 
 
   * Added context menu to console
   * Caught possible NullPointer exception in sketch loading
@@ -411,14 +416,14 @@ uecide (0.8.7z17) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Tue, 26 Aug 2014 22:20:25 +0100
 
-uecide (0.8.7z16) unstable; urgency=low 
+uecide (0.8.7z17) unstable; urgency=low 
 
   * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
   * Added keyword.txt handling
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sat, 23 Aug 2014 17:58:51 +0100
 
-uecide (0.8.7z15) unstable; urgency=low 
+uecide (0.8.7z16) unstable; urgency=low 
 
   * Fixed OS X application file permissions
   * Fixed preferences repainting on theme change and cleaned up toolbar button borders
@@ -426,7 +431,7 @@ uecide (0.8.7z15) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Fri, 22 Aug 2014 00:26:42 +0100
 
-uecide (0.8.7z14) unstable; urgency=low 
+uecide (0.8.7z15) unstable; urgency=low 
 
   * Fixed windows slowness
   * Finally fixed wandering tree entries
@@ -434,34 +439,34 @@ uecide (0.8.7z14) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Thu, 21 Aug 2014 00:47:41 +0100
 
-uecide (0.8.7z13) unstable; urgency=low 
+uecide (0.8.7z14) unstable; urgency=low 
 
   * Added code page handling
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 20 Aug 2014 17:24:56 +0100
 
-uecide (0.8.7z12) unstable; urgency=low 
+uecide (0.8.7z13) unstable; urgency=low 
 
   * Stopped the function list from bouncing around so much
   * Added gutter flags
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 20 Aug 2014 00:18:05 +0100
 
-uecide (0.8.7z11) unstable; urgency=low 
+uecide (0.8.7z12) unstable; urgency=low 
 
   * Tidy up of the build process
   * Added note/todo/fixme parsing and task lists
 
  -- Matt Jenkins <matt@majenko.co.uk>  Tue, 19 Aug 2014 14:08:09 +0100
 
-uecide (0.8.7z10) unstable; urgency=low 
+uecide (0.8.7z11) unstable; urgency=low 
 
   * Fixed sketch libraries
   * Bumped version
 
  -- Matt Jenkins <matt@majenko.co.uk>  Mon, 18 Aug 2014 15:06:10 +0100
 
-uecide (0.8.7z1) unstable; urgency=low 
+uecide (0.8.7z10) unstable; urgency=low 
 
   * Bumped version
   * Fixed typo in console CSS
@@ -484,7 +489,7 @@ uecide (0.8.7z1) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 18:48:01 +0100
 
-uecide (0.8.7z) unstable; urgency=low 
+uecide (0.8.7z1) unstable; urgency=low 
 
   * Backed out property file loader
   * Added third party library list and made About box HTML
@@ -493,20 +498,20 @@ uecide (0.8.7z) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sat, 09 Aug 2014 20:04:59 +0100
 
-uecide (0.8.7y) unstable; urgency=low 
+uecide (0.8.7z) unstable; urgency=low 
 
   * Reverted propertyfile loader update
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sat, 09 Aug 2014 18:11:07 +0100
 
-uecide (0.8.7x) unstable; urgency=low 
+uecide (0.8.7y) unstable; urgency=low 
 
   * Added USB javax source
   * Fixed release
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sat, 09 Aug 2014 17:41:25 +0100
 
-uecide (0.8.5e) unstable; urgency=low 
+uecide (0.8.7x) unstable; urgency=low 
 
   * Embarked on a daring resign
   * I have started redesigning much of the system from the ground up.  Instead
@@ -688,7 +693,7 @@ uecide (0.8.5e) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sat, 10 May 2014 18:27:08 +0100
 
-uecide (0.8.5d) unstable; urgency=low 
+uecide (0.8.5e) unstable; urgency=low 
 
   * Removed early jre version
   * There was a left-over large zip file of JRE 6 for windows hanging
@@ -732,7 +737,7 @@ uecide (0.8.5d) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sun, 04 May 2014 19:16:12 +0100
 
-uecide (0.8.5c) unstable; urgency=low 
+uecide (0.8.5d) unstable; urgency=low 
 
   * Fixed version display
   * A small unforseen bug in the build script meant that the version string
@@ -779,7 +784,7 @@ uecide (0.8.5c) unstable; urgency=low
 
  -- Matt Jenkins <matt@majenko.co.uk>  Mon, 28 Apr 2014 11:38:11 +0100
 
-uecide (0.8.5b) unstable; urgency=low 
+uecide (0.8.5c) unstable; urgency=low 
 
   * Fixed missing parameter to new format getLibraryCollection()
   * Obtain package version number from git tag

@@ -316,7 +316,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <delete dir="windows" />
     </target>
 
-    <target name="all-dist" depends="linux-zip, linux-deb, windows-zip-lite, windows-exe-lite, windows-zip-full, windows-exe-full, macosx-dmg" />
+    <target name="all-dist" depends="linux-zip, windows-zip-lite, windows-exe-lite, windows-zip-full, windows-exe-full, macosx-dmg" />
 
     <target name="dist-release" depends="all-dist" if="isRelease">
         <move todir="/var/www/uecide/downloads">

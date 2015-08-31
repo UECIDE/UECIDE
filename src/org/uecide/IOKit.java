@@ -93,16 +93,29 @@ public class IOKit {
                             if (db.equals("active")) { newNode.setFlag(IOKitNode.Flags.ACTIVE); }
                             if (db.equals("!active")) { newNode.clearFlag(IOKitNode.Flags.ACTIVE); }
                             if (db.startsWith("class ")) { newNode.setNodeClass(db.substring(6)); }
-                            if (db.startsWith("id 0x")) { newNode.setId(Integer.parseInt(db.substring(5), 16)); }
-                            if (db.startsWith("retain ")) { newNode.setRetain(Integer.parseInt(db.substring(7), 10)); }
+                            try {
+                                if (db.startsWith("id 0x")) { newNode.setId(Integer.parseInt(db.substring(5), 16)); }
+                            } catch (Exception ex) {
+                                newNode.setId(0);
+                            }
+                            try {
+                                if (db.startsWith("retain ")) { newNode.setRetain(Integer.parseInt(db.substring(7), 10)); }
+                            } catch (Exception ex) {
+                                newNode.setRetain(0);
+                            }
                             if (db.startsWith("busy ")) {
                                 Pattern withTime = Pattern.compile("^busy (\\d+) \\((\\d+) ms\\)$");
                                 Matcher tm = withTime.matcher(db);
-                                if (tm.find()) {
-                                    newNode.setBusy(Integer.parseInt(tm.group(1)));
-                                    newNode.setBusyTime(Integer.parseInt(tm.group(2)));
-                                } else {
-                                    newNode.setBusy(Integer.parseInt(db.substring(5), 10));
+                                try {
+                                    if (tm.find()) {
+                                        newNode.setBusy(Integer.parseInt(tm.group(1)));
+                                        newNode.setBusyTime(Integer.parseInt(tm.group(2)));
+                                    } else {
+                                        newNode.setBusy(Integer.parseInt(db.substring(5), 10));
+                                        newNode.setBusyTime(0);
+                                    }
+                                } catch (Exception ex) {
+                                    newNode.setBusy(0);
                                     newNode.setBusyTime(0);
                                 }
                             }
