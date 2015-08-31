@@ -1,3 +1,8 @@
+uecide (0.8.8alpha20) unstable; urgency=low 
+
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sun, 30 Aug 2015 19:09:40 +0100
+
 uecide (0.8.8alpha19) unstable; urgency=low 
 
   * Released beta
@@ -17,6 +22,7 @@ uecide (0.8.8alpha19) unstable; urgency=low
   * Fixed plugin preferences default loading
   * Added configurable reset delays
   * Overhauled debian building scripts
+  * Releasing new beta
 
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 15 Jul 2015 23:57:11 +0100
 

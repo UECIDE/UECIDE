@@ -2,3 +2,4 @@ uecide.jar usr/share/uecide
 dist/linux/uecide.png usr/share/icons
 dist/linux/uecide_sketch.png /usr/share/icons
 dist/linux/uecide.desktop usr/share/applications
+dist/linux/uecide usr/share/uecide

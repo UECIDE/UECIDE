@@ -105,7 +105,7 @@
     <target name="linux-zip" depends="build">
         <mkdir dir="bundle/linux/uecide-${version}" />
         <copy file="uecide.jar" todir="bundle/linux/uecide-${version}" />
-        <copy file="dist/linux/loader" tofile="bundle/linux/uecide-${version}/uecide" />
+        <copy file="dist/linux/uecide" tofile="bundle/linux/uecide-${version}/uecide" />
         <chmod perm="0755" file="bundle/linux/uecide-${version}/uecide" />
         <zip file="uecide-${version}-linux.zip" basedir="bundle/linux/" />
         <delete dir="bundle/linux" />
@@ -143,7 +143,7 @@
         <mkdir dir="${proot}/usr/share/applications" />
 
         <copy file="uecide.jar" todir="${proot}/usr/share/uecide" />
-        <copy file="dist/linux/loader" tofile="${proot}/usr/share/uecide/uecide" />
+        <copy file="dist/linux/uecide" tofile="${proot}/usr/share/uecide/uecide" />
         <chmod perm="0755" file="${proot}/usr/share/uecide/uecide" />
         <symlink link="${proot}/usr/bin/uecide" resource="../share/uecide/uecide" overwrite="true" />
         <copy file="dist/linux/icon.png" tofile="${proot}/usr/share/icons/uecide.png" />

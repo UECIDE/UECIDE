@@ -13,4 +13,4 @@
 	dh $@ --with javahelper
 
 override_dh_link:
-	dh_link usr/share/uecide/uecide.jar usr/bin/uecide
+	dh_link usr/share/uecide/uecide usr/bin/uecide

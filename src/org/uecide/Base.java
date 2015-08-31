@@ -256,6 +256,7 @@ public class Base implements AptPercentageListener {
         cli.addParameter("cli", "", Boolean.class, "Enter CLI mode");
 
         cli.addParameter("preferences", "", Boolean.class, "Display preferences dialog");
+        cli.addParameter("quiet", "", Boolean.class, "Reduce the noise of output");
 
         String[] argv = cli.process(args);
 
@@ -3283,5 +3284,9 @@ public class Base implements AptPercentageListener {
         } catch(Exception e) {
             error(e);
         }
+    }
+
+    public static boolean isQuiet() {
+        return cli.isSet("quiet");
     }
 }

@@ -37,6 +37,8 @@ import java.lang.reflect.*;
 
 import javax.script.*;
 
+import java.util.regex.*;
+
 import org.uecide.builtin.BuiltinCommand;
 import org.uecide.varcmd.VariableCommand;
 
@@ -260,7 +262,7 @@ public class Context {
             sketch.parsedMessage(e);
             return;
         }
-        System.out.print(e);
+        printParsed(e);
     }
 
 
@@ -381,6 +383,66 @@ public class Context {
         }
     }
         
+    public void printParsed(String message) {
+
+        Pattern pat = Pattern.compile("\\{\\\\(\\w+)\\s*(.*)\\}");
+
+        int openBracketLocation = message.indexOf("{\\");
+
+        // No open sequence means there's no parsing to do - just
+        // append the text as BODY and leave it at that.
+        if (openBracketLocation == -1) {
+            System.out.print(message);
+            return;
+        }
+
+        while (openBracketLocation >= 0) {
+            String leftChunk = message.substring(0, openBracketLocation);
+            String rightChunk = message.substring(openBracketLocation);
+            int closeBracketLocation = rightChunk.indexOf("}");
+            if (closeBracketLocation == -1) {
+                // Oops - something went wrong! No close bracket!
+                System.err.println("Badly formatted message: " + message);
+                return;
+            }
+            String block = rightChunk.substring(0, closeBracketLocation + 1);
+            String remainder = rightChunk.substring(closeBracketLocation + 1);
+
+            if (!leftChunk.equals("")) {
+                System.out.print(leftChunk);
+            }
+
+            Matcher m = pat.matcher(block);
+            if (m.find()) {
+                String type = m.group(1);
+                String text = m.group(2);
+                if (type.equals("body")) {
+                    System.out.print(text);
+                } else if (type.equals("warning")) {
+                    System.out.print("[36m" + text + "[0m");
+                } else if (type.equals("error")) {
+                    System.out.print("[31m" + text + "[0m");
+                } else if (type.equals("command")) {
+                    System.out.print(text);
+                } else if (type.equals("heading")) {
+                    System.out.print(text);
+                } else if (type.equals("bullet")) {
+                    System.out.print(" * " + text);
+                } else if (type.equals("bullet2")) {
+                    System.out.print("   * " + text);
+                } else if (type.equals("link")) {
+                    System.out.print(text);
+                }
+            }
+
+            message = remainder;
+            openBracketLocation = message.indexOf("{\\");
+        }
+        if (!message.equals("")) {
+            System.out.print(message);
+        }
+    }
+
 
 
     // Command and script execution
@@ -405,9 +467,7 @@ public class Context {
                 val[0].startsWith("board:") || 
                 val[0].startsWith("merged:")
             ) {
-                System.err.println("Script key value: " + val[0]);
                 String script = getResource(val[0]);
-                System.err.println("Script: " + script);
                 String function = val[1];
                 String[] args = Arrays.copyOfRange(val, 2, val.length);
 

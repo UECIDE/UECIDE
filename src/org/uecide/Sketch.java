@@ -389,7 +389,9 @@ public class Sketch {
     public void setProgrammer(String programmer) {
         if(programmer == null || programmer.equals("")) return;
 
-        Preferences.set("board." + selectedBoard.getName() + ".programmer", programmer);
+        if (selectedBoard != null) {
+            Preferences.set("board." + selectedBoard.getName() + ".programmer", programmer);
+        }
         selectedProgrammer = programmer;
 
         if(editor != null) editor.updateAll();
@@ -1651,7 +1653,7 @@ public class Sketch {
     }
 
     public boolean performSerialReset(boolean dtr, boolean rts, int speed, int predelay, int delay, int postdelay) {
-        ctx.bullet("Resetting board.");
+        if (!Base.isQuiet()) ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
             if (port instanceof SerialCommunicationPort) {
@@ -1678,7 +1680,7 @@ public class Sketch {
     }
 
     public boolean performBaudBasedReset(int b, int predelay, int delay, int postdelay) {
-        ctx.bullet("Resetting board.");
+        if (!Base.isQuiet()) ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
             if (port instanceof SerialCommunicationPort) {
@@ -1727,7 +1729,7 @@ public class Sketch {
             return false;
         }
 
-        heading("Compiling...");
+        if (!Base.isQuiet()) heading("Compiling...");
 
         try {
             if(!prepare()) {
@@ -2435,7 +2437,7 @@ public class Sketch {
             }
         }
 
-        bullet("Compiling sketch...");
+        if (!Base.isQuiet()) bullet("Compiling sketch...");
         setCompilingProgress(10);
         ArrayList<File>sketchObjects = compileSketch();
 
@@ -2444,7 +2446,7 @@ public class Sketch {
             return false;
         }
 
-        bullet("Compiling core...");
+        if (!Base.isQuiet()) bullet("Compiling core...");
         setCompilingProgress(20);
 
         if(!compileCore()) {
@@ -2454,7 +2456,7 @@ public class Sketch {
 
         setCompilingProgress(30);
 
-        bullet("Compiling libraries...");
+        if (!Base.isQuiet()) bullet("Compiling libraries...");
 
         if(!compileLibraries()) {
             error("Failed compiling libraries");
@@ -2463,7 +2465,7 @@ public class Sketch {
 
         setCompilingProgress(40);
 
-        bullet("Linking sketch...");
+        if (!Base.isQuiet()) bullet("Linking sketch...");
 
         if(!compileLink(sketchObjects)) {
             error("Failed linking sketch");
@@ -2555,7 +2557,7 @@ public class Sketch {
         }
 
 
-        heading("Compiling done.");
+        if (!Base.isQuiet()) heading("Compiling done.");
         setCompilingProgress(100);
 
         if(editor != null) {
@@ -2567,7 +2569,7 @@ public class Sketch {
 
         long endTime = System.currentTimeMillis();
         double compileTime = (double)(endTime - startTime) / 1000d;
-        bullet("Compilation took " + compileTime + " seconds");
+        if (!Base.isQuiet()) bullet("Compilation took " + compileTime + " seconds");
         ctx.executeKey("compile.postcmd");
         return true;
     }
@@ -2576,7 +2578,7 @@ public class Sketch {
         PropertyFile props = ctx.getMerged();
 
         if (props.get("compile.size") != null) {
-            heading("Memory usage");
+            if (!Base.isQuiet()) heading("Memory usage");
 
             ctx.startBuffer();
             ctx.executeKey("compile.size");
@@ -2623,8 +2625,8 @@ public class Sketch {
             ctx.set("size.flash", (textSize + dataSize + rodataSize) + "");
             ctx.set("size.ram", (bssSize + dataSize) + "");
 
-            bullet("Program size: " + (textSize + dataSize + rodataSize) + " bytes");
-            bullet("Memory size: " + (bssSize + dataSize) + " bytes");
+            if (!Base.isQuiet()) bullet("Program size: " + (textSize + dataSize + rodataSize) + " bytes");
+            if (!Base.isQuiet()) bullet("Memory size: " + (bssSize + dataSize) + " bytes");
         }
         return true;
     }
@@ -2777,7 +2779,7 @@ public class Sketch {
         }
 
         for(String lib : coreLibs.keySet()) {
-            bullet2(lib.toString());
+            if (!Base.isQuiet()) bullet2(lib.toString());
 
             if(!compileCore(coreLibs.get(lib), "Core_" + lib)) {
                 return false;
@@ -2861,7 +2863,7 @@ public class Sketch {
         File archive = getCacheFile(getArchiveName(lib));  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
         PropertyFile props = ctx.getMerged();
-        bullet2(lib.toString());
+        if (!Base.isQuiet()) bullet2(lib.toString());
 
         ctx.set("library", archive.getAbsolutePath());
 
@@ -2955,7 +2957,7 @@ public class Sketch {
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
                 if(Preferences.getBoolean("compiler.verbose_compile")) {
-                    bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
+                    if (!Base.isQuiet()) bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
                 }
 
                 continue;
@@ -3023,7 +3025,7 @@ public class Sketch {
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
                 if(Preferences.getBoolean("compiler.verbose_compile")) {
-                    bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
+                    if (!Base.isQuiet()) bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
                 }
 
                 continue;
@@ -3386,7 +3388,7 @@ public class Sketch {
 
     public boolean programFile(String programmer, String file) {
         PropertyFile props = ctx.getMerged();
-        heading("Uploading firmware...");
+        if (!Base.isQuiet()) heading("Uploading firmware...");
 
         ctx.set("filename", file);
 
@@ -3459,7 +3461,7 @@ public class Sketch {
             percentageMultiplier = 1.0f;
         }
 
-        bullet("Uploading...");
+        if (!Base.isQuiet()) bullet("Uploading...");
 
         if (percentageFilter != null || percentageCharacter != null) {
             ctx.addContextListener(new programContextListener(percentageFilter, percentageCharacter, percentageMultiplier));
@@ -3481,7 +3483,7 @@ public class Sketch {
         }
 
         if(res) {
-            bullet("Upload Complete");
+            if (!Base.isQuiet()) bullet("Upload Complete");
             return true;
         } else {
             error("Upload Failed");
@@ -4491,7 +4493,7 @@ public class Sketch {
                 } catch (Exception execpt) {
                 }
             } else {
-                ctx.error("Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":");
+                ctx.parsedMessage("{\\bullet}{\\error Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
             }
             ctx.parsedMessage("{\\bullet2}{\\error " + m.group(3) + "}\n");
             setLineComment(errorFile, errorLineNumber, m.group(3));
@@ -4535,7 +4537,7 @@ public class Sketch {
                 } catch (Exception execpt) {
                 }
             } else {
-                ctx.warning("Warning at line " + errorLineNumber + " in file " + errorFile.getName() + ":");
+                ctx.parsedMessage("{\\bullet}{\\warning Warning at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
             }
             ctx.parsedMessage("{\\bullet2}{\\warning " + m.group(3) + "}\n");
             setLineComment(errorFile, errorLineNumber, m.group(3));
@@ -4554,7 +4556,7 @@ public class Sketch {
     }
 
     public void parsedMessage(String e) {
-        System.out.print(e);
+        ctx.printParsed(e);
     }
 
 }
