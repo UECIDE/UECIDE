@@ -1,3 +1,9 @@
+uecide (0.8.8alpha22) unstable; urgency=low 
+
+  * Armoured integer parsing in IOKit
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 31 Aug 2015 14:06:58 +0100
+
 uecide (0.8.8alpha21) unstable; urgency=low 
 
   * Fixed broken shortcut keys

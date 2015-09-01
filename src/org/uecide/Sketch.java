@@ -1428,10 +1428,12 @@ public class Sketch {
 
             // Don't process any escaped characters - just add them verbatim.
             if (thisChar == '\\') {
-                out.append(thisChar);
+                if (!inSingleComment && !inMultiComment)
+                    out.append(thisChar);
                 cpos++;
                 if (cpos < data.length()) {
-                    out.append(data.charAt(cpos));
+                    if (!inSingleComment && !inMultiComment)
+                        out.append(data.charAt(cpos));
                     cpos++;
                 }
                 continue;
