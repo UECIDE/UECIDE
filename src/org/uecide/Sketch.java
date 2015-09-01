@@ -1426,6 +1426,17 @@ public class Sketch {
                 nextChar = data.charAt(cpos + 1);
             }
 
+            // Don't process any escaped characters - just add them verbatim.
+            if (thisChar == '\\') {
+                out.append(thisChar);
+                cpos++;
+                if (cpos < data.length()) {
+                    out.append(data.charAt(cpos));
+                    cpos++;
+                }
+                continue;
+            }
+
             // If we're currently in a string then keep moving on until the end of the string.
             // If we hit the closing quote we still want to move on since it'll start a new
             // string otherwise.
