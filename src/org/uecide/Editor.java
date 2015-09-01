@@ -4787,7 +4787,7 @@ public class Editor extends JFrame {
             return;
         }
 
-        if(Preferences.getBoolean("editor.save.automatic")) {
+        if(Preferences.getBoolean("editor.save.auto")) {
             if(!loadedSketch.parentIsProtected() && !loadedSketch.isUntitled()) {
                 saveAllTabs();
             }
