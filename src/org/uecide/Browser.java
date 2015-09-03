@@ -99,13 +99,6 @@ public class Browser extends JTextPane implements HyperlinkListener {
     }
 
     public void refreshTheme() {
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
-
-        for (String t : tags) {
-            String data = Base.theme.get(theme + "browser." + t, Base.theme.get("theme.default.browser." + t));
-            //css.addRule(t + " {" + data + "}");
-        }
     }
 
     public void navigate(String url) {
@@ -128,16 +121,13 @@ public class Browser extends JTextPane implements HyperlinkListener {
     }
 
     public String craftPage(String content) {
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
         StringBuilder sb = new StringBuilder();
 
         sb.append("<html>\n");
         sb.append("<head>\n");
         sb.append("<style>\n");
 
-        PropertyFile themeData = Base.theme.getChildren(theme + "browser");
-        PropertyFile defaultData = Base.theme.getChildren("theme.default.browser");
+        PropertyFile themeData = Base.getTheme().getChildren("browser");
         ArrayList<String> done = new ArrayList<String>();
 
         for (Object keyo : themeData.keySet()) {
@@ -145,14 +135,6 @@ public class Browser extends JTextPane implements HyperlinkListener {
             String data = themeData.get(key);
             sb.append(key + " {" + data + "}\n");
             done.add(key);
-        }
-
-        for (Object keyo : defaultData.keySet()) {
-            String key = (String)keyo;
-            if (done.indexOf(key) == -1) {
-                String data = defaultData.get(key);
-                sb.append(key + " {" + data + "}\n");
-            }
         }
 
         sb.append("</style>\n");

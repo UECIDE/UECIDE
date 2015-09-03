@@ -60,8 +60,6 @@ import org.uecide.Compiler;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import com.jtattoo.plaf.*;
-
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
@@ -86,8 +84,6 @@ public class Base implements AptPercentageListener {
 
     public static int REVISION = 23;
     public static String RELEASE = "release";
-
-    public static String iconSet = defaultIconSet;
 
     public static String overrideSettingsFolder = null;
 
@@ -140,6 +136,10 @@ public class Base implements AptPercentageListener {
     public static boolean onlineMode = true;
 
     public static ArrayList<CommunicationPort> communicationPorts = new ArrayList<CommunicationPort>();
+
+    public static TreeMap<String, Class<?>> lookAndFeels = new TreeMap<String, Class<?>>();
+
+    public static TreeMap<String, PropertyFile> themes = new TreeMap<String, PropertyFile>();
 
     /*! Get a Board from the internal boards list by its short name. */
     public static Board getBoard(String name) {
@@ -521,6 +521,7 @@ public class Base implements AptPercentageListener {
             cores = new TreeMap<String, Core>();
             boards = new TreeMap<String, Board>();
             plugins = new TreeMap<String, Class<?>>();
+            lookAndFeels = new TreeMap<String, Class<?>>();
             pluginInstances = new ArrayList<Plugin>();
 
             Serial.updatePortList();
@@ -609,6 +610,7 @@ public class Base implements AptPercentageListener {
         cores = new TreeMap<String, Core>();
         boards = new TreeMap<String, Board>();
         plugins = new TreeMap<String, Class<?>>();
+        lookAndFeels = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
 
         Serial.updatePortList();
@@ -672,14 +674,6 @@ public class Base implements AptPercentageListener {
         loadPlugins();
 
         loadIconSets();
-
-        if (preferences.get("theme.icons") != null) {
-            if (iconSets.get(preferences.get("theme.icons")) == null) {
-                iconSet = defaultIconSet;
-            } else {
-                iconSet = preferences.get("theme.icons");
-            }
-        }
 
         if(!headless) splashScreen.setMessage("Libraries...", 70);
 
@@ -2015,6 +2009,21 @@ public class Base implements AptPercentageListener {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+            pluginReflections = new Reflections("org.uecide");
+            try {
+                Set<Class<? extends LookAndFeel>> pluginClasses = pluginReflections.getSubTypesOf(LookAndFeel.class);
+                Debug.message(pluginClasses.toString());
+                for (Class<? extends LookAndFeel> c : pluginClasses) {
+                    Debug.message("Found look and feel class " + c.getName());
+                    if (c.getName().equals("org.uecide.plugin.PluginManager")) {
+                        continue;
+                    }
+                    System.err.println("Adding LAF: [" + c.getName() + "]");
+                    lookAndFeels.put(c.getName(), c);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -2328,6 +2337,7 @@ public class Base implements AptPercentageListener {
                 Editor.bulletAll("Update complete.");
                 Editor.updateAllEditors();
                 Editor.selectAllEditorBoards();
+                Editor.refreshAllEditors();
                 Editor.unlockAll();
             }
         };
@@ -2336,6 +2346,7 @@ public class Base implements AptPercentageListener {
 
     public static void rescanPlugins() {
         plugins = new TreeMap<String, Class<?>>();
+        lookAndFeels = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
         Editor.bulletAll("Scanning plugins...");
         loadPlugins();
@@ -2580,25 +2591,64 @@ public class Base implements AptPercentageListener {
     }
 
     public static void loadThemes() {
+
+        themes = new TreeMap<String, PropertyFile>();
+
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forPackage("org.uecide"))
+                .setScanners(new ResourcesScanner()));
+
+        Pattern pat = Pattern.compile(".*\\.theme");
+        Set<String> thms = reflections.getResources(pat);
+
+        for (String thm : thms) {
+            PropertyFile newTheme = new PropertyFile("/" + thm);
+            String name = newTheme.get("name");
+            if (name != null) {
+                Debug.message("Found embedded theme " + name);
+                PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
+                merged.mergeData(newTheme);
+                themes.put(newTheme.get("name"), merged);
+            }
+        }
+
         File tf = getThemesFolder();
         File[] files = tf.listFiles();
 
         for(File f : files) {
             if(f.getName().endsWith(".theme")) {
                 PropertyFile newTheme = new PropertyFile(f);
-                String name = f.getName();
-                name = name.substring(0, name.lastIndexOf("."));
-                theme.mergeData(newTheme, "theme." + name);
+                String name = newTheme.get("name");
+                if (name != null) {
+                    Debug.message("Found external theme " + name);
+                    PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
+                    merged.mergeData(newTheme);
+                    themes.put(newTheme.get("name"), merged);
+                }
             }
+        }
+    }
+
+    public static PropertyFile getTheme() {
+        String selectedTheme = Preferences.get("theme.editor");
+        if (themes.get(selectedTheme) != null) {
+            return themes.get(selectedTheme);
+        } else {    
+            return themes.get("Default");
+        }
+    }
+
+    public static void setTheme(String t) {
+        if (themes.get(t) != null) {
+            Preferences.set("theme.editor", t);
         }
     }
 
     public static HashMap<String, String> getThemeList() {
         HashMap<String, String> themeList = new HashMap<String, String>();
-        String[] themeKeys = theme.childKeysOf("theme");
 
-        for(String key : themeKeys) {
-            themeList.put(key, theme.get("theme." + key + ".name"));
+        for(String key : themes.keySet()) {
+            themeList.put(key, key);
         }
 
         return themeList;
@@ -2847,7 +2897,7 @@ public class Base implements AptPercentageListener {
 
     public static ImageIcon getIcon(String category, String name, int size) {
 
-        String path = getIconsPath(iconSet);
+        String path = getIconsPath(getIconSet());
 
         URL loc = Base.class.getResource(path + "/" + size + "x" + size + "/" + category + "/" + name + ".png");
         if(loc == null) {
@@ -2861,12 +2911,19 @@ public class Base implements AptPercentageListener {
         return new ImageIcon(loc);
     }
 
-    public static void setIconSet(String name) {
-        iconSet = name;
-    }
-
     public static String getIconSet() {
-        return iconSet;
+
+        return getTheme().get("icon");
+
+//        String iconSet = defaultIconSet;;
+//
+//        if (preferences.get("theme.icons") != null) {
+//            if (iconSets.get(preferences.get("theme.icons")) != null) {
+//                iconSet = preferences.get("theme.icons");
+//            }
+//        }
+//
+//        return iconSet;
     }
 
     public static void loadIconSets() {
@@ -2891,12 +2948,11 @@ public class Base implements AptPercentageListener {
 
     public static void setFont(JComponent comp, String key) {
 
-        String themekey = preferences.get("theme.editor", "default");
-        themekey = "theme." + themekey + ".";
+        PropertyFile theme = getTheme();
 
         String fontData = preferences.get(key);
         if (fontData == null) {
-            fontData = theme.get(themekey + key);
+            fontData = theme.get(key);
         }
         if (fontData == null) {
             return;
@@ -3091,52 +3147,28 @@ public class Base implements AptPercentageListener {
     }
 
     public static HashMap<String, String> getLookAndFeelList() {
-        HashMap<String, String>themes = new HashMap<String, String>();
-        UIManager.LookAndFeelInfo[] lafInfo = UIManager.getInstalledLookAndFeels();
+        HashMap<String, String>lafs = new HashMap<String, String>();
 
-        for(UIManager.LookAndFeelInfo info : lafInfo) {
-            themes.put(info.getClassName(), info.getName());
-        }
+        for (String p : lookAndFeels.keySet()) {
+            try {
 
-        // JTattoo collection
-        themes.put("com.jtattoo.plaf.acryl.AcrylLookAndFeel",          "Acryl");
-        themes.put("com.jtattoo.plaf.aero.AeroLookAndFeel",            "Aero");
-        themes.put("com.jtattoo.plaf.aluminium.AluminiumLookAndFeel",  "Aluminium");
-        themes.put("com.jtattoo.plaf.bernstein.BernsteinLookAndFeel",  "Bernstein");
-        themes.put("com.jtattoo.plaf.fast.FastLookAndFeel",            "Fast");
-        themes.put("com.jtattoo.plaf.graphite.GraphiteLookAndFeel",    "Graphite");
-        themes.put("com.jtattoo.plaf.hifi.HiFiLookAndFeel",            "HiFi");
-        themes.put("com.jtattoo.plaf.luna.LunaLookAndFeel",            "Luna");
-        themes.put("com.jtattoo.plaf.mcwin.McWinLookAndFeel",          "McWin");
-        themes.put("com.jtattoo.plaf.mint.MintLookAndFeel",            "Mint");
-        themes.put("com.jtattoo.plaf.noire.NoireLookAndFeel",          "Noire");
-        themes.put("com.jtattoo.plaf.smart.SmartLookAndFeel",          "Smart");
+                Class<?> plg = lookAndFeels.get(p);
+                Method m = plg.getMethod("isCompatible");
+                Object[] foo = null;
+                boolean compat = (Boolean)m.invoke(null, foo);
 
-        // The fifesoft Windows LaF collection is only available on Windows.
-        if(Base.isWindows()) {
-            themes.put("org.fife.plaf.Office2003.Office2003LookAndFeel", "Office 2003");
-            themes.put("org.fife.plaf.OfficeXP.OfficeXPLookAndFeel","Office XP");
-            themes.put("org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel", "Visual Studio 2005");
-        }
+                if (compat) {
+                    m = plg.getMethod("getName");
+                    String name = (String)m.invoke(null, foo);
+                    lafs.put(p, name);
+                }
 
-        themes.put("com.birosoft.liquid.LiquidLookAndFeel", "Liquid");
-
-        // TinyLAF collection
-
-        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-
-        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-            String themeName = td.getName();
-
-            if(themeName.equals("")) {
-                continue;
+            } catch (Exception e) {
             }
 
-            themes.put("de.muntjak.tinylookandfeel.TinyLookAndFeel;" + themeName, "Tiny: " + themeName);
         }
 
-        return themes;
-
+        return lafs;
     }
 
     public static HashMap<String, String> getIconSets() {
@@ -3225,64 +3257,21 @@ public class Base implements AptPercentageListener {
     }
 
     public static void setLookAndFeel() {
-        try {
-            if(!headless) {
-                if(isUnix()) {
-                    Toolkit xToolkit = Toolkit.getDefaultToolkit();
-                    java.lang.reflect.Field awtAppClassNameField =
-                        xToolkit.getClass().getDeclaredField("awtAppClassName");
-                    awtAppClassNameField.setAccessible(true);
-                    awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
+        String laf = getTheme().get("laf");
+        if(!headless) {
+            try {
+                Class<?> plg = lookAndFeels.get(laf); //Preferences.get("theme.window"));
+                if (plg == null) {
+                    System.err.println("LAF " + laf + " NOT FOUND!");
+                    return;
                 }
+                Method m = plg.getMethod("applyLAF");
+                Object[] foo = null;
+                m.invoke(null, foo);
 
-                String laf = Preferences.get("theme.window");
-
-                try {
-                    UIManager.setLookAndFeel(laf);
-                } catch (Exception badLaf) {
-                    System.err.println("Unable to set LAF");
-                }
-
-
-                if(laf != null) {
-                    String lafTheme = "";
-
-                    if(laf.indexOf(";") > -1) {
-                        lafTheme = laf.substring(laf.lastIndexOf(";") + 1);
-                        laf = laf.substring(0, laf.lastIndexOf(";"));
-                    }
-
-                    if(laf.startsWith("de.muntjak.tinylookandfeel.")) {
-                        de.muntjak.tinylookandfeel.ThemeDescription[] tinyThemes = de.muntjak.tinylookandfeel.Theme.getAvailableThemes();
-                        URI themeURI = null;
-
-                        for(de.muntjak.tinylookandfeel.ThemeDescription td : tinyThemes) {
-                            if(td.getName().equals(lafTheme)) {
-                                de.muntjak.tinylookandfeel.Theme.loadTheme(td);
-                                break;
-                            }
-                        }
-                    }
-
-
-                    if(laf.startsWith("com.jtattoo.plaf.")) {
-                        Properties props = new Properties();
-                        props.put("windowDecoration", Preferences.getBoolean("theme.window_system") ? "off" : "on");
-                        props.put("logoString", "UECIDE");
-                        props.put("textAntiAliasing", "on");
-
-                        Class<?> cls = Class.forName(laf);
-                        Class[] cArg = new Class[1];
-                        cArg[0] = Properties.class;
-                        Method mth = cls.getMethod("setCurrentTheme", cArg);
-                        mth.invoke(cls, props);
-                    }
-
-                }
+            } catch (Exception e) {
             }
 
-        } catch(Exception e) {
-            error(e);
         }
     }
 

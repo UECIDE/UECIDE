@@ -65,6 +65,29 @@ public class Console extends JTextPane {
     public Console() {
         super();
 
+        updateStyleSettings();
+
+        document = new BufferedStyledDocument(10000, 2000);
+        document.setParagraphAttributes(0, 0, body, true);
+
+        setDocument(document);
+        setEditable(false);
+
+        addMouseListener(new TextClickListener());
+        addMouseMotionListener(new TextMotionListener());
+    }   
+
+    @Override
+    public void paintComponent(Graphics g) {
+        if (Preferences.getBoolean("theme.fonts.editor_aa")) {
+            Graphics2D graphics2d = (Graphics2D) g;
+            graphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+        super.paintComponent(g);
+    }
+
+    public void updateStyleSettings() {
         setStyle(body, "body");
         setStyle(warning, "warning");
         setStyle(error, "error");
@@ -74,24 +97,13 @@ public class Console extends JTextPane {
         setStyle(bullet2, "bullet2");
         setStyle(link, "link");
 
-        document = new BufferedStyledDocument(10000, 2000);
-        document.setParagraphAttributes(0, 0, body, true);
+        setBackground(Base.getTheme().getColor("console.color"));
 
-        setDocument(document);
-        setEditable(false);
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
-        Color bgColor = Base.theme.getColor(theme + "console.color");
-
-        setBackground(bgColor);
-        addMouseListener(new TextClickListener());
-        addMouseMotionListener(new TextMotionListener());
-    }   
+    }
 
     void setStyle(MutableAttributeSet set, String name) {
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
-        Color bgColor = Base.theme.getColor(theme + "console.color");
+        PropertyFile theme = Base.getTheme();
+        Color bgColor = theme.getColor("console.color");
 
         Font font = getFont(name);
         StyleConstants.setBackground(set, bgColor);
@@ -100,40 +112,37 @@ public class Console extends JTextPane {
         StyleConstants.setFontFamily(set, font.getFamily());
         StyleConstants.setBold(set, font.isBold());
         StyleConstants.setItalic(set, font.isItalic());
-        StyleConstants.setUnderline(set, Base.theme.getBoolean(theme + "console." + name + ".underline"));
+        StyleConstants.setUnderline(set, Base.theme.getBoolean("console." + name + ".underline"));
         StyleConstants.setAlignment(set, StyleConstants.ALIGN_LEFT);
         StyleConstants.setLeftIndent(set, getIndent(name));
     }
 
     Color getColor(String name) {
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
+        PropertyFile theme = Base.getTheme();
 
-        Color color = Base.theme.getColor(theme + "console.output.color");
-        if (Base.theme.get(theme + "console." + name + ".color") != null) {
-            color = Base.theme.getColor(theme + "console." + name + ".color");
+        Color color = theme.getColor("console.output.color");
+        if (theme.get("console." + name + ".color") != null) {
+            color = theme.getColor("console." + name + ".color");
         }
         return color;
     }
 
     Font getFont(String name) {
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
+        PropertyFile theme = Base.getTheme();
 
-        Font font = Base.theme.getFont(theme + "theme.fonts.console");
-        if (Base.theme.get(theme + "console." + name + ".font") != null) {
-            font = Base.theme.getFont(theme + "console." + name + ".font");
+        Font font = theme.getFont("theme.fonts.console");
+        if (theme.get("console." + name + ".font") != null) {
+            font = theme.getFont("console." + name + ".font");
         }
         return font;
     }
 
     int getIndent(String name) {
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
+        PropertyFile theme = Base.getTheme();
 
-        int indent = Base.theme.getInteger(theme + "console.indent", 5);
-        if (Base.theme.get(theme + "console." + name + ".indent") != null) {
-            indent = Base.theme.getInteger(theme + "console." + name + ".indent");
+        int indent = theme.getInteger("console.indent", 5);
+        if (theme.get("console." + name + ".indent") != null) {
+            indent = theme.getInteger("console." + name + ".indent");
         }
         return indent;
     }

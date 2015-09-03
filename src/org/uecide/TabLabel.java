@@ -73,6 +73,8 @@ public class TabLabel extends JPanel {
         name = sketchFile.getName();
         this.setLayout(new BorderLayout());
         nameLabel = new JLabel(name);
+        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
+        Base.setFont(nameLabel, "tab.unmodified.label");
         fileIcon = Base.getIcon("mime",(FileType.getIcon(sketchFile)), 16);
 
         if(fileIcon != null) {
@@ -99,8 +101,8 @@ public class TabLabel extends JPanel {
         this.add(nameLabel, BorderLayout.CENTER);
         this.add(blab, BorderLayout.EAST);
         expectedFileTime = sf.lastModified();
-        update();
         isSelected = true; // Just been made, so must be selected!
+        update();
     }
 
     public TabLabel(Editor e, String tabname) {
@@ -109,11 +111,11 @@ public class TabLabel extends JPanel {
         name = tabname;
         this.setLayout(new BorderLayout());
         nameLabel = new JLabel(name);
+        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
         JLabel blab = new JLabel();
         nameLabel.setOpaque(false);
         blab.setIcon(Base.loadIconFromResource("tabs/close.png"));
-        Base.setFont(blab, "tab.label");
-        Base.setFont(nameLabel, "tab.label");
+        Base.setFont(nameLabel, "tab.unmodified.label");
 
         blab.addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
@@ -131,17 +133,22 @@ public class TabLabel extends JPanel {
         this.add(nameLabel, BorderLayout.CENTER);
         this.add(blab, BorderLayout.EAST);
         isSelected = true; // Just been made, so must be selected!
+        update();
     }
 
     public void update() {
         Font labelFont = nameLabel.getFont();
 
         if(modified) {
-            nameLabel.setFont(new Font(labelFont.getName(), Font.BOLD, labelFont.getSize()));
-            nameLabel.setText(sketchFile.getName() + " * ");
+            Base.setFont(nameLabel, "tab.modified.label");
         } else {
-            nameLabel.setFont(new Font(labelFont.getName(), Font.PLAIN, labelFont.getSize()));
-            nameLabel.setText(sketchFile.getName());
+            Base.setFont(nameLabel, "tab.unmodified.label");
+        }
+
+        if (isSelected) {
+            nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
+        } else {
+            nameLabel.setForeground(Base.getTheme().getColor("tab.deselected.fgcolor"));
         }
     }
 
@@ -214,6 +221,11 @@ public class TabLabel extends JPanel {
 
     public void changeState(boolean state) {
         isSelected = state;
+        if (isSelected) {
+            nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
+        } else {
+            nameLabel.setForeground(Base.getTheme().getColor("tab.deselected.fgcolor"));
+        }
     } 
 }
 

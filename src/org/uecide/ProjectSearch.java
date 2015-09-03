@@ -240,8 +240,6 @@ public class ProjectSearch {
             }
         }
 
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
         String term = searchTerm.getText().toLowerCase();
         JPanel list = new JPanel();
         list.setLayout(new BoxLayout(list, BoxLayout.PAGE_AXIS));
@@ -264,7 +262,7 @@ public class ProjectSearch {
                 if(line.toLowerCase().contains(term)) {
                     foundText = true;
                     if (eb != null) {
-                        eb.highlightLine(lineno - 1, Base.theme.getColor(theme + "editor.searchall.bgcolor"));
+                        eb.highlightLine(lineno - 1, Base.getTheme().getColor("editor.searchall.bgcolor"));
                     }
 
                     SearchResult res = new SearchResult(f, term, line, lineno);

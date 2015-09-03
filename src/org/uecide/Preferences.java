@@ -55,92 +55,10 @@ import de.muntjak.tinylookandfeel.*;
 
 public class Preferences extends JDialog implements TreeSelectionListener {
 
-    // prompt text stuff
-
-    static final String PROMPT_YES     = "Yes";
-    static final String PROMPT_NO      = "No";
-    static final String PROMPT_CANCEL  = "Cancel";
-    static final String PROMPT_OK      = "OK";
-    static final String PROMPT_BROWSE  = "Browse";
-
-    /**
-     * Standardized width for buttons. Mac OS X 10.3 wants 70 as its default,
-     * Windows XP needs 66, and my Ubuntu machine needs 80+, so 80 seems proper.
-     */
-    static public int BUTTON_WIDTH  = 80;
-
-    /**
-     * Standardized button height. Mac OS X 10.3 (Java 1.4) wants 29,
-     * presumably because it now includes the blue border, where it didn't
-     * in Java 1.3. Windows XP only wants 23 (not sure what default Linux
-     * would be). Because of the disparity, on Mac OS X, it will be set
-     * inside a static block.
-     */
-    static public int BUTTON_HEIGHT = 24;
-
-    // value for the size bars, buttons, etc
-
-    static final int GRID_SIZE     = 33;
-
-
-    // indents and spacing standards. these probably need to be modified
-    // per platform as well, since macosx is so huge, windows is smaller,
-    // and linux is all over the map
-
-    static final int GUI_BIG     = 13;
-    static final int GUI_BETWEEN = 10;
-    static final int GUI_SMALL   = 6;
-
-    // gui elements
-
-    int wide, high;
-
-    JTextField sketchbookLocationField;
-    JTextField externalEditorField;
-    JTextField editorFontField;
-    JTextField consoleFontField;
-    JCheckBox autoAssociateBox;
-    JCheckBox useSpacesForTabs;
-    JCheckBox visibleTabs;
-    JCheckBox checkNewVersion;
-    JCheckBox autoSave;
-    JCheckBox crashReport;
-    JTextField tabSize;
-    JCheckBox hideSecondaryToolbar;
-
-    JCheckBox keepFindOpen;
-
-    JTabbedPane tabs;
-
-    JTextField dataLocationField;
-    JCheckBox  createBackups;
-    JTextField backupNumber;
-
     Editor editor;
-
-    JComboBox selectedTheme;
-    JComboBox selectedEditorTheme;
-    JComboBox selectedIconTheme;
-    JCheckBox useSystemDecorator;
-
     ScrollablePanel advancedTreeBody;
 
-    JCheckBox dlgMissingLibraries;
-
-    JList extraPortList;
-    DefaultListModel extraPortListModel = new DefaultListModel();
-    JTextField portInput;
-
-    public static TreeMap<String, String>themes;
-
     PropertyFile changedPrefs = new PropertyFile();
-
-    JTable libraryLocationTable;
-    class LibraryDetail {
-        public String key;
-        public String description;
-        public String path;
-    };
 
     class KVPair implements Comparable {
         String key;
@@ -168,130 +86,6 @@ public class Preferences extends JDialog implements TreeSelectionListener {
             return value.compareTo(bo.getValue());
         }
     }
-
-    class LibraryTableModel extends AbstractTableModel {
-        private String[] columnNames = {"Key",
-                                        "Description",
-                                        "Path"
-                                       };
-        private ArrayList<LibraryDetail> data = new ArrayList<LibraryDetail>();
-
-        public int getColumnCount() {
-            return columnNames.length;
-        }
-
-        public int getRowCount() {
-            return data.size();
-        }
-
-        public String getColumnName(int col) {
-            return columnNames[col];
-        }
-
-        public Object getValueAt(int row, int col) {
-            switch(col) {
-            case 0:
-                return data.get(row).key;
-
-            case 1:
-                return data.get(row).description;
-
-            case 2:
-                return data.get(row).path;
-            }
-
-            return null;
-        }
-
-        /*
-         * JTable uses this method to determine the default renderer/
-         * editor for each cell.  If we didn't implement this method,
-         * then the last column would contain text ("true"/"false"),
-         * rather than a check box.
-         */
-        public Class getColumnClass(int c) {
-            return getValueAt(0, c).getClass();
-        }
-
-        /*
-         * Don't need to implement this method unless your table's
-         * editable.
-         */
-        public boolean isCellEditable(int row, int col) {
-            return true;
-        }
-
-        /*
-         * Don't need to implement this method unless your table's
-         * data can change.
-         */
-        public void setValueAt(Object value, int row, int col) {
-            if(row >= data.size()) {
-                LibraryDetail lib = new LibraryDetail();
-
-                switch(col) {
-                case 0:
-                    lib.key = (String)value;
-                    break;
-
-                case 1:
-                    lib.description = (String)value;
-                    break;
-
-                case 2:
-                    lib.path = (String)value;
-                    break;
-
-                default:
-                    return;
-                }
-
-                data.add(lib);
-            } else {
-                switch(col) {
-                case 0:
-                    data.get(row).key = (String)value;
-                    break;
-
-                case 1:
-                    data.get(row).description = (String)value;
-                    break;
-
-                case 2:
-                    data.get(row).path = (String)value;
-                    break;
-
-                default:
-                    return;
-                }
-            }
-
-            fireTableCellUpdated(row, col);
-        }
-        public void deleteRow(int row) {
-            data.remove(row);
-            fireTableDataChanged();
-        }
-
-        public void addNewRow(String key, String name, String path) {
-            LibraryDetail lib = new LibraryDetail();
-            lib.key = key;
-            lib.description = name;
-            lib.path = path;
-            data.add(lib);
-            fireTableDataChanged();
-        }
-
-    }
-
-    private LibraryTableModel libraryLocationModel = new LibraryTableModel();
-
-    private JButton deleteSelectedLibraryEntry;
-    // the calling editor, so updates can be applied
-
-    // data model
-
-    static PropertyFile properties;
 
     static public String fontToString(Font f) {
         String font = f.getName();
@@ -357,12 +151,6 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return font;
     }
 
-
-
-    static protected void init() {
-        properties = new PropertyFile(Base.getDataFile("preferences.txt"), Base.getContentFile("lib/preferences.txt"));
-    }
-
     public Dimension getMinimumSize() {
         return new Dimension(700, 500);
     }
@@ -408,6 +196,17 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         outer.add(buttonLine, BorderLayout.SOUTH);
 
         for(Class<?> pluginClass : Base.plugins.values()) {
+            try {
+                Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
+                if (getPreferencesTree != null) {
+                    PropertyFile pf = (PropertyFile)(getPreferencesTree.invoke(null));
+                    Base.preferencesTree.mergeData(pf);
+                }
+            } catch (Exception e) {
+            }
+        }
+
+        for(Class<?> pluginClass : Base.lookAndFeels.values()) {
             try {
                 Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
                 if (getPreferencesTree != null) {
@@ -535,7 +334,6 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         Base.preferences.save();
         Base.applyPreferences();
         Base.cleanAndScanAllSettings();
-        Editor.refreshAllEditors();
     }
 
     @SuppressWarnings("unchecked")

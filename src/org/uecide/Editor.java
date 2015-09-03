@@ -395,73 +395,7 @@ public class Editor extends JFrame {
         projectTabs.add(treePanel, "Project");
         projectTabs.add(filesPanel, "Files");
 
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
-
-        sketchContentTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
-        sketchContentTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
-        sketchFilesTree.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
-        sketchFilesTree.setForeground(Base.theme.getColor(theme + "editor.fgcolor"));
-
-        treeScroll.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
-        treePanel.setBackground(Base.theme.getColor(theme + "editor.bgcolor"));
-
-        treeScroll.setOpaque(false);
-        treePanel.setOpaque(false);
-        sketchContentTree.setOpaque(true);
-
-        File themeFolder = Base.getContentFile("lib/theme");
-
-        abortButton = Editor.addToolbarButton(toolbar, "actions", "cancel", "Abort", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                abortCompilation();
-            }
-        });
-        abortButton.setVisible(false);
-        runButton = Editor.addToolbarButton(toolbar, "actions", "run", "Compile (Shift: clean compile)", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
-                    loadedSketch.purgeCache();
-                    loadedSketch.purgeBuildFiles();
-                }
-                
-                compile();
-            }
-        });
-
-        programButton = Editor.addToolbarButton(toolbar, "actions", "program", "Program (Shift: clean compile and program)", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
-                    loadedSketch.purgeCache();
-                    loadedSketch.purgeBuildFiles();
-                }
-                program();
-            }
-        });
-
-        toolbar.addSeparator();
-
-        Editor.addToolbarButton(toolbar, "actions", "new", "New Sketch", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Base.handleNew();
-            }
-        });
-
-        Editor.addToolbarButton(toolbar, "actions", "open", "Open Sketch", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                handleOpenPrompt();
-            }
-        });
-
-        Editor.addToolbarButton(toolbar, "actions", "save", "Save Sketch", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                saveAllTabs();
-            }
-        });
-
-        toolbar.addSeparator();
-
-        addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
+        updateToolbar();
 
         toolbar.addSeparator();
 
@@ -576,6 +510,61 @@ public class Editor extends JFrame {
 
     }
 
+    public void updateToolbar() {
+        toolbar.removeAll();
+        abortButton = Editor.addToolbarButton(toolbar, "actions", "cancel", "Abort", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                abortCompilation();
+            }
+        });
+        abortButton.setVisible(false);
+        runButton = Editor.addToolbarButton(toolbar, "actions", "run", "Compile (Shift: clean compile)", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                    loadedSketch.purgeCache();
+                    loadedSketch.purgeBuildFiles();
+                }
+
+                compile();
+            }
+        });
+
+        programButton = Editor.addToolbarButton(toolbar, "actions", "program", "Program (Shift: clean compile and program)", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                    loadedSketch.purgeCache();
+                    loadedSketch.purgeBuildFiles();
+                }
+                program();
+            }
+        });
+
+        toolbar.addSeparator();
+
+        Editor.addToolbarButton(toolbar, "actions", "new", "New Sketch", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Base.handleNew();
+            }
+        });
+
+        Editor.addToolbarButton(toolbar, "actions", "open", "Open Sketch", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleOpenPrompt();
+            }
+        });
+
+        Editor.addToolbarButton(toolbar, "actions", "save", "Save Sketch", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveAllTabs();
+            }
+        });
+
+        toolbar.addSeparator();
+
+        addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
+
+    }
+
     public void hideManual() {
         manualScroll.setVisible(false);
         int w = getSize().width;
@@ -631,27 +620,28 @@ public class Editor extends JFrame {
         DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
-            String theme = Preferences.get("theme.editor");
-            theme = "theme." + theme + ".";
-
-            Color textColor = Base.theme.getColor(theme + "editor.fgcolor");
+            Color textColor = Base.getTheme().getColor("editor.fgcolor");
 
             if((value != null) && (value instanceof DefaultMutableTreeNode)) {
                 JPanel container = new JPanel();
+
                 container.setLayout(new BorderLayout());
                 ImageIcon icon = null;
+                JLabel text = null;
+                JProgressBar bar = null;
+
                 UIDefaults defaults = javax.swing.UIManager.getDefaults();
-                Color bg = defaults.getColor("List.selectionBackground");
-                Color fg = defaults.getColor("List.selectionForeground");
                 DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
                 Object userObject = node.getUserObject();
                 Border noBorder = BorderFactory.createEmptyBorder(0, 0, 0, 0);
                 Border paddingBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
 
+                container.setBorder(noBorder);
+
                 if (userObject instanceof FlaggedList) {
                     FlaggedList ent = (FlaggedList)userObject;
 
-                    JLabel text = new JLabel(ent.toString());
+                    text = new JLabel(ent.toString());
                     if (ent.getColor() == FlaggedList.Red) {
                         icon = Base.getIcon("flags", "fixme", 16);
                     } else if (ent.getColor() == FlaggedList.Green) {
@@ -662,99 +652,26 @@ public class Editor extends JFrame {
                         icon = Base.getIcon("flags", "info", 16);
                     }
 
-                    text.setBorder(paddingBorder);
-
-                    if(selected) {
-                        text.setBackground(bg);
-//                        text.setForeground(fg);
-                        text.setOpaque(true);
-                        Base.setFont(text, "tree.node.selected");
-                    } else {
-                        text.setOpaque(false);
-//                        text.setForeground(textColor);
-                        Base.setFont(text, "tree.node.unselected");
-                    }
-
-                    container.setOpaque(false);
-                    container.setBorder(noBorder);
-
-                    if(icon != null) {
-                        JLabel i = new JLabel(icon);
-                        container.add(i, BorderLayout.WEST);
-                    }
-
                     Font f = text.getFont();
                     text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
-                    container.add(text, BorderLayout.CENTER);
-                    return container;
-                }
-
-                if (userObject instanceof TodoEntry) {
+                } else if (userObject instanceof TodoEntry) {
                     TodoEntry ent = (TodoEntry)userObject;
 
-                    JLabel text = new JLabel(ent.toString());
+                    text = new JLabel(ent.toString());
                     icon = Base.getIcon("bookmarks", "todo", 16);
-                    text.setBorder(paddingBorder);
-
-                    if(selected) {
-                        text.setBackground(bg);
-//                        text.setForeground(fg);
-                        Base.setFont(text, "tree.node.selected");
-                        text.setOpaque(true);
-                    } else {
-                        text.setOpaque(false);
-                        Base.setFont(text, "tree.node.unselected");
-//                        text.setForeground(textColor);
-                    }
-
-                    container.setOpaque(false);
-                    container.setBorder(noBorder);
-
-                    if(icon != null) {
-                        JLabel i = new JLabel(icon);
-                        container.add(i, BorderLayout.WEST);
-                    }
 
                     Font f = text.getFont();
                     text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
-                    container.add(text, BorderLayout.CENTER);
-                    return container;
-                }
-
-                if(userObject instanceof FunctionBookmark) {
+                } else if (userObject instanceof FunctionBookmark) {
                     FunctionBookmark bm = (FunctionBookmark)userObject;
-                    JLabel text = new JLabel(bm.formatted());
+                    text = new JLabel(bm.formatted());
                     icon = Base.getIcon("bookmarks", "function", 16);
-                    text.setBorder(paddingBorder);
-
-                    if(selected) {
-                        text.setBackground(bg);
-//                        text.setForeground(fg);
-                        Base.setFont(text, "tree.node.selected");
-                        text.setOpaque(true);
-                    } else {
-                        text.setOpaque(false);
-//                        text.setForeground(textColor);
-                        Base.setFont(text, "tree.node.unselected");
-                    }
-
-                    container.setOpaque(false);
-                    container.setBorder(noBorder);
-
-                    if(icon != null) {
-                        JLabel i = new JLabel(icon);
-                        container.add(i, BorderLayout.WEST);
-                    }
 
                     Font f = text.getFont();
                     text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
-                    container.add(text, BorderLayout.CENTER);
-                    return container;
-                }
-
-                if(userObject instanceof File) {
+                } else if (userObject instanceof File) {
                     File file = (File)userObject;
-                    JLabel text = new JLabel(file.getName());
+                    text = new JLabel(file.getName());
 
                     if(file.isDirectory()) {
                         if(expanded) {
@@ -774,39 +691,12 @@ public class Editor extends JFrame {
                                 }
                             } catch(AbstractMethodError e) {
                             } catch(Exception e) {
-//                                error(e);
                             }
                         }
 
                         icon = (ImageIcon)oicon;
                     }
-
-                    text.setBorder(paddingBorder);
-
-                    if(selected) {
-                        text.setBackground(bg);
-//                        text.setForeground(fg);
-                        Base.setFont(text, "tree.node.selected");
-                        text.setOpaque(true);
-                    } else {
-                        text.setOpaque(false);
-//                        text.setForeground(textColor);
-                        Base.setFont(text, "tree.node.unselected");
-                    }
-
-                    container.setOpaque(false);
-                    container.setBorder(noBorder);
-
-                    if(icon != null) {
-                        JLabel i = new JLabel(icon);
-                        container.add(i, BorderLayout.WEST);
-                    }
-
-                    container.add(text, BorderLayout.CENTER);
-                    return container;
-                }
-
-                if(userObject instanceof Library) {
+                } else if (userObject instanceof Library) {
                     Library lib = (Library)userObject;
                     int pct = lib.getCompiledPercent();
 
@@ -820,102 +710,86 @@ public class Editor extends JFrame {
                         }
                     }
 
-                    container.setOpaque(false);
-                    container.setBorder(noBorder);
-                    JLabel i = new JLabel(icon);
-                    container.add(i, BorderLayout.WEST);
-
                     if(pct > 0 && pct < 100) {
-                        JProgressBar bar = new JProgressBar();
+                        bar = new JProgressBar();
                         bar.setString(lib.getName());
                         Dimension d = bar.getSize();
                         d.width = 80;
-                        //bar.setSize(d);
                         bar.setPreferredSize(d);
-                        //bar.setMinimumSize(d);
-                        //bar.setMaximumSize(d);
                         bar.setStringPainted(true);
                         bar.setValue(pct);
-                        container.add(bar, BorderLayout.CENTER);
                     } else {
-                        JLabel text = new JLabel(lib.getName());
-                        text.setBorder(paddingBorder);
-
-                        if(selected) {
-                            text.setBackground(bg);
-//                            text.setForeground(fg);
-                            Base.setFont(text, "tree.node.selected");
-                            text.setOpaque(true);
-                        } else {
-                            text.setOpaque(false);
-//                            text.setForeground(textColor);
-                            Base.setFont(text, "tree.node.unselected");
-                        }
-
-                        container.add(text, BorderLayout.CENTER);
+                        text = new JLabel(lib.getName());
                     }
-
-                    return container;
-                }
-
-                if(userObject instanceof Sketch) {
+                } else if (userObject instanceof Sketch) {
                     Sketch so = (Sketch)userObject;
-                    JLabel text = new JLabel(so.getName());
+                    text = new JLabel(so.getName());
                     icon = so.getIcon(16);
 
                     if(icon == null) {
                         icon = Base.loadIconFromResource("icon16.png");
                     }
+                } else {
+                    text = new JLabel(userObject.toString());
 
-                    text.setBorder(paddingBorder);
-
-                    if(selected) {
-                        text.setBackground(bg);
-//                        text.setForeground(fg);
-                        Base.setFont(text, "tree.node.selected");
-                        text.setOpaque(true);
+                    if(expanded) {
+                        icon = Base.getIcon("bookmarks", "folder-open", 16);
                     } else {
-                        text.setOpaque(false);
-//                        text.setForeground(textColor);
-                        Base.setFont(text, "tree.node.unselected");
+                        icon = Base.getIcon("bookmarks", "folder", 16);
+                    }
+                }
+                container.setOpaque(true);
+
+                if (text != null) {
+                    text.setBorder(paddingBorder);
+                    text.setOpaque(true);
+                    container.add(text, BorderLayout.CENTER);
+                    if (selected) {
+                        Color bg = defaults.getColor("List.selectionBackground");
+                        Color fg = defaults.getColor("List.selectionForeground");
+                        text.setBackground(bg);
+                        text.setForeground(fg);
+                    } else {
+                        Color bg = defaults.getColor("List.background");
+                        Color fg = defaults.getColor("List.foreground");
+                        text.setBackground(bg);
+                        text.setForeground(fg);
                     }
 
-                    container.setOpaque(false);
-                    container.setBorder(noBorder);
+                }
+                if (icon != null) {
                     JLabel i = new JLabel(icon);
+                    i.setOpaque(true);
                     container.add(i, BorderLayout.WEST);
-                    container.add(text, BorderLayout.CENTER);
-                    return container;
+                    if (selected) {
+                        Color bg = defaults.getColor("List.selectionBackground");
+                        Color fg = defaults.getColor("List.selectionForeground");
+                        i.setBackground(bg);
+                        i.setForeground(fg);
+                    } else {
+                        Color bg = defaults.getColor("List.background");
+                        Color fg = defaults.getColor("List.foreground");
+                        i.setBackground(bg);
+                        i.setForeground(fg);
+                    }
                 }
 
-                JLabel text = new JLabel(userObject.toString());
-
-                if(expanded) {
-                    icon = Base.getIcon("bookmarks", "folder-open", 16);
-                } else {
-                    icon = Base.getIcon("bookmarks", "folder", 16);
+                if (bar != null) {
+                    container.add(bar, BorderLayout.CENTER);
+                    bar.setOpaque(true);
+                    if (selected) {
+                        Color bg = defaults.getColor("List.selectionBackground");
+                        Color fg = defaults.getColor("List.selectionForeground");
+                        bar.setBackground(bg);
+                        bar.setForeground(fg);
+                    } else {
+                        Color bg = defaults.getColor("List.background");
+                        Color fg = defaults.getColor("List.foreground");
+                        bar.setBackground(bg);
+                        bar.setForeground(fg);
+                    }
                 }
-
-                text.setBorder(paddingBorder);
-
-                if(selected) {
-                    text.setBackground(bg);
-//                    text.setForeground(fg);
-                        Base.setFont(text, "tree.node.selected");
-                    text.setOpaque(true);
-                } else {
-                    text.setOpaque(false);
-//                    text.setForeground(textColor);
-                        Base.setFont(text, "tree.node.unselected");
-                }
-
-                container.setOpaque(false);
-                container.setBorder(noBorder);
-                JLabel i = new JLabel(icon);
-                container.add(i, BorderLayout.WEST);
-                container.add(text, BorderLayout.CENTER);
                 return container;
-
             }
 
             return defaultRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
@@ -969,7 +843,10 @@ public class Editor extends JFrame {
         sketchContentTree.expandPath(new TreePath(treeRoot.getPath()));
         sketchContentTree.expandPath(new TreePath(treeSource.getPath()));
 
+
         treeScroll.setViewportView(sketchContentTree);
+        treeScroll.setOpaque(true);
+        sketchContentTree.setOpaque(true);
         sketchContentTree.addMouseListener(new TreeMouseListener());
 
         filesTreeRoot = new DefaultMutableTreeNode(loadedSketch.getName());
@@ -2545,7 +2422,6 @@ public class Editor extends JFrame {
         sb.append((loadedSketch.getDevice() != null ? loadedSketch.getDevice().getName() : "None"));
         sb.append("</i></html>");
         statusText.setText(sb.toString());
-        statusText.setOpaque(false);
     }
 
     public int openOrSelectFile(File sf) {
@@ -4342,7 +4218,13 @@ public class Editor extends JFrame {
     public static void refreshAllEditors() {
         for(Editor e : editorList) {
             e.refreshEditors();
+            e.updateToolbar();
+            e.updateConsole();
         }
+    }
+
+    public void updateConsole() {
+        console.updateStyleSettings();
     }
 
     public void refreshEditors() {

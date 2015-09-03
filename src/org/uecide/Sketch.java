@@ -1924,6 +1924,10 @@ public class Sketch {
             return;
         }
 
+        if (configFile == null) {
+            return;
+        }
+
         if(configFile.size() > 0) {
             Debug.message("Saving config");
             configFile.save();
@@ -3535,8 +3539,7 @@ public class Sketch {
             return;
         }
 
-        String theme = Preferences.get("theme.editor");
-        theme = "theme." + theme + ".";
+        PropertyFile theme = Base.getTheme();
         PropertyFile props = ctx.getMerged();
 
         String eRec = props.get("compiler.error");
@@ -3564,7 +3567,7 @@ public class Sketch {
 
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(theme + "editor.compile.error.bgcolor"));
+                            eb.highlightLine(errorLineNumber - 1, theme.getColor("editor.compile.error.bgcolor"));
                             eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "fixme", 16), 0x1000);
                         }
 
@@ -3593,7 +3596,7 @@ public class Sketch {
 
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(warningLineNumber - 1, Base.theme.getColor(theme + "editor.compile.warning.bgcolor"));
+                            eb.highlightLine(warningLineNumber - 1, theme.getColor("editor.compile.warning.bgcolor"));
                             eb.flagLine(warningLineNumber - 1, Base.getIcon("flags", "todo", 16), 0x1001);
                             link("uecide://error/" + warningLineNumber + "/" + warningFile.getAbsolutePath() + "|Warning at line " + warningLineNumber + " in file " + warningFile.getName());
                         }
@@ -4479,14 +4482,12 @@ public class Sketch {
             int errorLineNumber = Integer.parseInt(m.group(2));
             if (editor != null) {
                 try {
-                    String theme = Preferences.get("theme.editor");
+                    PropertyFile theme = Base.getTheme();
                     int tabNumber = editor.getTabByFile(errorFile);
 
                     if(tabNumber > -1) {
                         EditorBase eb = editor.getTab(tabNumber);
-                        String ecol = "theme." + theme + ".editor.compile.error.bgcolor";
-                        String ecoldata = Base.theme.get(ecol);
-                        eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(ecol));
+                        eb.highlightLine(errorLineNumber - 1, theme.getColor("editor.compile.error.bgcolor"));
                         eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "fixme", 16), 0x1000);
                     }
 
@@ -4524,14 +4525,12 @@ public class Sketch {
             int errorLineNumber = Integer.parseInt(m.group(2));
             if (editor != null) {
                 try {
-                    String theme = Preferences.get("theme.editor");
+                    PropertyFile theme = Base.getTheme();
                     int tabNumber = editor.getTabByFile(errorFile);
 
                     if(tabNumber > -1) {
                         EditorBase eb = editor.getTab(tabNumber);
-                        String ecol = "theme." + theme + ".editor.compile.warning.bgcolor";
-                        String ecoldata = Base.theme.get(ecol);
-                        eb.highlightLine(errorLineNumber - 1, Base.theme.getColor(ecol));
+                        eb.highlightLine(errorLineNumber - 1, theme.getColor("editor.compile.warning.bgcolor"));
                         eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "todo", 16), 0x1001);
                     }
                     String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
