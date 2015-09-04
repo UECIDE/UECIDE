@@ -528,6 +528,23 @@ public class PropertyFile {
         return stringToFont(get(attr));
     }
 
+    public String getFontCSS(String key) {
+        Font f = getFont(key);
+
+        String out = "font-family: " + f.getFamily() + ";";
+        out += " font-size: " + f.getSize() + "px;";
+
+        if (f.isBold()) {
+            out += " font-weight: bold;";
+        }
+
+        if (f.isItalic()) {
+            out += " font-style: italic;";
+        }
+
+        return out;
+    }
+
     /*! Store a font specification in the key. */
     public void setFont(String attr, Font value) {
         set(attr, fontToString(value));

@@ -78,3 +78,19 @@ browser.h3=color: #000000; font-size: 12px; font-weight: bold;
 browser.h4=color: #000000; font-size: 11px; font-weight: bold;
 browser.h5=color: #000000; font-size: 10px; font-weight: bold;
 
+pluginmanager.shade.top=#ffffff
+pluginmagager.shade.bottom=#aabbcc
+
+
+pluginmanager.browser.font.p=SansSerif,plain,12
+pluginmanager.browser.font.li=SansSerif,plain,12
+pluginmanager.browser.font.h1=SansSerif,bold,20
+pluginmanager.browser.font.h2=SansSerif,bold,18
+pluginmanager.browser.font.h3=SansSerif,bold,16
+
+editor.markdown.font.p=SansSerif,plain,12
+editor.markdown.font.li=SansSerif,plain,12
+editor.markdown.font.h1=SansSerif,bold,20
+editor.markdown.font.h2=SansSerif,bold,18
+editor.markdown.font.h3=SansSerif,bold,16
+editor.markdown.font.pre=Monospaced,plain,12

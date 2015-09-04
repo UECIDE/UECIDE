@@ -226,7 +226,19 @@ public class PluginManager implements PropertyChangeListener
         }
 
         try {
-            longDesc = new Markdown4jProcessor().process(longDesc);
+            String fp = Base.getTheme().getFontCSS("pluginmanager.browser.font.p");
+            String fli = Base.getTheme().getFontCSS("pluginmanager.browser.font.li");
+            String fh1 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h1");
+            String fh2 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h2");
+            String fh3 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h3");
+
+            longDesc = new Markdown4jProcessor()
+                .addHtmlAttribute("style", fp, "p")
+                .addHtmlAttribute("style", fli, "li")
+                .addHtmlAttribute("style", fh1, "h1")
+                .addHtmlAttribute("style", fh2, "h2")
+                .addHtmlAttribute("style", fh3, "h3")
+                .process(longDesc);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -314,8 +326,8 @@ public class PluginManager implements PropertyChangeListener
             g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             int w = getWidth();
             int h = getHeight();
-            Color color1 = Color.WHITE;
-            Color color2 = new Color(215, 225, 255);
+            Color color1 = Base.getTheme().getColor("pluginmanager.shade.top");
+            Color color2 = Base.getTheme().getColor("pluginmanager.shade.bottom");
             GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
             g2d.setPaint(gp);
             g2d.fillRect(0, 0, w, h);

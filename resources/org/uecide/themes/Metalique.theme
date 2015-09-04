@@ -38,7 +38,7 @@ console.indent = 10
 console.color = #C1CDCD
 console.output.color = #545454
 console.error.color = #A52A2A
-console.warning.color = #FFA500
+console.warning.color = #8B6914
 console.bullet.indent = 40
 console.bullet.color = #545454
 console.bullet2.indent = 60
@@ -59,8 +59,8 @@ editor.searchall.bgcolor=#aaffaa
 
 tab.selected.fgcolor=#2F4F4F
 tab.deselected.fgcolor=#000000
-tab.modified.label=Monospaced,bold,14
-tab.unmodified.label=Monospaced,plain,14
+tab.modified.label=SansSerif,bold,14
+tab.unmodified.label=SansSerif,plain,14
 
 search.body=background-color: #000000; color: #00FF00; font-family: Arial, Helvetica, Sans-Serif; font-size: 10px;
 search.term=color: #FFFF00;
@@ -82,3 +82,7 @@ browser.h5=color: #000000; font-size: 10px; font-weight: bold;
 
 
 laf.jtattoo.menuSelectionBackgroundColor=#9FB6CD
+
+pluginmanager.shade.top=#ffffff
+pluginmanager.shade.bottom=#C1CDCD
+

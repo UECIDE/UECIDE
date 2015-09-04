@@ -757,6 +757,23 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return new File(data);
     }
 
+    public static String getFontCSS(String key) {
+        Font f = getFont(key);
+
+        String out = "font-family: " + f.getFamily() + ";";
+        out += " font-size: " + f.getSize() + "px;";
+
+        if (f.isBold()) {
+            out += " font-weight: bold;";
+        }
+
+        if (f.isItalic()) {
+            out += " font-style: italic;";
+        }
+
+        return out;
+    }
+
     public static Font getFont(String key) {
         String data = get(key);
         if (data == null || data.equals("")) {
