@@ -130,12 +130,12 @@ public class Splash extends JDialog { //Window {
 
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2.setFont(Base.theme.getFont("splash.version.font"));
+        g2.setFont(Base.theme.getFontNatural("splash.version.font"));
         g2.setColor(Base.theme.getColor("splash.version.color"));
         g2.drawString("v" + Base.systemVersion, x, y);
 
         if(Base.theme.get("splash.message.font") != null) {
-            g2.setFont(Base.theme.getFont("splash.message.font"));
+            g2.setFont(Base.theme.getFontNatural("splash.message.font"));
         }
 
         int barHeight = 20;
@@ -165,7 +165,7 @@ public class Splash extends JDialog { //Window {
         }
 
         if(Base.theme.get("splash.beta.font") != null) {
-            g2.setFont(Base.theme.getFont("splash.beta.font"));
+            g2.setFont(Base.theme.getFontNatural("splash.beta.font"));
         }
 
         if(Base.theme.get("splash.beta.color") != null) {

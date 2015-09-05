@@ -270,6 +270,32 @@ public class code extends JPanel implements EditorBase {
         });
 
         scrollPane = new RTextScrollPane(textArea);
+
+        scrollPane.removeMouseWheelListener(scrollPane.getMouseWheelListeners()[0]);
+
+        scrollPane.addMouseWheelListener(new MouseWheelListener() {
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.isControlDown()) {
+                    int scale = Preferences.getInteger("theme.fonts.scale");
+                    scale -= e.getWheelRotation() * 5;
+                    if (scale < 1) scale = 1;
+                    if (scale > 1000) scale = 1000;
+                    Preferences.setInteger("theme.fonts.scale", scale);
+                    textArea.setFont(Base.getTheme().getFont("editor.font"));
+                    gutter.setLineNumberFont(Base.getTheme().getFont("editor.font.linenumber"));
+                } else if (e.isShiftDown()) {
+                    // Horizontal scrolling
+                    Adjustable adj = scrollPane.getHorizontalScrollBar();
+                    int scroll = e.getUnitsToScroll() * adj.getBlockIncrement();
+                    adj.setValue(adj.getValue() + scroll);
+                } else {
+                    // Vertical scrolling
+                    Adjustable adj = scrollPane.getVerticalScrollBar();
+                    int scroll = e.getUnitsToScroll() * adj.getBlockIncrement();
+                    adj.setValue(adj.getValue() + scroll);
+                }
+            }
+        });
         toolbar = new JToolBar();
         toolbar.setFloatable(false);
         toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden"));
@@ -378,14 +404,14 @@ public class code extends JPanel implements EditorBase {
         textArea.setBackground(theme.getColor("editor.bgcolor"));
 
         textArea.setForeground(theme.getColor("editor.fgcolor"));
-        textArea.setFont(Preferences.getFont("theme.fonts.editor"));
+        textArea.setFont(theme.getFont("editor.font"));
 
         gutter = scrollPane.getGutter();
         gutter.setAntiAliasingEnabled(false);
         gutter.setAntiAliasingEnabled(Preferences.getBoolean("theme.fonts.editor_aa"));
 
 
-        gutter.setLineNumberFont(Preferences.getFont("theme.fonts.linenumber"));
+        gutter.setLineNumberFont(theme.getFont("editor.font.linenumber"));
 
         if(theme.get("editor.gutter.bgcolor") != null) {
             gutter.setBackground(theme.getColor("editor.gutter.bgcolor"));

@@ -57,7 +57,7 @@ editor.compile.error.bgcolor=#FFaaaa
 editor.compile.warning.bgcolor=#FFFFaa
 editor.searchall.bgcolor=#aaffaa
 
-tab.selected.fgcolor=#FFFFFF
+tab.selected.fgcolor=#000000
 tab.deselected.fgcolor=#000000
 
 search.body=background-color: #000000; color: #00FF00; font-family: Arial, Helvetica, Sans-Serif; font-size: 10px;

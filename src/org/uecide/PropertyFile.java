@@ -427,7 +427,6 @@ public class PropertyFile {
         String[] keys = properties.keySet().toArray(new String[0]);
         for (String thiskey : keys) {
             if (thiskey.startsWith(key + ".")) {
-                System.err.println("Removing key " + thiskey);
                 properties.remove(thiskey);
             }
         }
@@ -524,8 +523,23 @@ public class PropertyFile {
     /*! Convert a key's value into a Font object.  A font is internally stored as 
      *  * <family>,<style>,<size>
      */
+    public Font getFontNatural(String attr) {
+        Font font = stringToFont(get(attr));
+        return font;
+    }
+
     public Font getFont(String attr) {
-        return stringToFont(get(attr));
+        Font font = stringToFont(get(attr));
+        float size = font.getSize();
+        int scale = Preferences.getInteger("theme.fonts.scale");
+        if (scale == 0) {
+            scale = 100;
+        }
+        Font out = font.deriveFont(size * (float)scale / 100f);
+        if (out.getSize() <= 0) {
+            out = font.deriveFont(1f);
+        }
+        return out;
     }
 
     public String getFontCSS(String key) {
@@ -603,6 +617,7 @@ public class PropertyFile {
         }
 
         String name = pieces[0];
+
         int style = Font.PLAIN;  // equals zero
 
         if(pieces[1].indexOf("bold") != -1) {
@@ -623,7 +638,20 @@ public class PropertyFile {
             size = 12;
         }
 
-        Font font = new Font(name, style, size);
+        Font font = null;
+
+        if (name.startsWith("res://")) {
+            InputStream is = Base.class.getResourceAsStream(name.substring(5));
+            try {
+                Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
+                font = baseFont.deriveFont(style, size);
+            } catch (Exception e) {
+                Base.error(e);
+                font = new Font("Monospaced", Font.PLAIN, 12);
+            }
+        } else {
+            font = new Font(name, style, size);
+        }
 
         if(font == null) {
             font = new Font("Monospaced", Font.PLAIN, 12);

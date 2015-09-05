@@ -149,21 +149,15 @@ theme.editor.default=default
 theme.fonts.name=Fonts
 theme.fonts.type=section
 
-theme.fonts.editor.name=Editor font
-theme.fonts.editor.type=fontselect
-theme.fonts.editor.default=Monospaced,plain,12
+theme.fonts.scale.name=Font scale %
+theme.fonts.scale.type=range
+theme.fonts.scale.default=100
+theme.fonts.scale.min=1
+theme.fonts.scale.max=1000
 
-theme.fonts.linenumber.name=Line number font
-theme.fonts.linenumber.type=fontselect
-theme.fonts.linenumber.default=Monospaced,plain,12
-
-theme.fonts.editor_aa.name=Anti-Alias editor font
+theme.fonts.editor_aa.name=Anti-Alias fonts
 theme.fonts.editor_aa.type=checkbox
 theme.fonts.editor_aa.default=true
-
-theme.fonts.console.name=Console font
-theme.fonts.console.type=fontselect
-theme.fonts.console.default=Monospaced,plain,12
 
 locations.name=Locations
 locations.type=section

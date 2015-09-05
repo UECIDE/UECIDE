@@ -774,12 +774,35 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return out;
     }
 
+    public static Font getFontNatural(String key) {
+        String data = get(key);
+        Font font = null;
+        if (data == null || data.equals("")) {
+            font = Base.preferences.stringToFont("Monospaced,plain,12");
+        } else {
+            font = Base.preferences.stringToFont(data);
+        }
+        return font;
+    }
+
     public static Font getFont(String key) {
         String data = get(key);
+        Font font = null;
         if (data == null || data.equals("")) {
-            return Base.preferences.stringToFont("Monospaced,plain,12");
+            font = Base.preferences.stringToFont("Monospaced,plain,12");
+        } else {
+            font = Base.preferences.stringToFont(data);
         }
-        return Base.preferences.stringToFont(data);
+        float size = font.getSize();
+        int scale = getInteger("theme.fonts.scale");
+        if (scale == 0) {
+            scale = 100;
+        }
+        Font out = font.deriveFont(size * (float)scale / 100f);
+        if (out.getSize() <= 0) {
+            out = font.deriveFont(1f);
+        }
+        return out;
     }
 
     public static Integer getInteger(String key) {

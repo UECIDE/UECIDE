@@ -130,10 +130,15 @@ public class Console extends JTextPane {
     Font getFont(String name) {
         PropertyFile theme = Base.getTheme();
 
-        Font font = theme.getFont("theme.fonts.console");
+        Font font = Preferences.getFontNatural("theme.fonts.console");
+
+        System.err.println("Font class: " + name);
+
         if (theme.get("console." + name + ".font") != null) {
-            font = theme.getFont("console." + name + ".font");
+            System.err.println("Looking for theme console font");
+            font = theme.getFontNatural("console." + name + ".font");
         }
+        System.err.println(font);
         return font;
     }
 

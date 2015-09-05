@@ -80,6 +80,18 @@ class JTattooBase extends LookAndFeel {
             applyColorProperty(p, "tooltipForegroundColor");
             applyColorProperty(p, "tooltipBackgroundColor");
 
+            applyStringProperty(p, "textureSet");
+
+            applyBooleanProperty(p, "backgroundPattern");
+            applyBooleanProperty(p, "menuOpaque");
+            applyBooleanProperty(p, "dynamicLayout");
+            applyBooleanProperty(p, "toolbarDecorated");
+            applyBooleanProperty(p, "tooltipCastShadow");
+            applyBooleanProperty(p, "darkTexture");
+
+            applyIntegerProperty(p, "tooltipBorderSize");
+            applyIntegerProperty(p, "tooltipShadowSize");
+
             Class<?> cls = Class.forName(clsname);
             Class[] cArg = new Class[1];
             cArg[0] = Properties.class;
@@ -98,6 +110,33 @@ class JTattooBase extends LookAndFeel {
             String cval = c.getRed() + " " + c.getGreen() + " " + c.getBlue();
             p.put(name, cval);
             System.err.println("Setting property " + name + " to  " + cval);
+        }
+    }
+
+    static void applyIntegerProperty(Properties p, String name) {
+        PropertyFile theme = Base.getTheme();
+        if (theme.get("laf.jtattoo." + name) != null) {
+            int c = theme.getInteger("laf.jtattoo." + name);
+            p.put(name, "" + c);
+            System.err.println("Setting property " + name + " to  " + c);
+        }
+    }
+        
+    static void applyBooleanProperty(Properties p, String name) {
+        PropertyFile theme = Base.getTheme();
+        if (theme.get("laf.jtattoo." + name) != null) {
+            boolean c = theme.getBoolean("laf.jtattoo." + name);
+            p.put(name, c ? "yes" : "no");
+            System.err.println("Setting property " + name + " to  " + c);
+        }
+    }
+        
+    static void applyStringProperty(Properties p, String name) {
+        PropertyFile theme = Base.getTheme();
+        if (theme.get("laf.jtattoo." + name) != null) {
+            String c = theme.get("laf.jtattoo." + name);
+            p.put(name, c);
+            System.err.println("Setting property " + name + " to  " + c);
         }
     }
         

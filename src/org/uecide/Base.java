@@ -39,6 +39,7 @@ import java.net.*;
 import java.util.zip.*;
 import java.util.jar.*;
 import org.uecide.plugin.*;
+import org.uecide.themes.*;
 
 import javax.script.*;
 
@@ -618,8 +619,6 @@ public class Base implements AptPercentageListener {
 
         if(!headless) splashScreen.setMessage("Themes...", 25);
 
-        loadThemes();
-        theme.fullyParseFile();
 
         if(!headless) splashScreen.setMessage("Compilers...", 30);
 
@@ -674,6 +673,7 @@ public class Base implements AptPercentageListener {
         loadPlugins();
 
         loadIconSets();
+        loadThemes();
 
         if(!headless) splashScreen.setMessage("Libraries...", 70);
 
@@ -1967,6 +1967,7 @@ public class Base implements AptPercentageListener {
     }
 
     public static void loadPlugins() {
+
         File folder = getPluginsFolder();
         Debug.message("Loading plugins from " + folder);
         File[] files = folder.listFiles();
@@ -1980,50 +1981,79 @@ public class Base implements AptPercentageListener {
                     error(ex);
                 }
             }
+        }
 
-            Reflections pluginReflections = new Reflections("org.uecide.plugin");
-            try {
-                Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
-                Debug.message(pluginClasses.toString());
-                for (Class<? extends Plugin> c : pluginClasses) {
-                    Debug.message("Found plugin class " + c.getName());
-                    if (c.getName().equals("org.uecide.plugin.PluginManager")) {
-                        continue;
-                    }
-                    plugins.put(c.getName(), c);
+        folder = getThemesFolder();
+        Debug.message("Loading plugins from " + folder);
+        files = folder.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                Debug.message("  Loading " + f);
+                try {
+                    URL u = f.toURI().toURL();
+                    addURL(u);
+                } catch (Exception ex) {
+                    error(ex);
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
             }
-            pluginReflections = new Reflections("com.ardublock");
-            try {
-                Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
-                Debug.message(pluginClasses.toString());
-                for (Class<? extends Plugin> c : pluginClasses) {
-                    Debug.message("Found plugin class " + c.getName());
-                    if (c.getName().equals("org.uecide.plugin.PluginManager")) {
-                        continue;
-                    }
-                    plugins.put(c.getName(), c);
+        }
+
+        Reflections pluginReflections = new Reflections("org.uecide.plugin");
+        try {
+            Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
+            for (Class<? extends Plugin> c : pluginClasses) {
+                Debug.message("Found plugin class " + c.getName());
+                if (c.getName().equals("org.uecide.plugin.PluginManager")) {
+                    continue;
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                plugins.put(c.getName(), c);
             }
-            pluginReflections = new Reflections("org.uecide");
-            try {
-                Set<Class<? extends LookAndFeel>> pluginClasses = pluginReflections.getSubTypesOf(LookAndFeel.class);
-                Debug.message(pluginClasses.toString());
-                for (Class<? extends LookAndFeel> c : pluginClasses) {
-                    Debug.message("Found look and feel class " + c.getName());
-                    if (c.getName().equals("org.uecide.plugin.PluginManager")) {
-                        continue;
-                    }
-                    System.err.println("Adding LAF: [" + c.getName() + "]");
-                    lookAndFeels.put(c.getName(), c);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        pluginReflections = new Reflections("com.ardublock");
+        try {
+            Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
+            for (Class<? extends Plugin> c : pluginClasses) {
+                Debug.message("Found plugin class " + c.getName());
+                if (c.getName().equals("org.uecide.plugin.PluginManager")) {
+                    continue;
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                plugins.put(c.getName(), c);
             }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        pluginReflections = new Reflections("org.uecide");
+        try {
+            Set<Class<? extends LookAndFeel>> pluginClasses = pluginReflections.getSubTypesOf(LookAndFeel.class);
+            for (Class<? extends LookAndFeel> c : pluginClasses) {
+                Debug.message("Found look and feel class " + c.getName());
+                System.err.println("Adding LAF: [" + c.getName() + "]");
+                lookAndFeels.put(c.getName(), c);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        pluginReflections = new Reflections("org.uecide.themes");
+        try {
+            // We're not going to store the theme control objects - just execute the "init" function in them.
+            Set<Class<? extends ThemeControl>> controlClasses = pluginReflections.getSubTypesOf(ThemeControl.class);
+            for (Class<? extends ThemeControl> c : controlClasses) {
+                Method init = c.getMethod("init");
+                if (init != null) {
+                    Object[] noParameters = null;
+                    try {
+                        init.invoke(null, noParameters);
+                    } catch (Exception e) {
+                        error(e);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -2321,24 +2351,28 @@ public class Base implements AptPercentageListener {
         Thread thr = new Thread() {
             public void run() {
 
-                Editor.lockAll();
-                Editor.bulletAll("Updating serial ports...");
+                try {
+                    Editor.lockAll();
+                    Editor.bulletAll("Updating serial ports...");
 
-                Serial.updatePortList();
-                Serial.fillExtraPorts();
+                    Serial.updatePortList();
+                    Serial.fillExtraPorts();
 
-                rescanThemes();
-                rescanCompilers();
-                rescanCores();
-                rescanBoards();
-                rescanPlugins();
-                rescanLibraries();
-                buildPreferencesTree();
-                Editor.bulletAll("Update complete.");
-                Editor.updateAllEditors();
-                Editor.selectAllEditorBoards();
-                Editor.refreshAllEditors();
-                Editor.unlockAll();
+                    rescanThemes();
+                    rescanCompilers();
+                    rescanCores();
+                    rescanBoards();
+                    rescanPlugins();
+                    rescanLibraries();
+                    buildPreferencesTree();
+                    Editor.bulletAll("Update complete.");
+                    Editor.updateAllEditors();
+                    Editor.selectAllEditorBoards();
+                    Editor.refreshAllEditors();
+                    Editor.unlockAll();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         };
         thr.start();

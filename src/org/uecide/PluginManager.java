@@ -940,6 +940,12 @@ public class PluginManager implements PropertyChangeListener
             treeRoot.add(pluginsNode);
         }
 
+        DefaultMutableTreeNode themesNode = new DefaultMutableTreeNode("Themes");
+        fullNodeCount += addSectionToTree(themesNode, "themes");
+        if (themesNode.getChildCount() > 0) {
+            treeRoot.add(themesNode);
+        }
+
         DefaultMutableTreeNode libsNode = new DefaultMutableTreeNode("Libraries");
         fullNodeCount += addSectionToTree(libsNode, "libraries");
         if (libsNode.getChildCount() > 0) {
