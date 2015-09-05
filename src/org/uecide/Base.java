@@ -810,7 +810,8 @@ public class Base implements AptPercentageListener {
             Method method = sysclass.getDeclaredMethod("addURL", parameters);
             method.setAccessible(true);
             method.invoke(sysloader, new Object[]{u});
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
+            ex.printStackTrace();
             Base.error(ex);
         }
     }
@@ -1989,11 +1990,13 @@ public class Base implements AptPercentageListener {
         if (files != null) {
             for (File f : files) {
                 Debug.message("  Loading " + f);
-                try {
-                    URL u = f.toURI().toURL();
-                    addURL(u);
-                } catch (Exception ex) {
-                    error(ex);
+                if (f.getName().endsWith(".jar")) {
+                    try {
+                        URL u = f.toURI().toURL();
+                        addURL(u);
+                    } catch (Exception ex) {
+                        error(ex);
+                    }
                 }
             }
         }
@@ -2040,8 +2043,8 @@ public class Base implements AptPercentageListener {
         pluginReflections = new Reflections("org.uecide.themes");
         try {
             // We're not going to store the theme control objects - just execute the "init" function in them.
-            Set<Class<? extends ThemeControl>> controlClasses = pluginReflections.getSubTypesOf(ThemeControl.class);
-            for (Class<? extends ThemeControl> c : controlClasses) {
+            Set<Class<? extends org.uecide.themes.ThemeControl>> controlClasses = pluginReflections.getSubTypesOf(org.uecide.themes.ThemeControl.class);
+            for (Class<? extends org.uecide.themes.ThemeControl> c : controlClasses) {
                 Method init = c.getMethod("init");
                 if (init != null) {
                     Object[] noParameters = null;
@@ -2351,28 +2354,24 @@ public class Base implements AptPercentageListener {
         Thread thr = new Thread() {
             public void run() {
 
-                try {
-                    Editor.lockAll();
-                    Editor.bulletAll("Updating serial ports...");
+                try { Editor.lockAll(); } catch (Exception e) { e.printStackTrace(); }
+                try { Editor.bulletAll("Updating serial ports..."); } catch (Exception e) { e.printStackTrace(); }
 
-                    Serial.updatePortList();
-                    Serial.fillExtraPorts();
+                try { Serial.updatePortList(); } catch (Exception e) { e.printStackTrace(); }
+                try { Serial.fillExtraPorts(); } catch (Exception e) { e.printStackTrace(); }
 
-                    rescanThemes();
-                    rescanCompilers();
-                    rescanCores();
-                    rescanBoards();
-                    rescanPlugins();
-                    rescanLibraries();
-                    buildPreferencesTree();
-                    Editor.bulletAll("Update complete.");
-                    Editor.updateAllEditors();
-                    Editor.selectAllEditorBoards();
-                    Editor.refreshAllEditors();
-                    Editor.unlockAll();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                try { rescanThemes(); } catch (Exception e) { e.printStackTrace(); }
+                try { rescanCompilers(); } catch (Exception e) { e.printStackTrace(); }
+                try { rescanCores(); } catch (Exception e) { e.printStackTrace(); }
+                try { rescanBoards(); } catch (Exception e) { e.printStackTrace(); }
+                try { rescanPlugins(); } catch (Exception e) { e.printStackTrace(); }
+                try { rescanLibraries(); } catch (Exception e) { e.printStackTrace(); }
+                try { buildPreferencesTree(); } catch (Exception e) { e.printStackTrace(); }
+                try { Editor.bulletAll("Update complete."); } catch (Exception e) { e.printStackTrace(); }
+                try { Editor.updateAllEditors(); } catch (Exception e) { e.printStackTrace(); }
+                try { Editor.selectAllEditorBoards(); } catch (Exception e) { e.printStackTrace(); }
+                try { Editor.refreshAllEditors(); } catch (Exception e) { e.printStackTrace(); }
+                try { Editor.unlockAll(); } catch (Exception e) { e.printStackTrace(); }
             }
         };
         thr.start();

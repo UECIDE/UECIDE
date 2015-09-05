@@ -36,6 +36,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import java.util.regex.*;
+import java.awt.image.*;
 
 public class Console extends JTextPane {
     MutableAttributeSet body = new SimpleAttributeSet();
@@ -58,6 +59,17 @@ public class Console extends JTextPane {
 
     BufferedStyledDocument document;
 
+    BufferedImage topLeft = null;
+    BufferedImage topMiddle = null;
+    BufferedImage topRight = null;
+    BufferedImage middleLeft = null;
+    BufferedImage middleMiddle = null;
+    BufferedImage middleRight = null;
+    BufferedImage bottomLeft = null;
+    BufferedImage bottomMiddle = null;
+    BufferedImage bottomRight = null;
+
+
     private final static String LINK_ATTRIBUTE = "linkact";
 
     Editor urlClickListener = null;
@@ -75,15 +87,141 @@ public class Console extends JTextPane {
 
         addMouseListener(new TextClickListener());
         addMouseMotionListener(new TextMotionListener());
+        setOpaque(true);
     }   
 
     @Override
     public void paintComponent(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         if (Preferences.getBoolean("theme.fonts.editor_aa")) {
             Graphics2D graphics2d = (Graphics2D) g;
             graphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
         }
+
+        int w = getWidth();
+        int h = getHeight();
+        g2d.setPaint(Base.getTheme().getColor("console.color"));
+        g2d.fillRect(0, 0, w, h);
+
+        int fillStart = 0;
+        int fillEnd = getHeight();
+
+        int lineStart = 0;
+        int lineEnd = getWidth();
+
+        if (topLeft != null) {
+            fillStart = topLeft.getHeight();
+            lineStart = topLeft.getWidth();
+            g2d.drawImage(topLeft, 0, 0, this);
+        }
+
+        if (topRight != null) {
+            fillStart = topRight.getHeight();
+            lineEnd = getWidth() - topRight.getWidth();
+            g2d.drawImage(topRight, lineEnd, 0, this);
+        }
+
+        if (topMiddle != null) {
+            fillStart = topMiddle.getHeight();
+            int linePos = lineStart;
+            int blockWidth = topMiddle.getWidth();
+            int blockHeight = topMiddle.getHeight();
+            while (linePos < lineEnd) {
+                int copyWidth = Math.min(blockWidth, lineEnd - linePos);
+                g2d.drawImage(topMiddle, 
+                    linePos, 0, linePos + copyWidth, blockHeight,
+                    0, 0, copyWidth, blockHeight,
+                    this
+                );
+                linePos += blockWidth;
+            }
+        }
+
+        if (bottomLeft != null) {
+            fillEnd = getHeight() - bottomLeft.getHeight();
+            lineStart = bottomLeft.getWidth();
+            g2d.drawImage(bottomLeft, 0, fillEnd, this);
+        }
+
+        if (bottomRight != null) {
+            fillEnd = getHeight() - bottomRight.getHeight();
+            lineEnd = getWidth() - bottomRight.getWidth();
+            g2d.drawImage(bottomRight, lineEnd, fillStart, this);
+        }
+
+        if (bottomMiddle != null) {
+            fillEnd = getHeight() - bottomMiddle.getHeight();
+            int linePos = lineStart;
+            int blockWidth = bottomMiddle.getWidth();
+            int blockHeight = bottomMiddle.getHeight();
+            while (linePos < lineEnd) {
+                int copyWidth = Math.min(blockWidth, lineEnd - linePos);
+                g2d.drawImage(bottomMiddle, 
+                    linePos, fillEnd, linePos + copyWidth, fillEnd + blockHeight,
+                    0, 0, copyWidth, blockHeight,
+                    this
+                );
+                linePos += blockWidth;
+            }
+        }
+
+        if (middleLeft != null) {
+            lineStart = middleLeft.getWidth();
+            int fillPos = fillStart;
+            int blockWidth = middleLeft.getWidth();
+            int blockHeight = middleLeft.getHeight();
+            while (fillPos < fillEnd) {
+                int copyHeight = Math.min(blockHeight, fillEnd - fillPos);
+                g2d.drawImage(middleLeft, 
+                    0, fillPos, blockWidth, fillPos + copyHeight,
+                    0, 0, blockWidth, copyHeight,
+                    this
+                );
+                fillPos += blockHeight;
+            }
+        }
+
+        if (middleRight != null) {
+            lineEnd = getWidth() - middleRight.getWidth();
+            int fillPos = fillStart;
+            int blockWidth = middleRight.getWidth();
+            int blockHeight = middleRight.getHeight();
+            while (fillPos < fillEnd) {
+                int copyHeight = Math.min(blockHeight, fillEnd - fillPos);
+                g2d.drawImage(middleRight, 
+                    lineEnd, fillPos, lineEnd + blockWidth, fillPos + copyHeight,
+                    0, 0, blockWidth, copyHeight,
+                    this
+                );
+                fillPos += blockHeight;
+            }
+        }
+
+        if (middleMiddle != null) {
+            int fillPos = fillStart;
+            int blockWidth = middleMiddle.getWidth();
+            int blockHeight = middleMiddle.getHeight();
+            while (fillPos < fillEnd) {
+                int copyHeight = Math.min(blockHeight, fillEnd - fillPos);
+                int linePos = lineStart;
+                while (linePos < lineEnd) {
+                    int copyWidth = Math.min(blockWidth, lineEnd - linePos);
+                    g2d.drawImage(middleMiddle,
+                        linePos, fillPos, linePos + copyWidth, fillPos + copyHeight,
+                        0, 0, copyWidth, copyHeight,
+                        this
+                    );
+                    linePos += blockWidth;
+                }
+                fillPos += blockHeight;
+            }
+        }
+
+            
+                
+
         super.paintComponent(g);
     }
 
@@ -97,15 +235,40 @@ public class Console extends JTextPane {
         setStyle(bullet2, "bullet2");
         setStyle(link, "link");
 
-        setBackground(Base.getTheme().getColor("console.color"));
+        setBackground(new Color(1,1,1, (float) 0.01));
+//        setBackground(Base.getTheme().getColor("console.color"));
 
+        PropertyFile theme = Base.getTheme();
+        topLeft = loadImage(theme.get("console.background.image.topleft"));
+        topMiddle = loadImage(theme.get("console.background.image.topmiddle"));
+        topRight = loadImage(theme.get("console.background.image.topright"));
+        middleLeft = loadImage(theme.get("console.background.image.left"));
+        middleMiddle = loadImage(theme.get("console.background.image.middle"));
+        middleRight = loadImage(theme.get("console.background.image.right"));
+        bottomLeft = loadImage(theme.get("console.background.image.bottomleft"));
+        bottomMiddle = loadImage(theme.get("console.background.image.bottommiddle"));
+        bottomRight = loadImage(theme.get("console.background.image.bottomright"));
+
+        repaint();
+    }
+
+    BufferedImage loadImage(String path) {
+        if (path == null) {
+            return null;
+        }
+        BufferedImage in;
+        if (path.startsWith("res://")) {
+            return Base.loadImageFromResource(path.substring(5));
+        }
+        return null;
     }
 
     void setStyle(MutableAttributeSet set, String name) {
         PropertyFile theme = Base.getTheme();
-        Color bgColor = theme.getColor("console.color");
+        Color bgColor = new Color(1,1,1, (float) 0.01); //theme.getColor("console.color");
 
         Font font = getFont(name);
+
         StyleConstants.setBackground(set, bgColor);
         StyleConstants.setForeground(set, getColor(name));
         StyleConstants.setFontSize(set, font.getSize());
@@ -132,13 +295,9 @@ public class Console extends JTextPane {
 
         Font font = Preferences.getFontNatural("theme.fonts.console");
 
-        System.err.println("Font class: " + name);
-
         if (theme.get("console." + name + ".font") != null) {
-            System.err.println("Looking for theme console font");
             font = theme.getFontNatural("console." + name + ".font");
         }
-        System.err.println(font);
         return font;
     }
 
@@ -181,9 +340,17 @@ public class Console extends JTextPane {
         } else if (type == COMMAND) {
             doAppendString(message, command);
         } else if (type == BULLET) {
-            doAppendString("\u2022 " + message, bullet);
+            String bchar = Base.getTheme().get("console.bullet.character");
+            if (bchar == null) {
+                bchar = "\u2022";
+            }
+            doAppendString(bchar + " " + message, bullet);
         } else if (type == BULLET2) {
-            doAppendString("\u2023 " + message, bullet2);
+            String bchar = Base.getTheme().get("console.bullet2.character");
+            if (bchar == null) {
+                bchar = "\u2023";
+            }
+            doAppendString(bchar + " " + message, bullet2);
         } else if (type == LINK) {
             String[] chunks = message.split("\\|");
             link.addAttribute(LINK_ATTRIBUTE, new URLLinkAction(chunks[0]));
@@ -282,15 +449,26 @@ public class Console extends JTextPane {
     }
 
     private class TextClickListener extends MouseAdapter {
+        public void mousePressed(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                JPopupMenu menu = new JPopupMenu();
+                JMenuItem copy = new JMenuItem("Copy");
+                menu.add(copy);
+                menu.show(Console.this, e.getX(), e.getY());
+            }
+        }
+
         public void mouseClicked(MouseEvent e) {
-            try {
-                Element elem = document.getCharacterElement(Console.this.viewToModel(e.getPoint()));
-                AttributeSet as = elem.getAttributes();
-                URLLinkAction fla = (URLLinkAction)as.getAttribute(LINK_ATTRIBUTE);
-                if (fla != null) {
-                    fla.execute();
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                try {
+                    Element elem = document.getCharacterElement(Console.this.viewToModel(e.getPoint()));
+                    AttributeSet as = elem.getAttributes();
+                    URLLinkAction fla = (URLLinkAction)as.getAttribute(LINK_ATTRIBUTE);
+                    if (fla != null) {
+                        fla.execute();
+                    }
+                } catch(Exception x) {
                 }
-            } catch(Exception x) {
             }
         }
     }
