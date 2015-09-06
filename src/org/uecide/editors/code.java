@@ -1157,4 +1157,7 @@ public class code extends JPanel implements EditorBase {
             textArea.repaint();
         }
     }
+
+    public void populateMenu(JPopupMenu menu, int flags) {
+    }
 }

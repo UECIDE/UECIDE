@@ -1191,4 +1191,7 @@ public class markdown extends JPanel implements EditorBase {
         } catch (Exception e) {
         }
     }
+
+    public void populateMenu(JPopupMenu menu, int flags) {
+    }
 }

@@ -42,6 +42,7 @@ public interface EditorBase {
     public void setModified(boolean m);
     public File getFile();
     public void populateMenu(JMenu menu, int flags);
+    public void populateMenu(JPopupMenu menu, int flags);
     public boolean save();
     public boolean saveTo(File file);
     public void reloadFile();

@@ -238,4 +238,7 @@ public class bitmap extends JPanel implements EditorBase {
 
     public void repaint() {
     }
+
+    public void populateMenu(JPopupMenu menu, int flags) {
+    }
 }

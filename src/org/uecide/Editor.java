@@ -3461,6 +3461,20 @@ public class Editor extends JFrame {
         }
     }
 
+    public void addMenuChunk(JPopupMenu menu, int filterFlags) {
+        int tab = getActiveTab();
+
+        if(tab > -1) {
+            EditorBase eb = getTab(tab);
+
+            if(eb != null) {
+                eb.populateMenu(menu, filterFlags);
+            }
+        }
+
+        addPluginsToMenu(menu, filterFlags);
+    }
+
     public void addMenuChunk(JMenu menu, int filterFlags) {
         int tab = getActiveTab();
 
@@ -3487,13 +3501,22 @@ public class Editor extends JFrame {
         }
     }
 
+    public void addPluginsToMenu(JPopupMenu menu, int filterFlags) {
+        for(Plugin plugin : plugins) {
+            try {
+                plugin.populateMenu(menu, filterFlags);
+            } catch(AbstractMethodError e) {
+            } catch(Exception e) {
+            }
+        }
+    }
+
     public void addPluginsToMenu(JMenu menu, int filterFlags) {
         for(Plugin plugin : plugins) {
             try {
                 plugin.populateMenu(menu, filterFlags);
             } catch(AbstractMethodError e) {
             } catch(Exception e) {
-//                error(e);
             }
         }
     }

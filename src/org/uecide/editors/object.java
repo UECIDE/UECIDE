@@ -84,4 +84,7 @@ public class object extends text {
     public void reloadFile() {
         loadFile(file);
     }
+
+    public void populateMenu(JPopupMenu menu, int flags) {
+    }
 }

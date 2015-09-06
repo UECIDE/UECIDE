@@ -30,6 +30,8 @@
 
 package org.uecide;
 
+import org.uecide.plugin.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -38,7 +40,9 @@ import javax.swing.text.*;
 import java.util.regex.*;
 import java.awt.image.*;
 
-public class Console extends JTextPane {
+import java.awt.datatransfer.*;
+
+public class Console extends JTextPane implements ClipboardOwner {
     MutableAttributeSet body = new SimpleAttributeSet();
     MutableAttributeSet warning = new SimpleAttributeSet();
     MutableAttributeSet error = new SimpleAttributeSet();
@@ -454,6 +458,30 @@ public class Console extends JTextPane {
                 JPopupMenu menu = new JPopupMenu();
                 JMenuItem copy = new JMenuItem("Copy");
                 menu.add(copy);
+                copy.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        StringSelection ss = new StringSelection(getSelectedText());
+                        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        cb.setContents(ss, Console.this);
+                    }
+                });
+
+                JMenuItem copyAll = new JMenuItem("Copy All");
+                menu.add(copyAll);
+                copyAll.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        StringSelection ss = new StringSelection(getText());
+                        Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        cb.setContents(ss, Console.this);
+                    }
+                });
+
+                if (urlClickListener != null) {
+                    urlClickListener.addMenuChunk(menu, Plugin.MENU_POPUP_CONSOLE | Plugin.MENU_TOP);
+                    urlClickListener.addMenuChunk(menu, Plugin.MENU_POPUP_CONSOLE | Plugin.MENU_MID);
+                    urlClickListener.addMenuChunk(menu, Plugin.MENU_POPUP_CONSOLE | Plugin.MENU_BOTTOM);
+                }
+
                 menu.show(Console.this, e.getX(), e.getY());
             }
         }
@@ -488,5 +516,9 @@ public class Console extends JTextPane {
 
     public void setURLClickListener(Editor e) {
         urlClickListener = e;
+    }
+
+    @Override 
+    public void lostOwnership(Clipboard aClipboard, Transferable aContents) {
     }
 }

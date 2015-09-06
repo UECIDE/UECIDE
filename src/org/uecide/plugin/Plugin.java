@@ -68,6 +68,11 @@ public abstract class Plugin {
     public static final int MENU_FILE_FOLDER    = 0x0021; // A folder in the file tree
     public static final int MENU_FILE_FILE      = 0x0022; // A file in the file tree
 
+    // Popup menus
+    public static final int MENU_POPUP_CONSOLE  = 0x0030;
+
+
+
     // Menus are split into three regions - top middle and bottom.
     public static final int MENU_TOP    = 0x0100;
     public static final int MENU_MID    = 0x0200;
@@ -99,6 +104,7 @@ public abstract class Plugin {
     }
     public abstract void addToolbarButtons(JToolBar toolbar, int flags);
     public abstract void populateMenu(JMenu menu, int flags);
+    public abstract void populateMenu(JPopupMenu menu, int flags);
     public abstract void populateContextMenu(JPopupMenu menu, int flags, DefaultMutableTreeNode node);
     public abstract ImageIcon getFileIconOverlay(File f);
 

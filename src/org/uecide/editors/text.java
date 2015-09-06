@@ -58,5 +58,8 @@ public class text extends code {
         super(s, f, e);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
     }
+
+    public void populateMenu(JPopupMenu menu, int flags) {
+    }
 }
 

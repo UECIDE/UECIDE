@@ -286,8 +286,15 @@ public class PropertyFile {
      */
     public void saveDelay() {
         if(saveTimer != null) {
-            saveTimer.cancel();
-            saveTimer.purge();
+            try {
+                saveTimer.cancel();
+            } catch (Exception e) {
+            }
+
+            try {
+                saveTimer.purge();
+            } catch (Exception e) {
+            }
         }
 
         saveTimer = new Timer();

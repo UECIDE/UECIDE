@@ -48,4 +48,7 @@ public class none { //implements EditorBase {
         JLabel l = new JLabel("The file " + f.getName() + " cannot be edited.");
         p.add(l);
     }
+
+    public void populateMenu(JPopupMenu menu, int flags) {
+    }
 }
