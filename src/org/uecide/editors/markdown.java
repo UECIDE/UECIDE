@@ -1194,4 +1194,17 @@ public class markdown extends JPanel implements EditorBase {
 
     public void populateMenu(JPopupMenu menu, int flags) {
     }
+
+    public Component getContentPane() {
+        return textArea;
+    }
+
+    public Rectangle getViewRect() {
+        return scrollPane.getViewport().getViewRect();
+    }
+
+    public void setViewPosition(Point p) {
+        scrollPane.getViewport().setViewPosition(p);
+    }
+
 }

@@ -279,7 +279,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         populatePreferencesTree(root, Base.preferencesTree, null);
 
         tree.expandPath(new TreePath(root.getPath()));
-        tree.setRootVisible(false);
+        tree.setRootVisible(true);
 
         p.add(split, BorderLayout.CENTER);
         tree.addTreeSelectionListener(this);

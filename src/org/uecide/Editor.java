@@ -73,7 +73,7 @@ public class Editor extends JFrame {
 
     JSplitPane topBottomSplit;
     JSplitPane leftRightSplit;
-    JSplitPane manualSplit;
+    JSplitPane sidebarSplit;
 
     JTree sketchContentTree;
     JTree sketchFilesTree;
@@ -99,6 +99,7 @@ public class Editor extends JFrame {
     JPanel editorPanel;
     JPanel statusBar;
     JPanel projectPanel;
+    JPanel sidebarPanel;
     JPanel filesPanel;
     JPanel consolePanel;
 
@@ -106,6 +107,7 @@ public class Editor extends JFrame {
 
     JTabbedPane editorTabs;
     JTabbedPane projectTabs;
+    JTabbedPane sidebarTabs;
 
     JScrollPane treeScroll;
     JScrollPane filesTreeScroll;
@@ -122,7 +124,7 @@ public class Editor extends JFrame {
     DefaultMutableTreeNode filesTreeRoot;
     DefaultTreeModel filesTreeModel;
 
-    JScrollPane consoleScroll;
+    JShadowScrollPane consoleScroll;
 
     JProgressBar statusProgress;
     JLabel statusText;
@@ -131,11 +133,7 @@ public class Editor extends JFrame {
     JButton runButton;
     JButton programButton;
 
-    JScrollPane manualScroll;
-    Browser manualPane;
-    JToolBar manualBar;
-
-    JButton manualButton;
+    JScrollPane sidebarScroll;
 
     public static ArrayList<Editor>editorList = new ArrayList<Editor>();
 
@@ -241,6 +239,7 @@ public class Editor extends JFrame {
 
         treePanel = new JPanel();
         projectPanel = new JPanel();
+        sidebarPanel = new JPanel();
         filesPanel = new JPanel();
         editorPanel = new JPanel();
         consolePanel = new JPanel();
@@ -248,13 +247,15 @@ public class Editor extends JFrame {
 
         treePanel.setLayout(new BorderLayout());
         projectPanel.setLayout(new BorderLayout());
+        sidebarPanel.setLayout(new BorderLayout());
         filesPanel.setLayout(new BorderLayout());
         editorPanel.setLayout(new BorderLayout());
         consolePanel.setLayout(new BorderLayout());
         statusBar.setLayout(new BorderLayout());
 
         editorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-        projectTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        projectTabs = new JTabbedPane(JTabbedPane.LEFT, JTabbedPane.SCROLL_TAB_LAYOUT);
+        sidebarTabs = new JTabbedPane(JTabbedPane.RIGHT, JTabbedPane.SCROLL_TAB_LAYOUT);
 
         editorTabs.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -273,15 +274,9 @@ public class Editor extends JFrame {
         int width = Preferences.getInteger("editor.window.width");
         int height = Preferences.getInteger("editor.window.height");
 
-        File manroot = null;
-        if (loadedSketch.getCore() != null) {
-            manroot = loadedSketch.getCore().getManual();
-        }
-
         leftRightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, projectPanel, editorPanel);
-        manualSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, null);
-        topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, manualSplit, consolePanel);
-//        loadManual(manroot);
+        sidebarSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, sidebarPanel);
+        topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sidebarSplit, consolePanel);
 
 
 // Uncomment these two lines to force a NullPointer exception to test
@@ -290,35 +285,38 @@ public class Editor extends JFrame {
 //String forcedCrash = null;
 //System.err.println(forcedCrash.length());
 
-        manualSplit.setOneTouchExpandable(false);
+        sidebarSplit.setOneTouchExpandable(true);
         leftRightSplit.setOneTouchExpandable(true);
         topBottomSplit.setOneTouchExpandable(true);
-
-        if (manualScroll != null) {
-            manualScroll.setVisible(false);
-        }
 
         leftRightSplit.setContinuousLayout(true);
         topBottomSplit.setContinuousLayout(true);
 
-        leftRightSplit.setResizeWeight(0D);
-        topBottomSplit.setResizeWeight(1D);
-        manualSplit.setResizeWeight(1D);
+        leftRightSplit.setResizeWeight(0.1D);
+        topBottomSplit.setResizeWeight(0.7D);
+        sidebarSplit.setResizeWeight(0.9D);
 
-        int dividerSize = Preferences.getInteger("editor.layout.split_manual");
-        manualSplit.setDividerLocation(dividerSize);
-
-        dividerSize = Preferences.getInteger("editor.layout.split_console");
-        topBottomSplit.setDividerLocation(dividerSize);
-
-        dividerSize = Preferences.getInteger("editor.layout.split_tree");
-        leftRightSplit.setDividerLocation(dividerSize);
+//        int dividerSize = Preferences.getInteger("editor.layout.split_sidebar");
+//        if (dividerSize < 10) {
+//            dividerSize = getWidth() - 200;
+//        }
+//        sidebarSplit.setDividerLocation(dividerSize);
+//
+//        dividerSize = Preferences.getInteger("editor.layout.split_console");
+//        topBottomSplit.setDividerLocation(dividerSize);
+//
+//        dividerSize = Preferences.getInteger("editor.layout.split_tree");
+//        leftRightSplit.setDividerLocation(dividerSize);
 
         this.add(topBottomSplit, BorderLayout.CENTER);
 
         final Editor me = this;
 
-        consoleScroll = new JScrollPane();
+        consoleScroll = new JShadowScrollPane(
+            Base.getTheme().getInteger("console.shadow.top"),
+            Base.getTheme().getInteger("console.shadow.bottom")
+        );
+
         console = new Console();
 
         console.setURLClickListener(this);
@@ -392,8 +390,18 @@ public class Editor extends JFrame {
         initTreeStructure();
 
         projectPanel.add(projectTabs, BorderLayout.CENTER);
+
         projectTabs.add(treePanel, "Project");
         projectTabs.add(filesPanel, "Files");
+
+        addPanelsToTabs(projectTabs, Plugin.TABS_PROJECT);
+
+        sidebarPanel.add(sidebarTabs, BorderLayout.CENTER);
+
+        addPanelsToTabs(sidebarTabs, Plugin.TABS_SIDEBAR);
+
+        rotateTabLabels();
+        
 
         updateToolbar();
 
@@ -460,44 +468,40 @@ public class Editor extends JFrame {
         });
 
         openOrSelectFile(loadedSketch.getMainFile());
-        dividerSize = Preferences.getInteger("editor.layout.split_console");
-        topBottomSplit.setDividerLocation(dividerSize);
+//        dividerSize = Preferences.getInteger("editor.layout.split_console");
+//        topBottomSplit.setDividerLocation(dividerSize);
 
-        dividerSize = Preferences.getInteger("editor.layout.split_tree");
-        leftRightSplit.setDividerLocation(dividerSize);
+//        dividerSize = Preferences.getInteger("editor.layout.split_tree");
+//        leftRightSplit.setDividerLocation(dividerSize);
 
         // We want to do this last as the previous SETs trigger this change listener.
 
-        manualSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    int pos = (Integer)(e.getNewValue());
-                    Preferences.setInteger("editor.layout.split_manual", pos);
-                }
-            }
-        );
+//        sidebarSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+//            new PropertyChangeListener() {
+//                public void propertyChange(PropertyChangeEvent e) {
+//                    int pos = (Integer)(e.getNewValue());
+//                    Preferences.setInteger("editor.layout.split_sidebar", pos);
+//                }
+//            }
+//        );
+//
+//        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+//            new PropertyChangeListener() {
+//                public void propertyChange(PropertyChangeEvent e) {
+//                    int pos = (Integer)(e.getNewValue());
+//                    Preferences.setInteger("editor.layout.split_tree", pos);
+//                }
+//            }
+//        );
 
-        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    int pos = (Integer)(e.getNewValue());
-                    Preferences.setInteger("editor.layout.split_tree", pos);
-                }
-            }
-        );
-
-        topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    int pos = (Integer)(e.getNewValue());
-                    Preferences.setInteger("editor.layout.split_console", pos);
-                }
-            }
-        );
-
-        if (Preferences.getBoolean("editor.lauout.visible_manual")) {
-            showManual();
-        }
+//        topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+//            new PropertyChangeListener() {
+//                public void propertyChange(PropertyChangeEvent e) {
+//                    int pos = (Integer)(e.getNewValue());
+//                    Preferences.setInteger("editor.layout.split_console", pos);
+//                }
+//            }
+//        );
 
         for (int i = 0; toolbar.getComponentAtIndex(i) != null; i++) {
             Component c = toolbar.getComponentAtIndex(i);
@@ -508,6 +512,21 @@ public class Editor extends JFrame {
         }
         this.setVisible(true);
 
+    }
+   
+    public void rotateTabLabels() {
+        for (int i = 0; i < projectTabs.getTabCount(); i++) {
+            String c = projectTabs.getTitleAt(i);
+            JLabel l = new JLabel(c);
+            l.setUI(new VerticalLabelUI(false));
+            projectTabs.setTabComponentAt(i, l);
+        }
+        for (int i = 0; i < sidebarTabs.getTabCount(); i++) {
+            String c = sidebarTabs.getTitleAt(i);
+            JLabel l = new JLabel(c);
+            l.setUI(new VerticalLabelUI(true));
+            sidebarTabs.setTabComponentAt(i, l);
+        }
     }
 
     public void updateToolbar() {
@@ -563,57 +582,6 @@ public class Editor extends JFrame {
 
         addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
 
-    }
-
-    public void hideManual() {
-        manualScroll.setVisible(false);
-        int w = getSize().width;
-        int spos = w - manualSplit.getDividerLocation();
-        Preferences.setInteger("editor.layout.split_manual", spos);
-        Preferences.setBoolean("editor.layout.visible_manual", false);
-        manualSplit.setDividerLocation(1D);
-    }
-
-    public void loadManual(File f) {
-        if (f == null) {
-            return;
-        }
-        loadManual(f.getAbsolutePath());
-    }
-
-    public void loadManual(String f) {
-        if (f == null) {
-            return;
-        }
-        if (f.endsWith(".pdf")) {
-            Base.openURL(f);
-        } else {
-            manualPane = new Browser(new File(f));
-            manualPane.setRoot(loadedSketch.getCore().getManual());
-            manualPane.home();
-            manualScroll = new JScrollPane();
-            manualScroll.setViewportView(manualPane);
-            manualSplit.setRightComponent(manualScroll);
-            showManual();
-        }
-    }
-
-    public void showManual() {
-        if (loadedSketch == null) {
-            return;
-        }
-        if (loadedSketch.getCore() == null) {
-            return;
-        }
-
-        if (manualScroll == null) {
-            return;
-        }
-        manualScroll.setVisible(true);
-        int w = getSize().width;
-        int spos = Preferences.getInteger("editor.layout.split_manual");
-        Preferences.setBoolean("editor.layout.visible_manual", true);
-        manualSplit.setDividerLocation(w - spos);
     }
 
     class FileCellRenderer implements TreeCellRenderer {
@@ -2561,6 +2529,22 @@ public class Editor extends JFrame {
         return editorTabs.getTitleAt(i);
     }
 
+    public TabLabel getSelectedTab() {
+        int sel = editorTabs.getSelectedIndex();
+        if (sel < 0) {
+            return null;
+        }
+        return getTabLabel(sel);
+    }
+
+    public EditorBase getSelectedEditor() {
+        int sel = editorTabs.getSelectedIndex();
+        if (sel < 0) {
+            return null;
+        }
+        return getTab(sel);
+    }
+
     public String getSelectedTabName() {
         return getTabName(editorTabs.getSelectedIndex());
     }
@@ -3119,37 +3103,6 @@ public class Editor extends JFrame {
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
 
-        if (loadedSketch.getContext().getBoard() != null) {
-            if (loadedSketch.getContext().getBoard().getManual() != null) {
-                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getBoard().toString(), 0, 0, new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        loadManual(loadedSketch.getContext().getBoard().getManual());
-                    }
-                }));
-            }
-        }
-
-        if (loadedSketch.getContext().getCore() != null) {
-            if (loadedSketch.getContext().getCore().getManual() != null) {
-                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getCore().toString(), 0, 0, new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        loadManual(loadedSketch.getContext().getCore().getManual());
-                    }
-                }));
-            }
-        }
-
-        if (loadedSketch.getContext().getCompiler() != null) {
-            if (loadedSketch.getContext().getCompiler().getManual() != null) {
-                helpMenu.add(createMenuEntry("Manual for " + loadedSketch.getContext().getCompiler().toString(), 0, 0, new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        loadManual(loadedSketch.getContext().getCompiler().getManual());
-                    }
-                }));
-            }
-        }
-
-
         PropertyFile links = Base.theme.getChildren("links");
 
         for(String link : links.childKeys()) {
@@ -3418,7 +3371,6 @@ public class Editor extends JFrame {
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setCore(e.getActionCommand());
-//                    loadManual(loadedSketch.getCore().getManual());
                 }
             });
             item.setActionCommand(core.getName());
@@ -4164,7 +4116,6 @@ public class Editor extends JFrame {
 
         if(eb != null) {
             loadedSketch.setBoard(eb);
-//            loadManual(loadedSketch.getCore().getManual());
         }
     }
 
@@ -4229,7 +4180,16 @@ public class Editor extends JFrame {
     public static void updateLookAndFeel() {
         for(Editor e : editorList) {
             SwingUtilities.updateComponentTreeUI(e);
+            e.rotateTabLabels();
+            e.refreshScrolls();
         }
+    }
+
+    public void refreshScrolls() {
+        consoleScroll.setShadow(
+            Base.getTheme().getInteger("console.shadow.top"),
+            Base.getTheme().getInteger("console.shadow.bottom")
+        );
     }
 
     public static void releasePorts(String n) {
@@ -4809,6 +4769,17 @@ public class Editor extends JFrame {
         }
     }
 
+    public Console getConsole() { return console; }
     
+    public void addPanelsToTabs(JTabbedPane tabs, int flags) {
+        for(Plugin plugin : plugins) {
+            try {
+                plugin.addPanelsToTabs(tabs, flags);
+            } catch(AbstractMethodError e) {
+            } catch(Exception e) {
+            }
+        }
+    }
+        
 }
 

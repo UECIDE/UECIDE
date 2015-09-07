@@ -269,6 +269,13 @@ public class code extends JPanel implements EditorBase {
             }
         });
 
+        JPopupMenu pm = textArea.getPopupMenu();
+
+        editor.addMenuChunk(pm, Plugin.MENU_POPUP_EDITOR | Plugin.MENU_TOP);
+        editor.addMenuChunk(pm, Plugin.MENU_POPUP_EDITOR | Plugin.MENU_MID);
+        editor.addMenuChunk(pm, Plugin.MENU_POPUP_EDITOR | Plugin.MENU_BOTTOM);
+
+
         scrollPane = new RTextScrollPane(textArea);
 
         scrollPane.removeMouseWheelListener(scrollPane.getMouseWheelListeners()[0]);
@@ -1160,4 +1167,17 @@ public class code extends JPanel implements EditorBase {
 
     public void populateMenu(JPopupMenu menu, int flags) {
     }
+
+    public Component getContentPane() {
+        return (Component)textArea;
+    }
+
+    public Rectangle getViewRect() {
+        return scrollPane.getViewport().getViewRect();
+    }
+
+    public void setViewPosition(Point p) {
+        scrollPane.getViewport().setViewPosition(p);
+    }
+
 }

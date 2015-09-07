@@ -19,7 +19,7 @@ class JTattooBase extends LookAndFeel {
             UIManager.setLookAndFeel(clsname);
             
             Properties p = new Properties();
-            p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.system") ? "off" : "on");
+            p.put("windowDecoration", "off"); //Preferences.getBoolean("theme.jtattoo.system") ? "off" : "on");
             p.put("logoString", "UECIDE");
             p.put("textAntiAliasing", "on");
 

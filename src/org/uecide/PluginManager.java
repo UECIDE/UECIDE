@@ -412,8 +412,7 @@ public class PluginManager implements PropertyChangeListener
         lower.setLayout(new BorderLayout());
 
         split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upper, lower);
-        split.setResizeWeight(1D);
-        split.setDividerLocation(500);
+        split.setResizeWeight(0.9D);
         mainContainer.add(split, BorderLayout.CENTER);
 
         queue = new TaskQueue();

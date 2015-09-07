@@ -106,6 +106,9 @@ public class Console extends JTextPane implements ClipboardOwner {
 
         int w = getWidth();
         int h = getHeight();
+        if (Base.getTheme() == null) {
+            return;
+        }
         g2d.setPaint(Base.getTheme().getColor("console.color"));
         g2d.fillRect(0, 0, w, h);
 
@@ -273,7 +276,7 @@ public class Console extends JTextPane implements ClipboardOwner {
 
         Font font = getFont(name);
 
-        StyleConstants.setBackground(set, bgColor);
+//        StyleConstants.setBackground(set, bgColor);
         StyleConstants.setForeground(set, getColor(name));
         StyleConstants.setFontSize(set, font.getSize());
         StyleConstants.setFontFamily(set, font.getFamily());

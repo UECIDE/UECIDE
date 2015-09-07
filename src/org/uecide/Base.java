@@ -2351,30 +2351,46 @@ public class Base implements AptPercentageListener {
     // This handy little function will rebuild the whole of the internals of
     // UECIDE - that is, all the boards, cores, compilers and libraries etc.
     public static void cleanAndScanAllSettings() {
-        Thread thr = new Thread() {
-            public void run() {
+        try {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    Editor.lockAll();
 
-                try { Editor.lockAll(); } catch (Exception e) { e.printStackTrace(); }
-                try { Editor.bulletAll("Updating serial ports..."); } catch (Exception e) { e.printStackTrace(); }
+                    Editor.bulletAll("Updating serial ports...");
+                    Serial.updatePortList();
+                    Serial.fillExtraPorts();
 
-                try { Serial.updatePortList(); } catch (Exception e) { e.printStackTrace(); }
-                try { Serial.fillExtraPorts(); } catch (Exception e) { e.printStackTrace(); }
+                    Editor.bulletAll("Scanning compilers...");
+                    rescanCompilers(); 
 
-                try { rescanThemes(); } catch (Exception e) { e.printStackTrace(); }
-                try { rescanCompilers(); } catch (Exception e) { e.printStackTrace(); }
-                try { rescanCores(); } catch (Exception e) { e.printStackTrace(); }
-                try { rescanBoards(); } catch (Exception e) { e.printStackTrace(); }
-                try { rescanPlugins(); } catch (Exception e) { e.printStackTrace(); }
-                try { rescanLibraries(); } catch (Exception e) { e.printStackTrace(); }
-                try { buildPreferencesTree(); } catch (Exception e) { e.printStackTrace(); }
-                try { Editor.bulletAll("Update complete."); } catch (Exception e) { e.printStackTrace(); }
-                try { Editor.updateAllEditors(); } catch (Exception e) { e.printStackTrace(); }
-                try { Editor.selectAllEditorBoards(); } catch (Exception e) { e.printStackTrace(); }
-                try { Editor.refreshAllEditors(); } catch (Exception e) { e.printStackTrace(); }
-                try { Editor.unlockAll(); } catch (Exception e) { e.printStackTrace(); }
-            }
-        };
-        thr.start();
+                    Editor.bulletAll("Scanning cores...");
+                    rescanCores();
+
+                    Editor.bulletAll("Scanning boards...");
+                    rescanBoards();
+
+                    Editor.bulletAll("Scanning plugins...");
+                    rescanPlugins();
+
+                    Editor.bulletAll("Scanning themes...");
+                    rescanThemes();
+
+                    Editor.bulletAll("Scanning libraries...");
+                    rescanLibraries();
+
+                    buildPreferencesTree();
+
+                    Editor.bulletAll("Updating system....");
+                    Editor.updateAllEditors(); 
+                    Editor.selectAllEditorBoards();
+                    Editor.refreshAllEditors();
+
+                    Editor.unlockAll();
+                    Editor.bulletAll("Update complete.");
+                }
+            });
+        } catch (Exception e) {
+        }
     }
 
     public static void rescanPlugins() {
@@ -2386,7 +2402,6 @@ public class Base implements AptPercentageListener {
     }
 
     public static void rescanThemes() {
-        Editor.bulletAll("Scanning themes...");
         loadThemes();
         theme.fullyParseFile();
     }

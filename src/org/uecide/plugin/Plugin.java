@@ -70,6 +70,7 @@ public abstract class Plugin {
 
     // Popup menus
     public static final int MENU_POPUP_CONSOLE  = 0x0030;
+    public static final int MENU_POPUP_EDITOR   = 0x0031;
 
 
 
@@ -80,6 +81,10 @@ public abstract class Plugin {
 
     public static final int TOOLBAR_EDITOR = 1;
     public static final int TOOLBAR_TAB = 2;
+
+    public static final int TABS_PROJECT = 0x0001;
+    public static final int TABS_CONSOLE = 0x0002;
+    public static final int TABS_SIDEBAR = 0x0003;
 
 
     public Plugin() { }
@@ -115,4 +120,7 @@ public abstract class Plugin {
     }
 
     public void catchEvent(int event) { };
+
+    public abstract void addPanelsToTabs(JTabbedPane tabs, int flags);
+
 }

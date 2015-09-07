@@ -65,6 +65,11 @@ public class CrashReporter {
     public CrashReporter(Throwable ex) {
         exception = ex;
 
+        if (exception.toString().equals("java.lang.NullPointerError")) {
+            System.err.println("Auto-ignoring a NullPointerError");
+            return;
+        }
+
         Object[] options = {
             "Quit",
             "Ignore",

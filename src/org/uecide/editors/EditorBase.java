@@ -68,4 +68,7 @@ public interface EditorBase {
     public void clearKeywords();
     public void addKeyword(String name, Integer type);
     public void repaint();
+    public Component getContentPane();
+    public Rectangle getViewRect();
+    public void setViewPosition(Point p);
 }
