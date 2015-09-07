@@ -246,4 +246,11 @@ public class bitmap extends JPanel implements EditorBase {
         return label;
     }
 
+    public void setViewPosition(Point p) {
+    }
+
+    public Rectangle getViewRect() {
+        return scrollPane.getViewport().getViewRect();
+    }
+
 }
