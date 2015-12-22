@@ -1,0 +1,2 @@
+Version=0.8.8alpha22
+Release=beta
