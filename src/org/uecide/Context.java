@@ -62,6 +62,7 @@ public class Context {
     boolean bufferError = false;
 
     PropertyFile settings = null;
+    PropertyFile sketchSettings = null;
 
     Process runningProcess = null;
 
@@ -69,10 +70,13 @@ public class Context {
 
     DataStreamParser parser = null;
 
+    public boolean silence = false;
+
     // Make a new empty context.
 
     public Context() {
         settings = new PropertyFile();
+        sketchSettings = new PropertyFile();
     }
 
     // At least one of these should be called to configure the context:
@@ -123,8 +127,19 @@ public class Context {
         if (compiler != null) { pf.mergeData(compiler.getProperties()); }
         if (core != null) { pf.mergeData(core.getProperties()); }
         if (board != null) { pf.mergeData(board.getProperties()); }
+        pf.mergeData(sketchSettings);
         pf.mergeData(settings);
         return pf;
+    }
+
+    public String getMerged(String k) {
+        PropertyFile pf = new PropertyFile();
+        if (compiler != null) { pf.mergeData(compiler.getProperties()); }
+        if (core != null) { pf.mergeData(core.getProperties()); }
+        if (board != null) { pf.mergeData(board.getProperties()); }
+        pf.mergeData(sketchSettings);
+        pf.mergeData(settings);
+        return pf.get(k);
     }
 
     // Find a resource by its URI.  A URI is not a normal Java URI but a UECIDE
@@ -152,6 +167,9 @@ public class Context {
         }
         if (uri.startsWith("board:")) {
             return board.getEmbedded(uri.substring(6));
+        }
+        if (uri.startsWith("sketch:")) {
+            return sketchSettings.getEmbedded(uri.substring(7));
         }
         if (uri.startsWith("merged:")) {
             PropertyFile pf = getMerged();
@@ -465,6 +483,7 @@ public class Context {
                 val[0].startsWith("compiler:") || 
                 val[0].startsWith("core:") || 
                 val[0].startsWith("board:") || 
+                val[0].startsWith("sketch:") ||
                 val[0].startsWith("merged:")
             ) {
                 String script = getResource(val[0]);
@@ -509,7 +528,7 @@ public class Context {
                 return false;
             }
 
-            if (Preferences.getBoolean("compiler.verbose_compile")) {
+            if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
                 String argstr = "";
                 for (Object o : args) {
                     String s = o.toString();
@@ -770,7 +789,7 @@ public class Context {
             }
 
             cmdName = cmdName.substring(10);
-            if (Preferences.getBoolean("compiler.verbose_compile")) {
+            if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
                 String argstr = "";
                 for (String s : arg) {
                     if (!argstr.equals("")) {
@@ -858,8 +877,10 @@ public class Context {
             sb.append(" ");
         }
 
-        Debug.message("Execute: " + sb.toString());
-        if (Preferences.getBoolean("compiler.verbose_compile")) {
+        if (!silence) {
+            Debug.message("Execute: " + sb.toString());
+        }
+        if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
             command(sb.toString());
         }
 
@@ -1105,5 +1126,13 @@ public class Context {
 
     public void removeDataStreamParser() {
         parser = null;
+    }
+
+    public void loadSketchSettings(File pf) {
+        if (pf.exists()) {
+            sketchSettings = new PropertyFile(pf);
+        } else {
+            sketchSettings = new PropertyFile();
+        }
     }
 }

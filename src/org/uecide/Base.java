@@ -83,7 +83,6 @@ public class Base implements AptPercentageListener {
 
     public static final String defaultIconSet = "Gnomic";
 
-    public static int REVISION = 23;
     public static String RELEASE = "release";
 
     public static String overrideSettingsFolder = null;
@@ -303,23 +302,12 @@ public class Base implements AptPercentageListener {
             }
         }
 
-        try {
-            File f = getJarLocation();
+        PropertyFile versionInfo = new PropertyFile("/org/uecide/version.txt");
 
-            Debug.message("Getting version information from " + f.getAbsolutePath());
-            JarFile myself = new JarFile(f);
-            Manifest manifest = myself.getManifest();
-            Attributes manifestContents = manifest.getMainAttributes();
+        RELEASE = versionInfo.get("Release");
+        systemVersion = new Version(versionInfo.get("Version"));
 
-            systemVersion = new Version(manifestContents.getValue("Version"));
-            REVISION = Integer.parseInt(manifestContents.getValue("Compiled"));
-
-            RELEASE = manifestContents.getValue("Release");;
-
-            Debug.message("Version: " + systemVersion);
-        } catch(Exception e) {
-            error(e);
-        }
+        Debug.message("Version: " + systemVersion);
 
         if (cli.isSet("version")) {
             System.out.println("UECIDE Version " + systemVersion);
@@ -639,6 +627,7 @@ public class Base implements AptPercentageListener {
                     path = System.getProperty("user.dir");
                 }
                 Sketch s = new Sketch(path);
+                s.loadConfig();
                 if(presetPort != null) {
                     s.setDevice(presetPort);
                 }
@@ -833,6 +822,7 @@ public class Base implements AptPercentageListener {
             s = e.getSketch();
         } else {
             s = new Sketch(sketch);
+            s.loadConfig();
         }
 
         if(presetPort != null) {
@@ -1190,6 +1180,8 @@ public class Base implements AptPercentageListener {
         if(path != null) {
             updateMRU(new File(path));
         }
+
+        editor.getSketch().loadConfig();
 
         return editor;
     }
@@ -2032,7 +2024,6 @@ public class Base implements AptPercentageListener {
             Set<Class<? extends LookAndFeel>> pluginClasses = pluginReflections.getSubTypesOf(LookAndFeel.class);
             for (Class<? extends LookAndFeel> c : pluginClasses) {
                 Debug.message("Found look and feel class " + c.getName());
-                System.err.println("Adding LAF: [" + c.getName() + "]");
                 lookAndFeels.put(c.getName(), c);
             }
 

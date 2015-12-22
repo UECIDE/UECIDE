@@ -39,7 +39,7 @@ import java.net.*;
 public class NetworkDiscoveryService extends Service {
 
     public NetworkDiscoveryService() {
-        setInterval(2000);
+        setInterval(10000);
         setName("Network Discovery");
     }
 

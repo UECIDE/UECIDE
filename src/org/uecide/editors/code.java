@@ -641,6 +641,12 @@ public class code extends JPanel implements EditorBase {
         applyThemeFont(SyntaxScheme.COMMENT_MULTILINE,                  "editor.comment.font");
         applyThemeUnderline(SyntaxScheme.COMMENT_MULTILINE,             "editor.comment.underline");
 
+        applyThemeFGColor(SyntaxScheme.MARKUP_TAG_NAME,                 "editor.header.fgcolor");
+        applyThemeBGColor(SyntaxScheme.MARKUP_TAG_NAME,                 "editor.header.bgcolor");
+        applyThemeFont(SyntaxScheme.MARKUP_TAG_NAME,                    "editor.header.font");
+        applyThemeUnderline(SyntaxScheme.MARKUP_TAG_NAME,               "editor.header.underline");
+
+
         // Fine granied comments
         applyThemeFGColor(SyntaxScheme.COMMENT_DOCUMENTATION,           "editor.comment.documentation.fgcolor");
         applyThemeBGColor(SyntaxScheme.COMMENT_DOCUMENTATION,           "editor.comment.documentation.bgcolor");

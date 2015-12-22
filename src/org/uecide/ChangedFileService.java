@@ -33,7 +33,7 @@ package org.uecide;
 public class ChangedFileService extends Service {
     public ChangedFileService() {
         setName("Changed Files");
-        setInterval(5000);
+        setInterval(1000);
     }
 
     public void setup() {
@@ -59,6 +59,7 @@ public class ChangedFileService extends Service {
                         }
                     }
                 }
+                ed.updateSketchConfig();
             }
         }
     }

@@ -647,4 +647,67 @@ public class APT {
         }
         return false;
     }
+
+    // A generic function which will fill the arrays with what needs to be done.  Pre-fill the arrays with
+    // what you would like doing, and other actions will be added as needed.  It returns a true if any
+    // changes were made to the arrays so it can be called recursively.
+    public boolean calculateOperations(ArrayList<Package> install, ArrayList<Package> upgrade, ArrayList<Package> remove) {
+
+        boolean madeChanges = false;
+
+        // First off, do the packages that want to be installed require any other packages to be installed?
+        for (Package p : install) {
+            String[] deps = p.getDependencies(false);
+            for (String dep : deps) {
+                Package inst = installedPackages.get(dep);
+                // If it's not installed then add it to the install list.
+                if (inst == null) {
+                    inst = cachedPackages.get(dep);
+                    if (inst == null) {
+                        System.err.println("Error: Unresolved dependency: " + dep);
+                    } else {
+                        install.add(inst);
+                        madeChanges = true;
+                    }
+                } else {
+                    // Is the dependency up to date? If not then add it to the upgrade list
+                    Version installedVersion = inst.getVersion();
+                    Version availableVersion = cachedPackages.get(dep).getVersion();
+                    if (availableVersion.compareTo(installedVersion) > 0) {
+                        upgrade.add(inst);
+                        madeChanges = true;
+                    }
+                }
+            }
+        }
+
+        // Now we'll do the same for packages that want to be upgraded. Check they have all their dependencies
+        // and that they are all up to date.
+        for (Package p : upgrade) {
+            String[] deps = p.getDependencies(false);
+            for (String dep : deps) {
+                Package inst = installedPackages.get(dep);
+                // If it's not installed then add it to the install list.
+                if (inst == null) {
+                    inst = cachedPackages.get(dep);
+                    if (inst == null) {
+                        System.err.println("Error: Unresolved dependency: " + dep);
+                    } else {
+                        install.add(inst);
+                        madeChanges = true;
+                    }
+                } else {
+                    // Is the dependency up to date? If not then add it to the upgrade list
+                    Version installedVersion = inst.getVersion();
+                    Version availableVersion = cachedPackages.get(dep).getVersion();
+                    if (availableVersion.compareTo(installedVersion) > 0) {
+                        upgrade.add(inst);
+                        madeChanges = true;
+                    }
+                }
+            }
+        }
+        return madeChanges;
+        
+    }
 }

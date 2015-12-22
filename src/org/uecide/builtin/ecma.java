@@ -114,7 +114,6 @@ public class ecma implements BuiltinCommand {
                             while (stde_pr.ready()) {
                                 int i = stde_pr.read(tmp, 0, 20);
                                 ctx.messageStream(new String(tmp, 0, i));
-                                System.err.print(new String(tmp, 0, i));
                             }
                         } catch (Exception ex) {
                         }

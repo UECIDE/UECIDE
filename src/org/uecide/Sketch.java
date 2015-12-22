@@ -162,6 +162,10 @@ public class Sketch {
     }
 
     public Sketch(File path) {
+        this(path, null);
+    }
+
+    public Sketch(File path, Editor e) {
         uuid = UUID.randomUUID().toString();
         ctx = new Context();
         ctx.setSketch(this);
@@ -170,6 +174,10 @@ public class Sketch {
 
         if(path == null) {
             path = createUntitledSketch();
+        }
+
+        if (e != null) {
+            attachToEditor(e);
         }
 
         sketchFolder = path;
@@ -480,8 +488,6 @@ public class Sketch {
             out.println("}");
             out.close();
 
-            addLibraryToImportList(libname);
-
             if(editor != null) {
                 editor.insertStringAtStart(getMainFile(), "#include <" + libname + ".h>\n");
                 editor.updateTree();
@@ -581,8 +587,10 @@ public class Sketch {
             setDevice((CommunicationPort)null);
         }
 
-        configFile = new PropertyFile(new File(folder, "sketch.cfg"));
-        loadConfig();
+        updateSketchConfig();
+
+
+
 
         updateLibraryList();
 
@@ -951,7 +959,19 @@ public class Sketch {
         if (getCore() == null) {
             return null;
         }
-        return Library.getLibraryByInclude(filename, getCore().getName());
+        Library lib = Library.getLibraryByInclude(filename, getCore().getName());
+        if (lib == null) {
+            if (getCore().get("core.alias") != null) {
+                String[] aliases = ctx.parseString(getCore().get("core.alias")).split("::");
+                for (String alias : aliases) {
+                    lib = Library.getLibraryByInclude(filename, alias);
+                    if (lib != null) {
+                        return lib;
+                    }
+                }
+            }
+        }
+        return lib;
     }
 
     public TreeSet<String> getAllFunctionNames() {
@@ -1107,30 +1127,72 @@ public class Sketch {
     ArrayList<String> includeOrder = new ArrayList<String>();
 
     public synchronized void updateLibraryList() {
+        PropertyFile props = ctx.getMerged();
         cleanFiles();
+
+        importedLibraries = new HashMap<String, Library>();
+        unknownLibraries = new ArrayList<String>();
         includeOrder = new ArrayList<String>();
         HashMap<String, Integer> inclist = new HashMap<String, Integer>();
         Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
 
         for(File f : cleanedFiles.keySet()) {
-            String data = cleanedFiles.get(f);
-            String lines[] = data.split("\n");
+            try {
+                String data = cleanedFiles.get(f);
+                String fname = f.getName();
+                if(FileType.getType(f) == FileType.SKETCH) {
+                    String ext = ctx.parseString(props.get("build.extension"));
+                    if (ext == null) {
+                        ext = "cpp";
+                    }
+                    fname = "deps-temp." + ext;
+                } else {
+                    String[] bits = fname.split("\\.");
+                    fname = "deps-temp." + bits[bits.length-1];
+                }
 
-            for(String line : lines) {
-                Matcher match = inc.matcher(line.trim());
+                File tempFile = new File(getBuildFolder(), fname);
+                PrintWriter pw = new PrintWriter(tempFile);
+                pw.print(data);
+                pw.close();
+                
+                boolean haveHunted = huntForLibraries(tempFile, importedLibraries, unknownLibraries);
 
-                if(match.find()) {
-                    inclist.put(match.group(1), LIB_PENDING);
+                tempFile.delete();
 
-                    if(includeOrder.indexOf(match.group(1)) == -1) {
-                        includeOrder.add(match.group(1));
+                String lines[] = data.split("\n");
+
+                for(String line : lines) {
+                    Matcher match = inc.matcher(line.trim());
+
+                    if (match.find()) {
+                        if (!haveHunted) {
+                            Library lib = findLibrary(match.group(1));
+                            if (lib != null) {
+                                importedLibraries.put(match.group(1), lib);
+                            } else {
+                                if(unknownLibraries.indexOf(match.group(1)) == -1) {
+                                    unknownLibraries.add(match.group(1));
+                                }
+                            }
+                        }
+                        if(includeOrder.indexOf(match.group(1)) == -1) {
+                            includeOrder.add(match.group(1));
+                        }
                     }
                 }
+            } catch (Exception e) {
             }
         }
 
-        importedLibraries = new HashMap<String, Library>();
-        unknownLibraries = new ArrayList<String>();
+        orderedLibraries = new ArrayList<Library>();
+        for (String inclib : includeOrder) {
+            if (importedLibraries.get(inclib) != null) {
+                orderedLibraries.add(importedLibraries.get(inclib));
+            }
+        }
+
+/*
 
         int processed = 0;
 
@@ -1202,7 +1264,7 @@ public class Sketch {
                 inclist.put(i, state);
             }
         } while(processed != 0);
-
+*/
         if(editor != null) {
             editor.updateLibrariesTree();
         }
@@ -1225,6 +1287,7 @@ public class Sketch {
             cleanBuild();
         }
 
+        updateSketchConfig();
         updateLibraryList();
 
         if (Preferences.getBoolean("compiler.generate_makefile")) {
@@ -1513,151 +1576,6 @@ public class Sketch {
         return out.toString();
     }
 
-    public String[] gatherIncludes(File f) {
-        String[] data = getFileContent(f).split("\n"); //stripComments(f.textArea.getText()).split("\n");
-        ArrayList<String> includes = new ArrayList<String>();
-
-        Pattern pragma = Pattern.compile("#pragma\\s+parameter\\s+([^=]+)\\s*=\\s*(.*)");
-
-        for(String line : data) {
-            line = line.trim();
-
-            if(line.startsWith("#pragma")) {
-                Matcher m = pragma.matcher(line);
-
-                if(m.find()) {
-                    String key = m.group(1);
-                    String value = m.group(2);
-                    String munged = "";
-
-                    for(int i = 0; i < value.length(); i++) {
-
-                        if(value.charAt(i) == '"') {
-                            munged += '"';
-                            i++;
-
-                            while(value.charAt(i) != '"') {
-                                munged += value.charAt(i++);
-                            }
-
-                            munged += '"';
-                            continue;
-                        }
-
-                        if(value.charAt(i) == '\'') {
-                            munged += '\'';
-                            i++;
-
-                            while(value.charAt(i) != '\'') {
-                                munged += value.charAt(i++);
-                            }
-
-                            munged += '\'';
-                            continue;
-                        }
-
-                        if(value.charAt(i) == ' ') {
-                            munged += "::";
-                            continue;
-                        }
-
-                        munged += value.charAt(i);
-                    }
-
-                    ctx.set(key, munged);
-                }
-
-                continue;
-            }
-
-            if(line.startsWith("#include")) {
-                int qs = line.indexOf("<");
-
-                if(qs == -1) {
-                    qs = line.indexOf("\"");
-                }
-
-                if(qs == -1) {
-                    continue;
-                }
-
-                qs++;
-                int qe = line.indexOf(">");
-
-                if(qe == -1) {
-                    qe = line.indexOf("\"", qs);
-                }
-
-                String i = line.substring(qs, qe);
-                addLibraryToImportList(i);
-            }
-        }
-
-        return includes.toArray(new String[includes.size()]);
-    }
-
-    public Library addLibraryToImportList(String filename) {
-        String l = filename;
-
-        if(filename.endsWith(".h")) {
-            l = filename.substring(0, filename.lastIndexOf("."));
-        }
-
-        Library lib;
-
-        // First, let's look for libraries included in the sketch folder itself.  Those should take priority over
-        // every other library in the system.
-
-        File sketchLibFolder = new File(sketchFolder, "libraries");
-
-        if(sketchLibFolder.exists() && sketchLibFolder.isDirectory()) {
-            File libFolder = new File(sketchLibFolder, l);
-
-            if(libFolder.exists() && libFolder.isDirectory()) {
-                File libHeader = new File(libFolder, l + ".h");
-
-                if(libHeader.exists()) {
-                    lib = new Library(libHeader, "sketch", "all");
-                    importedLibraries.put(l, lib);
-                    orderedLibraries.add(lib);
-
-                    // And then work through all the required libraries and add them.
-                    ArrayList<String> requiredLibraries = lib.getRequiredLibraries();
-
-                    if (requiredLibraries != null) {
-                        for(String req : requiredLibraries) {
-                            addLibraryToImportList(req);
-                        }
-                    } else {
-                    }
-
-                    return lib;
-                }
-            }
-        }
-
-        lib = Library.getLibraryByInclude(filename, getCore().getName());
-
-        if(lib == null) {
-            // The library doesn't exist - either it's a system header or a library that isn't installed.
-            return null;
-        }
-
-        // At this point we have a valid library that hasn't yet been imported.  Now to recurse.
-        // First add the library to the imported list
-        importedLibraries.put(l, lib);
-        orderedLibraries.add(lib);
-
-        // And then work through all the required libraries and add them.
-        ArrayList<String> requiredLibraries = lib.getRequiredLibraries();
-
-        for(String req : requiredLibraries) {
-            addLibraryToImportList(req);
-        }
-
-        return lib;
-    }
-
     public boolean upload() {
         ctx.executeKey("upload.precmd");
         boolean ret = programFile(getProgrammer(), sketchName);
@@ -1675,6 +1593,8 @@ public class Sketch {
                     ctx.error("Error: " + sport.getLastError());
                     return false;
                 }
+                sport.setDTR(false);
+                sport.setRTS(false);
                 Thread.sleep(predelay);
                 sport.setDTR(dtr);
                 sport.setRTS(rts);
@@ -1702,6 +1622,8 @@ public class Sketch {
                     ctx.error("Error: " + sport.getLastError());
                     return false;
                 }
+                sport.setDTR(false);
+                sport.setRTS(false);
                 Thread.sleep(predelay);
                 sport.setDTR(true);
                 sport.setRTS(true);
@@ -1744,6 +1666,7 @@ public class Sketch {
 
         if (!Base.isQuiet()) heading("Compiling...");
 
+        if (!Base.isQuiet()) bullet("Preprocessing...");
         try {
             if(!prepare()) {
                 error(Translate.t("Compile Failed"));
@@ -1916,22 +1839,22 @@ public class Sketch {
     }
 
     public void saveConfig() {
-        if(isUntitled()) {
-            return;
-        }
-
-        if(parentIsProtected()) {
-            return;
-        }
-
-        if (configFile == null) {
-            return;
-        }
-
-        if(configFile.size() > 0) {
-            Debug.message("Saving config");
-            configFile.save();
-        }
+//        if(isUntitled()) {
+//            return;
+//        }
+//
+//        if(parentIsProtected()) {
+//            return;
+//        }
+//
+//        if (configFile == null) {
+//            return;
+//        }
+//
+//        if(configFile.size() > 0) {
+//            Debug.message("Saving config");
+//            configFile.save();
+//        }
     }
 
     public String getName() {
@@ -1943,6 +1866,7 @@ public class Sketch {
     }
 
     public ArrayList<Library> getOrderedLibraries() {
+        
         return orderedLibraries;
     }
 
@@ -2007,7 +1931,7 @@ public class Sketch {
         }
 
         for(Library l : getOrderedLibraries()) {
-            libFiles.add(l.getFolder().getAbsolutePath());
+            libFiles.add(l.getSourceFolder().getAbsolutePath());
         }
 
         return libFiles;
@@ -2136,35 +2060,15 @@ public class Sketch {
             includes.addAll(libfiles);
         }
 
-        for(String lib : includeOrder) {
-
-            // First look to see if the header is already in a library we have included thus far
-            boolean inExisting = false;
-
-            for (Library existing : importedLibraries.values()) {
-                if (existing.hasHeader(lib)) {
-                    ArrayList<File> lf = existing.getIncludeFolders(this);
-                    if (includes.indexOf(lf.get(0)) != -1) {
-                        inExisting = true;
-                    }
-                }
+        for (Library l : orderedLibraries) {
+            if(includes.indexOf(l) < 0) {
+                includes.add(l.getSourceFolder());
             }
-            if (inExisting) {
-                continue;
-            }
+        }
 
-            Library l = getSketchLibrary(lib);
-
-            if (l == null) {
-                l = Library.getLibraryByInclude(lib, getCore().getName());
-            }
-
-            if(l != null) {
-                for (File lf : l.getIncludeFolders(this)) {
-                    if (includes.indexOf(lf) == -1) {
-                        includes.add(lf);
-                    }
-                }
+        for (Library l : importedLibraries.values()) {
+            if (includes.indexOf(l) < 0) {
+                includes.add(l.getSourceFolder());
             }
         }
 
@@ -2281,6 +2185,7 @@ public class Sketch {
     }
 
     public boolean compile() {
+
         
         long startTime = System.currentTimeMillis();
 
@@ -2406,9 +2311,9 @@ public class Sketch {
             if (!libNames.equals("")) {
                 libNames += "::";
             }
-            libPaths += lib.getFolder().getAbsolutePath();
+            libPaths += lib.getSourceFolder().getAbsolutePath();
             libNames += lib.getName();
-            ctx.set("library." + lib.getName() + ".path", lib.getFolder().getAbsolutePath());
+            ctx.set("library." + lib.getName() + ".path", lib.getSourceFolder().getAbsolutePath());
         }
 
         ctx.set("library.paths", libPaths);
@@ -2698,6 +2603,10 @@ public class Sketch {
         if(recipe == null) {
             error("Error: I don't know how to compile " + fileName);
             return null;
+        }
+
+        if (Preferences.getBoolean("compiler.verbose_files")) {
+            bullet2(fileName);
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
@@ -3058,6 +2967,7 @@ public class Sketch {
                 return null;
             }
         }
+        ctx.removeDataStreamParser();
         return objectPaths;
     }
 
@@ -3480,9 +3390,23 @@ public class Sketch {
 
         if (!Base.isQuiet()) bullet("Uploading...");
 
-        if (percentageFilter != null || percentageCharacter != null) {
-            ctx.addContextListener(new programContextListener(percentageFilter, percentageCharacter, percentageMultiplier));
+        if (!Preferences.getBoolean("compiler.verbose_upload")) {
+            if (percentageFilter != null || percentageCharacter != null) {
+                ctx.addContextListener(new programContextListener(percentageFilter, percentageCharacter, percentageMultiplier));
+            }
+            if (props.get("upload." + programmer + ".quiet") != null) {
+                ctx.set("verbose", ctx.parseString(props.get("upload." + programmer + ".quiet")));
+            } else {
+                ctx.set("verbose", "");
+            }
+        } else {
+            if (props.get("upload." + programmer + ".verbose") != null) {
+                ctx.set("verbose", ctx.parseString(props.get("upload." + programmer + ".verbose")));
+            } else {
+                ctx.set("verbose", "");
+            }
         }
+
 
         boolean res = (Boolean)ctx.executeKey(cmdKey);
         percentageFilter = null;
@@ -4255,31 +4179,50 @@ public class Sketch {
     }
 
     public void loadConfig() {
-        Debug.message("Loading config");
+        PropertyFile m = ctx.getMerged();
 
-        if(configFile.get("board") != null) {
-            Debug.message("Board: " + configFile.get("board"));
-            setBoard(configFile.get("board"));
+        if (m.get("default.board") != null) {
+            String wantedBoard = m.get("default.board");
+            Board b = Base.getBoard(wantedBoard);
+            if (b == null) {
+                ctx.error("This sketch is set to use the board '" + wantedBoard + "' by default, but that board is not installed.");
+                ctx.error("You should manually select the correct board, or use the Plugin Manager to install the " + wantedBoard + " board.");
+            } else {
+                ctx.bullet("Selecting board: " + b);
+                setBoard(b);
+            }
         }
 
-        if(configFile.get("core") != null) {
-            Debug.message("Core: " + configFile.get("core"));
-            setCore(configFile.get("core"));
+        if (m.get("default.core") != null) {
+            String wantedCore = m.get("default.core");
+            Core c = Base.getCore(wantedCore);
+            if (c == null) {
+                ctx.error("This sketch is set to use the core '" + wantedCore + "' by default, but that core is not installed.");
+                ctx.error("You should manually select the correct core, or use the Plugin Manager to install the " + wantedCore + " core.");
+            } else {
+                ctx.bullet("Selecting core: " + c);
+                setCore(c);
+            }
         }
 
-        if(configFile.get("compiler") != null) {
-            Debug.message("Compiler: " + configFile.get("compiler"));
-            setCompiler(configFile.get("compiler"));
+        if (m.get("default.compiler") != null) {
+            String wantedCompiler = m.get("default.compiler");
+            Compiler c = Base.getCompiler(wantedCompiler);
+            if (c == null) {
+                ctx.error("This sketch is set to use the compiler '" + wantedCompiler + "' by default, but that compiler is not installed.");
+                ctx.error("You should manually select the correct compiler, or use the Plugin Manager to install the " + wantedCompiler + " compiler.");
+            } else {
+                ctx.bullet("Selecting compiler: " + c);
+                setCompiler(c);
+            }
         }
 
-        if(configFile.get("port") != null) {
-            Debug.message("Port: " + configFile.get("port"));
-            setDevice(configFile.get("port"));
+        if (m.get("default.programmer") != null) {
+            setProgrammer(m.get("default.programmer"));
         }
 
-        if(configFile.get("programmer") != null) {
-            Debug.message("Programmer: " + configFile.get("programmer"));
-            setProgrammer(configFile.get("programmer"));
+        if (m.get("default.port") != null) {
+            setDevice(m.get("default.port"));
         }
 
     }
@@ -4569,6 +4512,89 @@ public class Sketch {
 
     public void parsedMessage(String e) {
         ctx.printParsed(e);
+    }
+
+    public boolean huntForLibraries(File f, HashMap<String, Library>foundLibs, ArrayList<String> missingLibs) {
+
+        if (getBuildFolder() == null) {
+            return false;
+        }
+        PropertyFile props = ctx.getMerged();
+        if (props.get("compile.preproc") == null) {
+            return false;
+        }
+
+        File dst = new File(getBuildFolder(), "deps.txt");
+
+        ctx.silence = true;
+
+        int numberFoundThisPass = 0;
+        do {
+            ctx.snapshot();
+
+            ctx.set("option.flags", getFlags("flags"));
+            ctx.set("option.cflags", getFlags("cflags"));
+            ctx.set("option.cppflags", getFlags("cppflags"));
+            ctx.set("option.ldflags", getFlags("ldflags"));
+
+            numberFoundThisPass = 0;
+            ctx.set("source.name", f.getAbsolutePath());
+            ctx.set("object.name", dst.getAbsolutePath());
+            String libPaths = "";
+            for (Library aLib : foundLibs.values()) {
+                if (!libPaths.equals("")) {
+                    libPaths += "::";
+                }
+                libPaths += "-I" + aLib.getSourceFolder().getAbsolutePath();
+            }
+            ctx.set("includes", libPaths);
+
+            ctx.startBuffer(true);
+            ctx.executeKey("compile.preproc");
+            ctx.endBuffer();
+
+            if (dst.exists()) {
+                String data = Base.getFileAsString(dst);
+                data = data.replaceAll("\\\\\n", " ");
+                data = data.replaceAll("\\s+", "::");
+                String[] entries = data.split("::");
+                for (String entry : entries) {
+                    if (entry.endsWith(".h")) {
+                        Library lib = findLibrary(entry);
+                        if (lib != null) {
+                            foundLibs.put(entry, lib);
+                            numberFoundThisPass++;
+                        } else {
+                            if(missingLibs.indexOf(entry) == -1) {
+                                missingLibs.add(entry);
+                            }
+                        }
+                    }
+                }
+            }
+
+            ctx.rollback();
+        } while (numberFoundThisPass > 0);
+
+        ctx.silence = false;
+        return true;
+    }
+
+    long lastConfigChange = 0;
+    public boolean updateSketchConfig() {
+        File sketchConfigFile = new File(sketchFolder, "sketch.cfg");
+        if (!sketchConfigFile.exists()) {
+            return false;
+        }
+
+        long lastMod = sketchConfigFile.lastModified();
+        if (lastConfigChange != lastMod) {
+            ctx.loadSketchSettings(sketchConfigFile);
+            message("Sketch configuration updated");
+            lastConfigChange = lastMod;
+            return true;
+        }
+        return false;
     }
 
 }

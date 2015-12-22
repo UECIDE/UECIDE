@@ -8,29 +8,7 @@
         classpath="${launch4j.dir}/launch4j.jar
             :${launch4j.dir}/lib/xstream.jar" />
 
-    <property file="version.plist"/>
-    <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-i386/jre/lib/rt.jar">
-        <and>
-            <os family="unix"/>
-            <not>
-                <os family="mac"/>
-            </not>
-            <os arch="i386"/>
-        </and>
-    </condition>
-    <condition property="bootclass.path" value="/usr/lib/jvm/java-6-openjdk-amd64/jre/lib/rt.jar">
-        <and>
-            <os family="unix"/>
-            <not>
-                <os family="mac"/>
-            </not>
-            <os arch="amd64"/>
-        </and>
-    </condition>
-
-    <tstamp>
-        <format property="TODAY" pattern="yyyyMMdd" />
-    </tstamp>
+    <property file="resources/org/uecide/version.txt"/>
 
     <target name="clean" description="Clean out the build directories">
         <delete dir="bin" />
@@ -52,17 +30,15 @@
             </fileset>
         </path>
         <javac target="1.6" 
+               source="1.6"
                debug="true"
                debuglevel="lines,vars,source"
-               deprecation="true"
-               source="1.6"
                encoding="UTF-8"
                bootclasspath="${bootclass.path}"
                includeAntRuntime="false"
                srcdir="src" 
                destdir="bin">
             <classpath refid="class.path" />
-            <compilerarg value="-Xlint:unchecked"/>
         </javac>
     </target>		
 
@@ -80,12 +56,10 @@
             <fileset dir="resources" />
             <zipgroupfileset dir="lib" includes="*.jar" />
             <manifest>
-                <attribute name="Built-By" value="${user.name}" />
                 <attribute name="Main-Class" value="org.uecide.Base" />
                 <attribute name="Class-Path" value="uecide.jar" />
-                <attribute name="Version" value="${version}" />
-                <attribute name="Compiled" value="${TODAY}" />
-                <attribute name="Release" value="${mode}" />
+                <!--attribute name="Version" value="${Version}" />
+                <attribute name="Release" value="${Release}" /-->
             </manifest>
         </jar>
         <chmod perm="0755" file="uecide.jar" />
@@ -103,11 +77,11 @@
 
 
     <target name="linux-zip" depends="build">
-        <mkdir dir="bundle/linux/uecide-${version}" />
-        <copy file="uecide.jar" todir="bundle/linux/uecide-${version}" />
-        <copy file="dist/linux/uecide" tofile="bundle/linux/uecide-${version}/uecide" />
-        <chmod perm="0755" file="bundle/linux/uecide-${version}/uecide" />
-        <zip file="uecide-${version}-linux.zip" basedir="bundle/linux/" />
+        <mkdir dir="bundle/linux/uecide-${Version}" />
+        <copy file="uecide.jar" todir="bundle/linux/uecide-${Version}" />
+        <copy file="dist/linux/uecide" tofile="bundle/linux/uecide-${Version}/uecide" />
+        <chmod perm="0755" file="bundle/linux/uecide-${Version}/uecide" />
+        <zip file="uecide-${Version}-linux.zip" basedir="bundle/linux/" />
         <delete dir="bundle/linux" />
     </target>
 
@@ -136,7 +110,7 @@
 
     <target name="linux-build-deb" depends="build">
 
-        <property name="proot" value="bundle/linux/uecide-${version}-${arch}"/>
+        <property name="proot" value="bundle/linux/uecide-${Version}-${arch}"/>
         <mkdir dir="${proot}/usr/bin" />
         <mkdir dir="${proot}/usr/share/icons" />
         <mkdir dir="${proot}/usr/share/uecide" />
@@ -173,7 +147,7 @@ MimeType=application/x-uecide
 
         <mkdir dir="${proot}/DEBIAN" />
         <echo file="${proot}/DEBIAN/control">Package: uecide
-Version: ${version}
+Version: ${Version}
 Maintainer: Matt Jenkins &lt;matt@majenko.co.uk&gt;
 Architecture: ${arch}
 Section: Programming
@@ -192,8 +166,8 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <exec executable="fakeroot" dir="bundle/linux">
             <arg value="dpkg-deb"/>
             <arg value="-b"/>
-            <arg value="uecide-${version}-${arch}"/>
-            <arg value="../../uecide-${version}-${arch}.deb" />
+            <arg value="uecide-${Version}-${arch}"/>
+            <arg value="../../uecide-${Version}-${arch}.deb" />
         </exec>
 
         <delete dir="bundle/linux" />
@@ -208,7 +182,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         </copy>
 
         <replace file="bundle/macosx/UECIDE.app/Contents/Info.plist" token="{product.cap}" value="UECIDE" />
-        <replace file="bundle/macosx/UECIDE.app/Contents/Info.plist" token="{version}" value="${version}" />
+        <replace file="bundle/macosx/UECIDE.app/Contents/Info.plist" token="{version}" value="${Version}" />
 
         <copy file="dist/macosx/icon.icns" tofile="bundle/macosx/UECIDE.app/Contents/Resources/uecide.icns" overwrite="true" />
         <copy file="dist/macosx/doc.icns" tofile="bundle/macosx/UECIDE.app/Contents/Resources/doc.icns" overwrite="true" />
@@ -227,7 +201,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <arg value="-r" />
             <arg value="-apple" />
             <arg value="-o" />
-            <arg value="uecide-${version}-macosx.dmg" />
+            <arg value="uecide-${Version}-macosx.dmg" />
             <arg value="-dir-mode" />
             <arg value="0755" />
             <arg value="-file-mode" />
@@ -240,41 +214,41 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
     </target>
 
     <target name="windows-zip-lite" depends="build">
-        <mkdir dir="bundle/windows/uecide-${version}/lib" />
+        <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
-        <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows/uecide-${version}/" />
-        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${version}/UECIDE.exe" />
-        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${version}" />
-        <zip file="uecide-${version}-windows-lite.zip" basedir="bundle/windows/" />
+        <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows/uecide-${Version}/" />
+        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
+        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${Version}" />
+        <zip file="uecide-${Version}-windows-lite.zip" basedir="bundle/windows/" />
         <delete dir="windows" />
         <delete dir="bundle/windows" />
     </target>
 
     <target name="windows-zip-full" depends="build">
-        <mkdir dir="bundle/windows/uecide-${version}/lib" />
+        <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="tmp" />
         <mkdir dir="windows" /> 
         <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
-        <unzip dest="bundle/windows/uecide-${version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
-        <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${version}" />
-        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${version}/UECIDE.exe" />
-        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${version}" />
-        <zip file="uecide-${version}-windows-full.zip" basedir="bundle/windows/" />
+        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
+        <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" />
+        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
+        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${Version}" />
+        <zip file="uecide-${Version}-windows-full.zip" basedir="bundle/windows/" />
         <delete dir="windows" />
         <delete dir="bundle/windows" />
     </target>
 
     <target name="windows-exe-lite" depends="build">
-        <mkdir dir="bundle/windows/uecide-${version}/lib" />
+        <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
-        <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${version}" />
-        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${version}/UECIDE.exe" />
-        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${version}" />
+        <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" />
+        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
+        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${Version}" />
         <copy todir="bundle/windows" file="dist/windows/script.nsi" />
-        <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${version}" />
+        <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${Version}" />
         <replace file="bundle/windows/script.nsi" token="%TYPE%" value="lite" />
         <replace file="bundle/windows/script.nsi" token="%PRODUCT%" value="uecide" />
         <replace file="bundle/windows/script.nsi" token="%PRODUCTCAP%" value="UECIDE" />
@@ -283,24 +257,24 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <exec executable="makensis">
             <arg value="bundle/windows/script.nsi"/>
         </exec>
-        <copy file="bundle/windows/uecide-${version}-lite.exe" todir="." />
-        <delete file="bundle/windows/uecide-${version}-lite.exe"/>
+        <copy file="bundle/windows/uecide-${Version}-lite.exe" todir="." />
+        <delete file="bundle/windows/uecide-${Version}-lite.exe"/>
         <delete file="bundle/windows/script.nsi" />
         <delete dir="bundle/windows" />
         <delete dir="windows" />
     </target>
 
     <target name="windows-exe-full" depends="build">
-        <mkdir dir="bundle/windows/uecide-${version}/lib" />
+        <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
         <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
-        <unzip dest="bundle/windows/uecide-${version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
-        <copy file="uecide.jar" todir="bundle/windows/uecide-${version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${version}" />
-        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${version}/UECIDE.exe" />
-        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${version}" />
+        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
+        <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
+        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" />
+        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
+        <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${Version}" />
         <copy todir="bundle/windows" file="dist/windows/script.nsi" />
-        <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${version}" />
+        <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${Version}" />
         <replace file="bundle/windows/script.nsi" token="%TYPE%" value="full" />
         <replace file="bundle/windows/script.nsi" token="%PRODUCT%" value="uecide" />
         <replace file="bundle/windows/script.nsi" token="%PRODUCTCAP%" value="UECIDE" />
@@ -309,16 +283,16 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <exec executable="makensis">
             <arg value="bundle/windows/script.nsi"/>
         </exec>
-        <copy file="bundle/windows/uecide-${version}-full.exe" todir="." />
-        <delete file="bundle/windows/uecide-${version}-full.exe"/>
+        <copy file="bundle/windows/uecide-${Version}-full.exe" todir="." />
+        <delete file="bundle/windows/uecide-${Version}-full.exe"/>
         <delete file="bundle/windows/script.nsi" />
         <delete dir="bundle/windows" />
         <delete dir="windows" />
     </target>
 
-    <target name="all-dist" depends="linux-zip, windows-zip-lite, windows-exe-lite, windows-zip-full, windows-exe-full, macosx-dmg" />
+    <target name="dist" depends="linux-zip, windows-zip-lite, windows-exe-lite, windows-zip-full, windows-exe-full, bundle, macosx-dmg" />
 
-    <target name="dist-release" depends="all-dist" if="isRelease">
+    <target name="dist-release" depends="dist" if="isRelease">
         <move todir="/var/www/uecide/downloads">
             <fileset dir="." includes="uecide-*" />
         </move>
@@ -327,7 +301,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         </exec>
     </target>
 
-    <target name="dist-beta" depends="all-dist" if="isBeta">
+    <target name="dist-beta" depends="dist" if="isBeta">
         <move todir="/var/www/uecide/betadl">
             <fileset dir="." includes="uecide-*" />
         </move>
@@ -338,14 +312,11 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
 
     <target name="testMode">
         <condition property="isRelease">
-            <equals arg1="${mode}" arg2="release" casesensitive="false" />
+            <equals arg1="${Release}" arg2="release" casesensitive="false" />
         </condition>
         <condition property="isBeta">
-            <equals arg1="${mode}" arg2="beta" casesensitive="false" />
+            <equals arg1="${Release}" arg2="beta" casesensitive="false" />
         </condition>
-    </target>
-
-    <target name="dist" depends="testMode, dist-release, dist-beta">
     </target>
 
     <target name="tag">
@@ -354,7 +325,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <arg value="-m" />
             <arg value="Auto generated tag" />
             <arg value="-s" />
-            <arg value="${version}" />
+            <arg value="${Version}" />
         </exec>
         <exec executable="git">
             <arg value="push" />
@@ -363,7 +334,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
     </target>
 
     <target name="bundle" depends="build">
-        <launch4j configFile="UECIDE-l4j.xml" outfile="uecide-${version}-bundle.exe" />
+        <launch4j configFile="UECIDE-l4j.xml" outfile="uecide-${Version}-bundle.exe" />
     </target>
 
 </project>

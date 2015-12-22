@@ -91,6 +91,7 @@ public class Editor extends JFrame {
     JMenu serialPortsMenu;
     JMenu discoveredBoardsMenu;
     JMenu optionsMenu;
+    JMenu programmersSubmenu; 
 
     JToolBar toolbar;
     JToolBar treeToolBar;
@@ -105,9 +106,10 @@ public class Editor extends JFrame {
 
     Console console;
 
-    JTabbedPane editorTabs;
-    JTabbedPane projectTabs;
-    JTabbedPane sidebarTabs;
+    DnDTabbedPane editorTabs;
+    DnDTabbedPane projectTabs;
+    DnDTabbedPane sidebarTabs;
+    DnDTabbedPane consoleTabs;
 
     JScrollPane treeScroll;
     JScrollPane filesTreeScroll;
@@ -253,9 +255,10 @@ public class Editor extends JFrame {
         consolePanel.setLayout(new BorderLayout());
         statusBar.setLayout(new BorderLayout());
 
-        editorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-        projectTabs = new JTabbedPane(JTabbedPane.LEFT, JTabbedPane.SCROLL_TAB_LAYOUT);
-        sidebarTabs = new JTabbedPane(JTabbedPane.RIGHT, JTabbedPane.SCROLL_TAB_LAYOUT);
+        editorTabs = new DnDTabbedPane(); //JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        projectTabs = new DnDTabbedPane(); //JTabbedPane.LEFT, JTabbedPane.SCROLL_TAB_LAYOUT);
+        sidebarTabs = new DnDTabbedPane(); //JTabbedPane.RIGHT, JTabbedPane.SCROLL_TAB_LAYOUT);
+        consoleTabs = new DnDTabbedPane(); //JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
         editorTabs.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -323,7 +326,7 @@ public class Editor extends JFrame {
 
         consoleScroll.setViewportView(console);
 
-        consolePanel.add(consoleScroll);
+//        consolePanel.add(consoleScroll);
 
         toolbar = new JToolBar();
         treeToolBar = new JToolBar();
@@ -400,7 +403,13 @@ public class Editor extends JFrame {
 
         addPanelsToTabs(sidebarTabs, Plugin.TABS_SIDEBAR);
 
-        rotateTabLabels();
+        consolePanel.add(consoleTabs, BorderLayout.CENTER);
+
+        consoleTabs.add(consoleScroll, "Console");
+
+        addPanelsToTabs(consoleTabs, Plugin.TABS_CONSOLE);
+
+//        rotateTabLabels();
         
 
         updateToolbar();
@@ -2437,6 +2446,11 @@ public class Editor extends JFrame {
         return button;
     }
 
+    public boolean closeTab(Component c) {
+        System.err.println(c.getClass());
+        return false;
+    }
+
     public boolean closeTab(int tab) {
         if(tab == -1) return false;
 
@@ -2864,9 +2878,25 @@ public class Editor extends JFrame {
                 for(String group : catNames) {
                     TreeSet<Library>libs = Library.getLibraries(group, loadedSketch.getContext().getCore().getName());
 
-                    if(libs != null && libs.size() > 0) {
-                        JMenu top = new JMenu(Library.getCategoryName(group));
+                    if (libs == null) {
+                        libs = new TreeSet<Library>();
+                    }
 
+                    if (loadedSketch.getContext().getCore().get("core.alias") != null) {
+                        TreeSet<Library>aliasLibs = Library.getLibraries(group, loadedSketch.getContext().getCore().get("core.alias"));
+                        if (aliasLibs != null && aliasLibs.size() > 0) {
+
+                            for (Library l : aliasLibs) {
+                                if (!libs.contains(l)) {
+                                    libs.add(l);
+                                }
+                            }
+                        }
+                    }
+
+                    if(libs != null && libs.size() > 0) {
+
+                        JMenu top = new JMenu(Library.getCategoryName(group));
                         for(Library lib : libs) {
                             JMenu libMenu = new JMenu(lib.getName());
                             addSketchesFromFolder(libMenu, lib.getExamplesFolder());
@@ -3063,8 +3093,9 @@ public class Editor extends JFrame {
         Base.setFont(serialPortsMenu, "menu.entry");
         hardwareMenu.add(serialPortsMenu);
 
-        JMenu programmersSubmenu = new JMenu("Programmers");
+        programmersSubmenu = new JMenu("Programmers");
         populateProgrammersMenu(programmersSubmenu);
+
         Base.setFont(programmersSubmenu, "menu.entry");
         hardwareMenu.add(programmersSubmenu);
 
@@ -3253,6 +3284,7 @@ public class Editor extends JFrame {
     ButtonGroup boardMenuButtonGroup;
 
     public void populateProgrammersMenu(JMenu menu) {
+        menu.removeAll();
         TreeMap<String, String> programmers = loadedSketch.getProgrammerList();
         ButtonGroup programmerGroup = new ButtonGroup();
 
@@ -3975,7 +4007,7 @@ public class Editor extends JFrame {
         public void actionPerformed(ActionEvent e) {
             String lib = e.getActionCommand();
             insertStringAtStart(loadedSketch.getMainFile(), "#include <" + lib + ".h>\n");
-            loadedSketch.addLibraryToImportList(lib);
+//            loadedSketch.addLibraryToImportList(lib);
             updateLibrariesTree();
         }
     };
@@ -4163,13 +4195,14 @@ public class Editor extends JFrame {
     public void loadSketch(File f) {
         if(loadedSketch.isUntitled() && !isModified()) {
             closeAllTabs();
-            loadedSketch = new Sketch(f);
+            loadedSketch = new Sketch(f, this);
             loadedSketch.attachToEditor(this);
             filesTreeRoot.setUserObject(loadedSketch.getFolder());
             treeRoot.setUserObject(loadedSketch);
             updateAll();
 //            treeModel.nodeStructureChanged(treeRoot);
             openOrSelectFile(loadedSketch.getMainFile());
+            loadedSketch.loadConfig();
         } else {
             Base.createNewEditor(f.getPath());
         }
@@ -4180,7 +4213,7 @@ public class Editor extends JFrame {
     public static void updateLookAndFeel() {
         for(Editor e : editorList) {
             SwingUtilities.updateComponentTreeUI(e);
-            e.rotateTabLabels();
+//            e.rotateTabLabels();
             e.refreshScrolls();
         }
     }
@@ -4778,6 +4811,13 @@ public class Editor extends JFrame {
             } catch(AbstractMethodError e) {
             } catch(Exception e) {
             }
+        }
+    }
+
+    public void updateSketchConfig() {
+        if (loadedSketch.updateSketchConfig()) {
+            populateProgrammersMenu(programmersSubmenu);
+            populateOptionsMenu(optionsMenu);
         }
     }
         

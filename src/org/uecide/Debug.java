@@ -181,7 +181,6 @@ public class Debug {
     }
 
     public static void message(String s) {
-
         Thread t = Thread.currentThread();
         StackTraceElement[] st = t.getStackTrace();
         StackTraceElement caller = st[2];

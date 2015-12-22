@@ -33,7 +33,7 @@ package org.uecide;
 public class TreeUpdaterService extends Service {
     public TreeUpdaterService() {
         setName("Tree Updater");
-        setInterval(5000);
+        setInterval(1000);
     }
 
     public void setup() {

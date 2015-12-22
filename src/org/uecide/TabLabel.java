@@ -87,8 +87,8 @@ public class TabLabel extends JPanel {
 
         blab.addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
-                int tab = editor.getTabByFile(sketchFile);
-                editor.closeTab(tab);
+//                int tab = editor.getTabByFile(sketchFile);
+                editor.closeTab(TabLabel.this.getParent()); //tab);
             }
             public void mousePressed(MouseEvent e) {}
             public void mouseReleased(MouseEvent e) {}
@@ -138,6 +138,8 @@ public class TabLabel extends JPanel {
 
     public void update() {
         Font labelFont = nameLabel.getFont();
+        name = sketchFile.getName();
+        nameLabel.setText(name);
 
         if(modified) {
             Base.setFont(nameLabel, "tab.modified.label");
@@ -213,7 +215,7 @@ public class TabLabel extends JPanel {
     public void save() {
         int myTabNumber = editor.editorTabs.indexOfTabComponent(this);
         EditorBase eb = editor.getTab(myTabNumber);
-        Debug.message("Savibg tab " + name + " to " + sketchFile.getAbsolutePath());
+        Debug.message("Saving tab " + name + " to " + sketchFile.getAbsolutePath());
         eb.saveTo(sketchFile);
         expectedFileTime = sketchFile.lastModified();
         update();

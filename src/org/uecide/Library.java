@@ -802,5 +802,9 @@ public class Library implements Comparable {
         }
         return new PropertyFile();
     }
+
+    public File getSourceFolder() {
+        return sourceFolder;
+    }
 }
 

@@ -109,7 +109,6 @@ class JTattooBase extends LookAndFeel {
             Color c = theme.getColor("laf.jtattoo." + name);
             String cval = c.getRed() + " " + c.getGreen() + " " + c.getBlue();
             p.put(name, cval);
-            System.err.println("Setting property " + name + " to  " + cval);
         }
     }
 
@@ -118,7 +117,6 @@ class JTattooBase extends LookAndFeel {
         if (theme.get("laf.jtattoo." + name) != null) {
             int c = theme.getInteger("laf.jtattoo." + name);
             p.put(name, "" + c);
-            System.err.println("Setting property " + name + " to  " + c);
         }
     }
         
@@ -127,7 +125,6 @@ class JTattooBase extends LookAndFeel {
         if (theme.get("laf.jtattoo." + name) != null) {
             boolean c = theme.getBoolean("laf.jtattoo." + name);
             p.put(name, c ? "yes" : "no");
-            System.err.println("Setting property " + name + " to  " + c);
         }
     }
         
@@ -136,7 +133,6 @@ class JTattooBase extends LookAndFeel {
         if (theme.get("laf.jtattoo." + name) != null) {
             String c = theme.get("laf.jtattoo." + name);
             p.put(name, c);
-            System.err.println("Setting property " + name + " to  " + c);
         }
     }
         

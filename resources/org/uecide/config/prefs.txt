@@ -31,6 +31,10 @@ compiler.verbose_compile.type=checkbox
 compiler.verbose_compile.name=Verbose command execution
 compiler.verbose_compile.default=false
 
+compiler.verbose_files.type=checkbox
+compiler.verbose_files.name=List files as they are compiled
+compiler.verbose_files.default=false
+
 compiler.verbose_upload.type=checkbox
 compiler.verbose_upload.name=Verbose output during upload
 compiler.verbose_upload.default=false

@@ -256,6 +256,8 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
                 serialPort.removeEventListener();
                 serialPort.purgePort(1);
                 serialPort.purgePort(2);
+                serialPort.setDTR(false);
+                serialPort.setRTS(false);
                 serialPort.closePort();
             }
         } catch (Exception e) {
@@ -267,6 +269,8 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
             serialPort.openPort();
             serialPort.setParams(9600, 8, 1, 0);
             serialPort.addEventListener(this);
+            serialPort.setDTR(true);
+            serialPort.setRTS(true);
             return true;
         } catch (Exception e) {
             lastError = e.getMessage();
