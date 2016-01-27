@@ -72,7 +72,6 @@ public class Sketch {
     public Editor editor = null;    // The editor window the sketch is loaded in
     public File buildFolder;        // Where to build the sketch
     public String uuid;             // A globally unique ID for temporary folders etc
-    public PropertyFile configFile = null;  // File containing sketch configuration
 
     public String percentageFilter = null;
     public float percentageMultiplier = 1.0f;
@@ -225,6 +224,7 @@ public class Sketch {
 
         loadSketchFromFolder(path);
         buildFolder = createBuildFolder();
+
     }
 
     /**************************************************************************
@@ -425,7 +425,9 @@ public class Sketch {
             editor.updateAll();
         }
         if (getBoard() != null) {
-            Preferences.set("board." + getBoard().getName() + ".port", getDevice().toString());
+            if (getDevice() != null) {
+                Preferences.set("board." + getBoard().getName() + ".port", getDevice().toString());
+            }
         }
     }
 
@@ -433,6 +435,21 @@ public class Sketch {
         editor = e;
         editor.setTitle(Base.theme.get("product.cap") + " | " + sketchName);
         ctx.setEditor(e);
+        if (editor != null) {
+            PropertyFile props = ctx.getMerged();
+            if (props.get("sketch.window.x") != null) {
+                editor.setXPosition(props.getInteger("sketch.window.x"));
+            }
+            if (props.get("sketch.window.y") != null) {
+                editor.setYPosition(props.getInteger("sketch.window.y"));
+            }
+            if (props.get("sketch.window.w") != null) {
+                editor.setWidth(props.getInteger("sketch.window.w"));
+            }
+            if (props.get("sketch.window.h") != null) {
+                editor.setHeight(props.getInteger("sketch.window.h"));
+            }
+        }
     }
 
 
@@ -558,45 +575,44 @@ public class Sketch {
         if(selectedBoard != null) {
             String portName = Preferences.get("board." + selectedBoard.getName() + ".port");
 
-            if (portName == null) {
-                return;
-            }
+            if (portName != null) {
 
+                CommunicationPort p = null;
 
-            CommunicationPort p = null;
-
-            for (CommunicationPort dev : Base.communicationPorts) {
-                if (dev.toString().equals(portName)) {
-                    p = dev;
-                    break;
+                for (CommunicationPort dev : Base.communicationPorts) {
+                    if (dev.toString().equals(portName)) {
+                        p = dev;
+                        break;
+                    }
                 }
-            }
 
-            if (p == null) {
-                // Let's add a missing device - it can always be removed later.
-                if (portName.startsWith("ssh://")) {
-                    p = new SSHCommunicationPort(portName, selectedBoard);
-                    Base.communicationPorts.add(p);
-                } else {
-                    p = new SerialCommunicationPort(portName);
+                if (p == null) {
+                    // Let's add a missing device - it can always be removed later.
+                    if (portName.startsWith("ssh://")) {
+                        p = new SSHCommunicationPort(portName, selectedBoard);
+                        Base.communicationPorts.add(p);
+                    } else {
+                        p = new SerialCommunicationPort(portName);
+                    }
                 }
-            }
 
-            setDevice(p);
+                setDevice(p);
+            } else {
+                setDevice((CommunicationPort)null);
+            } 
         } else {
             setDevice((CommunicationPort)null);
         }
 
         updateSketchConfig();
 
-
-
-
         updateLibraryList();
 
         if(editor != null) {
             editor.fireEvent(UEvent.SKETCH_OPEN);
         }
+
+        loadConfig();
     }
 
     public boolean loadFile(File f) {
@@ -1834,27 +1850,7 @@ public class Sketch {
 
         saveAllFiles();
         Debug.message("All saved");
-        saveConfig();
         return true;
-    }
-
-    public void saveConfig() {
-//        if(isUntitled()) {
-//            return;
-//        }
-//
-//        if(parentIsProtected()) {
-//            return;
-//        }
-//
-//        if (configFile == null) {
-//            return;
-//        }
-//
-//        if(configFile.size() > 0) {
-//            Debug.message("Saving config");
-//            configFile.save();
-//        }
     }
 
     public String getName() {
@@ -4180,9 +4176,8 @@ public class Sketch {
 
     public void loadConfig() {
         PropertyFile m = ctx.getMerged();
-
-        if (m.get("default.board") != null) {
-            String wantedBoard = m.get("default.board");
+        if (m.get("sketch.board") != null) {
+            String wantedBoard = m.get("sketch.board");
             Board b = Base.getBoard(wantedBoard);
             if (b == null) {
                 ctx.error("This sketch is set to use the board '" + wantedBoard + "' by default, but that board is not installed.");
@@ -4193,8 +4188,8 @@ public class Sketch {
             }
         }
 
-        if (m.get("default.core") != null) {
-            String wantedCore = m.get("default.core");
+        if (m.get("sketch.core") != null) {
+            String wantedCore = m.get("sketch.core");
             Core c = Base.getCore(wantedCore);
             if (c == null) {
                 ctx.error("This sketch is set to use the core '" + wantedCore + "' by default, but that core is not installed.");
@@ -4205,8 +4200,8 @@ public class Sketch {
             }
         }
 
-        if (m.get("default.compiler") != null) {
-            String wantedCompiler = m.get("default.compiler");
+        if (m.get("sketch.compiler") != null) {
+            String wantedCompiler = m.get("sketch.compiler");
             Compiler c = Base.getCompiler(wantedCompiler);
             if (c == null) {
                 ctx.error("This sketch is set to use the compiler '" + wantedCompiler + "' by default, but that compiler is not installed.");
@@ -4217,12 +4212,12 @@ public class Sketch {
             }
         }
 
-        if (m.get("default.programmer") != null) {
-            setProgrammer(m.get("default.programmer"));
+        if (m.get("sketch.programmer") != null) {
+            setProgrammer(m.get("sketch.programmer"));
         }
 
-        if (m.get("default.port") != null) {
-            setDevice(m.get("default.port"));
+        if (m.get("sketch.port") != null) {
+            setDevice(m.get("sketch.port"));
         }
 
     }
@@ -4369,11 +4364,9 @@ public class Sketch {
     }
 
     public ImageIcon getIcon() {
-        if (configFile == null) {
-            return null;
-        }
-        if ((configFile.get("icon") != null) && !(configFile.get("icon").equals(""))) {
-            File iconFile = new File(sketchFolder, configFile.get("icon"));
+        PropertyFile m = ctx.getMerged();
+        if ((m.get("sketch.icon") != null) && !(m.get("sketch.icon").equals(""))) {
+            File iconFile = new File(sketchFolder, m.get("sketch.icon"));
             if (iconFile.exists()) {
                 return Base.loadIconFromFile(iconFile);
             }
@@ -4595,6 +4588,10 @@ public class Sketch {
             return true;
         }
         return false;
+    }
+
+    public Editor getEditor() { 
+        return editor;
     }
 
 }

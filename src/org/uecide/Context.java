@@ -1135,4 +1135,16 @@ public class Context {
             sketchSettings = new PropertyFile();
         }
     }
+
+    public void saveSketchSettings() {
+        if (sketch == null) {
+            return;
+        }
+        File f = new File(sketch.getFolder(), "sketch.cfg");
+        sketchSettings.save(f);
+    }
+
+    public PropertyFile getSketchSettings() {
+        return sketchSettings;
+    }
 }

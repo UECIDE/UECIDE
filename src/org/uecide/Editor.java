@@ -223,7 +223,6 @@ public class Editor extends JFrame {
         super();
         Editor.registerEditor(this);
         loadedSketch = s;
-        s.attachToEditor(this);
 
         for(Class<?> plugin : Base.plugins.values()) {
             try {
@@ -519,6 +518,7 @@ public class Editor extends JFrame {
                 b.setBorderPainted(false);
             }
         }
+        s.attachToEditor(this);
         this.setVisible(true);
 
     }
@@ -2674,7 +2674,6 @@ public class Editor extends JFrame {
             }
         }
 
-        loadedSketch.saveConfig();
         refreshTreeModel();
     }
 
@@ -4821,5 +4820,28 @@ public class Editor extends JFrame {
         }
     }
         
+    public void setXPosition(int x) {
+        Point p = getLocation(null);
+        p.x = x;
+        setLocation(p);
+    }
+
+    public void setYPosition(int y) {
+        Point p = getLocation(null);
+        p.y = y;
+        setLocation(p);
+    }
+
+    public void setWidth(int w) {
+        Dimension d = getSize(null);
+        d.width = w;
+        setSize(d);
+    }
+
+    public void setHeight(int h) {
+        Dimension d = getSize(null);
+        d.height = h;
+        setSize(d);
+    }
 }
 

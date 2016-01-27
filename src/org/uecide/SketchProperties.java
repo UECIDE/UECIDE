@@ -68,6 +68,7 @@ public class SketchProperties extends JDialog {
 
     JButton saveButton;
     JButton cancelButton;
+    JCheckBox winPos;
 
     JTabbedPane tabs;
     JPanel overviewPane;
@@ -111,6 +112,7 @@ public class SketchProperties extends JDialog {
 
         buttonBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
+
         saveButton = new JButton("OK");
         saveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -136,20 +138,22 @@ public class SketchProperties extends JDialog {
         overviewPane = new JPanel();
         overviewPane.setLayout(new BoxLayout(overviewPane, BoxLayout.PAGE_AXIS));
         overviewPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        addTextField(overviewPane, "author", "Sketch author:");
-        addTextArea(overviewPane, "summary", "Summary:");
-        addTextArea(overviewPane, "license", "Copyright / License:");
+        addTextField(overviewPane, "sketch.author", "Sketch author:");
+        addTextArea(overviewPane, "sketch.summary", "Summary:");
+        addTextArea(overviewPane, "sketch.license", "Copyright / License:");
+        winPos = new JCheckBox("Save Window Position");
+        overviewPane.add(winPos);
         tabs.add("Overview", overviewPane);
 
 
         objectsPane = new JPanel();
         objectsPane.setLayout(new BoxLayout(objectsPane, BoxLayout.PAGE_AXIS));
         objectsPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        addTextField(objectsPane, "board", "Board:");
-        addTextField(objectsPane, "core", "Core:");
-        addTextField(objectsPane, "compiler", "Compiler:");
-        addTextField(objectsPane, "port", "Serial port:");
-        addTextField(objectsPane, "programmer", "Programmer:");
+        addTextField(objectsPane, "sketch.board", "Board:");
+        addTextField(objectsPane, "sketch.core", "Core:");
+        addTextField(objectsPane, "sketch.compiler", "Compiler:");
+        addTextField(objectsPane, "sketch.port", "Serial port:");
+        addTextField(objectsPane, "sketch.programmer", "Programmer:");
         JButton setDef = new JButton("Set to current IDE values");
         setDef.setMaximumSize(setDef.getPreferredSize());
         setDef.addActionListener(new ActionListener() {
@@ -171,22 +175,34 @@ public class SketchProperties extends JDialog {
     }
 
     void addTextField(JPanel panel, String key, String label) {
+        Context ctx = sketch.getContext();
+        PropertyFile configFile = ctx.getSketchSettings();
         JLabel lab = new JLabel(label);
         lab.setAlignmentX(LEFT_ALIGNMENT);
         panel.add(lab);
         JTextField field = new JTextField();
-        field.setText(sketch.configFile.get(key));
+        String content = "";
+        if (configFile.get(key) != null) {
+            content = configFile.get(key);
+        }
+        field.setText(content);
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, field.getPreferredSize().height));
         fields.put(key, field);
         panel.add(field);
     }
 
     void addTextArea(JPanel panel, String key, String label) {
+        Context ctx = sketch.getContext();
+        PropertyFile configFile = ctx.getSketchSettings();
         JLabel lab = new JLabel(label);
         lab.setAlignmentX(LEFT_ALIGNMENT);
         panel.add(lab);
         JTextArea field = new JTextArea();
-        field.setText(sketch.configFile.get(key));
+        String content = "";
+        if (configFile.get(key) != null) {
+            content = configFile.get(key);
+        }
+        field.setText(content);
         field.setLineWrap(true);
         field.setWrapStyleWord(true);
         fields.put(key, field);
@@ -196,14 +212,29 @@ public class SketchProperties extends JDialog {
     }
 
     public void setObjectValues() {
-        ((JTextField)(fields.get("board"))).setText(sketch.getBoard().getName());
-        ((JTextField)(fields.get("core"))).setText(sketch.getCore().getName());
-        ((JTextField)(fields.get("compiler"))).setText(sketch.getCompiler().getName());
-        ((JTextField)(fields.get("port"))).setText(sketch.getDevice().toString());
-        ((JTextField)(fields.get("programmer"))).setText(sketch.getProgrammer());
+        String brd = "";
+        String cre = "";
+        String cmp = "";
+        String dev = "";
+        String prg = "";
+
+        if (sketch.getBoard() != null) brd = sketch.getBoard().getName();
+        if (sketch.getCore() != null) cre = sketch.getCore().getName();
+        if (sketch.getCompiler() != null) cmp = sketch.getCompiler().getName();
+        if (sketch.getDevice() != null) dev = sketch.getDevice().toString();
+        if (sketch.getProgrammer() != null) prg = sketch.getProgrammer();
+ 
+        ((JTextField)(fields.get("sketch.board"))).setText(brd);
+        ((JTextField)(fields.get("sketch.core"))).setText(cre);
+        ((JTextField)(fields.get("sketch.compiler"))).setText(cmp);
+        ((JTextField)(fields.get("sketch.port"))).setText(dev);
+        ((JTextField)(fields.get("sketch.programmer"))).setText(prg);
     }
 
     public void save() {
+        Context ctx = sketch.getContext();
+        PropertyFile cf = ctx.getSketchSettings();
+
         for(String key : fields.keySet()) {
             JComponent comp = fields.get(key);
 
@@ -211,21 +242,41 @@ public class SketchProperties extends JDialog {
                 JTextField c = (JTextField)comp;
 
                 if(c.getText().trim().equals("")) {
-                    sketch.configFile.unset(key);
+                    cf.unset(key);
                 } else {
-                    sketch.configFile.set(key, c.getText());
+                    cf.set(key, c.getText());
                 }
             } else if(comp instanceof JTextArea) {
                 JTextArea c = (JTextArea)comp;
 
                 if(c.getText().trim().equals("")) {
-                    sketch.configFile.unset(key);
+                    cf.unset(key);
                 } else {
-                    sketch.configFile.set(key, c.getText());
+                    cf.set(key, c.getText());
                 }
             }
         }
 
-        sketch.saveConfig();
+        if (winPos.isSelected()) {
+            saveWinPos();
+        }
+
+        ctx.saveSketchSettings();
+    }
+
+    public void saveWinPos() {
+        Editor e = sketch.getEditor();
+        if (e == null) {
+            return;
+        }
+        Point p = e.getLocation(null);
+        Dimension d = e.getSize(null);
+        Context ctx = sketch.getContext();
+        PropertyFile cf = ctx.getSketchSettings();
+
+        cf.setInteger("sketch.window.x", p.x);
+        cf.setInteger("sketch.window.y", p.y);
+        cf.setInteger("sketch.window.w", d.width);
+        cf.setInteger("sketch.window.h", d.height);
     }
 }

@@ -246,6 +246,12 @@ public class PropertyFile {
         }
     }
 
+    // Register a new backing file and save to it.
+    public void save(File f) {
+        userFile = f;
+        save();
+    }
+
     /*! Save the properties out to the currently registered backing file */
     public void save() {
         if(userFile != null) {
