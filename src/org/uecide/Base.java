@@ -717,7 +717,7 @@ public class Base implements AptPercentageListener {
             }
         }
 
-        if(loadLastSketch) {
+        if(loadLastSketch || Preferences.getBoolean("editor.save.loadlast")) {
             File lastFile = MRUList.get(0);
 
             if(lastFile != null) {

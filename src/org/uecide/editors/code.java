@@ -390,7 +390,7 @@ public class code extends JPanel implements EditorBase {
 
         PropertyFile theme = Base.getTheme();
 
-        textArea.setMarkOccurrences(true);
+        textArea.setMarkOccurrences(Preferences.getBoolean("editor.mark"));
 
         if(Preferences.get("editor.tabs.size") != null) {
             int ts = Preferences.getInteger("editor.tabs.size");

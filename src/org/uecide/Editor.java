@@ -3543,13 +3543,26 @@ public class Editor extends JFrame {
         javax.swing.filechooser.FileFilter filter = new SarFileFilter();
         fc.setFileFilter(filter);
 
-        fc.setCurrentDirectory(Base.getSketchbookFolder());
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.importsar");
+            if (loc == null) {
+                loc = Base.getSketchbookFolder();
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(Base.getSketchbookFolder());
+        }
 
         int rv = fc.showOpenDialog(this);
 
         if(rv == JFileChooser.APPROVE_OPTION) {
             try {
                 File sarFile = fc.getSelectedFile();
+
+                if (Preferences.getBoolean("editor.save.remloc")) {
+                    Preferences.setFile("editor.locations.importsar", sarFile.getParentFile());
+                }
+
                 JarFile sarfile = new JarFile(sarFile);
                 Manifest manifest = sarfile.getManifest();
                 Attributes manifestContents = manifest.getMainAttributes();
@@ -3858,10 +3871,23 @@ public class Editor extends JFrame {
         fc.setFileFilter(filter);
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.exportsar");
+            if (loc == null) {
+                loc = Base.getSketchbookFolder();
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(Base.getSketchbookFolder());
+        }
+
         int rv = fc.showSaveDialog(this);
 
         if(rv == JFileChooser.APPROVE_OPTION) {
             newFile = fc.getSelectedFile();
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                Preferences.setFile("editor.locations.exportsar", newFile.getParentFile());
+            }
             loadedSketch.generateSarFile(newFile);
         }
     }
@@ -3874,7 +3900,16 @@ public class Editor extends JFrame {
         javax.swing.filechooser.FileView view = new SketchFileView();
         fc.setFileView(view);
 
-        fc.setCurrentDirectory(Base.getSketchbookFolder());
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.savesketch");
+            if (loc == null) {
+                loc = Base.getSketchbookFolder();
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(Base.getSketchbookFolder());
+        }
+        
         fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
         int rv = fc.showSaveDialog(this);
@@ -3896,6 +3931,9 @@ public class Editor extends JFrame {
                 newFile.delete();
             }
 
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                Preferences.setFile("editor.locations.savesketch", newFile.getParentFile());
+            }
             loadedSketch.saveAs(newFile);
         }
     }
@@ -3959,17 +3997,23 @@ public class Editor extends JFrame {
             fc.setFileFilter(filter);
         }
 
-        if(importFileDefaultDir == null) {
-            importFileDefaultDir = new File(System.getProperty("user.dir"));
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.importfile");
+            if (loc == null) {
+                loc = new File(System.getProperty("user.dir"));
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
         }
-
-        fc.setCurrentDirectory(importFileDefaultDir);
-
+        
         int r = fc.showOpenDialog(this);
 
         if(r == JFileChooser.APPROVE_OPTION) {
             File src = fc.getSelectedFile();
-            importFileDefaultDir = src.getParentFile();
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                Preferences.setFile("editor.locations.importfile", src.getParentFile());
+            }
 
             if(!src.exists()) {
                 JOptionPane.showMessageDialog(this, "Cannot find file", "Unable to find the file " + src.getName(), JOptionPane.ERROR_MESSAGE);
@@ -4175,7 +4219,15 @@ public class Editor extends JFrame {
         javax.swing.filechooser.FileView view = new SketchFileView();
         fc.setFileView(view);
 
-        fc.setCurrentDirectory(Base.getSketchbookFolder());
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.opensketch");
+            if (loc == null) {
+                loc = Base.getSketchbookFolder();
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(Base.getSketchbookFolder());
+        }
 
         int rv = fc.showOpenDialog(this);
 
@@ -4183,6 +4235,9 @@ public class Editor extends JFrame {
             // Convert the DefaultShellFolder into a File object via a string representation
             // of the path
             File f = new File(fc.getSelectedFile().getAbsolutePath());
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                Preferences.setFile("editor.locations.opensketch", f.getParentFile());
+            }
             loadSketch(f);
         }
     }
@@ -4283,6 +4338,16 @@ public class Editor extends JFrame {
             }
         });
 
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.importlib");
+            if (loc == null) {
+                loc = Base.getSketchbookFolder();
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(Base.getSketchbookFolder());
+        }
+
         int rv = fc.showOpenDialog(this);
 
         if(rv == JFileChooser.APPROVE_OPTION) {
@@ -4290,6 +4355,9 @@ public class Editor extends JFrame {
             if (fc.getSelectedFile() == null) {
                 error("Open seems to have been cancelled. Aborting");
                 return;
+            }
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                Preferences.setFile("editor.locations.importlib", fc.getSelectedFile().getParentFile());
             }
             message("Analyzing " + fc.getSelectedFile().getName() + "...");
 
@@ -4511,11 +4579,24 @@ public class Editor extends JFrame {
             }
         });
 
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.extractzip");
+            if (loc == null) {
+                loc = Base.getSketchbookFolder();
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(Base.getSketchbookFolder());
+        }
+
         int rv = fc.showOpenDialog(this);
 
         if(rv == JFileChooser.APPROVE_OPTION) {
             setCursor(new Cursor(Cursor.WAIT_CURSOR));
             File zipFile = fc.getSelectedFile();
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                Preferences.setFile("editor.locations.extractzip", zipFile.getParentFile());
+            }
 
             try {
                 ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
@@ -4748,10 +4829,23 @@ public class Editor extends JFrame {
             fc.setFileFilter(filter);
             fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                File loc = Preferences.getFile("editor.locations.exportlib");
+                if (loc == null) {
+                    loc = Base.getSketchbookFolder();
+                }
+                fc.setCurrentDirectory(loc);
+            } else {
+                fc.setCurrentDirectory(Base.getSketchbookFolder());
+            }
+
             int rv = fc.showSaveDialog(this);
 
             if(rv == JFileChooser.APPROVE_OPTION) {
                 File archiveFile = fc.getSelectedFile();
+                if (Preferences.getBoolean("editor.save.remloc")) {
+                    Preferences.setFile("editor.locations.exportlib", archiveFile.getParentFile());
+                }
 
                 if(archiveFile.exists()) {
                     archiveFile.delete(); // Confirm!!!
