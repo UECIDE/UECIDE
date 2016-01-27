@@ -66,7 +66,7 @@ editor.external.type=section
 editor.find.name=Find & Replace
 editor.find.type=section
 
-editor.save.name=Save
+editor.save.name=Load/Save
 editor.save.type=section
 
 editor.tabs.name=Tabs
@@ -75,6 +75,9 @@ editor.tabs.type=section
 editor.toolbars.name=Toolbars
 editor.toolbars.type=section
 
+editor.mark.name=Automatically mark all occurrences of the current word
+editor.mark.type=checkbox
+editor.mark.default=true
 
 editor.dialog.crash.name=Enable crash reporter
 editor.dialog.crash.type=checkbox
@@ -91,6 +94,14 @@ editor.external.command.default=
 editor.find.keep.name=Keep Find & Replace permanantly open
 editor.find.keep.type=checkbox
 editor.find.keep.default=false
+
+editor.save.loadlast.name=Open last sketch automatically
+editor.save.loadlast.type=checkbox
+editor.save.loadlast.default=false
+
+editor.save.remloc.name=Remember last load/save location for file dialogs
+editor.save.remloc.type=checkbox
+editor.save.remloc.default=false
 
 editor.save.auto.name=Automatically save sketch before each compile
 editor.save.auto.type=checkbox
