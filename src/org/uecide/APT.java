@@ -434,6 +434,7 @@ public class APT {
         initRepository();
     }
     public void installPackage(Package p) {
+System.out.println("Installing " + p.getName());
         Package[] deps = resolveDepends(p);
         for (Package dep : deps) {
             if (!isInstalled(dep)) {
@@ -462,6 +463,7 @@ public class APT {
         String reps[] = p.getReplaces();
         if (reps != null) {
             for (String rep : reps) {
+System.err.println("Replace: " + rep);
                 Package rp = getPackage(rep);
                 if (isInstalled(rp)) {
                     uninstallPackage(rp, true);
@@ -564,7 +566,7 @@ public class APT {
                             dirs.add(f);
                         }
                         done++;
-                        p.reportPercentage((done * 50) / fcount);
+                        p.reportPercentage((done * 100) / fcount);
                     }
 
                     Collections.sort(dirs);
@@ -576,7 +578,7 @@ public class APT {
                     for (File dir : dirs) {
                         dir.delete();
                         done++;
-                        p.reportPercentage(50 + ((done * 50) / fcount));
+//                        p.reportPercentage(50 + ((done * 50) / fcount));
                     }
 
                     plist.delete();
@@ -709,5 +711,9 @@ public class APT {
         }
         return madeChanges;
         
+    }
+
+    public Collection<Package> getInstalledPackages() {
+        return installedPackages.values();
     }
 }

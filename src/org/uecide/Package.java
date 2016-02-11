@@ -184,6 +184,7 @@ public class Package implements Comparable, Serializable {
 
     public String[] getReplaces() {
         String deps = properties.get("Replaces");
+System.out.println("Replaces: " + deps);
         if (deps == null) {
             return null;
         }
@@ -321,11 +322,13 @@ public class Package implements Comparable, Serializable {
                 return false;
             }
 
+            System.out.println("Extracting " + getFilename());
 
             FileInputStream fis = new FileInputStream(src);
             ArArchiveInputStream ar = new ArArchiveInputStream(fis);
 
             ArArchiveEntry file = ar.getNextArEntry();
+            int dataFileSize = 0;
             while (file != null) {
                 long size = file.getSize();
                 String name = file.getName();
@@ -342,6 +345,13 @@ public class Package implements Comparable, Serializable {
                             byte[] data = new byte[tsize];
                             tar.read(data, 0, tsize);
                             control = new String(data, "UTF-8");
+                            String[] lines = control.split("\n");
+                            for (String line : lines) {
+                                if (line.startsWith("Installed-Size: ")) {
+                                    String iss = line.substring(16);
+                                    dataFileSize = Integer.parseInt(iss) * 1024;
+                                }
+                            }
                         }
                         te = tar.getNextTarEntry();
                     }
@@ -349,189 +359,21 @@ public class Package implements Comparable, Serializable {
                 }
 
                 if (name.equals("data.tar.gz")) {
-                    HashMap<String, String> symbolicLinks = new HashMap<String, String>();
                     GzipCompressorInputStream gzip = new GzipCompressorInputStream(ar);
                     TarArchiveInputStream tar = new TarArchiveInputStream(gzip);
-                    TarArchiveEntry te = tar.getNextTarEntry();
-                    while (te != null) {
-                        int tsize = (int)te.getSize();
-                        String tname = te.getName();
-                        if (pct != null) {
-                            long done = src.length() - (long)fis.available();
-                            int tpct = (int)((done * 100L) / src.length());
-                            reportPercentage(tpct);
-                        }
-
-                        File dest = new File(root, tname);
-                        if (te.isDirectory()) {
-                            dest.mkdirs();
-                            installedFiles.put(dest.getAbsolutePath(), -1);
-                        } else if (te.isLink()) {
-                            String linkdest = te.getLinkName();
-                            symbolicLinks.put(tname, linkdest);
-                        } else if (te.isSymbolicLink()) {
-                            String linkdest = te.getLinkName();
-                            symbolicLinks.put(tname, linkdest);
-                        } else {
-                            byte[] buffer = new byte[1024];
-                            int nread;
-                            int toRead = tsize;
-                            FileOutputStream fos = new FileOutputStream(dest);
-                            while ((nread = tar.read(buffer, 0, toRead > 1024 ? 1024 : toRead)) > 0) {
-                                toRead -= nread;
-                                fos.write(buffer, 0, nread);
-                            }
-                            fos.close();
-                            dest.setExecutable((te.getMode() & 0100) == 0100);
-                            dest.setWritable((te.getMode() & 0200) == 0200);
-                            dest.setReadable((te.getMode() & 0400) == 0400);
-                            installedFiles.put(dest.getAbsolutePath(), tsize);
-                        }
-                        te = tar.getNextTarEntry();
-                    }
-                    for (String link : symbolicLinks.keySet()) {
-                        String tgt = symbolicLinks.get(link);
-                        File linkFile = new File(root, link);
-                        File linkParent = linkFile.getParentFile();
-                        File tgtFile = new File(linkParent, tgt);
-                        FileInputStream copyFrom = new FileInputStream(tgtFile);
-                        FileOutputStream copyTo = new FileOutputStream(linkFile);
-                        byte[] copyBuffer = new byte[1024];
-                        int bytesCopied = 0;
-
-                        while ((bytesCopied = copyFrom.read(copyBuffer, 0, 1024)) > 0) {
-                            copyTo.write(copyBuffer, 0, bytesCopied);
-                        }
-                        copyFrom.close();
-                        copyTo.close();
-                        linkFile.setExecutable(tgtFile.canExecute());
-                        linkFile.setReadable(tgtFile.canRead());
-                        linkFile.setWritable(tgtFile.canWrite());
-                    }
+                    installedFiles = extractTarFile(tar, root, dataFileSize);
                 }
                     
                 if (name.equals("data.tar.xz")) {
-                    HashMap<String, String> symbolicLinks = new HashMap<String, String>();
-                    XZCompressorInputStream gzip = new XZCompressorInputStream(ar);
-                    TarArchiveInputStream tar = new TarArchiveInputStream(gzip);
-                    TarArchiveEntry te = tar.getNextTarEntry();
-                    while (te != null) {
-                        int tsize = (int)te.getSize();
-                        String tname = te.getName();
-                        if (pct != null) {
-                            long done = src.length() - (long)fis.available();
-                            int tpct = (int)((done * 100L) / src.length());
-                            reportPercentage(tpct);
-                        }
-
-                        File dest = new File(root, tname);
-                        if (te.isDirectory()) {
-                            dest.mkdirs();
-                            installedFiles.put(dest.getAbsolutePath(), -1);
-                        } else if (te.isLink()) {
-                            String linkdest = te.getLinkName();
-                            symbolicLinks.put(tname, linkdest);
-                        } else if (te.isSymbolicLink()) {
-                            String linkdest = te.getLinkName();
-                            symbolicLinks.put(tname, linkdest);
-                        } else {
-                            byte[] buffer = new byte[1024];
-                            int nread;
-                            int toRead = tsize;
-                            FileOutputStream fos = new FileOutputStream(dest);
-                            while ((nread = tar.read(buffer, 0, toRead > 1024 ? 1024 : toRead)) > 0) {
-                                toRead -= nread;
-                                fos.write(buffer, 0, nread);
-                            }
-                            fos.close();
-                            dest.setExecutable((te.getMode() & 0100) == 0100);
-                            dest.setWritable((te.getMode() & 0200) == 0200);
-                            dest.setReadable((te.getMode() & 0400) == 0400);
-                            installedFiles.put(dest.getAbsolutePath(), tsize);
-                        }
-                        te = tar.getNextTarEntry();
-                    }
-                    for (String link : symbolicLinks.keySet()) {
-                        String tgt = symbolicLinks.get(link);
-                        File linkFile = new File(root, link);
-                        File linkParent = linkFile.getParentFile();
-                        File tgtFile = new File(linkParent, tgt);
-                        FileInputStream copyFrom = new FileInputStream(tgtFile);
-                        FileOutputStream copyTo = new FileOutputStream(linkFile);
-                        byte[] copyBuffer = new byte[1024];
-                        int bytesCopied = 0;
-
-                        while ((bytesCopied = copyFrom.read(copyBuffer, 0, 1024)) > 0) {
-                            copyTo.write(copyBuffer, 0, bytesCopied);
-                        }
-                        copyFrom.close();
-                        copyTo.close();
-                        linkFile.setExecutable(tgtFile.canExecute());
-                        linkFile.setReadable(tgtFile.canRead());
-                        linkFile.setWritable(tgtFile.canWrite());
-                    }
+                    XZCompressorInputStream xzip = new XZCompressorInputStream(ar);
+                    TarArchiveInputStream tar = new TarArchiveInputStream(xzip);
+                    installedFiles = extractTarFile(tar, root, dataFileSize);
                 }
 
                 if (name.equals("data.tar.bz2")) {
-                    HashMap<String, String> symbolicLinks = new HashMap<String, String>();
-                    BZip2CompressorInputStream gzip = new BZip2CompressorInputStream(ar);
-                    TarArchiveInputStream tar = new TarArchiveInputStream(gzip);
-                    TarArchiveEntry te = tar.getNextTarEntry();
-                    while (te != null) {
-                        int tsize = (int)te.getSize();
-                        String tname = te.getName();
-                        if (pct != null) {
-                            long done = src.length() - (long)fis.available();
-                            int tpct = (int)((done * 100L) / src.length());
-                            reportPercentage(tpct);
-                        }
-
-                        File dest = new File(root, tname);
-                        if (te.isDirectory()) {
-                            dest.mkdirs();
-                            installedFiles.put(dest.getAbsolutePath(), -1);
-                        } else if (te.isLink()) {
-                            String linkdest = te.getLinkName();
-                            symbolicLinks.put(tname, linkdest);
-                        } else if (te.isSymbolicLink()) {
-                            String linkdest = te.getLinkName();
-                            symbolicLinks.put(tname, linkdest);
-                        } else {
-                            byte[] buffer = new byte[1024];
-                            int nread;
-                            int toRead = tsize;
-                            FileOutputStream fos = new FileOutputStream(dest);
-                            while ((nread = tar.read(buffer, 0, toRead > 1024 ? 1024 : toRead)) > 0) {
-                                toRead -= nread;
-                                fos.write(buffer, 0, nread);
-                            }
-                            fos.close();
-                            dest.setExecutable((te.getMode() & 0100) == 0100);
-                            dest.setWritable((te.getMode() & 0200) == 0200);
-                            dest.setReadable((te.getMode() & 0400) == 0400);
-                            installedFiles.put(dest.getAbsolutePath(), tsize);
-                        }
-                        te = tar.getNextTarEntry();
-                    }
-                    for (String link : symbolicLinks.keySet()) {
-                        String tgt = symbolicLinks.get(link);
-                        File linkFile = new File(root, link);
-                        File linkParent = linkFile.getParentFile();
-                        File tgtFile = new File(linkParent, tgt);
-                        FileInputStream copyFrom = new FileInputStream(tgtFile);
-                        FileOutputStream copyTo = new FileOutputStream(linkFile);
-                        byte[] copyBuffer = new byte[1024];
-                        int bytesCopied = 0;
-
-                        while ((bytesCopied = copyFrom.read(copyBuffer, 0, 1024)) > 0) {
-                            copyTo.write(copyBuffer, 0, bytesCopied);
-                        }
-                        copyFrom.close();
-                        copyTo.close();
-                        linkFile.setExecutable(tgtFile.canExecute());
-                        linkFile.setReadable(tgtFile.canRead());
-                        linkFile.setWritable(tgtFile.canWrite());
-                    }
+                    BZip2CompressorInputStream bzip = new BZip2CompressorInputStream(ar);
+                    TarArchiveInputStream tar = new TarArchiveInputStream(bzip);
+                    installedFiles = extractTarFile(tar, root, dataFileSize);
                 }
 
                 file = ar.getNextArEntry();
@@ -572,6 +414,74 @@ public class Package implements Comparable, Serializable {
             }
             pct.updatePercentage(this, p);
         }
+    }
+
+    HashMap<String, Integer> extractTarFile(TarArchiveInputStream tar, File root, int dataFileSize) {
+        HashMap<String, Integer> installedFiles = new HashMap<String, Integer>();
+        HashMap<String, String> symbolicLinks = new HashMap<String, String>();
+        try {
+            TarArchiveEntry te = tar.getNextTarEntry();
+
+            int copied = 0;
+            while (te != null) {
+                int tsize = (int)te.getSize();
+                copied += tsize;
+                String tname = te.getName();
+                if (pct != null) {
+                    int tpct = (int)((copied * 100L) / dataFileSize);
+                    reportPercentage(tpct);
+                }
+
+                File dest = new File(root, tname);
+                if (te.isDirectory()) {
+                    dest.mkdirs();
+                    installedFiles.put(dest.getAbsolutePath(), -1);
+                } else if (te.isLink()) {
+                    String linkdest = te.getLinkName();
+                    symbolicLinks.put(tname, linkdest);
+                } else if (te.isSymbolicLink()) {
+                    String linkdest = te.getLinkName();
+                    symbolicLinks.put(tname, linkdest);
+                } else {
+                    byte[] buffer = new byte[1024];
+                    int nread;
+                    int toRead = tsize;
+                    FileOutputStream fos = new FileOutputStream(dest);
+                    while ((nread = tar.read(buffer, 0, toRead > 1024 ? 1024 : toRead)) > 0) {
+                        toRead -= nread;
+                        fos.write(buffer, 0, nread);
+                    }
+                    fos.close();
+                    dest.setExecutable((te.getMode() & 0100) == 0100);
+                    dest.setWritable((te.getMode() & 0200) == 0200);
+                    dest.setReadable((te.getMode() & 0400) == 0400);
+                    installedFiles.put(dest.getAbsolutePath(), tsize);
+                }
+                te = tar.getNextTarEntry();
+            }
+            for (String link : symbolicLinks.keySet()) {
+                String tgt = symbolicLinks.get(link);
+                File linkFile = new File(root, link);
+                File linkParent = linkFile.getParentFile();
+                File tgtFile = new File(linkParent, tgt);
+                FileInputStream copyFrom = new FileInputStream(tgtFile);
+                FileOutputStream copyTo = new FileOutputStream(linkFile);
+                byte[] copyBuffer = new byte[1024];
+                int bytesCopied = 0;
+
+                while ((bytesCopied = copyFrom.read(copyBuffer, 0, 1024)) > 0) {
+                    copyTo.write(copyBuffer, 0, bytesCopied);
+                }
+                copyFrom.close();
+                copyTo.close();
+                linkFile.setExecutable(tgtFile.canExecute());
+                linkFile.setReadable(tgtFile.canRead());
+                linkFile.setWritable(tgtFile.canWrite());
+            }
+        } catch (Exception e) {
+            Base.error(e);
+        }
+        return installedFiles;
     }
 
 }

@@ -210,6 +210,7 @@ public class PluginManager implements PropertyChangeListener
         }
 
         longDesc += "\n\n----\n\n";
+        longDesc += "* Package name: " + pe.getName() + "\n";
         longDesc += "* Available: ";
         longDesc += pe.getVersion();
         longDesc += "\n";
@@ -1132,6 +1133,18 @@ public class PluginManager implements PropertyChangeListener
                 if (apt.isInstalled(p)) {
                     String ret = apt.uninstallPackage(p, true);
                 } 
+
+                String reps[] = p.getReplaces();
+                if (reps != null) {
+                    for (String rep : reps) {
+    System.err.println("Replace: " + rep);
+                        Package rp = apt.getPackage(rep);
+                        if (apt.isInstalled(rp)) {
+                            apt.uninstallPackage(rp, true);
+                        }
+                    }
+                }
+
                 p.extractPackage(Base.getDataFile("apt/cache"), Base.getDataFile("apt/db/packages"), Base.getDataFolder());
                 p.detachPercentageListener();
                 return null;
