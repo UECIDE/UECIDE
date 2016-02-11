@@ -99,6 +99,7 @@ public class Base implements AptPercentageListener {
     static private File toolsFolder;
     static private File hardwareFolder;
     public static ArrayList<File> MRUList;
+    public static HashMap<File,Integer> MCUList;
 
     static HashSet<File> libraries;
 
@@ -235,6 +236,7 @@ public class Base implements AptPercentageListener {
         cli.addParameter("update", "", Boolean.class, "Update the APT repositories");
         cli.addParameter("install", "package", String.class, "Install a package");
         cli.addParameter("remove", "package", String.class, "Uninstall a package");
+        cli.addParameter("remove-all", "", Boolean.class, "Uninstall all packages");
         cli.addParameter("upgrade", "", Boolean.class, "Upgrade all packages");
         cli.addParameter("search", "term", String.class, "Search packages for a term");
         cli.addParameter("list", "", Boolean.class, "List packages");
@@ -373,11 +375,32 @@ public class Base implements AptPercentageListener {
                 doExit = true;
             }
 
-            System.out.print("Installing " + p.getName() + "...");
+            System.out.println("Installing " + p.getName());
             p.attachPercentageListener(this);
             apt.installPackage(p);
             System.out.println("...done.");
             doExit = true;
+        }
+
+        if (cli.isSet("remove-all")) {
+            doExit = true;
+            if (!cli.isSet("force")) {
+                System.err.println("Will not remove all packages without --force!");
+            } else {
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                for (Package p : apt.getInstalledPackages()) {
+                    System.out.println("Uninstalling " + p.getName());
+                    p.attachPercentageListener(this);
+                    String ret = apt.uninstallPackage(p, true);
+                    if (ret == null) {
+                        System.out.println("...done.");
+                    } else {
+                        System.err.println("");
+                        System.err.println(ret);
+                    }
+                }
+            }
         }
             
         if (cli.isSet("remove")) {
@@ -396,7 +419,7 @@ public class Base implements AptPercentageListener {
                 doExit = true;
             }
 
-            System.out.print("Uninstalling " + p.getName() + "...");
+            System.out.println("Uninstalling " + p.getName());
             p.attachPercentageListener(this);
             String ret = apt.uninstallPackage(p, cli.isSet("force"));
             if (ret == null) {
@@ -548,9 +571,9 @@ public class Base implements AptPercentageListener {
         if(!headless) {
             splashScreen = new Splash();
 
-            if(RELEASE.equals("beta")) {
-                splashScreen.setBetaMessage("** BETA VERSION **");
-            }
+//            if(RELEASE.equals("beta")) {
+//                splashScreen.setBetaMessage("** BETA VERSION **");
+//            }
 
             splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
         }
@@ -916,6 +939,7 @@ public class Base implements AptPercentageListener {
     /* Initialize the internal MRU list from the preferences set */
     public static void initMRU() {
         MRUList = new ArrayList<File>();
+        MCUList = new HashMap<File,Integer>();
 
         for(int i = 0; i < 10; i++) {
             if(preferences.get("sketch.mru." + i) != null) {
@@ -925,6 +949,24 @@ public class Base implements AptPercentageListener {
                     if(MRUList.indexOf(f) == -1) {
                         MRUList.add(f);
                     }
+                }
+            }
+        }
+
+        for(int i = 0; i < 10; i++) {
+            if(preferences.get("sketch.mcu." + i) != null) {
+                String[] mcuEntry = preferences.getArray("sketch.mcu." + i);
+
+                int hits = 0;
+                try {
+                    hits = Integer.parseInt(mcuEntry[1]);
+                } catch (Exception e) {
+                }
+
+                File f = new File(mcuEntry[0]);
+
+                if(f.exists()) {
+                    MCUList.put(f, hits);
                 }
             }
         }
@@ -940,7 +982,7 @@ public class Base implements AptPercentageListener {
             f = f.getParentFile();
         }
 
-        if (MRUList == null) {
+        if ((MRUList == null) || (MCUList == null)) {
             initMRU();
         }
 
@@ -951,6 +993,14 @@ public class Base implements AptPercentageListener {
             MRUList.remove(10);
         }
 
+        int hits = 0;
+        try {
+            hits = MCUList.get(f);
+        } catch (Exception e) {
+        }
+        hits++;
+        MCUList.put(f, hits);
+
         for(int i = 0; i < 10; i++) {
             if(i < MRUList.size()) {
                 preferences.set("sketch.mru." + i, MRUList.get(i).getAbsolutePath());
@@ -958,6 +1008,30 @@ public class Base implements AptPercentageListener {
                 preferences.unset("sketch.mru." + i);
             }
         }
+
+        while (MCUList.size() > 10) {
+            int minHits = Integer.MAX_VALUE;
+
+            for (Integer i : MCUList.values()) {
+                if (i < minHits) {
+                    minHits = i;
+                }
+            }
+
+            for (File i : MCUList.keySet()) {
+                if (MCUList.get(i) == minHits) {
+                    MCUList.remove(i);
+                    break;
+                }
+            }
+        }
+
+        int z = 0;
+        for (File i : MCUList.keySet()) {
+            preferences.set("sketch.mcu." + z, i.getAbsolutePath() + "::" + MCUList.get(i));
+            z++;
+        }
+
 
         preferences.saveDelay();
     }
@@ -2343,43 +2417,45 @@ public class Base implements AptPercentageListener {
     // UECIDE - that is, all the boards, cores, compilers and libraries etc.
     public static void cleanAndScanAllSettings() {
         try {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    Editor.lockAll();
 
+            SwingWorker<String, Object> worker = new SwingWorker<String, Object>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    Editor.lockAll();
                     Editor.bulletAll("Updating serial ports...");
                     Serial.updatePortList();
                     Serial.fillExtraPorts();
-
                     Editor.bulletAll("Scanning compilers...");
-                    rescanCompilers(); 
-
+                    rescanCompilers();
                     Editor.bulletAll("Scanning cores...");
                     rescanCores();
-
                     Editor.bulletAll("Scanning boards...");
                     rescanBoards();
-
                     Editor.bulletAll("Scanning plugins...");
                     rescanPlugins();
-
                     Editor.bulletAll("Scanning themes...");
                     rescanThemes();
-
                     Editor.bulletAll("Scanning libraries...");
                     rescanLibraries();
 
                     buildPreferencesTree();
 
                     Editor.bulletAll("Updating system....");
-                    Editor.updateAllEditors(); 
-                    Editor.selectAllEditorBoards();
-                    Editor.refreshAllEditors();
-
-                    Editor.unlockAll();
-                    Editor.bulletAll("Update complete.");
+                    try { Editor.updateAllEditors(); } catch (Exception e) {}
+                    try { Editor.selectAllEditorBoards(); } catch (Exception e) {}
+                    try { Editor.refreshAllEditors(); } catch (Exception e) {}
+                    return "OK";
                 }
-            });
+
+                @Override
+                protected void done() {
+                    Editor.bulletAll("Update complete.");
+                    Editor.unlockAll();
+                }
+            };
+            worker.execute();
+
+            //Editor.unlockAll();
         } catch (Exception e) {
         }
     }
@@ -2388,7 +2464,6 @@ public class Base implements AptPercentageListener {
         plugins = new TreeMap<String, Class<?>>();
         lookAndFeels = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
-        Editor.bulletAll("Scanning plugins...");
         loadPlugins();
     }
 
@@ -2398,20 +2473,17 @@ public class Base implements AptPercentageListener {
     }
     public static void rescanCompilers() {
         compilers = new TreeMap<String, Compiler>();
-        Editor.bulletAll("Scanning compilers...");
         loadCompilers();
     }
 
     public static void rescanCores() {
         cores = new TreeMap<String, Core>();
-        Editor.bulletAll("Scanning cores...");
         loadCores();
     }
 
     public static void rescanBoards() {
         try {
             boards = new TreeMap<String, Board>();
-            Editor.bulletAll("Scanning boards...");
             loadBoards();
             Editor.updateAllEditors();
             Editor.selectAllEditorBoards();
@@ -2421,7 +2493,6 @@ public class Base implements AptPercentageListener {
     }
 
     public static void rescanLibraries() {
-        Editor.bulletAll("Scanning libraries...");
         gatherLibraries();
     }
 
@@ -2931,12 +3002,18 @@ public class Base implements AptPercentageListener {
 
     public static String getIconsPath(String name) {
         PropertyFile pf = iconSets.get(name);
+        if (pf == null) {
+            return null;
+        }
         return pf.get("path");
     }
 
     public static ImageIcon getIcon(String category, String name, int size) {
 
         String path = getIconsPath(getIconSet());
+        if (path == null) {
+            return null;
+        }
 
         URL loc = Base.class.getResource(path + "/" + size + "x" + size + "/" + category + "/" + name + ".png");
         if(loc == null) {
@@ -2952,6 +3029,9 @@ public class Base implements AptPercentageListener {
 
     public static String getIconSet() {
 
+        if (getTheme() == null) {
+            return null;
+        }
         return getTheme().get("icon");
 
 //        String iconSet = defaultIconSet;;
@@ -3057,11 +3137,13 @@ public class Base implements AptPercentageListener {
 
     int lastPct = -1;
     public void updatePercentage(Package p, int pct) {
-        if ((pct % 10) == 0) {
-            if (pct != lastPct) {
-                lastPct = pct;
-                System.out.print("+");
+        int pc = pct / 10;
+        if (pc != lastPct) {
+            lastPct = pc;
+            if (pc > 0) {
+                System.out.print("...");
             }
+            System.out.print((pc * 10) + "%");
         }
     }
 

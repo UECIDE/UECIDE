@@ -38,6 +38,7 @@ import java.awt.image.*;
 import java.awt.event.*;
 
 import java.util.*;
+import java.util.Timer;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -106,10 +107,10 @@ public class Editor extends JFrame {
 
     Console console;
 
-    DnDTabbedPane editorTabs;
-    DnDTabbedPane projectTabs;
-    DnDTabbedPane sidebarTabs;
-    DnDTabbedPane consoleTabs;
+    JTabbedPane editorTabs;
+    JTabbedPane projectTabs;
+    JTabbedPane sidebarTabs;
+    JTabbedPane consoleTabs;
 
     JScrollPane treeScroll;
     JScrollPane filesTreeScroll;
@@ -254,10 +255,10 @@ public class Editor extends JFrame {
         consolePanel.setLayout(new BorderLayout());
         statusBar.setLayout(new BorderLayout());
 
-        editorTabs = new DnDTabbedPane(); //JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-        projectTabs = new DnDTabbedPane(); //JTabbedPane.LEFT, JTabbedPane.SCROLL_TAB_LAYOUT);
-        sidebarTabs = new DnDTabbedPane(); //JTabbedPane.RIGHT, JTabbedPane.SCROLL_TAB_LAYOUT);
-        consoleTabs = new DnDTabbedPane(); //JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        editorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        projectTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        sidebarTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        consoleTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 
         editorTabs.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -310,7 +311,7 @@ public class Editor extends JFrame {
 //        dividerSize = Preferences.getInteger("editor.layout.split_tree");
 //        leftRightSplit.setDividerLocation(dividerSize);
 
-        this.add(topBottomSplit, BorderLayout.CENTER);
+        add(topBottomSplit, BorderLayout.CENTER);
 
         final Editor me = this;
 
@@ -2854,6 +2855,42 @@ public class Editor extends JFrame {
             recentSketchesMenu.add(recentitem);
         }
 
+        JMenu frequentSketchesMenu = new JMenu(Translate.t("Frequent Sketches"));
+        Base.setFont(frequentSketchesMenu, "menu.entry");
+        fileMenu.add(frequentSketchesMenu);
+
+        ArrayList<Integer> tmpArr = new ArrayList<Integer>();
+        for (Integer m : Base.MCUList.values()) {
+            if (tmpArr.indexOf(m) == -1) {
+                tmpArr.add(m);
+            }
+        }
+
+        Integer[] vals = tmpArr.toArray(new Integer[0]);
+        Arrays.sort(vals);
+
+        for (Integer hits : vals) {
+            for(File m : Base.MCUList.keySet()) {
+                if (Base.MCUList.get(m) == hits) {
+                    JMenuItem recentitem = createMenuEntry(m.getName(), 0, 0, new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            String path = e.getActionCommand();
+
+                            if(new File(path).exists()) {
+                                loadSketch(path);
+                            } else {
+                                error("Unable to find file " + path);
+                            }
+                        }
+                    });
+
+                    recentitem.setToolTipText(m.getAbsolutePath());
+                    recentitem.setActionCommand(m.getAbsolutePath());
+                    frequentSketchesMenu.add(recentitem, 0);
+                }
+            }
+        }
+
 
         JMenu examplesMenu = new JMenu(Translate.t("Examples"));
 
@@ -4155,11 +4192,13 @@ public class Editor extends JFrame {
     }
 
     public void lock() {
+        startUpdateBlocker();
         setEnabled(false);
     }
 
     public void unlock() {
         setEnabled(true);
+        stopUpdateBlocker();
     }
 
     public static void bulletAll(String msg) {
@@ -4936,6 +4975,45 @@ public class Editor extends JFrame {
         Dimension d = getSize(null);
         d.height = h;
         setSize(d);
+    }
+
+    JLabel updateLabel = new JLabel();
+    Timer updateBlockerTimer = null;
+
+    public void startUpdateBlocker() {
+        editorPanel.remove(editorTabs);
+        updateLabel.setHorizontalAlignment(JLabel.CENTER);
+        updateLabel.setVerticalAlignment(JLabel.CENTER);
+        editorPanel.add(updateLabel, BorderLayout.CENTER);
+        editorPanel.revalidate();
+        editorPanel.repaint();
+        //pack();
+
+        updateBlockerTimer = new Timer();
+        updateBlockerTimer.schedule(new TimerTask() {
+            public void run() {
+                tickUpdateBlocker();
+            }
+        }, 10, 50);
+
+    }
+
+    int spinPos = 0;
+    public void tickUpdateBlocker() {
+        spinPos++;
+        if (spinPos == 36) spinPos = 0;
+        String iname = "Spinner" + (spinPos * 10);
+        ImageIcon i = Base.getIcon("spinner", iname, 64);
+        updateLabel.setIcon(i);
+    }
+
+    public void stopUpdateBlocker() {
+        updateBlockerTimer.cancel();
+        editorPanel.remove(updateLabel);
+        editorPanel.add(editorTabs, BorderLayout.CENTER);
+        editorPanel.revalidate();
+        editorPanel.repaint();
+        //pack();
     }
 }
 
