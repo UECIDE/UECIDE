@@ -3093,17 +3093,29 @@ public class Editor extends JFrame {
             }
         }));
 
-        JMenu boardsSubmenu = new JMenu("Boards");
+        String boardName = "";
+        String coreName = "";
+        String compilerName = "";
+        String portName = "";
+
+        Context ctx = loadedSketch.getContext();
+
+        Board b = ctx.getBoard(); if (b != null) { boardName = " (" + b.getDescription() + ")"; }
+        Core c = ctx.getCore(); if (c != null) { coreName = " (" + c.getDescription() + ")"; }
+        Compiler o = ctx.getCompiler(); if (o != null) { compilerName = " (" + o.getDescription() + ")"; }
+        CommunicationPort p = ctx.getDevice(); if (p != null) { portName = " (" + p.getName() + ")"; }
+
+        JMenu boardsSubmenu = new JMenu("Boards" + boardName);
         populateBoardsMenu(boardsSubmenu);
         Base.setFont(boardsSubmenu, "menu.entry");
         hardwareMenu.add(boardsSubmenu);
 
-        JMenu coresSubmenu = new JMenu("Cores");
+        JMenu coresSubmenu = new JMenu("Cores" + coreName);
         populateCoresMenu(coresSubmenu);
         Base.setFont(coresSubmenu, "menu.entry");
         hardwareMenu.add(coresSubmenu);
 
-        JMenu compilersSubmenu = new JMenu("Compilers");
+        JMenu compilersSubmenu = new JMenu("Compilers" + compilerName);
         populateCompilersMenu(compilersSubmenu);
         Base.setFont(compilersSubmenu, "menu.entry");
         hardwareMenu.add(compilersSubmenu);
@@ -3114,7 +3126,7 @@ public class Editor extends JFrame {
         Base.setFont(optionsMenu, "menu.entry");
         hardwareMenu.add(optionsMenu);
 
-        serialPortsMenu = new JMenu("Device");
+        serialPortsMenu = new JMenu("Device" + portName);
         populateSerialMenu(serialPortsMenu);
         serialPortsMenu.addMenuListener(new MenuListener() {
             public void menuSelected(MenuEvent e) {
@@ -3467,7 +3479,7 @@ public class Editor extends JFrame {
         Arrays.sort(compilers);
 
         for(Compiler compiler : compilers) {
-            JMenuItem item = new JRadioButtonMenuItem(compiler.getName());
+            JMenuItem item = new JRadioButtonMenuItem(compiler.getDescription());
             compilerGroup.add(item);
             item.setSelected(loadedSketch.getContext().getCompiler().equals(compiler));
             item.addActionListener(new ActionListener() {
