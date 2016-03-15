@@ -87,7 +87,7 @@ public class Sketch {
     Board selectedBoard = null;
     String selectedBoardName = null;
     Compiler selectedCompiler = null;
-    String selectedProgrammer = null;
+    Programmer selectedProgrammer = null;
     CommunicationPort selectedDevice = null;
 
     boolean terminateExecution = false;
@@ -359,48 +359,43 @@ public class Sketch {
 
         Preferences.set("board." + selectedBoard.getName() + ".compiler", compiler.getName());
         String programmer = Preferences.get("board." + selectedBoard.getName() + ".programmer");
-
-        if(programmer == null) {
-            TreeMap<String, String> pl = getProgrammerList();
-
-            for(String p : pl.keySet()) {
-                programmer = p;
-                break;
-            }
-        }
-
         setProgrammer(programmer);
     }
 
-    public String getProgrammer() {
+    public Programmer getProgrammer() {
         return selectedProgrammer;
     }
 
-    public TreeMap<String, String> getProgrammerList() {
-        PropertyFile props = ctx.getMerged();
-        TreeMap<String, String> out = new TreeMap<String, String>();
+    public void setProgrammer(String programmer) {
+        Programmer p = Base.programmers.get(programmer);
+        setProgrammer(p);
+    }
 
-        String[] spl = props.getArray("sketch.upload");
-
-        if(spl != null) {
-            Arrays.sort(spl);
-
-            for(String pn : spl) {
-                String name = ctx.parseString(props.get("upload." + pn + ".name"));
-                out.put(pn, name);
+    public void setProgrammer(Programmer programmer) {
+        if(programmer == null) {
+            String cp = getCore().get("default.programmer");
+            if (cp != null) {
+                programmer = Base.programmers.get(programmer);
             }
         }
 
-        return out;
-    }
-
-    public void setProgrammer(String programmer) {
-        if(programmer == null || programmer.equals("")) return;
-
-        if (selectedBoard != null) {
-            Preferences.set("board." + selectedBoard.getName() + ".programmer", programmer);
+        if (programmer == null) {
+            for (Programmer p : Base.programmers.values()) {
+                if (p.worksWith(getBoard())) {
+                    programmer = p;
+                    break;
+                }
+            }
         }
+
+        if (programmer == null) {
+            error("Sorry, I cannot select a valid programmer.");
+        }
+
+        Preferences.set("board." + getBoard().getName() + ".programmer", programmer.getName());
+
         selectedProgrammer = programmer;
+        ctx.setProgrammer(programmer);
 
         if(editor != null) editor.updateAll();
     }
@@ -586,15 +581,15 @@ public class Sketch {
                     }
                 }
 
-                if (p == null) {
-                    // Let's add a missing device - it can always be removed later.
-                    if (portName.startsWith("ssh://")) {
-                        p = new SSHCommunicationPort(portName, selectedBoard);
-                        Base.communicationPorts.add(p);
-                    } else {
-                        p = new SerialCommunicationPort(portName);
-                    }
-                }
+//                if (p == null) {
+//                    // Let's add a missing device - it can always be removed later.
+//                    if (portName.startsWith("ssh://")) {
+//                        p = new SSHCommunicationPort(portName, selectedBoard);
+//                        Base.communicationPorts.add(p);
+//                    } else {
+//                        p = new SerialCommunicationPort(portName);
+//                    }
+//                }
 
                 setDevice(p);
             } else {
@@ -1650,8 +1645,8 @@ public class Sketch {
                 sport.setDTR(false);
                 sport.setRTS(false);
                 sport.closePort();
-                System.gc();
                 Thread.sleep(postdelay);
+                System.gc();
             }
         } catch (Exception e) {
             ctx.error(e);
@@ -3309,123 +3304,13 @@ public class Sketch {
         }
     }
 
-    public boolean programFile(String programmer, String file) {
-        PropertyFile props = ctx.getMerged();
-        if (!Base.isQuiet()) heading("Uploading firmware...");
-
-        ctx.set("filename", file);
-
-        if (props.get("upload." + programmer + ".message") != null) {
-            message(ctx.parseString(props.get("upload." + programmer + ".message")));
-        }
-
-        if(props.get("upload." + programmer + ".using") != null) {
-            if(props.get("upload." + programmer + ".using").equals("script")) {
-                return (Boolean)ctx.executeKey("upload." + programmer + ".script");
-            }
-        }
-
-        String cmdKey = null;
-
-        if(props.keyExists("upload." + programmer + ".command")) {
-            cmdKey = "upload." + programmer + ".command";
-        } else if(props.keyExists("upload." + programmer + ".script")) {
-            cmdKey = "upload." + programmer + ".script";
-        }
-
-        if(cmdKey == null) {
-            error("Unable to get a suitable upload command");
+    public boolean programFile(Programmer programmer, String file) {
+        Programmer p = getProgrammer();
+        if (p == null) {
+            ctx.error("No programmer selected");
             return false;
         }
-
-        String uploadType = props.get("upload." + programmer + ".using");
-
-        if(uploadType == null) uploadType = "serial";
-
-        int progbaud = 9600;
-
-        int predelay = props.getInteger("upload." + programmer  +".reset.predelay", 100);
-        int delay = props.getInteger("upload." + programmer  +".reset.delay", 100);
-        int postdelay = props.getInteger("upload." + programmer  +".reset.postdelay", 100);
-
-        if(uploadType.equals("serial")) {
-
-            boolean dtr = props.getBoolean("upload." + programmer + ".dtr");
-            boolean rts = props.getBoolean("upload." + programmer + ".rts");
-
-            String br = props.get("upload.speed");
-
-            if(br != null) {
-                br = ctx.parseString(br);
-                try {
-                    progbaud = Integer.parseInt(br);
-                } catch(Exception e) {
-                    progbaud = 115200;
-                }
-            }
-
-            if (!performSerialReset(dtr, rts, progbaud, predelay, delay, postdelay)) {
-                return false;
-            }
-        } else if(uploadType.equals("usbcdc")) {
-            int baud = props.getInteger("upload." + programmer + ".reset.baud");
-            if (!performBaudBasedReset(baud, predelay, delay, postdelay)) {
-                return false;
-            }
-        }
-
-        percentageFilter = ctx.parseString(props.get("upload." + programmer + ".percent"));
-        percentageCharacter = ctx.parseString(props.get("upload." + programmer + ".percent.character"));
-        percentageCharacterCount = 0;
-
-        try {
-            percentageMultiplier = Float.parseFloat(ctx.parseString(props.get("upload." + programmer + ".percent.multiply")));
-        } catch (Exception ee) {
-            percentageMultiplier = 1.0f;
-        }
-
-        if (!Base.isQuiet()) bullet("Uploading...");
-
-        if (!Preferences.getBoolean("compiler.verbose_upload")) {
-            if (percentageFilter != null || percentageCharacter != null) {
-                ctx.addContextListener(new programContextListener(percentageFilter, percentageCharacter, percentageMultiplier));
-            }
-            if (props.get("upload." + programmer + ".quiet") != null) {
-                ctx.set("verbose", ctx.parseString(props.get("upload." + programmer + ".quiet")));
-            } else {
-                ctx.set("verbose", "");
-            }
-        } else {
-            if (props.get("upload." + programmer + ".verbose") != null) {
-                ctx.set("verbose", ctx.parseString(props.get("upload." + programmer + ".verbose")));
-            } else {
-                ctx.set("verbose", "");
-            }
-        }
-
-
-        boolean res = (Boolean)ctx.executeKey(cmdKey);
-        percentageFilter = null;
-        percentageCharacter = null;
-        ctx.removeContextListener();
-
-        if(uploadType.equals("serial")) {
-
-            boolean dtr = props.getBoolean("upload." + programmer + ".dtr");
-            boolean rts = props.getBoolean("upload." + programmer + ".rts");
-
-            if (!performSerialReset(dtr, rts, progbaud, predelay, delay, postdelay)) {
-                return false;
-            }
-        }
-
-        if(res) {
-            if (!Base.isQuiet()) bullet("Upload Complete");
-            return true;
-        } else {
-            error("Upload Failed");
-            return false;
-        }
+        return p.programFile(ctx, file);
     }
 
     /**************************************************************************

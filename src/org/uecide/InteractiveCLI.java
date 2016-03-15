@@ -108,7 +108,15 @@ public class InteractiveCLI implements AptPercentageListener {
 
 
 
-            TreeMap<String, String> pl = _loadedSketch.getProgrammerList();
+            TreeMap<String, Programmer> pl = new TreeMap<String, Programmer>();
+
+            for (String k : Base.programmers.keySet()) {
+                Programmer p = Base.programmers.get(k);
+                if (p.worksWith(_loadedSketch.getBoard())) {
+                    pl.put(k, p);
+                }
+            }
+        
 
             _completor = new MultiCompletor(new Completor[] {
                 new ArgumentCompletor( 

@@ -231,20 +231,25 @@ public class Serial {
         File[] devs = dev.listFiles();
 
         for(File devfile : devs) {
-            if(devfile.getName().startsWith("tty.serial")) {
+            if(devfile.getName().startsWith("cu.")) {
                 names.add(devfile.getAbsolutePath());
                 continue;
             }
 
-            if(devfile.getName().startsWith("tty.usbserial")) {
-                names.add(devfile.getAbsolutePath());
-                continue;
-            }
+//            if(devfile.getName().startsWith("tty.serial")) {
+//                names.add(devfile.getAbsolutePath());
+//                continue;
+//            }
 
-            if(devfile.getName().startsWith("tty.usbmodem")) {
-                names.add(devfile.getAbsolutePath());
-                continue;
-            }
+//            if(devfile.getName().startsWith("tty.usbserial")) {
+//                names.add(devfile.getAbsolutePath());
+//                continue;
+//            }
+
+//            if(devfile.getName().startsWith("tty.usbmodem")) {
+//                names.add(devfile.getAbsolutePath());
+//                continue;
+//            }
         }
 
         return names;

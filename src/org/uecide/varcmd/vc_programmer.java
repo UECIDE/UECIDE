@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Majenko Technologies
+ * Copyright (c) 2016, Majenko Technologies
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification,
@@ -28,35 +28,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.uecide;
+package org.uecide.varcmd;
 
-public class DiscoveredBoard {
-    public Board board;
-    public String name;
-    public Object location;
-    public int type;
-    public String programmer;
+import org.uecide.*;
 
-    public PropertyFile properties = new PropertyFile();
-
-    static public final int SERIAL = 1;
-    static public final int NETWORK = 2;
-    static public final int USB = 3;
-
-    public String toString() {
-        String loc = location.toString();
-
-        if(type == NETWORK) {
-            if(loc.startsWith("/")) {
-                loc = loc.substring(1);
-            }
+public class vc_programmer implements VariableCommand {
+    public String main(Context sketch, String args) {
+        if (args.equals("root")) {
+            return sketch.getProgrammer().getFolder().getAbsolutePath();
         }
-
-        return String.format("%s v%s (%s) on %s",
-                             board.getDescription(),
-                             name,
-                             loc
-                            );
+        return sketch.getProgrammer().get(args);
     }
-
 }

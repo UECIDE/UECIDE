@@ -55,6 +55,7 @@ public class UObject implements Comparable {
     public static final int Board = 1;
     public static final int Core = 2;
     public static final int Compiler = 3;
+    public static final int Programmer = 4;
 
     public UObject(File dir) {
         _valid = false;
@@ -75,6 +76,11 @@ public class UObject implements Comparable {
                 if(this instanceof Compiler) {
                     _configFile = new File(_folder, "compiler.txt");
                     _type = Compiler;
+                }
+
+                if(this instanceof Programmer) {
+                    _configFile = new File(_folder, "programmer.txt");
+                    _type = Programmer;
                 }
 
                 if(!_configFile.exists()) {
@@ -226,8 +232,9 @@ public class UObject implements Comparable {
     public boolean worksWith(UObject c) {
         String fam = get("family");
 
+        // No family means all families.
         if(fam == null) {
-            return false;
+            return true;
         }
 
         String[] myFamilies = fam.split("::");

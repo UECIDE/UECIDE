@@ -136,7 +136,6 @@ public class UsbDiscoveryService extends Service {
                 db.name = String.format("%04x:%04x", dev.getUsbDeviceDescriptor().idVendor(), dev.getUsbDeviceDescriptor().idProduct());
                 db.location = dev;
                 db.programmer = b.get("usb.programmer");
-                db.version = "1";
                 db.type = DiscoveredBoard.USB;
                 Base.discoveredBoards.put(dev, db);
                 

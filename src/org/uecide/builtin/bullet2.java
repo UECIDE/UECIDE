@@ -28,35 +28,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.uecide;
+package org.uecide.builtin;
 
-public class DiscoveredBoard {
-    public Board board;
-    public String name;
-    public Object location;
-    public int type;
-    public String programmer;
+import org.uecide.*;
 
-    public PropertyFile properties = new PropertyFile();
+public class bullet2 implements BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) {
+        StringBuilder sb = new StringBuilder();
 
-    static public final int SERIAL = 1;
-    static public final int NETWORK = 2;
-    static public final int USB = 3;
-
-    public String toString() {
-        String loc = location.toString();
-
-        if(type == NETWORK) {
-            if(loc.startsWith("/")) {
-                loc = loc.substring(1);
-            }
+        for(String s : arg) {
+            sb.append(s);
+            sb.append(" ");
         }
 
-        return String.format("%s v%s (%s) on %s",
-                             board.getDescription(),
-                             name,
-                             loc
-                            );
+        ctx.bullet2(sb.toString());
+        return true;
     }
-
 }

@@ -51,6 +51,7 @@ public class Context {
     Board board = null;
     Core core = null;
     Compiler compiler = null;
+    Programmer programmer = null;
     Sketch sketch = null;
     Editor editor = null;
     CommunicationPort port = null;
@@ -81,6 +82,7 @@ public class Context {
 
     // At least one of these should be called to configure the context:
 
+    public void setProgrammer(Programmer p) { programmer = p; }
     public void setBoard(Board b) { board = b; }
     public void setCore(Core c) { core = c; }
     public void setCompiler(Compiler c) { compiler = c; }
@@ -98,6 +100,7 @@ public class Context {
 
     // Getters for all the above.
 
+    public Programmer getProgrammer() { return programmer; }
     public Board getBoard() { return board; }
     public Core getCore() { return core; }
     public Compiler getCompiler() { return compiler; }
@@ -124,6 +127,7 @@ public class Context {
 
     public PropertyFile getMerged() {
         PropertyFile pf = new PropertyFile();
+        if (programmer != null) { pf.mergeData(programmer.getProperties()); }
         if (compiler != null) { pf.mergeData(compiler.getProperties()); }
         if (core != null) { pf.mergeData(core.getProperties()); }
         if (board != null) { pf.mergeData(board.getProperties()); }
@@ -134,6 +138,7 @@ public class Context {
 
     public String getMerged(String k) {
         PropertyFile pf = new PropertyFile();
+        if (programmer != null) { pf.mergeData(programmer.getProperties()); }
         if (compiler != null) { pf.mergeData(compiler.getProperties()); }
         if (core != null) { pf.mergeData(core.getProperties()); }
         if (board != null) { pf.mergeData(board.getProperties()); }
@@ -167,6 +172,9 @@ public class Context {
         }
         if (uri.startsWith("board:")) {
             return board.getEmbedded(uri.substring(6));
+        }
+        if (uri.startsWith("programmer:")) {
+            return programmer.getEmbedded(uri.substring(6));
         }
         if (uri.startsWith("sketch:")) {
             return sketchSettings.getEmbedded(uri.substring(7));
@@ -483,6 +491,7 @@ public class Context {
                 val[0].startsWith("compiler:") || 
                 val[0].startsWith("core:") || 
                 val[0].startsWith("board:") || 
+                val[0].startsWith("programmer:") || 
                 val[0].startsWith("sketch:") ||
                 val[0].startsWith("merged:")
             ) {
@@ -751,6 +760,10 @@ public class Context {
             Constructor<?> ctor = c.getConstructor();
             VariableCommand  p = (VariableCommand)(ctor.newInstance());
 
+            if (p == null) {
+                return "";
+            }
+
             Class[] param_types = new Class<?>[2];
             param_types[0] = org.uecide.Context.class;
             param_types[1] = String.class;
@@ -763,7 +776,11 @@ public class Context {
             Object[] args = new Object[2];
             args[0] = this;
             args[1] = param;
-            return (String)m.invoke(p, args);
+            try {
+                return (String)m.invoke(p, args);
+            } catch (Exception e2) {
+            }
+            return "";
         } catch(Exception e) {
             error(e);
         }
@@ -818,7 +835,11 @@ public class Context {
             args[0] = this;
             args[1] = arg;
 
-            return m.invoke(p, args);
+            try {
+                return m.invoke(p, args);
+            } catch (Exception e2) {
+                return "";
+            }
 
 
         } catch(Exception e) {
@@ -1146,5 +1167,22 @@ public class Context {
 
     public PropertyFile getSketchSettings() {
         return sketchSettings;
+    }
+
+    public int getParsedInteger(String k) {
+        return getParsedInteger(k, 0);
+    }
+
+    public int getParsedInteger(String k, int d) {
+        PropertyFile props = getMerged();
+        String v = props.get(k);
+        if (v == null) return d;
+        if (v.equals("")) return d;
+        v = parseString(v);
+        try {
+            return Integer.parseInt(v);
+        } catch (Exception e) {
+        }
+        return d;
     }
 }

@@ -2894,6 +2894,16 @@ public class Editor extends JFrame {
 
         JMenu examplesMenu = new JMenu(Translate.t("Examples"));
 
+        JMenuItem emBrowse = new JMenuItem("Browse...");
+        emBrowse.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ExampleBrowser eb = new ExampleBrowser(Editor.this);
+            }
+        });
+        examplesMenu.add(emBrowse);
+        examplesMenu.addSeparator();
+
+
         if(loadedSketch.getContext().getCore() != null) {
             if (loadedSketch.getContext().getCompiler() != null) {
                 addSketchesFromFolder(examplesMenu, loadedSketch.getContext().getCompiler().getExamplesFolder());
@@ -2931,7 +2941,6 @@ public class Editor extends JFrame {
                     }
 
                     if(libs != null && libs.size() > 0) {
-
                         JMenu top = new JMenu(Library.getCategoryName(group));
                         for(Library lib : libs) {
                             JMenu libMenu = new JMenu(lib.getName());
@@ -3290,7 +3299,6 @@ public class Editor extends JFrame {
         menu.removeAll();
         ButtonGroup portGroup = new ButtonGroup();
 
-
         for (CommunicationPort port : Base.communicationPorts) {
             JMenuItem item = new JSerialMenuItem(port);
             portGroup.add(item);
@@ -3333,21 +3341,40 @@ public class Editor extends JFrame {
 
     public void populateProgrammersMenu(JMenu menu) {
         menu.removeAll();
-        TreeMap<String, String> programmers = loadedSketch.getProgrammerList();
-        ButtonGroup programmerGroup = new ButtonGroup();
+        ButtonGroup progGroup = new ButtonGroup();
 
-        for(String pn : programmers.keySet()) {
-            JMenuItem item = new JRadioButtonMenuItem(programmers.get(pn));
-            programmerGroup.add(item);
-            if (loadedSketch.getProgrammer() != null) {
-                item.setSelected(loadedSketch.getProgrammer().equals(pn));
+        Board board = loadedSketch.getContext().getBoard();
+        ArrayList<Programmer> progList = new ArrayList<Programmer>();
+
+        for(Programmer prog : Base.programmers.values()) {
+            if(prog.worksWith(board)) {
+                progList.add(prog);
             }
+        }
+
+        Programmer[] progs = progList.toArray(new Programmer[0]);
+        Arrays.sort(progs);
+
+        for(Programmer prog : progs) {
+            JMenuItem item = new JRadioButtonMenuItem(loadedSketch.getContext().parseString(prog.toString()));
+            progGroup.add(item);
+
+            if(loadedSketch.getContext().getProgrammer() != null) {
+                item.setSelected(loadedSketch.getContext().getProgrammer().equals(prog));
+            }
+
+            ImageIcon i = prog.getIcon(16);
+
+            if(i != null) {
+                item.setIcon(i);
+            }
+
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     loadedSketch.setProgrammer(e.getActionCommand());
                 }
             });
-            item.setActionCommand(pn);
+            item.setActionCommand(prog.getName());
             Base.setFont(item, "menu.entry");
             menu.add(item);
         }
@@ -4231,10 +4258,24 @@ public class Editor extends JFrame {
         }
     }
 
+    public static void selectAllEditorProgrammers() {
+        for(Editor e : editorList) {
+            e.reselectEditorProgrammer();
+        }
+    }
+
     public static void selectAllEditorBoards() {
         for(Editor e : editorList) {
             e.reselectEditorBoard();
         }
+    }
+
+    public void reselectEditorProgrammer() {
+//        String eb = loadedSketch.getBoardName();
+//
+//        if(eb != null) {
+//            loadedSketch.setBoard(eb);
+//        }
     }
 
     public void reselectEditorBoard() {

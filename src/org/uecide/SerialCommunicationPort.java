@@ -376,4 +376,14 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
             return f.getName();
         }
     }
+
+    HashMap<String, String> data = new HashMap<String, String>();
+    public void set(String key, String value) {
+        data.put(key, value);
+    }
+    public String get(String key) {
+        return data.get(key);
+    }
+
+
 }

@@ -35,10 +35,12 @@ import jssc.*;
 import java.util.*;
 import java.io.*;
 
-public class stk500 implements BuiltinCommand {
+public class stk500v2 implements BuiltinCommand, CommsListener {
 
-    SerialPort port = null;
+    boolean replyIsAvailable = false;
+
     String portName = null;
+    CommunicationPort port;
     int baudRate = 115200;
     Context ctx;
     int sequence = 0;
@@ -93,6 +95,7 @@ public class stk500 implements BuiltinCommand {
         } catch (Exception e) {
             ctx.error(e);
         }
+System.err.println("1");
 
         if(loadHexFile(new File(fle))) {
             ctx.message("File loaded");
@@ -101,28 +104,34 @@ public class stk500 implements BuiltinCommand {
             return false;
         }
 
+System.err.println("2");
         if (!connect(1000)) {
             ctx.error("Unable to connect");
             return false;
         }
 
+System.err.println("3");
         String dn = getDeviceName();
         if(dn != null) {
             ctx.message("Connected to " + dn);
         }
 
+System.err.println("4");
         if(enterProgMode()) {
             ctx.message("Entered programming mode");
         }
 
+System.err.println("5");
         if(uploadProgram()) {
             ctx.message("Upload complete");
         }
 
+System.err.println("6");
         if(leaveProgMode()) {
             ctx.message("Left programming mode");
         }
 
+System.err.println("7");
         disconnect();
         return true;
     }
@@ -142,42 +151,43 @@ public class stk500 implements BuiltinCommand {
             return;
         }
 
-        try {
-            port.setDTR(false);
-            port.setRTS(false);
-        } catch(Exception e) {
-            ctx.error(e);
-        }
+        port.pulseLine();
 
         connected = false;
-        Serial.closePort(port);
+        port.closePort();
     }
 
     public boolean connect(int to) {
         timeout = to;
-        port = Serial.requestPort(portName, baudRate);
 
-        sequence = 0;
-
-        if(port == null) {
-            ctx.error("Unable to open port " + portName);
+        port = null;
+        for (CommunicationPort p : Base.communicationPorts) {
+System.err.println(p.toString());
+            if (p.toString().equals(portName)) {
+                port = p;
+            }
+        }
+System.err.println("Port: " + port);
+        if (port == null) {
+            ctx.error("Unable to find port " + portName);
             return false;
         }
+
+        port.openPort();
+        port.addCommsListener(this);
+        port.setSpeed(baudRate);
+
+        sequence = 0;
 
         try {
             Thread.sleep(100); // Initial short delay
         } catch(Exception e) {
         }
 
-        try {
-            port.setDTR(true);
-            port.setRTS(true);
-        } catch(Exception e) {
-            ctx.error(e);
-        }
+        port.pulseLine();
 
         int tries = 10;
-        int[] rv = null;
+        ArrayList<Integer> rv = null;
 
         while(tries > 0 && rv == null) {
             rv = sendCommand(new int[] {CMD_SIGN_ON});
@@ -189,37 +199,36 @@ public class stk500 implements BuiltinCommand {
 
             ctx.error("Connection timed out");
 
-            Serial.closePort(port);
+            port.closePort();
             return false;
         }
 
         if(rv == null) {
             connected = false;
-            Serial.closePort(port);
+            port.closePort();
             return false;
         }
 
-        if(rv[0] != CMD_SIGN_ON) {
+        if(rv.get(0) != CMD_SIGN_ON) {
             connected = false;
-            Serial.closePort(port);
+            port.closePort();
             return false;
         }
 
-        int status = rv[1];
+        int status = rv.get(1);
 
         if(status != STATUS_CMD_OK) {
             connected = false;
-            Serial.closePort(port);
+            port.closePort();
             return false;
         }
 
-        int rlen = rv[2];
+        int rlen = rv.get(2);
 
         deviceName = "";
 
         for(int i = 0; i < rlen; i++) {
-            char c = (char)rv[3 + i];
-            deviceName += c;
+            deviceName += Character.toString((char)((int)rv.get(3 + i)));
         }
 
         connected = true;
@@ -236,54 +245,46 @@ public class stk500 implements BuiltinCommand {
         return deviceName;
     }
 
-    public int[] sendCommand(int[] command) {
-
+    public ArrayList<Integer> sendCommand(int[] command) {
+        replyIsAvailable = false;
         try {
             int checksum = 0;
-            port.writeByte((byte)0x1B);
+            port.write((byte)0x1B);
             checksum ^= 0x1B;
-            port.writeByte((byte)(sequence & 0xFF));
+            port.write((byte)(sequence & 0xFF));
             checksum ^= sequence;
-            port.writeByte((byte)((command.length >> 8) & 0xFF));
+            port.write((byte)((command.length >> 8) & 0xFF));
             checksum ^= ((command.length >> 8) & 0xFF);
-            port.writeByte((byte)(command.length & 0xFF));
+            port.write((byte)(command.length & 0xFF));
             checksum ^= (command.length & 0xFF);
-            port.writeByte((byte)0x0E);
+            port.write((byte)0x0E);
             checksum ^= 0x0E;
 
             for(int i = 0; i < command.length; i++) {
-                port.writeByte((byte)(command[i] & 0xFF));
+                port.write((byte)(command[i] & 0xFF));
+System.err.println(String.format("> [%02X]", command[i]));
                 checksum ^= command[i];
             }
 
-            port.writeByte((byte)(checksum & 0xFF));
+            port.write((byte)(checksum & 0xFF));
 
             sequence++;
 
-            byte[] header = port.readBytes(5, timeout);
-
-            while(header[0] != (byte)0x1B && header[4] != (byte)0x0E) {
-                byte[] next = port.readBytes(1, timeout);
-                header[0] = header[1];
-                header[1] = header[2];
-                header[2] = header[3];
-                header[3] = header[4];
-                header[4] = next[0];
+            int to = 0;
+            while (!replyIsAvailable) {
+                Thread.sleep(10);
+                to++;
+                if (to > 100) {
+System.err.println("Timeout");
+                    return null;
+                }
             }
+System.err.println("Reply: " + replyData.get(1));
 
-            int msglen = (unsigned_byte(header[2]) << 8) | unsigned_byte(header[3]);
-            byte[] message = port.readBytes(msglen, timeout);
-            byte[] cs = port.readBytes(1, timeout);
-
-            int[] out = new int[msglen];
-
-            for(int i = 0; i < msglen; i++) {
-                out[i] = unsigned_byte(message[i]);
-            }
-
-            return out;
+            return replyData;
 
         } catch(Exception e) {
+e.printStackTrace();
             ctx.error(e);
             return null;
         }
@@ -294,13 +295,13 @@ public class stk500 implements BuiltinCommand {
             return false;
         }
 
-        int[] rv = sendCommand(new int[] {CMD_SET_PARAMETER, param, val});
+        ArrayList<Integer> rv = sendCommand(new int[] {CMD_SET_PARAMETER, param, val});
 
         if(rv == null) {
             return false;
         }
 
-        if(rv[1] == STATUS_CMD_OK) {
+        if(rv.get(1) == STATUS_CMD_OK) {
             return true;
         }
 
@@ -312,14 +313,14 @@ public class stk500 implements BuiltinCommand {
             return 0;
         }
 
-        int[] rv = sendCommand(new int[] {CMD_GET_PARAMETER, param});
+        ArrayList<Integer> rv = sendCommand(new int[] {CMD_GET_PARAMETER, param});
 
         if(rv == null) {
             return 0;
         }
 
-        if(rv[1] == STATUS_CMD_OK) {
-            return rv[2];
+        if(rv.get(1) == STATUS_CMD_OK) {
+            return rv.get(2);
         }
 
         return 0;
@@ -330,13 +331,13 @@ public class stk500 implements BuiltinCommand {
             return false;
         }
 
-        int[] rv = sendCommand(new int[] {CMD_OSCCAL});
+        ArrayList<Integer> rv = sendCommand(new int[] {CMD_OSCCAL});
 
         if(rv == null) {
             return false;
         }
 
-        if(rv[1] == STATUS_CMD_OK) {
+        if(rv.get(1) == STATUS_CMD_OK) {
             return true;
         }
 
@@ -414,14 +415,14 @@ public class stk500 implements BuiltinCommand {
             message[10 + i] = data[i];
         }
 
-        int[] rv = sendCommand(message);
+        ArrayList<Integer> rv = sendCommand(message);
 
         if(rv == null) {
             ctx.error("Upload failed");
             return false;
         }
 
-        if(rv[1] != STATUS_CMD_OK) {
+        if(rv.get(1) != STATUS_CMD_OK) {
             ctx.error("Upload failed");
             return false;
         }
@@ -443,26 +444,26 @@ public class stk500 implements BuiltinCommand {
             int a2 = (int)((address >> 16) & 0xFFL);
             int a3 = (int)((address >> 24) & 0xFFL);
 
-            int[] rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, a3, a2, a1, a0});
+            ArrayList<Integer> rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, a3, a2, a1, a0});
 
             if(rv == null) {
                 return false;
             }
 
-            if(rv[1] == STATUS_CMD_OK) {
+            if(rv.get(1) == STATUS_CMD_OK) {
                 return true;
             }
 
             return false;
         } else {
             //int[] rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, 0x80, 0x00, 0x00, 0x00});
-            int[] rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, 0x00, 0x00, 0x00, 0x00});
+            ArrayList<Integer> rv = sendCommand(new int[] {CMD_LOAD_ADDRESS, 0x00, 0x00, 0x00, 0x00});
 
             if(rv == null) {
                 return false;
             }
 
-            if(rv[1] != STATUS_CMD_OK) {
+            if(rv.get(1) != STATUS_CMD_OK) {
                 return false;
             }
 
@@ -486,7 +487,7 @@ public class stk500 implements BuiltinCommand {
             return false;
         }
 
-        int[] rv = sendCommand(new int[] {
+        ArrayList<Integer> rv = sendCommand(new int[] {
                                    CMD_ENTER_PROGMODE_ISP,
                                    200,
                                    100,
@@ -505,7 +506,7 @@ public class stk500 implements BuiltinCommand {
             return false;
         }
 
-        if(rv[1] == STATUS_CMD_OK) {
+        if(rv.get(1) == STATUS_CMD_OK) {
             return true;
         }
 
@@ -517,14 +518,14 @@ public class stk500 implements BuiltinCommand {
             return false;
         }
 
-        int[] rv = sendCommand(new int[] { CMD_LEAVE_PROGMODE_ISP, 1, 1});
+        ArrayList<Integer> rv = sendCommand(new int[] { CMD_LEAVE_PROGMODE_ISP, 1, 1});
 
         if(rv == null) {
             ctx.error("Timeout leaving programming mode!");
             return false;
         }
 
-        if(rv[1] != STATUS_CMD_OK) {
+        if(rv.get(1) != STATUS_CMD_OK) {
             ctx.error("Error leaving programming mode!");
             return false;
         }
@@ -711,8 +712,6 @@ public class stk500 implements BuiltinCommand {
                     recordAddress = hr.getAddress();
                     fullAddress = baseAddress + (recordAddress + segmentAddress);
                     memChunks.put((Long)fullAddress, (int[])hr.getData());
-                    System.out.println(String.format("Loaded block at 0x%08x, size %d, made up of ba: 0x%08x, ra: 0x%08x, sa: 0x%08x",
-                        fullAddress, hr.getLength(), baseAddress, recordAddress, segmentAddress));
                     break;
 
                 case HexRecord.EoF:
@@ -731,14 +730,12 @@ public class stk500 implements BuiltinCommand {
                 case HexRecord.ExtendedLinearAddress:
                     data = hr.getData();
                     baseAddress = ((data[0] << 24) | (data[1] << 16));
-                    System.out.println(String.format("New base address 0x%08x", baseAddress));
                     break;
 
                 case HexRecord.StartLinearAddress:
                     // Not supported
                     break;
                 default:
-                    System.out.println(String.format("Unknown record type 0x%02X", hr.getType()));
                     break;
                 }
             }
@@ -767,9 +764,6 @@ public class stk500 implements BuiltinCommand {
 
             long pageoffset = start - pagestart;
 
-            System.out.println(String.format("Coalesced block at 0x%08x into page 0x%08x offset 0x%04x",
-                start, pagestart, pageoffset));
-
             for(int i = 0; i < chunkData.length; i++) {
                 if(pageoffset + i == pageSize) {
                     compressedChunks.put(pagestart, pageData);
@@ -793,4 +787,54 @@ public class stk500 implements BuiltinCommand {
 
         return true;
     }
+
+    public void commsEventReceived(CommsEvent e) {
+    }
+
+    ArrayList<Integer> replyData = new ArrayList<Integer>();
+    int recPhase = 0;
+    int msgLen = 0;
+
+    public void commsDataReceived(byte[] data) {
+        for (int i = 0; i < data.length; i++) {
+            int recByte = (int)data[i];
+
+System.err.println(String.format("< [%02X]", recByte));
+
+            switch(recPhase) {
+                case 0: // Message start
+                    if (recByte == 0x1B) {
+                        recPhase = 1;
+                    }
+                    break;
+                case 1: // Seqno
+                    // Ignore sequence numbers
+                    recPhase = 2;
+                    break;
+                case 2: // Message size
+                    msgLen = recByte;
+                    recPhase = 3;
+                    break;
+                case 3: // Token
+                    if (recByte == 0x0E) {
+                        recPhase = 4;
+                        replyData = new ArrayList<Integer>();
+                    } else {
+                        recPhase = 0;
+                    }
+                    break;
+                case 4:
+                    replyData.add(recByte);
+                    if (replyData.size() == msgLen) {
+                        recPhase = 5;
+                    }
+                    break;
+                case 5:
+                    replyIsAvailable=true;
+                    recPhase = 0;
+                    break;
+            }
+        }
+    }
+
 }

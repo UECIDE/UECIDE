@@ -116,6 +116,7 @@ public class Base implements AptPercentageListener {
     public static TreeMap<String, Compiler> compilers;
     public static TreeMap<String, Board> boards;
     public static TreeMap<String, Core> cores;
+    public static TreeMap<String, Programmer> programmers;
 //    public static TreeMap<String, Plugin> plugins;
     public static TreeMap<String, Class<?>> plugins = new TreeMap<String, Class<?>>();
     public static ArrayList<Plugin> pluginInstances;
@@ -532,6 +533,7 @@ public class Base implements AptPercentageListener {
             compilers = new TreeMap<String, Compiler>();
             cores = new TreeMap<String, Core>();
             boards = new TreeMap<String, Board>();
+            programmers = new TreeMap<String, Programmer>();
             plugins = new TreeMap<String, Class<?>>();
             lookAndFeels = new TreeMap<String, Class<?>>();
             pluginInstances = new ArrayList<Plugin>();
@@ -546,6 +548,9 @@ public class Base implements AptPercentageListener {
             System.out.println("done");
             System.out.print("Loading boards...");
             loadBoards();
+            System.out.println("done");
+            System.out.print("Loading programmers...");
+            loadProgrammers();
             System.out.println("done");
             System.out.print("Loading libraries...");
             gatherLibraries();
@@ -621,6 +626,7 @@ public class Base implements AptPercentageListener {
         compilers = new TreeMap<String, Compiler>();
         cores = new TreeMap<String, Core>();
         boards = new TreeMap<String, Board>();
+        programmers = new TreeMap<String, Programmer>();
         plugins = new TreeMap<String, Class<?>>();
         lookAndFeels = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
@@ -642,6 +648,10 @@ public class Base implements AptPercentageListener {
         if(!headless) splashScreen.setMessage("Boards...", 50);
 
         loadBoards();
+
+        if(!headless) splashScreen.setMessage("Programmers...", 55);
+
+        loadProgrammers();
 
         if (cli.isSet("mkmf")) {
             for(int i = 0; i < argv.length; i++) {
@@ -1140,6 +1150,44 @@ public class Base implements AptPercentageListener {
                     } else {    
                         Debug.message("    ==> IS NOT VALID!!!");
                     }
+                }
+            }
+        }
+    }
+
+    public static void loadProgrammers() {
+        programmers.clear();
+        loadProgrammersFromFolder(getProgrammersFolder());
+    }
+
+    /*! Load any programmers found in the specified folder */
+    public static void loadProgrammersFromFolder(File folder) {
+        String bl[] = folder.list();
+
+        if(bl == null) {
+            return;
+        }
+
+        Debug.message("Loading programmers from " + folder.getAbsolutePath());
+
+        for(int i = 0; i < bl.length; i++) {
+            if(bl[i].charAt(0) == '.')
+                continue;
+
+            File bdir = new File(folder, bl[i]);
+
+            if(bdir.isDirectory()) {
+                File bfile = new File(bdir, "programmer.txt");
+
+                if(bfile.exists()) {
+                    Debug.message("    Loading programmer " + bfile.getAbsolutePath());
+                    Programmer newProgrammer = new Programmer(bdir);
+
+                    if(newProgrammer.isValid()) {
+                        programmers.put(newProgrammer.getName(), newProgrammer);
+                    }
+                } else {
+                    loadProgrammersFromFolder(bdir);
                 }
             }
         }
@@ -2306,6 +2354,7 @@ public class Base implements AptPercentageListener {
     
     static public File getCacheFolder() { return getDataFolder("cache"); }
     static public File getCoresFolder() { return getDataFolder("cores"); }
+    static public File getProgrammersFolder() { return getDataFolder("programmers"); }
     static public File getBoardsFolder() { return getDataFolder("boards"); }
     static public File getThemesFolder() { return getDataFolder("themes"); }
     static public File getPluginsFolder() { return getDataFolder("plugins"); }
@@ -2431,6 +2480,8 @@ public class Base implements AptPercentageListener {
                     rescanCores();
                     Editor.bulletAll("Scanning boards...");
                     rescanBoards();
+                    Editor.bulletAll("Scanning programmers...");
+                    rescanProgrammers();
                     Editor.bulletAll("Scanning plugins...");
                     rescanPlugins();
                     Editor.bulletAll("Scanning themes...");
@@ -2479,6 +2530,17 @@ public class Base implements AptPercentageListener {
     public static void rescanCores() {
         cores = new TreeMap<String, Core>();
         loadCores();
+    }
+
+    public static void rescanProgrammers() {
+        try {
+            programmers = new TreeMap<String, Programmer>();
+            loadProgrammers();
+            Editor.updateAllEditors();
+            Editor.selectAllEditorProgrammers();
+        } catch(Exception e) {
+            error(e);
+        }
     }
 
     public static void rescanBoards() {
@@ -3156,6 +3218,15 @@ public class Base implements AptPercentageListener {
 
     public static void buildPreferencesTree() {
         preferencesTree = new PropertyFile();
+
+
+        for(Programmer c : programmers.values()) {
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "programmer:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
+        }
 
         for(Compiler c : compilers.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");

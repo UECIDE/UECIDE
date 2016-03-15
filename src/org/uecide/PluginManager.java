@@ -226,6 +226,12 @@ public class PluginManager implements PropertyChangeListener
             longDesc += "\n";
         }
 
+        if (pe.get("Depends") != null) {
+            longDesc += "* Depends: ";
+            longDesc += pe.get("Depends");
+            longDesc += "\n";
+        }
+
         try {
             String fp = Base.getTheme().getFontCSS("pluginmanager.browser.font.p");
             String fli = Base.getTheme().getFontCSS("pluginmanager.browser.font.li");
@@ -968,6 +974,12 @@ public class PluginManager implements PropertyChangeListener
         fullNodeCount += addSectionToTree(compilersNode, "compilers");
         if (compilersNode.getChildCount() > 0) {
             treeRoot.add(compilersNode);
+        }
+
+        DefaultMutableTreeNode programmersNode = new DefaultMutableTreeNode("Programmers");
+        fullNodeCount += addSectionToTree(programmersNode, "programmers");
+        if (programmersNode.getChildCount() > 0) {
+            treeRoot.add(programmersNode);
         }
 
         DefaultMutableTreeNode systemNode = new DefaultMutableTreeNode("System");

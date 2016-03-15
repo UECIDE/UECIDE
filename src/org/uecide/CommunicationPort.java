@@ -96,4 +96,8 @@ public interface CommunicationPort {
 
     // A function to get the "base" name of a port.
     public String getBaseName();
+
+    // A pair of functions to get and set data (strings) within the port object.
+    public void set(String key, String val);
+    public String get(String key);
 }

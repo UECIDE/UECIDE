@@ -47,10 +47,7 @@ public class SSHCommunicationPort implements CommunicationPort {
     String lastError = "No error";
     CommsListener listener = null;
     String consoleCommand = null;
-    String username = null;
     String password = null;
-    String hostname = null;
-    String portname = null;
 
     Session session = null;
     Channel channel = null;
@@ -61,41 +58,13 @@ public class SSHCommunicationPort implements CommunicationPort {
 
     ReadThread readThread = null;
 
-    public SSHCommunicationPort(String n, Board b) {
+    String name;
+
+    public SSHCommunicationPort(String n, Board b, InetAddress ip, int portnum) {
         board = b;
-        String unPart = "";
-        String hostPart = "";
-
-        if (n.startsWith("ssh://")) {
-            n = n.substring(6);
-        };
-        if (n.indexOf("@") > -1) {
-            String[] parts = n.split("@");
-            unPart = parts[0];
-            hostPart = parts[1];
-        } else {
-            hostPart = n;
-        }
-
-        String[] upbits = unPart.split(":");
-        String[] hostbits = hostPart.split(":");
-
-        username = upbits[0];
-        if (upbits.length == 2) { password = upbits[1]; }
-        hostname = hostbits[0];
-        if (hostbits.length == 2) { portname = hostbits[1]; }
-        if (portname == null) {
-            portname = "22";
-        }
-
-        if (username == null || username.equals("")) {
-            username = board.get("ssh.console.user");
-        }
-
-        try {
-            address = InetAddress.getByName(hostname);
-        } catch (Exception e) {
-        }
+        name = n;
+        address = ip;
+        port = portnum;
     }
 
     public String getConsoleAddress() {
@@ -117,7 +86,7 @@ public class SSHCommunicationPort implements CommunicationPort {
     }
 
     public String getProgrammingPort() {
-        return portname;
+        return "" + port;
     }
 
     public Board getBoard() {
@@ -125,26 +94,11 @@ public class SSHCommunicationPort implements CommunicationPort {
     }
 
     public String getName() {
-        String out = board.getDescription() + " (ssh://";
-        if (hostname != null) {
-            out += hostname;
-        }
-        if (portname != null) {
-            out += ":" + portname;
-        }
-        out += ")";
-        return out;
+        return name + " (" + getProgrammingAddress() + ")";
     }
 
     public String toString() {
-        String out = "ssh://";
-        if (hostname != null) {
-            out += hostname;
-        }
-        if (portname != null) {
-            out += ":" + portname;
-        }
-        return out;
+        return getName();
     }
 
     public void addCommsListener(CommsListener l) {
@@ -208,12 +162,12 @@ public class SSHCommunicationPort implements CommunicationPort {
 
     public boolean openPort() {
         try {
-            port = Integer.parseInt(portname);
             JSch jsch = new JSch();
-            session = jsch.getSession(username, hostname, port);
-            String password = Preferences.get("ssh." + hostname + "." + username);
+            String hostname = getProgrammingAddress();
+            session = jsch.getSession(get("user"), hostname, port);
+            String password = Preferences.get("ssh." + hostname + "." + get("user"));
             if(password == null) {
-                password = Base.session.get("ssh." + hostname + "." + username);
+                password = Base.session.get("ssh." + hostname + "." + get("user"));
             }
 
             if(password == null) {
@@ -232,8 +186,8 @@ public class SSHCommunicationPort implements CommunicationPort {
             } catch(JSchException e) {
                 if(e.getMessage().equals("Auth fail")) {
                     password = null;
-                    Preferences.unset("ssh." + hostname + "." + username);
-                    Base.session.unset("ssh." + hostname + "." + username);
+                    Preferences.unset("ssh." + hostname + "." + get("user"));
+                    Base.session.unset("ssh." + hostname + "." + get("user"));
                     lastError = "Authentication failed";
                     System.err.println(lastError);
                     session.disconnect();
@@ -250,7 +204,7 @@ public class SSHCommunicationPort implements CommunicationPort {
                 return false;
             }
 
-            Base.session.set("ssh." + hostname + "." + username, password);
+            Base.session.set("ssh." + hostname + "." + get("user"), password);
 
             String command = board.get("ssh.console.command");
             Channel channel = session.openChannel("exec");
@@ -286,14 +240,15 @@ public class SSHCommunicationPort implements CommunicationPort {
         JTextField passwordField = (JTextField)new JPasswordField(20);
         JCheckBox save = new JCheckBox("Remember password");
         Object[] ob = {passwordField, save};
-        int result = JOptionPane.showConfirmDialog(null, ob, "Enter password for " + username + "@" + hostname, JOptionPane.OK_CANCEL_OPTION);
+        String hostname = getProgrammingAddress();
+        int result = JOptionPane.showConfirmDialog(null, ob, "Enter password for " + get("user") + "@" + hostname, JOptionPane.OK_CANCEL_OPTION);
 
         if(result == JOptionPane.CANCEL_OPTION) {
             return null;
         }
 
         if(save.isSelected()) {
-            Preferences.set("ssh." + hostname + "." + username, passwordField.getText());
+            Preferences.set("ssh." + hostname + "." + get("user"), passwordField.getText());
         }
 
         return passwordField.getText();
@@ -336,4 +291,17 @@ public class SSHCommunicationPort implements CommunicationPort {
     public String getBaseName() {
         return toString();
     }
+
+    HashMap<String, String> data = new HashMap<String, String>();
+    public void set(String key, String value) {
+        data.put(key, value);
+    }
+    public String get(String key) {
+        return data.get(key);
+    }
+
+    public String getKey() {
+        return name;
+    }
+
 }

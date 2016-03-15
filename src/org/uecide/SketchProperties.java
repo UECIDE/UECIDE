@@ -76,6 +76,61 @@ public class SketchProperties extends JDialog {
 
     HashMap<String, JComponent> fields;
 
+    class KVPair {
+        String k;
+        String v;
+        public KVPair(String kk, String vv) {
+            k = kk;
+            v = vv;
+        }
+        public String getKey() { return k; }
+        public String getValue() { return v; }
+        public String toString() { return v; }
+    }
+
+    class KVPairModel extends AbstractListModel implements ComboBoxModel {
+        String selectedKey;
+        TreeMap<String, String>values = new TreeMap<String, String>();
+
+        public Object getSelectedItem() {
+            if (selectedKey == null) { return null; }
+            if (values.get(selectedKey) == null) { return null; }
+            KVPair kv = new KVPair(selectedKey, values.get(selectedKey));
+            return kv;
+        }
+
+        public void setSelectedItem(Object o) {
+            String k = null;
+            if (o instanceof KVPair) {
+                k = ((KVPair)o).getKey();
+            } else if (o instanceof String) {
+                k = (String)o;
+            }
+System.err.println("Selected item: " + k);
+            if (values.get(k) != null) {
+System.err.println("Confirmed");
+                selectedKey = k;
+            }
+        }
+
+        public void addItem(String k, String v) {
+            values.put(k, v);
+        }
+
+        public Object getElementAt(int i) {
+            String[] keys = values.keySet().toArray(new String[0]);
+            if (i >= keys.length) {
+                return null;
+            }
+            KVPair kv = new KVPair(keys[i], values.get(keys[i]));
+            return kv;
+        }
+
+        public int getSize() {
+            return values.keySet().size();
+        }
+    }
+
     public SketchProperties(Editor e, Sketch s) {
         super();
 
@@ -149,6 +204,12 @@ public class SketchProperties extends JDialog {
         objectsPane = new JPanel();
         objectsPane.setLayout(new BoxLayout(objectsPane, BoxLayout.PAGE_AXIS));
         objectsPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        HashMap<String, String> boardNames = new HashMap<String, String>();
+        for (String b : Base.boards.keySet()) {
+            boardNames.put(b, Base.boards.get(b).getDescription());
+        }
+
         addTextField(objectsPane, "sketch.board", "Board:");
         addTextField(objectsPane, "sketch.core", "Core:");
         addTextField(objectsPane, "sketch.compiler", "Compiler:");
@@ -191,6 +252,33 @@ public class SketchProperties extends JDialog {
         panel.add(field);
     }
 
+    void addComboField(JPanel panel, String key, String label, HashMap<String, String>list) {
+        Context ctx = sketch.getContext();
+        PropertyFile configFile = ctx.getSketchSettings();
+        JLabel lab = new JLabel(label);
+        lab.setAlignmentX(LEFT_ALIGNMENT);
+        panel.add(lab);
+
+        KVPairModel model = new KVPairModel();
+   
+        model.addItem("----NOTHING----", "None Selected");
+
+        for (String k : list.keySet()) {
+            model.addItem(k, list.get(k));
+        }
+
+        JComboBox field = new JComboBox(model);
+
+        String content = "";
+        if (configFile.get(key) != null) {
+            content = configFile.get(key);
+        }
+        field.setSelectedItem(content);
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, field.getPreferredSize().height));
+        fields.put(key, field);
+        panel.add(field);
+    }
+
     void addTextArea(JPanel panel, String key, String label) {
         Context ctx = sketch.getContext();
         PropertyFile configFile = ctx.getSketchSettings();
@@ -222,7 +310,7 @@ public class SketchProperties extends JDialog {
         if (sketch.getCore() != null) cre = sketch.getCore().getName();
         if (sketch.getCompiler() != null) cmp = sketch.getCompiler().getName();
         if (sketch.getDevice() != null) dev = sketch.getDevice().toString();
-        if (sketch.getProgrammer() != null) prg = sketch.getProgrammer();
+        if (sketch.getProgrammer() != null) prg = sketch.getProgrammer().getName();
  
         ((JTextField)(fields.get("sketch.board"))).setText(brd);
         ((JTextField)(fields.get("sketch.core"))).setText(cre);
@@ -253,6 +341,16 @@ public class SketchProperties extends JDialog {
                     cf.unset(key);
                 } else {
                     cf.set(key, c.getText());
+                }
+            } else if(comp instanceof JComboBox) {
+                JComboBox c = (JComboBox)comp;
+
+                KVPair p = (KVPair)c.getSelectedItem();
+                String k = p.getKey();
+                if (k.equals("----NOTHING----")) {
+                    cf.unset(key);
+                } else {
+                    cf.set(key, k);
                 }
             }
         }

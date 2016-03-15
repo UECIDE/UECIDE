@@ -51,7 +51,6 @@ public class ecma implements BuiltinCommand {
         try {
             ScriptEngineManager manager = new ScriptEngineManager();
             ScriptEngine engine = manager.getEngineByName("JavaScript");
-            engine.put("context", ctx);
             File f = new File(arg[0]);
             if (!f.exists()) {
                 ctx.error("File not found");
@@ -77,6 +76,7 @@ public class ecma implements BuiltinCommand {
             
             engine.eval(sb.toString());
 
+            engine.put("ctx", ctx);
             running = true;
 
             try {

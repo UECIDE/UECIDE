@@ -32,11 +32,82 @@ package org.uecide;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
+import javax.jmdns.ServiceListener;
+import javax.jmdns.ServiceEvent;
 import java.io.*;
 import java.util.*;
 import java.net.*;
 
 public class NetworkDiscoveryService extends Service {
+
+
+    class BoardServiceListener implements ServiceListener {
+        public void serviceResolved(ServiceEvent event) {
+            ServiceInfo info = event.getInfo();
+System.err.println(info);
+
+            String board = info.getPropertyString("board");
+            if (board == null) {
+System.err.println("No board entry");
+                return;
+            }
+            Board foundBoard = Base.boards.get(board);
+            if (foundBoard == null) {
+System.err.println("No board found");
+                return;
+            }
+
+            String protocol = info.getPropertyString("protocol");
+            if (protocol == null) {
+System.err.println("No protocol entry");
+                return;
+            }
+
+            if (protocol.equals("ssh")) {
+
+                InetAddress[] ips = info.getInetAddresses();
+                byte[] ip = ips[0].getAddress();
+                String[] urls = info.getURLs();
+                System.err.println(urls[0]);
+
+                SSHCommunicationPort newPort = new SSHCommunicationPort(info.getName(), foundBoard, ips[0], info.getPort());
+                System.err.println("Added: " + foundBoard);
+                for (Enumeration<String> e = info.getPropertyNames(); e.hasMoreElements();) {
+                    String k = e.nextElement();
+                    newPort.set(k, info.getPropertyString(k));
+                    System.err.println("  : " + k + " -> " + newPort.get(k));
+                }
+
+                synchronized(Base.communicationPorts) {
+                    Base.communicationPorts.add(newPort);
+                }
+            }
+        }
+        public void serviceAdded(ServiceEvent event) {
+        }
+        public void serviceRemoved(ServiceEvent event) {
+            ServiceInfo info = event.getInfo();
+            String key = info.getName();
+                    System.err.println("Removed: " + key);
+
+            synchronized(Base.communicationPorts) {
+                CommunicationPort fp = null;
+                for (CommunicationPort cp  : Base.communicationPorts) {
+                    if (cp instanceof SSHCommunicationPort) {
+                        SSHCommunicationPort scp = (SSHCommunicationPort)cp;
+                        if (scp.getKey().equals(key)) {
+                            fp = cp;
+                        }
+                    }
+                }
+                if (fp != null) {
+                    Base.communicationPorts.remove(fp);
+                }
+            }
+        }
+    }
+
+    BoardServiceListener boardListener = new BoardServiceListener();
 
     public NetworkDiscoveryService() {
         setInterval(10000);
@@ -47,7 +118,8 @@ public class NetworkDiscoveryService extends Service {
 
     public void setup() {
         try {
-            jmdns = JmDNS.create(InetAddress.getLocalHost());
+            byte[] ipAll = {0, 0, 0, 0};
+            jmdns = JmDNS.create(InetAddress.getByAddress(ipAll));
         } catch (UnknownHostException ex) {
         } catch (IOException ex) {
         }
@@ -55,108 +127,19 @@ public class NetworkDiscoveryService extends Service {
             System.err.println("JmDNS service unable to start");
             stop();
         }
+        ArrayList<String> fullServiceList = getServices();
+
+        jmdns.addServiceListener("_uecide._tcp.local.", boardListener);
+
+//        for (String service : fullServiceList) {
+//            jmdns.addServiceListener(service, boardListener);
+//        }
     }
 
     public void cleanup() {
     }
 
     public void loop() {
-        // First we want a list of all the possible services to look for.
-        ArrayList<String> fullServiceList = getServices();
-
-        HashMap<Object, DiscoveredBoard> passBoards = new HashMap<Object, DiscoveredBoard>();
-        HashMap<String, Board> boards = new HashMap<String, Board>();
-
-        for(String service : fullServiceList) {
-            if (service == null) {
-                continue;
-            }
-
-            ServiceInfo[] foundServices = jmdns.list(service, 1000);
-
-            if(foundServices != null) {
-                for(ServiceInfo info : foundServices) {
-
-                    InetAddress[] ips = info.getInetAddresses();
-                    Board foundBoard = getBoardByService(info);
-
-                    if(foundBoard != null) {
-
-                        DiscoveredBoard db = new DiscoveredBoard();
-                        db.board = foundBoard;
-                        db.name = info.getName();
-                        db.location = ips[0];
-                        db.programmer = foundBoard.get("mdns.programmer");
-                        db.version = info.getPropertyString(foundBoard.get("mdns.version"));
-                        db.type = DiscoveredBoard.NETWORK;
-
-                        if (foundBoard.get("mdns.class") != null) {
-                            if (foundBoard.get("mdns.class").equals("ssh")) {
-                                String uri = "ssh://";
-
-                                byte[] ip = ips[0].getAddress();
-
-                                String url = String.format("ssh://%d.%d.%d.%d:22",
-                                     (int)ip[0] & 0xFF,
-                                     (int)ip[1] & 0xFF,
-                                     (int)ip[2] & 0xFF,
-                                     (int)ip[3] & 0xFF);
-
-                                boards.put(url, foundBoard);
-                            }
-                        }
-
-
-                        for(Enumeration<String> e = info.getPropertyNames(); e.hasMoreElements();) {
-                            String prop = (String)e.nextElement();
-                            db.properties.set(prop, info.getPropertyString(prop));
-                        }
-
-                        passBoards.put(ips[0], db);
-                    }
-                }
-            }
-        }
-
-        // Now let's look for any existing found network boards that aren't in our list and remove them
-
-        ArrayList<CommunicationPort> toAdd = new ArrayList<CommunicationPort>();
-        ArrayList<CommunicationPort> toRemove = new ArrayList<CommunicationPort>();
-
-        for (CommunicationPort port : Base.communicationPorts) {
-            if (port instanceof SSHCommunicationPort) {
-                String name = port.toString();
-                if (!boards.keySet().contains(name)) {
-                    System.err.println("Removing " + port);
-                    toRemove.add(port);
-                }
-            }
-        }
-
-        for (String name : boards.keySet()) {
-            boolean found = false;
-            for (CommunicationPort port : Base.communicationPorts) {
-                if (port instanceof SSHCommunicationPort) {
-                    String pname = port.toString();
-                    if (pname.equals(name)) {
-                        found = true;
-                    }
-                }
-            }
-            if (found == false) {
-                System.err.println("Adding " + name);
-                toAdd.add(new SSHCommunicationPort(name, boards.get(name)));
-            }
-        }
-
-        for (CommunicationPort port : toRemove) {
-            Base.communicationPorts.remove(port);
-        }
-
-        for (CommunicationPort port : toAdd) {
-            Base.communicationPorts.add(port);
-        }
-
     }
 
     public ArrayList<String> getServices() {
