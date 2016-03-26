@@ -51,4 +51,7 @@ public class write implements BuiltinCommand {
         }
         return false;
     }
+
+    public void kill() {
+    }
 }

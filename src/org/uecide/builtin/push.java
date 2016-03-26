@@ -54,4 +54,7 @@ public class push implements BuiltinCommand {
         ctx.set(arg[0], val);
         return true;
     }
+
+    public void kill() {
+    }
 }

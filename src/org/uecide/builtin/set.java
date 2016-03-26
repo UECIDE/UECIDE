@@ -42,4 +42,7 @@ public class set implements BuiltinCommand {
         ctx.set(arg[0], arg[1]);
         return true;
     }
+
+    public void kill() {
+    }
 }

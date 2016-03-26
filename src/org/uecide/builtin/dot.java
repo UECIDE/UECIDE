@@ -37,4 +37,7 @@ public class dot implements BuiltinCommand {
         ctx.messageStream(".");
         return true;
     }
+
+    public void kill() {
+    }
 }

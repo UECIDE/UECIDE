@@ -66,6 +66,7 @@ public class Context {
     PropertyFile sketchSettings = null;
 
     Process runningProcess = null;
+    ThreadRet runningThread = null;
 
     PropertyFile savedSettings = null;
 
@@ -78,6 +79,10 @@ public class Context {
     public Context() {
         settings = new PropertyFile();
         sketchSettings = new PropertyFile();
+    }
+
+    class ThreadRet extends Thread {
+        public Object retval;
     }
 
     // At least one of these should be called to configure the context:
@@ -339,6 +344,19 @@ public class Context {
         }
         if (sketch != null) {
             sketch.bullet2(e);
+            return;
+        }
+        System.out.print("   + " + e);
+    }
+
+    public void bullet3(String e) {
+        if (!e.endsWith("\n")) { e += "\n"; }
+        if (editor != null) {
+            editor.bullet3(e);
+            return;
+        }
+        if (sketch != null) {
+            sketch.bullet3(e);
             return;
         }
         System.out.print("   + " + e);
@@ -820,7 +838,7 @@ public class Context {
             Class<?> c = Class.forName("org.uecide.builtin." + cmdName);
 
             Constructor<?> ctor = c.getConstructor();
-            BuiltinCommand  p = (BuiltinCommand)(ctor.newInstance());
+            final BuiltinCommand  p = (BuiltinCommand)(ctor.newInstance());
 
             if(c == null) {
                 return false;
@@ -829,15 +847,31 @@ public class Context {
             Class<?>[] param_types = new Class<?>[2];
             param_types[0] = org.uecide.Context.class;
             param_types[1] = String[].class;
-            Method m = c.getMethod("main", param_types);
+            
+            final Method m = c.getMethod("main", param_types);
+            final Method k = c.getMethod("kill");
 
             Object[] args = new Object[2];
             args[0] = this;
             args[1] = arg;
 
+            final Object[] aa = args;
+
             try {
-                return m.invoke(p, args);
+                runningThread = new ThreadRet() {
+                    public void run() {
+                        try {
+                            retval = m.invoke(p, aa);
+                        } catch (Exception e3) {
+                            retval = "";
+                        } 
+                    }
+                };
+                runningThread.start();
+                runningThread.join();
+                return runningThread.retval;
             } catch (Exception e2) {
+                runningThread = null;
                 return "";
             }
 
@@ -846,6 +880,7 @@ public class Context {
             Base.error(e);
         }
 
+        runningThread = null;
         return false;
     }
 
@@ -1098,6 +1133,9 @@ public class Context {
     }
 
     public void killRunningProcess() {
+        if (runningThread != null) {
+            runningThread.stop();
+        }
         if(runningProcess != null) {
             runningProcess.destroy();
             Base.processes.remove(runningProcess);

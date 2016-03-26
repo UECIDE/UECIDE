@@ -44,4 +44,7 @@ public class bullet2 implements BuiltinCommand {
         ctx.bullet2(sb.toString());
         return true;
     }
+
+    public void kill() {
+    }
 }

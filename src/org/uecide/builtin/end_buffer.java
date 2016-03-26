@@ -40,4 +40,7 @@ public class end_buffer implements BuiltinCommand {
         }
         return true;
     }
+
+    public void kill() {
+    }
 }

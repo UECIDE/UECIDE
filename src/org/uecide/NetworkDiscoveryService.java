@@ -81,6 +81,13 @@ System.err.println("No protocol entry");
                 synchronized(Base.communicationPorts) {
                     Base.communicationPorts.add(newPort);
                 }
+                Editor.broadcast(String.format("Found %s (%d.%d.%d.%d)",
+                    info.getName(),
+                    (int)ip[0] & 0xFF,
+                    (int)ip[1] & 0xFF,
+                    (int)ip[2] & 0xFF,
+                    (int)ip[3] & 0xFF
+                ));
             }
         }
         public void serviceAdded(ServiceEvent event) {

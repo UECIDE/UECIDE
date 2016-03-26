@@ -44,4 +44,7 @@ public class error implements BuiltinCommand {
         ctx.error(sb.toString());
         return true;
     }
+
+    public void kill() {
+    }
 }

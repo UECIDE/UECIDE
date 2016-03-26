@@ -44,4 +44,7 @@ public class exec implements BuiltinCommand {
         return (Boolean)ctx.executeKey(key);
 
     }
+
+    public void kill() {
+    }
 }

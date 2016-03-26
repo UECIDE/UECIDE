@@ -50,6 +50,7 @@ public class Console extends JTextPane implements ClipboardOwner {
     MutableAttributeSet command = new SimpleAttributeSet();
     MutableAttributeSet bullet = new SimpleAttributeSet();
     MutableAttributeSet bullet2 = new SimpleAttributeSet();
+    MutableAttributeSet bullet3 = new SimpleAttributeSet();
     MutableAttributeSet link = new SimpleAttributeSet();
 
     public final static int BODY = 1;
@@ -60,6 +61,7 @@ public class Console extends JTextPane implements ClipboardOwner {
     public final static int BULLET = 6;
     public final static int LINK = 7;
     public final static int BULLET2 = 8;
+    public final static int BULLET3 = 9;
 
     BufferedStyledDocument document;
 
@@ -240,6 +242,7 @@ public class Console extends JTextPane implements ClipboardOwner {
         setStyle(command, "command");
         setStyle(bullet, "bullet");
         setStyle(bullet2, "bullet2");
+        setStyle(bullet3, "bullet3");
         setStyle(link, "link");
 
         setBackground(new Color(1,1,1, (float) 0.01));
@@ -358,6 +361,12 @@ public class Console extends JTextPane implements ClipboardOwner {
                 bchar = "\u2023";
             }
             doAppendString(bchar + " " + message, bullet2);
+        } else if (type == BULLET3) {
+            String bchar = Base.getTheme().get("console.bullet3.character");
+            if (bchar == null) {
+                bchar = "\u25E6";
+            }
+            doAppendString(bchar + " " + message, bullet3);
         } else if (type == LINK) {
             String[] chunks = message.split("\\|");
             link.addAttribute(LINK_ATTRIBUTE, new URLLinkAction(chunks[0]));
@@ -416,6 +425,8 @@ public class Console extends JTextPane implements ClipboardOwner {
                     append(text, BULLET);
                 } else if (type.equals("bullet2")) {
                     append(text, BULLET2);
+                } else if (type.equals("bullet3")) {
+                    append(text, BULLET3);
                 } else if (type.equals("link")) {
                     append(text, LINK);
                 }

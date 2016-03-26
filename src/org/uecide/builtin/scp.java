@@ -269,4 +269,7 @@ public class scp implements BuiltinCommand {
         return passwordField.getText();
     }
 
+    public void kill() {
+    }
+
 }

@@ -34,9 +34,26 @@ import org.uecide.*;
 
 public class vc_programmer implements VariableCommand {
     public String main(Context sketch, String args) {
-        if (args.equals("root")) {
-            return sketch.getProgrammer().getFolder().getAbsolutePath();
+
+        String[] alist = args.split(",");
+        Programmer prog = sketch.getProgrammer();
+
+        String prop = alist[alist.length-1];
+
+        if (alist.length == 1) {
+            prop = alist[0];
+        } else {
+            prog = Base.programmers.get(alist[0]);
+            prop = alist[1];
         }
-        return sketch.getProgrammer().get(args);
+
+        if (prog == null) {
+            return "ERROR";
+        }
+
+        if (prop.equals("root")) {
+            return prog.getFolder().getAbsolutePath();
+        }
+        return sketch.getProgrammer().get(prop);
     }
 }

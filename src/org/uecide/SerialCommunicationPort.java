@@ -81,8 +81,15 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
         return portName;
     }
 
+    HashMap<String, String>macPortNameCache = new HashMap<String,String>();
+
     String getNameMacOS() {
         String deviceName = serialPort.getPortName();
+
+        if (macPortNameCache.get(deviceName) != null) {
+            return macPortNameCache.get(deviceName);
+        }
+
         String subName = deviceName;
         if (subName.startsWith("/dev/tty.")) {
             subName = subName.substring(9);
@@ -107,11 +114,13 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
                                 if (b.get("usb.vid") != null && b.get("usb.pid") != null) {
                                     if (b.get("usb.vid").equals(vid) && b.get("usb.pid").equals(pid)) {
                                         board = b;
+                                        macPortNameCache.put(deviceName, board.getDescription() + " (" + deviceName + ")");
                                         return board.getDescription() + " (" + deviceName + ")";
                                     }
                                 }
                             }
 
+                            macPortNameCache.put(deviceName, deviceName + " (" + par.get("USB Vendor Name") + " " + par.get("USB Product Name") + ")");
                             return deviceName + " (" + par.get("USB Vendor Name") + " " + par.get("USB Product Name") + ")";
                         }
                         par = par.getParentNode();
@@ -123,6 +132,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
             e.printStackTrace();
         }
 
+        macPortNameCache.put(deviceName, deviceName);
         return deviceName;
         
     }

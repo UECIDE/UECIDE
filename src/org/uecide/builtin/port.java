@@ -86,4 +86,7 @@ public class port implements BuiltinCommand {
         }
         return false;
     }
+
+    public void kill() {
+    }
 }

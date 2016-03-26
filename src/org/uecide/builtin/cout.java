@@ -43,4 +43,7 @@ public class cout implements BuiltinCommand {
         ctx.message(sb.toString());
         return true;
     }
+
+    public void kill() {
+    }
 }

@@ -103,4 +103,7 @@ public class gpio implements BuiltinCommand {
             e.printStackTrace();
         }
     }
+
+    public void kill() {
+    }
 }

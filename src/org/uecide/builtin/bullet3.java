@@ -32,9 +32,16 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class start_buffer implements BuiltinCommand {
+public class bullet3 implements BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
-        ctx.startBuffer(arg.length == 1);
+        StringBuilder sb = new StringBuilder();
+
+        for(String s : arg) {
+            sb.append(s);
+            sb.append(" ");
+        }
+
+        ctx.bullet3(sb.toString());
         return true;
     }
 

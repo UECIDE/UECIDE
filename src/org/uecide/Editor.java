@@ -2337,6 +2337,20 @@ public class Editor extends JFrame {
         console.append(msg, Console.BULLET2);
     }
 
+    public void bullet3(String msg) {
+        Debug.message(msg);
+
+        if(msg == null) {
+            return;
+        }
+
+        if(!msg.endsWith("\n")) {
+            msg += "\n";
+        }
+
+        console.append(msg, Console.BULLET3);
+    }
+
     public void message(String msg) {
         Debug.message(msg);
 

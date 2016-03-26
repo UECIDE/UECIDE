@@ -837,4 +837,7 @@ System.err.println(String.format("< [%02X]", recByte));
         }
     }
 
+
+    public void kill() {
+    }
 }

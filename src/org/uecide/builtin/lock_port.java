@@ -41,4 +41,7 @@ public class lock_port implements BuiltinCommand {
         Serial.lockPort(arg[0]);
         return true;
     }
+
+    public void kill() {
+    }
 }

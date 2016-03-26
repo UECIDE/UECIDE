@@ -367,6 +367,9 @@ public class Sketch {
     }
 
     public void setProgrammer(String programmer) {
+        if (programmer == null) {
+            return;
+        }
         Programmer p = Base.programmers.get(programmer);
         setProgrammer(p);
     }
@@ -390,6 +393,7 @@ public class Sketch {
 
         if (programmer == null) {
             error("Sorry, I cannot select a valid programmer.");
+            return;
         }
 
         Preferences.set("board." + getBoard().getName() + ".programmer", programmer.getName());
@@ -2597,7 +2601,7 @@ public class Sketch {
         }
 
         if (Preferences.getBoolean("compiler.verbose_files")) {
-            bullet2(fileName);
+            bullet3(fileName);
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
@@ -3555,6 +3559,17 @@ public class Sketch {
             editor.bullet2(s);
         } else {
             System.out.print("      > " + s);
+        }
+    }        
+
+    public void bullet3(String s) {
+        if(!s.endsWith("\n")) {
+            s += "\n";
+        }
+        if(editor != null) {
+            editor.bullet3(s);
+        } else {
+            System.out.print("        o " + s);
         }
     }        
 

@@ -40,4 +40,7 @@ public class delay implements BuiltinCommand {
         }
         return true;
     }
+
+    public void kill() {
+    }
 }

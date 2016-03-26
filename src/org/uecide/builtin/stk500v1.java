@@ -704,4 +704,7 @@ System.err.println("Programming chunk " + currentChunk + " at address " + start)
         }
     }
 
+    public void kill() {
+    }
+
 }

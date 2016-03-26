@@ -172,4 +172,7 @@ public class ssh  implements BuiltinCommand {
 
         return passwordField.getText();
     }
+
+    public void kill() {
+    }
 }

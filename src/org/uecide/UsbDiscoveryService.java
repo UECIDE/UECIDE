@@ -131,14 +131,10 @@ public class UsbDiscoveryService extends Service {
         try {
             Board b = getBoardByDevice(dev);
             if (b != null) {
-                DiscoveredBoard db = new DiscoveredBoard();
-                db.board = b;
-                db.name = String.format("%04x:%04x", dev.getUsbDeviceDescriptor().idVendor(), dev.getUsbDeviceDescriptor().idProduct());
-                db.location = dev;
-                db.programmer = b.get("usb.programmer");
-                db.type = DiscoveredBoard.USB;
-                Base.discoveredBoards.put(dev, db);
-                
+                UsbHidDevice newPort = new UsbHidDevice(b, dev);
+                synchronized(Base.communicationPorts) {
+                    Base.communicationPorts.add(newPort);
+                }
             }
         } catch (Exception exex) {
             Base.error(exex);
@@ -146,9 +142,23 @@ public class UsbDiscoveryService extends Service {
     }
     public void deviceDetached(UsbDevice dev) {
         try {
-            DiscoveredBoard b = Base.discoveredBoards.get(dev);
-            if (b != null) {
-                Base.discoveredBoards.remove(dev);
+            UsbDeviceDescriptor desc = dev.getUsbDeviceDescriptor();
+            short vid = desc.idVendor();
+            short pid = desc.idProduct();
+            String key = String.format("%04x:%04x", vid, pid);
+            synchronized(Base.communicationPorts) {
+                CommunicationPort fp = null;
+                for (CommunicationPort cp  : Base.communicationPorts) {
+                    if (cp instanceof UsbHidDevice) {
+                        UsbHidDevice scp = (UsbHidDevice)cp;
+                        if (scp.getKey().equals(key)) {
+                            fp = cp;
+                        }
+                    }
+                }
+                if (fp != null) {
+                    Base.communicationPorts.remove(fp);
+                }
             }
         } catch (Exception exex) {
             Base.error(exex);
@@ -169,6 +179,12 @@ public class UsbDiscoveryService extends Service {
                 if (bpids == null) {
                     continue;
                 }
+                if (b.get("usb.programmer") == null) {
+                    continue;
+                }
+                if (!b.get("usb.programmer").equals("hid")) {
+                    continue;
+                }
                 short bvid = 0;
                 short bpid = 0;
                 try {
@@ -178,6 +194,7 @@ public class UsbDiscoveryService extends Service {
                     continue;
                 }
                 if (vid == bvid && pid == bpid) {
+                    Editor.broadcast("Found device " + b.getDescription());
                     return b;
                 }
             }

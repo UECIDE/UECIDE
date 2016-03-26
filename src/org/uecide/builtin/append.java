@@ -55,4 +55,7 @@ public class append implements BuiltinCommand {
         }
         return false;
     }
+
+    public void kill() {
+    }
 }

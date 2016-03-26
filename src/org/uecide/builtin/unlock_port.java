@@ -37,4 +37,7 @@ public class unlock_port implements BuiltinCommand {
         Serial.unlockPort(arg[0]);
         return true;
     }
+
+    public void kill() {
+    }
 }

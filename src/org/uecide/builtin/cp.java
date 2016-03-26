@@ -78,4 +78,7 @@ public class cp implements BuiltinCommand {
         }
         return true;
     }
+
+    public void kill() {
+    }
 }

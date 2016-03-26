@@ -55,4 +55,7 @@ public class loadjar implements BuiltinCommand {
             return false;
         }
     }
+
+    public void kill() {
+    }
 }

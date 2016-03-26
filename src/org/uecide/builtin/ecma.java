@@ -135,4 +135,8 @@ public class ecma implements BuiltinCommand {
         return false;
     }
 
+    public void kill() {
+        running = false;
+    }
+
 }

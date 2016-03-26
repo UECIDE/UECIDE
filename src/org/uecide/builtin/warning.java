@@ -44,4 +44,7 @@ public class warning implements BuiltinCommand {
         ctx.warning(sb.toString());
         return true;
     }
+
+    public void kill() {
+    }
 }

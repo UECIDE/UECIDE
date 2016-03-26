@@ -52,4 +52,7 @@ public class spin implements BuiltinCommand {
         ctx.messageStream("\010" + symbol);
         return true;
     }
+
+    public void kill() {
+    }
 }
