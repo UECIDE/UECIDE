@@ -940,52 +940,28 @@ public class PluginManager implements PropertyChangeListener
         int fullNodeCount = 0;
         lastAdded = null;
 
-        DefaultMutableTreeNode pluginsNode = new DefaultMutableTreeNode("Plugins");
-        fullNodeCount += addSectionToTree(pluginsNode, "plugins");
-        if (pluginsNode.getChildCount() > 0) {
-            treeRoot.add(pluginsNode);
+        PropertyFile sections;
+
+        File sf = Base.getDataFile("apt/db/sections.db");
+        if (sf.exists()) {
+            sections = new PropertyFile(Base.getDataFile("apt/db/sections.db"));
+        } else {
+            sections = new PropertyFile();
+            sections.set("plugins", "Plugins");
+            sections.set("boards", "Boards");
+            sections.set("cores", "Cores");
+            sections.set("compilers", "Compilers");
+            sections.set("programmers", "Programmers");
+            sections.set("extra", "System");
+            sections.set("libraries", "Libraries");
         }
 
-        DefaultMutableTreeNode themesNode = new DefaultMutableTreeNode("Themes");
-        fullNodeCount += addSectionToTree(themesNode, "themes");
-        if (themesNode.getChildCount() > 0) {
-            treeRoot.add(themesNode);
-        }
-
-        DefaultMutableTreeNode libsNode = new DefaultMutableTreeNode("Libraries");
-        fullNodeCount += addSectionToTree(libsNode, "libraries");
-        if (libsNode.getChildCount() > 0) {
-            treeRoot.add(libsNode);
-        }
-
-        DefaultMutableTreeNode boardsNode = new DefaultMutableTreeNode("Boards");
-        fullNodeCount += addSectionToTree(boardsNode, "boards");
-        if (boardsNode.getChildCount() > 0) {
-            treeRoot.add(boardsNode);
-        }
-
-        DefaultMutableTreeNode coresNode = new DefaultMutableTreeNode("Cores");
-        fullNodeCount += addSectionToTree(coresNode, "cores");
-        if (coresNode.getChildCount() > 0) {
-            treeRoot.add(coresNode);
-        }
-
-        DefaultMutableTreeNode compilersNode = new DefaultMutableTreeNode("Compilers");
-        fullNodeCount += addSectionToTree(compilersNode, "compilers");
-        if (compilersNode.getChildCount() > 0) {
-            treeRoot.add(compilersNode);
-        }
-
-        DefaultMutableTreeNode programmersNode = new DefaultMutableTreeNode("Programmers");
-        fullNodeCount += addSectionToTree(programmersNode, "programmers");
-        if (programmersNode.getChildCount() > 0) {
-            treeRoot.add(programmersNode);
-        }
-
-        DefaultMutableTreeNode systemNode = new DefaultMutableTreeNode("System");
-        fullNodeCount += addSectionToTree(systemNode, "extra");
-        if (systemNode.getChildCount() > 0) {
-            treeRoot.add(systemNode);
+        for (String key : sections.keySet()) {
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(sections.get(key));
+            fullNodeCount += addSectionToTree(node, key);
+            if (node.getChildCount() > 0) {
+                treeRoot.add(node);
+            }
         }
 
         treeModel.nodeStructureChanged(treeRoot);

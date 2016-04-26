@@ -62,6 +62,7 @@ public class Library implements Comparable {
     public int compiledPercent = 0;
     public File sourceFolder;
     public File archFolder;
+    public boolean needsRescan = true;
 
     public HashMap<String, ArrayList<File>>sourceFilesByArch = null;
     public HashMap<String, ArrayList<File>>headerFilesByArch = null;
@@ -124,7 +125,6 @@ public class Library implements Comparable {
             }
 
             valid = true;
-            rescan();
             return;
         } else {
             // Is it a new 1.5.x style library?
@@ -138,7 +138,6 @@ public class Library implements Comparable {
                 mainInclude = new File(sourceFolder, name + ".h");
                 archFolder = new File(root, "arch");
                 valid = true;
-                rescan();
                 return;
             }
         }
@@ -212,7 +211,7 @@ public class Library implements Comparable {
         }
 
         probedFiles = new ArrayList<String>();
-
+/*
         for(File f : headerFiles) {
             gatherIncludes(f);
         }
@@ -220,6 +219,7 @@ public class Library implements Comparable {
         for(File f : sourceFiles) {
             gatherIncludes(f);
         }
+*/
     }
 
     ArrayList<String> probedFiles;
@@ -660,6 +660,12 @@ public class Library implements Comparable {
                 loadLibrariesFromFolder(subcat, "repo:" + subcat.getName());
             }
         }
+
+//        Thread reScanthread = new Thread() {
+//            public void run() {
+                rescanAll();
+//            }
+//        };
     }
 
     public static Library getLibraryByName(String name, String core, String group) {
@@ -805,6 +811,17 @@ public class Library implements Comparable {
 
     public File getSourceFolder() {
         return sourceFolder;
+    }
+
+    public synchronized static void rescanAll() {
+        for (ArrayList<Library> ll : libraryList.values()) {
+            for (Library l : ll) {
+                if (l.needsRescan) {
+                    l.rescan();
+                    l.needsRescan = false;
+                }
+            }
+        }
     }
 }
 

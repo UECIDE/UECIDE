@@ -3396,6 +3396,13 @@ public class Base implements AptPercentageListener {
                 ctx.executeKey("init.script");
             }
         }
+        for (Programmer c : programmers.values()) {
+            if (c.get("init.script.0") != null) {
+                Context ctx = new Context();
+                ctx.setProgrammer(c);
+                ctx.executeKey("init.script");
+            }
+        }
     }
 
     // If the package manager hasn't been configured then 
