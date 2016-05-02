@@ -1,2 +1,2 @@
-Version=0.8.9-pre1
+Version=0.8.9-pre2
 Release=beta
