@@ -3456,7 +3456,8 @@ public class Base implements AptPercentageListener {
     }
 
     public static void setLookAndFeel() {
-        String laf = getTheme().get("laf");
+        String laf = getTheme().getPlatformSpecific("laf");
+System.err.println(laf);
         if(!headless) {
             try {
                 Class<?> plg = lookAndFeels.get(laf); //Preferences.get("theme.window"));

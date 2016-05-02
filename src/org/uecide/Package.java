@@ -301,7 +301,7 @@ System.out.println("Replaces: " + deps);
                 out.close();
                 return true;
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 if (downloadTo.exists()) {
                     downloadTo.delete();
                 }
@@ -314,6 +314,7 @@ System.out.println("Replaces: " + deps);
     // contents as a string.
     public boolean extractPackage(File cache, File db, File root) {
         String control = "";
+        String md5sums = "";
         HashMap<String, Integer> installedFiles = new HashMap<String, Integer>();
         try {
             File src = new File(cache, getFilename());
@@ -353,6 +354,11 @@ System.out.println("Replaces: " + deps);
                                 }
                             }
                         }
+                        if (tname.equals("./md5sums")) {
+                            byte[] data = new byte[tsize];
+                            tar.read(data, 0, tsize);
+                            md5sums = new String(data, "UTF-8");
+                        }
                         te = tar.getNextTarEntry();
                     }
 
@@ -389,6 +395,10 @@ System.out.println("Replaces: " + deps);
             File cf = new File(pf, "control");
             PrintWriter pw = new PrintWriter(cf);
             pw.println(control);
+            pw.close();
+            File mf = new File(pf, "md5sums");
+            pw = new PrintWriter(mf);
+            pw.println(md5sums);
             pw.close();
             File ff = new File(pf, "files");
             pw = new PrintWriter(ff);

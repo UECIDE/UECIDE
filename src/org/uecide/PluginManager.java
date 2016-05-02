@@ -953,6 +953,7 @@ public class PluginManager implements PropertyChangeListener
             sections.set("compilers", "Compilers");
             sections.set("programmers", "Programmers");
             sections.set("extra", "System");
+            sections.set("themes", "Themes");
             sections.set("libraries", "Libraries");
         }
 

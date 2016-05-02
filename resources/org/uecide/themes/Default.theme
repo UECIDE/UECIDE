@@ -1,5 +1,7 @@
 name=Default
 laf=org.uecide.SystemDefaultLAF
+#laf.linux=com.sun.java.swing.plaf.gtk.GTKLookAndFeel
+.laf.windows=com.sun.java.swing.plaf.windows.WindowsLookAndFeel
 icon=Gnomic
 editor.fgcolor = #000000
 editor.bgcolor = #ffffff
