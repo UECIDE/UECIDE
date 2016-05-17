@@ -3196,6 +3196,23 @@ public class Editor extends JFrame {
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_BOTTOM);
 
+        PropertyFile pf = loadedSketch.getContext().getMerged();
+        PropertyFile tools = pf.getChildren("tool");
+        String[] toolsKeys = tools.childKeys();
+        System.err.println(toolsKeys);
+        for (String k : toolsKeys) {
+            String name = tools.get(k + ".name");
+            JMenuItem item = new JMenuItem(name);
+            item.setActionCommand("tool." + k);
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String baseKey = e.getActionCommand();
+                    loadedSketch.getContext().executeKey(baseKey + ".script");
+                }
+            });
+            toolsMenu.add(item);
+        }
+
         helpMenu.add(createMenuEntry("About " + Base.theme.get("product.cap"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleAbout();

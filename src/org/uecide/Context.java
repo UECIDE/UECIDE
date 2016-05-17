@@ -1108,7 +1108,9 @@ public class Context {
             }
         }
 
-        result = runningProcess.exitValue();
+        if (runningProcess != null) {
+            result = runningProcess.exitValue();
+        }
 
         Base.processes.remove(runningProcess);
 
@@ -1121,6 +1123,9 @@ public class Context {
 
     public static boolean isProcessRunning(Process process)
     {
+        if (process == null) {
+            return false;
+        }
         try
         {
             process.exitValue();
