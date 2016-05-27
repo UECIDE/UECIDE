@@ -356,6 +356,9 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
             Thread.sleep(100);
             serialPort.setDTR(true);
             serialPort.setRTS(true);
+            Thread.sleep(100);
+            serialPort.setDTR(false);
+            serialPort.setRTS(false);
         } catch (Exception e) {
             lastError = e.getMessage();
         }

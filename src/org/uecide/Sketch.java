@@ -2391,64 +2391,34 @@ public class Sketch {
 
         setCompilingProgress(50);
 
-        if(!compileEEP()) {
-            error("Failed extracting EEPROM image");
-            return false;
-        }
-
         setCompilingProgress(60);
 
+        PropertyFile autogen = props.getChildren("compile.autogen");
+        String[] types = autogen.childKeys();
 
-        if(props.get("compile.lss") != null) {
-            if(Preferences.getBoolean("compiler.generate_lss")) {
-                File redirectTo = new File(buildFolder, sketchName + ".lss");
+        int steps = 50 / types.length;
+        int pct = 50;
 
-                if(redirectTo.exists()) {
-                    redirectTo.delete();
+        for (String type : types) {
+            ctx.bullet2("Generating " + type + " file...");
+            ctx.executeKey("compile.autogen." + type);
+            pct += steps;
+            setCompilingProgress(pct);
+        }
+
+        if(Preferences.getBoolean("compiler.save_lss") && !parentIsProtected()) {
+            try {
+                Base.copyFile(new File(buildFolder, sketchName + ".lss"), new File(sketchFolder, sketchName + ".lss"));
+
+                if(editor != null) {
+                    editor.updateFilesTree();
                 }
-
-                boolean result = false;
-
-                String output = "";
-
-                try {
-                    ctx.startBuffer(true);
-                    result = compileLSS();
-                    output = ctx.endBuffer();
-                    PrintWriter pw = new PrintWriter(redirectTo);
-                    pw.print(output);
-                    pw.close();
-
-                } catch(Exception e) {
-                    result = false;
-                }
-
-                if(!result) {
-                    error("Failed generating listing");
-                    return false;
-                }
-
-                if(Preferences.getBoolean("compiler.save_lss") && !parentIsProtected()) {
-                    try {
-                        Base.copyFile(new File(buildFolder, sketchName + ".lss"), new File(sketchFolder, sketchName + ".lss"));
-
-                        if(editor != null) {
-                            editor.updateFilesTree();
-                        }
-                    } catch(Exception e) {
-                        error(e);
-                    }
-                }
+            } catch(Exception e) {
+                error(e);
             }
-
         }
 
         setCompilingProgress(70);
-
-        if(!compileHEX()) {
-            error("Failed converting to HEX file");
-            return false;
-        }
 
         if((
             Preferences.getBoolean("compiler.save_hex") || Base.cli.isSet("force-save-hex") || Base.cli.isSet("cli")) 

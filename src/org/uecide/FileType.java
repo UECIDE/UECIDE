@@ -122,15 +122,12 @@ public class FileType {
         fileTypeList.put("cfg", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("ini", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("map", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
+        fileTypeList.put("etx", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("txt", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("dat", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("md", new FileTypeInfo(FileType.DOCUMENT, "org.uecide.editors.markdown", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-markdown", GROUP_DOCS));
         fileTypeList.put("plist", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
         fileTypeList.put("properties", new FileTypeInfo(FileType.TEXT, "org.uecide.editors.text", SyntaxConstants.SYNTAX_STYLE_NONE, "text-x-generic", GROUP_OTHER));
-
-        fileTypeList.put("o", new FileTypeInfo(FileType.OBJECT, "org.uecide.editors.object", null, "binary", GROUP_BINARY));
-        fileTypeList.put("a", new FileTypeInfo(FileType.OBJECT, "org.uecide.editors.object", null, "binary", GROUP_BINARY));
-        fileTypeList.put("elf", new FileTypeInfo(FileType.OBJECT, "org.uecide.editors.object", null, "binary", GROUP_BINARY));
 
         fileTypeList.put("bmp", new FileTypeInfo(FileType.GRAPHIC, "org.uecide.editors.bitmap", null, "bmp", GROUP_GRAPHIC));
         fileTypeList.put("png", new FileTypeInfo(FileType.GRAPHIC, "org.uecide.editors.bitmap", null, "png", GROUP_GRAPHIC));

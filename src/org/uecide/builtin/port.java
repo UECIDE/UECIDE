@@ -76,11 +76,39 @@ public class port implements BuiltinCommand {
                     comPort.pulseLine();
                 }
                 return true;
+            } else if (action.equals("set")) {
+                if (arg[1].equals("dtr")) {
+                    if (comPort != null) {
+                        if (comPort instanceof SerialCommunicationPort) {
+                            SerialCommunicationPort sport = (SerialCommunicationPort)comPort;
+                            sport.setDTR(true);
+                        }
+                    }
+                } else if (arg[1].equals("rts")) {
+                    if (comPort != null) {
+                        if (comPort instanceof SerialCommunicationPort) {
+                            SerialCommunicationPort sport = (SerialCommunicationPort)comPort;
+                            sport.setRTS(true);
+                        }
+                    }
+                }
+            } else if (action.equals("clear")) {
+                if (arg[1].equals("dtr")) {
+                    if (comPort != null) {
+                        if (comPort instanceof SerialCommunicationPort) {
+                            SerialCommunicationPort sport = (SerialCommunicationPort)comPort;
+                            sport.setDTR(false);
+                        }
+                    }
+                } else if (arg[1].equals("rts")) {
+                    if (comPort != null) {
+                        if (comPort instanceof SerialCommunicationPort) {
+                            SerialCommunicationPort sport = (SerialCommunicationPort)comPort;
+                            sport.setRTS(false);
+                        }
+                    }
+                }
             }
-            
-
-        
-   
         } catch (Exception e) {
             Base.error(e);
         }
