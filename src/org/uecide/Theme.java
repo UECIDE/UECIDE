@@ -70,14 +70,15 @@ public class Theme extends PropertyFile {
     }
 
     public static void loadThemeList() {
-        File userThemes = Base.getThemesFolder();
+        File[] themeFolders = Base.getThemesFolders();
+        for (File userThemes : themeFolders) {
+            if(userThemes.exists() && userThemes.isDirectory()) {
+                String fl[] = userThemes.list();
 
-        if(userThemes.exists() && userThemes.isDirectory()) {
-            String fl[] = userThemes.list();
-
-            for(String f : fl) {
-                PropertyFile nf = new PropertyFile(new File(f));
-                themeList.put(nf.get("name"), nf);
+                for(String f : fl) {
+                    PropertyFile nf = new PropertyFile(new File(f));
+                    themeList.put(nf.get("name"), nf);
+                }
             }
         }
     }

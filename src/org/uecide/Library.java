@@ -50,9 +50,9 @@ public class Library implements Comparable {
     public File root;
     public String name;
     public File examplesFolder = null;
-    public ArrayList<File> sourceFiles;
-    public ArrayList<File> headerFiles;
-    public ArrayList<File> archiveFiles;
+    public TreeSet<File> sourceFiles;
+    public TreeSet<File> headerFiles;
+    public TreeSet<File> archiveFiles;
     public File mainInclude;
     public File utilityFolder;
     public File librariesFolder;
@@ -64,8 +64,8 @@ public class Library implements Comparable {
     public File archFolder;
     public boolean needsRescan = true;
 
-    public HashMap<String, ArrayList<File>>sourceFilesByArch = null;
-    public HashMap<String, ArrayList<File>>headerFilesByArch = null;
+    public HashMap<String, TreeSet<File>>sourceFilesByArch = null;
+    public HashMap<String, TreeSet<File>>headerFilesByArch = null;
 
     public boolean valid = false;
 
@@ -147,9 +147,9 @@ public class Library implements Comparable {
 
     public void rescan() {
         requiredLibraries = new ArrayList<String>();
-        sourceFiles = new ArrayList<File>();
-        archiveFiles = new ArrayList<File>();
-        headerFiles = new ArrayList<File>();
+        sourceFiles = new TreeSet<File>();
+        archiveFiles = new TreeSet<File>();
+        headerFiles = new TreeSet<File>();
         examples = new TreeMap<String, File>();
 
         sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "cpp", false));
@@ -161,15 +161,15 @@ public class Library implements Comparable {
         if (archFolder != null) {
             if (archFolder.exists()) {
                 File[] arches = archFolder.listFiles();
-                sourceFilesByArch = new HashMap<String, ArrayList<File>>();
-                headerFilesByArch = new HashMap<String, ArrayList<File>>();
+                sourceFilesByArch = new HashMap<String, TreeSet<File>>();
+                headerFilesByArch = new HashMap<String, TreeSet<File>>();
                 for (File arch : arches) {
                     if (arch.getName().startsWith(".")) {
                         continue;
                     }
                     if (arch.isDirectory()) {
-                        ArrayList<File>afiles = new ArrayList<File>();
-                        ArrayList<File>hfiles = new ArrayList<File>();
+                        TreeSet<File>afiles = new TreeSet<File>();
+                        TreeSet<File>hfiles = new TreeSet<File>();
                         afiles.addAll(Sketch.findFilesInFolder(arch, "cpp", false));
                         afiles.addAll(Sketch.findFilesInFolder(arch, "c", false));
                         afiles.addAll(Sketch.findFilesInFolder(arch, "S", false));
@@ -335,13 +335,13 @@ public class Library implements Comparable {
         return "#include <" + mainInclude.getName() + ">\n";
     }
 
-    public ArrayList<File> getSourceFiles(Sketch s) {
-        ArrayList<File> sf = new ArrayList<File>();
+    public TreeSet<File> getSourceFiles(Sketch s) {
+        TreeSet<File> sf = new TreeSet<File>();
 
         if (sourceFilesByArch!=null && s != null) {
             String arch = s.getArch();
             if (arch != null) {
-                ArrayList<File>af = sourceFilesByArch.get(arch);
+                TreeSet<File>af = sourceFilesByArch.get(arch);
                 if (af != null) {
                     sf.addAll(sourceFiles);
                 }
@@ -649,21 +649,23 @@ public class Library implements Comparable {
         // And now we have our new repo-based libraries.  First scan
         // a list of categories and their folders:
 
-        File repoLibs = Base.getDataFile("libraries");
-        if (!repoLibs.exists()) {
-            repoLibs.mkdirs();
-        }
-        File[] subcats = repoLibs.listFiles();
-        for (File subcat : subcats) {
-            if ((!subcat.getName().startsWith(".")) && (subcat.isDirectory())) {
-                setCategoryName("repo:" + subcat.getName(), subcat.getName());
-                loadLibrariesFromFolder(subcat, "repo:" + subcat.getName());
+        File[] repoLibsList = Base.getLibrariesFolders();
+        for (File repoLibs : repoLibsList) {
+            if (!repoLibs.exists()) {
+                continue;
+            }
+            File[] subcats = repoLibs.listFiles();
+            for (File subcat : subcats) {
+                if ((!subcat.getName().startsWith(".")) && (subcat.isDirectory())) {
+                    setCategoryName("repo:" + subcat.getName(), subcat.getName());
+                    loadLibrariesFromFolder(subcat, "repo:" + subcat.getName());
+                }
             }
         }
 
 //        Thread reScanthread = new Thread() {
 //            public void run() {
-                rescanAll();
+        rescanAll();
 //            }
 //        };
     }
@@ -781,7 +783,7 @@ public class Library implements Comparable {
         if (headerFilesByArch != null) {
             if (s != null) {
                 String arch = s.getArch();
-                ArrayList<File> hdrs = headerFilesByArch.get(arch);
+                TreeSet<File> hdrs = headerFilesByArch.get(arch);
                 if (hdrs != null) {
                     for (File hf : hdrs) {
                         File p = hf.getParentFile();

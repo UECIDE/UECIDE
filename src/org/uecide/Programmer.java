@@ -54,6 +54,11 @@ public class Programmer extends UObject {
 
         String method = props.get("programmer.method");
 
+        if (method == null) {
+            ctx.error("Programmer has no programmer.method");
+            return false;
+        }
+
         /* --- SCRIPT based upload --- */
         if (method.equals("script")) {
             return (Boolean)ctx.executeKey("programmer.script");

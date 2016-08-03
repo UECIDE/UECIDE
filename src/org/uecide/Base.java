@@ -1075,7 +1075,10 @@ public class Base implements AptPercentageListener {
     /*! Load all the compilers into the main compilers list */
     public static void loadCompilers() {
         compilers.clear();
-        loadCompilersFromFolder(getCompilersFolder());
+        File[] files = getCompilersFolders();
+        for (File file : files) {
+            loadCompilersFromFolder(file);
+        }
     }
 
     /*! Load any compilers found in the specified folder */
@@ -1121,7 +1124,10 @@ public class Base implements AptPercentageListener {
     /*! Load all the cores into the main cores list */
     public static void loadCores() {
         cores.clear();
-        loadCoresFromFolder(getCoresFolder());
+        File[] files = getCoresFolders();
+        for(File file : files) {
+            loadCoresFromFolder(file);
+        }
     }
 
     /*! Load any cores found in the specified folder */
@@ -1157,7 +1163,10 @@ public class Base implements AptPercentageListener {
 
     public static void loadProgrammers() {
         programmers.clear();
-        loadProgrammersFromFolder(getProgrammersFolder());
+        File[] files = getProgrammersFolders();
+        for (File file : files) {
+            loadProgrammersFromFolder(file);
+        }
     }
 
     /*! Load any programmers found in the specified folder */
@@ -1196,7 +1205,10 @@ public class Base implements AptPercentageListener {
     /*! Load all the boards into the main boards list */
     public static void loadBoards() {
         boards.clear();
-        loadBoardsFromFolder(getBoardsFolder());
+        File[] files = getBoardsFolders();
+        for (File file : files) {
+            loadBoardsFromFolder(file);
+        }
     }
 
     /*! Load any boards found in the specified folder */
@@ -2083,33 +2095,37 @@ public class Base implements AptPercentageListener {
 
     public static void loadPlugins() {
 
-        File folder = getPluginsFolder();
-        Debug.message("Loading plugins from " + folder);
-        File[] files = folder.listFiles();
-        if (files != null) {
-            for (File f : files) {
-                Debug.message("  Loading " + f);
-                try {
-                    URL u = f.toURI().toURL();
-                    addURL(u);
-                } catch (Exception ex) {
-                    error(ex);
-                }
-            }
-        }
-
-        folder = getThemesFolder();
-        Debug.message("Loading plugins from " + folder);
-        files = folder.listFiles();
-        if (files != null) {
-            for (File f : files) {
-                Debug.message("  Loading " + f);
-                if (f.getName().endsWith(".jar")) {
+        File[] folders = getPluginsFolders();
+        for (File folder : folders) {
+            Debug.message("Loading plugins from " + folder);
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    Debug.message("  Loading " + f);
                     try {
                         URL u = f.toURI().toURL();
                         addURL(u);
                     } catch (Exception ex) {
                         error(ex);
+                    }
+                }
+            }
+        }
+
+        folders = getThemesFolders();
+        for (File folder : folders) {
+            Debug.message("Loading plugins from " + folder);
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    Debug.message("  Loading " + f);
+                    if (f.getName().endsWith(".jar")) {
+                        try {
+                            URL u = f.toURI().toURL();
+                            addURL(u);
+                        } catch (Exception ex) {
+                            error(ex);
+                        }
                     }
                 }
             }
@@ -2353,13 +2369,32 @@ public class Base implements AptPercentageListener {
     }
     
     static public File getCacheFolder() { return getDataFolder("cache"); }
-    static public File getCoresFolder() { return getDataFolder("cores"); }
-    static public File getProgrammersFolder() { return getDataFolder("programmers"); }
-    static public File getBoardsFolder() { return getDataFolder("boards"); }
-    static public File getThemesFolder() { return getDataFolder("themes"); }
-    static public File getPluginsFolder() { return getDataFolder("plugins"); }
-    static public File getCompilersFolder() { return getDataFolder("compilers"); }
-    static public File getLibrariesFolder() { return getDataFolder("libraries"); }
+
+//    static public File getCoresFolder() { return getDataFolder("cores"); }
+//    static public File getProgrammersFolder() { return getDataFolder("programmers"); }
+//    static public File getBoardsFolder() { return getDataFolder("boards"); }
+//    static public File getThemesFolder() { return getDataFolder("themes"); }
+//    static public File getPluginsFolder() { return getDataFolder("plugins"); }
+//    static public File getCompilersFolder() { return getDataFolder("compilers"); }
+//    static public File getLibrariesFolder() { return getDataFolder("libraries"); }
+
+    static public File[] getAnyFolders(String type) {
+        ArrayList<File> locs = new ArrayList<File>();
+        locs.add(getDataFolder(type));
+        locs.add(getDataFolder("usr/share/uecide/" + type));
+        if (isPosix()) {
+            locs.add(new File("/usr/share/uecide/" + type));
+        }
+        return locs.toArray(new File[0]);
+    }
+
+    static public File[] getCoresFolders() { return getAnyFolders("cores"); }
+    static public File[] getProgrammersFolders() { return getAnyFolders("programmers"); }
+    static public File[] getBoardsFolders() { return getAnyFolders("boards"); }
+    static public File[] getThemesFolders() { return getAnyFolders("themes"); }
+    static public File[] getPluginsFolders() { return getAnyFolders("plugins"); }
+    static public File[] getCompilersFolders() { return getAnyFolders("compilers"); }
+    static public File[] getLibrariesFolders() { return getAnyFolders("libraries"); }
 
     static public void errorReport(Thread t, Throwable e) {
         showError("Uncaught Exception", "An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")\n" +
@@ -2784,18 +2819,22 @@ public class Base implements AptPercentageListener {
             }
         }
 
-        File tf = getThemesFolder();
-        File[] files = tf.listFiles();
+        File[] tfs = getThemesFolders();
+        for (File tf : tfs) {
+            if (tf.exists()) {
+                File[] files = tf.listFiles();
 
-        for(File f : files) {
-            if(f.getName().endsWith(".theme")) {
-                PropertyFile newTheme = new PropertyFile(f);
-                String name = newTheme.get("name");
-                if (name != null) {
-                    Debug.message("Found external theme " + name);
-                    PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
-                    merged.mergeData(newTheme);
-                    themes.put(newTheme.get("name"), merged);
+                for(File f : files) {
+                    if(f.getName().endsWith(".theme")) {
+                        PropertyFile newTheme = new PropertyFile(f);
+                        String name = newTheme.get("name");
+                        if (name != null) {
+                            Debug.message("Found external theme " + name);
+                            PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
+                            merged.mergeData(newTheme);
+                            themes.put(newTheme.get("name"), merged);
+                        }
+                    }
                 }
             }
         }

@@ -106,6 +106,7 @@ public class Editor extends JFrame {
     JPanel consolePanel;
 
     Console console;
+    Console output;
 
     JTabbedPane editorTabs;
     JTabbedPane projectTabs;
@@ -128,6 +129,7 @@ public class Editor extends JFrame {
     DefaultTreeModel filesTreeModel;
 
     JShadowScrollPane consoleScroll;
+    JShadowScrollPane outputScroll;
 
     JProgressBar statusProgress;
     JLabel statusText;
@@ -320,11 +322,18 @@ public class Editor extends JFrame {
             Base.getTheme().getInteger("console.shadow.bottom")
         );
 
+        outputScroll = new JShadowScrollPane(
+            Base.getTheme().getInteger("console.shadow.top"),
+            Base.getTheme().getInteger("console.shadow.bottom")
+        );
+
         console = new Console();
+        output = new Console();
 
         console.setURLClickListener(this);
 
         consoleScroll.setViewportView(console);
+        outputScroll.setViewportView(output);
 
 //        consolePanel.add(consoleScroll);
 
@@ -406,6 +415,7 @@ public class Editor extends JFrame {
         consolePanel.add(consoleTabs, BorderLayout.CENTER);
 
         consoleTabs.add(consoleScroll, "Console");
+        consoleTabs.add(outputScroll, "Output");
 
         addPanelsToTabs(consoleTabs, Plugin.TABS_CONSOLE);
 
@@ -2292,7 +2302,7 @@ public class Editor extends JFrame {
             msg += "\n";
         }
 
-        console.append(msg, Console.COMMAND);
+        output.append(msg, Console.COMMAND);
     }
 
     public void heading(String msg) {
@@ -2395,6 +2405,7 @@ public class Editor extends JFrame {
 
     public void clearConsole() {
         console.clear();
+        output.clear();
     }
 
     public void setProgress(int x) {

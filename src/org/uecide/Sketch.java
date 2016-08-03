@@ -2396,14 +2396,16 @@ public class Sketch {
         PropertyFile autogen = props.getChildren("compile.autogen");
         String[] types = autogen.childKeys();
 
-        int steps = 50 / types.length;
-        int pct = 50;
+        if (types.length > 0) {
+            int steps = 50 / types.length;
+            int pct = 50;
 
-        for (String type : types) {
-            ctx.bullet2("Generating " + type + " file...");
-            ctx.executeKey("compile.autogen." + type);
-            pct += steps;
-            setCompilingProgress(pct);
+            for (String type : types) {
+                ctx.bullet2("Generating " + type + " file...");
+                ctx.executeKey("compile.autogen." + type);
+                pct += steps;
+                setCompilingProgress(pct);
+            }
         }
 
         if(Preferences.getBoolean("compiler.save_lss") && !parentIsProtected()) {
@@ -2767,7 +2769,7 @@ public class Sketch {
         File libBuildFolder = new File(buildFolder, "lib" + lib.getLinkName());
         libBuildFolder.mkdirs();
 
-        ArrayList<File> fileList = lib.getSourceFiles(this);
+        TreeSet<File> fileList = lib.getSourceFiles(this);
 
         String origIncs = ctx.get("includes");
         ctx.set("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
@@ -3901,7 +3903,18 @@ public class Sketch {
         return false;
     }
 
+    public boolean parentIsIn(File[] files) {
+        for (File file : files) {
+           if (isChildOf(file)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean parentIsLibrary() {
+        ArrayList<File> filelist = new ArrayList<File>();
+
         TreeSet<String> groups = Library.getLibraryCategories();
 
         for(String group : groups) {
@@ -3912,25 +3925,22 @@ public class Sketch {
             }
 
             for(Library lib : libs) {
-                if(isChildOf(lib.getFolder())) {
-                    return true;
-                }
+                filelist.add(lib.getFolder());
             }
         }
-
-        return false;
+        return parentIsIn(filelist.toArray(new File[0]));
     }
 
     public boolean parentIsBoard() {
-        return isChildOf(Base.getBoardsFolder());
+        return parentIsIn(Base.getBoardsFolders());
     }
 
     public boolean parentIsCore() {
-        return isChildOf(Base.getCoresFolder());
+        return parentIsIn(Base.getCoresFolders());
     }
 
     public boolean parentIsCompiler() {
-        return isChildOf(Base.getCompilersFolder());
+        return parentIsIn(Base.getCompilersFolders());
     }
 
     public boolean parentIsProtected() {

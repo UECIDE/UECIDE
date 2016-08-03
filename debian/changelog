@@ -1,3 +1,46 @@
+uecide (0.8.9-pre3) unstable; urgency=low 
+
+  * Added script-based tools menu entry support
+  * Bumped version
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 02 May 2016 11:45:24 +0100
+
+uecide (0.8.9-pre2) unstable; urgency=low 
+
+  * Added themes to PiM
+  * Bumped version
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 26 Apr 2016 19:35:12 +0100
+
+uecide (0.8.9-pre1) unstable; urgency=low 
+
+  * Fixed preference mismatch in autosave facility
+  * Properly handled escaped characters in comment stripping
+  * Properly handled escaped characters in comment stripping
+  * Complete overhaul of theme system
+  * Added theming to other components in the system
+  * Added font scaling
+  * Added console background tileable images
+  * Added plugin popup menu support and console copy menu
+  * Updated internal repository
+  * Added support for editor data capture
+  * Added missing widgets
+  * Draggable tabs and ultiple panes
+  * Added version info file
+  * Overhaul of sketch properties system and updated RSyntaxTextArea
+  * Added load/save dialog location remembering option and mark-all enable/disable option
+  * Updated preferences entries
+  * Fixed Replaces: handling in GUI
+  * Reverted draggable tabs
+  * Added MCU list (Most Commonly Used) in Files menu
+  * Added selected board/core/compiler names to top level hardware menu
+  * Added spinner icon graphics
+  * Added programmer objects and associated control logic and commands
+  * Added bullet3, Usb HID device support, kill support for builtin commands
+  * Couple of cleanups
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 31 Aug 2015 14:29:38 +0100
+
 uecide (0.8.8alpha22) unstable; urgency=low 
 
   * Armoured integer parsing in IOKit
