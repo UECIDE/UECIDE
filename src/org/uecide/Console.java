@@ -326,7 +326,7 @@ public class Console extends JTextPane implements ClipboardOwner {
             String[] chars = message.split("(?!^)");
             for (String c : chars) {
                 if (c.equals("\010")) {
-                    document.remove(document.getEndPosition().getOffset()-1, 1);
+                    document.remove(document.getEndPosition().getOffset()-2, 1);
                 } else {
                     document.appendString(c, type);
                 }

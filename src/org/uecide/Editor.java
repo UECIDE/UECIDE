@@ -226,7 +226,9 @@ public class Editor extends JFrame {
         super();
         Editor.registerEditor(this);
         loadedSketch = s;
-
+//String crash = null;
+//if (crash.equals("")) { // crash; 
+//}
         for(Class<?> plugin : Base.plugins.values()) {
             try {
                 Constructor<?> ctor = plugin.getConstructor(Editor.class);

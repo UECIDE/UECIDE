@@ -247,7 +247,10 @@ public class Sketch {
 
     // Look up a board in the global boards map and set the board appropriately
     public void setBoard(String board) {
-        if(board == null || board.equals("")) return;
+        if(board == null || board.equals("")) {
+            Debug.message("NULL or blank board when calling setBoard");
+            return;
+        }
 
         Board b = Base.getBoard(board);
         setBoard(b);
@@ -259,6 +262,7 @@ public class Sketch {
         Debug.message("Selecting board " + board);
 
         if(board == null) {
+            Debug.message("NULL board when calling setBoard");
             return;
         }
 
@@ -271,10 +275,12 @@ public class Sketch {
         Core core = null;
 
         if(boardsCore != null) {
+            Debug.message("Board core is " + boardsCore);
             core = Base.cores.get(boardsCore);
         }
 
         if(core == null) {
+            Debug.message("Board core is null!");
             core = board.getCore();
         }
 
@@ -291,7 +297,10 @@ public class Sketch {
     }
 
     public void setCore(String core) {
-        if(core == null || core.equals("")) return;
+        if(core == null || core.equals("")) {
+            Debug.message("NULL or blank core when calling setCore");
+            return;
+        }
 
         Core c = Base.getCore(core);
         setCore(c);
@@ -305,6 +314,7 @@ public class Sketch {
     public void setCore(Core core) {
         Debug.message("Selecting core " + core);
         if(core == null) {
+            Debug.message("NULL core when calling setCore");
             return;
         }
 
@@ -325,7 +335,10 @@ public class Sketch {
         }
 
         if(compiler != null) {
+            Debug.message("Compiler set to " + compiler);
             setCompiler(compiler);
+        } else {
+            Debug.message("No compiler available!");
         }
 
         if(editor != null) {
@@ -359,6 +372,8 @@ public class Sketch {
 
         Preferences.set("board." + selectedBoard.getName() + ".compiler", compiler.getName());
         String programmer = Preferences.get("board." + selectedBoard.getName() + ".programmer");
+
+        Debug.message("Found programmer in prefs: " + programmer);
         setProgrammer(programmer);
     }
 
@@ -368,6 +383,8 @@ public class Sketch {
 
     public void setProgrammer(String programmer) {
         if (programmer == null) {
+            Debug.message("NULL programmer specified");
+            setProgrammer((Programmer)null);
             return;
         }
         Programmer p = Base.programmers.get(programmer);
@@ -391,12 +408,9 @@ public class Sketch {
             }
         }
 
-        if (programmer == null) {
-            error("Sorry, I cannot select a valid programmer.");
-            return;
+        if (programmer != null) {
+            Preferences.set("board." + getBoard().getName() + ".programmer", programmer.getName());
         }
-
-        Preferences.set("board." + getBoard().getName() + ".programmer", programmer.getName());
 
         selectedProgrammer = programmer;
         ctx.setProgrammer(programmer);

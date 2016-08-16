@@ -969,20 +969,26 @@ public class Context {
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-                    if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
-                        outline += inch;
-                    }
 
-                    if (inch.equals("\n")) {
-                        if (parser != null) {
+                    if (parser != null) {
+                        if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
+                            outline += inch;
+                        }
+                        if (inch.equals("\n")) {
                             outline = parser.parseStreamMessage(this, outline);
+                            if (buffer != null) {
+                                buffer.append(inch);
+                            } else {                        
+                                messageStream(inch);
+                            }
+                            outline = "";
                         }
+                    } else {
                         if (buffer != null) {
-                            buffer.append(outline);
+                            buffer.append(inch);
                         } else {                        
-                            messageStream(outline);
+                            messageStream(inch);
                         }
-                        outline = "";
                     }
                 }
 
@@ -992,24 +998,25 @@ public class Context {
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-                    if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
-                        errline += inch;
-                    }
-
-                    if (inch.equals("\n")) {
-                        if (parser != null) {
+                    if (parser != null) {
+                        if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
+                            errline += inch;
+                        }
+                        if (inch.equals("\n")) {
                             errline = parser.parseStreamError(this, errline);
-                        }
-                        if (bufferError) {
                             if (buffer != null) {
-                                buffer.append(errline);
+                                buffer.append(inch);
                             } else {                        
-                                errorStream(errline);
+                                errorStream(inch);
                             }
-                        } else {
-                            errorStream(errline);
+                            errline = "";
                         }
-                        errline = "";
+                    } else {
+                        if (buffer != null) {
+                            buffer.append(inch);
+                        } else {                        
+                            errorStream(inch);
+                        }
                     }
                 }
 
