@@ -43,7 +43,7 @@ public class loadjar implements BuiltinCommand {
             File f = new File(arg[0]);
 
             if (!f.exists()) {
-                ctx.error("Error: " + f.getAbsolutePath() + " could not be found.");
+                ctx.error(Base.i18n.string("err.notfound", f.getAbsolutePath()));
                 return false;
             }
 

@@ -53,7 +53,7 @@ public class ecma implements BuiltinCommand {
             ScriptEngine engine = manager.getEngineByName("JavaScript");
             File f = new File(arg[0]);
             if (!f.exists()) {
-                ctx.error("File not found");
+                ctx.error(Base.i18n.string("err.notfound", arg[0]));
                 return false;
             }
             StringBuilder sb = new StringBuilder();

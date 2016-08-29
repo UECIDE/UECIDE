@@ -90,7 +90,7 @@ public class ssh  implements BuiltinCommand {
                     password = null;
                     Preferences.unset("ssh." + host + "." + user);
                     Base.session.unset("ssh." + host + "." + user);
-                    ctx.error("Authentication failed");
+                    ctx.error(Base.i18n.string("err.ssh.auth"));
                     session.disconnect();
                     return false;
                 } else {
@@ -158,9 +158,14 @@ public class ssh  implements BuiltinCommand {
 
     public String askPassword() {
         JTextField passwordField = (JTextField)new JPasswordField(20);
-        JCheckBox save = new JCheckBox("Remember password");
+        JCheckBox save = new JCheckBox(Base.i18n.string("form.ssh.rempass"));
         Object[] ob = {passwordField, save};
-        int result = JOptionPane.showConfirmDialog(null, ob, "Enter password for " + user + "@" + host, JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(
+            null, 
+            ob, 
+            Base.i18n.string("form.ssh.askpass", user, host),
+            JOptionPane.OK_CANCEL_OPTION
+        );
 
         if(result == JOptionPane.CANCEL_OPTION) {
             return null;

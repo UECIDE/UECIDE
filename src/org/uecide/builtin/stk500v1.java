@@ -147,34 +147,21 @@ public class stk500v1 implements BuiltinCommand, CommsListener {
             ctx.error(e);
         }
 
-        if(loadHexFile(new File(fle))) {
-            ctx.bullet2("File loaded");
-        } else {
-            ctx.error("Unable to load file " + fle);
+        if(!loadHexFile(new File(fle))) {
+            ctx.error(Base.i18n.string("err.notfound", fle));
             return false;
         }
 
         if (!connect(1000)) {
-            ctx.error("Unable to connect");
+            ctx.error(Base.i18n.string("err.noconnect"));
             return false;
         }
 
         String dn = getDeviceName();
-        if(dn != null) {
-            ctx.bullet2("Connected to " + dn);
-        }
 
-        if(enterProgMode()) {
-            ctx.bullet2("Entered programming mode");
-        }
-
-        if(uploadProgram()) {
-            ctx.bullet2("Upload complete");
-        }
-
-        if(leaveProgMode()) {
-            ctx.bullet2("Left programming mode");
-        }
+        enterProgMode();
+        uploadProgram();
+        leaveProgMode();
 
         disconnect();
         if (ctx.getSketch() != null) {
@@ -339,7 +326,6 @@ System.err.println("Programming chunk " + currentChunk + " at address " + start)
             currentChunk ++;
 
             if(!loadAddress(start)) {
-                ctx.error(String.format("Load Address failed at address 0x%08x", start));
 
                 return false;
             }
@@ -367,7 +353,7 @@ System.err.println("Programming chunk " + currentChunk + " at address " + start)
         }
 
         if(!sendCommand(message)) {
-            ctx.error("Upload failed");
+            ctx.error(Base.i18n.string("err.upload"));
             return false;
         }
 
@@ -410,7 +396,6 @@ System.err.println("Programming chunk " + currentChunk + " at address " + start)
         }
 
         if (!sendCommand(new int[] { Cmnd_STK_LEAVE_PROGMODE })) {
-            ctx.error("Timeout leaving programming mode!");
             return false;
         }
 

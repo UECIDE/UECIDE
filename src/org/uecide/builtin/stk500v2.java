@@ -95,43 +95,22 @@ public class stk500v2 implements BuiltinCommand, CommsListener {
         } catch (Exception e) {
             ctx.error(e);
         }
-System.err.println("1");
 
         if(loadHexFile(new File(fle))) {
-            ctx.message("File loaded");
-        } else {
-            ctx.error("Unable to load file " + fle);
+            ctx.error(Base.i18n.string("err.notfound", fle));
             return false;
         }
 
-System.err.println("2");
         if (!connect(1000)) {
-            ctx.error("Unable to connect");
+            ctx.error(Base.i18n.string("err.noconnect"));
             return false;
         }
 
-System.err.println("3");
         String dn = getDeviceName();
-        if(dn != null) {
-            ctx.message("Connected to " + dn);
-        }
 
-System.err.println("4");
-        if(enterProgMode()) {
-            ctx.message("Entered programming mode");
-        }
-
-System.err.println("5");
-        if(uploadProgram()) {
-            ctx.message("Upload complete");
-        }
-
-System.err.println("6");
-        if(leaveProgMode()) {
-            ctx.message("Left programming mode");
-        }
-
-System.err.println("7");
+        enterProgMode();
+        uploadProgram();
+        leaveProgMode();
         disconnect();
         return true;
     }

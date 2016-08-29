@@ -74,7 +74,7 @@ public class scp implements BuiltinCommand {
                 password = askPassword();
 
                 if(password == null) {
-                    ctx.error("Unable to log in without a password");
+                    ctx.error(Base.i18n.string("err.ssh.nopass"));
                     return false;
                 }
             }
@@ -89,7 +89,7 @@ public class scp implements BuiltinCommand {
                     password = null;
                     Preferences.unset("ssh." + host + "." + user);
                     Base.session.unset("ssh." + host + "." + user);
-                    ctx.error("Authentication failed");
+                    ctx.error(Base.i18n.string("err.ssh.auth"));
                     session.disconnect();
                     return false;
                 } else {
@@ -118,7 +118,7 @@ public class scp implements BuiltinCommand {
             channel.connect();
 
             if(checkAck(in) != 0) {
-                ctx.error("Channel open failed");
+                ctx.error(Base.i18n.string("err.ssh.channel"));
                 session.disconnect();
                 return false;
             }
@@ -134,7 +134,7 @@ public class scp implements BuiltinCommand {
                 out.flush();
 
                 if(checkAck(in) != 0) {
-                    ctx.error("Timestamp failed");
+                    ctx.error(Base.i18n.string("err.ssh.stamp"));
                     session.disconnect();
                     return false;
                 }
@@ -155,7 +155,7 @@ public class scp implements BuiltinCommand {
             out.flush();
 
             if(checkAck(in) != 0) {
-                ctx.error("Remote open failed");
+                ctx.error(Base.i18n.string("err.ssh.open"));
                 session.disconnect();
                 return false;
             }
@@ -176,7 +176,7 @@ public class scp implements BuiltinCommand {
                 fis.close();
                 fis = null;
             } catch(Exception e) {
-                ctx.error("Copy failed: " + e.getMessage());
+                ctx.error(Base.i18n.string("err.ssh.copy", e.getMessage()));
                 session.disconnect();
 
                 try {
@@ -192,7 +192,7 @@ public class scp implements BuiltinCommand {
             out.flush();
 
             if(checkAck(in) != 0) {
-                ctx.error("Flush failed");
+                ctx.error(Base.i18n.string("err.ssh.flush"));
                 session.disconnect();
                 return false;
             }
@@ -208,7 +208,7 @@ public class scp implements BuiltinCommand {
                 session.disconnect();
             }
 
-            ctx.error("Copy failed: " + e.getMessage());
+            ctx.error(Base.i18n.string("err.ssh.copy", e.getMessage()));
 
             System.out.println(e);
 
@@ -254,9 +254,14 @@ public class scp implements BuiltinCommand {
 
     public String askPassword() {
         JTextField passwordField = (JTextField)new JPasswordField(20);
-        JCheckBox save = new JCheckBox("Remember password");
+        JCheckBox save = new JCheckBox(Base.i18n.string("form.ssh.rempass"));
         Object[] ob = {passwordField, save};
-        int result = JOptionPane.showConfirmDialog(null, ob, "Enter password for " + user + "@" + host, JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(
+            null, 
+            ob, 
+            Base.i18n.string("form.ssh.askpass", user, host), 
+            JOptionPane.OK_CANCEL_OPTION
+        );
 
         if(result == JOptionPane.CANCEL_OPTION) {
             return null;
