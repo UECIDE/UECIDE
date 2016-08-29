@@ -168,8 +168,8 @@ public class TabLabel extends JPanel {
     public void askReload() {
         int n = editor.twoOptionBox(
                     JOptionPane.WARNING_MESSAGE,
-                    "Reload File?",
-                    Translate.w("The file %1 has been modified outside UECIDE.  Do you want to reload it??", 40, "\n", sketchFile.getName()),
+                    Base.i18n.string("msg.reload.title"),
+                    Base.i18n.string("msg.reload.body", sketchFile.getName()),
                     "Yes", "No");
 
         if(n == 0) {

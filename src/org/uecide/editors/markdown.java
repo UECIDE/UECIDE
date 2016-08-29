@@ -67,13 +67,13 @@ public class markdown extends JPanel implements EditorBase {
     Editor editor;
     JPanel findPanel = null;
     JTextField searchTerm = new JTextField();
-    JButton findButton = new JButton("Find");
+    JButton findButton = new JButton(Base.i18n.string("misc.find"));
     SearchContext search = new SearchContext();
-    JCheckBox matchCase = new JCheckBox("Case");
-    JCheckBox searchBackwards = new JCheckBox("Back");
+    JCheckBox matchCase = new JCheckBox(Base.i18n.string("misc.case"));
+    JCheckBox searchBackwards = new JCheckBox(Base.i18n.string("misc.back"));
     JTextField replaceWith = new JTextField();
-    JButton replaceButton = new JButton("Replace");
-    JButton replaceAllButton = new JButton("All");
+    JButton replaceButton = new JButton(Base.i18n.string("misc.replace"));
+    JButton replaceAllButton = new JButton(Base.i18n.string("misc.all"));
     JButton findCloseButton;
     Gutter gutter;
 
@@ -853,10 +853,10 @@ public class markdown extends JPanel implements EditorBase {
         }
 
         int n = editor.twoOptionBox(JOptionPane.WARNING_MESSAGE,
-                                    "Revert File?",
-                                    Translate.w("You have unsaved changes.  Reverting the file will lose those changes.  Are you sure?", 40, "\n"),
-                                    "Yes",
-                                    "No"
+                                    Base.i18n.string("msg.revert.title"),
+                                    Base.i18n.string("msg.revert.body"),
+                                    Base.i18n.string("misc.yes"),
+                                    Base.i18n.string("misc.no")
                                    );
 
         if(n != 0) {
@@ -873,7 +873,7 @@ public class markdown extends JPanel implements EditorBase {
 
         switch(flags) {
         case(Plugin.MENU_FILE | Plugin.MENU_MID):
-            item = new JMenuItem(Translate.t("Revert File"));
+            item = new JMenuItem(Base.i18n.string("menu.file.revert"));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     revertFile();
@@ -883,7 +883,7 @@ public class markdown extends JPanel implements EditorBase {
             break;
 
         case(Plugin.MENU_EDIT | Plugin.MENU_TOP):
-            item = new JMenuItem(Translate.t("Copy"));
+            item = new JMenuItem(Base.i18n.string("menu.copy"));
             item.setAccelerator(KeyStroke.getKeyStroke('C', modifiers));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -891,7 +891,7 @@ public class markdown extends JPanel implements EditorBase {
                 }
             });
             menu.add(item);
-            item = new JMenuItem(Translate.t("Cut"));
+            item = new JMenuItem(Base.i18n.string("menu.cut"));
             item.setAccelerator(KeyStroke.getKeyStroke('X', modifiers));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -899,7 +899,7 @@ public class markdown extends JPanel implements EditorBase {
                 }
             });
             menu.add(item);
-            item = new JMenuItem(Translate.t("Paste"));
+            item = new JMenuItem(Base.i18n.string("menu.paste"));
             item.setAccelerator(KeyStroke.getKeyStroke('V', modifiers));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -910,7 +910,7 @@ public class markdown extends JPanel implements EditorBase {
             break;
 
         case(Plugin.MENU_EDIT | Plugin.MENU_MID):
-            item = new JMenuItem(Translate.t("Select All"));
+            item = new JMenuItem(Base.i18n.string("menu.selectall"));
             item.setAccelerator(KeyStroke.getKeyStroke('A', modifiers));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -921,7 +921,7 @@ public class markdown extends JPanel implements EditorBase {
             break;
 
         case(Plugin.MENU_EDIT | Plugin.MENU_BOTTOM):
-            item = new JMenuItem(Translate.t("Find & Replace"));
+            item = new JMenuItem(Base.i18n.string("menu.findreplace"));
             item.setAccelerator(KeyStroke.getKeyStroke('F', modifiers));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -929,7 +929,7 @@ public class markdown extends JPanel implements EditorBase {
                 }
             });
             menu.add(item);
-            item = new JMenuItem(Translate.t("Undo"));
+            item = new JMenuItem(Base.i18n.string("menu.undo"));
             item.setAccelerator(KeyStroke.getKeyStroke('Z', modifiers));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -937,7 +937,7 @@ public class markdown extends JPanel implements EditorBase {
                 }
             });
             menu.add(item);
-            item = new JMenuItem(Translate.t("Redo"));
+            item = new JMenuItem(Base.i18n.string("menu.redo"));
             item.setAccelerator(KeyStroke.getKeyStroke('Y', modifiers));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {

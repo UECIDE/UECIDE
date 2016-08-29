@@ -77,7 +77,7 @@ public class Debug {
             return;
         }
 
-        win = new JFrame("Debug Console");
+        win = new JFrame(Base.i18n.string("win.debug"));
 
         Container contentPane = win.getContentPane();
         contentPane.setLayout(new BorderLayout());
@@ -95,7 +95,7 @@ public class Debug {
 
         ImageIcon trashIcon = Base.loadIconFromResource("toolbar/trash.png");
         JButton trashButton = new JButton(trashIcon);
-        trashButton.setToolTipText(Translate.t("Clear Debug Log"));
+        trashButton.setToolTipText(Base.i18n.string("toolbar.clear"));
         trashButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Debug.debugText = new StringBuilder();
@@ -106,7 +106,7 @@ public class Debug {
 
         ImageIcon pauseIcon = Base.loadIconFromResource("toolbar/pause.png");
         pauseButton = new JToggleButton(pauseIcon);
-        pauseButton.setToolTipText(Translate.t("Pause Scrolling"));
+        pauseButton.setToolTipText(Base.i18n.string("toolbar.pause"));
         toolbar.add(pauseButton);
 
         contentPane.add(toolbar, BorderLayout.NORTH);

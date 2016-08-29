@@ -62,11 +62,6 @@ public class CommandLine {
                     arg = arg.substring(0, equals);
                 }
 
-                if (arg.equals("help")) {
-                    help();
-                    System.exit(0);
-                }
-
                 Class<?> aclass = parameterTypes.get(arg);
                 if (aclass == null) {
                     help();
@@ -116,6 +111,7 @@ public class CommandLine {
                 extraValues.add(arg);
             }
         }
+        
         return extraValues.toArray(new String[0]);
     }
 
@@ -147,7 +143,7 @@ public class CommandLine {
             }
             System.out.print(pname);
             System.out.print("  ");
-            System.out.println(parameterComments.get(s));
+            System.out.println(Base.i18n.string(parameterComments.get(s)));
         }
     }
 

@@ -75,7 +75,6 @@ public class Console extends JTextPane implements ClipboardOwner {
     BufferedImage bottomMiddle = null;
     BufferedImage bottomRight = null;
 
-
     private final static String LINK_ATTRIBUTE = "linkact";
 
     Editor urlClickListener = null;
@@ -470,7 +469,7 @@ public class Console extends JTextPane implements ClipboardOwner {
         public void mousePressed(MouseEvent e) {
             if (e.isPopupTrigger()) {
                 JPopupMenu menu = new JPopupMenu();
-                JMenuItem copy = new JMenuItem("Copy");
+                JMenuItem copy = new JMenuItem(Base.i18n.string("menu.copy"));
                 menu.add(copy);
                 copy.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
@@ -480,7 +479,7 @@ public class Console extends JTextPane implements ClipboardOwner {
                     }
                 });
 
-                JMenuItem copyAll = new JMenuItem("Copy All");
+                JMenuItem copyAll = new JMenuItem(Base.i18n.string("menu.copyall"));
                 menu.add(copyAll);
                 copyAll.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {

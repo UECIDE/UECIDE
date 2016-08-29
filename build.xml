@@ -3,6 +3,12 @@
 
     <property name="launch4j.dir" location="launch4j" />
 
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="/usr/share/ant/lib/ant-contrib.jar"/>
+        </classpath>
+    </taskdef>
+
     <taskdef name="launch4j"
         classname="net.sf.launch4j.ant.Launch4jTask"
         classpath="${launch4j.dir}/launch4j.jar
@@ -50,7 +56,7 @@
         <subant target="install" buildpath="thirdparty" />
     </target>
 
-    <target name="build" depends="compile" description="Build uecide">
+    <target name="build" depends="compile,i18n" description="Build uecide">
         <jar basedir="bin" destfile="uecide.jar">
             <fileset dir="bin" />
             <fileset dir="resources" />
@@ -336,5 +342,23 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
     <target name="bundle" depends="build">
         <launch4j configFile="UECIDE-l4j.xml" outfile="uecide-${Version}-bundle.exe" />
     </target>
+
+    <target name="native2ascii">
+        <basename property="asciif" file="${utf8}" suffix=".utf8" />
+        <dirname property="asciid" file="${utf8}" />
+        <exec executable="native2ascii">
+            <arg value="${utf8}" />
+            <arg value="${asciid}/${asciif}" />
+        </exec>
+    </target>
+
+    <target name="i18n">
+        <foreach target="native2ascii" param="utf8">
+            <fileset dir="resources/org/uecide/i18n">
+                <include name="**/*.properties.utf8" />
+            </fileset>
+        </foreach>
+    </target>
+    
 
 </project>

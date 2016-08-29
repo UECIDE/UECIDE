@@ -38,6 +38,7 @@ import java.util.*;
 import java.net.*;
 import java.util.zip.*;
 import java.util.jar.*;
+import java.text.*;
 import org.uecide.plugin.*;
 import org.uecide.themes.*;
 
@@ -143,6 +144,8 @@ public class Base implements AptPercentageListener {
 
     public static TreeMap<String, PropertyFile> themes = new TreeMap<String, PropertyFile>();
 
+    public static I18N i18n = new I18N("Core");
+
     /*! Get a Board from the internal boards list by its short name. */
     public static Board getBoard(String name) {
         return boards.get(name);
@@ -217,51 +220,62 @@ public class Base implements AptPercentageListener {
     /*! The constructor is the main execution routine. */
     public Base(String[] args) {
 
-        cli.addParameter("debug", "", Boolean.class, "Enable the debug window");
-        cli.addParameter("verbose", "", Boolean.class, "Output debug log to stdout");
-        cli.addParameter("exceptions", "", Boolean.class, "Output exceptions to stderr");
-        cli.addParameter("headless", "", Boolean.class, "Enable headless operation");
-        cli.addParameter("datadir", "location", String.class, "Specify location for plugins and data");
-        cli.addParameter("last-sketch", "", Boolean.class, "Automatically load last used sketch");
-        cli.addParameter("clean", "", Boolean.class, "Clean the build folder");
-        cli.addParameter("compile", "", Boolean.class, "Immediately compile loaded sketch");
-        cli.addParameter("upload", "", Boolean.class, "Immediately compile and upload loaded sketch");
-        cli.addParameter("board", "name", String.class, "Select specific board");
-        cli.addParameter("core", "name", String.class, "Select specific core");
-        cli.addParameter("compiler", "name", String.class, "Select specific compiler");
-        cli.addParameter("port", "name", String.class, "Select specific serial port");
-        cli.addParameter("programmer", "name", String.class, "Select specific programmer");
-        cli.addParameter("purge", "", Boolean.class, "Purge the cache files");
-        cli.addParameter("help", "", Boolean.class, "This help text");
 
-        cli.addParameter("update", "", Boolean.class, "Update the APT repositories");
-        cli.addParameter("install", "package", String.class, "Install a package");
-        cli.addParameter("remove", "package", String.class, "Uninstall a package");
-        cli.addParameter("remove-all", "", Boolean.class, "Uninstall all packages");
-        cli.addParameter("upgrade", "", Boolean.class, "Upgrade all packages");
-        cli.addParameter("search", "term", String.class, "Search packages for a term");
-        cli.addParameter("list", "", Boolean.class, "List packages");
-        cli.addParameter("section", "name", String.class, "Restrict to just one section");
-        cli.addParameter("group", "name", String.class, "Restrict to just one group");
-        cli.addParameter("subgroup", "name", String.class, "Restrict to just one subgroup");
-        cli.addParameter("family", "name", String.class, "Restrict to just one family");
-        cli.addParameter("force", "", Boolean.class, "Force an operation to succeed");
 
-        cli.addParameter("mkmf", "", Boolean.class, "Generate a Makefile for a sketch");
-        cli.addParameter("force-local-build", "", Boolean.class, "Force compilation within sketch folder");
-        cli.addParameter("force-save-hex", "", Boolean.class, "Force saving HEX file to sketch folder");
-        cli.addParameter("force-join-files", "", Boolean.class, "Force joining INO and PDE files into single CPP file");
-        cli.addParameter("online", "", Boolean.class, "Force online mode");
-        cli.addParameter("offline", "", Boolean.class, "Force offline mode");
+        cli.addParameter("debug",               "",         Boolean.class,  "cli.help.debug");
+        cli.addParameter("verbose",             "",         Boolean.class,  "cli.help.verbose");
+        cli.addParameter("exceptions",          "",         Boolean.class,  "cli.help.exceptions");
+        cli.addParameter("headless",            "",         Boolean.class,  "cli.help.headless");
+        cli.addParameter("datadir",             "location", String.class,   "cli.help.datadir");
+        cli.addParameter("last-sketch",         "",         Boolean.class,  "cli.help.last-sketch");
+        cli.addParameter("clean",               "",         Boolean.class,  "cli.help.clean");
+        cli.addParameter("compile",             "",         Boolean.class,  "cli.help.compile");
+        cli.addParameter("upload",              "",         Boolean.class,  "cli.help.upload");
+        cli.addParameter("board",               "name",     String.class,   "cli.help.board");
+        cli.addParameter("core",                "name",     String.class,   "cli.help.core");
+        cli.addParameter("compiler",            "name",     String.class,   "cli.help.compiler");
+        cli.addParameter("port",                "name",     String.class,   "cli.help.port");
+        cli.addParameter("programmer",          "name",     String.class,   "cli.help.programmer");
+        cli.addParameter("purge",               "",         Boolean.class,  "cli.help.purge");
+        cli.addParameter("help",                "",         Boolean.class,  "cli.help.help");
 
-        cli.addParameter("version", "", Boolean.class, "Display the UECIDE version number");
+        cli.addParameter("update",              "",         Boolean.class,  "cli.help.update");
+        cli.addParameter("install",             "package",  String.class,   "cli.help.install");
+        cli.addParameter("remove",              "package",  String.class,   "cli.help.remove");
+        cli.addParameter("remove-all",          "",         Boolean.class,  "cli.help.remove-all");
+        cli.addParameter("upgrade",             "",         Boolean.class,  "cli.help.upgrade");
+        cli.addParameter("search",              "term",     String.class,   "cli.help.search");
+        cli.addParameter("list",                "",         Boolean.class,  "cli.help.list");
+        cli.addParameter("section",             "name",     String.class,   "cli.help.section");
+        cli.addParameter("group",               "name",     String.class,   "cli.help.group");
+        cli.addParameter("subgroup",            "name",     String.class,   "cli.help.subgroup");
+        cli.addParameter("family",              "name",     String.class,   "cli.help.family");
+        cli.addParameter("force",               "",         Boolean.class,  "cli.help.force");
 
-        cli.addParameter("cli", "", Boolean.class, "Enter CLI mode");
+        cli.addParameter("mkmf",                "",         Boolean.class,  "cli.help.mkmf");
+        cli.addParameter("force-local-build",   "",         Boolean.class,  "cli.help.force-local-build");
+        cli.addParameter("force-save-hex",      "",         Boolean.class,  "cli.help.force-save-hex");
+        cli.addParameter("force-join-files",    "",         Boolean.class,  "cli.help.force-join-files");
+        cli.addParameter("online",              "",         Boolean.class,  "cli.help.online");
+        cli.addParameter("offline",             "",         Boolean.class,  "cli.help.offline");
 
-        cli.addParameter("preferences", "", Boolean.class, "Display preferences dialog");
-        cli.addParameter("quiet", "", Boolean.class, "Reduce the noise of output");
+        cli.addParameter("version",             "",         Boolean.class,  "cli.help.version");
+
+        cli.addParameter("cli",                 "",         Boolean.class,  "cli.help.cli");
+
+        cli.addParameter("preferences",         "",         Boolean.class,  "cli.help.preferences");
+        cli.addParameter("quiet",               "",         Boolean.class,  "cli.help.quiet");
+
+        cli.addParameter("locale",              "name",     String.class,   "cli.help.locale");
 
         String[] argv = cli.process(args);
+
+        i18n = new I18N("Core");
+
+        if (cli.isSet("help")) {
+            cli.help();
+            System.exit(0);
+        }
 
         headless = cli.isSet("headless");
         boolean loadLastSketch = cli.isSet("last-sketch");
@@ -313,7 +327,7 @@ public class Base implements AptPercentageListener {
         Debug.message("Version: " + systemVersion);
 
         if (cli.isSet("version")) {
-            System.out.println("UECIDE Version " + systemVersion);
+            System.out.println(i18n.string("msg.version", systemVersion));
             System.exit(0);
         }
 
@@ -352,10 +366,10 @@ public class Base implements AptPercentageListener {
             APT apt = pm.getApt();
             Package[] pl = apt.getUpgradeList();
             for (Package p : pl) {
-                System.out.print("Upgrading " + p.getName() + "...");
+                System.out.print(i18n.string("msg.upgrading", p.getName()));
                 p.attachPercentageListener(this);
                 apt.upgradePackage(p);
-                System.out.println("...done.");
+                System.out.println("..." + i18n.string("msg.done"));
             }
             doExit = true;
         }
@@ -365,37 +379,37 @@ public class Base implements AptPercentageListener {
             APT apt = pm.getApt();
             String packageName = cli.getString("install");
             if (packageName == null) {
-                System.err.println("Please specify a package to install");
+                System.err.println(i18n.string("err.selpkginst"));
                 doExit = true;
             }
 
             Package p = apt.getPackage(packageName);
             if (p == null) {
-                System.err.println("Unable to find package " + packageName);
-                System.err.println("Try using --search to find the package.");
+                System.err.println(i18n.string("err.pkgnotfound", packageName));
+                System.err.println(i18n.string("msg.usesearch"));
                 doExit = true;
             }
 
-            System.out.println("Installing " + p.getName());
+            System.out.println(i18n.string("msg.installing", p.getName()));
             p.attachPercentageListener(this);
             apt.installPackage(p);
-            System.out.println("...done.");
+            System.out.println(i18n.string("msg.done"));
             doExit = true;
         }
 
         if (cli.isSet("remove-all")) {
             doExit = true;
             if (!cli.isSet("force")) {
-                System.err.println("Will not remove all packages without --force!");
+                System.err.println(i18n.string("err.notremove"));
             } else {
                 PluginManager pm = new PluginManager();
                 APT apt = pm.getApt();
                 for (Package p : apt.getInstalledPackages()) {
-                    System.out.println("Uninstalling " + p.getName());
+                    System.out.println(i18n.string("msg.uninstalling", p.getName()));
                     p.attachPercentageListener(this);
                     String ret = apt.uninstallPackage(p, true);
                     if (ret == null) {
-                        System.out.println("...done.");
+                        System.out.println("..."+i18n.string("msg.done"));
                     } else {
                         System.err.println("");
                         System.err.println(ret);
@@ -409,22 +423,22 @@ public class Base implements AptPercentageListener {
             APT apt = pm.getApt();
             String packageName = cli.getString("remove");
             if (packageName == null) {
-                System.err.println("Please specify a package to uninstall");
+                System.err.println(i18n.string("err.selpkguninst"));
                 doExit = true;
             }
 
             Package p = apt.getPackage(packageName);
             if (p == null) {
-                System.err.println("Unable to find package " + packageName);
-                System.err.println("Try using --search to find the package.");
+                System.err.println(i18n.string("err.notfound", p.getName()));
+                System.err.println(i18n.string("msg.usesearch"));
                 doExit = true;
             }
 
-            System.out.println("Uninstalling " + p.getName());
+            System.out.println(i18n.string("msg.uninstalling", p.getName()));
             p.attachPercentageListener(this);
             String ret = apt.uninstallPackage(p, cli.isSet("force"));
             if (ret == null) {
-                System.out.println("...done.");
+                System.out.println("..." + i18n.string("msg.done"));
             } else {
                 System.err.println("");
                 System.err.println(ret);
@@ -438,7 +452,7 @@ public class Base implements AptPercentageListener {
             APT apt = pm.getApt();
             Package[] pkgs = apt.getPackages();
             String format = "%-50s %10s %10s %s";
-            System.out.println(String.format(format, "Package", "Installed", "Available", ""));
+            System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
             ArrayList<Package> out = new ArrayList<Package>();
             for (Package p : pkgs) {
                 if (cli.isSet("section")) {
@@ -466,7 +480,7 @@ public class Base implements AptPercentageListener {
                 if (instPack != null) {
                     inst = instPack.getVersion();
                     if (avail.compareTo(inst) > 0) {
-                        msg = "UPDATE!";
+                        msg = i18n.string("apt.list.update");
                     }
                 }
                 System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
@@ -481,7 +495,7 @@ public class Base implements AptPercentageListener {
             APT apt = pm.getApt();
             Package[] pkgs = apt.getPackages();
             String format = "%-50s %10s %10s %s";
-            System.out.println(String.format(format, "Package", "Installed", "Available", ""));
+            System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
             ArrayList<Package> out = new ArrayList<Package>();
             String term = cli.getString("search").toLowerCase();
             for (Package p : pkgs) {
@@ -510,7 +524,7 @@ public class Base implements AptPercentageListener {
                 if (instPack != null) {
                     inst = instPack.getVersion();
                     if (avail.compareTo(inst) > 0) {
-                        msg = "UPDATE!";
+                        msg = i18n.string("apt.list.update");
                     }
                 }
                 String comp = p.getName() + " " + p.getDescription();
@@ -540,21 +554,21 @@ public class Base implements AptPercentageListener {
 
             Serial.updatePortList();
 
-            System.out.print("Loading compilers...");
+            System.out.print(i18n.string("msg.loading.compilers"));
             loadCompilers();
-            System.out.println("done");
-            System.out.print("Loading cores...");
+            System.out.println(i18n.string("msg.done"));
+            System.out.print(i18n.string("msg.loading.cores"));
             loadCores();
-            System.out.println("done");
-            System.out.print("Loading boards...");
+            System.out.println(i18n.string("cli.msg.loading.done"));
+            System.out.print(i18n.string("msg.loading.boards"));
             loadBoards();
-            System.out.println("done");
-            System.out.print("Loading programmers...");
+            System.out.println(i18n.string("cli.msg.loading.done"));
+            System.out.print(i18n.string("msg.loading.programmers"));
             loadProgrammers();
-            System.out.println("done");
-            System.out.print("Loading libraries...");
+            System.out.println(i18n.string("msg.loading.done"));
+            System.out.print(i18n.string("msg.loading.libraries"));
             gatherLibraries();
-            System.out.println("done");
+            System.out.println(i18n.string("msg.loading.done"));
 
             buildPreferencesTree();
 
@@ -585,7 +599,7 @@ public class Base implements AptPercentageListener {
 
         
 
-        if (!headless) splashScreen.setMessage("Package Manager...", 15);
+        if (!headless) splashScreen.setMessage(i18n.string("splash.msg.packagemanager"), 15);
         initPackageManager();
 
 
@@ -595,7 +609,7 @@ public class Base implements AptPercentageListener {
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
-        if(!headless) splashScreen.setMessage("Application...", 20);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.application"), 20);
 
         platform.init(this);
 
@@ -607,8 +621,6 @@ public class Base implements AptPercentageListener {
 
         // Get the sketchbook path, and make sure it's set properly
         String sketchbookPath = preferences.get("locations.sketchbook");
-
-//        Translate.load("swedish");
 
         // If no path is set, get the default sketchbook folder for this platform
         if(sketchbookPath == null) {
@@ -634,22 +646,22 @@ public class Base implements AptPercentageListener {
         Serial.updatePortList();
         Serial.fillExtraPorts();
 
-        if(!headless) splashScreen.setMessage("Themes...", 25);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.themes"), 25);
 
 
-        if(!headless) splashScreen.setMessage("Compilers...", 30);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.compilers"), 30);
 
         loadCompilers();
 
-        if(!headless) splashScreen.setMessage("Cores...", 40);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.cores"), 40);
 
         loadCores();
 
-        if(!headless) splashScreen.setMessage("Boards...", 50);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.boards"), 50);
 
         loadBoards();
 
-        if(!headless) splashScreen.setMessage("Programmers...", 55);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.programmers"), 55);
 
         loadProgrammers();
 
@@ -690,14 +702,14 @@ public class Base implements AptPercentageListener {
             System.exit(0);
         }
 
-        if(!headless) splashScreen.setMessage("Plugins...", 60);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.plugins"), 60);
 
         loadPlugins();
 
         loadIconSets();
         loadThemes();
 
-        if(!headless) splashScreen.setMessage("Libraries...", 70);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.libraries"), 70);
 
         gatherLibraries();
 
@@ -708,12 +720,12 @@ public class Base implements AptPercentageListener {
 
         initMRU();
 
-        if(!headless) splashScreen.setMessage("Editor...", 80);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.editor"), 80);
 
         setLookAndFeel();
 
         if (cli.isSet("preferences")) {
-            splashScreen.setMessage("Complete", 100);
+            if(!headless) splashScreen.setMessage(i18n.string("splash.msg.complete"), 100);
             splashScreen.dispose();
             Preferences p = new Preferences(null);
             preferences.save();
@@ -764,22 +776,35 @@ public class Base implements AptPercentageListener {
         }
 
         if(!headless) {
-            splashScreen.setMessage("Complete", 100);
+            if(!headless) splashScreen.setMessage(i18n.string("splash.msg.complete"), 100);
             splashScreen.dispose();
 
             synchronized (Editor.editorList) {
                 if(boards.size() == 0) {
-                    showWarning(Translate.t("No boards installed"), Translate.w("You have no boards installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                        PluginManager pm = new PluginManager();
-                        pm.openWindow(Editor.editorList.get(0));
+
+                    showWarning(
+                        i18n.string("err.noboards.title"),
+                        i18n.string("err.noboards.body"),
+                        null
+                    );
+                    PluginManager pm = new PluginManager();
+                    pm.openWindow(Editor.editorList.get(0));
                 } else if(cores.size() == 0) {
-                    showWarning(Translate.t("No cores installed"), Translate.w("You have no cores installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                        PluginManager pm = new PluginManager();
-                        pm.openWindow(Editor.editorList.get(0));
+                    showWarning(
+                        i18n.string("err.nocores.title"),
+                        i18n.string("err.nocores.body"),
+                        null
+                    );
+                    PluginManager pm = new PluginManager();
+                    pm.openWindow(Editor.editorList.get(0));
                 } else if(compilers.size() == 0) {
-                    showWarning(Translate.t("No compilers installed"), Translate.w("You have no compilers installed.  I will now open the plugin manager so you can install the boards, cores and compilers you need to use %1.", 40, "\n", theme.get("product.cap")), null);
-                        PluginManager pm = new PluginManager();
-                        pm.openWindow(Editor.editorList.get(0));
+                    showWarning(
+                        i18n.string("err.nocompilers.title"),
+                        i18n.string("err.nocompilers.body"),
+                        null
+                    );
+                    PluginManager pm = new PluginManager();
+                    pm.openWindow(Editor.editorList.get(0));
                 }
             }
         }
@@ -787,11 +812,20 @@ public class Base implements AptPercentageListener {
         if(isTimeToCheckVersion()) {
             if(isNewVersionAvailable()) {
                 if(headless) {
-                    System.err.println("A new version is available!");
-                    System.err.println("Download it from: " + Base.theme.get("version." + RELEASE + ".download"));
+                    System.err.println(i18n.string("msg.version.available"));
+                    System.err.println(i18n.string("msg.version.download", Base.theme.get("version." + RELEASE + ".download")));
                 } else {
                     String[] options = {"Yes", "No"};
-                    int n = JOptionPane.showOptionDialog(null, "A newer version is available.\nWould you like to download it now?", "Newer version available", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+                    int n = JOptionPane.showOptionDialog(
+                        null, 
+                        i18n.string("msg.version.available.body"),
+                        i18n.string("msg.version.available"),
+                        JOptionPane.YES_NO_OPTION, 
+                        JOptionPane.QUESTION_MESSAGE, 
+                        null, 
+                        options, 
+                        options[0]
+                    );
 
                     if(n == 0) {
                         openURL(Base.theme.get("version." + RELEASE + ".download"));
@@ -930,21 +964,6 @@ public class Base implements AptPercentageListener {
                            "platform-specific code for your machine.", e);
         }
     }
-
-
-    /*! Check that the Java installation is new enough for us to run */
-    static protected void initRequirements() {
-        try {
-            Class.forName("com.sun.jdi.VirtualMachine");
-        } catch(ClassNotFoundException cnfe) {
-            Base.showPlatforms();
-            Base.showError("Please install JDK 1.5 or later",
-                           theme.get("product.cap") + " requires a full JDK (not just a JRE)\n" +
-                           "to run. Please install JDK 1.5 or later.\n" +
-                           "More information can be found in the reference.", cnfe);
-        }
-    }
-
 
     /* Initialize the internal MRU list from the preferences set */
     public static void initMRU() {
@@ -1244,11 +1263,11 @@ public class Base implements AptPercentageListener {
         }
     }
 
-    boolean breakTime = false;
-    String[] months = {
-        "jan", "feb", "mar", "apr", "may", "jun",
-        "jul", "aug", "sep", "oct", "nov", "dec"
-    };
+//    boolean breakTime = false;
+//    String[] months = {
+//        "jan", "feb", "mar", "apr", "may", "jun",
+//        "jul", "aug", "sep", "oct", "nov", "dec"
+//    };
 
     /*! Create a new untitled document in a new sketch window.  */
     public static void handleNew() {
@@ -1473,11 +1492,6 @@ public class Base implements AptPercentageListener {
             result = sketchbookFolder.mkdirs();
         }
 
-        if(!result) {
-            showError(Translate.t("You forgot your sketchbook"),
-                      Translate.t("I cannot run because I could not create a folder to store your sketchbook."), null);
-        }
-
         return sketchbookFolder;
     }
 
@@ -1493,8 +1507,11 @@ public class Base implements AptPercentageListener {
             platform.openURL(url);
 
         } catch(Exception e) {
-            showWarning(Translate.t("Problem Opening URL"),
-                        Translate.t("Could not open the URL") + "\n" + url, e);
+            showWarning(
+                i18n.string("err.badurl.title"),
+                i18n.string("err.badurl.body", url),
+                e
+            );
         }
     }
 
@@ -1517,8 +1534,11 @@ public class Base implements AptPercentageListener {
             platform.openFolder(file);
 
         } catch(Exception e) {
-            showWarning(Translate.t("Problem Opening Folder"),
-                        Translate.t("Could not open the folder") + "\n" + file.getAbsolutePath(), e);
+            showWarning(
+                i18n.string("err.badfolder.title"),
+                i18n.string("err.badfolder.body", file),
+                e
+            );
         }
     }
 
@@ -1617,41 +1637,6 @@ public class Base implements AptPercentageListener {
         openURL(referenceFile.getAbsolutePath());
     }
 
-    public static void showGettingStarted() {
-        if(Base.isMacOS()) {
-            Base.showReference("Guide_MacOSX.html");
-        } else if(Base.isWindows()) {
-            Base.showReference("Guide_Windows.html");
-        } else {
-            Base.openURL("http://www.arduino.cc/playground/Learning/Linux");
-        }
-    }
-
-    public static void showReference() {
-        showReference("index.html");
-    }
-
-
-    public static void showEnvironment() {
-        showReference("Guide_Environment.html");
-    }
-
-
-    public static void showPlatforms() {
-        showReference("environment" + File.separator + "platforms.html");
-    }
-
-
-    public static void showTroubleshooting() {
-        showReference("Guide_Troubleshooting.html");
-    }
-
-
-    public static void showFAQ() {
-        showReference("FAQ.html");
-    }
-
-
     // .................................................................
 
 
@@ -1660,7 +1645,7 @@ public class Base implements AptPercentageListener {
     * much of a bummer, but something to notify the user about.
     */
     public static void showMessage(String title, String message) {
-        if(title == null) title = Translate.t("Message");
+        if(title == null) title = i18n.string("alert.message");
 
         if(headless) {
             System.out.println(title + ": " + message);
@@ -1676,7 +1661,7 @@ public class Base implements AptPercentageListener {
     * Non-fatal error message with optional stack trace side dish.
     */
     public static void showWarning(String title, String message, Exception e) {
-        if(title == null) title = Translate.t("Warning");
+        if(title == null) title = i18n.string("alert.warning");
 
         if(headless) {
             System.out.println(title + ": " + message);
@@ -1697,7 +1682,7 @@ public class Base implements AptPercentageListener {
     * for errors that allow P5 to continue running.
     */
     public static void showError(String title, String message, Throwable e) {
-        if(title == null) title = Translate.t("Error");
+        if(title == null) title = i18n.string("alert.error");
 
         if(headless) {
             System.err.println(title + ": " + message);
@@ -1714,101 +1699,6 @@ public class Base implements AptPercentageListener {
 
 
     // ...................................................................
-
-    // incomplete
-    public static int showYesNoCancelQuestion(Editor editor, String title, String primary, String secondary) {
-        if(!Base.isMacOS()) {
-            int result =
-                JOptionPane.showConfirmDialog(null, primary + "\n" + secondary, title,
-                                              JOptionPane.YES_NO_CANCEL_OPTION,
-                                              JOptionPane.QUESTION_MESSAGE);
-            return result;
-        } else {
-            // Pane formatting adapted from the Quaqua guide
-            // http://www.randelshofer.ch/quaqua/guide/joptionpane.html
-            JOptionPane pane =
-                new JOptionPane("<html> " +
-                                "<head> <style type=\"text/css\">" +
-                                "b { font: 13pt \"Lucida Grande\" }" +
-                                "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }" +
-                                "</style> </head>" +
-                                "<b>" + Translate.t("Do you want to save changes to this sketch before closing?") + "</b>" +
-                                "<p>" + Translate.t("If you don't save, your changes will be lost."),
-                                JOptionPane.QUESTION_MESSAGE);
-
-            String[] options = new String[] {
-                Translate.t("Save"), Translate.t("Cancel"), Translate.t("Don't Save")
-            };
-            pane.setOptions(options);
-
-            // highlight the safest option ala apple hig
-            pane.setInitialValue(options[0]);
-
-            // on macosx, setting the destructive property places this option
-            // away from the others at the lefthand side
-            pane.putClientProperty("Quaqua.OptionPane.destructiveOption", new Integer(2));
-
-            JDialog dialog = pane.createDialog(editor, null);
-            dialog.setVisible(true);
-
-            Object result = pane.getValue();
-
-            if(result == options[0]) {
-                return JOptionPane.YES_OPTION;
-            } else if(result == options[1]) {
-                return JOptionPane.CANCEL_OPTION;
-            } else if(result == options[2]) {
-                return JOptionPane.NO_OPTION;
-            } else {
-                return JOptionPane.CLOSED_OPTION;
-            }
-        }
-    }
-
-    public static int showYesNoQuestion(Frame editor, String title, String primary, String secondary) {
-        if(!Base.isMacOS()) {
-            return JOptionPane.showConfirmDialog(editor,
-                                                 "<html><body>" +
-                                                 "<b>" + primary + "</b>" +
-                                                 "<br>" + secondary, title,
-                                                 JOptionPane.YES_NO_OPTION,
-                                                 JOptionPane.QUESTION_MESSAGE);
-        } else {
-            // Pane formatting adapted from the Quaqua guide
-            // http://www.randelshofer.ch/quaqua/guide/joptionpane.html
-            JOptionPane pane =
-                new JOptionPane("<html> " +
-                                "<head> <style type=\"text/css\">" +
-                                "b { font: 13pt \"Lucida Grande\" }" +
-                                "p { font: 11pt \"Lucida Grande\"; margin-top: 8px }" +
-                                "</style> </head>" +
-                                "<b>" + primary + "</b>" +
-                                "<p>" + secondary + "</p>",
-                                JOptionPane.QUESTION_MESSAGE);
-
-            String[] options = new String[] {
-                Translate.t("Yes"), Translate.t("No")
-            };
-            pane.setOptions(options);
-
-            // highlight the safest option ala apple hig
-            pane.setInitialValue(options[0]);
-
-            JDialog dialog = pane.createDialog(editor, null);
-            dialog.setVisible(true);
-
-            Object result = pane.getValue();
-
-            if(result == options[0]) {
-                return JOptionPane.YES_OPTION;
-            } else if(result == options[1]) {
-                return JOptionPane.NO_OPTION;
-            } else {
-                return JOptionPane.CLOSED_OPTION;
-            }
-        }
-    }
-
 
     public static File getContentFile(String name) {
         String path = System.getProperty("user.dir");
@@ -1967,7 +1857,7 @@ public class Base implements AptPercentageListener {
             removeDescendants(dir);
 
             if(!dir.delete()) {
-                error(Translate.t("Could not delete %1", dir.getName()));
+                error(i18n.string("err.nodelete", dir.getName()));
             }
         }
     }
@@ -2065,31 +1955,6 @@ public class Base implements AptPercentageListener {
             if(file.isDirectory()) {
                 listFiles(basePath, newPath, vector);
             }
-        }
-    }
-
-    public static void handleSystemInfo() {
-        Editor.broadcast(Translate.t("Version: ") + systemVersion + "\n");
-
-        Editor.broadcast(Translate.t("Installed plugins") + ":\n");
-
-        for(String plugin : plugins.keySet()) {
-            Version v = getPluginVersion(plugin);
-            Editor.broadcast("  " + plugin + " - " + v.toString() + "\n");
-        }
-
-        Editor.broadcast("\n" + Translate.t("Processes") + ":\n");
-
-        for(Process p : processes) {
-            Editor.broadcast("  " + p + "\n");
-        }
-
-        Editor.broadcast("\n" + Translate.t("Threads") + ":\n");
-        Thread[] threads = new Thread[Thread.activeCount()];
-        Thread.enumerate(threads);
-
-        for(Thread t : threads) {
-            Editor.broadcast("  " + t.getName() + "\n");
         }
     }
 
@@ -2370,14 +2235,6 @@ public class Base implements AptPercentageListener {
     
     static public File getCacheFolder() { return getDataFolder("cache"); }
 
-//    static public File getCoresFolder() { return getDataFolder("cores"); }
-//    static public File getProgrammersFolder() { return getDataFolder("programmers"); }
-//    static public File getBoardsFolder() { return getDataFolder("boards"); }
-//    static public File getThemesFolder() { return getDataFolder("themes"); }
-//    static public File getPluginsFolder() { return getDataFolder("plugins"); }
-//    static public File getCompilersFolder() { return getDataFolder("compilers"); }
-//    static public File getLibrariesFolder() { return getDataFolder("libraries"); }
-
     static public File[] getAnyFolders(String type) {
         ArrayList<File> locs = new ArrayList<File>();
         locs.add(getDataFolder(type));
@@ -2506,27 +2363,27 @@ public class Base implements AptPercentageListener {
                 @Override
                 protected String doInBackground() throws Exception {
                     Editor.lockAll();
-                    Editor.bulletAll("Updating serial ports...");
+                    Editor.bulletAll(i18n.string("msg.loading.serial"));
                     Serial.updatePortList();
                     Serial.fillExtraPorts();
-                    Editor.bulletAll("Scanning compilers...");
+                    Editor.bulletAll(i18n.string("msg.loading.compilers"));
                     rescanCompilers();
-                    Editor.bulletAll("Scanning cores...");
+                    Editor.bulletAll(i18n.string("msg.loading.cores"));
                     rescanCores();
-                    Editor.bulletAll("Scanning boards...");
+                    Editor.bulletAll(i18n.string("msg.loading.boards"));
                     rescanBoards();
-                    Editor.bulletAll("Scanning programmers...");
+                    Editor.bulletAll(i18n.string("msg.loading.programmers"));
                     rescanProgrammers();
-                    Editor.bulletAll("Scanning plugins...");
+                    Editor.bulletAll(i18n.string("msg.loading.plugins"));
                     rescanPlugins();
-                    Editor.bulletAll("Scanning themes...");
+                    Editor.bulletAll(i18n.string("msg.loading.themes"));
                     rescanThemes();
-                    Editor.bulletAll("Scanning libraries...");
+                    Editor.bulletAll(i18n.string("msg.loading.libraries"));
                     rescanLibraries();
 
                     buildPreferencesTree();
 
-                    Editor.bulletAll("Updating system....");
+                    Editor.bulletAll(i18n.string("msg.loading.updating"));
                     try { Editor.updateAllEditors(); } catch (Exception e) {}
                     try { Editor.selectAllEditorBoards(); } catch (Exception e) {}
                     try { Editor.refreshAllEditors(); } catch (Exception e) {}
@@ -2535,7 +2392,7 @@ public class Base implements AptPercentageListener {
 
                 @Override
                 protected void done() {
-                    Editor.bulletAll("Update complete.");
+                    Editor.bulletAll(i18n.string("msg.done"));
                     Editor.unlockAll();
                 }
             };
@@ -2864,64 +2721,7 @@ public class Base implements AptPercentageListener {
 
         return themeList;
     }
-
-    public static int redProportion(Color c) {
-        int red = c.getRed();
-        int green = c.getGreen();
-        int blue = c.getBlue();
-        int tot = red + green + blue;
-        return red * 100 / tot;
-    }
-
-    public static int greenProportion(Color c) {
-        int red = c.getRed();
-        int green = c.getGreen();
-        int blue = c.getBlue();
-        int tot = red + green + blue;
-        return green * 100 / tot;
-    }
-
-    public static int blueProportion(Color c) {
-        int red = c.getRed();
-        int green = c.getGreen();
-        int blue = c.getBlue();
-        int tot = red + green + blue;
-        return blue * 100 / tot;
-    }
-
-    public static Color reddest(Color first, Color... colors) {
-        Color cmax = first;
-        for (Color c : colors) {
-            int rp = redProportion(c);
-            if (rp > redProportion(cmax)) {
-                cmax = c;
-            }
-        }
-        return cmax;
-    }
-
-    public static Color bluest(Color first, Color... colors) {
-        Color cmax = first;
-        for (Color c : colors) {
-            int rp = blueProportion(c);
-            if (rp > blueProportion(cmax)) {
-                cmax = c;
-            }
-        }
-        return cmax;
-    }
-
-    public static Color greenest(Color first, Color... colors) {
-        Color cmax = first;
-        for (Color c : colors) {
-            int rp = greenProportion(c);
-            if (rp > greenProportion(cmax)) {
-                cmax = c;
-            }
-        }
-        return cmax;
-    }
-
+/*
     public static String runFunctionVariable(Sketch sketch, String command, String param) {
         try {
             Class<?> c = Class.forName("org.uecide.varcmd.vc_" + command);
@@ -3074,6 +2874,7 @@ public class Base implements AptPercentageListener {
 
         return out;
     }
+*/
 
     public static String getFileAsString(File f) {
         if (f == null) {
@@ -3129,21 +2930,10 @@ public class Base implements AptPercentageListener {
     }
 
     public static String getIconSet() {
-
         if (getTheme() == null) {
             return null;
         }
         return getTheme().get("icon");
-
-//        String iconSet = defaultIconSet;;
-//
-//        if (preferences.get("theme.icons") != null) {
-//            if (iconSets.get(preferences.get("theme.icons")) != null) {
-//                iconSet = preferences.get("theme.icons");
-//            }
-//        }
-//
-//        return iconSet;
     }
 
     public static void loadIconSets() {
@@ -3516,5 +3306,17 @@ System.err.println(laf);
 
     public static boolean isQuiet() {
         return cli.isSet("quiet");
+    }
+
+    public static Locale getLocale() {
+        if (cli != null) {
+            if (cli.isSet("locale")) {
+                String[] bits = cli.getString("locale").split("_");
+                if (bits.length == 2) {
+                    return new Locale(bits[0], bits[1]);
+                }
+            }
+        }
+        return Locale.getDefault();
     }
 }

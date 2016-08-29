@@ -551,7 +551,7 @@ public class Context {
 
             Invocable inv = (Invocable)engine;
             if (inv == null) {
-                error("Unable to create invocable");
+                error(Base.i18n.string("err.invocable"));
                 return false;
             }
 
@@ -613,7 +613,7 @@ public class Context {
                     lineno = Integer.parseInt(num);
                     continue;
                 } catch(Exception e) {
-                    error("Syntax error in " + key + " at line " + lineno);
+                    error(Base.i18n.string("err.syntax", key, lineno));
                     error(ld);
                     if (script.keyExists("fail")) {
                         String failKey = String.format("%s.fail", key);
@@ -629,7 +629,7 @@ public class Context {
                 int epos = param.indexOf("=");
 
                 if(epos == -1) {
-                    error("Syntax error in " + key + " at line " + lineno);
+                    error(Base.i18n.string("err.syntax", key, lineno));
                     error(ld);
                     if (script.keyExists("fail")) {
                         String failKey = String.format("%s.fail", key);
@@ -943,7 +943,7 @@ public class Context {
         try {
             runningProcess = process.start();
         } catch(Exception e) {
-            error("Unable to start process");
+            error(Base.i18n.string("err.process"));
             error(e);
             return false;
         }
@@ -1108,7 +1108,7 @@ public class Context {
             String igm = ignored.getMessage();
             if (igm != null) {
                 if (igm.equals("Stream closed")) {
-                    error("Cancelled");
+                    error(Base.i18n.string("misc.cancelled"));
                 } else {
                     error(ignored);
                 }

@@ -164,7 +164,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
         // setup dialog for the prefs
 
-        setTitle("Preferences");
+        setTitle(Base.i18n.string("win.preferences"));
         setResizable(true);
         setLayout(new BorderLayout());
         setModalityType(ModalityType.APPLICATION_MODAL);
@@ -176,13 +176,13 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         Box buttonLine = Box.createHorizontalBox();
         buttonLine.add(Box.createHorizontalGlue());
 
-        JButton cancelButton = new JButton(Translate.t("Cancel"));
+        JButton cancelButton = new JButton(Base.i18n.string("misc.cancel"));
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 disposeFrame();
             }
         });
-        JButton okButton = new JButton(Translate.t("OK"));
+        JButton okButton = new JButton(Base.i18n.string("misc.ok"));
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 applyFrame();
@@ -261,7 +261,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
     public void populateAdvancedSettings(JPanel p) {
         p.setLayout(new BorderLayout());
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Preferences");
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(Base.i18n.string("tree.preferences"));
         DefaultTreeModel treeModel = new DefaultTreeModel(root);
 
         JTree tree = new JTree(treeModel);
@@ -445,7 +445,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                     fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                     fc.setCurrentDirectory(new File(f.getText()));
                     fc.setDialogTitle("Select File");
-                    int n = fc.showDialog(Preferences.this, "Select");
+                    int n = fc.showDialog(Preferences.this, Base.i18n.string("misc.select"));
                     if (n == JFileChooser.APPROVE_OPTION) {
                         f.setText(fc.getSelectedFile().getAbsolutePath());
                         changedPrefs.set(fkey, f.getText());

@@ -59,6 +59,6 @@ public class SketchFolderFilter extends javax.swing.filechooser.FileFilter {
     }
 
     public String getDescription() {
-        return Translate.t("Sketch Folders");
+        return Base.i18n.string("filter.sketch");
     }
 }

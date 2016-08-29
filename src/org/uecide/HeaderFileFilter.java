@@ -59,6 +59,6 @@ public class HeaderFileFilter extends javax.swing.filechooser.FileFilter {
     }
 
     public String getDescription() {
-        return Translate.t("Header Files");
+        return Base.i18n.string("filter.header");
     }
 }

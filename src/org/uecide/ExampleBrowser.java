@@ -9,7 +9,7 @@ public class ExampleBrowser extends JDialog {
     public ExampleBrowser(Editor e) {
         editor = e;
         setModalityType(ModalityType.APPLICATION_MODAL);
-        setTitle("Example Sketch Browser");
+        setTitle(Base.i18n.string("win.example"));
         setLayout(new BorderLayout());
 
         JPanel mainPanel = new JPanel();

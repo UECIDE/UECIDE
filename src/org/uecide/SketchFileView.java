@@ -57,10 +57,10 @@ public class SketchFileView extends javax.swing.filechooser.FileView {
                     return sketchConfig.get("summary");
                 }
             }
-            return Translate.t("UECIDE Sketch Folder");
+            return Base.i18n.string("filters.sketch");
         }
 
-        return Translate.t("Directory");
+        return Base.i18n.string("misc.directory");
     }
 
     public Boolean isTraversable(File f) {

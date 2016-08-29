@@ -59,6 +59,6 @@ public class ZipFileFilter extends javax.swing.filechooser.FileFilter {
     }
 
     public String getDescription() {
-        return Translate.t("Zip Files");
+        return Base.i18n.string("filter.zip");
     }
 }

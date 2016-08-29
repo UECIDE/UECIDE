@@ -71,15 +71,13 @@ public class CrashReporter {
         }
 
         Object[] options = {
-            "Quit",
-            "Ignore",
-            "Report"
+            Base.i18n.string("misc.quit"),
+            Base.i18n.string("misc.ignore"),
+            Base.i18n.string("misc.report")
         };
 
         int n = JOptionPane.showOptionDialog(null,
-            "I'm afraid UECIDE has crashed:\n" + exception.toString() +
-            "\nDo you want to quit, ignore the error, or\n" +
-            "examine (and send) a crash report?",
+            Base.i18n.string("msg.crash.message", exception.toString()),
             exception.toString(),
             JOptionPane.YES_NO_CANCEL_OPTION,
             JOptionPane.QUESTION_MESSAGE,
@@ -124,19 +122,19 @@ public class CrashReporter {
         reportPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         reportPanel.setLayout(new BoxLayout(reportPanel, BoxLayout.PAGE_AXIS));
 
-        JLabel lab = new JLabel("Your name: ");
+        JLabel lab = new JLabel(Base.i18n.string("form.crash.name"));
         reportPanel.add(lab);
 
         final JTextField yourName = new JTextField(40);
         reportPanel.add(yourName);
 
-        lab = new JLabel("Your Email: ");
+        lab = new JLabel(Base.i18n.string("form.crash.email"));
         reportPanel.add(lab);
 
         final JTextField yourEmail = new JTextField(40);
         reportPanel.add(yourEmail);
 
-        lab = new JLabel("Text of the report:");
+        lab = new JLabel(Base.i18n.string("form.crash.text"));
         reportPanel.add(lab);
 
         final JTextArea reportBody = new JTextArea(10, 50);
@@ -147,7 +145,7 @@ public class CrashReporter {
         JScrollPane rbs = new JScrollPane(reportBody);
         reportPanel.add(rbs);
         
-        lab = new JLabel("Your comments:");
+        lab = new JLabel(Base.i18n.string("form.crash.comments"));
         reportPanel.add(lab);
         
         final JTextArea reportComments = new JTextArea(10, 50);
@@ -159,7 +157,7 @@ public class CrashReporter {
 
         JPanel bb = new JPanel();
         bb.setLayout(new FlowLayout());
-        JButton rep = new JButton("Send Report");
+        JButton rep = new JButton(Base.i18n.string("misc.send"));
         rep.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -212,7 +210,7 @@ public class CrashReporter {
             }
         });
         bb.add(rep);
-        JButton can = new JButton("Cancel");
+        JButton can = new JButton(Base.i18n.string("misc.cancel"));
         can.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 frame.dispose();

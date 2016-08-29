@@ -405,8 +405,8 @@ public class Editor extends JFrame {
 
         projectPanel.add(projectTabs, BorderLayout.CENTER);
 
-        projectTabs.add(treePanel, "Project");
-        projectTabs.add(filesPanel, "Files");
+        projectTabs.add(treePanel, Base.i18n.string("tab.project"));
+        projectTabs.add(filesPanel, Base.i18n.string("tab.files"));
 
         addPanelsToTabs(projectTabs, Plugin.TABS_PROJECT);
 
@@ -416,8 +416,8 @@ public class Editor extends JFrame {
 
         consolePanel.add(consoleTabs, BorderLayout.CENTER);
 
-        consoleTabs.add(consoleScroll, "Console");
-        consoleTabs.add(outputScroll, "Output");
+        consoleTabs.add(consoleScroll, Base.i18n.string("tab.console"));
+        consoleTabs.add(outputScroll, Base.i18n.string("tab.output"));
 
         addPanelsToTabs(consoleTabs, Plugin.TABS_CONSOLE);
 
@@ -431,27 +431,27 @@ public class Editor extends JFrame {
         menuBar = new JMenuBar();
         Base.setFont(menuBar, "menu.bar");
 
-        fileMenu = new JMenu(Translate.t("File"));
+        fileMenu = new JMenu(Base.i18n.string("menu.file"));
         Base.setFont(fileMenu, "menu.bar");
         menuBar.add(fileMenu);
 
-        editMenu = new JMenu(Translate.t("Edit"));
+        editMenu = new JMenu(Base.i18n.string("menu.edit"));
         Base.setFont(editMenu, "menu.bar");
         menuBar.add(editMenu);
 
-        sketchMenu = new JMenu(Translate.t("Sketch"));
+        sketchMenu = new JMenu(Base.i18n.string("menu.sketch"));
         Base.setFont(sketchMenu, "menu.bar");
         menuBar.add(sketchMenu);
 
-        hardwareMenu = new JMenu(Translate.t("Hardware"));
+        hardwareMenu = new JMenu(Base.i18n.string("menu.hardware"));
         Base.setFont(hardwareMenu, "menu.bar");
         menuBar.add(hardwareMenu);
 
-        toolsMenu = new JMenu(Translate.t("Tools"));
+        toolsMenu = new JMenu(Base.i18n.string("menu.tools"));
         Base.setFont(toolsMenu, "menu.bar");
         menuBar.add(toolsMenu);
 
-        helpMenu = new JMenu(Translate.t("Help"));
+        helpMenu = new JMenu(Base.i18n.string("menu.help"));
         Base.setFont(helpMenu, "menu.bar");
         menuBar.add(helpMenu);
 
@@ -553,13 +553,13 @@ public class Editor extends JFrame {
 
     public void updateToolbar() {
         toolbar.removeAll();
-        abortButton = Editor.addToolbarButton(toolbar, "actions", "cancel", "Abort", new ActionListener() {
+        abortButton = Editor.addToolbarButton(toolbar, "actions", "cancel", Base.i18n.string("toolbar.abort"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 abortCompilation();
             }
         });
         abortButton.setVisible(false);
-        runButton = Editor.addToolbarButton(toolbar, "actions", "run", "Compile (Shift: clean compile)", new ActionListener() {
+        runButton = Editor.addToolbarButton(toolbar, "actions", "run", Base.i18n.string("toolbar.run"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -570,7 +570,7 @@ public class Editor extends JFrame {
             }
         });
 
-        programButton = Editor.addToolbarButton(toolbar, "actions", "program", "Program (Shift: clean compile and program)", new ActionListener() {
+        programButton = Editor.addToolbarButton(toolbar, "actions", "program", Base.i18n.string("toolbar.program"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -582,19 +582,19 @@ public class Editor extends JFrame {
 
         toolbar.addSeparator();
 
-        Editor.addToolbarButton(toolbar, "actions", "new", "New Sketch", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "new", Base.i18n.string("toolbar.new"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.handleNew();
             }
         });
 
-        Editor.addToolbarButton(toolbar, "actions", "open", "Open Sketch", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "open", Base.i18n.string("toolbar.open"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleOpenPrompt();
             }
         });
 
-        Editor.addToolbarButton(toolbar, "actions", "save", "Save Sketch", new ActionListener() {
+        Editor.addToolbarButton(toolbar, "actions", "save", Base.i18n.string("toolbar.save"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveAllTabs();
             }
@@ -815,12 +815,12 @@ public class Editor extends JFrame {
         treeRoot.setUserObject(loadedSketch);
         treeModel = new DefaultTreeModel(treeRoot);
         sketchContentTree = new JTree(treeModel);
-        treeSource = new DefaultMutableTreeNode("Source");
-        treeHeaders = new DefaultMutableTreeNode("Headers");
-        treeLibraries = new DefaultMutableTreeNode("Libraries");
-        treeBinaries = new DefaultMutableTreeNode("Binaries");
-        treeOutput = new DefaultMutableTreeNode("Output");
-        treeDocs = new DefaultMutableTreeNode("Documentation");
+        treeSource = new DefaultMutableTreeNode(Base.i18n.string("tree.source"));
+        treeHeaders = new DefaultMutableTreeNode(Base.i18n.string("tree.headers"));
+        treeLibraries = new DefaultMutableTreeNode(Base.i18n.string("tree.libraries"));
+        treeBinaries = new DefaultMutableTreeNode(Base.i18n.string("tree.binaries"));
+        treeOutput = new DefaultMutableTreeNode(Base.i18n.string("tree.output"));
+        treeDocs = new DefaultMutableTreeNode(Base.i18n.string("tree.docs"));
         TreeCellRenderer renderer = new FileCellRenderer();
         sketchContentTree.setCellRenderer(renderer);
         treeRoot.add(treeSource);
@@ -1265,9 +1265,9 @@ public class Editor extends JFrame {
                             ArrayList<TodoEntry> todo = loadedSketch.todo(f);
                             if (todo != null && todo.size() > 0) {
 
-                                FlaggedList noteList = new FlaggedList(FlaggedList.Green, "Notes");
-                                FlaggedList todoList = new FlaggedList(FlaggedList.Yellow, "To Do");
-                                FlaggedList fixmeList = new FlaggedList(FlaggedList.Red, "Fix Me");
+                                FlaggedList noteList = new FlaggedList(FlaggedList.Green, Base.i18n.string("tree.notes"));
+                                FlaggedList todoList = new FlaggedList(FlaggedList.Yellow, Base.i18n.string("tree.todo"));
+                                FlaggedList fixmeList = new FlaggedList(FlaggedList.Red, Base.i18n.string("tree.fixme"));
 
                                 DefaultMutableTreeNode noteEntries = new DefaultMutableTreeNode(noteList);
                                 DefaultMutableTreeNode todoEntries = new DefaultMutableTreeNode(todoList);
@@ -1615,28 +1615,28 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_SKETCH | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if(s.equals("Source")) {
-                        JMenuItem item = new JMenuItem("Create sketch file (.ino)");
+                    } else if(s.equals(Base.i18n.string("tree.source"))) {
+                        JMenuItem item = new JMenuItem(Base.i18n.string("menu.create.ino"));
                         item.setActionCommand("ino");
                         item.addActionListener(createNewAction);
                         Base.setFont(item, "menu.entry");
                         menu.add(item);
-                        item = new JMenuItem("Create C++ source file");
+                        item = new JMenuItem(Base.i18n.string("menu.create.cpp"));
                         item.setActionCommand("cpp");
                         item.addActionListener(createNewAction);
                         Base.setFont(item, "menu.entry");
                         menu.add(item);
-                        item = new JMenuItem("Create C source file");
+                        item = new JMenuItem(Base.i18n.string("menu.create.c"));
                         item.setActionCommand("c");
                         item.addActionListener(createNewAction);
                         Base.setFont(item, "menu.entry");
                         menu.add(item);
-                        item = new JMenuItem("Create assembly source file");
+                        item = new JMenuItem(Base.i18n.string("menu.create.asm"));
                         item.setActionCommand("S");
                         item.addActionListener(createNewAction);
                         Base.setFont(item, "menu.entry");
                         menu.add(item);
-                        item = new JMenuItem("Import source file");
+                        item = new JMenuItem(Base.i18n.string("menu.import.source"));
                         item.setActionCommand("source");
                         item.addActionListener(importFileAction);
                         Base.setFont(item, "menu.entry");
@@ -1647,13 +1647,13 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_SOURCE | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if(s.equals("Headers")) {
-                        JMenuItem item = new JMenuItem("Create header file");
+                    } else if(s.equals(Base.i18n.string("tree.headers"))) {
+                        JMenuItem item = new JMenuItem(Base.i18n.string("menu.create.header"));
                         item.setActionCommand("h");
                         item.addActionListener(createNewAction);
                         Base.setFont(item, "menu.entry");
                         menu.add(item);
-                        item = new JMenuItem("Import header file");
+                        item = new JMenuItem(Base.i18n.string("menu.import.header"));
                         item.setActionCommand("header");
                         item.addActionListener(importFileAction);
                         Base.setFont(item, "menu.entry");
@@ -1673,8 +1673,8 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_LIBRARIES | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if(s.equals("Binaries")) {
-                        JMenuItem item = new JMenuItem("Add binary file");
+                    } else if(s.equals(Base.i18n.string("tree.binaries"))) {
+                        JMenuItem item = new JMenuItem(Base.i18n.string("menu.import.binary"));
                         item.setActionCommand("binary");
                         item.addActionListener(importFileAction);
                         Base.setFont(item, "menu.entry");
@@ -1685,8 +1685,8 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if(s.equals("Output")) {
-                        JMenuItem item = new JMenuItem("Purge output files");
+                    } else if(s.equals(Base.i18n.string("tree.output"))) {
+                        JMenuItem item = new JMenuItem(Base.i18n.string("menu.purge.output"));
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
                                 loadedSketch.purgeBuildFiles();
@@ -1699,8 +1699,8 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_BOTTOM, o);
                         menu.show(sketchContentTree, e.getX(), e.getY());
-                    } else if(s.equals("Documentation")) {
-                        JMenuItem item = new JMenuItem("Create Markdown file");
+                    } else if(s.equals(Base.i18n.string("tree.docs"))) {
+                        JMenuItem item = new JMenuItem(Base.i18n.string("menu.create.markdown"));
                         item.setActionCommand("md");
                         item.addActionListener(createNewAction);
                         Base.setFont(item, "menu.entry");
@@ -1719,7 +1719,7 @@ public class Editor extends JFrame {
                     String ee = Preferences.get("editor.external.command");
 
                     if(ee != null && !ee.equals("")) {
-                        JMenuItem openExternal = new JMenuItem("Open in external editor");
+                        JMenuItem openExternal = new JMenuItem(Base.i18n.string("menu.file.external"));
                         openExternal.setActionCommand(thisFile.getAbsolutePath());
                         openExternal.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
@@ -1734,7 +1734,7 @@ public class Editor extends JFrame {
                         menu.add(openExternal);
                     }
 
-                    JMenuItem renameItem = new JMenuItem("Rename file");
+                    JMenuItem renameItem = new JMenuItem(Base.i18n.string("menu.file.rename"));
                     renameItem.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             String fn = e.getActionCommand();
@@ -1742,7 +1742,7 @@ public class Editor extends JFrame {
                             File mf = loadedSketch.getMainFile();
 
                             if(f.equals(mf)) {
-                                alert("You cannot rename the main sketch file.\nUse \"Save As\" instead.");
+                                alert(Base.i18n.string("err.mainfile.norename"));
                                 return;
                             }
 
@@ -1766,7 +1766,7 @@ public class Editor extends JFrame {
                     Base.setFont(renameItem, "menu.entry");
                     menu.add(renameItem);
 
-                    JMenuItem deleteItem = new JMenuItem("Delete file");
+                    JMenuItem deleteItem = new JMenuItem(Base.i18n.string("menu.file.delete"));
                     deleteItem.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             String fn = e.getActionCommand();
@@ -1774,11 +1774,18 @@ public class Editor extends JFrame {
                             File mf = loadedSketch.getMainFile();
 
                             if(f.equals(mf)) {
-                                alert("You cannot delete the main sketch file.");
+                                alert(Base.i18n.string("err.mainfile.nodelete"));
                                 return;
                             }
 
-                            if(twoOptionBox(JOptionPane.QUESTION_MESSAGE, "Delete?", "Are you sure you want to delete\n" + f.getName() + "?", "Yes", "No") == 0) {
+                            if(twoOptionBox(
+                                JOptionPane.QUESTION_MESSAGE, 
+                                Base.i18n.string("msg.file.delete.title"),
+                                Base.i18n.string("msg.file.delete.body", f.getName()),
+                                Base.i18n.string("misc.yes"),
+                                Base.i18n.string("misc.no")
+                            ) == 0) {
+
                                 loadedSketch.deleteFile(f);
                                 int tab = getTabByFile(f);
 
@@ -1803,20 +1810,19 @@ public class Editor extends JFrame {
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_TOP, o);
                     menu.addSeparator();
 
-                    JMenu infoMenu = new JMenu("Info");
-                    infoMenu.add(new JMenuItem("Type code: " + FileType.getType(thisFile)));
+                    JMenu infoMenu = new JMenu(Base.i18n.string("menu.file.info"));
                     JMenuItem filePath = new JMenuItem(thisFile.getAbsolutePath());
                     filePath.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             StringSelection sel = new StringSelection(e.getActionCommand());
                             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                             clipboard.setContents(sel, sel);
-                            message("Path copied to clipboard.");
+                            message(Base.i18n.string("msg.file.info.copied"));
                         }
                     });
                     filePath.setActionCommand(thisFile.getAbsolutePath());
                     infoMenu.add(filePath);
-                    JMenuItem fileSize = new JMenuItem(thisFile.length() + " bytes");
+                    JMenuItem fileSize = new JMenuItem(Base.i18n.string("menu.file.info.size", thisFile.length()));
                     infoMenu.add(fileSize);
                     Base.setFont(infoMenu, "menu.entry");
                     menu.add(infoMenu);
@@ -1826,8 +1832,8 @@ public class Editor extends JFrame {
                     if(p.getUserObject() instanceof String) {
                         String ptext = (String)p.getUserObject();
 
-                        if(ptext.equals("Binaries")) {
-                            JMenuItem insertRef = new JMenuItem("Insert reference");
+                        if(ptext.equals(Base.i18n.string("tree.binaries"))) {
+                            JMenuItem insertRef = new JMenuItem(Base.i18n.string("menu.file.reference"));
                             insertRef.addActionListener(new ActionListener() {
                                 public void actionPerformed(ActionEvent e) {
                                     String filename = e.getActionCommand();
@@ -1836,7 +1842,7 @@ public class Editor extends JFrame {
 
                                     if(at > -1) {
                                         EditorBase eb = getTab(at);
-                                        eb.insertAtCursor("extern char " + filename + "[] asm(\"_binary_objects_" + filename + "_start\");\n");
+                                        eb.insertAtCursor("extern const char " + filename + "[] asm(\"_binary_objects_" + filename + "_start\");\n");
                                     }
                                 }
                             });
@@ -1855,7 +1861,7 @@ public class Editor extends JFrame {
 
                 } else if(o.getUserObject() instanceof Library) {
                     final Library lib = (Library)(o.getUserObject());
-                    JMenuItem item = new JMenuItem("Delete cached archive");
+                    JMenuItem item = new JMenuItem(Base.i18n.string("menu.library.purge"));
                     item.setEnabled(loadedSketch.libraryIsCompiled(lib));
                     item.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -1865,7 +1871,7 @@ public class Editor extends JFrame {
                     });
                     Base.setFont(item, "menu.entry");
                     menu.add(item);
-                    item = new JMenuItem("Recompile now");
+                    item = new JMenuItem(Base.i18n.string("menu.library.recompile"));
                     item.setEnabled(!compilerRunning());
                     item.setActionCommand("yes");
                     item.addActionListener(new ActionListener() {
@@ -1874,7 +1880,7 @@ public class Editor extends JFrame {
                             clearConsole();
 
                             if(compilerRunning()) {
-                                error("Sorry, there is already a compiler thread running for this sketch.");
+                                error(Base.i18n.string("err.compilerrunning"));
                                 return;
                             }
 
@@ -1887,7 +1893,7 @@ public class Editor extends JFrame {
                     menu.add(item);
 
                     if(lib.isLocal(loadedSketch.getFolder())) {
-                        item = new JMenuItem("Export library...");
+                        item = new JMenuItem(Base.i18n.string("menu.library.export"));
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
                                 exportLocalLibrary(lib);
@@ -1896,11 +1902,11 @@ public class Editor extends JFrame {
                         Base.setFont(item, "menu.entry");
                         menu.add(item);
                     } else {
-                        item = new JMenuItem("Localize library");
+                        item = new JMenuItem(Base.i18n.string("menu.library.localize"));
                         item.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
                                 if(loadedSketch.parentIsProtected()) {
-                                    error("You cannot localize a library in an example. Use Save As first.");
+                                    error(Base.i18n.string("err.library.localize.example"));
                                     return;
                                 }
 
@@ -1916,7 +1922,7 @@ public class Editor extends JFrame {
                         menu.add(item);
                     }
 
-                    item = new JMenuItem("Open library location");
+                    item = new JMenuItem(Base.i18n.string("menu.library.open"));
                     item.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             Base.openFolder(lib.getFolder());
@@ -1970,7 +1976,7 @@ public class Editor extends JFrame {
                     JPopupMenu menu = new JPopupMenu();
 
                     if(thisFile.isDirectory()) {
-                        JMenuItem openInOS = new JMenuItem("Open in OS");
+                        JMenuItem openInOS = new JMenuItem(Base.i18n.string("menu.dir.open"));
                         openInOS.setActionCommand(thisFile.getAbsolutePath());
                         openInOS.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
@@ -1980,7 +1986,7 @@ public class Editor extends JFrame {
                         Base.setFont(openInOS, "menu.entry");
                         menu.add(openInOS);
 
-                        JMenuItem mkdirItem = new JMenuItem("Create directory");
+                        JMenuItem mkdirItem = new JMenuItem(Base.i18n.string("menu.dir.create"));
                         mkdirItem.setActionCommand(thisFile.getAbsolutePath());
                         mkdirItem.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
@@ -1997,7 +2003,7 @@ public class Editor extends JFrame {
                         });
                         Base.setFont(mkdirItem, "menu.entry");
                         menu.add(mkdirItem);
-                        JMenuItem unzipItem = new JMenuItem("Extract ZIP file here");
+                        JMenuItem unzipItem = new JMenuItem(Base.i18n.string("menu.dir.unzip"));
                         unzipItem.setActionCommand(thisFile.getAbsolutePath());
                         unzipItem.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
@@ -2010,7 +2016,7 @@ public class Editor extends JFrame {
                         String ee = Preferences.get("editor.external.command");
 
                         if(ee != null && !ee.equals("")) {
-                            JMenuItem openExternal = new JMenuItem("Open in external editor");
+                            JMenuItem openExternal = new JMenuItem(Base.i18n.string("menu.file.external"));
                             openExternal.setActionCommand(thisFile.getAbsolutePath());
                             openExternal.addActionListener(new ActionListener() {
                                 public void actionPerformed(ActionEvent e) {
@@ -2028,7 +2034,7 @@ public class Editor extends JFrame {
 
                     populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_TOP, o);
 
-                    JMenuItem renameItem = new JMenuItem("Rename file");
+                    JMenuItem renameItem = new JMenuItem(Base.i18n.string("menu.file.rename"));
                     renameItem.setActionCommand(thisFile.getAbsolutePath());
                     renameItem.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -2037,7 +2043,7 @@ public class Editor extends JFrame {
                             File mf = loadedSketch.getMainFile();
 
                             if(f.equals(mf)) {
-                                alert("You cannot rename the main sketch file.\nUse \"Save As\" instead.");
+                                alert(Base.i18n.string("err.mainfile.norename"));
                                 return;
                             }
 
@@ -2060,7 +2066,7 @@ public class Editor extends JFrame {
                     Base.setFont(renameItem, "menu.entry");
                     menu.add(renameItem);
 
-                    JMenuItem deleteItem = new JMenuItem("Delete file");
+                    JMenuItem deleteItem = new JMenuItem(Base.i18n.string("menu.file.delete"));
                     deleteItem.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             String fn = e.getActionCommand();
@@ -2068,11 +2074,17 @@ public class Editor extends JFrame {
                             File mf = loadedSketch.getMainFile();
 
                             if(f.equals(mf)) {
-                                alert("You cannot delete the main sketch file.");
+                                alert(Base.i18n.string("err.mainfile.nodelete"));
                                 return;
                             }
 
-                            if(twoOptionBox(JOptionPane.QUESTION_MESSAGE, "Delete?", "Are you sure you want to delete\n" + f.getName() + "?", "Yes", "No") == 0) {
+                            if(twoOptionBox(
+                                JOptionPane.QUESTION_MESSAGE, 
+                                Base.i18n.string("msg.file.delete.title"),
+                                Base.i18n.string("msg.file.delete.body", f.getName()),
+                                Base.i18n.string("misc.yes"),
+                                Base.i18n.string("misc.no")
+                            ) == 0) {
                                 loadedSketch.deleteFile(f);
                                 int tab = getTabByFile(f);
 
@@ -2098,22 +2110,23 @@ public class Editor extends JFrame {
                     menu.addSeparator();
                     populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_MID, o);
 
-                    JMenu infoMenu = new JMenu("Info");
+                    JMenu infoMenu = new JMenu(Base.i18n.string("menu.file.info"));
                     JMenuItem filePath = new JMenuItem(thisFile.getAbsolutePath());
                     filePath.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             StringSelection sel = new StringSelection(e.getActionCommand());
                             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                             clipboard.setContents(sel, sel);
-                            message("Path copied to clipboard.");
+                            message(Base.i18n.string("msg.file.info.copied"));
                         }
                     });
                     filePath.setActionCommand(thisFile.getAbsolutePath());
                     infoMenu.add(filePath);
-                    JMenuItem fileSize = new JMenuItem(thisFile.length() + " bytes");
+                    JMenuItem fileSize = new JMenuItem(Base.i18n.string("menu.file.info.size", thisFile.length()));
                     infoMenu.add(fileSize);
                     Base.setFont(infoMenu, "menu.entry");
                     menu.add(infoMenu);
+
                     menu.addSeparator();
                     populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_BOTTOM, o);
                     menu.show(sketchFilesTree, e.getX(), e.getY());
@@ -2417,16 +2430,14 @@ public class Editor extends JFrame {
     public void setStatus() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("<html><b>Board: </b><i>");
-        sb.append((loadedSketch.getContext().getBoard() != null ? loadedSketch.getContext().getBoard() : "None"));
-        sb.append("</i> <b>Core: </b><i>");
-        sb.append((loadedSketch.getContext().getCore() != null ? loadedSketch.getContext().getCore() : "None"));
-        sb.append("</i> <b>Compiler: </b><i>");
-        sb.append((loadedSketch.getContext().getCompiler() != null ? loadedSketch.getContext().getCompiler() : "None"));
-        sb.append("</i> <b>Device: </b><i>");
-        sb.append((loadedSketch.getDevice() != null ? loadedSketch.getDevice().getName() : "None"));
-        sb.append("</i></html>");
-        statusText.setText(sb.toString());
+
+        statusText.setText("<html>" + Base.i18n.string("status.html",
+            loadedSketch.getContext().getBoard() != null ? loadedSketch.getContext().getBoard() : "None",
+            loadedSketch.getContext().getCore() != null ? loadedSketch.getContext().getCore() : "None",
+            loadedSketch.getContext().getCompiler() != null ? loadedSketch.getContext().getCompiler() : "None",
+            loadedSketch.getDevice() != null ? loadedSketch.getDevice().getName() : "None"
+
+        ) + "</html>");
     }
 
     public int openOrSelectFile(File sf) {
@@ -2488,11 +2499,11 @@ public class Editor extends JFrame {
             if(eb.isModified()) {
                 int option = threeOptionBox(
                                  JOptionPane.WARNING_MESSAGE,
-                                 Translate.t("Unsaved File"),
-                                 Translate.w("This file has been modified.  Do you want to save your work before you close this tab?", 40, "\n"),
-                                 "Save",
-                                 "Don't Save",
-                                 "Cancel"
+                                 Base.i18n.string("msg.unsaved.title"),
+                                 Base.i18n.string("msg.unsaved.body"),
+                                 Base.i18n.string("misc.yes"),
+                                 Base.i18n.string("misc.no"),
+                                 Base.i18n.string("misc.cancel")
                              );
 
                 if(option == 2) return false;
@@ -2512,7 +2523,7 @@ public class Editor extends JFrame {
             return -1;
         }
         if(sf.exists() == false) {
-            error("Sorry, I can't find " + sf.getName() + ".");
+            error(Base.i18n.string("err.notfound", sf.getName()));
             return -1;
         }
 
@@ -2520,7 +2531,7 @@ public class Editor extends JFrame {
             String className = FileType.getEditor(sf.getName());
 
             if(className == null) {
-                error("File type for " + sf.getName() + " unknown");
+                error(Base.i18n.string("err.badfile", sf.getName()));
                 return -1;
             }
 
@@ -2715,7 +2726,7 @@ public class Editor extends JFrame {
     }
 
     public void alert(String message) {
-        JOptionPane.showMessageDialog(this, message, "Alert", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, Base.i18n.string("misc.alert"), JOptionPane.WARNING_MESSAGE);
     }
 
     public int twoOptionBox(int type, String title, String message, String option0, String option1) {
@@ -2734,14 +2745,11 @@ public class Editor extends JFrame {
 
         if(editorList.size() == 1) {
             if(Base.isMacOS()) {
-                Object[] options = { Translate.t("OK"), Translate.t("Cancel") };
-                String prompt =
-                    "Are you sure you want to Quit?\n" + 
-                    "Closing the last open sketch will quit UECIDE.";
+                Object[] options = { Base.i18n.string("misc.yes"), Base.i18n.string("misc.cancel") };
 
                 int result = JOptionPane.showOptionDialog(this,
-                             prompt,
-                             Translate.t("Quit"),
+                             Base.i18n.string("msg.quit.body"),
+                             Base.i18n.string("msg.quit.title"),
                              JOptionPane.YES_NO_OPTION,
                              JOptionPane.QUESTION_MESSAGE,
                              null,
@@ -2795,7 +2803,7 @@ public class Editor extends JFrame {
                             if(new File(path).exists()) {
                                 loadSketch(path);
                             } else {
-                                error("Unable to find file " + path);
+                                error(Base.i18n.string("err.notfound", path));
                             }
                         }
                     });
@@ -2846,13 +2854,13 @@ public class Editor extends JFrame {
         JMenu submenu;
         int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-        fileMenu.add(createMenuEntry("New", KeyEvent.VK_N, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.new"), KeyEvent.VK_N, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.handleNew();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Open...", KeyEvent.VK_O, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.open"), KeyEvent.VK_O, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleOpenPrompt();
             }
@@ -2860,7 +2868,7 @@ public class Editor extends JFrame {
 
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_TOP);
 
-        JMenu recentSketchesMenu = new JMenu(Translate.t("Recent Sketches"));
+        JMenu recentSketchesMenu = new JMenu(Base.i18n.string("menu.file.recent"));
         Base.setFont(recentSketchesMenu, "menu.entry");
         fileMenu.add(recentSketchesMenu);
 
@@ -2872,7 +2880,7 @@ public class Editor extends JFrame {
                     if(new File(path).exists()) {
                         loadSketch(path);
                     } else {
-                        error("Unable to find file " + path);
+                        error(Base.i18n.string("err.notfound", path));
                     }
                 }
             });
@@ -2882,7 +2890,7 @@ public class Editor extends JFrame {
             recentSketchesMenu.add(recentitem);
         }
 
-        JMenu frequentSketchesMenu = new JMenu(Translate.t("Frequent Sketches"));
+        JMenu frequentSketchesMenu = new JMenu(Base.i18n.string("menu.file.frequent"));
         Base.setFont(frequentSketchesMenu, "menu.entry");
         fileMenu.add(frequentSketchesMenu);
 
@@ -2906,7 +2914,7 @@ public class Editor extends JFrame {
                             if(new File(path).exists()) {
                                 loadSketch(path);
                             } else {
-                                error("Unable to find file " + path);
+                                error(Base.i18n.string("err.notfound", path));
                             }
                         }
                     });
@@ -2919,9 +2927,9 @@ public class Editor extends JFrame {
         }
 
 
-        JMenu examplesMenu = new JMenu(Translate.t("Examples"));
+        JMenu examplesMenu = new JMenu(Base.i18n.string("menu.file.examples"));
 
-        JMenuItem emBrowse = new JMenuItem("Browse...");
+        JMenuItem emBrowse = new JMenuItem(Base.i18n.string("menu.file.examples.browse"));
         emBrowse.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 ExampleBrowser eb = new ExampleBrowser(Editor.this);
@@ -2991,31 +2999,31 @@ public class Editor extends JFrame {
         fileMenu.addSeparator();
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_MID);
 
-        fileMenu.add(createMenuEntry("Close", KeyEvent.VK_W, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.close"), KeyEvent.VK_W, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 askCloseWindow();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Save", KeyEvent.VK_S, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.save"), KeyEvent.VK_S, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveAllTabs();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Save As...", KeyEvent.VK_S, KeyEvent.SHIFT_MASK, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.saveas"), KeyEvent.VK_S, KeyEvent.SHIFT_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 saveAs();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Export as SAR...", 0, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.export"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 exportSar();
             }
         }));
 
-        fileMenu.add(createMenuEntry("Import SAR...", 0, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.import"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 importSar();
             }
@@ -3023,7 +3031,7 @@ public class Editor extends JFrame {
 
         fileMenu.addSeparator();
 
-        JCheckBoxMenuItem cbitem = new JCheckBoxMenuItem("Online");
+        JCheckBoxMenuItem cbitem = new JCheckBoxMenuItem(Base.i18n.string("menu.file.online"));
         cbitem.setState(Base.isOnline());
         cbitem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -3037,7 +3045,7 @@ public class Editor extends JFrame {
         });
         fileMenu.add(cbitem);
 
-        fileMenu.add(createMenuEntry("Preferences", KeyEvent.VK_MINUS, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.preferences"), KeyEvent.VK_MINUS, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Preferences prefs = new Preferences(Editor.this);
             }
@@ -3046,7 +3054,7 @@ public class Editor extends JFrame {
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_BOTTOM);
 
 
-        fileMenu.add(createMenuEntry("Quit", KeyEvent.VK_Q, 0, new ActionListener() {
+        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.quit"), KeyEvent.VK_Q, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if(Editor.closeAllEditors()) {
                     Preferences.save();
@@ -3082,32 +3090,32 @@ public class Editor extends JFrame {
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_TOP);
         sketchMenu.addSeparator();
 
-        JMenu createSubmenu = new JMenu("Create new");
-        createSubmenu.add(createMenuEntry("Sketch file (.ino)", 0, 0, createNewAction, "ino"));
-        createSubmenu.add(createMenuEntry("C++ file", 0, 0, createNewAction, "cpp"));
-        createSubmenu.add(createMenuEntry("C file", 0, 0, createNewAction, "c"));
-        createSubmenu.add(createMenuEntry("Header file", 0, 0, createNewAction, "h"));
-        createSubmenu.add(createMenuEntry("Assembly file", 0, 0, createNewAction, "S"));
-        createSubmenu.add(createMenuEntry("Library", 0, 0, createNewAction, "lib"));
+        JMenu createSubmenu = new JMenu(Base.i18n.string("menu.sketch.create"));
+        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.ino"), 0, 0, createNewAction, "ino"));
+        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.cpp"), 0, 0, createNewAction, "cpp"));
+        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.c"), 0, 0, createNewAction, "c"));
+        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.header"), 0, 0, createNewAction, "h"));
+        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.asm"), 0, 0, createNewAction, "S"));
+        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.library"), 0, 0, createNewAction, "lib"));
         sketchMenu.add(createSubmenu);
 
-        JMenu importSubmenu = new JMenu("Import file");
-        importSubmenu.add(createMenuEntry("Source file", 0, 0, new ActionListener() {
+        JMenu importSubmenu = new JMenu(Base.i18n.string("menu.sketch.import"));
+        importSubmenu.add(createMenuEntry(Base.i18n.string("menu.sketch.import.source"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
-        importSubmenu.add(createMenuEntry("Header file", 0, 0, new ActionListener() {
+        importSubmenu.add(createMenuEntry(Base.i18n.string("menu.sketch.import.header"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
-        importSubmenu.add(createMenuEntry("Binary file", 0, 0, new ActionListener() {
+        importSubmenu.add(createMenuEntry(Base.i18n.string("menu.sketch.import.binary"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
         sketchMenu.add(importSubmenu);
 
-        JMenu librariesSubmenu = new JMenu("Libraries");
-        librariesSubmenu.add(createMenuEntry("Install library archive...", 0, 0, new ActionListener() {
+        JMenu librariesSubmenu = new JMenu(Base.i18n.string("menu.sketch.import.libraries"));
+        librariesSubmenu.add(createMenuEntry(Base.i18n.string("menu.sketch.import.libraries.install"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 installLibraryArchive();
             }
@@ -3123,7 +3131,7 @@ public class Editor extends JFrame {
         sketchMenu.addSeparator();
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_BOTTOM);
 
-        sketchMenu.add(createMenuEntry("Sketch properties...", 0, 0, new ActionListener() {
+        sketchMenu.add(createMenuEntry(Base.i18n.string("menu.sketch.properties"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new SketchProperties(Editor.this, loadedSketch);
             }
@@ -3141,28 +3149,28 @@ public class Editor extends JFrame {
         Compiler o = ctx.getCompiler(); if (o != null) { compilerName = " (" + o.getDescription() + ")"; }
         CommunicationPort p = ctx.getDevice(); if (p != null) { portName = " (" + p.getName() + ")"; }
 
-        JMenu boardsSubmenu = new JMenu("Boards" + boardName);
+        JMenu boardsSubmenu = new JMenu(Base.i18n.string("menu.hardware.boards") + boardName);
         populateBoardsMenu(boardsSubmenu);
         Base.setFont(boardsSubmenu, "menu.entry");
         hardwareMenu.add(boardsSubmenu);
 
-        JMenu coresSubmenu = new JMenu("Cores" + coreName);
+        JMenu coresSubmenu = new JMenu(Base.i18n.string("menu.hardware.cores") + coreName);
         populateCoresMenu(coresSubmenu);
         Base.setFont(coresSubmenu, "menu.entry");
         hardwareMenu.add(coresSubmenu);
 
-        JMenu compilersSubmenu = new JMenu("Compilers" + compilerName);
+        JMenu compilersSubmenu = new JMenu(Base.i18n.string("menu.hardware.compilers") + compilerName);
         populateCompilersMenu(compilersSubmenu);
         Base.setFont(compilersSubmenu, "menu.entry");
         hardwareMenu.add(compilersSubmenu);
 
-        optionsMenu = new JMenu("Options");
+        optionsMenu = new JMenu(Base.i18n.string("menu.hardware.options"));
         populateOptionsMenu(optionsMenu);
         optionsMenu.setEnabled(optionsMenu.getItemCount() > 0);
         Base.setFont(optionsMenu, "menu.entry");
         hardwareMenu.add(optionsMenu);
 
-        serialPortsMenu = new JMenu("Device" + portName);
+        serialPortsMenu = new JMenu(Base.i18n.string("menu.hardware.devices") + portName);
         populateSerialMenu(serialPortsMenu);
         serialPortsMenu.addMenuListener(new MenuListener() {
             public void menuSelected(MenuEvent e) {
@@ -3177,7 +3185,7 @@ public class Editor extends JFrame {
         Base.setFont(serialPortsMenu, "menu.entry");
         hardwareMenu.add(serialPortsMenu);
 
-        programmersSubmenu = new JMenu("Programmers");
+        programmersSubmenu = new JMenu(Base.i18n.string("menu.hardware.programmers"));
         populateProgrammersMenu(programmersSubmenu);
 
         Base.setFont(programmersSubmenu, "menu.entry");
@@ -3189,7 +3197,7 @@ public class Editor extends JFrame {
         hardwareMenu.addSeparator();
         addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_BOTTOM);
 
-        toolsMenu.add(createMenuEntry("Plugin Manager", 0, 0, new ActionListener() {
+        toolsMenu.add(createMenuEntry(Base.i18n.string("menu.tools.pm"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 PluginManager pm = new PluginManager();
                 pm.openWindow(Editor.this);
@@ -3200,7 +3208,7 @@ public class Editor extends JFrame {
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_MID);
 
-        toolsMenu.add(createMenuEntry("Service Manager", 0, 0, new ActionListener() {
+        toolsMenu.add(createMenuEntry(Base.i18n.string("menu.tools.sm"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 ServiceManager.open(Editor.this);
             }
@@ -3226,7 +3234,7 @@ public class Editor extends JFrame {
             toolsMenu.add(item);
         }
 
-        helpMenu.add(createMenuEntry("About " + Base.theme.get("product.cap"), 0, 0, new ActionListener() {
+        helpMenu.add(createMenuEntry(Base.i18n.string("menu.help.about"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleAbout();
             }
@@ -3260,27 +3268,27 @@ public class Editor extends JFrame {
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_MID);
         helpMenu.addSeparator();
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
-        JMenu debugSubmenu = new JMenu("Debug");
+        JMenu debugSubmenu = new JMenu(Base.i18n.string("menu.help.debug"));
 
-        debugSubmenu.add(createMenuEntry("Debug Console", 0, 0, new ActionListener() {
+        debugSubmenu.add(createMenuEntry(Base.i18n.string("menu.help.debug.console"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Debug.show();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry("Rebuild internal structures", 0, 0, new ActionListener() {
+        debugSubmenu.add(createMenuEntry(Base.i18n.string("menu.help.debug.rebuild"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.cleanAndScanAllSettings();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry("Purge cache files", 0, 0, new ActionListener() {
+        debugSubmenu.add(createMenuEntry(Base.i18n.string("menu.help.debug.purge"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 loadedSketch.purgeCache();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry("Open data folder", 0, 0, new ActionListener() {
+        debugSubmenu.add(createMenuEntry(Base.i18n.string("menu.help.debug.opendata"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.openURL(Base.getDataFolder().getAbsolutePath());
             }
@@ -3787,14 +3795,14 @@ public class Editor extends JFrame {
                 c.gridwidth = 1;
                 final Editor me = this;
 
-                JButton cancel = new JButton(Translate.t("Cancel"));
+                JButton cancel = new JButton(Base.i18n.string("misc.cancel"));
                 cancel.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         me.willDoImport = false;
                         dialog.dispose();
                     }
                 });
-                JButton impt = new JButton(Translate.t("Import"));
+                JButton impt = new JButton(Base.i18n.string("misc.import"));
                 impt.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         me.willDoImport = true;
@@ -4039,10 +4047,12 @@ public class Editor extends JFrame {
 
             if(newFile.exists()) {
                 int n = twoOptionBox(
-                            JOptionPane.WARNING_MESSAGE,
-                            "Overwrite File?",
-                            Translate.w("Do you really want to overwrite the file %1?", 40, "\n", newFile.getName()),
-                            "Yes", "No");
+                    JOptionPane.WARNING_MESSAGE,
+                    Base.i18n.string("msg.overwrite.title"),
+                    Base.i18n.string("msg.overwrite.body", newFile.getName()),
+                    Base.i18n.string("misc.yes"),
+                    Base.i18n.string("misc.no")
+                );
 
                 if(n != 0) {
                     return;
@@ -4074,11 +4084,11 @@ public class Editor extends JFrame {
 
     public void createNewSketchFile(String extension) {
         String name = (String)JOptionPane.showInputDialog(
-                          this,
-                          "Enter filename",
-                          "Create new ." + extension + " file",
-                          JOptionPane.PLAIN_MESSAGE
-                      );
+            this,
+            Base.i18n.string("msg.create.body"),
+            Base.i18n.string("msg.create.title", extension),
+            JOptionPane.PLAIN_MESSAGE
+        );
 
         while(!validName(name)) {
             if(name == null) {
@@ -4086,18 +4096,19 @@ public class Editor extends JFrame {
             }
 
             JOptionPane.showMessageDialog(this,
-                                          "Invalid Filename",
-                                          "The filename contains invalid characters.",
-                                          JOptionPane.ERROR_MESSAGE);
+                Base.i18n.string("err.invalid.body"),
+                Base.i18n.string("err.invalid.title"),
+                JOptionPane.ERROR_MESSAGE
+            );
             name = (String)JOptionPane.showInputDialog(
-                       this,
-                       "Enter filename",
-                       "Create new ." + extension + " file",
-                       JOptionPane.PLAIN_MESSAGE,
-                       null,
-                       null,
-                       name
-                   );
+                this,
+                Base.i18n.string("msg.create.body"),
+                Base.i18n.string("msg.create.title", extension),
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                null,
+                name
+            );
         }
 
         loadedSketch.createNewFile(name + "." + extension);
@@ -4136,7 +4147,11 @@ public class Editor extends JFrame {
             }
 
             if(!src.exists()) {
-                JOptionPane.showMessageDialog(this, "Cannot find file", "Unable to find the file " + src.getName(), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, 
+                    Base.i18n.string("err.notfound.title"),
+                    Base.i18n.string("err.notfound", src.getName()), 
+                    JOptionPane.ERROR_MESSAGE
+                );
                 return;
             }
 
@@ -4444,11 +4459,6 @@ public class Editor extends JFrame {
 
     public void handleAbout() {
         About a = new About(this);
-//        Dimension ss = getSize();
-//        Point sl = getLocation();
-//        Splash splash = new Splash(sl.x, sl.y, ss.width, ss.height);
-//        splash.enableCloseOnClick();
-
     }
 
     public void installLibraryArchive() {
@@ -4470,7 +4480,7 @@ public class Editor extends JFrame {
             }
 
             public String getDescription() {
-                return Translate.t("ZIP Files");
+                return Base.i18n.string("filters.zip");
             }
         });
 
@@ -4489,13 +4499,12 @@ public class Editor extends JFrame {
         if(rv == JFileChooser.APPROVE_OPTION) {
             String[] entries = getZipEntries(fc.getSelectedFile());
             if (fc.getSelectedFile() == null) {
-                error("Open seems to have been cancelled. Aborting");
                 return;
             }
             if (Preferences.getBoolean("editor.save.remloc")) {
                 Preferences.setFile("editor.locations.importlib", fc.getSelectedFile().getParentFile());
             }
-            message("Analyzing " + fc.getSelectedFile().getName() + "...");
+            message(Base.i18n.string("msg.analyzing", fc.getSelectedFile().getName()));
 
             // In a library we expect certain things to be in certain places.  That's only
             // logical, or the IDE won't be able to find them!  People that don't package
@@ -4529,7 +4538,7 @@ public class Editor extends JFrame {
 
                         if(parent.equals(possibleLibraryName) || parent.contains(possibleLibraryName)) {
                             // this looks like a valid archive at this point.
-                            message("Found library " + possibleLibraryName + " at " + folder);
+                            message(Base.i18n.string("msg.analyzing.found", possibleLibraryName, folder));
                             foundLibs.put(possibleLibraryName, folder);
                         }
                     }
@@ -4548,15 +4557,18 @@ public class Editor extends JFrame {
 
                 LibCatObject[] catarr = cats.toArray(new LibCatObject[cats.size()]);
 
-                LibCatObject loc = (LibCatObject)JOptionPane.showInputDialog(this, "Select location to store this library:", "Select Destination", JOptionPane.PLAIN_MESSAGE,
-                                   null, catarr, null);
+                LibCatObject loc = (LibCatObject)JOptionPane.showInputDialog(this, 
+                    Base.i18n.string("msg.libdest.body"),
+                    Base.i18n.string("msg.libdest.title"), 
+                    JOptionPane.PLAIN_MESSAGE,
+                    null, catarr, null);
 
                 if(loc != null) {
                     File installPath = Library.getCategoryLocation(loc.getKey());
                     message("Installing to " + installPath.getAbsolutePath());
 
                     for(String lib : foundLibs.keySet()) {
-                        message("Installing " + lib + "...");
+                        message(Base.i18n.string("misc.analyzing.install", lib));
                         // First make a list of remapped files...
                         TreeMap<String, File> translatedFiles = new TreeMap<String, File>();
 
@@ -4577,14 +4589,14 @@ public class Editor extends JFrame {
 
                     }
 
-                    message("Updating library list...");
+                    message(Base.i18n.string("misc.analyzing.updating.start"));
                     Base.gatherLibraries();
                     Editor.updateAllEditors();
-                    message("Installation finished.");
+                    message(Base.i18n.string("misc.analyzing.updating.done"));
                 }
             } else {
-                error("Unable to detect any valid libraries in the archive.");
-                warning("You may need to manually install it or re-package it properly.");
+                error(Base.i18n.string("err.analyzing.notfound.error"));
+                warning(Base.i18n.string("err.analyzing.notfound.warning"));
             }
         }
     }
@@ -4676,13 +4688,13 @@ public class Editor extends JFrame {
         }
 
         String newName = (String)JOptionPane.showInputDialog(
-                             this,
-                             "Enter filename:",
-                             "Enter Filename",
-                             JOptionPane.PLAIN_MESSAGE,
-                             null,
-                             null,
-                             oldName);
+            this,
+            Base.i18n.string("msg.askfile.body"),
+            Base.i18n.string("msg.askfile.title"),
+            JOptionPane.PLAIN_MESSAGE,
+            null,
+            null,
+            oldName);
         return newName;
     }
 
@@ -4711,7 +4723,7 @@ public class Editor extends JFrame {
             }
 
             public String getDescription() {
-                return Translate.t("ZIP Files");
+                return Base.i18n.string("filters.zip");
             }
         });
 
@@ -4897,7 +4909,7 @@ public class Editor extends JFrame {
         clearConsole();
 
         if(compilerRunning()) {
-            error("Sorry, there is already a compiler thread running for this sketch.");
+            error(Base.i18n.string("err.compilerrunning"));
             return;
         }
 
@@ -4916,7 +4928,7 @@ public class Editor extends JFrame {
         clearConsole();
 
         if(compilerRunning()) {
-            error("Sorry, there is already a compiler thread running for this sketch.");
+            error(Base.i18n.string("err.compilerrunning"));
             return;
         }
 

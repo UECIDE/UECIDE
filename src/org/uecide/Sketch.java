@@ -1303,12 +1303,12 @@ public class Sketch {
         PropertyFile props = ctx.getMerged();
 
         if(getBoard() == null) {
-            error(Translate.w("You have no board selected.  You must select a board before you can compile your sketch.", 80, "\n"));
+            error(Base.i18n.string("err.noboard"));
             return false;
         }
 
         if(getCore() == null) {
-            error(Translate.w("You have no core selected.  You must select a core before you can compile your sketch.", 80, "\n"));
+            error(Base.i18n.string("err.nocore"));
             return false;
         }
 
@@ -1679,26 +1679,26 @@ public class Sketch {
         }
 
         if(getBoard() == null) {
-            error(Translate.w("The sketch cannot be compiled: You have no board selected. If you haven't yet installed any boards please do so through the Plugin Manager.", 80, "\n"));
+            error(Base.i18n.string("err.noboard"));
             return false;
         }
 
         if(getCore() == null) {
-            error(Translate.w("The sketch cannot be compiled: You have no core selected. If you haven't yet installed a core please do so through the Plugin Manager.", 80, "\n"));
+            error(Base.i18n.string("err.nocore"));
             return false;
         }
 
         if(getCompiler() == null) {
-            error(Translate.w("The sketch cannot be compiled: The compiler for the selected core is not available. Please ensure the compiler is installed using the Plugin Manager.", 80, "\n"));
+            error(Base.i18n.string("err.nocompiler"));
             return false;
         }
 
-        if (!Base.isQuiet()) heading("Compiling...");
+        if (!Base.isQuiet()) heading(Base.i18n.string("msg.compiling"));
 
-        if (!Base.isQuiet()) bullet("Preprocessing...");
+        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.preprocessing"));
         try {
             if(!prepare()) {
-                error(Translate.t("Compile Failed"));
+                error(Base.i18n.string("err.compiling.failed"));
                 setCompilingProgress(0);
                 return false;
             }
@@ -2373,33 +2373,33 @@ public class Sketch {
         ArrayList<File>sketchObjects = compileSketch();
 
         if(sketchObjects == null) {
-            error("Failed compiling sketch");
+            error(Base.i18n.string("err.compiling.failed"));
             return false;
         }
 
-        if (!Base.isQuiet()) bullet("Compiling core...");
+        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.core"));
         setCompilingProgress(20);
 
         if(!compileCore()) {
-            error("Failed compiling core");
+            error(Base.i18n.string("err.compiling.failed"));
             return false;
         }
 
         setCompilingProgress(30);
 
-        if (!Base.isQuiet()) bullet("Compiling libraries...");
+        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.libraries"));
 
         if(!compileLibraries()) {
-            error("Failed compiling libraries");
+            error(Base.i18n.string("err.compiling.failed"));
             return false;
         }
 
         setCompilingProgress(40);
 
-        if (!Base.isQuiet()) bullet("Linking sketch...");
+        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.linking"));
 
         if(!compileLink(sketchObjects)) {
-            error("Failed linking sketch");
+            error(Base.i18n.string("err.compiling.failed"));
             return false;
         }
 
@@ -2415,7 +2415,7 @@ public class Sketch {
             int pct = 50;
 
             for (String type : types) {
-                ctx.bullet2("Generating " + type + " file...");
+                ctx.bullet2(Base.i18n.string("msg.compiling.genfile", type));
                 ctx.executeKey("compile.autogen." + type);
                 pct += steps;
                 setCompilingProgress(pct);
@@ -2460,7 +2460,7 @@ public class Sketch {
         }
 
 
-        if (!Base.isQuiet()) heading("Compiling done.");
+        if (!Base.isQuiet()) heading(Base.i18n.string("msg.compiling.done"));
         setCompilingProgress(100);
 
         if(editor != null) {
@@ -2472,7 +2472,7 @@ public class Sketch {
 
         long endTime = System.currentTimeMillis();
         double compileTime = (double)(endTime - startTime) / 1000d;
-        if (!Base.isQuiet()) bullet("Compilation took " + compileTime + " seconds");
+        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.time", compileTime));
         ctx.executeKey("compile.postcmd");
         return true;
     }
@@ -2481,7 +2481,7 @@ public class Sketch {
         PropertyFile props = ctx.getMerged();
 
         if (props.get("compile.size") != null) {
-            if (!Base.isQuiet()) heading("Memory usage");
+            if (!Base.isQuiet()) heading(Base.i18n.string("msg.compiling.memory"));
 
             ctx.startBuffer();
             ctx.executeKey("compile.size");
@@ -2528,8 +2528,8 @@ public class Sketch {
             ctx.set("size.flash", (textSize + dataSize + rodataSize) + "");
             ctx.set("size.ram", (bssSize + dataSize) + "");
 
-            if (!Base.isQuiet()) bullet("Program size: " + (textSize + dataSize + rodataSize) + " bytes");
-            if (!Base.isQuiet()) bullet("Memory size: " + (bssSize + dataSize) + " bytes");
+            if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.progsize", (textSize + dataSize + rodataSize))); 
+            if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.ramsize", (bssSize + dataSize))); 
         }
         return true;
     }
@@ -2582,7 +2582,7 @@ public class Sketch {
         }
 
         if(recipe == null) {
-            error("Error: I don't know how to compile " + fileName);
+            error(Base.i18n.string("err.badfile", fileName));
             return null;
         }
 
@@ -2863,10 +2863,6 @@ public class Sketch {
             objectPaths.add(objectFile);
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if(Preferences.getBoolean("compiler.verbose_compile")) {
-                    if (!Base.isQuiet()) bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
-                }
-
                 continue;
             }
 
@@ -2931,10 +2927,6 @@ public class Sketch {
             ctx.set("object.name", objectFile.getAbsolutePath());
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                if(Preferences.getBoolean("compiler.verbose_compile")) {
-                    if (!Base.isQuiet()) bullet2("Skipping " + file.getAbsolutePath() + " as not modified.");
-                }
-
                 continue;
             }
 
@@ -3297,7 +3289,7 @@ public class Sketch {
     public boolean programFile(Programmer programmer, String file) {
         Programmer p = getProgrammer();
         if (p == null) {
-            ctx.error("No programmer selected");
+            ctx.error(Base.i18n.string("err.noprogrammer"));
             return false;
         }
         return p.programFile(ctx, file);
@@ -4074,10 +4066,9 @@ public class Sketch {
             String wantedBoard = m.get("sketch.board");
             Board b = Base.getBoard(wantedBoard);
             if (b == null) {
-                ctx.error("This sketch is set to use the board '" + wantedBoard + "' by default, but that board is not installed.");
-                ctx.error("You should manually select the correct board, or use the Plugin Manager to install the " + wantedBoard + " board.");
+                ctx.error(Base.i18n.string("err.badboard", wantedBoard));
             } else {
-                ctx.bullet("Selecting board: " + b);
+                ctx.bullet(Base.i18n.string("msg.selecting.board", b));
                 setBoard(b);
             }
         }
@@ -4086,10 +4077,9 @@ public class Sketch {
             String wantedCore = m.get("sketch.core");
             Core c = Base.getCore(wantedCore);
             if (c == null) {
-                ctx.error("This sketch is set to use the core '" + wantedCore + "' by default, but that core is not installed.");
-                ctx.error("You should manually select the correct core, or use the Plugin Manager to install the " + wantedCore + " core.");
+                ctx.error(Base.i18n.string("err.badcore", wantedCore));
             } else {
-                ctx.bullet("Selecting core: " + c);
+                ctx.bullet(Base.i18n.string("msg.selecting.core", c));
                 setCore(c);
             }
         }
@@ -4098,10 +4088,9 @@ public class Sketch {
             String wantedCompiler = m.get("sketch.compiler");
             Compiler c = Base.getCompiler(wantedCompiler);
             if (c == null) {
-                ctx.error("This sketch is set to use the compiler '" + wantedCompiler + "' by default, but that compiler is not installed.");
-                ctx.error("You should manually select the correct compiler, or use the Plugin Manager to install the " + wantedCompiler + " compiler.");
+                ctx.error(Base.i18n.string("err.badcompiler", wantedCompiler));
             } else {
-                ctx.bullet("Selecting compiler: " + c);
+                ctx.bullet(Base.i18n.string("msg.selecting.compiler", c));
                 setCompiler(c);
             }
         }
@@ -4477,7 +4466,6 @@ public class Sketch {
         long lastMod = sketchConfigFile.lastModified();
         if (lastConfigChange != lastMod) {
             ctx.loadSketchSettings(sketchConfigFile);
-            message("Sketch configuration updated");
             lastConfigChange = lastMod;
             return true;
         }

@@ -59,6 +59,6 @@ public class SourceFileFilter extends javax.swing.filechooser.FileFilter {
     }
 
     public String getDescription() {
-        return Translate.t("Source Files");
+        return Base.i18n.string("filter.source");
     }
 }
