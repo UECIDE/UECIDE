@@ -15,20 +15,3 @@ Description: Family grouping control
  Family grouping control
 Family: pic32
 
-Package: uecide-repositories
-Version: 1.0.6
-Architecture: all
-Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 37
-Homepage: http://uecide.org
-Priority: extra
-Section: extra
-Filename: pool/extra/u/uecide-repositories/uecide-repositories_1.0.6_all.deb
-Size: 3006
-SHA256: 87dff424c06cdf0f7e588aa1da2dfa49e994385d774bd47d82d05466efbd9e68
-SHA1: 5bee315f0d2d4d671e27153741d0acaae056fe4c
-MD5sum: 604b04dee8bbcd94c2e3d0f47057e6da
-Description: Repository List
- The list of available UECIDE repositories
-Family: pic32
-
