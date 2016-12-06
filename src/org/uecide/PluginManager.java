@@ -380,6 +380,10 @@ public class PluginManager implements PropertyChangeListener
 //    }
 
     public void openWindow(Editor ed) {
+        openWindow(ed, false);
+    }
+
+    public void openWindow(Editor ed, boolean doUpdate) {
         editor = ed; 
 
         frame = new JDialog(editor, JDialog.ModalityType.APPLICATION_MODAL);
@@ -651,9 +655,13 @@ public class PluginManager implements PropertyChangeListener
         }
 
         frame.pack();
+        if (doUpdate) {
+            downloadPluginList();
+        }
         frame.setSize(new Dimension(800, 600));
         frame.setLocationRelativeTo(editor);
         frame.setVisible(true);
+
     }
 
     public void askCloseWindow() {
@@ -692,6 +700,7 @@ public class PluginManager implements PropertyChangeListener
         
             @Override
             public Void doInBackground() {
+System.err.println("Downloading plugin list...");
                 apt.update(this);
                 Package p = apt.getPackage("uecide-families");
                 if (p != null) {
@@ -700,6 +709,7 @@ public class PluginManager implements PropertyChangeListener
                     }
                 }
                 updateTree();
+System.err.println("Done.");
                 return null;
             }
 

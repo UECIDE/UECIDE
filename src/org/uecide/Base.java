@@ -788,7 +788,7 @@ public class Base implements AptPercentageListener {
                         null
                     );
                     PluginManager pm = new PluginManager();
-                    pm.openWindow(Editor.editorList.get(0));
+                    pm.openWindow(Editor.editorList.get(0), true);
                 } else if(cores.size() == 0) {
                     showWarning(
                         i18n.string("err.nocores.title"),
@@ -796,7 +796,7 @@ public class Base implements AptPercentageListener {
                         null
                     );
                     PluginManager pm = new PluginManager();
-                    pm.openWindow(Editor.editorList.get(0));
+                    pm.openWindow(Editor.editorList.get(0), true);
                 } else if(compilers.size() == 0) {
                     showWarning(
                         i18n.string("err.nocompilers.title"),
@@ -804,7 +804,7 @@ public class Base implements AptPercentageListener {
                         null
                     );
                     PluginManager pm = new PluginManager();
-                    pm.openWindow(Editor.editorList.get(0));
+                    pm.openWindow(Editor.editorList.get(0), true);
                 }
             }
         }
