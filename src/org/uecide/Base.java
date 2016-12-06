@@ -3259,7 +3259,7 @@ public class Base implements AptPercentageListener {
             File sourcesFile = new File(dbFolder, "sources.db");
             if (!sourcesFile.exists()) {
                 PrintWriter pw = new PrintWriter(sourcesFile);
-                pw.println("deb res://org/uecide/dist uecide boards cores compilers plugins extra libraries");
+                pw.println("deb res://org/uecide/dist uecide boards cores compilers plugins extra libraries uecide main");
                 pw.close();
                 PluginManager pm = new PluginManager();
                 APT apt = pm.getApt();
@@ -3271,11 +3271,11 @@ public class Base implements AptPercentageListener {
                 }
                 apt.save();
 
-                PropertyFile props = new PropertyFile(new File(dbFolder, "repositories.db"));
-                apt.addSource(props.get("master.url"), props.get("master.codename"), pm.getCleanOSName(), props.get("master.sections").split("::"));
-                apt.saveSources();
-                apt.update();
-                apt.save();
+//                PropertyFile props = new PropertyFile(new File(dbFolder, "repositories.db"));
+//                apt.addSource(props.get("master.url"), props.get("master.codename"), pm.getCleanOSName(), props.get("master.sections").split("::"));
+//                apt.saveSources();
+//                apt.update();
+//                apt.save();
             }
 
         } catch (Exception e) {
@@ -3286,7 +3286,6 @@ public class Base implements AptPercentageListener {
 
     public static void setLookAndFeel() {
         String laf = getTheme().getPlatformSpecific("laf");
-System.err.println(laf);
         if(!headless) {
             try {
                 Class<?> plg = lookAndFeels.get(laf); //Preferences.get("theme.window"));

@@ -1,3 +1,17 @@
+uecide (0.8.9-pre5) unstable; urgency=low 
+
+  * Improved console buffering strategy
+  * Released 0.8.9-pre5
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 03 Aug 2016 13:51:36 +0100
+
+uecide (0.8.9-pre4) unstable; urgency=low 
+
+  * Enhanced port command. Added hex file merging
+  * Updated editor
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 18 May 2016 22:51:55 +0100
+
 uecide (0.8.9-pre3) unstable; urgency=low 
 
   * Added script-based tools menu entry support

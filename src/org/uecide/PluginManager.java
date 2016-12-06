@@ -265,119 +265,119 @@ public class PluginManager implements PropertyChangeListener
 
     }
 
-    class RepoEntry extends JPanel {
-        PropertyFile props;
-        String key;
-        JCheckBox enabled;
-        JLabel nameLabel;
-        JTextArea descLabel;
-        JLabel locLabel;
-        JLabel flagLabel;
-
-        RepoEntry(PropertyFile p, String k) {
-            key = k;
-            props = p;
-
-
-            setLayout(new BorderLayout());
-            JPanel inner = new JPanel();
-            inner.setOpaque(false);
-            inner.setLayout(new BorderLayout());
-            inner.setBorder(new EmptyBorder(4, 4, 4, 4));
-
-            enabled = new JCheckBox();
-            add(enabled, BorderLayout.WEST);
-
-            nameLabel = new JLabel(props.get("name"));
-            inner.add(nameLabel, BorderLayout.NORTH);
-
-            if (!props.get("country").equals("NONE")) {
-                flagLabel = new JLabel(props.get("country"));
-                flagLabel.setIcon(Base.getIcon("flags", props.get("country").toLowerCase(), 16));
-                add(flagLabel, BorderLayout.EAST);
-            }
-
-            descLabel = new JTextArea(props.get("description"));
-            descLabel.setLineWrap(true);
-            descLabel.setWrapStyleWord(true);
-            descLabel.setEditable(false);
-            descLabel.setOpaque(false);
-            inner.add(descLabel, BorderLayout.CENTER);
-
-            add(inner, BorderLayout.CENTER);
-
-            Font f = nameLabel.getFont();
-            nameLabel.setFont(new Font(f.getName(), Font.BOLD, f.getSize()));
-
-            setBorder(BorderFactory.createLineBorder(new Color(180, 180, 180), 1));
-
-            enabled.setSelected(apt.hasSource(props.get("url"), props.get("codename")));
-
-            enabled.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (enabled.isSelected()) {
-                        apt.addSource(props.get("url"), props.get("codename"), getCleanOSName(), props.get("sections").split("::"));
-                    } else {
-                        apt.removeSource(props.get("url"), props.get("codename"));
-                    }
-                    apt.saveSources();
-                }
-            });
-        }
-
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            int w = getWidth();
-            int h = getHeight();
-            Color color1 = Base.getTheme().getColor("pluginmanager.shade.top");
-            Color color2 = Base.getTheme().getColor("pluginmanager.shade.bottom");
-            GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
-            g2d.setPaint(gp);
-            g2d.fillRect(0, 0, w, h);
-        }
-
-    }
-
-    public void openRepoManager() {
-        JDialog repoManager = new JDialog(frame, JDialog.ModalityType.APPLICATION_MODAL);
-        repoManager.setTitle("Available Repositories");
-        JPanel repoContainer = new JPanel();
-        repoContainer.setLayout(new BorderLayout());
-
-        JPanel list = new JPanel();
-        list.setLayout(new BoxLayout(list, BoxLayout.PAGE_AXIS));
-
-        JScrollPane sb = new JScrollPane(list,
-            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        repoContainer.add(sb, BorderLayout.CENTER);
-
-        File dd = Base.getDataFolder();
-        File reps = new File(dd, "apt/db/repositories.db");
-        if (!reps.exists()) {
-            Base.copyResourceToFile("/org/uecide/config/repositories.db", reps);
-        }
-
-        PropertyFile props = new PropertyFile(reps);
-
-        for (String key : props.childKeys()) {
-            PropertyFile pf = props.getChildren(key);
-            RepoEntry re = new RepoEntry(pf, key);
-            list.add(re);
-        }
-
-        repoContainer.add(sb, BorderLayout.CENTER);
-        repoManager.add(repoContainer);
-        repoManager.pack();
-        repoManager.setSize(new Dimension(500, 300));
-        repoManager.setLocationRelativeTo(frame);
-        repoManager.setVisible(true);
-    }
+//    class RepoEntry extends JPanel {
+//        PropertyFile props;
+//        String key;
+//        JCheckBox enabled;
+//        JLabel nameLabel;
+//        JTextArea descLabel;
+//        JLabel locLabel;
+//        JLabel flagLabel;
+//
+//        RepoEntry(PropertyFile p, String k) {
+//            key = k;
+//            props = p;
+//
+//
+//            setLayout(new BorderLayout());
+//            JPanel inner = new JPanel();
+//            inner.setOpaque(false);
+//            inner.setLayout(new BorderLayout());
+//            inner.setBorder(new EmptyBorder(4, 4, 4, 4));
+//
+//            enabled = new JCheckBox();
+//            add(enabled, BorderLayout.WEST);
+//
+//            nameLabel = new JLabel(props.get("name"));
+//            inner.add(nameLabel, BorderLayout.NORTH);
+//
+//            if (!props.get("country").equals("NONE")) {
+//                flagLabel = new JLabel(props.get("country"));
+//                flagLabel.setIcon(Base.getIcon("flags", props.get("country").toLowerCase(), 16));
+//                add(flagLabel, BorderLayout.EAST);
+//            }
+//
+//            descLabel = new JTextArea(props.get("description"));
+//            descLabel.setLineWrap(true);
+//            descLabel.setWrapStyleWord(true);
+//            descLabel.setEditable(false);
+//            descLabel.setOpaque(false);
+//            inner.add(descLabel, BorderLayout.CENTER);
+//
+//            add(inner, BorderLayout.CENTER);
+//
+//            Font f = nameLabel.getFont();
+//            nameLabel.setFont(new Font(f.getName(), Font.BOLD, f.getSize()));
+//
+//            setBorder(BorderFactory.createLineBorder(new Color(180, 180, 180), 1));
+//
+//            enabled.setSelected(apt.hasSource(props.get("url"), props.get("codename")));
+//
+//            enabled.addActionListener(new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    if (enabled.isSelected()) {
+//                        apt.addSource(props.get("url"), props.get("codename"), getCleanOSName(), props.get("sections").split("::"));
+//                    } else {
+//                        apt.removeSource(props.get("url"), props.get("codename"));
+//                    }
+//                    apt.saveSources();
+//                }
+//            });
+//        }
+//
+//
+//        @Override
+//        protected void paintComponent(Graphics g) {
+//            super.paintComponent(g);
+//            Graphics2D g2d = (Graphics2D) g;
+//            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+//            int w = getWidth();
+//            int h = getHeight();
+//            Color color1 = Base.getTheme().getColor("pluginmanager.shade.top");
+//            Color color2 = Base.getTheme().getColor("pluginmanager.shade.bottom");
+//            GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+//            g2d.setPaint(gp);
+//            g2d.fillRect(0, 0, w, h);
+//        }
+//
+//    }
+//
+//    public void openRepoManager() {
+//        JDialog repoManager = new JDialog(frame, JDialog.ModalityType.APPLICATION_MODAL);
+//        repoManager.setTitle("Available Repositories");
+//        JPanel repoContainer = new JPanel();
+//        repoContainer.setLayout(new BorderLayout());
+//
+//        JPanel list = new JPanel();
+//        list.setLayout(new BoxLayout(list, BoxLayout.PAGE_AXIS));
+//
+//        JScrollPane sb = new JScrollPane(list,
+//            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+//            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+//
+//        repoContainer.add(sb, BorderLayout.CENTER);
+//
+//        File dd = Base.getDataFolder();
+//        File reps = new File(dd, "apt/db/repositories.db");
+//        if (!reps.exists()) {
+//            Base.copyResourceToFile("/org/uecide/config/repositories.db", reps);
+//        }
+//
+//        PropertyFile props = new PropertyFile(reps);
+//
+//        for (String key : props.childKeys()) {
+//            PropertyFile pf = props.getChildren(key);
+//            RepoEntry re = new RepoEntry(pf, key);
+//            list.add(re);
+//        }
+//
+//        repoContainer.add(sb, BorderLayout.CENTER);
+//        repoManager.add(repoContainer);
+//        repoManager.pack();
+//        repoManager.setSize(new Dimension(500, 300));
+//        repoManager.setLocationRelativeTo(frame);
+//        repoManager.setVisible(true);
+//    }
 
     public void openWindow(Editor ed) {
         editor = ed; 
@@ -396,13 +396,13 @@ public class PluginManager implements PropertyChangeListener
         menuBar.add(fileMenu);
         frame.add(menuBar, BorderLayout.NORTH);
 
-        JMenuItem repoMenu = new JMenuItem("Repositories");
-        fileMenu.add(repoMenu);
-        repoMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openRepoManager();
-            }
-        });
+//        JMenuItem repoMenu = new JMenuItem("Repositories");
+//        fileMenu.add(repoMenu);
+//        repoMenu.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                openRepoManager();
+//            }
+//        });
 
         JMenuItem closeMenu = new JMenuItem("Close");
         fileMenu.add(closeMenu);
@@ -947,15 +947,19 @@ public class PluginManager implements PropertyChangeListener
             sections = new PropertyFile(Base.getDataFile("apt/db/sections.db"));
         } else {
             sections = new PropertyFile();
-            sections.set("plugins", "Plugins");
-            sections.set("boards", "Boards");
-            sections.set("cores", "Cores");
-            sections.set("compilers", "Compilers");
-            sections.set("programmers", "Programmers");
-            sections.set("extra", "System");
-            sections.set("themes", "Themes");
-            sections.set("libraries", "Libraries");
         }
+
+        // Add any missing entries. This whole file could do with being moved to a plugin. That way
+        // it can be updated at will in future without having to add new entries to the code.
+        if (sections.get("plugins") == null) { sections.set("plugins", "Plugins"); }
+        if (sections.get("boards") == null) { sections.set("boards", "Boards"); }
+        if (sections.get("cores") == null) { sections.set("cores", "Cores"); }
+        if (sections.get("compilers") == null) { sections.set("compilers", "Compilers"); }
+        if (sections.get("programmers") == null) { sections.set("programmers", "Programmers"); }
+        if (sections.get("extra") == null) { sections.set("extra", "System"); }
+        if (sections.get("themes") == null) { sections.set("themes", "Themes"); }
+        if (sections.get("libraries") == null) { sections.set("libraries", "Libraries"); }
+        if (sections.get("repos") == null) { sections.set("repos", "Repositories"); }
 
         for (String key : sections.keySet()) {
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(sections.get(key));

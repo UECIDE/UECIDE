@@ -8,7 +8,7 @@ Homepage: http://uecide.org
 
 Package: uecide
 Architecture: all
-Depends: openjdk-7-jdk
+Depends: default-jdk
 Recommends: ${java:Recommends}
 Description: Universal Embedded Computing IDE
  One IDE to rule them all, one IDE to find them.

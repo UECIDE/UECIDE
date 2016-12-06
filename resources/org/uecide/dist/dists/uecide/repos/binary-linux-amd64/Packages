@@ -1,0 +1,17 @@
+Package: repos-master
+Source: repos-core
+Version: 1.0.0
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 11
+Priority: extra
+Section: repos
+Filename: pool/repos/r/repos-core/repos-master_1.0.0_all.deb
+Size: 1182
+SHA256: 804f79416017e2be4ca7c44e45cc109c925f327646ab860cc743c6ffa3f90a31
+SHA1: 27221c41b7ce4e9328e372c12e26bcbb7794427e
+MD5sum: cea4802fa944d419a2a8c21adfa91252
+Description: Master UECIDE Repository
+ This is the main repository for UECIDE plugins etc.
+Group: Core
+

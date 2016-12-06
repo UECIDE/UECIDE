@@ -3220,7 +3220,6 @@ public class Editor extends JFrame {
         PropertyFile pf = loadedSketch.getContext().getMerged();
         PropertyFile tools = pf.getChildren("tool");
         String[] toolsKeys = tools.childKeys();
-        System.err.println(toolsKeys);
         for (String k : toolsKeys) {
             String name = tools.get(k + ".name");
             JMenuItem item = new JMenuItem(name);
