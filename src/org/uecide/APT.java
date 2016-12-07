@@ -121,7 +121,7 @@ public class APT {
 //    }
 
     public void loadSources(File sfile) {
-        sources = new ArrayList<Source>();
+        //sources = new ArrayList<Source>();
         if (!sfile.exists()) {
             return;
         }
@@ -162,6 +162,7 @@ public class APT {
         packagesFolder = new File(dbFolder, "packages");
 
         makeTree();
+        sources = new ArrayList<Source>();
 
         loadSources(new File(dbFolder, "sources.db"));
 
