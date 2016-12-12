@@ -700,7 +700,6 @@ public class PluginManager implements PropertyChangeListener
         
             @Override
             public Void doInBackground() {
-System.err.println("Downloading plugin list...");
                 apt.update(this);
                 Package p = apt.getPackage("uecide-families");
                 if (p != null) {
@@ -709,7 +708,6 @@ System.err.println("Downloading plugin list...");
                     }
                 }
                 updateTree();
-System.err.println("Done.");
                 return null;
             }
 
@@ -920,6 +918,7 @@ System.err.println("Done.");
                     Package[] ssgPacks = filterPackages(sgPacks, "Subsubgroup", subSubGroup);
                     DefaultMutableTreeNode ssgNode = new DefaultMutableTreeNode(subSubGroup);
                     fullNodeCount += addPackagesToNode(ssgPacks, ssgNode);
+                    sgNode.add(ssgNode);
                 }
 
                 Package[] ssgNullPacks = filterPackages(sgPacks, "Subsubgroup", null);
@@ -1140,7 +1139,6 @@ System.err.println("Done.");
                 String reps[] = p.getReplaces();
                 if (reps != null) {
                     for (String rep : reps) {
-    System.err.println("Replace: " + rep);
                         Package rp = apt.getPackage(rep);
                         if (apt.isInstalled(rp)) {
                             apt.uninstallPackage(rp, true);
