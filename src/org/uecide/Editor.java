@@ -2411,10 +2411,11 @@ public class Editor extends JFrame {
     }
 
     public void error(Throwable e) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
-        error(sw.toString());
+        error(e.getMessage());
+//        StringWriter sw = new StringWriter();
+//        PrintWriter pw = new PrintWriter(sw);
+//        e.printStackTrace(pw);
+//        error(sw.toString());
     }
 
 

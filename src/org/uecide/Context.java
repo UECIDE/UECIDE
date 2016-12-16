@@ -60,6 +60,8 @@ public class Context {
 
     StringBuilder buffer = null;
 
+    HashMap<String, String> varcmds = new HashMap<String, String>();
+
     boolean bufferError = false;
 
     PropertyFile settings = null;
@@ -79,6 +81,7 @@ public class Context {
     public Context() {
         settings = new PropertyFile();
         sketchSettings = new PropertyFile();
+        updateSystem();
     }
 
     class ThreadRet extends Thread {
@@ -87,12 +90,12 @@ public class Context {
 
     // At least one of these should be called to configure the context:
 
-    public void setProgrammer(Programmer p) { programmer = p; }
-    public void setBoard(Board b) { board = b; }
-    public void setCore(Core c) { core = c; }
-    public void setCompiler(Compiler c) { compiler = c; }
-    public void setSketch(Sketch s) { sketch = s; }
-    public void setEditor(Editor e) { editor = e; }
+    public void setProgrammer(Programmer p) { programmer = p; updateSystem(); }
+    public void setBoard(Board b) { board = b; updateSystem(); }
+    public void setCore(Core c) { core = c; updateSystem(); }
+    public void setCompiler(Compiler c) { compiler = c; updateSystem(); }
+    public void setSketch(Sketch s) { sketch = s; updateSystem(); }
+    public void setEditor(Editor e) { editor = e; updateSystem(); }
     public void setDevice(CommunicationPort p) { 
         port = p; 
         if (port != null) {
@@ -101,6 +104,39 @@ public class Context {
             set("ip", port.getProgrammingAddress());
         }
 
+    }
+
+    public void loadVarCmdsFromDirectory(File vcdir) {
+        if (vcdir.exists() && vcdir.isDirectory()) {
+            File[] flist = vcdir.listFiles();
+            for (File f : flist) {
+                if (f.getName().endsWith(".jvc")) {
+                    String src = Base.getFileAsString(f);
+                    String fn = f.getName();
+                    fn = fn.substring(0, fn.length() - 4);
+                    varcmds.put(fn, src);
+                }
+            }
+        }
+    }
+
+    public synchronized void updateSystem() {
+        // Load varcmds:
+        varcmds = new HashMap<String, String>();
+        loadVarCmdsFromDirectory(new File(Base.getDataFolder(), "usr/share/uecide/system/vc"));
+
+        if (compiler != null && compiler.get("system.varcmd") != null) {
+            loadVarCmdsFromDirectory(new File(compiler.getFolder(), compiler.get("system.varcmd")));
+        }
+        if (core != null && core.get("system.varcmd") != null) {
+            loadVarCmdsFromDirectory(new File(core.getFolder(), core.get("system.varcmd")));
+        }
+        if (board != null && board.get("system.varcmd") != null) {
+            loadVarCmdsFromDirectory(new File(board.getFolder(), board.get("system.varcmd")));
+        }
+        if (programmer != null && programmer.get("system.varcmd") != null) {
+            loadVarCmdsFromDirectory(new File(programmer.getFolder(), programmer.get("system.varcmd")));
+        }
     }
 
     // Getters for all the above.
@@ -535,6 +571,10 @@ public class Context {
     }
 
     public Object executeJavaScript(String script, String function, Object[] args) {
+        return executeJavaScript(null, script, function, args);
+    }
+
+    public Object executeJavaScript(String filename, String script, String function, Object[] args) {
         if (function == null) {
             return false;
         }
@@ -542,6 +582,9 @@ public class Context {
         try {
             ScriptEngineManager manager = new ScriptEngineManager();
             ScriptEngine engine = manager.getEngineByName("JavaScript");
+            if (filename != null) {
+                engine.put(ScriptEngine.FILENAME, filename);
+            }
 
             if (script == null) { return false; }
             if (script.equals("")) { return false; }
@@ -768,6 +811,21 @@ public class Context {
     }
 
     public String runFunctionVariable(String command, String param) {
+        if (varcmds.get(command) != null) {
+            Object[] pars = {this, param};
+            Object ret = executeJavaScript(command, varcmds.get(command), "main", pars);
+            if (ret instanceof Boolean) {
+                if ((Boolean)ret == false) {
+                    return "ERR";
+                } else {
+                    return "OK";
+                }
+            } else {
+                return (String)ret;
+            }
+        }
+
+
         try {
             Class<?> c = Class.forName("org.uecide.varcmd.vc_" + command);
 

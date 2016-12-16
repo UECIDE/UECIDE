@@ -1,3 +1,24 @@
+Package: core-varcmd
+Version: 1.0.0
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 81
+Homepage: http://uecide.org
+Priority: extra
+Section: extra
+Filename: pool/extra/c/core-varcmd/core-varcmd_1.0.0_all.deb
+Size: 6240
+SHA256: 802a4b1d06a7fd95d9d7a7413cfc193d5b67d3891596438cf9335006452c410d
+SHA1: 5ac589c68f1efa712c4b3a87350e67a96b40b005
+MD5sum: f2428afe21517861d99255667800a1a1
+Description: Core varcmd scriptlets
+ Varcmd scriptlets are used to enhance the ability of the
+ config and control files handling. They are called as the
+ ${cmd:...} format of variables.
+Family: pic32
+Group: System
+Subgroup: Scriptlets
+
 Package: uecide-families
 Version: 1.0.6
 Architecture: all

@@ -270,6 +270,20 @@ public class Base implements AptPercentageListener {
 
         String[] argv = cli.process(args);
 
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                System.err.println(getRequestingURL());
+                Pattern pat = Pattern.compile(":\\/\\/([a-zA-Z0-9]+):([a-zA-Z0-9]+)@");
+                Matcher m = pat.matcher(getRequestingURL().toString());
+                if (m.find()) {
+                    System.err.println("[" + m.group(1) + "][" + m.group(2) + "]");
+                    return new PasswordAuthentication(m.group(1), m.group(2).toCharArray());
+                }
+
+                return null;
+            }
+        });
+
         i18n = new I18N("Core");
 
         if (cli.isSet("help")) {
