@@ -82,8 +82,12 @@ public class Board extends UObject {
         String c = get("core");
 
         if(c == null) {
+            Debug.message("Board has no core");
             return null;
         }
+        Debug.message("Board's core is [" + c + "]");
+        Core cc = Base.cores.get(c);
+        Debug.message("Found base core " + cc);
 
         return Base.cores.get(c);
     }
