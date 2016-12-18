@@ -986,6 +986,23 @@ public class PluginManager implements PropertyChangeListener
             }
         }
 
+        TreeSet<Package> localPkg = new TreeSet<Package>();
+
+        for (Package pkg : apt.getInstalledPackages()) {
+            if (apt.getPackage(pkg.getName()) == null) {
+                localPkg.add(pkg);
+            }
+        }
+
+        if (localPkg.size() > 0) {
+            DefaultMutableTreeNode loc = new DefaultMutableTreeNode("Local Packages");
+            for (Package p : localPkg) {
+                DefaultMutableTreeNode pn = new DefaultMutableTreeNode(p);
+                loc.add(pn);
+            }
+            treeRoot.add(loc);
+        }
+
         treeModel.nodeStructureChanged(treeRoot);
 
         if (fullNodeCount < 5) {
