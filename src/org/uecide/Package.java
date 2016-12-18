@@ -53,7 +53,14 @@ public class Package implements Comparable, Serializable {
         stateCode = c; 
     }
 
+    public Package() {
+    }
+
     public Package(String data) {
+        parseData(data);
+    }
+
+    public void parseData(String data) {
         String[] lines = data.split("\n");
         Pattern p = Pattern.compile("^([^:]+):\\s+(.*)$", Pattern.MULTILINE);
 
@@ -94,28 +101,7 @@ public class Package implements Comparable, Serializable {
     }
 
     public Package(String source, String data) {
-        String[] lines = data.split("\n");
-        Pattern p = Pattern.compile("^([^:]+):\\s+(.*)$", Pattern.MULTILINE);
-
-        String currentLine = "";
-        for (String line : lines) {
-            if (line.startsWith(" ")) {
-                currentLine += "\n";
-                currentLine += line;
-            } else {
-                int colon = currentLine.indexOf(":");
-                if (colon > 0) {
-                    properties.put(currentLine.substring(0, colon), currentLine.substring(colon+2));
-                }
-                currentLine = line;
-            }
-        }
-        if (!currentLine.equals("")) {
-            int colon = currentLine.indexOf(":");
-            if (colon > 0) {
-                properties.put(currentLine.substring(0, colon), currentLine.substring(colon+2));
-            }
-        }
+        parseData(data);
 
         addRepository(source);
 
@@ -313,17 +299,20 @@ System.out.println("Replaces: " + deps);
     // Extract a package and install it. Returns the control file
     // contents as a string.
     public boolean extractPackage(File cache, File db, File root) {
+        return doExtractPackage(new File(cache, getFilename()), db, root);
+    }
+
+    public boolean doExtractPackage(File src, File db, File root) {
         String control = "";
         String md5sums = "";
         HashMap<String, Integer> installedFiles = new HashMap<String, Integer>();
         try {
-            File src = new File(cache, getFilename());
             if (!src.exists()) {
                 System.err.println("Unable to open cache file");
                 return false;
             }
 
-            System.out.println("Extracting " + getFilename());
+            System.out.println("Extracting " + src.getName());
 
             FileInputStream fis = new FileInputStream(src);
             ArArchiveInputStream ar = new ArArchiveInputStream(fis);
@@ -353,6 +342,7 @@ System.out.println("Replaces: " + deps);
                                     dataFileSize = Integer.parseInt(iss) * 1024;
                                 }
                             }
+                            if (!isValid) parseData(control);
                         }
                         if (tname.equals("./md5sums")) {
                             byte[] data = new byte[tsize];

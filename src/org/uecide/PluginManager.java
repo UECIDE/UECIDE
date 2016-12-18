@@ -400,6 +400,14 @@ public class PluginManager implements PropertyChangeListener
         menuBar.add(fileMenu);
         frame.add(menuBar, BorderLayout.NORTH);
 
+        JMenuItem installPackage = new JMenuItem("Install Package...");
+        fileMenu.add(installPackage);
+        installPackage.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                askInstallPackage();
+            }
+        });
+
 //        JMenuItem repoMenu = new JMenuItem("Repositories");
 //        fileMenu.add(repoMenu);
 //        repoMenu.addActionListener(new ActionListener() {
@@ -1196,6 +1204,67 @@ public class PluginManager implements PropertyChangeListener
 
     public APT getApt() {
         return apt;
+    }
+
+    class DebFileFilter extends javax.swing.filechooser.FileFilter {
+        public boolean accept(File f) {
+            if(f.getName().endsWith(".deb")) {
+                return true;
+            }
+
+            if(f.isDirectory()) {
+                return true;
+            }
+
+            return false;
+        }
+
+        public String getDescription() {
+            return Base.i18n.string("filter.deb");
+        }
+    }
+
+    public void askInstallPackage() {
+
+        JFileChooser fc = new JFileChooser();
+
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        javax.swing.filechooser.FileFilter filter = new DebFileFilter();
+        fc.setFileFilter(filter);
+
+        int rv = fc.showOpenDialog(frame);
+        if (rv == JFileChooser.APPROVE_OPTION) {
+            final File f = fc.getSelectedFile();
+            if (f.exists()) {
+                Package p = new Package("");
+                QueueWorker installPackageTask = new QueueWorker() {
+                    @Override
+                    public String getTaskName() { return "Extract " + f.getName(); }
+
+                    @Override
+                    public String getActiveDescription() { return "Extracting"; }
+
+                    @Override
+                    public String getQueuedDescription() { return "Extract pending"; }
+
+                    @Override
+                    public Void doInBackground() {
+                        Package p = new Package();
+                        p.attachPercentageListener(this);
+                        p.doExtractPackage(f, Base.getDataFile("apt/db/packages"), Base.getDataFolder());
+                        return null;
+                    }
+
+                    @Override
+                    public void done() {
+                    }
+                };
+
+                queue.addTask(installPackageTask);
+
+            }
+        }
     }
 
 }

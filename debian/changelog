@@ -1,3 +1,19 @@
+uecide (0.8.9-pre6) unstable; urgency=low 
+
+  * Added internationalization support
+  * Fixed ant-contrib inclusion
+  * Added more I18N entries
+  * Reinstated basic Translate for existing plugins
+  * Added multi-repo file system
+  * Updated serial terminal
+  * Included master repo package
+  * Removed redundant uecide-repositories package from internal repo
+  * Updated families package
+  * Fixed multiple-source overwrite bug
+  * Released pre6
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Aug 2016 13:52:41 +0100
+
 uecide (0.8.9-pre5) unstable; urgency=low 
 
   * Improved console buffering strategy
