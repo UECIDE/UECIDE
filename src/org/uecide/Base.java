@@ -793,6 +793,18 @@ public class Base implements AptPercentageListener {
             if(!headless) splashScreen.setMessage(i18n.string("splash.msg.complete"), 100);
             splashScreen.dispose();
 
+            if (preferences.get("changelog.hide") != null) {
+                Version vhidden = new Version(preferences.get("changelog.hide"));
+                if (systemVersion.compareTo(vhidden) > 0) {
+System.err.println("Showing changelog as there is a new version");
+                    Changelog c = new Changelog(Editor.editorList.get(0));
+                }
+            } else {
+System.err.println("Showing changelog as I don't know better");
+                Changelog c = new Changelog(Editor.editorList.get(0));
+            }
+
+
             synchronized (Editor.editorList) {
                 if(boards.size() == 0) {
 
@@ -899,6 +911,7 @@ public class Base implements AptPercentageListener {
             if(e == null) {
                 return false;
             }
+
 
             s = e.getSketch();
         } else {
