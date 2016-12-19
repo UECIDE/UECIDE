@@ -1,0 +1,17 @@
+#!/bin/bash
+TAGS=$(git tag -l --sort=-v:refname)
+CTAG=""
+echo "<h1>Changelog</h1>" 
+echo 
+for TAG in $TAGS; do
+    echo "<h2>$CTAG</h2>" 
+    echo 
+    echo "<ul>" 
+    git log $CTAG...$TAG --oneline --pretty=format:"<li>%s</li>" --date=short 
+    echo 
+    echo "<ul>" 
+    echo 
+    CTAG=$TAG
+done
+
+

@@ -28,7 +28,11 @@
         </delete>
     </target>
 
-    <target name="compile" description="Compile" depends="git_contributors">
+    <target name="changelog">
+        <exec output="resources/org/uecide/changelog.html" executable="./mklog"/>
+    </target>
+
+    <target name="compile" description="Compile" depends="git_contributors,changelog">
         <mkdir dir="bin" />
         <path id="class.path">
             <fileset dir="lib">

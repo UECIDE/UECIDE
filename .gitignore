@@ -12,7 +12,5 @@ debian/uecide.substvars
 debian/uecide/
 documentation/
 thirdparty
-thirdparty
-thirdparty
-thirdparty
 uecide.jar
+resources/org/uecide/changelog.html
