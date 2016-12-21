@@ -587,6 +587,22 @@ public class PluginManager implements PropertyChangeListener
                         Base.showMessage("Uninstall Error", pe.getName() + " is a required component.\nIt cannot be uninstalled.");
                     } else {
                         if (apt.isInstalled(pe)) {
+
+                            Package[] deps = apt.getDependants(pe);
+                            if (deps.length > 0) {
+                                String o = pe.getName() + " is required by:\n";
+                                for (Package dep : deps) {
+                                    o += "    " + dep.getName() + "\n";
+                                }
+                                o += "Uninstalling will remove these packages as well.\nAre you sure you want to uninstall " + pe.getName() + "?";
+
+                                Object[] options = {"Yes", "No"};
+
+
+                                if (JOptionPane.showOptionDialog(frame, o, "Dependant Package", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]) == 1) {
+                                    return;
+                                }
+                            } 
                             startUninstall(pe);
                         }
                     }
@@ -1111,6 +1127,12 @@ public class PluginManager implements PropertyChangeListener
             public Void doInBackground() {
                 Package p = (Package)getUserObject();
                 p.attachPercentageListener(this);
+                Package[] deps = apt.getDependants(p);
+                if (deps.length > 0) {
+                    for (Package dep : deps) {
+                        apt.uninstallPackage(dep, false);
+                    }
+                }
                 String ret = apt.uninstallPackage(p, false);
                 p.detachPercentageListener();
                 if (ret != null) {
