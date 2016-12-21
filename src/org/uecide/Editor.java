@@ -3313,7 +3313,9 @@ public class Editor extends JFrame {
                 JMenuItem item = new JRadioButtonMenuItem(optvals.get(key));
                 thisGroup.add(item);
                 item.setActionCommand(opt + "=" + key);
-                item.setSelected(loadedSketch.getOption(opt).equals(key));
+                if (loadedSketch.getOption(opt) != null) {
+                    item.setSelected(loadedSketch.getOption(opt).equals(key));
+                }
                 item.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         String data = e.getActionCommand();
