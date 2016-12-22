@@ -1,16 +1,16 @@
 Package: core-varcmd
-Version: 1.0.1
+Version: 1.0.2
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
 Installed-Size: 81
 Homepage: http://uecide.org
 Priority: extra
 Section: extra
-Filename: pool/extra/c/core-varcmd/core-varcmd_1.0.1_all.deb
-Size: 6322
-SHA256: 373d55d0aa5a25e7a005f4294d80212ea6123e6925320b8829ee55d844107ce7
-SHA1: 9fa49a97713d46683dbe04a0fc1af404ec5286b1
-MD5sum: 7cf6a5f1fb9aec2758a907a1b770a299
+Filename: pool/extra/c/core-varcmd/core-varcmd_1.0.2_all.deb
+Size: 6346
+SHA256: cf20d68aa21894a93fe718444ecd4334d243464325409629ac81a6f9b0007cbb
+SHA1: 87f48628d75422f8104543ef9fab754516245ecf
+MD5sum: 9469d621675d7253122736b3229df2c0
 Description: Core varcmd scriptlets
  Varcmd scriptlets are used to enhance the ability of the
  config and control files handling. They are called as the
