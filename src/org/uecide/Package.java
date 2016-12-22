@@ -463,7 +463,11 @@ System.out.println("Replaces: " + deps);
                 String tgt = symbolicLinks.get(link);
                 File linkFile = new File(root, link);
                 File linkParent = linkFile.getParentFile();
-                File tgtFile = new File(linkParent, tgt);
+                File troot = root;
+                if (!tgt.startsWith("./")) {
+                    troot = linkParent;
+                }
+                File tgtFile = new File(troot, tgt); //linkParent, tgt);
                 FileInputStream copyFrom = new FileInputStream(tgtFile);
                 FileOutputStream copyTo = new FileOutputStream(linkFile);
                 byte[] copyBuffer = new byte[1024];
