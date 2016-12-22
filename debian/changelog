@@ -1,3 +1,28 @@
+uecide (0.8.9-pre7) unstable; urgency=low 
+
+  * Added missing sub-sub-group nodes to plugin manager tree
+  * Converted varcmds to javascript scriptlets
+  * Added manual package installation option
+  * Improved board no-core event debugging
+  * Display locally installed packages in tree
+  * Added updated VS files
+  * Added some files to gitignore for tidiness
+  * Added changelog generation
+  * Added changelog window
+  * Updated RSyntaxTextArea
+  * Updated jmDNS
+  * Added slf4j api
+  * Added NOP logger
+  * Added recursive uninstall of packages and updated varcmd package
+  * Fixed null pointer with no default option in sketch.cfg
+  * Fixed package file link dereferencing without full path
+  * Added download file integrity check
+  * Added CR for console line clearing
+  * Updated varcmd package
+  * Released 0.8.9-pre7
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 07 Dec 2016 11:28:45 +0000
+
 uecide (0.8.9-pre6) unstable; urgency=low 
 
   * Added internationalization support

@@ -239,8 +239,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="tmp" />
         <mkdir dir="windows" /> 
-        <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
-        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
+        <!--get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
+        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-7-windows.zip" overwrite="false"/-->
+        <get src="http://uecide.org/supportfiles/jre-8-windows.zip" dest="tmp/jre-8-windows.zip" usetimestamp="true" />
+        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-8-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
         <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" />
         <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
@@ -277,8 +279,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
     <target name="windows-exe-full" depends="build">
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
-        <get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
-        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-7-windows.zip" overwrite="false"/>
+        <!--get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
+        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-7-windows.zip" overwrite="false"/-->
+        <get src="http://uecide.org/supportfiles/jre-8-windows.zip" dest="tmp/jre-8-windows.zip" usetimestamp="true" />
+        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-8-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
         <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" />
         <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
