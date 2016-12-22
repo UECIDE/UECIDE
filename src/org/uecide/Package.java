@@ -35,6 +35,8 @@ import java.util.regex.*;
 import java.io.*;
 import java.net.*;
 
+import java.security.MessageDigest;
+
 import org.apache.commons.compress.archivers.ar.*;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.compress.compressors.gzip.*;
@@ -228,72 +230,126 @@ System.out.println("Replaces: " + deps);
         }
     }
 
-    public boolean fetchPackage(File folder) {
-        File downloadTo = new File(folder, getFilename());
-        String[] repos = properties.get("Repository").split(";");
-        shuffleArray(repos);
-        int contentLength = -1;
-        for (String repo : repos) {
-            try {
-                InputStream in = null;
-                if (repo.startsWith("http://") || repo.startsWith("https://")) {
-                    URI uri = new URI(repo + "/" + properties.get("Filename"));
-                    URL downloadFrom = uri.toURL();
-                    System.out.println("Fetching " + downloadFrom);
-                    HttpURLConnection httpConn = (HttpURLConnection) downloadFrom.openConnection();
-                    contentLength = httpConn.getContentLength();
+    public boolean checkFileIntegrity(File cacheFolder) {
+        File downloadTo = new File(cacheFolder, getFilename());
 
-                    if (downloadTo.exists()) {
-                        if (downloadTo.length() == contentLength) {
+        // First off do some lightweight checks. If these fail the SHA check is bound to fail so
+        // why bother trugding through that when we can catch a failure quickly with this?
+        if (!downloadTo.exists()) {
+            return false;
+        }
+
+        long size = 0;
+        try {
+            size = Integer.parseInt(properties.get("Size"));
+        } catch (Exception ignored) {
+        }
+
+        if (downloadTo.length() != size) {
+            return false;
+        }
+
+        String existingSha = properties.get("SHA256");
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            FileInputStream fis = new FileInputStream(downloadTo);
+
+            byte[] dataBytes = new byte[1024];
+
+            int nread = 0;
+            while ((nread = fis.read(dataBytes)) != -1) {
+                md.update(dataBytes, 0, nread);
+            };
+            byte[] mdbytes = md.digest();
+
+            StringBuffer hexString = new StringBuffer();
+            for (int i=0;i<mdbytes.length;i++) {
+              hexString.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+
+            }
+
+            if (!hexString.toString().equals(existingSha)) {
+                return false;
+            }
+        } catch (Exception ignored) {
+        }
+        return true;
+    }
+
+    public boolean fetchPackage(File folder) {
+        if (!checkFileIntegrity(folder)) {
+            File downloadTo = new File(folder, getFilename());
+            if (downloadTo.exists()) {
+                downloadTo.delete();
+            }
+            String[] repos = properties.get("Repository").split(";");
+            shuffleArray(repos);
+            int contentLength = -1;
+            for (String repo : repos) {
+                try {
+                    InputStream in = null;
+                    if (repo.startsWith("http://") || repo.startsWith("https://")) {
+                        URI uri = new URI(repo + "/" + properties.get("Filename"));
+                        URL downloadFrom = uri.toURL();
+                        System.out.println("Fetching " + downloadFrom);
+                        HttpURLConnection httpConn = (HttpURLConnection) downloadFrom.openConnection();
+                        contentLength = httpConn.getContentLength();
+
+                        if (checkFileIntegrity(folder)) {
                             return true;
                         }
-                    }
-                    in = httpConn.getInputStream();
-                } else if (repo.startsWith("res://")) {
-                    String reps = repo.substring(6);
-                    if (!reps.startsWith("/")) {
-                        reps = "/" + reps;
-                    }
-                    in = Base.class.getResourceAsStream(reps + "/" + properties.get("Filename"));
-                    if (in == null) {
-                        System.err.println("Error: Resource not found: " + reps + "/" + properties.get("Filename"));
+                        in = httpConn.getInputStream();
+                    } else if (repo.startsWith("res://")) {
+                        String reps = repo.substring(6);
+                        if (!reps.startsWith("/")) {
+                            reps = "/" + reps;
+                        }
+                        in = Base.class.getResourceAsStream(reps + "/" + properties.get("Filename"));
+                        if (in == null) {
+                            System.err.println("Error: Resource not found: " + reps + "/" + properties.get("Filename"));
+                            return false;
+                        }
+                    } else if (repo.startsWith("file://")) {
+                        return false;
+                    } else {
+                        System.err.println("Error: No URI handler for " + repo);
                         return false;
                     }
-                } else if (repo.startsWith("file://")) {
-                    return false;
-                } else {
-                    System.err.println("Error: No URI handler for " + repo);
-                    return false;
-                }
 
-                BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(downloadTo));
+                    BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(downloadTo));
 
-                byte[] buffer = new byte[1024];
-                int n;
-                long tot = 0;
-                int lastVal = -1;
-                while ((n = in.read(buffer)) > 0) {
-                    tot += n;
-                    if (contentLength != -1) {
-                        int tpct = (int)((tot * 100) / contentLength);
-                        if (tpct != lastVal) {
-                            lastVal = tpct;
-                            reportPercentage(tpct);
+                    byte[] buffer = new byte[1024];
+                    int n;
+                    long tot = 0;
+                    int lastVal = -1;
+                    while ((n = in.read(buffer)) > 0) {
+                        tot += n;
+                        if (contentLength != -1) {
+                            int tpct = (int)((tot * 100) / contentLength);
+                            if (tpct != lastVal) {
+                                lastVal = tpct;
+                                reportPercentage(tpct);
+                            }
                         }
+                        out.write(buffer, 0, n);
                     }
-                    out.write(buffer, 0, n);
-                }
-                in.close();
-                out.close();
-                return true;
-            } catch (Exception e) {
-//                e.printStackTrace();
-                if (downloadTo.exists()) {
-                    downloadTo.delete();
+                    in.close();
+                    out.close();
+                    if (checkFileIntegrity(folder)) {
+                        return true;
+                    }
+                } catch (Exception e) {
+    //                e.printStackTrace();
+                    if (downloadTo.exists()) {
+                        downloadTo.delete();
+                    }
                 }
             }
+            return false;
+        } else {
+            return true;
         }
-        return false;
     }
 
     // Extract a package and install it. Returns the control file
