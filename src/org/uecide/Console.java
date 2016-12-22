@@ -326,6 +326,10 @@ public class Console extends JTextPane implements ClipboardOwner {
             for (String c : chars) {
                 if (c.equals("\010")) {
                     document.remove(document.getEndPosition().getOffset()-2, 1);
+                } else if (c.equals("\r")) {
+                    String content = document.getText(0, document.getLength());
+                    int lastLineBreak = content.lastIndexOf('\n') + 1;
+                    document.remove(lastLineBreak, document.getLength() - lastLineBreak); 
                 } else {
                     document.appendString(c, type);
                 }
