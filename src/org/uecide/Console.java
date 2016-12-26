@@ -75,6 +75,8 @@ public class Console extends JTextPane implements ClipboardOwner {
     BufferedImage bottomMiddle = null;
     BufferedImage bottomRight = null;
 
+    boolean couldEraseLine = false;
+
     private final static String LINK_ATTRIBUTE = "linkact";
 
     Editor urlClickListener = null;
@@ -326,13 +328,19 @@ public class Console extends JTextPane implements ClipboardOwner {
             for (String c : chars) {
                 if (c.equals("\010")) {
                     document.remove(document.getEndPosition().getOffset()-2, 1);
-                } else if (c.equals("\r")) {
+                    continue;
+                } 
+                if (c.equals("\r")) {
+                    couldEraseLine = true;
+                    continue;
+                }
+                if (!c.equals("\n") && couldEraseLine) {
                     String content = document.getText(0, document.getLength());
                     int lastLineBreak = content.lastIndexOf('\n') + 1;
                     document.remove(lastLineBreak, document.getLength() - lastLineBreak); 
-                } else {
-                    document.appendString(c, type);
                 }
+                document.appendString(c, type);
+                couldEraseLine = false;
             }
             document.insertAll();
             setCaretPosition(document.getLength());
