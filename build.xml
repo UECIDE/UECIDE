@@ -223,19 +223,21 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
 
     </target>
 
-    <target name="windows-zip-lite" depends="build">
+    <target name="windows-zip-lite" depends="build,uecide.exe,uecide-cli.exe">
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
         <copy file="dist/windows/dist/debug.bat" todir="bundle/windows/uecide-${Version}/" />
-        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
+        <!--copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" /-->
+        <copy file="uecide.exe" todir="bundle/windows/uecide-${Version}/" />
+        <copy file="uecide-cli.exe" todir="bundle/windows/uecide-${Version}/" />
         <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${Version}" />
         <zip file="uecide-${Version}-windows-lite.zip" basedir="bundle/windows/" />
         <delete dir="windows" />
         <delete dir="bundle/windows" />
     </target>
 
-    <target name="windows-zip-full" depends="build">
+    <target name="windows-zip-full" depends="build,uecide.exe,uecide-cli.exe">
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="tmp" />
         <mkdir dir="windows" /> 
@@ -244,8 +246,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <get src="http://uecide.org/supportfiles/jre-8-windows.zip" dest="tmp/jre-8-windows.zip" usetimestamp="true" />
         <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-8-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" />
-        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
+        <!--copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" /-->
+        <!--copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" /-->
+        <copy file="uecide.exe" todir="bundle/windows/uecide-${Version}/" />
+        <copy file="uecide-cli.exe" todir="bundle/windows/uecide-${Version}/" />
         <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${Version}" />
         <zip file="uecide-${Version}-windows-full.zip" basedir="bundle/windows/" />
         <delete dir="windows" />
@@ -256,8 +260,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" />
-        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
+        <!--copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" /-->
+        <!--copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" /-->
+        <copy file="uecide.exe" todir="bundle/windows/uecide-${Version}/" />
+        <copy file="uecide-cli.exe" todir="bundle/windows/uecide-${Version}/" />
         <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${Version}" />
         <copy todir="bundle/windows" file="dist/windows/script.nsi" />
         <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${Version}" />
@@ -284,8 +290,10 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <get src="http://uecide.org/supportfiles/jre-8-windows.zip" dest="tmp/jre-8-windows.zip" usetimestamp="true" />
         <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-8-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
-        <copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" />
-        <copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" />
+        <!--copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" /-->
+        <!--copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" /-->
+        <copy file="uecide.exe" todir="bundle/windows/uecide-${Version}/" />
+        <copy file="uecide-cli.exe" todir="bundle/windows/uecide-${Version}/" />
         <copy file="dist/windows/UECIDE.ico" todir="bundle/windows/uecide-${Version}" />
         <copy todir="bundle/windows" file="dist/windows/script.nsi" />
         <replace file="bundle/windows/script.nsi" token="%VERSION%" value="${Version}" />
@@ -345,6 +353,19 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <arg value="push" />
             <arg value="--tags" />
         </exec>
+    </target>
+
+    <target name="uecide.exe">
+        <copy file="UECIDE-l4j-std.xml" tofile="UECIDE-l4j-gui.xml" />
+        <replace file="UECIDE-l4j-gui.xml" token="{version}" value="${Version}" />
+        <replace file="UECIDE-l4j-gui.xml" token="{header}" value="gui" />
+        <launch4j configFile="UECIDE-l4j-gui.xml" outfile="uecide.exe" />
+    </target>
+    <target name="uecide-cli.exe">
+        <copy file="UECIDE-l4j-std.xml" tofile="UECIDE-l4j-cli.xml" />
+        <replace file="UECIDE-l4j-cli.xml" token="{version}" value="${Version}" />
+        <replace file="UECIDE-l4j-cli.xml" token="{header}" value="console" />
+        <launch4j configFile="UECIDE-l4j-cli.xml" outfile="uecide-cli.exe" />
     </target>
 
     <target name="bundle" depends="build">
