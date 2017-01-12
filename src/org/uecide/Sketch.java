@@ -2424,10 +2424,13 @@ public class Sketch {
 
         if(Preferences.getBoolean("compiler.save_lss") && !parentIsProtected()) {
             try {
-                Base.copyFile(new File(buildFolder, sketchName + ".lss"), new File(sketchFolder, sketchName + ".lss"));
+                File lss = new File(buildFolder, sketchName + ".lss");
+                if (lss.exists()) {
+                    Base.copyFile(new File(buildFolder, sketchName + ".lss"), new File(sketchFolder, sketchName + ".lss"));
 
-                if(editor != null) {
-                    editor.updateFilesTree();
+                    if(editor != null) {
+                        editor.updateFilesTree();
+                    }
                 }
             } catch(Exception e) {
                 error(e);
@@ -4474,6 +4477,14 @@ public class Sketch {
 
     public Editor getEditor() { 
         return editor;
+    }
+
+    public void outputErrorStream(String msg) {
+        System.err.print(msg);
+    }
+   
+    public void outputMessageStream(String msg) {
+        System.out.print(msg);
     }
 
 }

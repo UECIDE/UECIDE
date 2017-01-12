@@ -2320,6 +2320,14 @@ public class Editor extends JFrame {
         output.append(msg, Console.COMMAND);
     }
 
+    public void outputMessageStream(String msg) {
+        output.append(msg, Console.BODY);
+    }
+
+    public void outputErrorStream(String msg) {
+        output.append(msg, Console.ERROR);
+    }
+
     public void heading(String msg) {
         Debug.message(msg);
 

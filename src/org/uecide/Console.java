@@ -53,6 +53,15 @@ public class Console extends JTextPane implements ClipboardOwner {
     MutableAttributeSet bullet3 = new SimpleAttributeSet();
     MutableAttributeSet link = new SimpleAttributeSet();
 
+    MutableAttributeSet fgBlack = new SimpleAttributeSet();
+    MutableAttributeSet fgRed = new SimpleAttributeSet();
+    MutableAttributeSet fgGreen = new SimpleAttributeSet();
+    MutableAttributeSet fgYellow = new SimpleAttributeSet();
+    MutableAttributeSet fgBlue = new SimpleAttributeSet();
+    MutableAttributeSet fgMagenta = new SimpleAttributeSet();
+    MutableAttributeSet fgCyan = new SimpleAttributeSet();
+    MutableAttributeSet fgWhite = new SimpleAttributeSet();
+
     public final static int BODY = 1;
     public final static int WARNING = 2;
     public final static int ERROR = 3;
@@ -62,6 +71,15 @@ public class Console extends JTextPane implements ClipboardOwner {
     public final static int LINK = 7;
     public final static int BULLET2 = 8;
     public final static int BULLET3 = 9;
+
+    public final static int BLACK   = 1000;
+    public final static int RED     = 1001;
+    public final static int GREEN   = 1002;
+    public final static int YELLOW  = 1003;
+    public final static int BLUE    = 1004;
+    public final static int MAGENTA = 1005;
+    public final static int CYAN    = 1006;
+    public final static int WHITE   = 1007;
 
     BufferedStyledDocument document;
 
@@ -246,6 +264,15 @@ public class Console extends JTextPane implements ClipboardOwner {
         setStyle(bullet3, "bullet3");
         setStyle(link, "link");
 
+        StyleConstants.setForeground(fgBlack,   new Color(0, 0, 0));
+        StyleConstants.setForeground(fgRed,     new Color(255, 0, 0));
+        StyleConstants.setForeground(fgGreen,   new Color(0, 255, 0));
+        StyleConstants.setForeground(fgYellow,  new Color(255, 255, 0));
+        StyleConstants.setForeground(fgBlue,    new Color(0, 0, 255));
+        StyleConstants.setForeground(fgMagenta, new Color(255, 0, 255));
+        StyleConstants.setForeground(fgCyan,    new Color(0, 255, 255));
+        StyleConstants.setForeground(fgWhite,   new Color(255, 255, 255));
+
         setBackground(new Color(1,1,1, (float) 0.01));
 //        setBackground(Base.getTheme().getColor("console.color"));
 
@@ -335,9 +362,7 @@ public class Console extends JTextPane implements ClipboardOwner {
                     continue;
                 }
                 if (!c.equals("\n") && couldEraseLine) {
-                    String content = document.getText(0, document.getLength());
-                    int lastLineBreak = content.lastIndexOf('\n') + 1;
-                    document.remove(lastLineBreak, document.getLength() - lastLineBreak); 
+                    removeLastLine();
                 }
                 document.appendString(c, type);
                 couldEraseLine = false;
@@ -346,6 +371,15 @@ public class Console extends JTextPane implements ClipboardOwner {
             setCaretPosition(document.getLength());
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void removeLastLine() {
+        try {
+            String content = document.getText(0, document.getLength());
+            int lastLineBreak = content.lastIndexOf('\n') + 1;
+            document.remove(lastLineBreak, document.getLength() - lastLineBreak); 
+        } catch (Exception ignored) {
         }
     }
 
@@ -382,6 +416,22 @@ public class Console extends JTextPane implements ClipboardOwner {
             String[] chunks = message.split("\\|");
             link.addAttribute(LINK_ATTRIBUTE, new URLLinkAction(chunks[0]));
             doAppendString(chunks[1], link);
+        } else if (type == BLACK) {
+            doAppendString(message, fgBlack);
+        } else if (type == RED) {
+            doAppendString(message, fgRed);
+        } else if (type == GREEN) {
+            doAppendString(message, fgGreen);
+        } else if (type == YELLOW) {
+            doAppendString(message, fgYellow);
+        } else if (type == BLUE) {
+            doAppendString(message, fgBlue);
+        } else if (type == MAGENTA) {
+            doAppendString(message, fgMagenta);
+        } else if (type == CYAN) {
+            doAppendString(message, fgCyan);
+        } else if (type == WHITE) {
+            doAppendString(message, fgWhite);
         }
     }
 
