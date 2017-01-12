@@ -408,6 +408,14 @@ public class PluginManager implements PropertyChangeListener
             }
         });
 
+        JMenuItem analysePackage = new JMenuItem("Analyse Packages");
+        fileMenu.add(analysePackage);
+        analysePackage.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                analyseAllPackages();
+            }
+        });
+
 //        JMenuItem repoMenu = new JMenuItem("Repositories");
 //        fileMenu.add(repoMenu);
 //        repoMenu.addActionListener(new ActionListener() {
@@ -1306,4 +1314,8 @@ public class PluginManager implements PropertyChangeListener
         }
     }
 
+    public void analyseAllPackages() {
+        PackageAnalyser pa = new PackageAnalyser();
+        pa.openWindow(frame);
+    }
 }

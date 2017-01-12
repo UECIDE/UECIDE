@@ -269,7 +269,7 @@ System.out.println("Replaces: " + deps);
 
             }
 
-            if (!hexString.toString().equals(existingSha)) {
+            if (!hexString.toString().equalsIgnoreCase(existingSha)) {
                 return false;
             }
         } catch (Exception ignored) {
