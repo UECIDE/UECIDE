@@ -1051,13 +1051,13 @@ public class Context {
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-                    rawMessageStream(inch);
 
                     if (parser != null) {
                         if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
                             outline += inch;
                         }
                         if (inch.equals("\n")) {
+                            rawMessageStream(outline);
                             outline = parser.parseStreamMessage(this, outline);
                             outline = parser.parseStreamError(this, outline);
                             if (buffer != null) {
@@ -1082,12 +1082,12 @@ public class Context {
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-                    rawErrorStream(inch);
                     if (parser != null) {
                         if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
                             errline += inch;
                         }
                         if (inch.equals("\n")) {
+                            rawErrorStream(errline);
                             errline = parser.parseStreamMessage(this, errline);
                             errline = parser.parseStreamError(this, errline);
                             if (buffer != null) {
@@ -1120,13 +1120,13 @@ public class Context {
                 if(i < 0)break;
                 
                 String inch = new String(tmp, 0, i);
-                rawMessageStream(inch);
                 if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
                     outline += inch;
                 }
 
                 if (inch.equals("\n")) {
                     if (parser != null) {
+                        rawMessageStream(outline);
                         outline = parser.parseStreamMessage(this, outline);
                         outline = parser.parseStreamError(this, outline);
                     }
@@ -1141,6 +1141,7 @@ public class Context {
 
             if (!outline.equals("")) {
                 if (parser != null) {
+                    rawMessageStream(outline);
                     outline = parser.parseStreamMessage(this, outline);
                     outline = parser.parseStreamError(this, outline);
                 }
@@ -1157,13 +1158,13 @@ public class Context {
                 if(i < 0)break;
                 
                 String inch = new String(tmp, 0, i);
-                rawErrorStream(inch);
                 if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
                     errline += inch;
                 }
 
                 if (inch.equals("\n")) {
                     if (parser != null) {
+                        rawErrorStream(errline);
                         errline = parser.parseStreamMessage(this, errline);
                         errline = parser.parseStreamError(this, errline);
                     }
@@ -1182,6 +1183,7 @@ public class Context {
 
             if (!errline.equals("")) {
                 if (parser != null) {
+                    rawErrorStream(errline);
                     errline = parser.parseStreamMessage(this, errline);
                     errline = parser.parseStreamError(this, errline);
                 }
