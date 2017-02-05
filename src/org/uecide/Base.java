@@ -90,6 +90,8 @@ public class Base implements AptPercentageListener {
 
     public static ArrayList<Process> processes = new ArrayList<Process>();
 
+    public static HashMap<String, JSPlugin> jsplugins;
+
     static Platform platform;
 
     static private boolean headless;
@@ -878,6 +880,28 @@ System.err.println("Showing changelog as I don't know better");
             } catch (IllegalAccessException ex) {
             } catch (InvocationTargetException ex) {
             }
+        }
+    }
+
+    public static void addJarFile(File f) {
+        try {
+            File find = f;
+            if (!find.exists()) {
+                File[] pfs = getPluginsFolders();
+                for (File pf : pfs) {
+                    find = new File(pf, f.getPath());
+                    if (find.exists()) {
+                        break;
+                    }
+                }
+            }
+            if (!find.exists()) {
+                error("File not found: " + f);
+                return;
+            }
+            Base.addURL(f.toURI().toURL());
+        } catch (Exception e) {
+            error(e);
         }
     }
     
@@ -2079,6 +2103,8 @@ System.err.println("Showing changelog as I don't know better");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        loadJSPlugins();
     }
 
     public static Version getPluginVersion(String plugin) {
@@ -2292,9 +2318,6 @@ System.err.println("Showing changelog as I don't know better");
             return;
         }
         try {
-            if (Preferences.getBoolean("editor.dialog.crash") == true) {
-                CrashReporter rep = new CrashReporter(e);
-            }
             e.printStackTrace();
             if(e.getCause() == null) {
                 return;
@@ -3344,5 +3367,40 @@ System.err.println("Showing changelog as I don't know better");
             }
         }
         return Locale.getDefault();
+    }
+
+    public static void loadJSPlugins() {
+        jsplugins = new HashMap<String, JSPlugin>();
+
+        File[] pfs = getPluginsFolders();
+        for (File pf : pfs) {
+            loadJSPluginsFromFolder(pf);
+        }
+
+        for (JSPlugin p : jsplugins.values()) {
+            p.onBoot();
+        }
+    }
+
+    public static void loadJSPluginsFromFolder(File f) {
+        if (!f.exists()) return;
+        if (!f.isDirectory()) return;
+        File[] files = f.listFiles();
+        for (File file : files) {
+            if (file.getName().endsWith(".jpl")) {
+                Debug.message("Loading javascript plugin " + file.getAbsolutePath());
+                JSPlugin p = new JSPlugin(file);
+                JSPlugin op = jsplugins.get(file.getName());
+                if (op != null) {
+                    Version vold = new Version(op.getVersion());
+                    Version vnew = new Version(p.getVersion());
+                    if (vold.compareTo(vnew) < 0) {
+                        jsplugins.put(file.getName(), p);
+                    }
+                } else {
+                    jsplugins.put(file.getName(), p);
+                }
+            }
+        }
     }
 }

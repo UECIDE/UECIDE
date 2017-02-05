@@ -1,3 +1,13 @@
+uecide (0.8.9-pre8) unstable; urgency=low 
+
+  * Upgraded windows FULL bundles to JRE 8
+  * Only erase lines from console if the character following a CR is *not* an NL
+  * Switched to dual launch4j launchers in Windows
+  * Updated JSch to 0.1.54
+  * Released 0.8.9-pre8
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Thu, 22 Dec 2016 19:12:12 +0000
+
 uecide (0.8.9-pre7) unstable; urgency=low 
 
   * Added missing sub-sub-group nodes to plugin manager tree

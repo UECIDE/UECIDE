@@ -140,11 +140,22 @@ public class Editor extends JFrame {
 
     JScrollPane sidebarScroll;
 
+    HashMap<String, Object> dataStore = new HashMap<String, Object>();
+
     public static ArrayList<Editor>editorList = new ArrayList<Editor>();
 
     ArrayList<Plugin> plugins = new ArrayList<Plugin>();
 
     Thread compilationThread = null;
+
+
+    public void set(String s, Object o) {
+        dataStore.put(s, o);
+    }
+
+    public Object get(String s) {
+        return dataStore.get(s);
+    }
 
     class FlaggedList {
         String name;
@@ -3630,6 +3641,18 @@ public class Editor extends JFrame {
             } catch(Exception e) {
             }
         }
+
+        for (JSPlugin p : Base.jsplugins.values()) {
+            ArrayList<JSAction> ents = p.getMenuActions(filterFlags);
+            if (ents != null) {
+                for (JSAction act : ents) {
+                    JMenuItem item = new JMenuItem(act.tooltip);
+                    JSActionListener l = new JSActionListener(this, act);
+                    item.addActionListener(l);
+                    menu.add(item);
+                }
+            }
+        }
     }
 
     public void addPluginsToMenu(JMenu menu, int filterFlags) {
@@ -3638,6 +3661,18 @@ public class Editor extends JFrame {
                 plugin.populateMenu(menu, filterFlags);
             } catch(AbstractMethodError e) {
             } catch(Exception e) {
+            }
+        }
+
+        for (JSPlugin p : Base.jsplugins.values()) {
+            ArrayList<JSAction> ents = p.getMenuActions(filterFlags);
+            if (ents != null) {
+                for (JSAction act : ents) {
+                    JMenuItem item = new JMenuItem(act.tooltip);
+                    JSActionListener l = new JSActionListener(this, act);
+                    item.addActionListener(l);
+                    menu.add(item);
+                }
             }
         }
     }
@@ -3651,6 +3686,25 @@ public class Editor extends JFrame {
 //                error(e);
             }
         }
+
+        if (filterFlags == Plugin.TOOLBAR_EDITOR) {
+            for (JSPlugin p : Base.jsplugins.values()) {
+                ArrayList<JSAction> icons = p.getMainToolbarIcons();
+                if (icons != null) {
+                    for (JSAction action : icons) {
+                        String[] icodat = action.icon.split("/");
+                        JButton b = Editor.addToolbarButton(toolbar, icodat[0], icodat[1], action.tooltip);
+                        JSActionListener l = new JSActionListener(this, action);
+                        b.addActionListener(l);
+                    }
+                }
+            }
+        } else {
+            for (JSPlugin p : Base.jsplugins.values()) {
+                ArrayList<JSAction> icons = p.getEditorToolbarIcons();
+            }
+        }
+
     }
 
     public void updateAll() {
@@ -4578,7 +4632,7 @@ public class Editor extends JFrame {
                     message("Installing to " + installPath.getAbsolutePath());
 
                     for(String lib : foundLibs.keySet()) {
-                        message(Base.i18n.string("misc.analyzing.install", lib));
+                        message(Base.i18n.string("msg.analyzing.install", lib));
                         // First make a list of remapped files...
                         TreeMap<String, File> translatedFiles = new TreeMap<String, File>();
 
@@ -4599,10 +4653,10 @@ public class Editor extends JFrame {
 
                     }
 
-                    message(Base.i18n.string("misc.analyzing.updating.start"));
+                    message(Base.i18n.string("msg.analyzing.updating.start"));
                     Base.gatherLibraries();
                     Editor.updateAllEditors();
-                    message(Base.i18n.string("misc.analyzing.updating.done"));
+                    message(Base.i18n.string("msg.analyzing.updating.done"));
                 }
             } else {
                 error(Base.i18n.string("err.analyzing.notfound.error"));
