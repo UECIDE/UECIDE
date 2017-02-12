@@ -250,7 +250,7 @@ System.out.println("Replaces: " + deps);
         }
 
         return true; // What follows is way too slow on a Pi.
-
+/*
         String existingSha = properties.get("SHA256");
 
         try {
@@ -277,6 +277,7 @@ System.out.println("Replaces: " + deps);
         } catch (Exception ignored) {
         }
         return true;
+*/
     }
 
     public boolean fetchPackage(File folder) {
