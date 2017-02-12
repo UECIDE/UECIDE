@@ -249,6 +249,8 @@ System.out.println("Replaces: " + deps);
             return false;
         }
 
+        return true; // What follows is way too slow on a Pi.
+
         String existingSha = properties.get("SHA256");
 
         try {
