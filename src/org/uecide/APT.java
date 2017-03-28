@@ -407,6 +407,7 @@ public class APT {
     }
 
     public boolean isInstalled(Package p) {
+        if (p == null) return false;
         String name = p.getName();
         Package inst = installedPackages.get(name);
         if (inst == null) {
