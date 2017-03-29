@@ -2433,17 +2433,17 @@ System.err.println("Showing changelog as I don't know better");
 
                     buildPreferencesTree();
 
-                    Editor.bulletAll(i18n.string("msg.loading.updating"));
-                    try { Editor.updateAllEditors(); } catch (Exception e) {}
-                    try { Editor.selectAllEditorBoards(); } catch (Exception e) {}
-                    try { Editor.refreshAllEditors(); } catch (Exception e) {}
                     return "OK";
                 }
 
                 @Override
                 protected void done() {
-                    Editor.bulletAll(i18n.string("msg.done"));
                     Editor.unlockAll();
+                    Editor.bulletAll(i18n.string("msg.loading.updating"));
+                    try { Editor.updateAllEditors(); } catch (Exception e) {}
+                    try { Editor.selectAllEditorBoards(); } catch (Exception e) {}
+                    try { Editor.refreshAllEditors(); } catch (Exception e) {}
+                    Editor.bulletAll(i18n.string("msg.done"));
                 }
             };
             worker.execute();
