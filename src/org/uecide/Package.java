@@ -502,19 +502,23 @@ System.out.println("Replaces: " + deps);
                     String linkdest = te.getLinkName();
                     symbolicLinks.put(tname, linkdest);
                 } else {
-                    byte[] buffer = new byte[1024];
-                    int nread;
-                    int toRead = tsize;
-                    FileOutputStream fos = new FileOutputStream(dest);
-                    while ((nread = tar.read(buffer, 0, toRead > 1024 ? 1024 : toRead)) > 0) {
-                        toRead -= nread;
-                        fos.write(buffer, 0, nread);
+                    try {
+                        byte[] buffer = new byte[1024];
+                        int nread;
+                        int toRead = tsize;
+                        FileOutputStream fos = new FileOutputStream(dest);
+                        while ((nread = tar.read(buffer, 0, toRead > 1024 ? 1024 : toRead)) > 0) {
+                            toRead -= nread;
+                            fos.write(buffer, 0, nread);
+                        }
+                        fos.close();
+                        dest.setExecutable((te.getMode() & 0100) == 0100);
+                        dest.setWritable((te.getMode() & 0200) == 0200);
+                        dest.setReadable((te.getMode() & 0400) == 0400);
+                        installedFiles.put(dest.getAbsolutePath(), tsize);
+                    } catch (Exception fex) {
+                        Base.error("Error extracting " + dest + ": " + fex + " (ignoring)");
                     }
-                    fos.close();
-                    dest.setExecutable((te.getMode() & 0100) == 0100);
-                    dest.setWritable((te.getMode() & 0200) == 0200);
-                    dest.setReadable((te.getMode() & 0400) == 0400);
-                    installedFiles.put(dest.getAbsolutePath(), tsize);
                 }
                 te = tar.getNextTarEntry();
             }
