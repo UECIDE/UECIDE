@@ -2528,7 +2528,12 @@ public class Editor extends JFrame {
 
                 if(option == 2) return false;
 
-                if(option == 0) eb.save();
+                if(option == 0) {
+                    if (loadedSketch.isUntitled()) {
+                        saveAs();
+                    }
+                    eb.save();
+                }
             }
 
         }
