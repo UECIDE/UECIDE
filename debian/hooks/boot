@@ -14,7 +14,7 @@ while (my $l = <CONTROL>) {
 }
 close(CONTROL);
 
-my $taglist = `git tag --sort=-refname`;
+my $taglist = `git tag --sort=-v:refname`;
 $taglist .= "\n";
 
 my @tags = split(/\n/, $taglist);

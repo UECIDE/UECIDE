@@ -2773,7 +2773,7 @@ public class Sketch {
         File archive = getCacheFile(getArchiveName(lib));  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
         PropertyFile props = ctx.getMerged();
-        if (!Base.isQuiet()) bullet2(lib.toString());
+        if (!Base.isQuiet()) bullet2(lib.toString() + " [" + lib.getFolder().getAbsolutePath() + "]");
 
         ctx.set("library", archive.getAbsolutePath());
 

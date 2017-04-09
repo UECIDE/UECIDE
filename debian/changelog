@@ -1,3 +1,23 @@
+uecide (0.8.9-pre10) unstable; urgency=low 
+
+  * Temporarily removed SHA25 integrity check
+  * Temporarily removed SHA25 integrity check
+  * Null Pointer when replacing non-existant package
+  * Trapped failed extract of file
+  * Possible fox for font corruption on update
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sun, 05 Feb 2017 22:37:41 +0000
+
+uecide (0.8.9-pre9) unstable; urgency=low 
+
+  * Added raw output to output tab
+  * Added package validation system
+  * Only send raw output to output tab when being otherwise preprocessed
+  * Added experimental JavaScript plugin support
+  * Released 0.8.9-pre9
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 07 Jan 2017 19:24:42 +0000
+
 uecide (0.8.9-pre8) unstable; urgency=low 
 
   * Upgraded windows FULL bundles to JRE 8
@@ -147,61 +167,6 @@ uecide (0.8.8alpha20) unstable; urgency=low
 
 uecide (0.8.8alpha19) unstable; urgency=low 
 
-  * Upgrade RSTA
-  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
-  * Fixed sketch libraries
-  * Bumped version
-  * Tidy up of the build process
-  * Added note/todo/fixme parsing and task lists
-  * Stopped the function list from bouncing around so much
-  * Added gutter flags
-  * Added code page handling
-  * Fixed windows slowness
-  * Finally fixed wandering tree entries
-  * Bumped version
-  * Fixed OS X application file permissions
-  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
-  * Fixed a subtle bug in lib include selection
-  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
-  * Added keyword.txt handling
-  * Added new bundles of plugins
-  * Remove autoformat bundle
-  * Fixed windows and mac boot stubs
-  * Switched to using a batch file to load windows version for now until a better stub can be crafted
-  * Fixed exe loader stub at last!
-  * Updated jna, added native java support on windows
-  * Bundled new plugin manager;
-  * Added source for windows stub
-  * Rebuilt console without HTML
-  * Build enhancements to support more compilers
-  * Fixed library naming problem
-  * Fix compilation for newer JNA
-  * Fixing concurrent modifications
-  * Fixed compilation when main header is manually included
-  * Added OS version data and moved varfuncs to base
-  * Two new varfunc categories - os and uecide. OS contains the os name,
-  * version, flavour and arch.  UECIDE contains the UECIDE version and
-  * the product name.
-  * The string parsing routines and the varfuncs have been moved completely to
-  * the Base object so they can be used from other places such as plugins without
-  * any sketch being available.  The plugin manager now uses it for filling
-  * in the arguments to the plugin URL.
-  * Fixed some null pointer errors
-  * Added option to disable crash reporter
-  * Updated version
-  * Fixed prefs open in MacOSX
-  * Added windows and osx version probing
-  * Debianized package
-  * Added ant as build depend
-  * Removed dependency version restrictions for launchpad
-  * Fixed XP launch, and some cosmetics
-  * The &diams; messages have been replaced with proper "bullet" calls to clean
-  * up the display a little.
-  * The UECIDE.exe program has been recompiled under XP instead of Windows 7
-  * so it will run in everyting from XP upwards now (it was failing in XP
-  * before).
-  * Updated version
-  * Fixed crash reports
   * Added menu entries and keyboard shortcuts for compile and upload
   * Fixed windows exe packaging
   * Updated stub to find all jre8 releases
@@ -294,120 +259,6 @@ uecide (0.8.8alpha19) unstable; urgency=low
   * Added embedded binary support
   * Bumped version
 
- -- Matt Jenkins <matt@majenko.co.uk>  Sat, 16 Aug 2014 15:55:56 +0100
-
-uecide (0.8.7z9) unstable; urgency=low 
-
-  * Added services and migrated some threads and timers to the service infrastructure
-  * Added new required libraries
-  * Bumped version
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 11:34:19 +0100
-
-uecide (0.8.7z8) unstable; urgency=low 
-
-  * Fixed MRU initialize bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 10:46:11 +0100
-
-uecide (0.8.7z7) unstable; urgency=low 
-
-  * Sorted function list alphabetically
-  * Improved crash reporting system
-  * Improved command line handling
-  * Made all plugin commands non-static and added javascript engine
-  * Released version 0.8.7z7
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 19:34:57 +0100
-
-uecide (0.8.7z6) unstable; urgency=low 
-
-  * Fixed tree update collision bug
-
- -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 13:46:17 +0100
-
-uecide (0.8.7z5) unstable; urgency=low 
-
-  * Added crash reporter
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Aug 2014 20:55:42 +0100
-
-uecide (0.8.7z4) unstable; urgency=low 
-
-  * Added manual browser
-
- -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Aug 2014 13:58:02 +0100
-
-uecide (0.8.7z3) unstable; urgency=low 
-
-  * Added manual browser
-  * Added crash reporter
-  * Fixed tree update collision bug
-  * Sorted function list alphabetically
-  * Improved crash reporting system
-  * Improved command line handling
-  * Made all plugin commands non-static and added javascript engine
-  * Released version 0.8.7z7
-  * Fixed MRU initialize bug
-  * Added services and migrated some threads and timers to the service infrastructure
-  * Added new required libraries
-  * Bumped version
-  * Upgrade RSTA
-  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
-  * Fixed sketch libraries
-  * Bumped version
-  * Tidy up of the build process
-  * Added note/todo/fixme parsing and task lists
-  * Stopped the function list from bouncing around so much
-  * Added gutter flags
-  * Added code page handling
-  * Fixed windows slowness
-  * Finally fixed wandering tree entries
-  * Bumped version
-  * Fixed OS X application file permissions
-  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
-  * Fixed a subtle bug in lib include selection
-  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
-  * Added keyword.txt handling
-  * Added new bundles of plugins
-  * Remove autoformat bundle
-  * Fixed windows and mac boot stubs
-  * Switched to using a batch file to load windows version for now until a better stub can be crafted
-  * Fixed exe loader stub at last!
-  * Updated jna, added native java support on windows
-  * Bundled new plugin manager;
-  * Added source for windows stub
-  * Rebuilt console without HTML
-  * Build enhancements to support more compilers
-  * Fixed library naming problem
-  * Fix compilation for newer JNA
-  * Fixing concurrent modifications
-  * Fixed compilation when main header is manually included
-  * Added OS version data and moved varfuncs to base
-  * Two new varfunc categories - os and uecide. OS contains the os name,
-  * version, flavour and arch.  UECIDE contains the UECIDE version and
-  * the product name.
-  * The string parsing routines and the varfuncs have been moved completely to
-  * the Base object so they can be used from other places such as plugins without
-  * any sketch being available.  The plugin manager now uses it for filling
-  * in the arguments to the plugin URL.
-  * Fixed some null pointer errors
-  * Added option to disable crash reporter
-  * Updated version
-  * Fixed prefs open in MacOSX
-  * Added windows and osx version probing
-  * Debianized package
-  * Added ant as build depend
-  * Removed dependency version restrictions for launchpad
-  * Fixed XP launch, and some cosmetics
-  * The &diams; messages have been replaced with proper "bullet" calls to clean
-  * up the display a little.
-  * The UECIDE.exe program has been recompiled under XP instead of Windows 7
-  * so it will run in everyting from XP upwards now (it was failing in XP
-  * before).
-  * Updated version
-  * Fixed crash reports
-
  -- Matt Jenkins <matt@majenko.co.uk>  Wed, 03 Dec 2014 15:05:47 +0000
 
 uecide (0.8.7z25) unstable; urgency=low 
@@ -433,37 +284,6 @@ uecide (0.8.7z24) unstable; urgency=low
 
 uecide (0.8.7z23-1) unstable; urgency=low 
 
-  * Added context menu to console
-  * Caught possible NullPointer exception in sketch loading
-  * Added manual browser
-  * Added crash reporter
-  * Fixed tree update collision bug
-  * Sorted function list alphabetically
-  * Improved crash reporting system
-  * Improved command line handling
-  * Made all plugin commands non-static and added javascript engine
-  * Released version 0.8.7z7
-  * Fixed MRU initialize bug
-  * Added services and migrated some threads and timers to the service infrastructure
-  * Added new required libraries
-  * Bumped version
-  * Upgrade RSTA
-  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
-  * Fixed sketch libraries
-  * Bumped version
-  * Tidy up of the build process
-  * Added note/todo/fixme parsing and task lists
-  * Stopped the function list from bouncing around so much
-  * Added gutter flags
-  * Added code page handling
-  * Fixed windows slowness
-  * Finally fixed wandering tree entries
-  * Bumped version
-  * Fixed OS X application file permissions
-  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
-  * Fixed a subtle bug in lib include selection
-  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
-  * Added keyword.txt handling
   * Added new bundles of plugins
   * Remove autoformat bundle
   * Fixed windows and mac boot stubs
@@ -491,42 +311,6 @@ uecide (0.8.7z23-1) unstable; urgency=low
   * Updated version
   * Fixed prefs open in MacOSX
   * Added windows and osx version probing
-
- -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 19:29:55 +0100
-
-uecide (0.8.7z2) unstable; urgency=low 
-
-  * Added context menu to console
-  * Caught possible NullPointer exception in sketch loading
-  * Added manual browser
-  * Added crash reporter
-  * Fixed tree update collision bug
-  * Sorted function list alphabetically
-  * Improved crash reporting system
-  * Improved command line handling
-  * Made all plugin commands non-static and added javascript engine
-  * Released version 0.8.7z7
-  * Fixed MRU initialize bug
-  * Added services and migrated some threads and timers to the service infrastructure
-  * Added new required libraries
-  * Bumped version
-  * Upgrade RSTA
-  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
-  * Fixed sketch libraries
-  * Bumped version
-  * Tidy up of the build process
-  * Added note/todo/fixme parsing and task lists
-  * Stopped the function list from bouncing around so much
-  * Added gutter flags
-  * Added code page handling
-  * Fixed windows slowness
-  * Finally fixed wandering tree entries
-  * Bumped version
-  * Fixed OS X application file permissions
-  * Fixed preferences repainting on theme change and cleaned up toolbar button borders
-  * Fixed a subtle bug in lib include selection
-  * Big refactoring uecide.app -> org.uecide. New plugins loading methodology
-  * Added keyword.txt handling
 
  -- Matt Jenkins <matt@majenko.co.uk>  Tue, 26 Aug 2014 22:20:25 +0100
 
@@ -582,24 +366,64 @@ uecide (0.8.7z11) unstable; urgency=low
 
 uecide (0.8.7z10) unstable; urgency=low 
 
+  * Upgrade RSTA
+  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 16 Aug 2014 15:55:56 +0100
+
+uecide (0.8.7z9) unstable; urgency=low 
+
+  * Added services and migrated some threads and timers to the service infrastructure
+  * Added new required libraries
   * Bumped version
-  * Fixed typo in console CSS
-  * Added context menu to console
-  * Caught possible NullPointer exception in sketch loading
-  * Added manual browser
-  * Added crash reporter
-  * Fixed tree update collision bug
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 11:34:19 +0100
+
+uecide (0.8.7z8) unstable; urgency=low 
+
+  * Fixed MRU initialize bug
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Fri, 15 Aug 2014 10:46:11 +0100
+
+uecide (0.8.7z7) unstable; urgency=low 
+
   * Sorted function list alphabetically
   * Improved crash reporting system
   * Improved command line handling
   * Made all plugin commands non-static and added javascript engine
   * Released version 0.8.7z7
-  * Fixed MRU initialize bug
-  * Added services and migrated some threads and timers to the service infrastructure
-  * Added new required libraries
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 19:34:57 +0100
+
+uecide (0.8.7z6) unstable; urgency=low 
+
+  * Fixed tree update collision bug
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 13 Aug 2014 13:46:17 +0100
+
+uecide (0.8.7z5) unstable; urgency=low 
+
+  * Added crash reporter
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Aug 2014 20:55:42 +0100
+
+uecide (0.8.7z4) unstable; urgency=low 
+
+  * Added manual browser
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 12 Aug 2014 13:58:02 +0100
+
+uecide (0.8.7z3) unstable; urgency=low 
+
+  * Added context menu to console
+  * Caught possible NullPointer exception in sketch loading
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 19:29:55 +0100
+
+uecide (0.8.7z2) unstable; urgency=low 
+
   * Bumped version
-  * Upgrade RSTA
-  * Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service
+  * Fixed typo in console CSS
 
  -- Matt Jenkins <matt@majenko.co.uk>  Sun, 10 Aug 2014 18:48:01 +0100
 
