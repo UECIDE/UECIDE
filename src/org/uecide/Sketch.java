@@ -423,6 +423,7 @@ public class Sketch {
     }
 
     public void setDevice(String name) {
+System.err.println("Sketch::setDevice(" + name + ")");
         for (CommunicationPort dev : Base.communicationPorts) {
             if (dev.toString().equals(name)) {
                 setDevice(dev);
@@ -589,6 +590,7 @@ public class Sketch {
             String portName = Preferences.get("board." + selectedBoard.getName() + ".port");
 
             if (portName != null) {
+System.err.println("Looking for port " + portName);
 
                 CommunicationPort p = null;
 
@@ -599,15 +601,18 @@ public class Sketch {
                     }
                 }
 
-//                if (p == null) {
-//                    // Let's add a missing device - it can always be removed later.
-//                    if (portName.startsWith("ssh://")) {
-//                        p = new SSHCommunicationPort(portName, selectedBoard);
-//                        Base.communicationPorts.add(p);
-//                    } else {
-//                        p = new SerialCommunicationPort(portName);
-//                    }
-//                }
+                if (p == null) {
+                    // Let's add a missing device - it can always be removed later.
+                    if (portName.startsWith("ssh://")) {
+//                        SSHCommunicationPort sp = new SSHCommunicationPort(portName, selectedBoard);
+//                        Base.communicationPorts.add(sp);
+//                        p = sp;
+                    } else {
+                        SerialCommunicationPort sp = new SerialCommunicationPort(portName);
+                        Base.communicationPorts.add(sp);
+                        p = sp;
+                    }
+                }
 
                 setDevice(p);
             } else {
