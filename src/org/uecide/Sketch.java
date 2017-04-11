@@ -423,7 +423,6 @@ public class Sketch {
     }
 
     public void setDevice(String name) {
-System.err.println("Sketch::setDevice(" + name + ")");
         for (CommunicationPort dev : Base.communicationPorts) {
             if (dev.toString().equals(name)) {
                 setDevice(dev);
@@ -590,7 +589,6 @@ System.err.println("Sketch::setDevice(" + name + ")");
             String portName = Preferences.get("board." + selectedBoard.getName() + ".port");
 
             if (portName != null) {
-System.err.println("Looking for port " + portName);
 
                 CommunicationPort p = null;
 
