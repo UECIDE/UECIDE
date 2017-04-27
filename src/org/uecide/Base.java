@@ -2369,14 +2369,14 @@ System.err.println("Showing changelog as I don't know better");
 
 
     public static void error(String e) {
-        Editor.broadcast(e);
+        Editor.broadcastError(e);
         System.err.println(e);
         Debug.message(e);
     }
 
     public static void error(Throwable e) {
 
-        Editor.broadcast(e.getMessage());
+        Editor.broadcastError(e.getMessage());
 
         try {
             Debug.message("");

@@ -72,6 +72,7 @@ public class Source {
             in.close();
             inData.append(out.toString("UTF-8"));
         } catch (Exception e) {
+            Base.error(e);
             System.err.println("Error downloading " + url + ": " + e.getMessage());
         }
         return inData.toString();

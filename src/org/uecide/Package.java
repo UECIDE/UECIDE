@@ -343,6 +343,7 @@ System.out.println("Replaces: " + deps);
                         return true;
                     }
                 } catch (Exception e) {
+                    Base.error(e);
     //                e.printStackTrace();
                     if (downloadTo.exists()) {
                         downloadTo.delete();
@@ -550,5 +551,4 @@ System.out.println("Replaces: " + deps);
         }
         return installedFiles;
     }
-
 }

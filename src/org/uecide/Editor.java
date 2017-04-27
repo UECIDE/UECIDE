@@ -4346,6 +4346,18 @@ public class Editor extends JFrame {
         }
     }
 
+    public static void broadcastWarning(String msg) {
+        for(Editor e : editorList) {
+            e.warning(msg);
+        }
+    }
+
+    public static void broadcastError(String msg) {
+        for(Editor e : editorList) {
+            e.error(msg);
+        }
+    }
+
     public static void lockAll() {
         for (Editor e : editorList) {
             e.lock();
