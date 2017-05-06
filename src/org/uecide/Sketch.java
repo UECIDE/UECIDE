@@ -2534,8 +2534,24 @@ public class Sketch {
             ctx.set("size.flash", (textSize + dataSize + rodataSize) + "");
             ctx.set("size.ram", (bssSize + dataSize) + "");
 
-            if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.progsize", (textSize + dataSize + rodataSize))); 
-            if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.ramsize", (bssSize + dataSize))); 
+            if (!Base.isQuiet()) {
+                int max_ram = props.getInteger("memory.sram");
+                int max_rom = props.getInteger("memory.flash");
+
+                if (max_rom > 0) {
+                    int romperc = (textSize + dataSize + rodataSize) * 100 / max_rom;
+                    bullet(Base.i18n.string("msg.compiling.progsize.perc", (textSize + dataSize + rodataSize), romperc)); 
+                } else {
+                    bullet(Base.i18n.string("msg.compiling.progsize", (textSize + dataSize + rodataSize))); 
+                }
+
+                if (max_ram > 0) {
+                    int ramperc = (bssSize + dataSize) * 100 / max_ram;
+                    bullet(Base.i18n.string("msg.compiling.ramsize.perc", (bssSize + dataSize), ramperc)); 
+                } else {
+                    bullet(Base.i18n.string("msg.compiling.ramsize", (bssSize + dataSize))); 
+                }
+            }
         }
         return true;
     }

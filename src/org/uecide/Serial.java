@@ -395,7 +395,14 @@ public class Serial {
         PropertyFile sub = Base.preferences.getChildren("editor.serial.port");
         for (String k : sub.keySet()) {
             String pname = sub.get(k);
-            addExtraPort(pname);
+            if (Base.isPosix()) {
+                File f = new File(pname);
+                if (f.exists()) {
+                    addExtraPort(pname);
+                } 
+            } else {
+                addExtraPort(pname);
+            }
         }
     }
 
