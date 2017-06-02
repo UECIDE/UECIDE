@@ -3309,7 +3309,7 @@ System.err.println("Showing changelog as I don't know better");
             File sourcesFile = new File(dbFolder, "sources.db");
             if (!sourcesFile.exists()) {
                 PrintWriter pw = new PrintWriter(sourcesFile);
-                pw.println("deb res://org/uecide/dist uecide boards cores compilers plugins extra libraries uecide main");
+                pw.println("deb res://org/uecide/dist uecide boards cores compilers plugins extra libraries main");
                 pw.close();
                 PluginManager pm = new PluginManager();
                 APT apt = pm.getApt();

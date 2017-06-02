@@ -112,7 +112,10 @@ public class Source {
             if (url.startsWith("http://") || url.startsWith("https://")) {
                 inData.append(getCompressedFileHTTP(url + "Packages.gz"));
             } else if (url.startsWith("res://")) {
-                inData.append(getCompressedFileRes(url.substring(6) + "Packages.gz"));
+                String s = (getCompressedFileRes(url.substring(6) + "Packages.gz"));
+                if (s != null) {
+                    inData.append(s);
+                }
             } else if (url.startsWith("file://")) {
                 inData.append(getCompressedFileLocal(url.substring(7) + "Packages.gz"));
             } else {
