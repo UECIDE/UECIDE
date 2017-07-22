@@ -64,12 +64,18 @@ public class Library implements Comparable {
     public File archFolder;
     public boolean needsRescan = true;
 
+    public int compat = 0;
+
     public HashMap<String, TreeSet<File>>sourceFilesByArch = null;
     public HashMap<String, TreeSet<File>>headerFilesByArch = null;
 
     public boolean valid = false;
 
     public boolean buildLibrary = false;
+
+    public static int COMPAT_UNK = 0;
+    public static int COMPAT_14X = 1;
+    public static int COMPAT_15X = 2;
 
     PropertyFile properties = null;
     File propertyFile = null;
@@ -104,6 +110,7 @@ public class Library implements Comparable {
             propertyFile = new File(root, "library.txt");
 
             if(propertyFile.exists()) {
+                compat = COMPAT_15X;
                 properties = new PropertyFile(propertyFile);
                 utilityFolder = new File(root, properties.get("utility", "utility"));
                 utilRecurse = properties.getBoolean("utility.recurse");
@@ -117,6 +124,7 @@ public class Library implements Comparable {
                     sourceFolder = new File(root, properties.get("source"));
                 }
             } else {
+                compat = COMPAT_14X;
                 utilityFolder = new File(root, "utility");
                 archFolder = null;
                 examplesFolder = new File(root, "examples");
@@ -131,6 +139,7 @@ public class Library implements Comparable {
             File pf = new File(root, "library.properties");
 
             if(pf.exists()) {
+                compat = COMPAT_15X;
                 examplesFolder = new File(root, "examples");
                 librariesFolder = new File(root, "libraries");
                 sourceFolder = new File(root, "src");
@@ -152,11 +161,11 @@ public class Library implements Comparable {
         headerFiles = new TreeSet<File>();
         examples = new TreeMap<String, File>();
 
-        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "cpp", false));
-        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "c", false));
-        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "S", false));
-        archiveFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "a", false));
-        headerFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "h", false));
+        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "cpp", (compat == COMPAT_15X)));
+        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "c", (compat == COMPAT_15X)));
+        sourceFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "S", (compat == COMPAT_15X)));
+        archiveFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "a", (compat == COMPAT_15X)));
+        headerFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "h", (compat == COMPAT_15X)));
 
         if (archFolder != null) {
             if (archFolder.exists()) {
@@ -181,12 +190,15 @@ public class Library implements Comparable {
             }
         }
 
-        if(utilityFolder.exists() && utilityFolder.isDirectory()) {
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", utilRecurse));
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "c", utilRecurse));
-            sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "S", utilRecurse));
-            archiveFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "a", utilRecurse));
-            headerFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "h", utilRecurse));
+
+        if (compat != COMPAT_15X) {
+            if(utilityFolder.exists() && utilityFolder.isDirectory()) {
+                sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "cpp", utilRecurse));
+                sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "c", utilRecurse));
+                sourceFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "S", utilRecurse));
+                archiveFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "a", utilRecurse));
+                headerFiles.addAll(Sketch.findFilesInFolder(utilityFolder, "h", utilRecurse));
+            }
         }
 
         if(examplesFolder.exists() && examplesFolder.isDirectory()) {
@@ -211,7 +223,7 @@ public class Library implements Comparable {
         }
 
         probedFiles = new ArrayList<String>();
-/*
+
         for(File f : headerFiles) {
             gatherIncludes(f);
         }
@@ -219,7 +231,6 @@ public class Library implements Comparable {
         for(File f : sourceFiles) {
             gatherIncludes(f);
         }
-*/
     }
 
     ArrayList<String> probedFiles;

@@ -4412,14 +4412,100 @@ public class Sketch {
         ctx.printParsed(e);
     }
 
+    public ArrayList<String> gatherIncludes(File f) {
+        String[] data;
+        ArrayList<String> requiredLibraries = new ArrayList<String>();
+
+        try {
+            FileReader in = new FileReader(f);
+            StringBuilder contents = new StringBuilder();
+            char[] buffer = new char[4096];
+            int read = 0;
+
+            do {
+                contents.append(buffer, 0, read);
+                read = in.read(buffer);
+            } while(read >= 0);
+
+            in.close();
+            data = contents.toString().split("\n");
+        } catch(Exception e) {
+            Base.error(e);
+            return null;
+        }
+
+        ArrayList<String> includes = new ArrayList<String>();
+
+        for(String line : data) {
+            line = line.trim();
+
+            if(line.startsWith("#include")) {
+                int qs = line.indexOf("<");
+
+                if(qs == -1) {
+                    qs = line.indexOf("\"");
+                }
+
+                if(qs == -1) {
+                    continue;
+                }
+
+                qs++;
+                int qe = line.indexOf(">");
+
+                if(qe == -1) {
+                    qe = line.indexOf("\"", qs);
+                }
+
+                String i = line.substring(qs, qe);
+
+                requiredLibraries.add(i);
+            }
+        }
+        return requiredLibraries;
+    }
+
+    public void addRecursiveLibraries(HashMap<String, Library>foundLibs, ArrayList<String> missingLibs, Library lib) {
+        for (String inc : lib.getRequiredLibraries()) {
+            Library sl = findLibrary(inc);
+            if (sl != null) {
+                if (foundLibs.get(inc) == null) {
+                    foundLibs.put(inc, sl);
+                    addRecursiveLibraries(foundLibs, missingLibs, sl);
+                }
+            } else {
+                if (missingLibs.indexOf(inc) == -1) {
+                    missingLibs.add(inc);
+                }
+            }
+        }
+    }
+
     public boolean huntForLibraries(File f, HashMap<String, Library>foundLibs, ArrayList<String> missingLibs) {
 
         if (getBuildFolder() == null) {
             return false;
         }
         PropertyFile props = ctx.getMerged();
-        if (props.get("compile.preproc") == null) {
-            return false;
+        if (props.get("compile.preproc") == null) { // Manually parse it.
+
+
+            ArrayList<String> incs = gatherIncludes(f);
+            for (String inc : incs) {
+                Library l = findLibrary(inc);
+                if (l != null) {
+                    if (foundLibs.get(inc) == null) {
+                        foundLibs.put(inc, l);
+                        addRecursiveLibraries(foundLibs, missingLibs, l);
+                    }
+                } else {
+                    if (missingLibs.indexOf(inc) == -1) {
+                        missingLibs.add(inc);
+                    }
+                }
+            }
+
+            return true;
         }
 
         File dst = new File(getBuildFolder(), "deps.txt");
