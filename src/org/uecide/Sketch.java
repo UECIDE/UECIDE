@@ -429,6 +429,14 @@ public class Sketch {
                 return;
             }
         }
+        if (Base.isPosix()) {
+            File f = new File(name);
+            if (f.exists() && !f.isDirectory()) {
+                SerialCommunicationPort p = new SerialCommunicationPort(f.getAbsolutePath());
+                Base.communicationPorts.add(p);
+                setDevice(p);
+            }
+        }
     }
 
     public void setDevice(CommunicationPort dev) {
