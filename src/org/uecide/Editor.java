@@ -68,6 +68,8 @@ import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
 import javax.jmdns.ServiceInfo;
 
+import com.wittams.gritty.swing.*;
+
 public class Editor extends JFrame {
 
     Box mainDecorationContainer;
@@ -106,7 +108,8 @@ public class Editor extends JFrame {
     JPanel consolePanel;
 
     Console console;
-    Console output;
+    GrittyTerminal testConsole;
+    ConsoleTty outputTty;
 
     JTabbedPane editorTabs;
     JTabbedPane projectTabs;
@@ -341,12 +344,28 @@ public class Editor extends JFrame {
         );
 
         console = new Console();
-        output = new Console();
+
+        testConsole = new GrittyTerminal();
+        outputTty = new ConsoleTty();
+        testConsole.getTermPanel().setSize(new Dimension(100, 100));
+        testConsole.getTermPanel().setAntiAliasing(true);
+        testConsole.getTermPanel().setFont(Base.getTheme().getFont("console.command.font"));
+
+        JPanel outputPanel = new JPanel();
+        outputPanel.setLayout(new BorderLayout());
+        outputPanel.add(testConsole.getTermPanel(), BorderLayout.CENTER);
+        outputPanel.add(testConsole.getScrollBar(), BorderLayout.EAST);
+
+        testConsole.setTty(outputTty);
+        testConsole.start();
 
         console.setURLClickListener(this);
 
         consoleScroll.setViewportView(console);
-        outputScroll.setViewportView(output);
+
+
+//        outputScroll.setViewportView(testConsole.getTermPanel()); //output);
+
 
 //        consolePanel.add(consoleScroll);
 
@@ -428,7 +447,7 @@ public class Editor extends JFrame {
         consolePanel.add(consoleTabs, BorderLayout.CENTER);
 
         consoleTabs.add(consoleScroll, Base.i18n.string("tab.console"));
-        consoleTabs.add(outputScroll, Base.i18n.string("tab.output"));
+        consoleTabs.add(outputPanel, Base.i18n.string("tab.output"));
 
         addPanelsToTabs(consoleTabs, Plugin.TABS_CONSOLE);
 
@@ -2318,25 +2337,28 @@ public class Editor extends JFrame {
     }
 
     public void command(String msg) {
-        Debug.message(msg);
-
-        if(msg == null) {
-            return;
-        }
-
-        if(!msg.endsWith("\n")) {
-            msg += "\n";
-        }
-
-        output.append(msg, Console.COMMAND);
+        outputTty.feed("[32m" + msg);
+//        Debug.message(msg);
+//
+//        if(msg == null) {
+//            return;
+//        }
+//
+//        if(!msg.endsWith("\n")) {
+//            msg += "\n";
+//        }
+//
+//        output.append(msg, Console.COMMAND);
     }
 
     public void outputMessageStream(String msg) {
-        output.append(msg, Console.BODY);
+        outputTty.feed("[32m" + msg);
+//        output.append(msg, Console.BODY);
     }
 
     public void outputErrorStream(String msg) {
-        output.append(msg, Console.ERROR);
+        outputTty.feed("[31m" + msg);
+//        output.append(msg, Console.ERROR);
     }
 
     public void heading(String msg) {
@@ -2440,7 +2462,8 @@ public class Editor extends JFrame {
 
     public void clearConsole() {
         console.clear();
-        output.clear();
+//        output.clear();
+        outputTty.feed("[2J[1;1H");
     }
 
     public void setProgress(int x) {
@@ -4240,6 +4263,17 @@ public class Editor extends JFrame {
                 dp.mkdirs();
             }
 
+            try {
+                if (src.getCanonicalPath().equals(dest.getCanonicalPath())) {
+                    JOptionPane.showMessageDialog(this, 
+                        Base.i18n.string("err.samefile", src.getName(), dest.getName()), 
+                        Base.i18n.string("err.samefile.title"),
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+            } catch (Exception eee) { }
+
             Base.copyFile(src, dest);
 
             if(type == "source" || type == "header") {
@@ -4501,10 +4535,14 @@ public class Editor extends JFrame {
             SwingUtilities.updateComponentTreeUI(e);
 //            e.rotateTabLabels();
             e.refreshScrolls();
+
+
         }
     }
 
     public void refreshScrolls() {
+        testConsole.getTermPanel().setAntiAliasing(true);
+        testConsole.getTermPanel().setFont(Base.getTheme().getFont("console.command.font"));
         consoleScroll.setShadow(
             Base.getTheme().getInteger("console.shadow.top"),
             Base.getTheme().getInteger("console.shadow.bottom")

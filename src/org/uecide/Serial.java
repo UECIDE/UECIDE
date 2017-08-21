@@ -177,6 +177,15 @@ public class Serial {
 
     }
 
+    public static CommunicationPort getPortByName(String name) {
+        for (CommunicationPort cp : Base.communicationPorts) {
+            if (cp.toString().equals(name)) {
+                return cp;
+            }
+        }
+        return null;
+    }
+    
     public static SerialPort requestPort(String name, int baudRate) {
         SerialPort nsp = requestPort(name);
 

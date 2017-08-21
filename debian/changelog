@@ -1,3 +1,44 @@
+uecide (0.8.9-pre16) unstable; urgency=low 
+
+  * Improved library recursion for non-preproc compilers
+  * Improved missing library detection
+  * Allow manual override of port name on POSIX systems from command line
+  * Released pre-16
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 15 Jul 2017 19:09:36 +0100
+
+uecide (0.8.9-pre15) unstable; urgency=low 
+
+  * Replaced JAVA stub for OSX
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Fri, 02 Jun 2017 16:53:06 +0100
+
+uecide (0.8.9-pre14) unstable; urgency=low 
+
+  * Fixed problem of null pointer on missing res: repo file
+  * Released 0.8.9-pre14
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Fri, 12 May 2017 11:03:37 +0100
+
+uecide (0.8.9-pre12) unstable; urgency=low 
+
+  * Updated bundled varcmd package to 1.0.3
+  * Added console error reporting for failed downloads of packages and repos
+  * Only add extra ports that actually exist (posix only)
+  * Released 0.8.9-pre12
+  * Updated plist to Java 1.8
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 11 Apr 2017 12:08:34 +0100
+
+uecide (0.8.9-pre11) unstable; urgency=low 
+
+  * Fix no save as on close of unsaved sketch
+  * Added displaying full path of library when compiling
+  * Reinstated adding of missing port at sketch load
+  * First iteration of example browser
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 29 Mar 2017 12:00:50 +0100
+
 uecide (0.8.9-pre10) unstable; urgency=low 
 
   * Temporarily removed SHA25 integrity check

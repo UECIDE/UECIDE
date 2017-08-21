@@ -53,6 +53,8 @@ import java.beans.*;
 
 import org.markdown4j.Markdown4jProcessor;
 
+import com.wittams.gritty.swing.*;
+
 public class PluginManager implements PropertyChangeListener
 {
 
@@ -79,7 +81,35 @@ public class PluginManager implements PropertyChangeListener
 
     Editor editor;
 
+    GrittyTerminal outputConsole;
+    ConsoleTty outputTty;
+
     HashMap<String, String> familyNames = new HashMap<String, String>();
+
+    class ConsoleOutputStream extends OutputStream {
+        ConsoleTty thisTty;
+
+        public ConsoleOutputStream(ConsoleTty tty) {
+            thisTty = tty;
+        }
+/*
+
+        @Override
+        public void write(byte[] b) {
+            thisTty.feed(b);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            thisTty.feed(b);
+        }
+*/
+
+        @Override
+        public void write(int b) {
+            thisTty.feed((byte)b);
+        }
+    }
 
     public PluginManager() { 
         File dd = Base.getDataFolder();
@@ -439,12 +469,37 @@ public class PluginManager implements PropertyChangeListener
         lower.setLayout(new BorderLayout());
 
         split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upper, lower);
-        split.setResizeWeight(0.8D);
+        split.setResizeWeight(0.5D);
         mainContainer.add(split, BorderLayout.CENTER);
 
         queue = new TaskQueue();
-        lower.add(queue, BorderLayout.CENTER);
+
+        outputConsole = new GrittyTerminal();
+        outputConsole.getTermPanel().setAntiAliasing(true);
+        outputConsole.getTermPanel().setFont(Base.getTheme().getFont("console.command.font"));
+        outputTty = new ConsoleTty();
+
+        JPanel p = new JPanel();
+        p.setLayout(new BorderLayout());
+        p.add(outputConsole.getTermPanel(), BorderLayout.CENTER);
+        p.add(outputConsole.getScrollBar(), BorderLayout.EAST);
+
+        lower.add(p);
         queue.addPropertyChangeListener(this);
+
+//        Dimension dim = consoleScroll.getPreferredSize();
+//        dim.height = 2000;
+//        consoleScroll.setSize(dim);
+
+        outputConsole.setTty(outputTty);
+        outputConsole.start();
+
+        ConsoleOutputStream stream = new ConsoleOutputStream(outputTty); 
+
+        PrintStream ttyFeed = new PrintStream(stream);
+
+        System.setOut(ttyFeed);
+        System.setErr(ttyFeed);
 
         treeRoot = new DefaultMutableTreeNode("Plugins");
         treeModel = new DefaultTreeModel(treeRoot);
@@ -713,6 +768,9 @@ public class PluginManager implements PropertyChangeListener
             }
         }
         frame.dispose();
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+        System.setErr(new PrintStream(new FileOutputStream(FileDescriptor.err)));
+
         Base.cleanAndScanAllSettings();
     }
 
@@ -732,7 +790,7 @@ public class PluginManager implements PropertyChangeListener
         
             @Override
             public Void doInBackground() {
-                apt.update(this);
+                apt.update();
                 Package p = apt.getPackage("uecide-families");
                 if (p != null) {
                     if (!apt.isInstalled(p) || apt.isUpgradable(p)) {
@@ -1094,9 +1152,7 @@ public class PluginManager implements PropertyChangeListener
             @Override
             public Void doInBackground() {
                 Package p = (Package)getUserObject();
-                p.attachPercentageListener(this);
                 p.fetchPackage(Base.getDataFile("apt/cache"));
-                p.detachPercentageListener();
                 return null;
             }
 
@@ -1134,18 +1190,13 @@ public class PluginManager implements PropertyChangeListener
             @Override
             public Void doInBackground() {
                 Package p = (Package)getUserObject();
-                p.attachPercentageListener(this);
                 Package[] deps = apt.getDependants(p);
                 if (deps.length > 0) {
                     for (Package dep : deps) {
                         apt.uninstallPackage(dep, false);
                     }
                 }
-                String ret = apt.uninstallPackage(p, false);
-                p.detachPercentageListener();
-                if (ret != null) {
-                    Base.showMessage("Uninstall error", ret);
-                }
+                apt.uninstallPackage(p, false);
                 return null;
             }
 
@@ -1186,9 +1237,8 @@ public class PluginManager implements PropertyChangeListener
             @Override
             public Void doInBackground() {
                 Package p = (Package)getUserObject();
-                p.attachPercentageListener(this);
                 if (apt.isInstalled(p)) {
-                    String ret = apt.uninstallPackage(p, true);
+                    apt.uninstallPackage(p, true);
                 } 
 
                 String reps[] = p.getReplaces();
@@ -1202,7 +1252,6 @@ public class PluginManager implements PropertyChangeListener
                 }
 
                 p.extractPackage(Base.getDataFile("apt/cache"), Base.getDataFile("apt/db/packages"), Base.getDataFolder());
-                p.detachPercentageListener();
                 return null;
             }
 
@@ -1298,7 +1347,6 @@ public class PluginManager implements PropertyChangeListener
                     @Override
                     public Void doInBackground() {
                         Package p = new Package();
-                        p.attachPercentageListener(this);
                         p.doExtractPackage(f, Base.getDataFile("apt/db/packages"), Base.getDataFolder());
                         return null;
                     }

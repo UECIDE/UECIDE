@@ -351,14 +351,14 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
 
     public void pulseLine() {
         try {
-            serialPort.setDTR(false);
-            serialPort.setRTS(false);
-            Thread.sleep(100);
             serialPort.setDTR(true);
             serialPort.setRTS(true);
             Thread.sleep(100);
             serialPort.setDTR(false);
             serialPort.setRTS(false);
+            Thread.sleep(100);
+            serialPort.setDTR(true);
+            serialPort.setRTS(true);
         } catch (Exception e) {
             lastError = e.getMessage();
         }
@@ -397,6 +397,110 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     public String get(String key) {
         return data.get(key);
     }
+
+
+    public int getVID() {
+        if (Base.isLinux()) {
+            return getVIDPIDLinux("idVendor");
+        } else if (Base.isMacOS()) {
+            return getVIDPIDMacOS("idVendor");
+        } else {
+            return 0;
+        }
+    }
+
+    public int getPID() {
+        if (Base.isLinux()) {
+            return getVIDPIDLinux("idProduct");
+        } else if (Base.isMacOS()) {
+            return getVIDPIDMacOS("idProduct");
+        } else {
+            return 0;
+        }
+    }
+
+    int getVIDPIDLinux(String name) {
+        BufferedReader reader;
+        try {
+            String pn = serialPort.getPortName();
+            File f = new File(pn);
+            pn = f.getCanonicalPath();
+            pn = pn.substring(pn.lastIndexOf("/") + 1);
+
+            File classFolder = new File("/sys/class/tty", pn);
+
+            if(classFolder == null || !classFolder.exists()) {
+                return 0;
+            }
+
+            File dev = new File(classFolder.getCanonicalPath());
+
+            if(dev.getAbsolutePath().indexOf("/usb") == -1) {
+                return 0;
+            }
+
+            File root = dev;
+            File vidFile = new File(root, name);
+
+            while(!root.getName().startsWith("usb") && !vidFile.exists()) {
+                root = root.getParentFile();
+                vidFile = new File(root, name);
+            }
+
+            if(!vidFile.exists()) {
+                return 0;
+            }
+
+            reader = new BufferedReader(new FileReader(vidFile));
+            String vidstr = reader.readLine();
+            reader.close();
+
+            int vid = Integer.parseInt(vidstr, 16);
+            return vid;
+        } catch(Exception e) {
+            Base.error(e);
+            return 0;
+        }
+    }
+
+
+    int getVIDPIDMacOS(String name) {
+        String deviceName = serialPort.getPortName();
+
+        String subName = deviceName;
+
+        if (subName.startsWith("/dev/tty.")) {
+            subName = subName.substring(9);
+        } else if (subName.startsWith("/dev/cu.")) {
+            subName = subName.substring(8);
+        }
+
+        IOKit.parseRegistry();
+        ArrayList<IOKitNode> list = IOKit.findByClass("IOSerialBSDClient");
+
+        try {
+            for (IOKitNode n : list) {
+                if (n.get("IOTTYDevice").equals(subName)) {
+
+                    IOKitNode par = n.getParentNode();
+                    while (par != null) {
+                        if (par.getNodeClass().equals("IOUSBDevice")) {
+                            int vid = Integer.parseInt(par.get(name));
+                            return vid;
+                        }
+                        par = par.getParentNode();
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+
+    }
+
 
 
 }

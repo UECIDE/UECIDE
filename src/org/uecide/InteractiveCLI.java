@@ -35,7 +35,7 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 
-public class InteractiveCLI implements AptPercentageListener {
+public class InteractiveCLI {
     String[] _argv;
     Sketch _loadedSketch;
     ConsoleReader _reader;
@@ -268,7 +268,6 @@ public class InteractiveCLI implements AptPercentageListener {
                             if (p == null) {
                                 System.out.println("Package '" + args[i] + "' not found");
                             } else {
-                                p.attachPercentageListener(this);
                                 _apt.installPackage(p);
                                 System.out.println();
                             }
@@ -283,7 +282,6 @@ public class InteractiveCLI implements AptPercentageListener {
                         if (p == null) {
                             System.out.println("Package not found");
                         } else {
-                            p.attachPercentageListener(this);
                             System.out.println(_apt.uninstallPackage(p, false));
                         }
                         updateComplete(); 
@@ -485,11 +483,6 @@ public class InteractiveCLI implements AptPercentageListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void updatePercentage(Package p, int pct) {
-        if (pct > 100) pct = 100;
-        System.out.print("\r" + p.getName() + " ... " + pct + "%" + Character.toString((char)27) + "[0K");
     }
 
     public void rescanEverything() {

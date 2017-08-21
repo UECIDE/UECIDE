@@ -109,15 +109,19 @@ public class Source {
         StringBuilder inData = new StringBuilder();
         HashMap<String, Package> packages = new HashMap<String, Package>();
         for (String url : sectionUrls.values()) {
+            System.out.print("Update: " + url + "Packages.gz" + " ... ");
             if (url.startsWith("http://") || url.startsWith("https://")) {
                 inData.append(getCompressedFileHTTP(url + "Packages.gz"));
+                System.out.println("done");
             } else if (url.startsWith("res://")) {
                 String s = (getCompressedFileRes(url.substring(6) + "Packages.gz"));
                 if (s != null) {
                     inData.append(s);
                 }
+                System.out.println("done");
             } else if (url.startsWith("file://")) {
                 inData.append(getCompressedFileLocal(url.substring(7) + "Packages.gz"));
+                System.out.println("done");
             } else {
                 System.err.println("No URI Handler for URL");
             }

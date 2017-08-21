@@ -158,7 +158,7 @@ public class TaskQueue extends JPanel implements PropertyChangeListener {
             }
         }
 
-         while(running < 3) {
+         while(running < 1) {
             QueueWorker runit = null;
             for (QueueWorker w : workerList) {
                 if (w.getState() == SwingWorker.StateValue.PENDING) {

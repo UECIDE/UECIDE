@@ -2,6 +2,7 @@ package org.uecide;
 
 import java.util.*;
 import java.text.*;
+import org.apache.commons.lang3.text.WordUtils;
 
 public class I18N {
     public static Locale locale;
@@ -20,32 +21,32 @@ public class I18N {
 
     public static String string(String key, Object o1) {
         Object[] args = { o1 };
-        return string(key, args);
+        return WordUtils.wrap(string(key, args), 50);
     }
 
     public static String string(String key, Object o1, Object o2) {
         Object[] args = { o1, o2 };
-        return string(key, args);
+        return WordUtils.wrap(string(key, args), 50);
     }
 
     public static String string(String key, Object o1, Object o2, Object o3) {
         Object[] args = { o1, o2, o3 };
-        return string(key, args);
+        return WordUtils.wrap(string(key, args), 50);
     }
 
     public static String string(String key, Object o1, Object o2, Object o3, Object o4) {
         Object[] args = { o1, o2, o3, o4 };
-        return string(key, args);
+        return WordUtils.wrap(string(key, args), 50);
     }
 
     public static String string(String key, Object[] args) {
         formatter.applyPattern(string(key));
-        return formatter.format(args);
+        return WordUtils.wrap(formatter.format(args), 50);
     }
 
     public static String string(String key) {
         try {
-            return bundle.getString(key);
+            return WordUtils.wrap(bundle.getString(key), 50);
         } catch (Exception e) {
             return "{" + source + "/" + key + "}";
         }

@@ -46,7 +46,6 @@ import org.apache.commons.compress.compressors.bzip2.*;
 public class Package implements Comparable, Serializable {
     public HashMap<String, String> properties = new HashMap<String, String>();
     public boolean isValid = false;
-    public AptPercentageListener pct = null;
 
     public int stateCode = 0;
 
@@ -89,18 +88,6 @@ public class Package implements Comparable, Serializable {
         isValid = (getName() != null);
     }
                     
-
-    public void attachPercentageListener(AptPercentageListener listener) {
-        pct = listener;
-    }
-
-    public void detachPercentageListener() {
-        pct = null;
-    }
-
-    public AptPercentageListener getPercentageListener() {
-        return pct;
-    }
 
     public Package(String source, String data) {
         parseData(data);
@@ -172,7 +159,6 @@ public class Package implements Comparable, Serializable {
 
     public String[] getReplaces() {
         String deps = properties.get("Replaces");
-System.out.println("Replaces: " + deps);
         if (deps == null) {
             return null;
         }
@@ -295,13 +281,12 @@ System.out.println("Replaces: " + deps);
                     if (repo.startsWith("http://") || repo.startsWith("https://")) {
                         URI uri = new URI(repo + "/" + properties.get("Filename"));
                         URL downloadFrom = uri.toURL();
-                        System.out.println("Fetching " + downloadFrom);
                         HttpURLConnection httpConn = (HttpURLConnection) downloadFrom.openConnection();
                         contentLength = httpConn.getContentLength();
 
-                        if (checkFileIntegrity(folder)) {
-                            return true;
-                        }
+//                        if (checkFileIntegrity(folder)) {
+//                            return true;
+//                        }
                         in = httpConn.getInputStream();
                     } else if (repo.startsWith("res://")) {
                         String reps = repo.substring(6);
@@ -326,17 +311,57 @@ System.out.println("Replaces: " + deps);
                     int n;
                     long tot = 0;
                     int lastVal = -1;
+
+                    String tname = getName();
+                    if (tname.length() > 20) {
+                        tname = tname.substring(0, 20);
+                    }
+                    while (tname.length() < 20) {
+                        tname += " ";
+                    }
+
+                    System.out.print("\rDownloading " + tname + " [.........................]");
+                    long start = System.currentTimeMillis() / 1000;
+                    long ts = start;
                     while ((n = in.read(buffer)) > 0) {
+                        long now = System.currentTimeMillis() / 1000;
                         tot += n;
                         if (contentLength != -1) {
-                            int tpct = (int)((tot * 100) / contentLength);
-                            if (tpct != lastVal) {
+                            int tpct = (int)((tot * 100) / contentLength) / 4;
+                            if (now != ts) {
+                                ts = now;
                                 lastVal = tpct;
-                                reportPercentage(tpct);
+                                System.out.print("\rDownloading " + tname + " [");
+                                for (int i = 0; i < 25; i++) {
+                                    if (i <= tpct) {
+                                        System.out.print("#");
+                                    } else {
+                                        System.out.print(".");
+                                    }
+                                }
+                                System.out.print("] ");
+
+                                long diff = now - start;
+                                if (diff > 0) {
+                                    long bps = tot / diff;
+                                    long remain = contentLength - tot;
+                                    long trem = remain / bps;
+                                    long sec = trem % 60;
+                                    long min = (trem / 60) % 60;
+                                    long hour = (trem / 3600);
+                                    if (bps >= (1024 * 1024)) {
+                                        System.out.print(String.format("%7.2f MBps %02d:%02d:%02d", (float)bps / 1048576f, hour, min, sec));
+                                    } else if (bps >= 1024) {
+                                        System.out.print(String.format("%7.2f kBps %02d:%02d:%02d", (float)bps / 1024f, hour, min, sec));
+                                    } else {
+                                        System.out.print(String.format("%4d Bps    %02d:%02d:%02d", bps, hour, min, sec));
+                                    }
+                                }
                             }
                         }
                         out.write(buffer, 0, n);
                     }
+                    System.out.println("\rDownloading " + tname + " [#########################] done[0K");
                     in.close();
                     out.close();
                     if (checkFileIntegrity(folder)) {
@@ -363,192 +388,17 @@ System.out.println("Replaces: " + deps);
     }
 
     public boolean doExtractPackage(File src, File db, File root) {
-        String control = "";
-        String md5sums = "";
-        HashMap<String, Integer> installedFiles = new HashMap<String, Integer>();
+
         try {
-            if (!src.exists()) {
-                System.err.println("Unable to open cache file");
-                return false;
-            }
-
-            System.out.println("Extracting " + src.getName());
-
-            FileInputStream fis = new FileInputStream(src);
-            ArArchiveInputStream ar = new ArArchiveInputStream(fis);
-
-            ArArchiveEntry file = ar.getNextArEntry();
-            int dataFileSize = 0;
-            while (file != null) {
-                long size = file.getSize();
-                String name = file.getName();
-
-
-                if (name.equals("control.tar.gz")) {
-                    GzipCompressorInputStream gzip = new GzipCompressorInputStream(ar);
-                    TarArchiveInputStream tar = new TarArchiveInputStream(gzip);
-                    TarArchiveEntry te = tar.getNextTarEntry();
-                    while (te != null) {
-                        int tsize = (int)te.getSize();
-                        String tname = te.getName();
-                        if (tname.equals("./control")) {
-                            byte[] data = new byte[tsize];
-                            tar.read(data, 0, tsize);
-                            control = new String(data, "UTF-8");
-                            String[] lines = control.split("\n");
-                            for (String line : lines) {
-                                if (line.startsWith("Installed-Size: ")) {
-                                    String iss = line.substring(16);
-                                    dataFileSize = Integer.parseInt(iss) * 1024;
-                                }
-                            }
-                            if (!isValid) parseData(control);
-                        }
-                        if (tname.equals("./md5sums")) {
-                            byte[] data = new byte[tsize];
-                            tar.read(data, 0, tsize);
-                            md5sums = new String(data, "UTF-8");
-                        }
-                        te = tar.getNextTarEntry();
-                    }
-
-                }
-
-                if (name.equals("data.tar.gz")) {
-                    GzipCompressorInputStream gzip = new GzipCompressorInputStream(ar);
-                    TarArchiveInputStream tar = new TarArchiveInputStream(gzip);
-                    installedFiles = extractTarFile(tar, root, dataFileSize);
-                }
-                    
-                if (name.equals("data.tar.xz")) {
-                    XZCompressorInputStream xzip = new XZCompressorInputStream(ar);
-                    TarArchiveInputStream tar = new TarArchiveInputStream(xzip);
-                    installedFiles = extractTarFile(tar, root, dataFileSize);
-                }
-
-                if (name.equals("data.tar.bz2")) {
-                    BZip2CompressorInputStream bzip = new BZip2CompressorInputStream(ar);
-                    TarArchiveInputStream tar = new TarArchiveInputStream(bzip);
-                    installedFiles = extractTarFile(tar, root, dataFileSize);
-                }
-
-                file = ar.getNextArEntry();
-            }
-
-
-            ar.close();
-            fis.close();
-            
-
+            System.out.println("Installing " + getName() + " ... ");
+            DebFile df = new DebFile(src);
             File pf = new File(db, getName());
             pf.mkdirs();
-            File cf = new File(pf, "control");
-            PrintWriter pw = new PrintWriter(cf);
-            pw.println(control);
-            pw.close();
-            File mf = new File(pf, "md5sums");
-            pw = new PrintWriter(mf);
-            pw.println(md5sums);
-            pw.close();
-            File ff = new File(pf, "files");
-            pw = new PrintWriter(ff);
-            for (String f : installedFiles.keySet()) {
-                pw.println(f);
-            }
-            pw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        
-        return true;
-    }
-
-    void reportPercentage(int p) {
-        if (pct != null) {
-            if (p < 0) {
-                p = 0;
-            }
-            if (p > 100) {
-                p = 100;
-            }
-            pct.updatePercentage(this, p);
-        }
-    }
-
-    HashMap<String, Integer> extractTarFile(TarArchiveInputStream tar, File root, int dataFileSize) {
-        HashMap<String, Integer> installedFiles = new HashMap<String, Integer>();
-        HashMap<String, String> symbolicLinks = new HashMap<String, String>();
-        try {
-            TarArchiveEntry te = tar.getNextTarEntry();
-
-            int copied = 0;
-            while (te != null) {
-                int tsize = (int)te.getSize();
-                copied += tsize;
-                String tname = te.getName();
-                if (pct != null) {
-                    int tpct = (int)((copied * 100L) / dataFileSize);
-                    reportPercentage(tpct);
-                }
-
-                File dest = new File(root, tname);
-                if (te.isDirectory()) {
-                    dest.mkdirs();
-                    installedFiles.put(dest.getAbsolutePath(), -1);
-                } else if (te.isLink()) {
-                    String linkdest = te.getLinkName();
-                    symbolicLinks.put(tname, linkdest);
-                } else if (te.isSymbolicLink()) {
-                    String linkdest = te.getLinkName();
-                    symbolicLinks.put(tname, linkdest);
-                } else {
-                    try {
-                        byte[] buffer = new byte[1024];
-                        int nread;
-                        int toRead = tsize;
-                        FileOutputStream fos = new FileOutputStream(dest);
-                        while ((nread = tar.read(buffer, 0, toRead > 1024 ? 1024 : toRead)) > 0) {
-                            toRead -= nread;
-                            fos.write(buffer, 0, nread);
-                        }
-                        fos.close();
-                        dest.setExecutable((te.getMode() & 0100) == 0100);
-                        dest.setWritable((te.getMode() & 0200) == 0200);
-                        dest.setReadable((te.getMode() & 0400) == 0400);
-                        installedFiles.put(dest.getAbsolutePath(), tsize);
-                    } catch (Exception fex) {
-                        Base.error("Error extracting " + dest + ": " + fex + " (ignoring)");
-                    }
-                }
-                te = tar.getNextTarEntry();
-            }
-            for (String link : symbolicLinks.keySet()) {
-                String tgt = symbolicLinks.get(link);
-                File linkFile = new File(root, link);
-                File linkParent = linkFile.getParentFile();
-                File troot = root;
-                if (!tgt.startsWith("./")) {
-                    troot = linkParent;
-                }
-                File tgtFile = new File(troot, tgt); //linkParent, tgt);
-                FileInputStream copyFrom = new FileInputStream(tgtFile);
-                FileOutputStream copyTo = new FileOutputStream(linkFile);
-                byte[] copyBuffer = new byte[1024];
-                int bytesCopied = 0;
-
-                while ((bytesCopied = copyFrom.read(copyBuffer, 0, 1024)) > 0) {
-                    copyTo.write(copyBuffer, 0, bytesCopied);
-                }
-                copyFrom.close();
-                copyTo.close();
-                linkFile.setExecutable(tgtFile.canExecute());
-                linkFile.setReadable(tgtFile.canRead());
-                linkFile.setWritable(tgtFile.canWrite());
-            }
+            df.extract(pf, root);
         } catch (Exception e) {
             Base.error(e);
+            return false;
         }
-        return installedFiles;
+        return true;
     }
 }

@@ -49,7 +49,7 @@ import java.awt.event.*;
 import say.swing.*;
 import org.json.simple.*;
 
-public abstract class QueueWorker extends SwingWorker<Void, Long> implements AptPercentageListener {
+public abstract class QueueWorker extends SwingWorker<Void, Long> {
     Object userObject = null;
     String taskCommand = null;
 
@@ -61,8 +61,4 @@ public abstract class QueueWorker extends SwingWorker<Void, Long> implements Apt
     public abstract String getTaskName();
     public abstract String getQueuedDescription();
     public abstract String getActiveDescription();
-
-    public void updatePercentage(Package pkg, int pct) {
-        setProgress(pct);
-    }
 }

@@ -192,6 +192,7 @@ public class APT {
                 }
             }
         }
+
     }
 
     public HashMap<String, Package> loadPackages(File f) {
@@ -223,6 +224,12 @@ public class APT {
             }
             in.close();
             fis.close();
+            if (chunk.toString().length() > 0) {
+                Package p = new Package(chunk.toString());
+                if (p.isValid) {
+                    out.put(p.getName(), p);
+                }
+            }
             return out; 
         } catch (Exception e) {
             e.printStackTrace();
@@ -266,19 +273,12 @@ public class APT {
     }
 
     public void update() {
-        update(null);
-    }
-
-    public void update(AptPercentageListener pct) {
         cachedPackages = new HashMap<String, Package>();
         int num = sources.size();
         int done = 0;
         for (Source s : sources) {
             Package[] packages = s.getPackages();
             done++;
-            if (pct != null) {
-                pct.updatePercentage(null, (done * 100) / num);
-            }
 
             for (Package p : packages) {
                 if (cachedPackages.get(p.getName()) != null) {
@@ -446,16 +446,13 @@ public class APT {
         initRepository();
     }
     public void installPackage(Package p) {
-System.out.println("Installing " + p.getName());
         Package[] deps = resolveDepends(p);
         for (Package dep : deps) {
             if (!isInstalled(dep)) {
-                dep.attachPercentageListener(p.getPercentageListener());
                 if (!dep.fetchPackage(cacheFolder)) {
                     System.err.println("Error downloading " + dep);
                     return;
                 }
-                dep.detachPercentageListener();
             }
         }
         if (!p.fetchPackage(cacheFolder)) {
@@ -464,9 +461,7 @@ System.out.println("Installing " + p.getName());
 
         for (Package dep : deps) {
             if (!isInstalled(dep)) {
-                dep.attachPercentageListener(p.getPercentageListener());
                 dep.extractPackage(cacheFolder, packagesFolder, root);
-                dep.detachPercentageListener();
             }
         }
         if (isInstalled(p)) {
@@ -475,7 +470,6 @@ System.out.println("Installing " + p.getName());
         String reps[] = p.getReplaces();
         if (reps != null) {
             for (String rep : reps) {
-System.err.println("Replace: " + rep);
                 Package rp = getPackage(rep);
                 if (isInstalled(rp)) {
                     uninstallPackage(rp, true);
@@ -535,78 +529,109 @@ System.err.println("Replace: " + rep);
         uninstallPackage(p, false);
     }
 
-    public String uninstallPackage(Package p, boolean force) {
+    public boolean uninstallPackage(Package p, boolean force) {
         if (!isInstalled(p)) {
-            return (p.getName() + " is not installed.");
+            System.err.println(p.getName() + " is not installed.");
+            return false;
         }
         try {
             if (!force) {
                 Package[] deps = getDependants(p);
                 if (deps.length > 0) {
-                    String o = p.getName() + " is required by:\n";
+                    System.err.println(p.getName() + " is required by:");
                     for (Package dep : deps) {
-                        o += "    " + dep.getName() + "\n";
+                        System.err.println("    " + dep.getName());
                     }
-                    o += "It cannot be removed.";
-                    return o;
+                    System.err.println("It cannot be removed.");
+                    return false;
                 }
             }
 
-            ArrayList<File>files = new ArrayList<File>();
+            System.out.print("Uninstalling " + p.getName() + " ... ");
+            
             File pdir = new File(packagesFolder, p.getName());
             if (pdir.exists()) {
+
+                File md5 = new File(pdir, "md5sums");
                 File plist = new File(pdir, "files");
-                if (plist.exists()) {
+
+                ArrayList<File> files = new ArrayList<File>();
+
+                if (md5.exists()) {
+                    FileReader fr = new FileReader(md5);
+                    BufferedReader br = new BufferedReader(fr);
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        String[] bits = line.split("\\s+");
+                        if (bits.length == 2) {
+                            File f = new File(Base.getDataFolder(), bits[1]);
+                            files.add(f);
+                        }
+                    }
+                    br.close();
+                    fr.close();
+                } else if (plist.exists()) {
                     FileReader fr = new FileReader(plist);
                     BufferedReader br = new BufferedReader(fr);
                     String line;
                     while ((line = br.readLine()) != null) {
                         File f = new File(line);
-                        files.add(f);
+                        if (!f.isDirectory()) {
+                            files.add(f);
+                        }
                     }
                     br.close();
                     fr.close();
+                }
 
-                    int fcount = files.size();
-                    int done = 0;
+                ArrayList<File> dirs = new ArrayList<File>();
 
-                    ArrayList<File>dirs = new ArrayList<File>();
-                    for (File f : files) {
-                        if (!f.isDirectory()) {
-                            f.delete();
-                        } else {
-                            dirs.add(f);
+                for (File f : files) {
+                    File par = f.getParentFile();
+                    if (!par.getCanonicalPath().equals(Base.getDataFolder().getCanonicalPath())) {
+                        if (dirs.indexOf(par) == -1) {    
+                            dirs.add(par);
                         }
-                        done++;
-                        p.reportPercentage((done * 100) / fcount);
                     }
-
-                    Collections.sort(dirs);
-                    Collections.reverse(dirs);
-
-                    fcount = dirs.size();
-                    done = 0;
-
-                    for (File dir : dirs) {
-                        dir.delete();
-                        done++;
-//                        p.reportPercentage(50 + ((done * 50) / fcount));
-                    }
-
-                    plist.delete();
+                    f.delete();
                 }
-                File cf = new File(pdir, "control");
-                if (cf.exists()) {
-                    cf.delete();
-                }
-                pdir.delete();
+
+                cleanDirectoryList(dirs);
+
+                Base.removeDir(pdir);
+                
             }
             initRepository();
+            System.out.println("done");
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return false;
     }
+
+    void cleanDirectoryList(ArrayList<File> dirs) throws IOException {
+        ArrayList<File> todo = new ArrayList<File>();
+        for (File d : dirs) {
+            if (d.isDirectory()) {
+                String[] files = d.list();
+                if (files.length == 0) {
+                    File p = d.getParentFile();
+                    if (!p.getCanonicalPath().equals(Base.getDataFolder().getCanonicalPath())) {
+                        if (todo.indexOf(p) == -1) {    
+                            todo.add(p);
+                        }
+                        
+                        d.delete();
+                    }
+                }
+            }
+        }
+        if (todo.size() > 0) {
+            cleanDirectoryList(todo);
+        }
+    }
+
     public int getPackageCount() {
         return cachedPackages.values().size();
     }

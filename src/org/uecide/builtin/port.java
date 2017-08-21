@@ -32,11 +32,18 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 import java.io.*;
+import java.util.*;
+
+import org.usb4java.*;
+
+import javax.usb.*;
+import javax.usb.event.*;
+
 
 public class port implements BuiltinCommand {
     static CommunicationPort comPort = null;
 
-    public boolean main(Context ctx, String[] arg) {
+    public boolean main(org.uecide.Context ctx, String[] arg) {
         if (arg.length == 0) {
             return false;
         }
@@ -108,6 +115,61 @@ public class port implements BuiltinCommand {
                         }
                     }
                 }
+            } else if (action.equals("find")) {
+                // Find a new USB COM port that has the specified
+                // VID/PID pair. The port should not exist when the
+                // command is called, and the command will block
+                // until the port appears, or it times out.
+                //
+                // port::find::403::a662
+
+                int vid = Integer.parseInt(arg[1], 16);
+                int pid = Integer.parseInt(arg[2], 16);
+
+                ArrayList<String> currentList = Serial.getPortList();
+
+                long start = System.currentTimeMillis();
+                while (true) {
+                    Serial.updatePortList();
+System.err.println("====");
+                    Thread.sleep(100);
+                    ArrayList<String> newList = Serial.getPortList();
+                    for (String port : newList) {
+System.err.println("   " + port);
+                        if (currentList.indexOf(port) < 0) {
+                            System.err.println("New port found: " + port);
+                            CommunicationPort cp = Serial.getPortByName(port);
+                            if (cp != null) {
+                                if (cp instanceof SerialCommunicationPort) {
+                                    SerialCommunicationPort sp = (SerialCommunicationPort)cp;
+                                    int newvid = sp.getVID();
+                                    int newpid = sp.getPID();
+
+System.err.println(String.format("VID: %x PID: %x\r\n", newvid, newpid));
+
+                                    if (Base.isWindows()) { // Can't do it yet
+                                        System.err.println("Match found");
+                                        ctx.set("port.found", port);
+                                        return true;
+                                    }
+
+                                    if ((newvid == vid) && (newpid == pid)) {
+                                        System.err.println("Match found");
+                                        ctx.set("port.found", port);
+                                        return true;
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+                    if (System.currentTimeMillis() - start > 10000) {
+                        ctx.error("Timeout looking for port");
+                        return false;
+                    }
+                    currentList = newList;
+                }
             }
         } catch (Exception e) {
             Base.error(e);
@@ -117,4 +179,52 @@ public class port implements BuiltinCommand {
 
     public void kill() {
     }
+
+
+    public ArrayList<UsbDevice> getAllUsbDevices() {
+        try {
+            UsbServices services = UsbHostManager.getUsbServices();
+            UsbHub rootHub = services.getRootUsbHub();
+            return getAllUsbDevices(rootHub);
+        } catch (Exception e) { 
+            Base.error(e);
+        }
+        return null;
+    }
+
+    // Recurses
+    public ArrayList<UsbDevice> getAllUsbDevices(UsbDevice device) {
+        ArrayList<UsbDevice> devs = new ArrayList<UsbDevice>();
+        try {
+            devs.add(device);
+
+            if(device.isUsbHub()) {
+                final UsbHub hub = (UsbHub) device;
+
+                @SuppressWarnings("unchecked")
+                List<UsbDevice>devlist = (List<UsbDevice>)hub.getAttachedUsbDevices();
+
+                for(UsbDevice child : devlist) {
+                    ArrayList<UsbDevice> subs = (ArrayList<UsbDevice>) getAllUsbDevices(child);
+                    devs.addAll(subs);
+                }
+            }
+        } catch (Exception e) {
+            Base.error(e);
+        }
+        return devs;
+    }
+
+    public UsbDevice getDeviceByVidPid(int vid, int pid) {
+        ArrayList<UsbDevice> devs = getAllUsbDevices();
+
+        for (UsbDevice dev : devs) {
+            UsbDeviceDescriptor desc = dev.getUsbDeviceDescriptor();
+            if ((desc.idVendor() == vid) && (desc.idProduct() == pid)) {
+                return dev;
+            }
+        }
+        return null;
+    }
+        
 }

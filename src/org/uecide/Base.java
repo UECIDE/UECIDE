@@ -78,7 +78,7 @@ import org.reflections.scanners.*;
  *  location for application data, and a selection of useful
  *  helper functions.
  */
-public class Base implements AptPercentageListener {
+public class Base {
 
     public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
 
@@ -382,10 +382,7 @@ public class Base implements AptPercentageListener {
             APT apt = pm.getApt();
             Package[] pl = apt.getUpgradeList();
             for (Package p : pl) {
-                System.out.print(i18n.string("msg.upgrading", p.getName()));
-                p.attachPercentageListener(this);
                 apt.upgradePackage(p);
-                System.out.println("..." + i18n.string("msg.done"));
             }
             doExit = true;
         }
@@ -407,7 +404,6 @@ public class Base implements AptPercentageListener {
             }
 
             System.out.println(i18n.string("msg.installing", p.getName()));
-            p.attachPercentageListener(this);
             apt.installPackage(p);
             System.out.println(i18n.string("msg.done"));
             doExit = true;
@@ -421,16 +417,9 @@ public class Base implements AptPercentageListener {
                 PluginManager pm = new PluginManager();
                 APT apt = pm.getApt();
                 for (Package p : apt.getInstalledPackages()) {
-                    System.out.println(i18n.string("msg.uninstalling", p.getName()));
-                    p.attachPercentageListener(this);
-                    String ret = apt.uninstallPackage(p, true);
-                    if (ret == null) {
-                        System.out.println("..."+i18n.string("msg.done"));
-                    } else {
-                        System.err.println("");
-                        System.err.println(ret);
-                    }
+                    apt.uninstallPackage(p, true);
                 }
+                doExit = true;
             }
         }
             
@@ -451,15 +440,7 @@ public class Base implements AptPercentageListener {
             }
 
             System.out.println(i18n.string("msg.uninstalling", p.getName()));
-            p.attachPercentageListener(this);
-            String ret = apt.uninstallPackage(p, cli.isSet("force"));
-            if (ret == null) {
-                System.out.println("..." + i18n.string("msg.done"));
-            } else {
-                System.err.println("");
-                System.err.println(ret);
-                doExit = true;
-            }
+            apt.uninstallPackage(p, cli.isSet("force"));
             doExit = true;
         }
 
@@ -1844,6 +1825,7 @@ System.err.println("Showing changelog as I don't know better");
 
     public static void copyFile(File sourceFile, File targetFile) {
         try {
+            if (sourceFile.getCanonicalPath().equals(targetFile.getCanonicalPath())) return;
             InputStream from =
                 new BufferedInputStream(new FileInputStream(sourceFile));
             OutputStream to =
@@ -3074,18 +3056,6 @@ System.err.println("Showing changelog as I don't know better");
         comp.setFont(f);
         comp.setForeground(fg);
 
-    }
-
-    int lastPct = -1;
-    public void updatePercentage(Package p, int pct) {
-        int pc = pct / 10;
-        if (pc != lastPct) {
-            lastPct = pc;
-            if (pc > 0) {
-                System.out.print("...");
-            }
-            System.out.print((pc * 10) + "%");
-        }
     }
 
     public static boolean yesno(String title, String question) {

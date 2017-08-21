@@ -349,11 +349,11 @@ public class Context {
     public void command(String e) {
         if (!e.endsWith("\n")) { e += "\n"; }
         if (editor != null) {
-            editor.command(e);
+            editor.command("\n" + e);
             return;
         }
         if (sketch != null) {
-            sketch.command(e);
+            sketch.command("\n" + e);
             return;
         }
         System.out.print(e);
@@ -631,7 +631,7 @@ public class Context {
                     }
                     argstr += s;
                 }
-                command(function + "(" + argstr + ")");
+//                command(function + "(" + argstr + ")");
             }
 
             if (args == null) {
@@ -1051,13 +1051,13 @@ public class Context {
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-
+                    if (buffer == null) rawMessageStream(inch);
                     if (parser != null) {
                         if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
                             outline += inch;
                         }
                         if (inch.equals("\n")) {
-                            rawMessageStream(outline);
+//                            rawMessageStream(outline);
                             outline = parser.parseStreamMessage(this, outline);
                             outline = parser.parseStreamError(this, outline);
                             if (buffer != null) {
@@ -1082,12 +1082,13 @@ public class Context {
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
+                    if (buffer == null) rawErrorStream(inch);
                     if (parser != null) {
                         if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
                             errline += inch;
                         }
                         if (inch.equals("\n")) {
-                            rawErrorStream(errline);
+//                            rawErrorStream(errline);
                             errline = parser.parseStreamMessage(this, errline);
                             errline = parser.parseStreamError(this, errline);
                             if (buffer != null) {
@@ -1124,9 +1125,10 @@ public class Context {
                     outline += inch;
                 }
 
+                if (buffer == null) rawMessageStream(inch);
                 if (inch.equals("\n")) {
                     if (parser != null) {
-                        rawMessageStream(outline);
+//                        rawMessageStream(outline);
                         outline = parser.parseStreamMessage(this, outline);
                         outline = parser.parseStreamError(this, outline);
                     }
@@ -1141,7 +1143,7 @@ public class Context {
 
             if (!outline.equals("")) {
                 if (parser != null) {
-                    rawMessageStream(outline);
+//                    rawMessageStream(outline);
                     outline = parser.parseStreamMessage(this, outline);
                     outline = parser.parseStreamError(this, outline);
                 }
@@ -1162,9 +1164,11 @@ public class Context {
                     errline += inch;
                 }
 
+                if (buffer == null) rawErrorStream(inch);
+
                 if (inch.equals("\n")) {
                     if (parser != null) {
-                        rawErrorStream(errline);
+//                        rawErrorStream(errline);
                         errline = parser.parseStreamMessage(this, errline);
                         errline = parser.parseStreamError(this, errline);
                     }
@@ -1183,7 +1187,7 @@ public class Context {
 
             if (!errline.equals("")) {
                 if (parser != null) {
-                    rawErrorStream(errline);
+//                    rawErrorStream(errline);
                     errline = parser.parseStreamMessage(this, errline);
                     errline = parser.parseStreamError(this, errline);
                 }
