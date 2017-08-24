@@ -365,7 +365,7 @@ public class markdown extends JPanel implements EditorBase {
         editor.addPluginsToToolbar(toolbar, Plugin.TOOLBAR_TAB);
 
         refreshSettings();
-        previewSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, previewScroll);
+        previewSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, previewScroll);
 
 
 

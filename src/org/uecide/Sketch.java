@@ -2688,6 +2688,7 @@ public class Sketch {
 
                 if(out == null) {
                     coreBuildFolder.delete();
+                    if (archive.exists()) archive.delete();
                     return false;
                 }
 
@@ -2697,6 +2698,7 @@ public class Sketch {
                 if(!ok) {
                     out.delete();
                     coreBuildFolder.delete();
+                    if (archive.exists()) archive.delete();
                     return false;
                 }
 

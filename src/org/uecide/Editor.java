@@ -351,6 +351,17 @@ public class Editor extends JFrame {
         testConsole.getTermPanel().setAntiAliasing(true);
         testConsole.getTermPanel().setFont(Base.getTheme().getFont("console.command.font"));
 
+        testConsole.getTermPanel().addMouseWheelListener(new MouseWheelListener() {
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                System.err.println(e.getScrollAmount() * e.getWheelRotation());
+                testConsole.getScrollBar().setValue(
+                    testConsole.getScrollBar().getValue() + (
+                        e.getScrollAmount() * e.getWheelRotation()
+                    )
+                );
+            }
+        });
+
         JPanel outputPanel = new JPanel();
         outputPanel.setLayout(new BorderLayout());
         outputPanel.add(testConsole.getTermPanel(), BorderLayout.CENTER);

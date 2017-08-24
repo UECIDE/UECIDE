@@ -64,7 +64,6 @@ public class DebFile {
     // Extract a file into root adding the control files to db.
     public void extract(File db, File root) throws IOException {
         // Step one, extract the files from the deb.
-        System.out.print("    Extracting ... ");
         HashMap<String, File> files = extractOuterFiles();
         HashMap<File, FileInfo> pendingFiles = null;
 
@@ -73,23 +72,18 @@ public class DebFile {
         if (files.get("data.tar.xz") != null) pendingFiles = extractTarXzFile(files.get("data.tar.xz"), root);
         if (files.get("data.tar.bz2") != null) pendingFiles = extractTarBz2File(files.get("data.tar.bz2"), root);
 
-        System.out.println("done");
         // Step three, rename the files to the proper names and
         // copy any linked files (windows doesn't do links)
-        System.out.print("    Installing ... ");
         installFiles(pendingFiles);
-        System.out.println("done");
 
         // Step four, extract the control information
         pendingFiles = extractTarGzFile(files.get("control.tar.gz"), db);
 
-        System.out.print("    Configuring ... ");
 
         installFiles(pendingFiles);
         
         // Step five, remove the temporary files
         cleanup();
-        System.out.println("done");
     }
 
     void installFiles(HashMap<File, FileInfo> files) {

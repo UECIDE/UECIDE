@@ -3,7 +3,7 @@ Label: UECIDE Internal
 Suite: stable
 Codename: uecide
 Version: 3.1
-Date: Mon, 21 Aug 2017 11:41:45 UTC
+Date: Mon, 21 Aug 2017 22:37:30 UTC
 Architectures: windows-i386 windows-amd64 linux-amd64 linux-i386 linux-armhf linux-armel darwin-amd64
 Components: cores boards compilers plugins themes extra libraries repos main
 Description: Internal repository for distribution of plugins
@@ -80,29 +80,29 @@ MD5Sum:
  d41d8cd98f00b204e9800998ecf8427e 0 compilers/source/Sources
  7029066c27ac6f5ef18d660d5741979a 20 compilers/source/Sources.gz
  348ac6b5928083cd722a55d3acb9b6d7 170 compilers/source/Release
- d70333ae44e920ae70837b113b138bd3 498 plugins/binary-windows-i386/Packages
- 42f2a09d3f443b3620623b51c7536088 363 plugins/binary-windows-i386/Packages.gz
+ 26c8288eaf3353bc84ecf7ad310f9dd1 498 plugins/binary-windows-i386/Packages
+ c454a9986203cac97e3c9d5f70736d02 362 plugins/binary-windows-i386/Packages.gz
  152f64040e8ca7c2143833920f88240b 174 plugins/binary-windows-i386/Release
- d70333ae44e920ae70837b113b138bd3 498 plugins/binary-windows-amd64/Packages
- 42f2a09d3f443b3620623b51c7536088 363 plugins/binary-windows-amd64/Packages.gz
+ 26c8288eaf3353bc84ecf7ad310f9dd1 498 plugins/binary-windows-amd64/Packages
+ c454a9986203cac97e3c9d5f70736d02 362 plugins/binary-windows-amd64/Packages.gz
  606dec1dff570f595ec693722b408c19 175 plugins/binary-windows-amd64/Release
- d70333ae44e920ae70837b113b138bd3 498 plugins/binary-linux-amd64/Packages
- 42f2a09d3f443b3620623b51c7536088 363 plugins/binary-linux-amd64/Packages.gz
+ 26c8288eaf3353bc84ecf7ad310f9dd1 498 plugins/binary-linux-amd64/Packages
+ c454a9986203cac97e3c9d5f70736d02 362 plugins/binary-linux-amd64/Packages.gz
  8b82328ddee383981079bdabcb87a7fd 173 plugins/binary-linux-amd64/Release
- d70333ae44e920ae70837b113b138bd3 498 plugins/binary-linux-i386/Packages
- 42f2a09d3f443b3620623b51c7536088 363 plugins/binary-linux-i386/Packages.gz
+ 26c8288eaf3353bc84ecf7ad310f9dd1 498 plugins/binary-linux-i386/Packages
+ c454a9986203cac97e3c9d5f70736d02 362 plugins/binary-linux-i386/Packages.gz
  d1c47ce2c5ec4b25e55ff582c22b0569 172 plugins/binary-linux-i386/Release
- d70333ae44e920ae70837b113b138bd3 498 plugins/binary-linux-armhf/Packages
- 42f2a09d3f443b3620623b51c7536088 363 plugins/binary-linux-armhf/Packages.gz
+ 26c8288eaf3353bc84ecf7ad310f9dd1 498 plugins/binary-linux-armhf/Packages
+ c454a9986203cac97e3c9d5f70736d02 362 plugins/binary-linux-armhf/Packages.gz
  28f58c515ed6eee69e914cefb066c483 173 plugins/binary-linux-armhf/Release
- d70333ae44e920ae70837b113b138bd3 498 plugins/binary-linux-armel/Packages
- 42f2a09d3f443b3620623b51c7536088 363 plugins/binary-linux-armel/Packages.gz
+ 26c8288eaf3353bc84ecf7ad310f9dd1 498 plugins/binary-linux-armel/Packages
+ c454a9986203cac97e3c9d5f70736d02 362 plugins/binary-linux-armel/Packages.gz
  6c142da5565152bf5263c16e44bd4472 173 plugins/binary-linux-armel/Release
- d70333ae44e920ae70837b113b138bd3 498 plugins/binary-darwin-amd64/Packages
- 42f2a09d3f443b3620623b51c7536088 363 plugins/binary-darwin-amd64/Packages.gz
+ 26c8288eaf3353bc84ecf7ad310f9dd1 498 plugins/binary-darwin-amd64/Packages
+ c454a9986203cac97e3c9d5f70736d02 362 plugins/binary-darwin-amd64/Packages.gz
  a274246a15d249678b2e37e18a51e658 174 plugins/binary-darwin-amd64/Release
- a66396284675edb50d921b7ef23e630e 884 plugins/source/Sources
- f15a29af13ec3ac7d4b1a0c4b84a8aed 504 plugins/source/Sources.gz
+ 614ac3addc5fd19e563f5cafcf70b739 884 plugins/source/Sources
+ 210f699c92d78d990995ca22e862adb0 502 plugins/source/Sources.gz
  74fb72684e5606ce0c0d75ac70e02ba1 168 plugins/source/Release
  d41d8cd98f00b204e9800998ecf8427e 0 themes/binary-windows-i386/Packages
  7029066c27ac6f5ef18d660d5741979a 20 themes/binary-windows-i386/Packages.gz
@@ -311,29 +311,29 @@ SHA1:
  da39a3ee5e6b4b0d3255bfef95601890afd80709 0 compilers/source/Sources
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 compilers/source/Sources.gz
  ad68db53c9f4c5b4cef8330a4cf6298048398967 170 compilers/source/Release
- 0db8e2e9cd888b6ed2467cf4aadf1790c2ac8f33 498 plugins/binary-windows-i386/Packages
- f09e0cc700b671b27010098652672ca542108218 363 plugins/binary-windows-i386/Packages.gz
+ 2939469ca54c0fb5471a5249b2b6b96c50207754 498 plugins/binary-windows-i386/Packages
+ bd0fe5ed0694cae99bae372ab6bcf35d0f39e7ee 362 plugins/binary-windows-i386/Packages.gz
  b78d0d5bceb0d01b1e43b3acd6bf9350ef1e6077 174 plugins/binary-windows-i386/Release
- 0db8e2e9cd888b6ed2467cf4aadf1790c2ac8f33 498 plugins/binary-windows-amd64/Packages
- f09e0cc700b671b27010098652672ca542108218 363 plugins/binary-windows-amd64/Packages.gz
+ 2939469ca54c0fb5471a5249b2b6b96c50207754 498 plugins/binary-windows-amd64/Packages
+ bd0fe5ed0694cae99bae372ab6bcf35d0f39e7ee 362 plugins/binary-windows-amd64/Packages.gz
  c072eb5cbe98b7e83d37807a2912d18057161c85 175 plugins/binary-windows-amd64/Release
- 0db8e2e9cd888b6ed2467cf4aadf1790c2ac8f33 498 plugins/binary-linux-amd64/Packages
- f09e0cc700b671b27010098652672ca542108218 363 plugins/binary-linux-amd64/Packages.gz
+ 2939469ca54c0fb5471a5249b2b6b96c50207754 498 plugins/binary-linux-amd64/Packages
+ bd0fe5ed0694cae99bae372ab6bcf35d0f39e7ee 362 plugins/binary-linux-amd64/Packages.gz
  1b5747ca9626e92ea187a336ce5396fc69ba6745 173 plugins/binary-linux-amd64/Release
- 0db8e2e9cd888b6ed2467cf4aadf1790c2ac8f33 498 plugins/binary-linux-i386/Packages
- f09e0cc700b671b27010098652672ca542108218 363 plugins/binary-linux-i386/Packages.gz
+ 2939469ca54c0fb5471a5249b2b6b96c50207754 498 plugins/binary-linux-i386/Packages
+ bd0fe5ed0694cae99bae372ab6bcf35d0f39e7ee 362 plugins/binary-linux-i386/Packages.gz
  5a9863edb268a29f18a43ed9b405e2d5f77dff87 172 plugins/binary-linux-i386/Release
- 0db8e2e9cd888b6ed2467cf4aadf1790c2ac8f33 498 plugins/binary-linux-armhf/Packages
- f09e0cc700b671b27010098652672ca542108218 363 plugins/binary-linux-armhf/Packages.gz
+ 2939469ca54c0fb5471a5249b2b6b96c50207754 498 plugins/binary-linux-armhf/Packages
+ bd0fe5ed0694cae99bae372ab6bcf35d0f39e7ee 362 plugins/binary-linux-armhf/Packages.gz
  313023610dcc97295d32d85de3672903a79899a4 173 plugins/binary-linux-armhf/Release
- 0db8e2e9cd888b6ed2467cf4aadf1790c2ac8f33 498 plugins/binary-linux-armel/Packages
- f09e0cc700b671b27010098652672ca542108218 363 plugins/binary-linux-armel/Packages.gz
+ 2939469ca54c0fb5471a5249b2b6b96c50207754 498 plugins/binary-linux-armel/Packages
+ bd0fe5ed0694cae99bae372ab6bcf35d0f39e7ee 362 plugins/binary-linux-armel/Packages.gz
  35c48e540394946020218f03d73fa69ce827d24b 173 plugins/binary-linux-armel/Release
- 0db8e2e9cd888b6ed2467cf4aadf1790c2ac8f33 498 plugins/binary-darwin-amd64/Packages
- f09e0cc700b671b27010098652672ca542108218 363 plugins/binary-darwin-amd64/Packages.gz
+ 2939469ca54c0fb5471a5249b2b6b96c50207754 498 plugins/binary-darwin-amd64/Packages
+ bd0fe5ed0694cae99bae372ab6bcf35d0f39e7ee 362 plugins/binary-darwin-amd64/Packages.gz
  6a3f841024c0551cc71d95277c375190660146f1 174 plugins/binary-darwin-amd64/Release
- 61511e462b92d313ad1190cb7804ca7dbc4dee10 884 plugins/source/Sources
- bedd561acd5e0ef2ddb672775cc44d002c4bf42c 504 plugins/source/Sources.gz
+ 2ea5594995b049100cf58d0d3632380360634e09 884 plugins/source/Sources
+ 675486d9052826ded3a259642c0aece9d7d58cb4 502 plugins/source/Sources.gz
  9c20e7899e2187dbffc29be222a7084b0c85d265 168 plugins/source/Release
  da39a3ee5e6b4b0d3255bfef95601890afd80709 0 themes/binary-windows-i386/Packages
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 themes/binary-windows-i386/Packages.gz
@@ -542,29 +542,29 @@ SHA256:
  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 compilers/source/Sources
  59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 compilers/source/Sources.gz
  7765c6377e2b27e0e1781a3236ac0ffd4f178148207295e87e6d17f18b3a06b5 170 compilers/source/Release
- 8e8b1aaa9f7ad1fb4ae990241dbea485d6c33de9aaa29a590a093dde047f68b8 498 plugins/binary-windows-i386/Packages
- b020f3478d53feb62cbe9b7016c23f7d9c49f167f0ac34b7e0eb368882ba71fb 363 plugins/binary-windows-i386/Packages.gz
+ 2a304dd61163f083fa0a33293eba9875778a9e0f4227daade8c0c3ecdb5724f5 498 plugins/binary-windows-i386/Packages
+ 871efa3e6bf4a0d5eb91b224bbc051b8e111dbefb1206598e600741890300926 362 plugins/binary-windows-i386/Packages.gz
  cda10cb820ee0079987e3095359a4c44fa93f1171f7b429fcbc52578c01a7dbe 174 plugins/binary-windows-i386/Release
- 8e8b1aaa9f7ad1fb4ae990241dbea485d6c33de9aaa29a590a093dde047f68b8 498 plugins/binary-windows-amd64/Packages
- b020f3478d53feb62cbe9b7016c23f7d9c49f167f0ac34b7e0eb368882ba71fb 363 plugins/binary-windows-amd64/Packages.gz
+ 2a304dd61163f083fa0a33293eba9875778a9e0f4227daade8c0c3ecdb5724f5 498 plugins/binary-windows-amd64/Packages
+ 871efa3e6bf4a0d5eb91b224bbc051b8e111dbefb1206598e600741890300926 362 plugins/binary-windows-amd64/Packages.gz
  f9bfab753e52cf0902d2b850527553eaa8657e88105c3df91b6ba6815767927b 175 plugins/binary-windows-amd64/Release
- 8e8b1aaa9f7ad1fb4ae990241dbea485d6c33de9aaa29a590a093dde047f68b8 498 plugins/binary-linux-amd64/Packages
- b020f3478d53feb62cbe9b7016c23f7d9c49f167f0ac34b7e0eb368882ba71fb 363 plugins/binary-linux-amd64/Packages.gz
+ 2a304dd61163f083fa0a33293eba9875778a9e0f4227daade8c0c3ecdb5724f5 498 plugins/binary-linux-amd64/Packages
+ 871efa3e6bf4a0d5eb91b224bbc051b8e111dbefb1206598e600741890300926 362 plugins/binary-linux-amd64/Packages.gz
  b2b67d66e8bf107bfc161d40df3fe490bf57dec054034c3608173f93cfaf9f7a 173 plugins/binary-linux-amd64/Release
- 8e8b1aaa9f7ad1fb4ae990241dbea485d6c33de9aaa29a590a093dde047f68b8 498 plugins/binary-linux-i386/Packages
- b020f3478d53feb62cbe9b7016c23f7d9c49f167f0ac34b7e0eb368882ba71fb 363 plugins/binary-linux-i386/Packages.gz
+ 2a304dd61163f083fa0a33293eba9875778a9e0f4227daade8c0c3ecdb5724f5 498 plugins/binary-linux-i386/Packages
+ 871efa3e6bf4a0d5eb91b224bbc051b8e111dbefb1206598e600741890300926 362 plugins/binary-linux-i386/Packages.gz
  8c0636b253da9268accc33662440a58bf6917580fa8287c9d3b9ba6adbfbdaf1 172 plugins/binary-linux-i386/Release
- 8e8b1aaa9f7ad1fb4ae990241dbea485d6c33de9aaa29a590a093dde047f68b8 498 plugins/binary-linux-armhf/Packages
- b020f3478d53feb62cbe9b7016c23f7d9c49f167f0ac34b7e0eb368882ba71fb 363 plugins/binary-linux-armhf/Packages.gz
+ 2a304dd61163f083fa0a33293eba9875778a9e0f4227daade8c0c3ecdb5724f5 498 plugins/binary-linux-armhf/Packages
+ 871efa3e6bf4a0d5eb91b224bbc051b8e111dbefb1206598e600741890300926 362 plugins/binary-linux-armhf/Packages.gz
  b03e0da2b64943202424e52440b04bbab8a508e38edae888f1b29ed52db23c73 173 plugins/binary-linux-armhf/Release
- 8e8b1aaa9f7ad1fb4ae990241dbea485d6c33de9aaa29a590a093dde047f68b8 498 plugins/binary-linux-armel/Packages
- b020f3478d53feb62cbe9b7016c23f7d9c49f167f0ac34b7e0eb368882ba71fb 363 plugins/binary-linux-armel/Packages.gz
+ 2a304dd61163f083fa0a33293eba9875778a9e0f4227daade8c0c3ecdb5724f5 498 plugins/binary-linux-armel/Packages
+ 871efa3e6bf4a0d5eb91b224bbc051b8e111dbefb1206598e600741890300926 362 plugins/binary-linux-armel/Packages.gz
  1878d560820b9d0b4febda2ec970b30348d18fc9dfdea541e230a3559078438c 173 plugins/binary-linux-armel/Release
- 8e8b1aaa9f7ad1fb4ae990241dbea485d6c33de9aaa29a590a093dde047f68b8 498 plugins/binary-darwin-amd64/Packages
- b020f3478d53feb62cbe9b7016c23f7d9c49f167f0ac34b7e0eb368882ba71fb 363 plugins/binary-darwin-amd64/Packages.gz
+ 2a304dd61163f083fa0a33293eba9875778a9e0f4227daade8c0c3ecdb5724f5 498 plugins/binary-darwin-amd64/Packages
+ 871efa3e6bf4a0d5eb91b224bbc051b8e111dbefb1206598e600741890300926 362 plugins/binary-darwin-amd64/Packages.gz
  c3bedafff841f0cd9259e4359df6b1ae7a33d7ef655f35af287e9f779e46022d 174 plugins/binary-darwin-amd64/Release
- 5beb9140c7531a7e73eefccec10ab50a4811258e06584642eb17912bea1f5344 884 plugins/source/Sources
- 8f2d2849448b894ca25b6460491ec32009407a37f801f3313f2d3edf3231ae72 504 plugins/source/Sources.gz
+ a717f82d68abab521341e17eecfae1938373728f7da5ea1f742e79be2049755c 884 plugins/source/Sources
+ 40fe02a47f6ab66ef5dfe4d2be1bf9fb2988c51c8305bf35c539ae83e5e11248 502 plugins/source/Sources.gz
  70a4e73cf7353ca4691d705a10469fe28435c058d8987034dcfb686c62698a3b 168 plugins/source/Release
  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 themes/binary-windows-i386/Packages
  59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 themes/binary-windows-i386/Packages.gz
