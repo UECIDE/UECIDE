@@ -353,7 +353,6 @@ public class Editor extends JFrame {
 
         testConsole.getTermPanel().addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                System.err.println(e.getScrollAmount() * e.getWheelRotation());
                 testConsole.getScrollBar().setValue(
                     testConsole.getScrollBar().getValue() + (
                         e.getScrollAmount() * e.getWheelRotation()

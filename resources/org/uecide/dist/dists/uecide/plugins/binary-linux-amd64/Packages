@@ -1,15 +1,15 @@
 Package: serialterminal
-Version: 1.1.0
+Version: 1.1.1
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 108
+Installed-Size: 109
 Priority: optional
 Section: plugins
-Filename: pool/plugins/s/serialterminal/serialterminal_1.1.0_all.deb
-Size: 90712
-SHA256: f572608a63f41006153e9fd1fa882b74bc62843aadf8b0b7467bc9d1098ca2f6
-SHA1: 05217d143bed5875a1f2c46d93d9d573a2d3e072
-MD5sum: d89c3b57070083c8d80a750998ce4f9d
+Filename: pool/plugins/s/serialterminal/serialterminal_1.1.1_all.deb
+Size: 91482
+SHA256: ff4d3d0e4fb8e28f729eeb544ea5973ff5833d82344910c8dc64d43df4b46f09
+SHA1: d0b065b23290c9bc2a66498eb86198868685cd0c
+MD5sum: 68dcfe3f255a286ac2129156c9304133
 Description: Serial Terminal
  Serial Terminal emulator with ANSI support.
 Group: Communications
