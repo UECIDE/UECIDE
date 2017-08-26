@@ -1133,6 +1133,8 @@ public class PluginManager implements PropertyChangeListener
 
         QueueWorker downloader = new QueueWorker() {
 
+            boolean status;
+
             @Override
             public String getTaskName() {
                 Package p = (Package)getUserObject();
@@ -1152,12 +1154,12 @@ public class PluginManager implements PropertyChangeListener
             @Override
             public Void doInBackground() {
                 Package p = (Package)getUserObject();
-                p.fetchPackage(Base.getDataFile("apt/cache"));
+                status = p.fetchPackage(Base.getDataFile("apt/cache"));
                 return null;
             }
 
             public void done() {
-                startInstall((Package)getUserObject());
+                if (status) startInstall((Package)getUserObject());
             }
         };
 

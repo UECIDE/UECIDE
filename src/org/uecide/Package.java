@@ -321,6 +321,11 @@ public class Package implements Comparable, Serializable {
                     }
 
                     System.out.print("\rDownloading " + tname + " [.........................]");
+
+                    String existingSha = properties.get("SHA256");
+                    MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+
                     long start = System.currentTimeMillis() / 1000;
                     long ts = start;
                     while ((n = in.read(buffer)) > 0) {
@@ -359,11 +364,26 @@ public class Package implements Comparable, Serializable {
                                 }
                             }
                         }
+                        md.update(buffer, 0, n);
                         out.write(buffer, 0, n);
                     }
-                    System.out.println("\rDownloading " + tname + " [#########################] done[0K");
                     in.close();
                     out.close();
+                    byte[] mdbytes = md.digest();
+
+                    StringBuffer hexString = new StringBuffer();
+                    for (int i=0;i<mdbytes.length;i++) {
+                      hexString.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
+                    }
+
+                    if (!hexString.toString().equalsIgnoreCase(existingSha)) {
+                        System.out.println("\rDownloading " + tname + " [#########################] [31mchecksum error[0m[0K");
+                        downloadTo.delete();
+                        return false;
+                    }
+
+                    System.out.println("\rDownloading " + tname + " [#########################] done[0K");
+
                     if (checkFileIntegrity(folder)) {
                         return true;
                     }
