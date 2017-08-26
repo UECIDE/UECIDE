@@ -96,7 +96,6 @@ public abstract class Service implements Runnable {
 
     public void run() {
         active = true;
-        System.err.println("Service '" + getName() + "' started");
         setup();
         while (running) {
             try {
@@ -107,7 +106,6 @@ public abstract class Service implements Runnable {
             loop();
         }
         cleanup();
-        System.err.println("Service '" + getName() + "' stopped");
         active = false;
     }
 

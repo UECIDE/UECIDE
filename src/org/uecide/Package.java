@@ -267,6 +267,7 @@ public class Package implements Comparable, Serializable {
     }
 
     public boolean fetchPackage(File folder) {
+        String errorMessage = "";
         if (!checkFileIntegrity(folder)) {
             File downloadTo = new File(folder, getFilename());
             if (downloadTo.exists()) {
@@ -388,8 +389,9 @@ public class Package implements Comparable, Serializable {
                         return true;
                     }
                 } catch (Exception e) {
-                    Base.error(e);
-    //                e.printStackTrace();
+                    errorMessage = e.toString();
+                    System.err.println();
+                    System.err.println("[31mDownload failed: " + errorMessage + "[0m");
                     if (downloadTo.exists()) {
                         downloadTo.delete();
                     }
@@ -410,11 +412,12 @@ public class Package implements Comparable, Serializable {
     public boolean doExtractPackage(File src, File db, File root) {
 
         try {
-            System.out.println("Installing " + getName() + " ... ");
+            System.out.print("Installing " + getName() + " ... ");
             DebFile df = new DebFile(src);
             File pf = new File(db, getName());
             pf.mkdirs();
             df.extract(pf, root);
+            System.out.println("done");
         } catch (Exception e) {
             Base.error(e);
             return false;
