@@ -434,13 +434,12 @@ public class Base {
 
             Package p = apt.getPackage(packageName);
             if (p == null) {
-                System.err.println(i18n.string("err.notfound", p.getName()));
+                System.err.println(i18n.string("err.notfound", packageName));
                 System.err.println(i18n.string("msg.usesearch"));
-                doExit = true;
+            } else {
+                System.out.println(i18n.string("msg.uninstalling", p.getName()));
+                apt.uninstallPackage(p, cli.isSet("force"));
             }
-
-            System.out.println(i18n.string("msg.uninstalling", p.getName()));
-            apt.uninstallPackage(p, cli.isSet("force"));
             doExit = true;
         }
 
