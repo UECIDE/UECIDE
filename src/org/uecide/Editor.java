@@ -1832,7 +1832,7 @@ public class Editor extends JFrame {
                                 if(f.isDirectory()) {
                                     Base.removeDir(f);
                                 } else {
-                                    f.delete();
+                                    Base.tryDelete(f);
                                 }
 
                                 if(tab >= 0) {
@@ -2131,7 +2131,7 @@ public class Editor extends JFrame {
                                 if(f.isDirectory()) {
                                     Base.removeDir(f);
                                 } else {
-                                    f.delete();
+                                    Base.tryDelete(f);
                                 }
 
                                 if(tab >= 0) {
@@ -4160,7 +4160,7 @@ public class Editor extends JFrame {
                     return;
                 }
 
-                newFile.delete();
+                Base.tryDelete(newFile);
             }
 
             if (Preferences.getBoolean("editor.save.remloc")) {
@@ -5125,7 +5125,7 @@ public class Editor extends JFrame {
                 }
 
                 if(archiveFile.exists()) {
-                    archiveFile.delete(); // Confirm!!!
+                    Base.tryDelete(archiveFile);
                 }
 
                 FileOutputStream outfile = new FileOutputStream(archiveFile);

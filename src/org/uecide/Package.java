@@ -271,7 +271,7 @@ public class Package implements Comparable, Serializable {
         if (!checkFileIntegrity(folder)) {
             File downloadTo = new File(folder, getFilename());
             if (downloadTo.exists()) {
-                downloadTo.delete();
+                Base.tryDelete(downloadTo);
             }
             String[] repos = properties.get("Repository").split(";");
             shuffleArray(repos);
@@ -379,7 +379,7 @@ public class Package implements Comparable, Serializable {
 
                     if (!hexString.toString().equalsIgnoreCase(existingSha)) {
                         System.out.println("\rDownloading " + tname + " [#########################] [31mchecksum error[0m[0K");
-                        downloadTo.delete();
+                        Base.tryDelete(downloadTo);
                         return false;
                     }
 
@@ -393,7 +393,7 @@ public class Package implements Comparable, Serializable {
                     System.err.println();
                     System.err.println("[31mDownload failed: " + errorMessage + "[0m");
                     if (downloadTo.exists()) {
-                        downloadTo.delete();
+                        Base.tryDelete(downloadTo);
                     }
                 }
             }

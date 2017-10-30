@@ -537,6 +537,7 @@ public class Base {
             System.exit(0);
         }
 
+
         if (cli.isSet("cli")) {
             headless = true;
             platform.init(this);
@@ -547,7 +548,7 @@ public class Base {
             plugins = new TreeMap<String, Class<?>>();
             lookAndFeels = new TreeMap<String, Class<?>>();
             pluginInstances = new ArrayList<Plugin>();
-
+            
             Serial.updatePortList();
 
             System.out.print(i18n.string("msg.loading.compilers"));
@@ -564,6 +565,8 @@ public class Base {
             System.out.println(i18n.string("msg.loading.done"));
             System.out.print(i18n.string("msg.loading.libraries"));
             gatherLibraries();
+            System.out.print(i18n.string("msg.loading.cleanup"));
+            cleanupDirectory(getDataFolder());
             System.out.println(i18n.string("msg.loading.done"));
 
             buildPreferencesTree();
@@ -715,6 +718,9 @@ public class Base {
         runInitScripts();
 
         initMRU();
+        if (!headless) splashScreen.setMessage(i18n.string("splash.msg.cleanup"), 80);
+
+            cleanupDirectory(getDataFolder());
 
         if(!headless) splashScreen.setMessage(i18n.string("splash.msg.editor"), 80);
 
@@ -1455,7 +1461,7 @@ public class Base {
             File folder = File.createTempFile(name, null);
             //String tempPath = ignored.getParent();
             //return new File(tempPath);
-            folder.delete();
+            tryDelete(folder);
             folder.mkdirs();
             return folder;
 
@@ -1885,10 +1891,7 @@ public class Base {
         if(dir.exists()) {
             Debug.message("Deleting folder " + dir.getAbsolutePath());
             removeDescendants(dir);
-
-            if(!dir.delete()) {
-                //error(i18n.string("err.nodelete", dir.getName()));
-            }
+            tryDelete(dir);
         }
     }
 
@@ -1910,7 +1913,7 @@ public class Base {
             File dead = new File(dir, files[i]);
 
             if(!dead.isDirectory()) {
-                dead.delete();
+                Base.tryDelete(dead);
             } else {
                 removeDir(dead);
             }
@@ -3372,6 +3375,56 @@ public class Base {
                 } else {
                     jsplugins.put(file.getName(), p);
                 }
+            }
+        }
+    }
+
+    public static void tryDelete(File file) {
+        // If it's not there, do nothing.
+        if (!file.exists()) {
+            return;
+        }
+
+        // Try and delete it
+        try {
+            file.delete();
+        } catch (Exception e) {
+        }
+
+        // If it deleted then return
+        if (!file.exists()) return;
+
+        // Otherwise let's try and rename it.
+
+        try {
+            String name = file.getName();
+            File folder = file.getParentFile();
+            File dest = new File(folder, name + ".delete");
+            file.renameTo(dest);
+            if (!file.exists() && dest.exists()) {
+                dest.deleteOnExit();
+                return;
+            }
+        } catch (Exception ee) {
+        }
+       
+        error("Error deleting " + file);
+    }
+
+    public static void cleanupDirectory(File root) {
+        if (!root.exists() || !root.isDirectory()) {
+            return;
+        }
+        File[] files = root.listFiles();
+        for (File f : files) {
+            if (f.getName().endsWith(".delete")) {
+                try {
+                    f.delete();
+                } catch (Exception e) {
+                }
+            }
+            if (f.isDirectory()) {
+                cleanupDirectory(f);
             }
         }
     }

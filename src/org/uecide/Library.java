@@ -87,7 +87,6 @@ public class Library implements Comparable {
         core = c;
 
 
-
         // Identify library type.
 
         // 1. Is it an old style library?
@@ -359,7 +358,9 @@ public class Library implements Comparable {
             }
         }
 
-        sf.addAll(sourceFiles);
+        if (sourceFiles != null) {
+            sf.addAll(sourceFiles);
+        }
         return sf;
     }
 

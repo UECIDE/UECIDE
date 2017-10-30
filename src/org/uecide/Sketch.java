@@ -990,7 +990,10 @@ public class Sketch {
                     File testFile = new File(f, filename);
 
                     if(f.exists()) {
-                        return new Library(testFile, sketchName, "all");
+                        Library ne = new Library(testFile, "sketch", "all");
+                        ne.rescan();
+                        return ne;
+//                        return new Library(testFile, sketchName, "all");
                     }
                 }
             }
@@ -1198,7 +1201,7 @@ public class Sketch {
                 
                 boolean haveHunted = huntForLibraries(tempFile, importedLibraries, unknownLibraries);
 
-                tempFile.delete();
+                Base.tryDelete(tempFile);
 
                 String lines[] = data.split("\n");
 
@@ -1775,7 +1778,7 @@ public class Sketch {
 
             if(last.exists()) {
                 Debug.message("Deleting " + last.getAbsolutePath());
-                last.delete();
+                Base.tryDelete(last);
             }
 
             for(int i = numToSave - 1; i >= 1; i--) {
@@ -1942,7 +1945,7 @@ public class Sketch {
             testFile.createNewFile();
 
             if(testFile.exists()) {
-                testFile.delete();
+                Base.tryDelete(testFile);
                 canWrite = true;
             }
         } catch(Exception e) {
@@ -2636,7 +2639,7 @@ public class Sketch {
                     File cachedStubObject = getCacheFile(mainStubObject.getName());
                     if (mainStubObject.exists()) {
                         Base.copyFile(mainStubObject, cachedStubObject);
-                        mainStubObject.delete();
+                        Base.tryDelete(mainStubObject);
                     }
                 }
             }
@@ -2687,8 +2690,8 @@ public class Sketch {
                 File out = compileFile(f, coreBuildFolder);
 
                 if(out == null) {
-                    coreBuildFolder.delete();
-                    if (archive.exists()) archive.delete();
+                    Base.tryDelete(coreBuildFolder);
+                    if (archive.exists()) Base.tryDelete(archive);
                     return false;
                 }
 
@@ -2696,17 +2699,17 @@ public class Sketch {
                 boolean ok = (Boolean)ctx.executeKey("compile.ar");
 
                 if(!ok) {
-                    out.delete();
-                    coreBuildFolder.delete();
-                    if (archive.exists()) archive.delete();
+                    Base.tryDelete(out);
+                    Base.tryDelete(coreBuildFolder);
+                    if (archive.exists()) Base.tryDelete(archive);
                     return false;
                 }
 
-                out.delete();
+                Base.tryDelete(out);
             }
         }
 
-        coreBuildFolder.delete();
+        Base.tryDelete(coreBuildFolder);
         return true;
     }
 
@@ -2763,7 +2766,7 @@ public class Sketch {
                         editor.updateLibrariesTree();
                     }
 
-                    libBuildFolder.delete();
+                    Base.tryDelete(libBuildFolder);
                     return false;
                 }
 
@@ -2778,8 +2781,8 @@ public class Sketch {
                         editor.updateLibrariesTree();
                     }
 
-                    out.delete();
-                    libBuildFolder.delete();
+                    Base.tryDelete(out);
+                    Base.tryDelete(libBuildFolder);
                     return false;
                 }
 
@@ -2790,7 +2793,7 @@ public class Sketch {
                     editor.updateLibrariesTree();
                 }
 
-                out.delete();
+                Base.tryDelete(out);
             }
         }
 
@@ -2805,7 +2808,7 @@ public class Sketch {
             editor.updateLibrariesTree();
         }
 
-        libBuildFolder.delete();
+        Base.tryDelete(libBuildFolder);
 
         return true;
     }
@@ -3808,7 +3811,7 @@ public class Sketch {
 
     public void purgeLibrary(Library lib) {
         File arch = new File(getCacheFolder(), getArchiveName(lib));
-        arch.delete();
+        Base.tryDelete(arch);
     }
 
     public void purgeCache() {
@@ -3924,7 +3927,7 @@ public class Sketch {
     public boolean generateSarFile(File archiveFile) {
         try {
             if(archiveFile.exists()) {
-                archiveFile.delete();
+                Base.tryDelete(archiveFile);
             }
 
             FileOutputStream outfile = new FileOutputStream(archiveFile);

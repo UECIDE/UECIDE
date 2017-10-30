@@ -93,7 +93,7 @@ public class DebFile {
             if (fi.type == FILE) {
                 // Remove the old file if it's there
                 if (dest.exists()) {
-                    dest.delete();
+                    Base.tryDelete(dest);
                 }
                 fi.source.renameTo(dest);
             }
@@ -104,7 +104,7 @@ public class DebFile {
             FileInfo fi = files.get(dest);
             if (fi.type == LINK) {
                 if (dest.exists()) {
-                    dest.delete();
+                    Base.tryDelete(dest);
                 }
                 Base.copyFile(fi.source, dest);
                 dest.setExecutable(fi.source.canExecute());

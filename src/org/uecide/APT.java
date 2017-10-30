@@ -593,7 +593,7 @@ public class APT {
                             dirs.add(par);
                         }
                     }
-                    f.delete();
+                    Base.tryDelete(f);
                 }
 
                 cleanDirectoryList(dirs);
@@ -622,7 +622,7 @@ public class APT {
                             todo.add(p);
                         }
                         
-                        d.delete();
+                        Base.tryDelete(d);
                     }
                 }
             }
