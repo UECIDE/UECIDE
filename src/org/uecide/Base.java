@@ -42,8 +42,6 @@ import java.text.*;
 import org.uecide.plugin.*;
 import org.uecide.themes.*;
 
-import com.microchip.mplab.mdb.debugapi.CmdDebugger;
-
 import javax.script.*;
 
 import org.uecide.builtin.BuiltinCommand;
