@@ -768,6 +768,7 @@ public class Base {
             File lastFile = MRUList.get(0);
 
             if(lastFile != null) {
+                if (!headless && !opened)
                 opened = doOpenThings(lastFile);
             }
         }
