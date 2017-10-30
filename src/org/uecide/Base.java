@@ -42,6 +42,8 @@ import java.text.*;
 import org.uecide.plugin.*;
 import org.uecide.themes.*;
 
+import com.microchip.mplab.mdb.debugapi.CmdDebugger;
+
 import javax.script.*;
 
 import org.uecide.builtin.BuiltinCommand;
@@ -778,11 +780,9 @@ public class Base {
             if (preferences.get("changelog.hide") != null) {
                 Version vhidden = new Version(preferences.get("changelog.hide"));
                 if (systemVersion.compareTo(vhidden) > 0) {
-System.err.println("Showing changelog as there is a new version");
                     Changelog c = new Changelog(Editor.editorList.get(0));
                 }
             } else {
-System.err.println("Showing changelog as I don't know better");
                 Changelog c = new Changelog(Editor.editorList.get(0));
             }
 
@@ -1889,7 +1889,7 @@ System.err.println("Showing changelog as I don't know better");
             removeDescendants(dir);
 
             if(!dir.delete()) {
-                error(i18n.string("err.nodelete", dir.getName()));
+                //error(i18n.string("err.nodelete", dir.getName()));
             }
         }
     }
@@ -2246,7 +2246,12 @@ System.err.println("Showing changelog as I don't know better");
             if ((preferences != null) && (preferences.getFile("locations.data") != null)) {
                 out = preferences.getFile("locations.data");
             } else {
-                out = platform.getSettingsFolder();
+                File portable = new File(getJarLocation().getParentFile(), "portable");
+                if (portable.exists() && portable.isDirectory()) {
+                    out = portable;
+                } else {
+                    out = platform.getSettingsFolder();
+                }
             }
         }
         if (!out.exists()) {
