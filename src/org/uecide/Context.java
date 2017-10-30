@@ -945,7 +945,8 @@ public class Context {
                         try {
                             retval = m.invoke(p, aa);
                         } catch (Exception e3) {
-                            retval = "";
+                            Base.error(e3);
+                            retval = false;
                         } 
                     }
                 };
@@ -953,8 +954,9 @@ public class Context {
                 runningThread.join();
                 return runningThread.retval;
             } catch (Exception e2) {
+                Base.error(e2);
                 runningThread = null;
-                return "";
+                return false;
             }
 
 

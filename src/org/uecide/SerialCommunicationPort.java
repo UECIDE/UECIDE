@@ -320,7 +320,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
             
 
     public CommsSpeed[] getSpeeds() {
-        CommsSpeed[] s = new CommsSpeed[25];
+        CommsSpeed[] s = new CommsSpeed[26];
         s[0] = new CommsSpeed(300, "300 baud");
         s[1] = new CommsSpeed(1200, "1200 baud");
         s[2] = new CommsSpeed(2400, "2400 baud");
@@ -333,19 +333,20 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
         s[9] = new CommsSpeed(57600, "57600 baud");
         s[10] = new CommsSpeed(115200, "115200 baud");
         s[11] = new CommsSpeed(230400, "230400 baud");
-        s[12] = new CommsSpeed(460800, "460800 baud");
-        s[13] = new CommsSpeed(500000, "500000 baud");
-        s[14] = new CommsSpeed(512000, "512000 baud");
-        s[15] = new CommsSpeed(576000, "576000 baud");
-        s[16] = new CommsSpeed(1000000, "1000000 baud");
-        s[17] = new CommsSpeed(1024000, "1024000 baud");
-        s[18] = new CommsSpeed(1152000, "1152000 baud");
-        s[19] = new CommsSpeed(2000000, "2000000 baud");
-        s[20] = new CommsSpeed(2304000, "2304000 baud");
-        s[21] = new CommsSpeed(2500000, "2500000 baud");
-        s[22] = new CommsSpeed(3000000, "3000000 baud");
-        s[23] = new CommsSpeed(3500000, "3500000 baud");
-        s[24] = new CommsSpeed(4000000, "4000000 baud");
+        s[12] = new CommsSpeed(250000, "250000 baud");
+        s[13] = new CommsSpeed(460800, "460800 baud");
+        s[14] = new CommsSpeed(500000, "500000 baud");
+        s[15] = new CommsSpeed(512000, "512000 baud");
+        s[16] = new CommsSpeed(576000, "576000 baud");
+        s[17] = new CommsSpeed(1000000, "1000000 baud");
+        s[18] = new CommsSpeed(1024000, "1024000 baud");
+        s[19] = new CommsSpeed(1152000, "1152000 baud");
+        s[20] = new CommsSpeed(2000000, "2000000 baud");
+        s[21] = new CommsSpeed(2304000, "2304000 baud");
+        s[22] = new CommsSpeed(2500000, "2500000 baud");
+        s[23] = new CommsSpeed(3000000, "3000000 baud");
+        s[24] = new CommsSpeed(3500000, "3500000 baud");
+        s[25] = new CommsSpeed(4000000, "4000000 baud");
         return s;
     }
 

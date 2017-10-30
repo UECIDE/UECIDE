@@ -113,7 +113,7 @@ public class ecma implements BuiltinCommand {
                         try {
                             while (stde_pr.ready()) {
                                 int i = stde_pr.read(tmp, 0, 20);
-                                ctx.messageStream(new String(tmp, 0, i));
+                                ctx.messageStream("+" + new String(tmp, 0, i));
                             }
                         } catch (Exception ex) {
                         }
@@ -124,12 +124,19 @@ public class ecma implements BuiltinCommand {
 
 
             Invocable inv = (Invocable)engine;
-            Boolean ret = (Boolean)inv.invokeFunction("run", (Object[])args);
+            Object o = inv.invokeFunction("run", (Object[])args);
+            Boolean ret = false;
+            if (o instanceof Boolean) {
+                ret = (Boolean)o;
+            } else {
+                System.err.println(o);
+            }
             stdo_pw.flush();
             stde_pw.flush();
             running = false;
             return ret;
         } catch (Exception e) {
+            ctx.error("Exception...");
             ctx.error(e);
         }
         return false;
