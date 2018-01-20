@@ -560,8 +560,9 @@ public class Base {
             Serial.updatePortList();
 
             System.out.print(i18n.string("msg.loading.assets"));
-            loadCompilers();
             loadCores();
+            waitForAssetLoading();
+            loadCompilers();
             loadBoards();
             loadProgrammers();
             gatherLibraries();
@@ -650,18 +651,18 @@ public class Base {
         if(!headless) splashScreen.setMessage(i18n.string("splash.msg.assets"), 40);
 
 
-        loadCompilers();
         loadCores();
+        waitForAssetLoading();
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.assets"), 50);
+
+        loadCompilers();
         loadBoards();
         loadProgrammers();
         gatherLibraries();
-
         cleanupSystem();
-
         loadPlugins();
         loadIconSets();
         loadThemes();
-
         waitForAssetLoading();
 
 

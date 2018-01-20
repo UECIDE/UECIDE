@@ -48,35 +48,59 @@ import org.uecide.varcmd.VariableCommand;
 // It is here that all execution, messaging, string parsing, etc should happen.
 
 public class Context {
-    Board board = null;
-    Core core = null;
-    Compiler compiler = null;
-    Programmer programmer = null;
-    Sketch sketch = null;
-    Editor editor = null;
-    CommunicationPort port = null;
+    public Board board = null;
+    public Core core = null;
+    public Compiler compiler = null;
+    public Programmer programmer = null;
+    public Sketch sketch = null;
+    public Editor editor = null;
+    public CommunicationPort port = null;
 
-    ContextListener listener = null;
+    public ContextListener listener = null;
 
-    StringBuilder buffer = null;
+    public StringBuilder buffer = null;
 
-    HashMap<String, String> varcmds = new HashMap<String, String>();
+    public HashMap<String, String> varcmds = new HashMap<String, String>();
 
     boolean bufferError = false;
 
-    PropertyFile settings = null;
-    PropertyFile sketchSettings = null;
+    public PropertyFile settings = null;
+    public PropertyFile sketchSettings = null;
 
-    Process runningProcess = null;
-    ThreadRet runningThread = null;
+    public Process runningProcess = null;
+    public ThreadRet runningThread = null;
 
-    PropertyFile savedSettings = null;
+    public PropertyFile savedSettings = null;
 
-    DataStreamParser parser = null;
+    public DataStreamParser parser = null;
 
     public boolean silence = false;
 
     // Make a new empty context.
+
+    public Context(Context src) {
+        board = src.board;
+        core = src.core;
+        compiler = src.compiler;
+        programmer = src.programmer;
+        sketch = src.sketch;
+        editor = src.editor;
+        port = src.port;
+        listener = src.listener;
+        buffer = src.buffer;
+        bufferError = src.bufferError;
+        runningProcess = src.runningProcess;
+        runningThread = src.runningThread;
+        parser = src.parser;
+        silence = src.silence;
+
+        for (String vc : src.varcmds.keySet()) {
+            varcmds.put(vc, src.varcmds.get(vc));
+        }
+        settings = new PropertyFile(src.settings);
+        sketchSettings = new PropertyFile(src.sketchSettings);
+        savedSettings = new PropertyFile(src.savedSettings);
+    }
 
     public Context() {
         settings = new PropertyFile();

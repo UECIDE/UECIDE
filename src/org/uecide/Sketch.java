@@ -1210,12 +1210,13 @@ public class Sketch {
 
                     if (match.find()) {
                         if (!haveHunted) {
-                            Library lib = findLibrary(match.group(1));
+                            Library lib = findLibrary(match.group(1).trim());
                             if (lib != null) {
-                                importedLibraries.put(match.group(1), lib);
+                                System.err.println("Located library " + match.group(1).trim() + " (" + lib.getMainInclude() + ")");
+                                importedLibraries.put(lib.getMainInclude(), lib);
                             } else {
-                                if(unknownLibraries.indexOf(match.group(1)) == -1) {
-                                    unknownLibraries.add(match.group(1));
+                                if(unknownLibraries.indexOf(match.group(1).trim()) == -1) {
+                                    unknownLibraries.add(match.group(1).trim());
                                 }
                             }
                         }
@@ -1237,6 +1238,12 @@ public class Sketch {
 
         if(editor != null) {
             editor.updateLibrariesTree();
+        }
+
+        System.err.println("Libraries:");
+
+        for (String libname : importedLibraries.keySet()) {
+            System.err.println("    " + libname);
         }
     }
 
@@ -2494,21 +2501,65 @@ public class Sketch {
         return true;
     }
 
+    class LibCompileThread extends Thread {
+        public boolean compiled = false;
+        public Library target = null;
+        public LibCompileThread(Library tgt) {
+            target = tgt;
+        }
+        public void run() {
+            compiled = compileLibrary(target);
+        }
+    }
+
     public boolean compileLibraries() {
+        boolean ok = true;
+        ArrayList<LibCompileThread> threads = new ArrayList<LibCompileThread>();
+
+        int maxThreads = 4;
+        int currentThreads = 0;
+
         for(String lib : importedLibraries.keySet()) {
-            if(!compileLibrary(importedLibraries.get(lib))) {
-                return false;
+
+            while (currentThreads >= maxThreads) {
+                for (LibCompileThread t : threads) {
+                    try {
+                        t.join(10);
+                        if (t.getState() == Thread.State.TERMINATED) {
+                            if (t.compiled == false) ok = false;
+                            currentThreads--;
+                            threads.remove(threads.indexOf(t));
+                            break;
+                        }
+                    } catch (Exception e) {
+                        error(e);
+                    }
+                }
+            }
+
+            LibCompileThread t = new LibCompileThread(importedLibraries.get(lib));
+            t.start();
+            threads.add(t);
+            currentThreads++;
+        }
+
+        for (LibCompileThread t : threads) {
+            try {
+                t.join();
+                if (t.compiled == false) ok = false;
+            } catch (Exception e) {
+                error(e);
             }
         }
 
-        return true;
+        return ok;
     }
 
-    private File compileFile(File src) {
-        return compileFile(src, buildFolder);
+    private File compileFile(Context localCtx, File src) {
+        return compileFile(localCtx, src, buildFolder);
     }
 
-    private File compileFile(File src, File fileBuildFolder) {
+    private File compileFile(Context localCtx, File src, File fileBuildFolder) {
     
         String fileName = src.getName();
         String recipe = null;
@@ -2519,7 +2570,7 @@ public class Sketch {
             return null;
         }
 
-        PropertyFile props = ctx.getMerged();
+        PropertyFile props = localCtx.getMerged();
 
         if(fileName.endsWith(".cpp")) {
             recipe = "compile.cpp";
@@ -2551,7 +2602,7 @@ public class Sketch {
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-        String objExt = ctx.parseString(props.get("compiler.object","o"));
+        String objExt = localCtx.parseString(props.get("compiler.object","o"));
         File dest = new File(fileBuildFolder, fileName + "." +objExt);
 
         if(dest.exists()) {
@@ -2560,11 +2611,11 @@ public class Sketch {
             }
         }
 
-        ctx.set("build.path", fileBuildFolder.getAbsolutePath());
-        ctx.set("source.name", src.getAbsolutePath());
-        ctx.set("object.name", dest.getAbsolutePath());
+        localCtx.set("build.path", fileBuildFolder.getAbsolutePath());
+        localCtx.set("source.name", src.getAbsolutePath());
+        localCtx.set("object.name", dest.getAbsolutePath());
 
-        ctx.addDataStreamParser(new DataStreamParser() {
+        localCtx.addDataStreamParser(new DataStreamParser() {
             public String parseStreamMessage(Context ctx, String m) {
                 if (parseLineForWarningMessage(ctx, m)) {
                     return "";
@@ -2583,11 +2634,11 @@ public class Sketch {
         });
 
         String output = "";
-        if(!(Boolean)ctx.executeKey(recipe)) {
-            ctx.removeDataStreamParser();
+        if(!(Boolean)localCtx.executeKey(recipe)) {
+            localCtx.removeDataStreamParser();
             return null;
         }
-        ctx.removeDataStreamParser();
+        localCtx.removeDataStreamParser();
 
         if(!dest.exists()) {
             return null;
@@ -2635,7 +2686,7 @@ public class Sketch {
             for (String stubFile : bits) {
                 File mainStubFile = new File(stubFile);
                 if (mainStubFile.exists()) {
-                    File mainStubObject = compileFile(mainStubFile);
+                    File mainStubObject = compileFile(ctx, mainStubFile);
                     File cachedStubObject = getCacheFile(mainStubObject.getName());
                     if (mainStubObject.exists()) {
                         Base.copyFile(mainStubObject, cachedStubObject);
@@ -2687,7 +2738,7 @@ public class Sketch {
 
         for(File f : fileList) {
             if(f.lastModified() > archiveDate) {
-                File out = compileFile(f, coreBuildFolder);
+                File out = compileFile(ctx, f, coreBuildFolder);
 
                 if(out == null) {
                     Base.tryDelete(coreBuildFolder);
@@ -2729,12 +2780,13 @@ public class Sketch {
     }
 
     public boolean compileLibrary(Library lib) {
+        Context localCtx = new Context(ctx);
         File archive = getCacheFile(getArchiveName(lib));  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
-        PropertyFile props = ctx.getMerged();
+        PropertyFile props = localCtx.getMerged();
         if (!Base.isQuiet()) bullet2(lib.toString() + " [" + lib.getFolder().getAbsolutePath() + "]");
 
-        ctx.set("library", archive.getAbsolutePath());
+        localCtx.set("library", archive.getAbsolutePath());
 
         long archiveDate = 0;
 
@@ -2744,11 +2796,14 @@ public class Sketch {
 
         File libBuildFolder = new File(buildFolder, "lib" + lib.getLinkName());
         libBuildFolder.mkdirs();
+        if (!libBuildFolder.exists()) {
+            error("Failed to make build folder " + libBuildFolder);
+        }
 
         TreeSet<File> fileList = lib.getSourceFiles(this);
 
-        String origIncs = ctx.get("includes");
-        ctx.set("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
+        String origIncs = localCtx.get("includes");
+        localCtx.set("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
 
         int fileCount = fileList.size();
 
@@ -2756,7 +2811,7 @@ public class Sketch {
 
         for(File f : fileList) {
             if(f.lastModified() > archiveDate) {
-                File out = compileFile(f, libBuildFolder);
+                File out = compileFile(localCtx, f, libBuildFolder);
 
                 if(out == null) {
                     purgeLibrary(lib);
@@ -2770,8 +2825,8 @@ public class Sketch {
                     return false;
                 }
 
-                ctx.set("object.name", out.getAbsolutePath());
-                boolean ok = (Boolean)ctx.executeKey("compile.ar");
+                localCtx.set("object.name", out.getAbsolutePath());
+                boolean ok = (Boolean)localCtx.executeKey("compile.ar");
 
                 if(!ok) {
                     purgeLibrary(lib);
@@ -2801,7 +2856,7 @@ public class Sketch {
             editor.updateOutputTree();
         }
 
-        ctx.set("includes", origIncs);
+        localCtx.set("includes", origIncs);
         lib.setCompiledPercent(100);
 
         if(editor != null) {
@@ -2854,25 +2909,25 @@ public class Sketch {
         return objectPaths;
     }
 
-    private ArrayList<File> compileFileList(File dest, ArrayList<File> sources, String key) {
+    private ArrayList<File> compileFileList(Context localCtx, File dest, ArrayList<File> sources, String key) {
         ArrayList<File> objectPaths = new ArrayList<File>();
-        PropertyFile props = ctx.getMerged();
+        PropertyFile props = localCtx.getMerged();
 
-        ctx.set("build.path", dest.getAbsolutePath());
-        String objExt = ctx.parseString(props.get("compiler.object","o"));
+        localCtx.set("build.path", dest.getAbsolutePath());
+        String objExt = localCtx.parseString(props.get("compiler.object","o"));
 
-        ctx.addDataStreamParser(new DataStreamParser() {
-            public String parseStreamMessage(Context ctx, String m) {
-                if (parseLineForWarningMessage(ctx, m)) {
+        localCtx.addDataStreamParser(new DataStreamParser() {
+            public String parseStreamMessage(Context localCtx, String m) {
+                if (parseLineForWarningMessage(localCtx, m)) {
                     return "";
                 }
                 return m;
             }
-            public String parseStreamError(Context ctx, String m) {
-                if (parseLineForErrorMessage(ctx, m)) {
+            public String parseStreamError(Context localCtx, String m) {
+                if (parseLineForErrorMessage(localCtx, m)) {
                     return "";
                 }
-                if (parseLineForWarningMessage(ctx, m)) {
+                if (parseLineForWarningMessage(localCtx, m)) {
                     return "";
                 }
                 return m;
@@ -2885,42 +2940,42 @@ public class Sketch {
             File objectFile = new File(dest, fileName + "." + objExt);
             objectPaths.add(objectFile);
 
-            ctx.set("source.name", file.getAbsolutePath());
-            ctx.set("object.name", objectFile.getAbsolutePath());
+            localCtx.set("source.name", file.getAbsolutePath());
+            localCtx.set("object.name", objectFile.getAbsolutePath());
 
             if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
                 continue;
             }
 
-            if(!(Boolean)ctx.executeKey(key)) {
-                ctx.removeDataStreamParser();
+            if(!(Boolean)localCtx.executeKey(key)) {
+                localCtx.removeDataStreamParser();
                 return null;
             }
 
             if(!objectFile.exists()) {
-                ctx.removeDataStreamParser();
+                localCtx.removeDataStreamParser();
                 return null;
             }
         }
-        ctx.removeDataStreamParser();
+        localCtx.removeDataStreamParser();
         return objectPaths;
     }
 
-    private ArrayList<File> compileFiles(File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources) {
+    private ArrayList<File> compileFiles(Context localCtx, File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources) {
 
         ArrayList<File> objectPaths = new ArrayList<File>();
-        PropertyFile props = ctx.getMerged();
+        PropertyFile props = localCtx.getMerged();
 
-        ctx.set("build.path", dest.getAbsolutePath());
-        String objExt = ctx.parseString(props.get("compiler.object","o"));
+        localCtx.set("build.path", dest.getAbsolutePath());
+        String objExt = localCtx.parseString(props.get("compiler.object","o"));
 
-        ArrayList<File> sObjects = compileFileList(dest, sSources, "compile.S");
+        ArrayList<File> sObjects = compileFileList(localCtx, dest, sSources, "compile.S");
         if (sObjects == null) { return null; }
 
-        ArrayList<File> cObjects = compileFileList(dest, cSources, "compile.c");
+        ArrayList<File> cObjects = compileFileList(localCtx, dest, cSources, "compile.c");
         if (cObjects == null) { return null; }
 
-        ArrayList<File> cppObjects = compileFileList(dest, cppSources, "compile.cpp");
+        ArrayList<File> cppObjects = compileFileList(localCtx, dest, cppSources, "compile.cpp");
         if (cppObjects == null) { return null; }
 
         objectPaths.addAll(sObjects);
@@ -2950,7 +3005,7 @@ public class Sketch {
             }
         }
 
-        ArrayList<File> compiledFiles = compileFiles(
+        ArrayList<File> compiledFiles = compileFiles(ctx,
                                             buildFolder,
                                             findFilesInFolder(buildFolder, "S", false),
                                             findFilesInFolder(buildFolder, "c", false),
@@ -2995,7 +3050,7 @@ public class Sketch {
                     }
                 }
 
-                sf.addAll(compileFiles(buildFolder, sFiles, cFiles, cppFiles));
+                sf.addAll(compileFiles(ctx, buildFolder, sFiles, cFiles, cppFiles));
             }
         }
 
@@ -3004,7 +3059,7 @@ public class Sketch {
         if(suf.exists()) {
             File buf = new File(buildFolder, "utility");
             buf.mkdirs();
-            ArrayList<File> uf = compileFiles(
+            ArrayList<File> uf = compileFiles(ctx,
                                 buf,
                                 findFilesInFolder(suf, "S", true),
                                 findFilesInFolder(suf, "c", true),
@@ -4409,8 +4464,8 @@ public class Sketch {
         for (String inc : lib.getRequiredLibraries()) {
             Library sl = findLibrary(inc);
             if (sl != null) {
-                if (foundLibs.get(inc) == null) {
-                    foundLibs.put(inc, sl);
+                if (foundLibs.get(sl.getMainInclude()) == null) {
+                    foundLibs.put(sl.getMainInclude(), sl);
                     addRecursiveLibraries(foundLibs, missingLibs, sl);
                 }
             } else {
@@ -4434,8 +4489,8 @@ public class Sketch {
             for (String inc : incs) {
                 Library l = findLibrary(inc);
                 if (l != null) {
-                    if (foundLibs.get(inc) == null) {
-                        foundLibs.put(inc, l);
+                    if (foundLibs.get(l.getMainInclude()) == null) {
+                        foundLibs.put(l.getMainInclude(), l);
                         addRecursiveLibraries(foundLibs, missingLibs, l);
                     }
                 } else {

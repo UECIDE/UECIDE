@@ -841,5 +841,9 @@ public class Library implements Comparable {
             }
         }
     }
+
+    public String getMainInclude() {
+        return mainInclude.getName();
+    }
 }
 
