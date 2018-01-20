@@ -100,4 +100,6 @@ public interface CommunicationPort {
     // A pair of functions to get and set data (strings) within the port object.
     public void set(String key, String val);
     public String get(String key);
+
+    public boolean exists();
 }

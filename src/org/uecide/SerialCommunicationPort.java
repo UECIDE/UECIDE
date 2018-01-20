@@ -503,5 +503,10 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     }
 
 
+    public boolean exists() {
+        File f = new File(serialPort.getPortName());
+        return f.exists();
+    }
+
 
 }

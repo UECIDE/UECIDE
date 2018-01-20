@@ -142,5 +142,8 @@ public class UsbHidDevice implements CommunicationPort {
     public boolean write(byte[] data) { return false; }
     public boolean write(byte data) { return false; }
 
+    public boolean exists() {   
+        return true;
+    }
 
 }

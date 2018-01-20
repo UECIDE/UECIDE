@@ -1212,7 +1212,6 @@ public class Sketch {
                         if (!haveHunted) {
                             Library lib = findLibrary(match.group(1).trim());
                             if (lib != null) {
-                                System.err.println("Located library " + match.group(1).trim() + " (" + lib.getMainInclude() + ")");
                                 importedLibraries.put(lib.getMainInclude(), lib);
                             } else {
                                 if(unknownLibraries.indexOf(match.group(1).trim()) == -1) {
@@ -1240,11 +1239,6 @@ public class Sketch {
             editor.updateLibrariesTree();
         }
 
-        System.err.println("Libraries:");
-
-        for (String libname : importedLibraries.keySet()) {
-            System.err.println("    " + libname);
-        }
     }
 
     public synchronized boolean prepare() {

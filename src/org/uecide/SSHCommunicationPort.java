@@ -304,4 +304,8 @@ public class SSHCommunicationPort implements CommunicationPort {
         return name;
     }
 
+    public boolean exists() { 
+        return true;
+    }
+
 }

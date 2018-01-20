@@ -6,7 +6,7 @@ Label: UECIDE Internal
 Suite: stable
 Codename: uecide
 Version: 3.1
-Date: Thu, 24 Aug 2017 19:50:37 UTC
+Date: Wed, 17 Jan 2018 15:01:17 UTC
 Architectures: windows-i386 windows-amd64 linux-amd64 linux-i386 linux-armhf linux-armel darwin-amd64
 Components: cores boards compilers plugins themes extra libraries repos main
 Description: Internal repository for distribution of plugins
@@ -705,7 +705,7 @@ SHA256:
  06b4e8164bf04b3d16f1b420465db0e4b757cc8211195c623855b057b2889231 368 Contents-darwin-amd64.gz
 -----BEGIN PGP SIGNATURE-----
 
-iF4EAREIAAYFAlmfLg0ACgkQg4ak0MqfAKGZXQEAp5tCTB9UeD9W2un7NKBccS52
-sXBb/KHT6Di0jsIgASAA/0tqjM906DiKdHwAUHrvkYqIbWBzcFgHikr0+ee1XuEf
-=ZpdM
+iF4EAREIAAYFAlpfZT4ACgkQg4ak0MqfAKE0cAD9EIc24EPXN6jHBa126FJ3GEM1
+JeXO0r8Uw+dIhF4tYagA/jaoUiOqvdvgnbW9J/IIbKBCp8LjrsyiNR591nMHTg/E
+=EPOi
 -----END PGP SIGNATURE-----
