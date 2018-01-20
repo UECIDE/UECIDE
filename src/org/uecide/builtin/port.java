@@ -131,13 +131,10 @@ public class port implements BuiltinCommand {
                 long start = System.currentTimeMillis();
                 while (true) {
                     Serial.updatePortList();
-System.err.println("====");
                     Thread.sleep(100);
                     ArrayList<String> newList = Serial.getPortList();
                     for (String port : newList) {
-System.err.println("   " + port);
                         if (currentList.indexOf(port) < 0) {
-                            System.err.println("New port found: " + port);
                             CommunicationPort cp = Serial.getPortByName(port);
                             if (cp != null) {
                                 if (cp instanceof SerialCommunicationPort) {
@@ -145,16 +142,12 @@ System.err.println("   " + port);
                                     int newvid = sp.getVID();
                                     int newpid = sp.getPID();
 
-System.err.println(String.format("VID: %x PID: %x\r\n", newvid, newpid));
-
                                     if (Base.isWindows()) { // Can't do it yet
-                                        System.err.println("Match found");
                                         ctx.set("port.found", port);
                                         return true;
                                     }
 
                                     if ((newvid == vid) && (newpid == pid)) {
-                                        System.err.println("Match found");
                                         ctx.set("port.found", port);
                                         return true;
                                     }

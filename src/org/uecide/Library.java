@@ -608,6 +608,9 @@ public class Library implements Comparable {
         libraryList = new TreeMap<String, ArrayList<Library>>();
         categoryNames = new TreeMap<String, String>();
 
+
+// We never have these any more. They're all split out into core-centric library folders
+/*
         // Start with the compiler.  It's rare that there would be any here.
         for(Compiler c : Base.compilers.values()) {
             setCategoryName("compiler:" + c.getName(), c.getDescription());
@@ -625,6 +628,7 @@ public class Library implements Comparable {
             setCategoryName("board:" + c.getName(), c.getDescription());
             loadLibrariesFromFolder(c.getLibrariesFolder(), "core:" + c.getName());
         }
+*/
 
         int foundCats = 0;
 

@@ -148,6 +148,14 @@ public class Base {
 
     public static I18N i18n = new I18N("Core");
 
+    static Thread compilerLoaderThread = null;
+    static Thread coreLoaderThread = null;
+    static Thread boardLoaderThread = null;
+    static Thread programmerLoaderThread = null;
+    static Thread libraryLoaderThread = null;
+    static Thread cleanupThread = null;
+
+
     /*! Get a Board from the internal boards list by its short name. */
     public static Board getBoard(String name) {
         return boards.get(name);
@@ -551,22 +559,16 @@ public class Base {
             
             Serial.updatePortList();
 
-            System.out.print(i18n.string("msg.loading.compilers"));
+            System.out.print(i18n.string("msg.loading.assets"));
             loadCompilers();
-            System.out.println(i18n.string("msg.done"));
-            System.out.print(i18n.string("msg.loading.cores"));
             loadCores();
-            System.out.println(i18n.string("cli.msg.loading.done"));
-            System.out.print(i18n.string("msg.loading.boards"));
             loadBoards();
-            System.out.println(i18n.string("cli.msg.loading.done"));
-            System.out.print(i18n.string("msg.loading.programmers"));
             loadProgrammers();
-            System.out.println(i18n.string("msg.loading.done"));
-            System.out.print(i18n.string("msg.loading.libraries"));
             gatherLibraries();
-            System.out.print(i18n.string("msg.loading.cleanup"));
-            cleanupDirectory(getDataFolder());
+            cleanupSystem();
+            waitForAssetLoading();
+            System.out.println(i18n.string("msg.loading.done"));
+
             System.out.println(i18n.string("msg.loading.done"));
 
             buildPreferencesTree();
@@ -645,24 +647,26 @@ public class Base {
         Serial.updatePortList();
         Serial.fillExtraPorts();
 
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.themes"), 25);
+        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.assets"), 40);
 
-
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.compilers"), 30);
 
         loadCompilers();
-
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.cores"), 40);
-
         loadCores();
-
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.boards"), 50);
-
         loadBoards();
-
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.programmers"), 55);
-
         loadProgrammers();
+        gatherLibraries();
+
+        cleanupSystem();
+
+        loadPlugins();
+        loadIconSets();
+        loadThemes();
+
+        waitForAssetLoading();
+
+
+
+        buildPreferencesTree();
 
         if (cli.isSet("mkmf")) {
             for(int i = 0; i < argv.length; i++) {
@@ -701,26 +705,11 @@ public class Base {
             System.exit(0);
         }
 
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.plugins"), 60);
-
-        loadPlugins();
-
-        loadIconSets();
-        loadThemes();
-
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.libraries"), 70);
-
-        gatherLibraries();
-
-        buildPreferencesTree();
-
 
         runInitScripts();
 
         initMRU();
-        if (!headless) splashScreen.setMessage(i18n.string("splash.msg.cleanup"), 80);
 
-            cleanupDirectory(getDataFolder());
 
         if(!headless) splashScreen.setMessage(i18n.string("splash.msg.editor"), 80);
 
@@ -1130,10 +1119,15 @@ public class Base {
     /*! Load all the compilers into the main compilers list */
     public static void loadCompilers() {
         compilers.clear();
-        File[] files = getCompilersFolders();
-        for (File file : files) {
-            loadCompilersFromFolder(file);
-        }
+        compilerLoaderThread = new Thread() {
+            public void run() {
+                File[] files = getCompilersFolders();
+                for (File file : files) {
+                    loadCompilersFromFolder(file);
+                }
+            }
+        };
+        compilerLoaderThread.start();
     }
 
     /*! Load any compilers found in the specified folder */
@@ -1179,10 +1173,15 @@ public class Base {
     /*! Load all the cores into the main cores list */
     public static void loadCores() {
         cores.clear();
-        File[] files = getCoresFolders();
-        for(File file : files) {
-            loadCoresFromFolder(file);
-        }
+        coreLoaderThread = new Thread() {
+            public void run() {
+                File[] files = getCoresFolders();
+                for(File file : files) {
+                    loadCoresFromFolder(file);
+                }
+            }
+        };
+        coreLoaderThread.start();
     }
 
     /*! Load any cores found in the specified folder */
@@ -1218,10 +1217,15 @@ public class Base {
 
     public static void loadProgrammers() {
         programmers.clear();
-        File[] files = getProgrammersFolders();
-        for (File file : files) {
-            loadProgrammersFromFolder(file);
-        }
+        programmerLoaderThread = new Thread() {
+            public void run() {
+                File[] files = getProgrammersFolders();
+                for (File file : files) {
+                    loadProgrammersFromFolder(file);
+                }
+            }
+        };
+        programmerLoaderThread.start();
     }
 
     /*! Load any programmers found in the specified folder */
@@ -1260,10 +1264,15 @@ public class Base {
     /*! Load all the boards into the main boards list */
     public static void loadBoards() {
         boards.clear();
-        File[] files = getBoardsFolders();
-        for (File file : files) {
-            loadBoardsFromFolder(file);
-        }
+        boardLoaderThread = new Thread() {
+            public void run() {
+                File[] files = getBoardsFolders();
+                for (File file : files) {
+                    loadBoardsFromFolder(file);
+                }
+            }
+        };
+        boardLoaderThread.start();
     }
 
     /*! Load any boards found in the specified folder */
@@ -1380,7 +1389,12 @@ public class Base {
 
     /*! Load all the libraries in the system */
     public static void gatherLibraries() {
-        Library.loadLibraries();
+        libraryLoaderThread = new Thread() {
+            public void run() {
+                Library.loadLibraries();
+            }
+        };
+        libraryLoaderThread.start();
     }
 
     public static Platform getPlatform() {
@@ -2404,20 +2418,16 @@ public class Base {
                     Editor.bulletAll(i18n.string("msg.loading.serial"));
                     Serial.updatePortList();
                     Serial.fillExtraPorts();
-                    Editor.bulletAll(i18n.string("msg.loading.compilers"));
+                    Editor.bulletAll(i18n.string("msg.loading.assets"));
                     rescanCompilers();
-                    Editor.bulletAll(i18n.string("msg.loading.cores"));
                     rescanCores();
-                    Editor.bulletAll(i18n.string("msg.loading.boards"));
                     rescanBoards();
-                    Editor.bulletAll(i18n.string("msg.loading.programmers"));
                     rescanProgrammers();
-                    Editor.bulletAll(i18n.string("msg.loading.plugins"));
                     rescanPlugins();
-                    Editor.bulletAll(i18n.string("msg.loading.themes"));
                     rescanThemes();
-                    Editor.bulletAll(i18n.string("msg.loading.libraries"));
                     rescanLibraries();
+
+                    waitForAssetLoading();
 
                     buildPreferencesTree();
 
@@ -3429,4 +3439,65 @@ public class Base {
             }
         }
     }
+
+    public static void waitForAssetLoading() {
+        while (coreLoaderThread != null) {
+            try {
+                coreLoaderThread.join();
+                coreLoaderThread = null;
+            } catch (Exception e) {
+            }
+        }
+
+        while (compilerLoaderThread != null) {
+            try {
+                compilerLoaderThread.join();
+                compilerLoaderThread = null;
+            } catch (Exception e) {
+            }
+        }
+
+        while (boardLoaderThread != null) {
+            try {
+                boardLoaderThread.join();
+                boardLoaderThread = null;
+            } catch (Exception e) {
+            }
+        }
+       
+        while (programmerLoaderThread != null) {
+            try {
+                programmerLoaderThread.join();
+                programmerLoaderThread = null;
+            } catch (Exception e) {
+            }
+        }
+       
+        while (libraryLoaderThread != null) {
+            try {
+                libraryLoaderThread.join();
+                libraryLoaderThread = null;
+            } catch (Exception e) {
+            }
+        }
+
+        while (cleanupThread != null) {
+            try {
+                cleanupThread.join();
+                cleanupThread = null;
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public static void cleanupSystem() {
+        cleanupThread = new Thread() {
+            public void run() {
+                cleanupDirectory(getDataFolder());
+            }
+        };
+        cleanupThread.start();
+    }
+
 }
+
