@@ -1286,7 +1286,6 @@ public class Sketch {
                                     lineNo = Integer.parseInt(lineSplit[1]);
                                 } catch (Exception e) {
                                 }
-                                System.err.println(proto + " at line " + lineNo);
                                 FunctionPrototype prototype = new FunctionPrototype();
                                 prototype.file = f;
                                 prototype.lineNo = lineNo;

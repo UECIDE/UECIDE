@@ -233,9 +233,7 @@ public class Base {
 
     static public void cacheSystemFilesFromList(File[] list) {
         for (File f : list) {
-            System.out.print("Caching " + f.getAbsolutePath() + " ... ");
             systemFileCache.add(f);
-            System.out.println("done");
         }
     }
 
