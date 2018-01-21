@@ -40,22 +40,23 @@ import javax.swing.*;
  */
 
 public class UObject implements Comparable {
-    private File _folder;
-    private boolean _valid;
-    private File _configFile;
-    private PropertyFile _properties;
-    private int _type;
-    private String _name;
-    private String _version;
-    private String _revision;
-    private String _family;
-    private String _description;
+    protected File _folder;
+    protected boolean _valid;
+    protected File _configFile;
+    protected PropertyFile _properties;
+    protected int _type;
+    protected String _name;
+    protected String _version;
+    protected String _revision;
+    protected String _family;
+    protected String _description;
 
     public static final int None = 0;
     public static final int Board = 1;
     public static final int Core = 2;
     public static final int Compiler = 3;
     public static final int Programmer = 4;
+    public static final int Tool = 5;
 
     public UObject(File dir) {
         _valid = false;
@@ -81,6 +82,11 @@ public class UObject implements Comparable {
                 if(this instanceof Programmer) {
                     _configFile = new File(_folder, "programmer.txt");
                     _type = Programmer;
+                }
+
+                if(this instanceof Tool) {
+                    _configFile = new File(_folder, "tool.txt");
+                    _type = Tool;
                 }
 
                 if(!_configFile.exists()) {

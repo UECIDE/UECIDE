@@ -120,6 +120,7 @@ public class Base {
     public static TreeMap<String, Board> boards;
     public static TreeMap<String, Core> cores;
     public static TreeMap<String, Programmer> programmers;
+    public static TreeMap<String, Tool> tools;
 //    public static TreeMap<String, Plugin> plugins;
     public static TreeMap<String, Class<?>> plugins = new TreeMap<String, Class<?>>();
     public static ArrayList<Plugin> pluginInstances;
@@ -152,8 +153,11 @@ public class Base {
     static Thread coreLoaderThread = null;
     static Thread boardLoaderThread = null;
     static Thread programmerLoaderThread = null;
+    static Thread toolLoaderThread = null;
     static Thread libraryLoaderThread = null;
     static Thread cleanupThread = null;
+
+    public static FileCache systemFileCache = null;
 
 
     /*! Get a Board from the internal boards list by its short name. */
@@ -227,11 +231,31 @@ public class Base {
 
     public static boolean extraDebug = false;
 
+    static public void cacheSystemFilesFromList(File[] list) {
+        for (File f : list) {
+            System.out.print("Caching " + f.getAbsolutePath() + " ... ");
+            systemFileCache.add(f);
+            System.out.println("done");
+        }
+    }
+
+    static public void cacheSystemFiles() {
+        systemFileCache = new FileCache();
+
+        cacheSystemFilesFromList(getCoresFolders());
+        cacheSystemFilesFromList(getToolsFolders());
+        cacheSystemFilesFromList(getProgrammersFolders());
+        cacheSystemFilesFromList(getBoardsFolders());
+        cacheSystemFilesFromList(getThemesFolders());
+        cacheSystemFilesFromList(getPluginsFolders());
+        cacheSystemFilesFromList(getCompilersFolders());
+// I'd love to cache the library tree and parse it, but that would make
+// categories suck big time.
+//        cacheSystemFilesFromList(getLibrariesFolders()); 
+    }
+
     /*! The constructor is the main execution routine. */
     public Base(String[] args) {
-
-
-
         cli.addParameter("debug",               "",         Boolean.class,  "cli.help.debug");
         cli.addParameter("verbose",             "",         Boolean.class,  "cli.help.verbose");
         cli.addParameter("exceptions",          "",         Boolean.class,  "cli.help.exceptions");
@@ -551,6 +575,7 @@ public class Base {
             platform.init(this);
             compilers = new TreeMap<String, Compiler>();
             cores = new TreeMap<String, Core>();
+            tools = new TreeMap<String, Tool>();
             boards = new TreeMap<String, Board>();
             programmers = new TreeMap<String, Programmer>();
             plugins = new TreeMap<String, Class<?>>();
@@ -560,14 +585,7 @@ public class Base {
             Serial.updatePortList();
 
             System.out.print(i18n.string("msg.loading.assets"));
-            loadCores();
-            waitForAssetLoading();
-            loadCompilers();
-            loadBoards();
-            loadProgrammers();
-            gatherLibraries();
-            cleanupSystem();
-            waitForAssetLoading();
+            loadAssets();
             System.out.println(i18n.string("msg.loading.done"));
 
             System.out.println(i18n.string("msg.loading.done"));
@@ -639,6 +657,7 @@ public class Base {
 
         compilers = new TreeMap<String, Compiler>();
         cores = new TreeMap<String, Core>();
+        tools = new TreeMap<String, Tool>();
         boards = new TreeMap<String, Board>();
         programmers = new TreeMap<String, Programmer>();
         plugins = new TreeMap<String, Class<?>>();
@@ -651,21 +670,7 @@ public class Base {
         if(!headless) splashScreen.setMessage(i18n.string("splash.msg.assets"), 40);
 
 
-        loadCores();
-        waitForAssetLoading();
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.assets"), 50);
-
-        loadCompilers();
-        loadBoards();
-        loadProgrammers();
-        gatherLibraries();
-        cleanupSystem();
-        loadPlugins();
-        loadIconSets();
-        loadThemes();
-        waitForAssetLoading();
-
-
+        loadAssets();
 
         buildPreferencesTree();
 
@@ -1117,197 +1122,121 @@ public class Base {
         return null;
     }
 
-    /*! Load all the compilers into the main compilers list */
     public static void loadCompilers() {
         compilers.clear();
         compilerLoaderThread = new Thread() {
             public void run() {
-                File[] files = getCompilersFolders();
-                for (File file : files) {
-                    loadCompilersFromFolder(file);
+
+                ArrayList<File> compilerFiles = systemFileCache.getFilesByName("compiler.txt");
+                for (File cfile : compilerFiles) {
+                    if(cfile.exists()) {
+                        Debug.message("    Loading compiler " + cfile.getAbsolutePath());
+                        Compiler newCompiler = new Compiler(cfile.getParentFile());
+
+                        if(newCompiler.isValid()) {
+                            compilers.put(newCompiler.getName(), newCompiler);
+                        } else {
+                            Debug.message("    ==> IS NOT VALID!!!");
+                        }
+                    }
                 }
             }
         };
         compilerLoaderThread.start();
     }
 
-    /*! Load any compilers found in the specified folder */
-    public static void loadCompilersFromFolder(File folder) {
-        if(folder == null) {
-            return;
-        }
-
-        if(!folder.exists()) {
-            return;
-        }
-
-        if(!folder.isDirectory())
-            return;
-
-        String cl[] = folder.list();
-
-        Debug.message("Loading compilers from " + folder.getAbsolutePath());
-
-        for(int i = 0; i < cl.length; i++) {
-            if(cl[i].charAt(0) == '.')
-                continue;
-
-            File cdir = new File(folder, cl[i]);
-
-            if(cdir.isDirectory()) {
-                File cfile = new File(cdir, "compiler.txt");
-
-                if(cfile.exists()) {
-                    Debug.message("    Loading compiler " + cfile.getAbsolutePath());
-                    Compiler newCompiler = new Compiler(cdir);
-
-                    if(newCompiler.isValid()) {
-                        compilers.put(newCompiler.getName(), newCompiler);
-                    } else {    
-                        Debug.message("    ==> IS NOT VALID!!!");
-                    }
-                }
-            }
-        }
-    }
-
-    /*! Load all the cores into the main cores list */
     public static void loadCores() {
         cores.clear();
         coreLoaderThread = new Thread() {
             public void run() {
-                File[] files = getCoresFolders();
-                for(File file : files) {
-                    loadCoresFromFolder(file);
+
+                ArrayList<File> coreFiles = systemFileCache.getFilesByName("core.txt");
+                for (File cfile : coreFiles) {
+                    if(cfile.exists()) {
+                        Debug.message("    Loading core " + cfile.getAbsolutePath());
+                        Core newCore = new Core(cfile.getParentFile());
+
+                        if(newCore.isValid()) {
+                            cores.put(newCore.getName(), newCore);
+                        } else {
+                            Debug.message("    ==> IS NOT VALID!!!");
+                        }
+                    }
                 }
             }
         };
         coreLoaderThread.start();
     }
 
-    /*! Load any cores found in the specified folder */
-    public static void loadCoresFromFolder(File folder) {
-        if(!folder.isDirectory())
-            return;
-
-        String cl[] = folder.list();
-        Debug.message("Loading cores from " + folder.getAbsolutePath());
-
-        for(int i = 0; i < cl.length; i++) {
-            if(cl[i].charAt(0) == '.')
-                continue;
-
-            File cdir = new File(folder, cl[i]);
-
-            if(cdir.isDirectory()) {
-                File cfile = new File(cdir, "core.txt");
-
-                if(cfile.exists()) {
-                    Debug.message("    Loading core " + cfile.getAbsolutePath());
-                    Core newCore = new Core(cdir);
-
-                    if(newCore.isValid()) {
-                        cores.put(newCore.getName(), newCore);
-                    } else {    
-                        Debug.message("    ==> IS NOT VALID!!!");
-                    }
-                }
-            }
-        }
-    }
-
-    public static void loadProgrammers() {
-        programmers.clear();
-        programmerLoaderThread = new Thread() {
-            public void run() {
-                File[] files = getProgrammersFolders();
-                for (File file : files) {
-                    loadProgrammersFromFolder(file);
-                }
-            }
-        };
-        programmerLoaderThread.start();
-    }
-
-    /*! Load any programmers found in the specified folder */
-    public static void loadProgrammersFromFolder(File folder) {
-        String bl[] = folder.list();
-
-        if(bl == null) {
-            return;
-        }
-
-        Debug.message("Loading programmers from " + folder.getAbsolutePath());
-
-        for(int i = 0; i < bl.length; i++) {
-            if(bl[i].charAt(0) == '.')
-                continue;
-
-            File bdir = new File(folder, bl[i]);
-
-            if(bdir.isDirectory()) {
-                File bfile = new File(bdir, "programmer.txt");
-
-                if(bfile.exists()) {
-                    Debug.message("    Loading programmer " + bfile.getAbsolutePath());
-                    Programmer newProgrammer = new Programmer(bdir);
-
-                    if(newProgrammer.isValid()) {
-                        programmers.put(newProgrammer.getName(), newProgrammer);
-                    }
-                } else {
-                    loadProgrammersFromFolder(bdir);
-                }
-            }
-        }
-    }
-
-    /*! Load all the boards into the main boards list */
     public static void loadBoards() {
         boards.clear();
         boardLoaderThread = new Thread() {
             public void run() {
-                File[] files = getBoardsFolders();
-                for (File file : files) {
-                    loadBoardsFromFolder(file);
+
+                ArrayList<File> boardFiles = systemFileCache.getFilesByName("board.txt");
+                for (File bfile : boardFiles) {
+                    if(bfile.exists()) {
+                        Debug.message("    Loading board " + bfile.getAbsolutePath());
+                        Board newBoard = new Board(bfile.getParentFile());
+
+                        if(newBoard.isValid()) {
+                            boards.put(newBoard.getName(), newBoard);
+                        } else {
+                            Debug.message("    ==> IS NOT VALID!!!");
+                        }
+                    }
                 }
             }
         };
         boardLoaderThread.start();
     }
 
-    /*! Load any boards found in the specified folder */
-    public static void loadBoardsFromFolder(File folder) {
-        String bl[] = folder.list();
+    public static void loadProgrammers() {
+        programmers.clear();
+        programmerLoaderThread = new Thread() {
+            public void run() {
 
-        if(bl == null) {
-            return;
-        }
+                ArrayList<File> programmerFiles = systemFileCache.getFilesByName("programmer.txt");
+                for (File pfile : programmerFiles) {
+                    if(pfile.exists()) {
+                        Debug.message("    Loading programmer " + pfile.getAbsolutePath());
+                        Programmer newProgrammer = new Programmer(pfile.getParentFile());
 
-        Debug.message("Loading boards from " + folder.getAbsolutePath());
-
-        for(int i = 0; i < bl.length; i++) {
-            if(bl[i].charAt(0) == '.')
-                continue;
-
-            File bdir = new File(folder, bl[i]);
-
-            if(bdir.isDirectory()) {
-                File bfile = new File(bdir, "board.txt");
-
-                if(bfile.exists()) {
-                    Debug.message("    Loading board " + bfile.getAbsolutePath());
-                    Board newBoard = new Board(bdir);
-
-                    if(newBoard.isValid()) {
-                        boards.put(newBoard.getName(), newBoard);
+                        if(newProgrammer.isValid()) {
+                            programmers.put(newProgrammer.getName(), newProgrammer);
+                        } else {
+                            Debug.message("    ==> IS NOT VALID!!!");
+                        }
                     }
-                } else {
-                    loadBoardsFromFolder(bdir);
                 }
             }
-        }
+        };
+        programmerLoaderThread.start();
     }
+
+    public static void loadTools() {
+        tools.clear();
+        toolLoaderThread = new Thread() {
+            public void run() {
+
+                ArrayList<File> toolFiles = systemFileCache.getFilesByName("tool.txt");
+                for (File tfile : toolFiles) {
+                    if(tfile.exists()) {
+                        Debug.message("    Loading tool " + tfile.getAbsolutePath());
+                        Tool newTool = new Tool(tfile.getParentFile());
+
+                        if(newTool.isValid()) {
+                            tools.put(newTool.getName(), newTool);
+                        } else {
+                            Debug.message("    ==> IS NOT VALID!!!");
+                        }
+                    }
+                }
+            }
+        };
+        toolLoaderThread.start();
+    }
+
 
 //    boolean breakTime = false;
 //    String[] months = {
@@ -2298,10 +2227,13 @@ public class Base {
         if (isPosix()) {
             locs.add(new File("/usr/share/uecide/" + type));
         }
+
+        locs.add(new File(getSketchbookFolder(), type));
         return locs.toArray(new File[0]);
     }
 
     static public File[] getCoresFolders() { return getAnyFolders("cores"); }
+    static public File[] getToolsFolders() { return getAnyFolders("tools"); }
     static public File[] getProgrammersFolders() { return getAnyFolders("programmers"); }
     static public File[] getBoardsFolders() { return getAnyFolders("boards"); }
     static public File[] getThemesFolders() { return getAnyFolders("themes"); }
@@ -2415,6 +2347,7 @@ public class Base {
             SwingWorker<String, Object> worker = new SwingWorker<String, Object>() {
                 @Override
                 protected String doInBackground() throws Exception {
+                    cacheSystemFiles();
                     Editor.lockAll();
                     Editor.bulletAll(i18n.string("msg.loading.serial"));
                     Serial.updatePortList();
@@ -2424,6 +2357,7 @@ public class Base {
                     rescanCores();
                     rescanBoards();
                     rescanProgrammers();
+                    rescanTools();
                     rescanPlugins();
                     rescanThemes();
                     rescanLibraries();
@@ -2466,6 +2400,11 @@ public class Base {
     public static void rescanCompilers() {
         compilers = new TreeMap<String, Compiler>();
         loadCompilers();
+    }
+
+    public static void rescanTools() {
+        tools = new TreeMap<String, Tool>();
+        loadTools();
     }
 
     public static void rescanCores() {
@@ -3423,24 +3362,6 @@ public class Base {
         error("Error deleting " + file);
     }
 
-    public static void cleanupDirectory(File root) {
-        if (!root.exists() || !root.isDirectory()) {
-            return;
-        }
-        File[] files = root.listFiles();
-        for (File f : files) {
-            if (f.getName().endsWith(".delete")) {
-                try {
-                    f.delete();
-                } catch (Exception e) {
-                }
-            }
-            if (f.isDirectory()) {
-                cleanupDirectory(f);
-            }
-        }
-    }
-
     public static void waitForAssetLoading() {
         while (coreLoaderThread != null) {
             try {
@@ -3474,6 +3395,14 @@ public class Base {
             }
         }
        
+        while (toolLoaderThread != null) {
+            try {
+                toolLoaderThread.join();
+                toolLoaderThread = null;
+            } catch (Exception e) {
+            }
+        }
+       
         while (libraryLoaderThread != null) {
             try {
                 libraryLoaderThread.join();
@@ -3494,11 +3423,35 @@ public class Base {
     public static void cleanupSystem() {
         cleanupThread = new Thread() {
             public void run() {
-                cleanupDirectory(getDataFolder());
+                ArrayList<File> flist = systemFileCache.getFilesByExtension("delete");
+                for (File f : flist) {
+                    f.delete();
+                }
             }
         };
         cleanupThread.start();
     }
 
+    public static Tool getTool(String name) {
+        return tools.get(name);
+    }
+
+    public static void loadAssets() {
+        cacheSystemFiles();
+
+        loadCores();
+        waitForAssetLoading();
+
+        loadCompilers();
+        loadBoards();
+        loadProgrammers();
+        loadTools();
+        loadPlugins();
+        loadIconSets();
+        loadThemes();
+        gatherLibraries();
+        cleanupSystem();
+        waitForAssetLoading();
+    }
 }
 

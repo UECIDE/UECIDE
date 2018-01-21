@@ -1241,6 +1241,66 @@ public class Sketch {
 
     }
 
+    class FunctionPrototype {
+        File file;
+        int lineNo;
+        String prototype;
+    }
+
+    public ArrayList<FunctionPrototype> scanForFunctions(File f) {
+
+        ArrayList<FunctionPrototype> protos = new ArrayList<FunctionPrototype>();
+        
+        Tool t = Base.getTool("ctags");
+        if (t != null) {
+            Pattern pat = Pattern.compile("\\^(.*)\\(");
+            ctx.set("filename", f.getName());
+            ctx.set("sketch.root", f.getParentFile().getAbsolutePath());
+            ctx.set("build.root", buildFolder.getAbsolutePath());
+            t.execute(ctx, "ctags.parse.ino");
+
+            File tags = new File(buildFolder, f.getName() + ".tags");
+            if (tags.exists()) { // We got the tags
+                String tagData = Base.getFileAsString(tags);
+                String[] tagLines = tagData.split("\n");
+
+                for (String tagLine : tagLines) {
+                    String[] tagEntries = tagLine.split("\t");
+                    if (tagEntries.length == 6) {
+
+                        String name = tagEntries[0];
+                        String file = tagEntries[1];
+                        String body = tagEntries[2];
+                        String type = tagEntries[3];
+                        String line = tagEntries[4];
+                        String signature = tagEntries[5];
+
+                        if (type.equals("f")) { // It's a function
+                            String[] sigSplit = signature.split(":");
+                            String[] lineSplit = line.split(":");
+                            Matcher m = pat.matcher(body);
+                            if (m.find()) {
+                                String proto = m.group(1) + sigSplit[1] + ";";
+                                int lineNo = -1;
+                                try {
+                                    lineNo = Integer.parseInt(lineSplit[1]);
+                                } catch (Exception e) {
+                                }
+                                System.err.println(proto + " at line " + lineNo);
+                                FunctionPrototype prototype = new FunctionPrototype();
+                                prototype.file = f;
+                                prototype.lineNo = lineNo;
+                                prototype.prototype = proto;
+                                protos.add(prototype);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return protos;
+    }
+
     public synchronized boolean prepare() {
         PropertyFile props = ctx.getMerged();
 
@@ -1267,178 +1327,124 @@ public class Sketch {
             }
         }
 
-        // We now have the data.  Now, if we're combining files, we shall do it
-        // in this map.
-
-        if(Preferences.getBoolean("compiler.combine_ino") || Base.cli.isSet("force-join-files")) {
-            File mainFile = getMainFile();
-            StringBuilder out = new StringBuilder();
-
-            if(!Preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + mainFile.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
-
-            out.append(cleanedFiles.get(mainFile));
-
-            for(String fn : getFileNames()) {
-                File f = getFileByName(fn);
-
-                if(FileType.getType(f) == FileType.SKETCH) {
-                    if(f != mainFile) {
-                        String data = cleanedFiles.get(f);
-
-                        if(!Preferences.getBoolean("compiler.disableline")) out.append("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
-
-                        out.append(data);
-                        cleanedFiles.remove(f);
-                    }
-                }
-            }
-
-            cleanedFiles.put(mainFile, out.toString());
+        // New: The sketch must be saved before compiling. We compile
+        // direct from the sketch folder now, not from copies in the build
+        // folder. Except INO/PDE files, of course, which get munged and copied.
+        if (!save()) {
+            error("Unable to save sketch. Cannot compile.");
+            return false;
         }
 
-        // We now have a has of all the file data, with any ino or pde
-        // files combined into the main file entry.  The old ino and pde
-        // entries have been removed.  Now to parse any INO or PDE files
-        // for prototypes etc and do the Arduino fudging.  We should
-        // do it properly, really, looking for the first function in the
-        // file and placing the prototypes directly before that.
+        // Find all the function prototypes in sketch files
+        ArrayList<FunctionPrototype> protos = new ArrayList<FunctionPrototype>();
 
-        Pattern pragma = Pattern.compile("^#pragma\\s+parameter\\s+([^=]+)\\s*=\\s*(.*)\\s*$");
-        Pattern paramsplit = Pattern.compile("(?:\"[^\"]*\"|[^\\s\"])+");
-
-        for(File f : cleanedFiles.keySet()) {
+        for (String fn : getFileNames()) {
+            File f = getFileByName(fn);
             if(FileType.getType(f) == FileType.SKETCH) {
-                HashMap<Integer, String> funcs = findFunctions(cleanedFiles.get(f));
-
-                Integer ffLineNo = Integer.MAX_VALUE;
-                String firstFunction = "";
-
-                for(Integer i : funcs.keySet()) {
-                    if(i < ffLineNo) {
-                        ffLineNo = i;
-                        firstFunction = funcs.get(i);
-                    }
-                }
-
-                int line = 1;
-                StringBuilder munged = new StringBuilder();
-
-                for(String l : cleanedFiles.get(f).split("\n")) {
-                    if(!Preferences.getBoolean("compiler.disable_prototypes")) {
-                        if(l.trim().startsWith(firstFunction)) {
-                            for(String func : funcs.values()) {
-                                func = func.replaceAll("=[^,)]+", "");
-                                munged.append(func + ";\n");
-                            }
-
-                            if(!Preferences.getBoolean("compiler.disableline")) munged.append("#line " + line + " \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
-                        }
-                    }
-
-                    Matcher mtch = pragma.matcher(l.trim());
-
-                    if(mtch.find()) {
-                        l = "// " + l;
-                        Matcher part = paramsplit.matcher(mtch.group(2).trim());
-                        String parms = "";
-
-                        while(part.find()) {
-                            if(parms.equals("") == false) {
-                                parms += "::";
-                            }
-
-                            parms += part.group(0);
-                        }
-
-                        ctx.set(mtch.group(1), parms);
-                    }
-
-                    munged.append(l + "\n");
-
-                    if(!l.startsWith("#line 1 ")) {
-                        line++;
-                    }
-
-                    cleanedFiles.put(f, munged.toString());
-                }
+                protos.addAll(scanForFunctions(f));
             }
         }
 
-        // Now we have munged the files, let's dump them into files in the
-        // build folder ready for compilation.
+        // Save these prototypes into a header file.
+        try {
+            File out = new File(buildFolder, getName() + "_proto.h");
+            PrintWriter pw = new PrintWriter(out);
+            pw.println("#ifndef _UECIDE_FUNCTION_PROTOTYPES");
+            pw.println("#define _UECIDE_FUNCTION_PROTOTYPES");
+            pw.println();
+            for (FunctionPrototype p : protos) {
+                pw.println(p.prototype);
+            }
+            pw.println();
+            pw.println("#endif");
+            pw.close();
+        } catch (Exception e) {
+            error(e);
+            return false;
+        }
+
+        // Copy each INO/PDE file across scanning it as we go, starting with the
+        // main INO file.
 
         try {
-            for(File f : cleanedFiles.keySet()) {
-                if(FileType.getType(f) == FileType.SKETCH) {
-                    String ext = ctx.parseString(props.get("build.extension"));
+            String ext = ctx.parseString(props.get("build.extension"));
+            if (ext == null) {
+                ext = "cpp";
+            }
+            File masterSketchFile = new File(buildFolder, getName() + "." + ext);
+            PrintWriter pw = new PrintWriter(masterSketchFile);
+    
 
-                    if(ext == null) {
-                        ext = "cpp";
+            // Work out which the first prototype in the main file is.
+            int lineno = Integer.MAX_VALUE;
+            for (FunctionPrototype p : protos) {
+                if (p.file.equals(getMainFile())) {
+                    if (p.lineNo < lineno) {
+                        lineno = p.lineNo;
                     }
-
-                    String newFileName = f.getName().substring(0, f.getName().lastIndexOf(".")) + "." + ext;
-                    File newFile = new File(buildFolder, newFileName);
-                    PrintWriter pw = new PrintWriter(newFile);
-                    pw.write("/***************************************************\n");
-                    pw.write(" * ! ! ! !        I M P O R T A N T        ! ! ! ! *\n");
-                    pw.write(" *                                                 *\n");
-                    pw.write(" * THIS FILE IS AUTOMATICALLY GENERATED AND SHOULD *\n");
-                    pw.write(" * NOT BE DIRECTLY EDITED. INSTEAD EDIT THE INO OR *\n");
-                    pw.write(" * PDE FILE THIS FILE IS GENERATED FROM!!!         *\n");
-                    pw.write(" ***************************************************/\n");
-                    pw.write("\n");
-
-                    if(props.get("core.header") != null) {
-                        boolean gotHeader = false;
-                        String hdr = ctx.parseString(props.get("core.header"));
-                        String[] lines = cleanedFiles.get(f).split("\n");
-                        Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
-                        for (String l : lines) {
-                            Matcher m = inc.matcher(l);
-                            if (m.find()) {
-                                if (m.group(1).equals(hdr)) {
-                                    gotHeader = true;
-                                }
-                            }
-                        }
-                        
-                        if (!gotHeader) {
-                            pw.write("#include <" + hdr + ">\n");
-                        }
-                    }
-
-                    if(!Preferences.getBoolean("compiler.combine_ino") || Base.cli.isSet("force-join-files")) {
-                        if(!Preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
-                    }
-
-                    pw.write(cleanedFiles.get(f));
-                    pw.close();
-                } else {
-                    File buildFile = new File(buildFolder, f.getName());
-                    PrintWriter pw = new PrintWriter(buildFile);
-                    pw.write("/***************************************************\n");
-                    pw.write(" * ! ! ! !        I M P O R T A N T        ! ! ! ! *\n");
-                    pw.write(" *                                                 *\n");
-                    pw.write(" * THIS FILE IS AUTOMATICALLY GENERATED AND SHOULD *\n");
-                    pw.write(" * NOT BE DIRECTLY EDITED. INSTEAD EDIT THE SOURCE *\n");
-                    pw.write(" * FILE THIS FILE IS GENERATED FROM!!!             *\n");
-                    pw.write(" ***************************************************/\n");
-
-                    if(!Preferences.getBoolean("compiler.disableline")) pw.write("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"\n");
-
-                    pw.write(cleanedFiles.get(f));
-                    pw.close();
                 }
             }
-        } catch(Exception e) {
+
+            String hdr = props.get("core.header");
+            if (hdr != null) {
+                pw.println("#include <" + hdr + ">");
+            }
+            pw.println("#line 1 \"" + getMainFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+
+            int thisLine = 1;
+
+            String data = Base.getFileAsString(getMainFile());
+            String lines[] = data.split("\n");
+            for (String line : lines) {
+                if (thisLine == lineno) {
+                    pw.println("#include <" + getName() + "_proto.h>");
+                    pw.println("#line " + thisLine + " \"" + getMainFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+                }
+                pw.println(line);
+                thisLine++;
+            }
+
+            pw.close();
+        } catch (Exception e) {
             error(e);
+            return false;
+        }
+                    
+
+        // Now do the same for all other sketch files.
+
+        for (String fn : getFileNames()) {
+            File f = getFileByName(fn);
+            if (!f.equals(getMainFile())) {
+                if (FileType.getType(f) == FileType.SKETCH) {
+                    try {
+                        String ext = ctx.parseString(props.get("build.extension"));
+                        if (ext == null) {
+                            ext = "cpp";
+                        }
+                        File masterSketchFile = new File(buildFolder, getName() + "." + ext);
+                        PrintWriter pw = new PrintWriter(new FileOutputStream(masterSketchFile, true));
+
+                        pw.println("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+
+                        int thisLine = 1;
+
+                        String data = Base.getFileAsString(f);
+                        pw.print(data);
+
+                        pw.close();
+                    } catch (Exception e) {
+                        error(e);
+                        return false;
+                    }
+                }
+            }
         }
 
-        if(editor != null) {
-            editor.updateOutputTree();
-        }
+
 
         return true;
+
     }
 
     public String stripComments(String data) {
@@ -2535,6 +2541,11 @@ public class Sketch {
             t.start();
             threads.add(t);
             currentThreads++;
+
+            try {
+                Thread.sleep(10);
+            } catch (Exception e) {
+            }
         }
 
         for (LibCompileThread t : threads) {
@@ -3001,10 +3012,21 @@ public class Sketch {
 
         ArrayList<File> compiledFiles = compileFiles(ctx,
                                             buildFolder,
-                                            findFilesInFolder(buildFolder, "S", false),
-                                            findFilesInFolder(buildFolder, "c", false),
-                                            findFilesInFolder(buildFolder, "cpp", false)
+                                            findFilesInFolder(getFolder(), "S", false),
+                                            findFilesInFolder(getFolder(), "c", false),
+                                            findFilesInFolder(getFolder(), "cpp", false)
                                         );
+
+        
+        String ext = ctx.parseString(props.get("build.extension"));
+        if (ext == null) {
+            ext = "cpp";
+        }
+        ArrayList<File> mainSketchFile = new ArrayList<File>();
+        mainSketchFile.add(new File(buildFolder, getName() + "." + ext));
+        
+        compiledFiles.addAll(compileFileList(ctx, buildFolder, mainSketchFile, "compile." + ext));
+    
 
         if(compiledFiles != null) {
             sf.addAll(compiledFiles);
