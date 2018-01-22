@@ -131,6 +131,10 @@ public class Package implements Comparable, Serializable {
         return 0;
     }
 
+    public String getPriority() {
+        return properties.get("Priority");
+    }
+
     public String getRepository() {
         return properties.get("Repository");
     }

@@ -273,10 +273,20 @@ public class APT {
     }
 
     public void update() {
+        update(false);
+    }
+
+    public void update(boolean resOnly) {
         cachedPackages = new HashMap<String, Package>();
         int num = sources.size();
         int done = 0;
         for (Source s : sources) {
+            if (resOnly) {
+                if (!s.getRoot().startsWith("res://")) {
+                    continue;
+                }
+            }
+
             Package[] packages = s.getPackages();
             done++;
 
@@ -341,6 +351,19 @@ public class APT {
         ArrayList<Package> out = new ArrayList<Package>();
         for (Package p : cachedPackages.values()) {
             if ((section == null) || (p.getSection().equals(section))) {
+                out.add(p);
+            }
+        }
+        Package[] plist = out.toArray(new Package[0]);
+        Arrays.sort(plist);
+        return plist;
+    }
+
+    public Package[] getRequiredPackages() {
+        ArrayList<Package> out = new ArrayList<Package>();
+        for (Package p : cachedPackages.values()) {
+            if (p.getPriority().equals("required")) {
+System.err.println("Required package " + p.getName());
                 out.add(p);
             }
         }

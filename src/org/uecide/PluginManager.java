@@ -1055,6 +1055,7 @@ public class PluginManager implements PropertyChangeListener
         if (sections.get("cores") == null) { sections.set("cores", "Cores"); }
         if (sections.get("compilers") == null) { sections.set("compilers", "Compilers"); }
         if (sections.get("programmers") == null) { sections.set("programmers", "Programmers"); }
+        if (sections.get("tools") == null) { sections.set("tools", "Tools"); }
         if (sections.get("extra") == null) { sections.set("extra", "System"); }
         if (sections.get("themes") == null) { sections.set("themes", "Themes"); }
         if (sections.get("libraries") == null) { sections.set("libraries", "Libraries"); }

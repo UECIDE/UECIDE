@@ -3230,20 +3230,25 @@ public class Base {
                 packagesFolder.mkdirs();
             }
 
-            File sourcesFile = new File(dbFolder, "sources.db");
+            File sourcesDir = new File(dbFolder, "sources.d");
+
+            if (!sourcesDir.exists()) {
+                sourcesDir.mkdirs();
+            }
+            File sourcesFile = new File(sourcesDir, "internal.db");
             if (!sourcesFile.exists()) {
                 PrintWriter pw = new PrintWriter(sourcesFile);
                 pw.println("deb res://org/uecide/dist uecide boards cores compilers plugins extra libraries main");
                 pw.close();
-                PluginManager pm = new PluginManager();
-                APT apt = pm.getApt();
-                apt.update();
-                Package[] packages = apt.getPackages();
-                for (Package p : packages) {
-                    apt.installPackage(p);
-                    System.err.println("Installing " + p);
-                }
-                apt.save();
+//                PluginManager pm = new PluginManager();
+//                APT apt = pm.getApt();
+//                apt.update();
+//                Package[] packages = apt.getPackages();
+//                for (Package p : packages) {
+//                    apt.installPackage(p);
+//                    System.err.println("Installing " + p);
+//                }
+//                apt.save();
 
 //                PropertyFile props = new PropertyFile(new File(dbFolder, "repositories.db"));
 //                apt.addSource(props.get("master.url"), props.get("master.codename"), pm.getCleanOSName(), props.get("master.sections").split("::"));
@@ -3251,6 +3256,21 @@ public class Base {
 //                apt.update();
 //                apt.save();
             }
+
+            PluginManager reqpm = new PluginManager();
+            APT reqapt = reqpm.getApt();
+            reqapt.update(true);
+            Package[] reqpkgs = reqapt.getPackages();
+            for (Package p : reqpkgs) {
+                if (reqapt.isInstalled(p)) {
+                    if (reqapt.isUpgradable(p)) {
+                        reqapt.upgradePackage(p);
+                    }
+                } else {
+                    reqapt.installPackage(p);
+                }
+            }
+            reqapt.save();
 
         } catch (Exception e) {
             error(e);
