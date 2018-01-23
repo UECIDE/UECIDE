@@ -658,6 +658,10 @@ public class Sketch {
         return null;
     }
 
+    public File getBuildFileByName(String filename) {
+        return new File(buildFolder, filename);
+    }
+
     public String[] getFileNames() {
         String[] out = new String[sketchFiles.size()];
         int i = 0;
@@ -1300,6 +1304,8 @@ public class Sketch {
         return protos;
     }
 
+    ArrayList<File> filesToCompile = null;
+
     public synchronized boolean prepare() {
         PropertyFile props = ctx.getMerged();
 
@@ -1317,6 +1323,24 @@ public class Sketch {
             cleanBuild();
         }
 
+        filesToCompile = new ArrayList<File>();
+
+        for (String fn : getFileNames()) {
+            File f = getFileByName(fn);
+            int ft = FileType.getType(f);
+            switch (ft) {
+                case FileType.ASMSOURCE:
+                case FileType.CSOURCE:
+                case FileType.CPPSOURCE:
+                    dumpFileData(buildFolder, fn);
+                    filesToCompile.add(f);
+                    break;
+                case FileType.SKETCH:
+                    dumpFileData(buildFolder, fn);
+                    break;
+            }
+        }
+
         updateSketchConfig();
         updateLibraryList();
 
@@ -1326,19 +1350,11 @@ public class Sketch {
             }
         }
 
-        // New: The sketch must be saved before compiling. We compile
-        // direct from the sketch folder now, not from copies in the build
-        // folder. Except INO/PDE files, of course, which get munged and copied.
-        if (!save()) {
-            error("Unable to save sketch. Cannot compile.");
-            return false;
-        }
-
         // Find all the function prototypes in sketch files
         ArrayList<FunctionPrototype> protos = new ArrayList<FunctionPrototype>();
 
         for (String fn : getFileNames()) {
-            File f = getFileByName(fn);
+            File f = getBuildFileByName(fn);
             if(FileType.getType(f) == FileType.SKETCH) {
                 protos.addAll(scanForFunctions(f));
             }
@@ -1370,7 +1386,7 @@ public class Sketch {
             if (ext == null) {
                 ext = "cpp";
             }
-            File masterSketchFile = new File(buildFolder, getName() + "." + ext);
+            File masterSketchFile = new File(buildFolder, getName() + "_combined." + ext);
             PrintWriter pw = new PrintWriter(masterSketchFile);
     
 
@@ -1392,7 +1408,7 @@ public class Sketch {
 
             int thisLine = 1;
 
-            String data = Base.getFileAsString(getMainFile());
+            String data = getFileContent(getMainFile());
             String lines[] = data.split("\n");
             for (String line : lines) {
                 if (thisLine == lineno) {
@@ -1421,14 +1437,14 @@ public class Sketch {
                         if (ext == null) {
                             ext = "cpp";
                         }
-                        File masterSketchFile = new File(buildFolder, getName() + "." + ext);
+                        File masterSketchFile = new File(buildFolder, getName() + "_combined." + ext);
                         PrintWriter pw = new PrintWriter(new FileOutputStream(masterSketchFile, true));
 
                         pw.println("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
 
                         int thisLine = 1;
 
-                        String data = Base.getFileAsString(f);
+                        String data = getFileContent(f);
                         pw.print(data);
 
                         pw.close();
@@ -2576,24 +2592,16 @@ public class Sketch {
 
         PropertyFile props = localCtx.getMerged();
 
-        if(fileName.endsWith(".cpp")) {
-            recipe = "compile.cpp";
-        }
-
-        if(fileName.endsWith(".cxx")) {
-            recipe = "compile.cpp";
-        }
-
-        if(fileName.endsWith(".cc")) {
-            recipe = "compile.cpp";
-        }
-
-        if(fileName.endsWith(".c")) {
-            recipe = "compile.c";
-        }
-
-        if(fileName.endsWith(".S")) {
-            recipe = "compile.S";
+        switch (FileType.getType(src)) {
+            case FileType.CPPSOURCE:
+                recipe = "compile.cpp";
+                break;
+            case FileType.CSOURCE:
+                recipe = "compile.c";
+                break;
+            case FileType.ASMSOURCE:
+                recipe = "compile.S";
+                break;
         }
 
         if(recipe == null) {
@@ -2965,6 +2973,18 @@ public class Sketch {
         return objectPaths;
     }
 
+    public void dumpFileData(File dest, String name) {
+        try {
+            File out = new File(dest, name);
+            File in = getFileByName(name);
+            PrintWriter pw = new PrintWriter(out);
+            pw.print(getFileContent(in));
+            pw.close();
+        } catch (Exception e) {
+            error(e);
+        }
+    }
+
     private ArrayList<File> compileFiles(Context localCtx, File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources) {
 
         ArrayList<File> objectPaths = new ArrayList<File>();
@@ -3009,30 +3029,30 @@ public class Sketch {
             }
         }
 
-        ArrayList<File> compiledFiles = compileFiles(ctx,
-                                            buildFolder,
-                                            findFilesInFolder(getFolder(), "S", false),
-                                            findFilesInFolder(getFolder(), "c", false),
-                                            findFilesInFolder(getFolder(), "cpp", false)
-                                        );
-
-        
         String ext = ctx.parseString(props.get("build.extension"));
         if (ext == null) {
             ext = "cpp";
         }
-        ArrayList<File> mainSketchFile = new ArrayList<File>();
-        mainSketchFile.add(new File(buildFolder, getName() + "." + ext));
-        
-        compiledFiles.addAll(compileFileList(ctx, buildFolder, mainSketchFile, "compile." + ext));
-    
 
-        if(compiledFiles != null) {
-            sf.addAll(compiledFiles);
-        } else {
-            return null;
+        File mainParsedFile = new File(buildFolder, getName() + "_combined." + ext);
+
+
+        switch (FileType.getType(mainParsedFile)) {
+            case FileType.ASMSOURCE:
+            case FileType.CSOURCE:
+            case FileType.CPPSOURCE:
+                filesToCompile.add(mainParsedFile);
+                break;
         }
 
+        for (File f : filesToCompile) {
+            File obj = compileFile(ctx, f, buildFolder);
+            if (obj == null) {
+                return null;
+            }
+            sf.add(obj);
+        }
+        
         String boardFiles = ctx.parseString(props.get("build.files"));
 
         if(boardFiles != null) {
