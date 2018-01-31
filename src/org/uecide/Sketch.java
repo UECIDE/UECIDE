@@ -1245,15 +1245,9 @@ public class Sketch {
 
     }
 
-    class FunctionPrototype {
-        File file;
-        int lineNo;
-        String prototype;
-    }
+    public ArrayList<FunctionBookmark> scanForFunctions(File f) {
 
-    public ArrayList<FunctionPrototype> scanForFunctions(File f) {
-
-        ArrayList<FunctionPrototype> protos = new ArrayList<FunctionPrototype>();
+        ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
         
         Tool t = Base.getTool("ctags");
         if (t != null) {
@@ -1280,26 +1274,62 @@ public class Sketch {
                     String name = leftBits[0];
                     String file = leftBits[1];
                     String body = leftBits[2];
-                    String type = rightBits[0];
-                    String line = rightBits[1];
+
+                    for (int i = 3; i < leftBits.length; i++) {
+                        body += " " + leftBits[i];
+                    }
+
+
+                    String type = "";
+                    String line = "";
+                    String signature = "";
+
+                    for (String rightBit : rightBits) {
+                        String[] rightBitParts = rightBit.split(":");
+
+                        if (rightBitParts[0].length() == 1) {
+                            type = rightBitParts[0];
+                            continue;
+                        }
+
+                        if (rightBitParts[0].equals("line")) {
+                            line = rightBitParts[1];
+                        }
+
+                        if (rightBitParts[0].equals("signature")) {
+                            signature = rightBitParts[1];
+                        }
+                    }
 
                     if (type.equals("f")) { // It's a function
-                        String signature = rightBits[2];
-                        String[] sigSplit = signature.split(":");
-                        String[] lineSplit = line.split(":");
+                        if (signature.equals("")) {
+                            error("Unable to get signature for " + name);
+                            return null;
+                        }
                         Matcher m = pat.matcher(body);
                         if (m.find()) {
-                            String proto = m.group(1) + sigSplit[1] + ";";
+                            String proto = m.group(1) + signature + ";";
                             int lineNo = -1;
                             try {
-                                lineNo = Integer.parseInt(lineSplit[1]);
+                                lineNo = Integer.parseInt(line);
                             } catch (Exception e) {
                             }
-                            FunctionPrototype prototype = new FunctionPrototype();
-                            prototype.file = f;
-                            prototype.lineNo = lineNo;
-                            prototype.prototype = proto;
-                            protos.add(prototype);
+
+                            String firstBit = m.group(1).replaceAll("\\s+", " ");
+
+                            String[] rtBits = firstBit.split(" ");
+
+                            String rt = "";
+                            for (String rtb : rtBits) {
+                                if (!rtb.equals(name)) {
+                                    rt += rtb + " ";
+                                }
+                            }
+
+                            FunctionBookmark prototypeBm = new FunctionBookmark(f, lineNo, name, rt.trim(), signature);
+                            protos.add(prototypeBm);
+
+                            System.err.println(prototypeBm.dump());
                         }
                     }
                 }
@@ -1355,7 +1385,7 @@ public class Sketch {
         }
 
         // Find all the function prototypes in sketch files
-        ArrayList<FunctionPrototype> protos = new ArrayList<FunctionPrototype>();
+        ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
 
         for (String fn : getFileNames()) {
             File f = getBuildFileByName(fn);
@@ -1366,10 +1396,10 @@ public class Sketch {
 
         // Work out which the first prototype in the main file is.
         int lineno = Integer.MAX_VALUE;
-        for (FunctionPrototype p : protos) {
-            if (p.file.equals(getBuildFileByName(getMainFile().getName()))) {
-                if (p.lineNo < lineno) {
-                    lineno = p.lineNo;
+        for (FunctionBookmark p : protos) {
+            if (p.getFile().getAbsolutePath().equals(getBuildFileByName(getMainFile().getName()).getAbsolutePath())) {
+                if (p.getLine() < lineno) {
+                    lineno = p.getLine();
                 }
             }
         }
@@ -1383,8 +1413,8 @@ public class Sketch {
             pw.println();
             pw.println("// This should be inserted at line " + lineno);
             pw.println();
-            for (FunctionPrototype p : protos) {
-                pw.println(p.prototype);
+            for (FunctionBookmark p : protos) {
+                pw.println(p + ";");
             }
             pw.println();
             pw.println("#endif");

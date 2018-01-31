@@ -69,6 +69,14 @@ public class FunctionBookmark {
     String name;
     ArrayList<String> parameters = new ArrayList<String>();
 
+    public FunctionBookmark(File f, int l, String n, String rt, String pl) {
+        file = f;
+        line = l;
+        name = n;
+        returnType = rt;
+        proto = rt.trim() + " " + n.trim() + pl.trim();
+    }
+
     public FunctionBookmark(File f, int l, String p) {
         file = f;
         line = l;
@@ -147,6 +155,10 @@ public class FunctionBookmark {
 
     public String getFunction() {
         return proto;
+    }
+
+    public String dump() {
+        return returnType + " " + name + proto + " @ " + file.getAbsolutePath() + " line " + line;
     }
 }
 
