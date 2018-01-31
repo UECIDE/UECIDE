@@ -1043,7 +1043,7 @@ public class code extends JPanel implements EditorBase {
 
     public void highlightLine(int line, Color color) {
         try {
-            textArea.addLineHighlight(line, color);
+            textArea.addLineHighlight(line-1, color);
         } catch(Exception e) {
             Base.error(e);
         }
@@ -1100,7 +1100,7 @@ public class code extends JPanel implements EditorBase {
         for (Flag f : flagList) {
             Icon i = f.getIcon();
             try {
-                gutter.addLineTrackingIcon(f.getLine(), i);
+                gutter.addLineTrackingIcon(f.getLine() - 1, i);
             } catch (BadLocationException ex) {
             }
         }
@@ -1109,7 +1109,7 @@ public class code extends JPanel implements EditorBase {
 
     public void gotoLine(final int line) {
         try {
-            textArea.setCaretPosition(textArea.getLineStartOffset(line));
+            textArea.setCaretPosition(textArea.getLineStartOffset(line - 1));
         } catch(BadLocationException e) {
         }
     }

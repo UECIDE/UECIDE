@@ -694,7 +694,7 @@ public class Editor extends JFrame {
                     text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
                 } else if (userObject instanceof FunctionBookmark) {
                     FunctionBookmark bm = (FunctionBookmark)userObject;
-                    text = new JLabel(bm.formatted());
+                    text = new JLabel(bm.briefFormatted());
                     icon = Base.getIcon("bookmarks", "function", 16);
 
                     Font f = text.getFont();
@@ -1286,11 +1286,10 @@ public class Editor extends JFrame {
                             node = new DefaultMutableTreeNode(f.getName());
                             node.setUserObject(f);
                             treeSource.add(node);
-                            HashMap<Integer, String> funcs = loadedSketch.getFunctionsForFile(f);
+                            ArrayList<FunctionBookmark> funcs = loadedSketch.getFunctionsForFile(f);
 
                             if(funcs != null) {
-                                for(int line : funcs.keySet()) {
-                                    FunctionBookmark b = new FunctionBookmark(f, line, funcs.get(line));
+                                for(FunctionBookmark b : funcs) {
                                     DefaultMutableTreeNode fe = new DefaultMutableTreeNode(b);
                                     node.add(fe);
                                 }
@@ -5164,7 +5163,7 @@ public class Editor extends JFrame {
                 int tab = openOrSelectFile(new File(m.group(2)));
                 if (tab != -1) {
                     EditorBase eb = getTab(tab);
-                    eb.gotoLine(line - 1);
+                    eb.gotoLine(line);
                 }
 
             } catch (Exception e) {

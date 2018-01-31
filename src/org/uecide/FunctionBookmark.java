@@ -67,56 +67,14 @@ public class FunctionBookmark {
 
     String returnType;
     String name;
-    ArrayList<String> parameters = new ArrayList<String>();
+    String paramList;
 
     public FunctionBookmark(File f, int l, String n, String rt, String pl) {
         file = f;
         line = l;
         name = n;
         returnType = rt;
-        proto = rt.trim() + " " + n.trim() + pl.trim();
-    }
-
-    public FunctionBookmark(File f, int l, String p) {
-        file = f;
-        line = l;
-        proto = p.trim();
-        parsePrototype();
-    }
-
-    public String simplify(String in) {
-        String out = in.trim();
-        String rep = out.replaceAll("\\s\\s", " ");
-        while (!rep.equals(out)) {
-            out = rep;
-            rep = out.replaceAll("\\s\\s", " ");
-        }
-        return out;
-    }
-
-    public void parsePrototype() {
-        Pattern p = Pattern.compile("^(.*)\\((.*)\\)$");
-        Matcher m = p.matcher(proto);
-        if (m.find()) {
-            String def = simplify(m.group(1));
-            String parms = simplify(m.group(2));
-            String[] spl = def.split(" ");
-            int num = spl.length;
-            name = spl[num-1];
-            returnType = "";
-            for (int i = 0; i < num-1; i++) {
-                if (i != 0) {
-                    returnType += " ";
-                }
-                returnType += spl[i];
-            }
-
-            spl = parms.split(",");
-            for (String parm : spl) {
-                parameters.add(simplify(parm));
-            }
-
-        }
+        paramList = pl.trim();
     }
 
     public String getName() {
@@ -124,25 +82,15 @@ public class FunctionBookmark {
     }
 
     public String formatted() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(returnType);
-        sb.append(" ");
-        sb.append(name);
-        sb.append("(");
-        boolean first = true;
-        for (String parm : parameters) {
-            if (!first) {
-                sb.append(", ");
-            }
-            sb.append(parm);
-            first = false;
-        }
-        sb.append(")");
-        return sb.toString();
+        return returnType + " " + name + paramList;
+    }
+
+    public String briefFormatted() {
+        return name + paramList;
     }
 
     public String toString() {
-        return proto;
+        return returnType.trim() + " " + name.trim() + paramList.trim();
     }
 
     public File getFile() {
@@ -158,7 +106,7 @@ public class FunctionBookmark {
     }
 
     public String dump() {
-        return returnType + " " + name + proto + " @ " + file.getAbsolutePath() + " line " + line;
+        return returnType + " " + name + paramList + " @ " + file.getAbsolutePath() + " line " + line;
     }
 }
 

@@ -103,7 +103,9 @@ public class Sketch {
 
     TreeMap<String, String> selectedOptions = new TreeMap<String, String>();
 
-    HashMap<File, HashMap<Integer, String>> functionList = new HashMap<File, HashMap<Integer, String>>();
+    ArrayList<FunctionBookmark> functionListBm = new ArrayList<FunctionBookmark>();
+
+//    HashMap<File, HashMap<Integer, String>> functionList = new HashMap<File, HashMap<Integer, String>>();
 
     // Do we want to purge the cache files before building?  This is set by the
     // options system.
@@ -1023,14 +1025,27 @@ public class Sketch {
 
     public TreeSet<String> getAllFunctionNames() {
         TreeSet<String>funcs = new TreeSet<String>();
-        for (HashMap<Integer, String> ent : functionList.values()) {
-            funcs.addAll(ent.values());
+        for (FunctionBookmark bm : functionListBm) {
+            funcs.add(bm.getName());
         }
+//        for (HashMap<Integer, String> ent : functionList.values()) {
+//            funcs.addAll(ent.values());
+//        }
         return funcs;
     }
 
-    public HashMap<Integer, String> getFunctionsForFile(File f) {
-        return functionList.get(f);
+//    public HashMap<Integer, String> getFunctionsForFile(File f) {
+//        return functionList.get(f);
+//    }
+
+    public ArrayList<FunctionBookmark> getFunctionsForFile(File f) {
+        ArrayList<FunctionBookmark>funcs = new ArrayList<FunctionBookmark>();
+        for (FunctionBookmark bm : functionListBm) {
+            if (bm.getFile().getName().equals(f.getName())) {
+                funcs.add(bm);
+            }
+        }
+        return funcs;
     }
 
     public HashMap<Integer, String> findLabels(String data) {
@@ -1080,7 +1095,8 @@ public class Sketch {
             return;
         }
 
-        functionList = new HashMap<File, HashMap<Integer, String>>();
+//        functionList = new HashMap<File, HashMap<Integer, String>>();
+        functionListBm = new ArrayList<FunctionBookmark>();
         String data;
         HashMap<Integer, String>funcs = null;
 
@@ -1089,83 +1105,91 @@ public class Sketch {
             case FileType.SKETCH:
             case FileType.CSOURCE:
             case FileType.CPPSOURCE:
-                data = getFileContent(f);
-                data = stripComments(data);
-                funcs = findFunctions(data);
-                functionList.put(f, funcs);
+//                data = getFileContent(f);
+//                data = stripComments(data);
+//                funcs = findFunctions(data);
+                File tf = dumpFileData(buildFolder, f.getName());
+                ArrayList<FunctionBookmark> bm = scanForFunctions(tf);
+                functionListBm.addAll(bm);
+                
+//                funcs = new HashMap<Integer, String>();
+//                for (FunctionBookmark b : bm) {
+//                    funcs.put(b.getLine(), b.getName());
+//                }
+//                functionList.put(f, funcs);
                 break;
 
             case FileType.ASMSOURCE:
-                data = getFileContent(f);
-                funcs = findLabels(data);
-                functionList.put(f, funcs);
+//                data = getFileContent(f);
+//                funcs = findLabels(data);
+//                functionList.put(f, funcs);
                 break;
             }
         }
     }
 
-    public HashMap<Integer, String> findFunctions(String in) {
-        HashMap<Integer, String> funcs = new HashMap<Integer, String>();
-
-        String out = in.replaceAll("\\\\.", "");
-
-        out = out.replaceAll("'[^'\\n\\r]*'", "");
-        out = out.replaceAll("\"[^\"\\n\\r]*\"", "");
-        out = stripBlock(out, "{", "}");
-        String[] s = out.split("\n");
-        StringBuilder decimated = new StringBuilder();
-        boolean continuation = false;
-        int lineno = 0;
-
-        for(String line : s) {
-            line = line.trim();
-            lineno++;
-
-            if(line.equals("")) {
-                continue;
-            }
-
-            if(line.startsWith("#")) {
-                continue;
-            }
-
-            if(continuation) {
-                decimated.append(line);
-
-                if(line.endsWith(")")) {
-                    continuation = false;
-                    funcs.put(lineno - 1, decimated.toString());
-                    decimated = new StringBuilder();
-                }
-
-                continue;
-            }
-
-            if(line.endsWith(";")) {
-                continue;
-            }
-
-            if(line.indexOf("(") == -1) {
-                continue;
-            }
-
-            Pattern p = Pattern.compile("[a-zA-Z0-9_\\*]+\\s+[a-zA-Z0-9_\\*]+\\s*\\(");
-            Matcher m = p.matcher(line);
-
-            if(m.find()) {
-                decimated.append(line);
-
-                if(!line.endsWith(")")) {
-                    continuation = true;
-                } else {
-                    funcs.put(lineno - 1, decimated.toString());
-                    decimated = new StringBuilder();
-                }
-            }
-        }
-
-        return funcs;
-    }
+//    public HashMap<Integer, String> findFunctions(String in) {
+//        HashMap<Integer, String> funcs = new HashMap<Integer, String>();
+//
+//        String out = in.replaceAll("\\\\.", "");
+//
+//        out = out.replaceAll("'[^'\\n\\r]*'", "");
+//        out = out.replaceAll("\"[^\"\\n\\r]*\"", "");
+//        out = stripBlock(out, "{", "}");
+//        String[] s = out.split("\n");
+//        StringBuilder decimated = new StringBuilder();
+//        boolean continuation = false;
+//        int lineno = 0;
+//
+//        for(String line : s) {
+//            line = line.trim();
+//            lineno++;
+//
+//            if(line.equals("")) {
+//                continue;
+//            }
+//
+//            if(line.startsWith("#")) {
+//                continue;
+//            }
+//
+//            if(continuation) {
+//                decimated.append(line);
+//
+//                if(line.endsWith(")")) {
+//                    continuation = false;
+//                    funcs.put(lineno - 1, decimated.toString());
+//                    decimated = new StringBuilder();
+//                }
+//
+//                continue;
+//            }
+//
+//            if(line.endsWith(";")) {
+//                continue;
+//            }
+//
+//            if(line.indexOf("(") == -1) {
+//                continue;
+//            }
+//
+//            Pattern p = Pattern.compile("[a-zA-Z0-9_\\*]+\\s+[a-zA-Z0-9_\\*]+\\s*\\(");
+//            Matcher m = p.matcher(line);
+//
+//            if(m.find()) {
+//                decimated.append(line);
+//
+//                if(!line.endsWith(")")) {
+//                    continuation = true;
+//                } else {
+//                    funcs.put(lineno - 1, decimated.toString());
+//                    decimated = new StringBuilder();
+//                }
+//            }
+//        }
+//
+ //       return funcs;
+ //   }
 
     public static final int LIB_PENDING = 0;
     public static final int LIB_PROCESSED = 1;
@@ -1328,8 +1352,6 @@ public class Sketch {
 
                             FunctionBookmark prototypeBm = new FunctionBookmark(f, lineNo, name, rt.trim(), signature);
                             protos.add(prototypeBm);
-
-                            System.err.println(prototypeBm.dump());
                         }
                     }
                 }
@@ -3009,16 +3031,18 @@ public class Sketch {
         return objectPaths;
     }
 
-    public void dumpFileData(File dest, String name) {
+    public File dumpFileData(File dest, String name) {
         try {
             File out = new File(dest, name);
             File in = getFileByName(name);
             PrintWriter pw = new PrintWriter(out);
             pw.print(getFileContent(in));
             pw.close();
+            return out;
         } catch (Exception e) {
             error(e);
         }
+        return null;
     }
 
     private ArrayList<File> compileFiles(Context localCtx, File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources) {
@@ -3442,8 +3466,8 @@ public class Sketch {
 
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(errorLineNumber - 1, theme.getColor("editor.compile.error.bgcolor"));
-                            eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "fixme", 16), 0x1000);
+                            eb.highlightLine(errorLineNumber, theme.getColor("editor.compile.error.bgcolor"));
+                            eb.flagLine(errorLineNumber, Base.getIcon("flags", "fixme", 16), 0x1000);
                         }
 
                         link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Error at line " + errorLineNumber + " in file " + errorFile.getName());
@@ -3471,8 +3495,8 @@ public class Sketch {
 
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(warningLineNumber - 1, theme.getColor("editor.compile.warning.bgcolor"));
-                            eb.flagLine(warningLineNumber - 1, Base.getIcon("flags", "todo", 16), 0x1001);
+                            eb.highlightLine(warningLineNumber, theme.getColor("editor.compile.warning.bgcolor"));
+                            eb.flagLine(warningLineNumber, Base.getIcon("flags", "todo", 16), 0x1001);
                             link("uecide://error/" + warningLineNumber + "/" + warningFile.getAbsolutePath() + "|Warning at line " + warningLineNumber + " in file " + warningFile.getName());
                         }
 
@@ -4244,7 +4268,7 @@ public class Sketch {
 
         String content = getFileContent(f);
         String[] lines = content.split("\n");
-        int lineno = 0;
+        int lineno = 1;
         for (String line : lines) {
             Matcher m = p.matcher(line);
             if (m.find()) {
@@ -4321,10 +4345,7 @@ public class Sketch {
         for (Library l : importedLibraries.values()) {
             addKeywordsFromFile(l.getKeywords());
         }
-        TreeSet<String> fl = getAllFunctionNames();
-        for (String s : fl) {
-            FunctionBookmark bm = new FunctionBookmark(null, 0, s);
-
+        for (FunctionBookmark bm : functionListBm) {
             keywords.put(bm.getName(), KeywordTypes.KEYWORD3);
         }
 
@@ -4394,8 +4415,8 @@ public class Sketch {
 
                     if(tabNumber > -1) {
                         EditorBase eb = editor.getTab(tabNumber);
-                        eb.highlightLine(errorLineNumber - 1, theme.getColor("editor.compile.error.bgcolor"));
-                        eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "fixme", 16), 0x1000);
+                        eb.highlightLine(errorLineNumber, theme.getColor("editor.compile.error.bgcolor"));
+                        eb.flagLine(errorLineNumber, Base.getIcon("flags", "fixme", 16), 0x1000);
                     }
 
                     String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
@@ -4437,8 +4458,8 @@ public class Sketch {
 
                     if(tabNumber > -1) {
                         EditorBase eb = editor.getTab(tabNumber);
-                        eb.highlightLine(errorLineNumber - 1, theme.getColor("editor.compile.warning.bgcolor"));
-                        eb.flagLine(errorLineNumber - 1, Base.getIcon("flags", "todo", 16), 0x1001);
+                        eb.highlightLine(errorLineNumber, theme.getColor("editor.compile.warning.bgcolor"));
+                        eb.flagLine(errorLineNumber, Base.getIcon("flags", "todo", 16), 0x1001);
                     }
                     String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
 
