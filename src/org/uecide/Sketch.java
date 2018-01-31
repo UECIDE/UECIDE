@@ -105,8 +105,6 @@ public class Sketch {
 
     ArrayList<FunctionBookmark> functionListBm = new ArrayList<FunctionBookmark>();
 
-//    HashMap<File, HashMap<Integer, String>> functionList = new HashMap<File, HashMap<Integer, String>>();
-
     // Do we want to purge the cache files before building?  This is set by the
     // options system.
     public boolean doPrePurge = false;
@@ -999,7 +997,6 @@ public class Sketch {
                         Library ne = new Library(testFile, "sketch", "all");
                         ne.rescan();
                         return ne;
-//                        return new Library(testFile, sketchName, "all");
                     }
                 }
             }
@@ -1028,15 +1025,8 @@ public class Sketch {
         for (FunctionBookmark bm : functionListBm) {
             funcs.add(bm.getName());
         }
-//        for (HashMap<Integer, String> ent : functionList.values()) {
-//            funcs.addAll(ent.values());
-//        }
         return funcs;
     }
-
-//    public HashMap<Integer, String> getFunctionsForFile(File f) {
-//        return functionList.get(f);
-//    }
 
     public ArrayList<FunctionBookmark> getFunctionsForFile(File f) {
         ArrayList<FunctionBookmark>funcs = new ArrayList<FunctionBookmark>();
@@ -1095,7 +1085,6 @@ public class Sketch {
             return;
         }
 
-//        functionList = new HashMap<File, HashMap<Integer, String>>();
         functionListBm = new ArrayList<FunctionBookmark>();
         String data;
         HashMap<Integer, String>funcs = null;
@@ -1105,91 +1094,17 @@ public class Sketch {
             case FileType.SKETCH:
             case FileType.CSOURCE:
             case FileType.CPPSOURCE:
-//                data = getFileContent(f);
-//                data = stripComments(data);
-//                funcs = findFunctions(data);
                 File tf = dumpFileData(buildFolder, f.getName());
                 ArrayList<FunctionBookmark> bm = scanForFunctions(tf);
                 functionListBm.addAll(bm);
                 
-//                funcs = new HashMap<Integer, String>();
-//                for (FunctionBookmark b : bm) {
-//                    funcs.put(b.getLine(), b.getName());
-//                }
-//                functionList.put(f, funcs);
                 break;
 
             case FileType.ASMSOURCE:
-//                data = getFileContent(f);
-//                funcs = findLabels(data);
-//                functionList.put(f, funcs);
                 break;
             }
         }
     }
-
-//    public HashMap<Integer, String> findFunctions(String in) {
-//        HashMap<Integer, String> funcs = new HashMap<Integer, String>();
-//
-//        String out = in.replaceAll("\\\\.", "");
-//
-//        out = out.replaceAll("'[^'\\n\\r]*'", "");
-//        out = out.replaceAll("\"[^\"\\n\\r]*\"", "");
-//        out = stripBlock(out, "{", "}");
-//        String[] s = out.split("\n");
-//        StringBuilder decimated = new StringBuilder();
-//        boolean continuation = false;
-//        int lineno = 0;
-//
-//        for(String line : s) {
-//            line = line.trim();
-//            lineno++;
-//
-//            if(line.equals("")) {
-//                continue;
-//            }
-//
-//            if(line.startsWith("#")) {
-//                continue;
-//            }
-//
-//            if(continuation) {
-//                decimated.append(line);
-//
-//                if(line.endsWith(")")) {
-//                    continuation = false;
-//                    funcs.put(lineno - 1, decimated.toString());
-//                    decimated = new StringBuilder();
-//                }
-//
-//                continue;
-//            }
-//
-//            if(line.endsWith(";")) {
-//                continue;
-//            }
-//
-//            if(line.indexOf("(") == -1) {
-//                continue;
-//            }
-//
-//            Pattern p = Pattern.compile("[a-zA-Z0-9_\\*]+\\s+[a-zA-Z0-9_\\*]+\\s*\\(");
-//            Matcher m = p.matcher(line);
-//
-//            if(m.find()) {
-//                decimated.append(line);
-//
-//                if(!line.endsWith(")")) {
-//                    continuation = true;
-//                } else {
-//                    funcs.put(lineno - 1, decimated.toString());
-//                    decimated = new StringBuilder();
-//                }
-//            }
-//        }
-//
- //       return funcs;
- //   }
 
     public static final int LIB_PENDING = 0;
     public static final int LIB_PROCESSED = 1;
