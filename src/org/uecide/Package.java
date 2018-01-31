@@ -255,7 +255,7 @@ public class Package implements Comparable, Serializable {
             };
             byte[] mdbytes = md.digest();
 
-            StringBuffer hexString = new StringBuffer();
+            StringBuilder hexString = new StringBuilder();
             for (int i=0;i<mdbytes.length;i++) {
               hexString.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
 
@@ -376,7 +376,7 @@ public class Package implements Comparable, Serializable {
                     out.close();
                     byte[] mdbytes = md.digest();
 
-                    StringBuffer hexString = new StringBuffer();
+                    StringBuilder hexString = new StringBuilder();
                     for (int i=0;i<mdbytes.length;i++) {
                       hexString.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
                     }

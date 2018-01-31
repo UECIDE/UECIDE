@@ -133,7 +133,7 @@ public class CommandLine {
             }
         }
         for (String s : arglist) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             System.out.print("    --");
             sb.append(s);
             if (parameterTypes.get(s) != Boolean.class) {

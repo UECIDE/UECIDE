@@ -761,7 +761,7 @@ public class Sketch {
 
     static public String sanitizeName(String origName) {
         char c[] = origName.toCharArray();
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         for(int i = 0; i < c.length; i++) {
             if(((c[i] >= '0') && (c[i] <= '9')) ||

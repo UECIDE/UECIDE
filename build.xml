@@ -60,6 +60,20 @@
         <subant target="install" buildpath="thirdparty" />
     </target>
 
+    <target name="build-minimal" depends="compile,i18n" description="Build uecide">
+        <jar basedir="bin" destfile="uecide.jar">
+            <fileset dir="bin" />
+            <fileset dir="resources" />
+            <manifest>
+                <attribute name="Main-Class" value="org.uecide.Base" />
+                <attribute name="Class-Path" value="uecide.jar" />
+                <!--attribute name="Version" value="${Version}" />
+                <attribute name="Release" value="${Release}" /-->
+            </manifest>
+        </jar>
+        <chmod perm="0755" file="uecide.jar" />
+    </target>
+
     <target name="build" depends="compile,i18n" description="Build uecide">
         <jar basedir="bin" destfile="uecide.jar">
             <fileset dir="bin" />

@@ -558,18 +558,25 @@ public class PropertyFile {
     public String getFontCSS(String key) {
         Font f = getFont(key);
 
-        String out = "font-family: " + f.getFamily() + ";";
-        out += " font-size: " + f.getSize() + "px;";
+        StringBuilder out = new StringBuilder();
+
+        out.append("font-family: ");
+        out.append(f.getFamily());
+        out.append(";");
+
+        out.append(" font-size: ");
+        out.append(f.getSize());
+        out.append("px;");
 
         if (f.isBold()) {
-            out += " font-weight: bold;";
+            out.append(" font-weight: bold;");
         }
 
         if (f.isItalic()) {
-            out += " font-style: italic;";
+            out.append(" font-style: italic;");
         }
 
-        return out;
+        return out.toString();
     }
 
     /*! Store a font specification in the key. */
@@ -595,26 +602,28 @@ public class PropertyFile {
 
     /*! Convert a Font into the internal String representation. */
     public String fontToString(Font f) {
-        String font = f.getName();
-        String style = "";
-        font += ",";
+        boolean gotStyle = false;
+        StringBuilder font = new StringBuilder();
+        font.append(f.getName());
+        font.append(",");
 
         if((f.getStyle() & Font.BOLD) != 0) {
-            style += "bold";
+            font.append("bold");
+            gotStyle = true;
         }
 
         if((f.getStyle() & Font.ITALIC) != 0) {
-            style += "italic";
+            font.append("italic");
+            gotStyle = true;
         }
 
-        if(style.equals("")) {
-            style = "plain";
+        if (!gotStyle) {
+            font.append("plain");
         }
 
-        font += style;
-        font += ",";
-        font += Integer.toString(f.getSize());
-        return font;
+        font.append(",");
+        font.append(Integer.toString(f.getSize()));
+        return font.toString();
     }
 
     /*! Convert a String representation of a Font into a Font. */

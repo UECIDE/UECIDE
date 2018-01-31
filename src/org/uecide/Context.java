@@ -927,7 +927,7 @@ public class Context {
             cmdName = cmdName.substring(10);
             if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
 
-                StringBuffer args = new StringBuffer();
+                StringBuilder args = new StringBuilder();
 
                 args.append(cmdName);
 
