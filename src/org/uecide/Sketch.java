@@ -1269,33 +1269,37 @@ public class Sketch {
                 String[] tagLines = tagData.split("\n");
 
                 for (String tagLine : tagLines) {
-                    String[] tagEntries = tagLine.split("\t");
-                    if (tagEntries.length == 6) {
 
-                        String name = tagEntries[0];
-                        String file = tagEntries[1];
-                        String body = tagEntries[2];
-                        String type = tagEntries[3];
-                        String line = tagEntries[4];
-                        String signature = tagEntries[5];
+                    String halves[] = tagLine.split(";\"\t"); // Get the two halves - left is the name, path and pattern, right is the type, line and signature.
 
-                        if (type.equals("f")) { // It's a function
-                            String[] sigSplit = signature.split(":");
-                            String[] lineSplit = line.split(":");
-                            Matcher m = pat.matcher(body);
-                            if (m.find()) {
-                                String proto = m.group(1) + sigSplit[1] + ";";
-                                int lineNo = -1;
-                                try {
-                                    lineNo = Integer.parseInt(lineSplit[1]);
-                                } catch (Exception e) {
-                                }
-                                FunctionPrototype prototype = new FunctionPrototype();
-                                prototype.file = f;
-                                prototype.lineNo = lineNo;
-                                prototype.prototype = proto;
-                                protos.add(prototype);
+                    if (halves.length != 2) continue;
+
+                    String[] leftBits = halves[0].split("\t");
+                    String[] rightBits = halves[1].split("\t");
+
+                    String name = leftBits[0];
+                    String file = leftBits[1];
+                    String body = leftBits[2];
+                    String type = rightBits[0];
+                    String line = rightBits[1];
+
+                    if (type.equals("f")) { // It's a function
+                        String signature = rightBits[2];
+                        String[] sigSplit = signature.split(":");
+                        String[] lineSplit = line.split(":");
+                        Matcher m = pat.matcher(body);
+                        if (m.find()) {
+                            String proto = m.group(1) + sigSplit[1] + ";";
+                            int lineNo = -1;
+                            try {
+                                lineNo = Integer.parseInt(lineSplit[1]);
+                            } catch (Exception e) {
                             }
+                            FunctionPrototype prototype = new FunctionPrototype();
+                            prototype.file = f;
+                            prototype.lineNo = lineNo;
+                            prototype.prototype = proto;
+                            protos.add(prototype);
                         }
                     }
                 }
@@ -1360,12 +1364,24 @@ public class Sketch {
             }
         }
 
+        // Work out which the first prototype in the main file is.
+        int lineno = Integer.MAX_VALUE;
+        for (FunctionPrototype p : protos) {
+            if (p.file.equals(getBuildFileByName(getMainFile().getName()))) {
+                if (p.lineNo < lineno) {
+                    lineno = p.lineNo;
+                }
+            }
+        }
+
         // Save these prototypes into a header file.
         try {
             File out = new File(buildFolder, getName() + "_proto.h");
             PrintWriter pw = new PrintWriter(out);
             pw.println("#ifndef _UECIDE_FUNCTION_PROTOTYPES");
             pw.println("#define _UECIDE_FUNCTION_PROTOTYPES");
+            pw.println();
+            pw.println("// This should be inserted at line " + lineno);
             pw.println();
             for (FunctionPrototype p : protos) {
                 pw.println(p.prototype);
@@ -1389,16 +1405,6 @@ public class Sketch {
             File masterSketchFile = new File(buildFolder, getName() + "_combined." + ext);
             PrintWriter pw = new PrintWriter(masterSketchFile);
     
-
-            // Work out which the first prototype in the main file is.
-            int lineno = Integer.MAX_VALUE;
-            for (FunctionPrototype p : protos) {
-                if (p.file.equals(getMainFile())) {
-                    if (p.lineNo < lineno) {
-                        lineno = p.lineNo;
-                    }
-                }
-            }
 
             String hdr = props.get("core.header");
             if (hdr != null) {
