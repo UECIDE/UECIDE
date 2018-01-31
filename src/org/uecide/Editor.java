@@ -92,7 +92,7 @@ public class Editor extends JFrame {
     JMenu toolsMenu;
     JMenu helpMenu;
     JMenu serialPortsMenu;
-    JMenu discoveredBoardsMenu;
+//    JMenu discoveredBoardsMenu;
     JMenu optionsMenu;
     JMenu programmersSubmenu; 
 
@@ -160,7 +160,7 @@ public class Editor extends JFrame {
         return dataStore.get(s);
     }
 
-    class FlaggedList {
+    static class FlaggedList {
         String name;
         int color;
 
@@ -952,29 +952,29 @@ public class Editor extends JFrame {
             return false;
         }
 
-        private boolean haveCompleteNode(JTree tree) {
-            int[] selRows = tree.getSelectionRows();
-            TreePath path = tree.getPathForRow(selRows[0]);
-            DefaultMutableTreeNode first = (DefaultMutableTreeNode)path.getLastPathComponent();
-            int childCount = first.getChildCount();
-
-            if(childCount > 0 && selRows.length == 1) {
-                return false;
-            }
-
-            for(int i = 1; i < selRows.length; i++) {
-                path = tree.getPathForRow(selRows[i]);
-                DefaultMutableTreeNode next = (DefaultMutableTreeNode)path.getLastPathComponent();
-
-                if(first.isNodeChild(next)) {
-                    if(childCount > selRows.length - 1) {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
+//        private boolean haveCompleteNode(JTree tree) {
+//            int[] selRows = tree.getSelectionRows();
+//            TreePath path = tree.getPathForRow(selRows[0]);
+//            DefaultMutableTreeNode first = (DefaultMutableTreeNode)path.getLastPathComponent();
+//            int childCount = first.getChildCount();
+//
+//            if(childCount > 0 && selRows.length == 1) {
+//                return false;
+//            }
+//
+//            for(int i = 1; i < selRows.length; i++) {
+//                path = tree.getPathForRow(selRows[i]);
+//                DefaultMutableTreeNode next = (DefaultMutableTreeNode)path.getLastPathComponent();
+//
+//                if(first.isNodeChild(next)) {
+//                    if(childCount > selRows.length - 1) {
+//                        return false;
+//                    }
+//                }
+//            }
+//
+//            return true;
+//        }
 
         protected Transferable createTransferable(JComponent c) {
             JTree tree = (JTree)c;
@@ -1058,8 +1058,10 @@ public class Editor extends JFrame {
                         nodes = (DefaultMutableTreeNode[])t.getTransferData(nodesFlavor);
                     } catch(UnsupportedFlavorException ufe) {
                         System.out.println("UnsupportedFlavor: " + ufe.getMessage());
+                        return false;
                     } catch(java.io.IOException ioe) {
                         System.out.println("I/O error: " + ioe.getMessage());
+                        return false;
                     }
 
                     // Get drop location info.
@@ -1267,7 +1269,6 @@ public class Editor extends JFrame {
                     return;
                 }
 
-                DefaultMutableTreeNode ntc = new DefaultMutableTreeNode();
                 treeSource.removeAllChildren();
                 DefaultMutableTreeNode node;
 
@@ -1991,16 +1992,16 @@ public class Editor extends JFrame {
     public class FileTreeMouseListener extends MouseAdapter {
 
         public void mousePressed(MouseEvent e) {
-            ActionListener createNewAction = new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    // createNewAnyFile(e.getActionCommand());
-                }
-            };
-            ActionListener importFileAction = new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    // importAnyFile(e.getActionCommand());
-                }
-            };
+//            ActionListener createNewAction = new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    // createNewAnyFile(e.getActionCommand());
+//                }
+//            };
+//            ActionListener importFileAction = new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    // importAnyFile(e.getActionCommand());
+//                }
+//            };
 
             int selRow = sketchFilesTree.getRowForLocation(e.getX(), e.getY());
             TreePath selPath = sketchFilesTree.getPathForLocation(e.getX(), e.getY());
@@ -2480,8 +2481,6 @@ public class Editor extends JFrame {
     }
 
     public void setStatus() {
-        StringBuilder sb = new StringBuilder();
-
 
         statusText.setText("<html>" + Base.i18n.string("status.html",
             loadedSketch.getContext().getBoard() != null ? loadedSketch.getContext().getBoard() : "None",
@@ -2962,9 +2961,10 @@ public class Editor extends JFrame {
         Arrays.sort(vals);
 
         for (Integer hits : vals) {
-            for(File m : Base.MCUList.keySet()) {
-                if (Base.MCUList.get(m) == hits) {
-                    JMenuItem recentitem = createMenuEntry(m.getName(), 0, 0, new ActionListener() {
+            for(Map.Entry<File, Integer> m : Base.MCUList.entrySet()) {
+                if (m.getValue().equals(hits)) {
+                    File mf = m.getKey();
+                    JMenuItem recentitem = createMenuEntry(mf.getName(), 0, 0, new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             String path = e.getActionCommand();
 
@@ -2976,8 +2976,8 @@ public class Editor extends JFrame {
                         }
                     });
 
-                    recentitem.setToolTipText(m.getAbsolutePath());
-                    recentitem.setActionCommand(m.getAbsolutePath());
+                    recentitem.setToolTipText(mf.getAbsolutePath());
+                    recentitem.setActionCommand(mf.getAbsolutePath());
                     frequentSketchesMenu.add(recentitem, 0);
                 }
             }
@@ -2989,7 +2989,7 @@ public class Editor extends JFrame {
         JMenuItem emBrowse = new JMenuItem(Base.i18n.string("menu.file.examples.browse"));
         emBrowse.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                ExampleBrowser eb = new ExampleBrowser(Editor.this);
+                new ExampleBrowser(Editor.this);
             }
         });
         examplesMenu.add(emBrowse);
@@ -3104,7 +3104,7 @@ public class Editor extends JFrame {
 
         fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.preferences"), KeyEvent.VK_MINUS, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Preferences prefs = new Preferences(Editor.this);
+                new Preferences(Editor.this);
             }
         }));
 
@@ -3256,8 +3256,10 @@ public class Editor extends JFrame {
 
         toolsMenu.add(createMenuEntry(Base.i18n.string("menu.tools.pm"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                PluginManager pm = new PluginManager();
-                pm.openWindow(Editor.this);
+                try {
+                    PluginManager pm = new PluginManager();
+                    pm.openWindow(Editor.this);
+                } catch (Exception ex) { error(ex); }
             }
         }));
 
@@ -3391,7 +3393,7 @@ public class Editor extends JFrame {
         }
     }
 
-    class JSerialMenuItem extends JRadioButtonMenuItem {
+    static class JSerialMenuItem extends JRadioButtonMenuItem {
         CommunicationPort port = null;
         String name = null;
 
@@ -3794,6 +3796,7 @@ public class Editor extends JFrame {
 
                 JarFile sarfile = new JarFile(sarFile);
                 Manifest manifest = sarfile.getManifest();
+                sarfile.close();
                 Attributes manifestContents = manifest.getMainAttributes();
 
                 String sketchName = manifestContents.getValue("Sketch-Name");
@@ -4221,10 +4224,10 @@ public class Editor extends JFrame {
         JFileChooser fc = new JFileChooser();
         javax.swing.filechooser.FileFilter filter;
 
-        if(type == "source") {
+        if(type.equals("source")) {
             filter = new SourceFileFilter();
             fc.setFileFilter(filter);
-        } else if(type == "header") {
+        } else if(type.equals("header")) {
             filter = new HeaderFileFilter();
             fc.setFileFilter(filter);
         }
@@ -4258,9 +4261,9 @@ public class Editor extends JFrame {
 
             File dest = null;
 
-            if(type == "source" || type == "header") {
+            if(type.equals("source") || type.equals("header")) {
                 dest = new File(loadedSketch.getFolder(), src.getName());
-            } else if(type == "binary") {
+            } else if(type.equals("binary")) {
                 dest = new File(loadedSketch.getBinariesFolder(), src.getName());
             } else {
                 return;
@@ -4285,7 +4288,7 @@ public class Editor extends JFrame {
 
             Base.copyFile(src, dest);
 
-            if(type == "source" || type == "header") {
+            if(type.equals("source") || type.equals("header")) {
                 loadedSketch.loadFile(dest);
             }
 
@@ -4586,7 +4589,7 @@ public class Editor extends JFrame {
     }
 
     public void handleAbout() {
-        About a = new About(this);
+        new About(this);
     }
 
     public void installLibraryArchive() {
@@ -4767,7 +4770,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public class LibCatObject {
+    static public class LibCatObject {
         public String key = null;
         public String name = null;
         public LibCatObject(String k, String n) {

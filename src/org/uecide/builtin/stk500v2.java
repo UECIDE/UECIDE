@@ -79,7 +79,7 @@ public class stk500v2 implements BuiltinCommand, CommsListener {
     public static long pageSize = 256;
 
     public boolean main(Context c, String[] args) {
-        Context ctx = c;
+        ctx = c;
         if (args.length != 3) {
             ctx.error("Usage: __builtin_stk500::port::baud::filename");
             return false;
@@ -512,7 +512,7 @@ e.printStackTrace();
         return true;
     }
 
-    class HexRecord {
+    static class HexRecord {
         int length = 0;
         long address = 0;
         int type = 0;

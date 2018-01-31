@@ -185,7 +185,6 @@ public class SSHCommunicationPort implements CommunicationPort {
                 session.connect();
             } catch(JSchException e) {
                 if(e.getMessage().equals("Auth fail")) {
-                    password = null;
                     Preferences.unset("ssh." + hostname + "." + get("user"));
                     Base.session.unset("ssh." + hostname + "." + get("user"));
                     lastError = "Authentication failed";
@@ -207,7 +206,7 @@ public class SSHCommunicationPort implements CommunicationPort {
             Base.session.set("ssh." + hostname + "." + get("user"), password);
 
             String command = board.get("ssh.console.command");
-            Channel channel = session.openChannel("exec");
+            channel = session.openChannel("exec");
             ((ChannelExec)channel).setCommand(command);
 
             stdout = channel.getInputStream();

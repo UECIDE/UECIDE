@@ -143,7 +143,7 @@ public class PropertyFile {
                 try {
                     FileInputStream fis = new FileInputStream(defaults);
                     BufferedReader r = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-                    loadProperties(properties, r);
+                    loadProperties(defaultProperties, r);
                     r.close();
                     fis.close();
                 } catch(Exception e) {
@@ -733,7 +733,7 @@ public class PropertyFile {
 
     /*! Return a PropertyFile which is a subset of all the keys below the provided *path*. */
     public PropertyFile getChildren(String path) {
-        if(path == null || path == "") {
+        if(path == null || path.equals("")) {
             return new PropertyFile(this);
         }
 

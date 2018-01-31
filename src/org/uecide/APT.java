@@ -49,28 +49,28 @@ public class APT {
 
     ArrayList<Source>sources = new ArrayList<Source>();
 
-    public APT(String rootPath) {
+    public APT(String rootPath) throws FileNotFoundException, IOException {
         root = new File(rootPath);
         initRepository();
     }
 
-    public APT(File rootFile) {
+    public APT(File rootFile) throws FileNotFoundException, IOException {
         root = rootFile;
         initRepository();
     }
 
     public void makeTree() {
         if (!aptFolder.exists()) {  
-            aptFolder.mkdirs();
+            if (!aptFolder.mkdirs()) { System.err.println("Unable to make apt folder"); return; }
         }
         if (!dbFolder.exists()) {
-            dbFolder.mkdir();
+            if (!dbFolder.mkdir()) { System.err.println("Unable to make db folder"); }
         }
         if (!cacheFolder.exists()) {
-            cacheFolder.mkdir();
+            if (!cacheFolder.mkdir()) { System.err.println("Unable to make cache folder"); }
         }
         if (!packagesFolder.exists()) {
-            packagesFolder.mkdir();
+            if (!packagesFolder.mkdir()) { System.err.println("Unable to make packages folder"); }
         }
     }
 
@@ -120,42 +120,38 @@ public class APT {
 //        }
 //    }
 
-    public void loadSources(File sfile) {
-        //sources = new ArrayList<Source>();
+    public void loadSources(File sfile) throws FileNotFoundException, IOException{
+        
         if (!sfile.exists()) {
             return;
         }
 
-        try {
-            FileReader fr = new FileReader(sfile);
-            BufferedReader br = new BufferedReader(fr);
-            String line;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.startsWith("#")) {
-                    continue;
-                }
-                String[] bits = line.split("\\s+");
-                if (bits.length < 4) {
-                    continue;
-                }
-
-                if (bits[0].equals("deb")) {
-                    String url = bits[1];
-                    String codename = bits[2];
-                    String[] sects = Arrays.copyOfRange(bits, 3, bits.length);
-                    Source s = new Source(url, codename, getOS(), sects);
-                    addSource(s);
-                }
+        FileReader fr = new FileReader(sfile);
+        BufferedReader br = new BufferedReader(fr);
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.startsWith("#")) {
+                continue;
             }
-            br.close();
-            fr.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+            String[] bits = line.split("\\s+");
+            if (bits.length < 4) {
+                continue;
+            }
+
+            if (bits[0].equals("deb")) {
+                String url = bits[1];
+                String codename = bits[2];
+                String[] sects = Arrays.copyOfRange(bits, 3, bits.length);
+                Source s = new Source(url, codename, getOS(), sects);
+                addSource(s);
+            }
         }
+        br.close();
+        fr.close();
     }
 
-    public void initRepository() {
+    public void initRepository() throws FileNotFoundException, IOException {
         aptFolder = new File(root, "apt");
         dbFolder = new File(aptFolder, "db");
         cacheFolder = new File(aptFolder, "cache");
@@ -278,7 +274,6 @@ public class APT {
 
     public void update(boolean resOnly) {
         cachedPackages = new HashMap<String, Package>();
-        int num = sources.size();
         int done = 0;
         for (Source s : sources) {
             if (resOnly) {
@@ -439,7 +434,7 @@ System.err.println("Required package " + p.getName());
         return true;
     }
 
-    public void upgradePackage(Package p) {
+    public void upgradePackage(Package p) throws FileNotFoundException, IOException{
         if (!isUpgradable(p)) {
             return;
         }
@@ -468,7 +463,7 @@ System.err.println("Required package " + p.getName());
         p.extractPackage(cacheFolder, packagesFolder, root);
         initRepository();
     }
-    public void installPackage(Package p) {
+    public void installPackage(Package p) throws FileNotFoundException, IOException{
         Package[] deps = resolveDepends(p);
         for (Package dep : deps) {
             if (!isInstalled(dep)) {

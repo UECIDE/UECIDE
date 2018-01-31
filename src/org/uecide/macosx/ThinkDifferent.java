@@ -91,7 +91,7 @@ public class ThinkDifferent implements ApplicationListener {
 
 
     public void handlePreferences(ApplicationEvent ae) {
-        Preferences p = new Preferences(null);
+        new Preferences(null);
     }
 
 

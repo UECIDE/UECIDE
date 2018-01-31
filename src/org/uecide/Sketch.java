@@ -454,9 +454,9 @@ public class Sketch {
 
     void attachToEditor(Editor e) {
         editor = e;
-        editor.setTitle(Base.theme.get("product.cap") + " | " + sketchName);
         ctx.setEditor(e);
         if (editor != null) {
+            editor.setTitle(Base.theme.get("product.cap") + " | " + sketchName);
             PropertyFile props = ctx.getMerged();
             if (props.get("sketch.window.x") != null) {
                 editor.setXPosition(props.getInteger("sketch.window.x"));
@@ -913,54 +913,6 @@ public class Sketch {
         return l.split("\n").length;
     }
 
-    public String stripBlock(String in, String start, String end) {
-        String regexp;
-        String mid;
-
-        if(start.equals(end)) {
-            mid = start;
-        } else {
-            mid = start + end;
-        }
-
-        if(start == "{") start = "\\" + start;
-
-        if(end == "}") end = "\\" + end;
-
-        regexp = "(?s)" + start + "[^" + mid + "]*" + end;
-
-        boolean done = false;
-        String out = in;
-        int pass = 1;
-
-        while(!done) {
-            String rep = out.replaceFirst(regexp, "");
-            int lines = linesInString(out);
-            int newLines = linesInString(rep);
-            int rets = lines - newLines;
-            String retStr = "";
-
-            for(int i = 0; i < rets; i++) {
-                retStr += "\n";
-            }
-
-            rep = out.replaceFirst(regexp, retStr);
-
-            String[] left = out.split("\n");
-            String[] right = out.split("\n");
-
-            if(rep.equals(out)) {
-                done = true;
-            } else {
-                out = rep;
-            }
-
-            pass++;
-        }
-
-        return out;
-    }
-
     // Locate a library by its header file.  Scan through all the known
     // libraries for the right file.  First pass looks for libraries named
     // after the included file.  Second pass looks through all the
@@ -1119,7 +1071,6 @@ public class Sketch {
         importedLibraries = new HashMap<String, Library>();
         unknownLibraries = new ArrayList<String>();
         includeOrder = new ArrayList<String>();
-        HashMap<String, Integer> inclist = new HashMap<String, Integer>();
         Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
 
         for(File f : cleanedFiles.keySet()) {
@@ -1567,7 +1518,7 @@ public class Sketch {
                 sport.setDTR(false);
                 sport.setRTS(false);
                 sport.closePort();
-                System.gc();
+//                System.gc();
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
@@ -1600,7 +1551,7 @@ public class Sketch {
                 sport.setRTS(false);
                 sport.closePort();
                 Thread.sleep(postdelay);
-                System.gc();
+//                System.gc();
             }
         } catch (Exception e) {
             ctx.error(e);
@@ -1610,9 +1561,9 @@ public class Sketch {
     }
 
     public boolean build() {
-        if(Preferences.getBoolean("editor.external.command")) {
-            //reloadAllFiles();
-        }
+//        if(Preferences.getBoolean("editor.external.command")) {
+//            //reloadAllFiles();
+//        }
 
         if(getBoard() == null) {
             error(Base.i18n.string("err.noboard"));
@@ -1917,7 +1868,7 @@ public class Sketch {
     }
 
     public void cleanup() {
-        System.gc();
+//        System.gc();
         Base.removeDescendants(buildFolder);
     }
 
@@ -2006,13 +1957,13 @@ public class Sketch {
         }
 
         for (Library l : orderedLibraries) {
-            if(includes.indexOf(l) < 0) {
+            if(includes.indexOf(l.getSourceFolder()) < 0) {
                 includes.add(l.getSourceFolder());
             }
         }
 
         for (Library l : importedLibraries.values()) {
-            if (includes.indexOf(l) < 0) {
+            if (includes.indexOf(l.getSourceFolder()) < 0) {
                 includes.add(l.getSourceFolder());
             }
         }
@@ -2164,77 +2115,79 @@ public class Sketch {
         ctx.set("includes", generateIncludes());
         ctx.set("filename", sketchName);
 
-        if ((Preferences.getBoolean("editor.dialog.missinglibs")) && (Base.isOnline())) {
-            if (editor != null) {
-                if (unknownLibraries.size() > 0) {
-                    PluginManager pm = new PluginManager();
-                    HashMap<String, Package> foundPackages = new HashMap<String, Package>();
-                    for (String l : unknownLibraries) {
-                        File sketchHeader = new File(sketchFolder, l);
-                        if (!sketchHeader.exists()) {
-                            Package p = pm.findLibraryByInclude(getCore(), l);
-                            if (p != null) {
-                                foundPackages.put(l, p);
+        try {
+            if ((Preferences.getBoolean("editor.dialog.missinglibs")) && (Base.isOnline())) {
+                if (editor != null) {
+                    if (unknownLibraries.size() > 0) {
+                        PluginManager pm = new PluginManager();
+                        HashMap<String, Package> foundPackages = new HashMap<String, Package>();
+                        for (String l : unknownLibraries) {
+                            File sketchHeader = new File(sketchFolder, l);
+                            if (!sketchHeader.exists()) {
+                                Package p = pm.findLibraryByInclude(getCore(), l);
+                                if (p != null) {
+                                    foundPackages.put(l, p);
+                                }
                             }
                         }
-                    }
 
-                    if (foundPackages.size() > 0) {
-                        JPanel panel = new JPanel();
-                        panel.setLayout(new GridBagLayout());
-                        GridBagConstraints c = new GridBagConstraints();
+                        if (foundPackages.size() > 0) {
+                            JPanel panel = new JPanel();
+                            panel.setLayout(new GridBagLayout());
+                            GridBagConstraints c = new GridBagConstraints();
 
-                        c.gridwidth = 2;
-                        c.gridx = 0;
-                        c.gridy = 0;
-                        c.fill = GridBagConstraints.HORIZONTAL;
-                        c.anchor = GridBagConstraints.LINE_START;
+                            c.gridwidth = 2;
+                            c.gridx = 0;
+                            c.gridy = 0;
+                            c.fill = GridBagConstraints.HORIZONTAL;
+                            c.anchor = GridBagConstraints.LINE_START;
 
-                        panel.add(new JLabel("I have identified some libraries you may be missing:"), c);
-                        
-                        c.gridy++;
-                        panel.add(new JLabel(" "), c);
+                            panel.add(new JLabel("I have identified some libraries you may be missing:"), c);
+                            
+                            c.gridy++;
+                            panel.add(new JLabel(" "), c);
 
-                        c.gridwidth = 1;
+                            c.gridwidth = 1;
 
-                        for(String l : foundPackages.keySet()) {
+                            for(String l : foundPackages.keySet()) {
+                                c.gridx = 0;
+                                c.gridy++;
+                                panel.add(new JLabel(l + ": "), c);
+                                c.gridx = 1;
+                                panel.add(new JLabel(foundPackages.get(l).getName()), c);
+                            }
                             c.gridx = 0;
                             c.gridy++;
-                            panel.add(new JLabel(l + ": "), c);
-                            c.gridx = 1;
-                            panel.add(new JLabel(foundPackages.get(l).getName()), c);
-                        }
-                        c.gridx = 0;
-                        c.gridy++;
-                        c.gridwidth = 2;
-                        panel.add(new JLabel(" "), c);
+                            c.gridwidth = 2;
+                            panel.add(new JLabel(" "), c);
 
-                        c.gridy++;
-                        panel.add(new JLabel("Do you want me to install these libraries for you?"), c);
+                            c.gridy++;
+                            panel.add(new JLabel("Do you want me to install these libraries for you?"), c);
 
-                        JCheckBox cb = new JCheckBox("Never ask me again");
-                        Object[] options = {cb, "Yes", "No"};
-                        int n = JOptionPane.showOptionDialog(editor, panel, "Missing Libraries", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
+                            JCheckBox cb = new JCheckBox("Never ask me again");
+                            Object[] options = {cb, "Yes", "No"};
+                            int n = JOptionPane.showOptionDialog(editor, panel, "Missing Libraries", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
 
-                        if (cb.isSelected()) {
-                            Preferences.setBoolean("editor.dialog.missinglibs", false);
-                        }
-
-                        if (n == 1) {
-                            bullet("Updating repository information...");
-                            APT apt = pm.getApt();
-                            apt.update();
-                            bullet("Installing missing libraries...");
-                            for (Package p : foundPackages.values()) {
-                                installLibrary(pm.getApt(), p, true);
+                            if (cb.isSelected()) {
+                                Preferences.setBoolean("editor.dialog.missinglibs", false);
                             }
-                            Base.rescanLibraries();
-                            ctx.set("includes", generateIncludes());
+
+                            if (n == 1) {
+                                bullet("Updating repository information...");
+                                APT apt = pm.getApt();
+                                apt.update();
+                                bullet("Installing missing libraries...");
+                                for (Package p : foundPackages.values()) {
+                                    installLibrary(pm.getApt(), p, true);
+                                }
+                                Base.rescanLibraries();
+                                ctx.set("includes", generateIncludes());
+                            }
                         }
                     }
                 }
             }
-        }
+        } catch (Exception ex) { error(ex); }
 
         if(doPrePurge) {
             doPrePurge = false;
@@ -2682,7 +2635,7 @@ public class Sketch {
         }
 
         for(String lib : coreLibs.keySet()) {
-            if (!Base.isQuiet()) bullet2(lib.toString());
+            if (!Base.isQuiet()) bullet2(lib);
 
             if(!compileCore(coreLibs.get(lib), "Core_" + lib)) {
                 return false;
@@ -3119,15 +3072,15 @@ public class Sketch {
         return files;
     }
 
-    static private boolean createFolder(File folder) {
-        if(folder.isDirectory())
-            return false;
-
-        if(!folder.mkdir())
-            return false;
-
-        return true;
-    }
+//    static private boolean createFolder(File folder) {
+//        if(folder.isDirectory())
+//            return false;
+//
+//        if(!folder.mkdir())
+//            return false;
+//
+//        return true;
+//    }
 
     private boolean compileLink(List<File> objectFiles) {
         PropertyFile props = ctx.getMerged();
@@ -3143,7 +3096,7 @@ public class Sketch {
             neverInclude = "";
         }
 
-        neverInclude.replaceAll(" ", "::");
+        neverInclude = neverInclude.replaceAll(" ", "::");
         String neverIncludes[] = neverInclude.split("::");
 
         String liboption = props.get("compile.liboption");
@@ -3189,29 +3142,29 @@ public class Sketch {
         return (Boolean)ctx.executeKey("compile.link");
     }
 
-    private boolean compileEEP() {
-        PropertyFile props = ctx.getMerged();
-        if (!props.keyExists("compile.eep")) {
-            return true;
-        }
-        return (Boolean)ctx.executeKey("compile.eep");
-    }
+//    private boolean compileEEP() {
+//        PropertyFile props = ctx.getMerged();
+//        if (!props.keyExists("compile.eep")) {
+//            return true;
+//        }
+//        return (Boolean)ctx.executeKey("compile.eep");
+//    }
 
-    private boolean compileLSS() {
-        PropertyFile props = ctx.getMerged();
-        if (!props.keyExists("compile.lss")) {
-            return true;
-        }
-        return (Boolean)ctx.executeKey("compile.lss");
-    }
+//    private boolean compileLSS() {
+//        PropertyFile props = ctx.getMerged();
+//        if (!props.keyExists("compile.lss")) {
+//            return true;
+//        }
+//        return (Boolean)ctx.executeKey("compile.lss");
+//    }
 
-    private boolean compileHEX() {
-        PropertyFile props = ctx.getMerged();
-        if (!props.keyExists("compile.hex")) {
-            return true;
-        }
-        return (Boolean)ctx.executeKey("compile.hex");
-    }
+//    private boolean compileHEX() {
+//        PropertyFile props = ctx.getMerged();
+//        if (!props.keyExists("compile.hex")) {
+//            return true;
+//        }
+//        return (Boolean)ctx.executeKey("compile.hex");
+//    }
 
     public boolean isUntitled() {
         return isUntitled;
@@ -3240,7 +3193,7 @@ public class Sketch {
     }
 
     public void cleanBuild() {
-        System.gc();
+//        System.gc();
         Base.removeDescendants(buildFolder);
     }
 
@@ -3441,8 +3394,8 @@ public class Sketch {
             return;
         }
 
-        mBuffer.replaceAll("\\r\\n", "\\n");
-        mBuffer.replaceAll("\\r", "\\n");
+        mBuffer = mBuffer.replaceAll("\\r\\n", "\\n");
+        mBuffer = mBuffer.replaceAll("\\r", "\\n");
 
         boolean eol = false;
 
@@ -4300,7 +4253,7 @@ public class Sketch {
         if (props.get("makefile.template") != null) {
             String template = Base.getFileAsString(new File(ctx.parseString(props.get("makefile.template"))));
             File out = new File(sketchFolder, "Makefile");
-            generateFileFromTemplate(template.toString(), out);
+            generateFileFromTemplate(template, out);
         }
     }
 
@@ -4435,8 +4388,6 @@ public class Sketch {
             Base.error(e);
             return null;
         }
-
-        ArrayList<String> includes = new ArrayList<String>();
 
         for(String line : data) {
             line = line.trim();

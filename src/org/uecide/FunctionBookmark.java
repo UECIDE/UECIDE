@@ -63,7 +63,6 @@ import java.util.zip.*;
 public class FunctionBookmark {
     File file;
     int line;
-    String proto;
 
     String returnType;
     String name;
@@ -102,7 +101,7 @@ public class FunctionBookmark {
     }
 
     public String getFunction() {
-        return proto;
+        return returnType.trim() + " " + name.trim() + paramList.trim();
     }
 
     public String dump() {

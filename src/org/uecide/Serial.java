@@ -454,8 +454,10 @@ public class Serial {
 
             BufferedReader reader = new BufferedReader(new FileReader(prodFile));
             String product = reader.readLine();
+            reader.close();
             reader = new BufferedReader(new FileReader(mfgFile));
             String manufacturer = reader.readLine();
+            reader.close();
 
             return manufacturer + " " + product;
             /*

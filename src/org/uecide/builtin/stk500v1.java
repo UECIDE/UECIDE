@@ -402,7 +402,7 @@ System.err.println("Programming chunk " + currentChunk + " at address " + start)
         return true;
     }
 
-    class HexRecord {
+    static class HexRecord {
         int length = 0;
         long address = 0;
         int type = 0;

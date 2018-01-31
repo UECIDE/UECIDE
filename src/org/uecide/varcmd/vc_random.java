@@ -43,7 +43,7 @@ public class vc_random implements VariableCommand {
             int low = Integer.parseInt(bits[0]);
             int high = Integer.parseInt(bits[1]);
             Random r = new Random();
-            int val = Math.abs(r.nextInt());
+            int val = Math.abs(r.nextInt() / 2);
             val = val % (high - low);
             val += low;
             return Integer.toString(val);

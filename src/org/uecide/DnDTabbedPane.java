@@ -193,7 +193,7 @@ public class DnDTabbedPane extends JTabbedPane {
         }       
     }
 
-    class TabTransferData {
+    static class TabTransferData {
         private DnDTabbedPane m_tabbedPane = null;
         private int m_tabIndex = -1;
 
@@ -543,10 +543,10 @@ public class DnDTabbedPane extends JTabbedPane {
         s_glassPane.setVisible(true);
     }
 
-    private Rectangle getTabAreaBound() {
-        Rectangle lastTab = getUI().getTabBounds(this, getTabCount() - 1);
-        return new Rectangle(0, 0, getWidth(), lastTab.y + lastTab.height);
-    }
+//    private Rectangle getTabAreaBound() {
+//        Rectangle lastTab = getUI().getTabBounds(this, getTabCount() - 1);
+//        return new Rectangle(0, 0, getWidth(), lastTab.y + lastTab.height);
+//    }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);

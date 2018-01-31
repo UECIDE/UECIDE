@@ -143,7 +143,7 @@ public class Programmer extends UObject {
                 sport.setDTR(false);
                 sport.setRTS(false);
                 sport.closePort();
-                System.gc();
+//                System.gc();
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
@@ -176,7 +176,7 @@ public class Programmer extends UObject {
                 sport.setRTS(false);
                 sport.closePort();
                 Thread.sleep(postdelay);
-                System.gc();
+//                System.gc();
             }
         } catch (Exception e) {
             ctx.error(e);

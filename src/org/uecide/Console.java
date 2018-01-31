@@ -302,12 +302,10 @@ public class Console extends JTextPane implements ClipboardOwner {
     }
 
     void setStyle(MutableAttributeSet set, String name) {
-        PropertyFile theme = Base.getTheme();
-        Color bgColor = new Color(1,1,1, (float) 0.01); //theme.getColor("console.color");
+//        PropertyFile theme = Base.getTheme();
 
         Font font = getFont(name);
 
-//        StyleConstants.setBackground(set, bgColor);
         StyleConstants.setForeground(set, getColor(name));
         StyleConstants.setFontSize(set, font.getSize());
         StyleConstants.setFontFamily(set, font.getFamily());

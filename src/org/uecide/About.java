@@ -98,7 +98,7 @@ public class About {
         info.setEditable(false);
 //        info.setBackground(new Color(0, 0, 0));
 //        info.setForeground(new Color(0, 255, 0));
-        Font f = info.getFont();
+//        Font f = info.getFont();
 
         info.addHyperlinkListener(new HyperlinkListener() {
             public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -114,7 +114,7 @@ public class About {
 
         HTMLEditorKit kit = new HTMLEditorKit();
         info.setEditorKit(kit);
-        StyleSheet css = kit.getStyleSheet();
+//        StyleSheet css = kit.getStyleSheet();
 
 //        css.addRule("body {color: #88ff88; font-family: Arial,Helvetica,Sans-Serif;}");
 //        css.addRule("a {color: #88ffff;}");
@@ -195,6 +195,7 @@ public class About {
                     s.append("</li>");
                 }
             }
+            reader.close();
         } catch(Exception ex) {
             Base.error(ex);
         }

@@ -48,7 +48,7 @@ public class Platform extends org.uecide.Platform {
         try {
             String laf = Base.theme.get("window.laf");
 
-            if((laf != null) && (laf != "default")) {
+            if((laf != null) && (!laf.equals("default"))) {
                 UIManager.setLookAndFeel(laf);
             }
 

@@ -233,7 +233,7 @@ public class bitmap extends JPanel implements EditorBase {
     public void clearKeywords() {
     }
 
-    public void addKeyword(String name, Integer type) {
+    public void addKeyword(String name, int type) {
     }
 
     public void repaint() {

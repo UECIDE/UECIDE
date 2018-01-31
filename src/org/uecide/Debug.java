@@ -64,7 +64,7 @@ public class Debug {
     public static boolean shown = false;
     public static RTextScrollPane scrollPane;
     public static JToolBar toolbar;
-    public static boolean pause = false;
+//    public static boolean pause = false;
     public static JToggleButton pauseButton;
     public static boolean verbose = false;
 

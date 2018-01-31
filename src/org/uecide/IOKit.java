@@ -129,11 +129,9 @@ public class IOKit {
                             stack.push(lastNode);
                             parentNode = lastNode;
                             currentDepth = indent;
-                        } else if (indent < currentDepth) {
-                            while (indent < currentDepth) {
-                                parentNode = stack.pop();
-                                currentDepth -= 2;
-                            }
+                        } else while (indent < currentDepth) {
+                            parentNode = stack.pop();
+                            currentDepth -= 2;
                         }
 
                         if (parentNode != null) {

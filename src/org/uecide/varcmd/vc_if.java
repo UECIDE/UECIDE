@@ -41,7 +41,7 @@ public class vc_if implements VariableCommand {
         } else {
             String condition = bits[0];
             String trueVal = bits[1];
-            String falseVal = bits.length == 3 ? bits[2] : "";
+            String falseVal = bits[2];
 
             String[] conditionBits = condition.split("=");
 

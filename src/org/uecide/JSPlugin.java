@@ -57,14 +57,6 @@ public class JSPlugin {
             engine.put("editor", ed);
 
             Invocable inv = (Invocable)engine;
-            if (inv == null) {
-                if (ctx != null) {
-                    ctx.error(Base.i18n.string("err.invocable"));
-                } else {
-                    Base.error(Base.i18n.string("err.invocable"));
-                }
-                return false;
-            }
 
             if (args == null) {
                 ret = inv.invokeFunction(function);

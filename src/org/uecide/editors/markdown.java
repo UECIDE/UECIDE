@@ -85,7 +85,7 @@ public class markdown extends JPanel implements EditorBase {
 
     JToolBar toolbar;
 
-    class Flag {
+    static class Flag {
         Icon icon;
         int group;
         int line;
@@ -227,6 +227,8 @@ public class markdown extends JPanel implements EditorBase {
         editor = e;
         sketch = s;
         this.setLayout(new BorderLayout());
+
+        if (f == null) return;
 
         rDocument = new RSyntaxDocument(FileType.getSyntaxStyle(f.getName()));
 
@@ -375,9 +377,7 @@ public class markdown extends JPanel implements EditorBase {
 
         this.add(previewSplit, BorderLayout.CENTER);
 
-        if(f != null) {
-            loadFile(f);
-        }
+        loadFile(f);
 
         if(Preferences.getBoolean("editor.find.keep")) {
             openFindPanel();
@@ -1133,7 +1133,7 @@ public class markdown extends JPanel implements EditorBase {
         }
     }
 
-    public void addKeyword(String name, Integer type) {
+    public void addKeyword(String name, int type) {
         if (fileSyntax.equals(SyntaxConstants.SYNTAX_STYLE_EXTENDABLE_CPLUSPLUS)) {
             RSyntaxDocument d = (RSyntaxDocument)textArea.getDocument();
             ExtendableCPlusPlusTokenMaker tm = (ExtendableCPlusPlusTokenMaker)d.getTokenMaker();

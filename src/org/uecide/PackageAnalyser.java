@@ -26,7 +26,11 @@ public class PackageAnalyser extends JDialog {
 
         Thread thr = new Thread(new Runnable() {
             public void run() {
-                analysePackages();
+                try {
+                    analysePackages();
+                } catch (Exception e) {
+                    Base.error(e);
+                }
             }
         });
         thr.start();
@@ -34,7 +38,7 @@ public class PackageAnalyser extends JDialog {
         setVisible(true);
     }
 
-    public void analysePackages() {
+    public void analysePackages() throws FileNotFoundException, IOException {
 
         File dd = Base.getDataFolder();
 
@@ -126,6 +130,7 @@ public class PackageAnalyser extends JDialog {
                 while ((nread = fis.read(dataBytes)) != -1) {
                     md.update(dataBytes, 0, nread);
                 }
+                fis.close();
                 byte[] mdbytes = md.digest();
 
                 StringBuffer hexString = new StringBuffer();

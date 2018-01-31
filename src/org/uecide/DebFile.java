@@ -52,7 +52,7 @@ public class DebFile {
     File debFile;
     File tempLoc;
 
-    class FileInfo {
+    static class FileInfo {
         int type;
         File source;
     }
@@ -88,28 +88,30 @@ public class DebFile {
 
     void installFiles(HashMap<File, FileInfo> files) {
         // First do the file renaming
-        for (File dest : files.keySet()) {
-            FileInfo fi = files.get(dest);
+        for (Map.Entry<File, FileInfo> dest : files.entrySet()) {
+            FileInfo fi = dest.getValue();
+            File d = dest.getKey();
             if (fi.type == FILE) {
                 // Remove the old file if it's there
-                if (dest.exists()) {
-                    Base.tryDelete(dest);
+                if (d.exists()) {
+                    Base.tryDelete(d);
                 }
-                fi.source.renameTo(dest);
+                fi.source.renameTo(d);
             }
         }
 
         // Now copy linked files
-        for (File dest : files.keySet()) {
-            FileInfo fi = files.get(dest);
+        for (Map.Entry<File, FileInfo> dest : files.entrySet()) {
+            FileInfo fi = dest.getValue();
+            File d = dest.getKey();
             if (fi.type == LINK) {
-                if (dest.exists()) {
-                    Base.tryDelete(dest);
+                if (d.exists()) {
+                    Base.tryDelete(d);
                 }
-                Base.copyFile(fi.source, dest);
-                dest.setExecutable(fi.source.canExecute());
-                dest.setWritable(fi.source.canRead());
-                dest.setReadable(fi.source.canWrite());
+                Base.copyFile(fi.source, d);
+                d.setExecutable(fi.source.canExecute());
+                d.setWritable(fi.source.canRead());
+                d.setReadable(fi.source.canWrite());
             }
         }
             
@@ -141,11 +143,13 @@ public class DebFile {
 
                 to.flush();
                 to.close();
+                from.close();
                 dest.setLastModified(file.getLastModified());
                 filelist.put(name, dest);
             }
             file = ar.getNextArEntry();
         }
+        ar.close();
         return filelist;
     }
 

@@ -266,8 +266,8 @@ public class Context {
 
             out = sb.toString();
 
+            reader.close();
             from.close();
-            from = null;
         } catch(Exception e) {
             error(e);
         }
@@ -641,10 +641,6 @@ public class Context {
             engine.eval(script);
 
             Invocable inv = (Invocable)engine;
-            if (inv == null) {
-                error(Base.i18n.string("err.invocable"));
-                return false;
-            }
 
             if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
                 String argstr = "";
@@ -684,7 +680,6 @@ public class Context {
     public Object executeUScript(String key) {
         PropertyFile props = getMerged();
         PropertyFile script = props.getChildren(key);
-        ArrayList<String>lines = script.keySet();
         int lineno = 0;
 
         Object res = false;
@@ -931,14 +926,16 @@ public class Context {
 
             cmdName = cmdName.substring(10);
             if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
-                String argstr = "";
+
+                StringBuffer args = new StringBuffer();
+
+                args.append(cmdName);
+
                 for (String s : arg) {
-                    if (!argstr.equals("")) {
-                        argstr += " ";
-                    }
-                    argstr += s;
+                    args.append(" ");
+                    args.append(s);
                 }
-                command(cmdName + " " + argstr);
+                command(args.toString());
             }
 
             Class<?> c = Class.forName("org.uecide.builtin." + cmdName);
@@ -955,7 +952,7 @@ public class Context {
             param_types[1] = String[].class;
             
             final Method m = c.getMethod("main", param_types);
-            final Method k = c.getMethod("kill");
+//            final Method k = c.getMethod("kill");
 
             Object[] args = new Object[2];
             args[0] = this;

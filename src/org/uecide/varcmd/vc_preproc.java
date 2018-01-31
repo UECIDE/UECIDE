@@ -58,7 +58,7 @@ public class vc_preproc implements VariableCommand {
         data = ctx.parseString(data);
 
         String extension = null;
-        String[] fbits = infile.getName().split(".");
+        String[] fbits = infile.getName().split("\\.");
         if (fbits.length > 1) {
             extension = "." + fbits[fbits.length-1];
         }

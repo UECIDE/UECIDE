@@ -260,9 +260,10 @@ public class Platform {
         if (f.exists()) {
             PropertyFile p = new PropertyFile(f);
             String flav = p.get("ID");
-            if (flav != null) {
-                platformInfo.set("flavour", flav);
+            if (flav == null) {
+                return;
             }
+            platformInfo.set("flavour", flav);
 
             if (flav.equals("debian")) {
                 String v = p.get("VERSION");

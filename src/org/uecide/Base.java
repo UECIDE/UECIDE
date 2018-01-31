@@ -137,7 +137,7 @@ public class Base {
 
     public static PropertyFile preferencesTree = new PropertyFile();
 
-    public static HashMap<Object, DiscoveredBoard> discoveredBoards = new HashMap<Object, DiscoveredBoard>();
+//    public static HashMap<Object, DiscoveredBoard> discoveredBoards = new HashMap<Object, DiscoveredBoard>();
 
     public static boolean onlineMode = true;
 
@@ -401,165 +401,178 @@ public class Base {
         }
         
         if (cli.isSet("update")) {
-            PluginManager pm = new PluginManager();
-            APT apt = pm.getApt();
-            apt.update();
+            try {
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                apt.update();
+            } catch (Exception ex) { error(ex); }
             doExit = true;
         }
 
         if (cli.isSet("upgrade")) {
-            PluginManager pm = new PluginManager();
-            APT apt = pm.getApt();
-            Package[] pl = apt.getUpgradeList();
-            for (Package p : pl) {
-                apt.upgradePackage(p);
+            try {
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                Package[] pl = apt.getUpgradeList();
+                for (Package p : pl) {
+                    apt.upgradePackage(p);
+                }
+            } catch (Exception e) {
+                error(e);
             }
             doExit = true;
         }
 
         if (cli.isSet("install")) {
-            PluginManager pm = new PluginManager();
-            APT apt = pm.getApt();
-            String packageName = cli.getString("install");
-            if (packageName == null) {
-                System.err.println(i18n.string("err.selpkginst"));
-                doExit = true;
-            }
-
-            Package p = apt.getPackage(packageName);
-            if (p == null) {
-                System.err.println(i18n.string("err.pkgnotfound", packageName));
-                System.err.println(i18n.string("msg.usesearch"));
-                doExit = true;
-            }
-
-            System.out.println(i18n.string("msg.installing", p.getName()));
-            apt.installPackage(p);
-            System.out.println(i18n.string("msg.done"));
+            try {
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                String packageName = cli.getString("install");
+                if (packageName == null) {
+                    System.err.println(i18n.string("err.selpkginst"));
+                } else {
+                    Package p = apt.getPackage(packageName);
+                    if (p == null) {
+                        System.err.println(i18n.string("err.pkgnotfound", packageName));
+                        System.err.println(i18n.string("msg.usesearch"));
+                    } else {
+                        System.out.println(i18n.string("msg.installing", p.getName()));
+                        apt.installPackage(p);
+                        System.out.println(i18n.string("msg.done"));
+                    }
+                }
+            } catch (Exception ex) { error(ex); }
             doExit = true;
         }
 
         if (cli.isSet("remove-all")) {
-            doExit = true;
-            if (!cli.isSet("force")) {
-                System.err.println(i18n.string("err.notremove"));
-            } else {
-                PluginManager pm = new PluginManager();
-                APT apt = pm.getApt();
-                for (Package p : apt.getInstalledPackages()) {
-                    apt.uninstallPackage(p, true);
+            try {
+                if (!cli.isSet("force")) {
+                    System.err.println(i18n.string("err.notremove"));
+                } else {
+                    PluginManager pm = new PluginManager();
+                    APT apt = pm.getApt();
+                    for (Package p : apt.getInstalledPackages()) {
+                        apt.uninstallPackage(p, true);
+                    }
                 }
-                doExit = true;
-            }
+            } catch (Exception ex) { error(ex); }
+            doExit = true;
         }
             
         if (cli.isSet("remove")) {
-            PluginManager pm = new PluginManager();
-            APT apt = pm.getApt();
-            String packageName = cli.getString("remove");
-            if (packageName == null) {
-                System.err.println(i18n.string("err.selpkguninst"));
-                doExit = true;
-            }
+            try {
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                String packageName = cli.getString("remove");
+                if (packageName == null) {
+                    System.err.println(i18n.string("err.selpkguninst"));
+                    doExit = true;
+                }
 
-            Package p = apt.getPackage(packageName);
-            if (p == null) {
-                System.err.println(i18n.string("err.notfound", packageName));
-                System.err.println(i18n.string("msg.usesearch"));
-            } else {
-                System.out.println(i18n.string("msg.uninstalling", p.getName()));
-                apt.uninstallPackage(p, cli.isSet("force"));
-            }
+                Package p = apt.getPackage(packageName);
+                if (p == null) {
+                    System.err.println(i18n.string("err.notfound", packageName));
+                    System.err.println(i18n.string("msg.usesearch"));
+                } else {
+                    System.out.println(i18n.string("msg.uninstalling", p.getName()));
+                    apt.uninstallPackage(p, cli.isSet("force"));
+                }
+            } catch (Exception ex) { error(ex); }
             doExit = true;
         }
 
         if (cli.isSet("list")) {
-            PluginManager pm = new PluginManager();
-            APT apt = pm.getApt();
-            Package[] pkgs = apt.getPackages();
-            String format = "%-50s %10s %10s %s";
-            System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
-            ArrayList<Package> out = new ArrayList<Package>();
-            for (Package p : pkgs) {
-                if (cli.isSet("section")) {
-                    if (p.get("Section") == null) { continue; }
-                    if (!p.get("Section").equals(cli.getString("section"))) { continue; }
-                }
-                if (cli.isSet("family")) {
-                    if (p.get("Family") == null) { continue; }
-                    if (!p.get("Family").equals(cli.getString("family"))) { continue; }
-                }
-                if (cli.isSet("group")) {
-                    if (p.get("Group") == null) { continue; }
-                    if (!p.get("Group").equals(cli.getString("group"))) { continue; }
-                }
-                if (cli.isSet("subgroup")) {
-                    if (p.get("Subgroup") == null) { continue; }
-                    if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
-                }
-
-                String name = p.getName();
-                Package instPack = apt.getInstalledPackage(p.getName());
-                Version avail = p.getVersion();
-                Version inst = null;
-                String msg = "";
-                if (instPack != null) {
-                    inst = instPack.getVersion();
-                    if (avail.compareTo(inst) > 0) {
-                        msg = i18n.string("apt.list.update");
+            try {
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                Package[] pkgs = apt.getPackages();
+                String format = "%-50s %10s %10s %s";
+                System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
+                ArrayList<Package> out = new ArrayList<Package>();
+                for (Package p : pkgs) {
+                    if (cli.isSet("section")) {
+                        if (p.get("Section") == null) { continue; }
+                        if (!p.get("Section").equals(cli.getString("section"))) { continue; }
                     }
-                }
-                System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
-                System.out.println("  " + p.getDescriptionLineOne());
+                    if (cli.isSet("family")) {
+                        if (p.get("Family") == null) { continue; }
+                        if (!p.get("Family").equals(cli.getString("family"))) { continue; }
+                    }
+                    if (cli.isSet("group")) {
+                        if (p.get("Group") == null) { continue; }
+                        if (!p.get("Group").equals(cli.getString("group"))) { continue; }
+                    }
+                    if (cli.isSet("subgroup")) {
+                        if (p.get("Subgroup") == null) { continue; }
+                        if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
+                    }
 
-            }
+                    String name = p.getName();
+                    Package instPack = apt.getInstalledPackage(p.getName());
+                    Version avail = p.getVersion();
+                    Version inst = null;
+                    String msg = "";
+                    if (instPack != null) {
+                        inst = instPack.getVersion();
+                        if (avail.compareTo(inst) > 0) {
+                            msg = i18n.string("apt.list.update");
+                        }
+                    }
+                    System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+                    System.out.println("  " + p.getDescriptionLineOne());
+
+                }
+            } catch (Exception ex) { error(ex); }
             doExit = true;
         }
                 
         if (cli.isSet("search")) {
-            PluginManager pm = new PluginManager();
-            APT apt = pm.getApt();
-            Package[] pkgs = apt.getPackages();
-            String format = "%-50s %10s %10s %s";
-            System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
-            ArrayList<Package> out = new ArrayList<Package>();
-            String term = cli.getString("search").toLowerCase();
-            for (Package p : pkgs) {
-                if (cli.isSet("section")) {
-                    if (p.get("Section") == null) { continue; }
-                    if (!p.get("Section").equals(cli.getString("section"))) { continue; }
-                }
-                if (cli.isSet("family")) {
-                    if (p.get("Family") == null) { continue; }
-                    if (!p.get("Family").equals(cli.getString("family"))) { continue; }
-                }
-                if (cli.isSet("group")) {
-                    if (p.get("Group") == null) { continue; }
-                    if (!p.get("Group").equals(cli.getString("group"))) { continue; }
-                }
-                if (cli.isSet("subgroup")) {
-                    if (p.get("Subgroup") == null) { continue; }
-                    if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
-                }
-
-                String name = p.getName();
-                Package instPack = apt.getInstalledPackage(p.getName());
-                Version avail = p.getVersion();
-                Version inst = null;
-                String msg = "";
-                if (instPack != null) {
-                    inst = instPack.getVersion();
-                    if (avail.compareTo(inst) > 0) {
-                        msg = i18n.string("apt.list.update");
+            try {
+                PluginManager pm = new PluginManager();
+                APT apt = pm.getApt();
+                Package[] pkgs = apt.getPackages();
+                String format = "%-50s %10s %10s %s";
+                System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
+                ArrayList<Package> out = new ArrayList<Package>();
+                String term = cli.getString("search").toLowerCase();
+                for (Package p : pkgs) {
+                    if (cli.isSet("section")) {
+                        if (p.get("Section") == null) { continue; }
+                        if (!p.get("Section").equals(cli.getString("section"))) { continue; }
                     }
-                }
-                String comp = p.getName() + " " + p.getDescription();
-                if (comp.toLowerCase().contains(term)) {
-                    System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
-                    System.out.println("  " + p.getDescriptionLineOne());
-                }
+                    if (cli.isSet("family")) {
+                        if (p.get("Family") == null) { continue; }
+                        if (!p.get("Family").equals(cli.getString("family"))) { continue; }
+                    }
+                    if (cli.isSet("group")) {
+                        if (p.get("Group") == null) { continue; }
+                        if (!p.get("Group").equals(cli.getString("group"))) { continue; }
+                    }
+                    if (cli.isSet("subgroup")) {
+                        if (p.get("Subgroup") == null) { continue; }
+                        if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
+                    }
 
-            }
+                    String name = p.getName();
+                    Package instPack = apt.getInstalledPackage(p.getName());
+                    Version avail = p.getVersion();
+                    Version inst = null;
+                    String msg = "";
+                    if (instPack != null) {
+                        inst = instPack.getVersion();
+                        if (avail.compareTo(inst) > 0) {
+                            msg = i18n.string("apt.list.update");
+                        }
+                    }
+                    String comp = p.getName() + " " + p.getDescription();
+                    if (comp.toLowerCase().contains(term)) {
+                        System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+                        System.out.println("  " + p.getDescriptionLineOne());
+                    }
+
+                }
+            } catch (Exception ex) { error(ex); }
             doExit = true;
         }
 
@@ -650,7 +663,7 @@ public class Base {
         File sketchbookFolder = new File(sketchbookPath);
 
         if(!sketchbookFolder.exists()) {
-            sketchbookFolder.mkdirs();
+            if (!sketchbookFolder.mkdirs()) { error("Unable to make sketchbook folder " + sketchbookFolder.getAbsolutePath()); }
         }
 
         compilers = new TreeMap<String, Compiler>();
@@ -722,7 +735,7 @@ public class Base {
         if (cli.isSet("preferences")) {
             if(!headless) splashScreen.setMessage(i18n.string("splash.msg.complete"), 100);
             splashScreen.dispose();
-            Preferences p = new Preferences(null);
+            new Preferences(null);
             preferences.save();
             System.exit(0);
         }
@@ -784,35 +797,37 @@ public class Base {
                 Changelog c = new Changelog(Editor.editorList.get(0));
             }
 
+            try {
 
-            synchronized (Editor.editorList) {
-                if(boards.size() == 0) {
+                synchronized (Editor.editorList) {
+                    if(boards.size() == 0) {
 
-                    showWarning(
-                        i18n.string("err.noboards.title"),
-                        i18n.string("err.noboards.body"),
-                        null
-                    );
-                    PluginManager pm = new PluginManager();
-                    pm.openWindow(Editor.editorList.get(0), true);
-                } else if(cores.size() == 0) {
-                    showWarning(
-                        i18n.string("err.nocores.title"),
-                        i18n.string("err.nocores.body"),
-                        null
-                    );
-                    PluginManager pm = new PluginManager();
-                    pm.openWindow(Editor.editorList.get(0), true);
-                } else if(compilers.size() == 0) {
-                    showWarning(
-                        i18n.string("err.nocompilers.title"),
-                        i18n.string("err.nocompilers.body"),
-                        null
-                    );
-                    PluginManager pm = new PluginManager();
-                    pm.openWindow(Editor.editorList.get(0), true);
+                        showWarning(
+                            i18n.string("err.noboards.title"),
+                            i18n.string("err.noboards.body"),
+                            null
+                        );
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0), true);
+                    } else if(cores.size() == 0) {
+                        showWarning(
+                            i18n.string("err.nocores.title"),
+                            i18n.string("err.nocores.body"),
+                            null
+                        );
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0), true);
+                    } else if(compilers.size() == 0) {
+                        showWarning(
+                            i18n.string("err.nocompilers.title"),
+                            i18n.string("err.nocompilers.body"),
+                            null
+                        );
+                        PluginManager pm = new PluginManager();
+                        pm.openWindow(Editor.editorList.get(0), true);
+                    }
                 }
-            }
+            } catch (Exception ex) { error(ex); }
         }
 
         if(isTimeToCheckVersion()) {
@@ -1076,17 +1091,17 @@ public class Base {
                 }
             }
 
-            for (File i : MCUList.keySet()) {
-                if (MCUList.get(i) == minHits) {
-                    MCUList.remove(i);
+            for (Map.Entry<File,Integer> i : MCUList.entrySet()) {
+                if (i.getValue().equals(minHits)) {
+                    MCUList.remove(i.getKey());
                     break;
                 }
             }
         }
 
         int z = 0;
-        for (File i : MCUList.keySet()) {
-            preferences.set("sketch.mcu." + z, i.getAbsolutePath() + "::" + MCUList.get(i));
+        for (Map.Entry<File,Integer> i : MCUList.entrySet()) {
+            preferences.set("sketch.mcu." + z, i.getKey().getAbsolutePath() + "::" + i.getValue());
             z++;
         }
 
@@ -1405,7 +1420,7 @@ public class Base {
             //String tempPath = ignored.getParent();
             //return new File(tempPath);
             tryDelete(folder);
-            folder.mkdirs();
+            if (!folder.mkdirs()) { error("Unable to create temp folder " + folder.getAbsolutePath()); }
             return folder;
 
         } catch(Exception e) {
@@ -1461,13 +1476,11 @@ public class Base {
 
         try {
             sketchbookFolder = platform.getDefaultSketchbookFolder();
-        } catch(Exception e) { }
+        } catch(Exception e) { return null; }
 
         // create the folder if it doesn't exist already
-        boolean result = true;
-
         if(!sketchbookFolder.exists()) {
-            result = sketchbookFolder.mkdirs();
+            if (!sketchbookFolder.mkdirs()) { error("Unable to make sketchbook folder " + sketchbookFolder.getAbsolutePath()); }
         }
 
         return sketchbookFolder;
@@ -1784,12 +1797,12 @@ public class Base {
             }
 
             to.flush();
-            from.close(); // ??
-            from = null;
-            to.close(); // ??
-            to = null;
+            from.close();
+            to.close();
 
-            targetFile.setLastModified(sourceFile.lastModified());
+            if (!targetFile.setLastModified(sourceFile.lastModified())) {
+                error("Unable to set modification date on " + sourceFile.getAbsolutePath());
+            }
         } catch(Exception e) {
             error(e);
         }
@@ -1802,7 +1815,12 @@ public class Base {
     */
     public static void copyDir(File sourceDir, File targetDir) {
         try {
-            targetDir.mkdirs();
+            if (!targetDir.exists()) {
+                if (!targetDir.mkdirs()) {
+                    error("Unable to make target folder " + targetDir.getAbsolutePath());
+                    return;
+                }
+            }
             String files[] = sourceDir.list();
 
             for(int i = 0; i < files.length; i++) {
@@ -2043,6 +2061,7 @@ public class Base {
         try {
             JarFile myself = new JarFile(f);
             Manifest manifest = myself.getManifest();
+            myself.close();
             Attributes manifestContents = manifest.getMainAttributes();
 
             return new Version(manifestContents.getValue("Version"));
@@ -2075,10 +2094,12 @@ public class Base {
 
                     if(name.endsWith(classFileName)) {
                         // Remove .class and convert slashes to periods.
+                        zipFile.close();
                         return name.substring(0, name.length() - 6).replace('/', '.');
                     }
                 }
             }
+            zipFile.close();
         } catch(IOException e) {
             error(e);
         }
@@ -2277,27 +2298,22 @@ public class Base {
         }
     }
 
-    public static byte[] loadBytesRaw(File file) {
-        try {
-            int size = (int) file.length();
-            FileInputStream input = new FileInputStream(file);
-            byte buffer[] = new byte[size];
-            int offset = 0;
-            int bytesRead;
+    public static byte[] loadBytesRaw(File file) throws FileNotFoundException, IOException {
+        FileInputStream input = new FileInputStream(file);
 
-            while((bytesRead = input.read(buffer, offset, size - offset)) != -1) {
-                offset += bytesRead;
+        int size = (int) file.length();
+        byte buffer[] = new byte[size];
+        int offset = 0;
+        int bytesRead;
 
-                if(bytesRead == 0) break;
-            }
-
-            input.close();  // weren't properly being closed
-            input = null;
-            return buffer;
-        } catch(Exception e) {
-            error(e);
-            return null;
+        while((bytesRead = input.read(buffer, offset, size - offset)) != -1) {
+            offset += bytesRead;
+            if(bytesRead == 0) break;
         }
+
+        input.close();
+
+        return buffer;
     }
 
 
@@ -2503,9 +2519,7 @@ public class Base {
 
             to.flush();
             from.close();
-            from = null;
             to.close();
-            to = null;
         } catch(Exception e) {
             error(e);
             return false;
@@ -2514,49 +2528,50 @@ public class Base {
         return true;
     }
 
-    private static ArrayList<String> getResourcesFromJarFile(File file, String root, String extension) {
-        ArrayList<String> retval = new ArrayList<String>();
-        ZipFile zf;
+//    private static ArrayList<String> getResourcesFromJarFile(File file, String root, String extension) {
+//        ArrayList<String> retval = new ArrayList<String>();
+//        ZipFile zf;
+//
+//        try {
+//            zf = new ZipFile(file);
+//            final Enumeration e = zf.entries();
+//
+//            while(e.hasMoreElements()) {
+//                final ZipEntry ze = (ZipEntry) e.nextElement();
+//                final String fileName = ze.getName();
+//
+//                if(fileName.startsWith(root) && fileName.endsWith(extension)) {
+//                    retval.add(fileName);
+//                }
+//            }
+//
+//            zf.close();
+//        } catch(Exception e) {
+//            error(e);
+//        }
+//
+//        return retval;
+//    }
 
-        try {
-            zf = new ZipFile(file);
-            final Enumeration e = zf.entries();
-
-            while(e.hasMoreElements()) {
-                final ZipEntry ze = (ZipEntry) e.nextElement();
-                final String fileName = ze.getName();
-
-                if(fileName.startsWith(root) && fileName.endsWith(extension)) {
-                    retval.add(fileName);
-                }
-            }
-
-            zf.close();
-        } catch(Exception e) {
-            error(e);
-        }
-
-        return retval;
-    }
-
-    private String getBundleVersion(String path) {
-        try {
-            InputStream instr = Base.class.getResourceAsStream(path);
-
-            if(instr == null) {
-                return "0.0.0a";
-            }
-
-            JarInputStream jis = new JarInputStream(instr);
-            Manifest manifest = jis.getManifest();
-            Attributes manifestContents = manifest.getMainAttributes();
-            return manifestContents.getValue("Version");
-        } catch(Exception e) {
-            error(e);
-        }
-
-        return "unknown";
-    }
+//    private String getBundleVersion(String path) {
+//        try {
+//            InputStream instr = Base.class.getResourceAsStream(path);
+//
+//            if(instr == null) {
+//                return "0.0.0a";
+//            }
+//
+//            JarInputStream jis = new JarInputStream(instr);
+//            Manifest manifest = jis.getManifest();
+//            Attributes manifestContents = manifest.getMainAttributes();
+//            jis.close();
+//            return manifestContents.getValue("Version");
+//        } catch(Exception e) {
+//            error(e);
+//        }
+//
+//        return "unknown";
+//    }
 
     public Version getLatestVersion() {
         try {
@@ -3055,14 +3070,14 @@ public class Base {
             preferencesTree.mergeData(prefs);
         }
 
-        for (String p : plugins.keySet()) {
+        for (Map.Entry<String, Class<?>> p : plugins.entrySet()) {
             try {
-                Class<?> plg = plugins.get(p);
+                Class<?> plg = p.getValue();
                 Method m = plg.getMethod("getPreferencesTree");
                 Object[] foo = null;
                 PropertyFile prefs = (PropertyFile)m.invoke(null, foo);
                 for (String k : prefs.keySet()) {
-                    prefs.setSource(k, "plugin:" + p);
+                    prefs.setSource(k, "plugin:" + p.getKey());
                 }
                 preferencesTree.mergeData(prefs);
             } catch (Exception e) {
@@ -3118,7 +3133,6 @@ public class Base {
         String out = "";
         try {
             InputStream from = Base.class.getResourceAsStream(resource);
-            byte[] buffer = new byte[16 * 1024];
             int bytesRead;
 
             StringBuilder sb = new StringBuilder();
@@ -3133,8 +3147,8 @@ public class Base {
 
             out = sb.toString();
 
+            reader.close();
             from.close();
-            from = null;
         } catch(Exception e) {
             error(e);
         }
@@ -3144,10 +3158,9 @@ public class Base {
     public static HashMap<String, String> getLookAndFeelList() {
         HashMap<String, String>lafs = new HashMap<String, String>();
 
-        for (String p : lookAndFeels.keySet()) {
+        for (Map.Entry<String, Class<?>> p : lookAndFeels.entrySet()) {
             try {
-
-                Class<?> plg = lookAndFeels.get(p);
+                Class<?> plg = p.getValue();
                 Method m = plg.getMethod("isCompatible");
                 Object[] foo = null;
                 boolean compat = (Boolean)m.invoke(null, foo);
@@ -3155,7 +3168,7 @@ public class Base {
                 if (compat) {
                     m = plg.getMethod("getName");
                     String name = (String)m.invoke(null, foo);
-                    lafs.put(p, name);
+                    lafs.put(p.getKey(), name);
                 }
 
             } catch (Exception e) {

@@ -149,15 +149,16 @@ public class ServiceManager {
                         stopButton.setEnabled(false);
                         startButton.setEnabled(false);
                         restartButton.setEnabled(false);
-                    }
-                    if (s.isRunning()) {
-                        stopButton.setEnabled(true);
-                        startButton.setEnabled(false);
-                        restartButton.setEnabled(true);
                     } else {
-                        stopButton.setEnabled(false);
-                        startButton.setEnabled(true);
-                        restartButton.setEnabled(false);
+                        if (s.isRunning()) {
+                            stopButton.setEnabled(true);
+                            startButton.setEnabled(false);
+                            restartButton.setEnabled(true);
+                        } else {
+                            stopButton.setEnabled(false);
+                            startButton.setEnabled(true);
+                            restartButton.setEnabled(false);
+                        }
                     }
                 }
             }
@@ -296,15 +297,16 @@ public class ServiceManager {
                         stopButton.setEnabled(false);
                         startButton.setEnabled(false);
                         restartButton.setEnabled(false);
-                    }
-                    if (s.isRunning()) {
-                        stopButton.setEnabled(true);
-                        startButton.setEnabled(false);
-                        restartButton.setEnabled(true);
                     } else {
-                        stopButton.setEnabled(false);
-                        startButton.setEnabled(true);
-                        restartButton.setEnabled(false);
+                        if (s.isRunning()) {
+                            stopButton.setEnabled(true);
+                            startButton.setEnabled(false);
+                            restartButton.setEnabled(true);
+                        } else {
+                            stopButton.setEnabled(false);
+                            startButton.setEnabled(true);
+                            restartButton.setEnabled(false);
+                        }
                     }
                     menu.show(serviceTable, e.getX(), e.getY());
                 }

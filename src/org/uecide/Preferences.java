@@ -60,7 +60,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
     PropertyFile changedPrefs = new PropertyFile();
 
-    class KVPair implements Comparable {
+    static class KVPair implements Comparable {
         String key;
         String value;
 
@@ -244,7 +244,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         setVisible(true);
     }
 
-    class PrefTreeEntry {
+    static class PrefTreeEntry {
         String key;
         String name;
     
@@ -682,9 +682,9 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return b;
     }
 
-    class ScrollablePanel extends JPanel implements Scrollable {
+    static class ScrollablePanel extends JPanel implements Scrollable {
         public Dimension getPreferredScrollableViewportSize() {
-            return getPreferredSize();
+            return super.getPreferredSize();
         }
 
         public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
@@ -845,7 +845,6 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         c.gridy = 0;
         c.weightx = 1.0;
 
-        ArrayList<Box> blist = new ArrayList<Box>();
         int size = 0;
         for (String pref : pf.childKeys()) {
             if (pf.keyExists(pref + ".type")) {

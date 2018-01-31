@@ -41,7 +41,7 @@ import java.net.*;
 public class NetworkDiscoveryService extends Service {
 
 
-    class BoardServiceListener implements ServiceListener {
+    static class BoardServiceListener implements ServiceListener {
         public void serviceResolved(ServiceEvent event) {
             ServiceInfo info = event.getInfo();
 System.err.println(info);

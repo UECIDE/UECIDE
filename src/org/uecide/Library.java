@@ -275,8 +275,6 @@ public class Library implements Comparable {
             return;
         }
 
-        ArrayList<String> includes = new ArrayList<String>();
-
         for(String line : data) {
             line = line.trim();
 

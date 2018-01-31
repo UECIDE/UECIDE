@@ -66,7 +66,7 @@ public interface EditorBase {
     public void removeFlag(int line);
     public void removeFlagGroup(int group);
     public void clearKeywords();
-    public void addKeyword(String name, Integer type);
+    public void addKeyword(String name, int type);
     public void repaint();
     public Component getContentPane();
     public Rectangle getViewRect();

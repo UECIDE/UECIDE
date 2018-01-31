@@ -54,7 +54,7 @@ public class Platform extends org.uecide.Platform {
             // Use the Quaqua L & F on OS X to make JFileChooser less awful
             String laf = Base.theme.get("window.laf.macosx");
 
-            if((laf != null) && (laf != "default")) {
+            if((laf != null) && (!laf.equals("default"))) {
                 UIManager.setLookAndFeel(laf);
             } else {
                 UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
@@ -193,7 +193,7 @@ public class Platform extends org.uecide.Platform {
     }
 
 
-    public PropertyFile platformInfo = new PropertyFile();
+//    public PropertyFile platformInfo = new PropertyFile();
 
     public void probeInfo() {
         File f = new File("/System/Library/CoreServices/SystemVersion.plist");

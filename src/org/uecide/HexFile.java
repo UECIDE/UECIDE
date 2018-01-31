@@ -10,7 +10,7 @@ public class HexFile {
         memory = new TreeMap<Long, Long>();
     }
 
-    public HexFile(File in) {
+    public HexFile(File in) throws FileNotFoundException, IOException {
         memory = new TreeMap<Long, Long>();
         loadFile(in);
     }
@@ -51,57 +51,53 @@ public class HexFile {
         return h2d(a) << 12 | h2d(b) << 8 | h2d(c) << 4 | h2d(d);
     }
 
-    public boolean loadFile(File in) {
+    public boolean loadFile(File in) throws FileNotFoundException, IOException {
         if (!in.exists()) {
             return false;
         }
 
         Long baseAddress = 0L;
         Long currentAddress = 0L;
-        try {
-            FileReader fr = new FileReader(in);
-            BufferedReader br = new BufferedReader(fr);
+        FileReader fr = new FileReader(in);
+        BufferedReader br = new BufferedReader(fr);
 
-            String line = br.readLine();
-            while (line != null) {
-                line = line.trim();
-                if (line.startsWith(":")) {
-                    char[] chars = line.toCharArray();
-                    int reclen = h2d2(chars[1], chars[2]);
-                    int address = h2d4(chars[3], chars[4], chars[5], chars[6]);
-                    int rectype = (int)h2d2(chars[7], chars[8]);
-                    switch (rectype) {
-                        case 0: // Data
-                            currentAddress = baseAddress + address;
+        String line = br.readLine();
+        while (line != null) {
+            line = line.trim();
+            if (line.startsWith(":")) {
+                char[] chars = line.toCharArray();
+                int reclen = h2d2(chars[1], chars[2]);
+                int address = h2d4(chars[3], chars[4], chars[5], chars[6]);
+                int rectype = (int)h2d2(chars[7], chars[8]);
+                switch (rectype) {
+                    case 0: // Data
+                        currentAddress = baseAddress + address;
 
-                            for (int i = 0; i < reclen * 2; i += 2) {
-                                Long val = (long)h2d2(chars[9 + i], chars[10 + i]);
-                                Long offsetAddress = currentAddress & 0xFFFFFFFCL;
-                                Long offsetByte = currentAddress % 4;
-                                Long temp = memory.get(offsetAddress);
-                                if (temp == null) {
-                                    temp = 0L;
-                                }
-                                temp |= (Long)val << ((3-offsetByte) * 8);
-                                memory.put(offsetAddress, temp);
-                                currentAddress++;
+                        for (int i = 0; i < reclen * 2; i += 2) {
+                            Long val = (long)h2d2(chars[9 + i], chars[10 + i]);
+                            Long offsetAddress = currentAddress & 0xFFFFFFFCL;
+                            Long offsetByte = currentAddress % 4;
+                            Long temp = memory.get(offsetAddress);
+                            if (temp == null) {
+                                temp = 0L;
                             }
-                            break;
-                        case 1: // End of file
-                            br.close();
-                            return true;
-                        case 4: // Extended Linear Address
-                            baseAddress = (long)h2d4(chars[9], chars[10], chars[11], chars[12]) << 16;
-                            break;
-                    }
+                            temp |= (Long)val << ((3-offsetByte) * 8);
+                            memory.put(offsetAddress, temp);
+                            currentAddress++;
+                        }
+                        break;
+                    case 1: // End of file
+                        br.close();
+                        return true;
+                    case 4: // Extended Linear Address
+                        baseAddress = (long)h2d4(chars[9], chars[10], chars[11], chars[12]) << 16;
+                        break;
                 }
-                line = br.readLine();
             }
-        } catch (Exception e) {
-            return false;
+            line = br.readLine();
         }
-        return false;
-        
+        br.close();
+        return true;
     }
 
     int csum(int total) {
@@ -145,62 +141,58 @@ public class HexFile {
         return o;
     }
 
-    public boolean saveFile(File out) {
-        try {
-            PrintWriter pw = new PrintWriter(out);
-            Long[] addressList = memory.keySet().toArray(new Long[0]);
-            Long startAddress = -1L;
-            Long startOffset = -1L;
-            Long lastAddress = -1L;
-            Long[] recordChunk = new Long[16];
-            Long lineAddress = addressList[0];
-            int reclen = 0;
-            for (Long address : addressList) {
-                Long addressOffset = address >> 16 & 0xFFFF;
+    public boolean saveFile(File out) throws FileNotFoundException, IOException {
+        PrintWriter pw = new PrintWriter(out);
+        Long[] addressList = memory.keySet().toArray(new Long[0]);
+        Long startAddress = -1L;
+        Long startOffset = -1L;
+        Long lastAddress = -1L;
+        Long[] recordChunk = new Long[16];
+        Long lineAddress = addressList[0];
+        int reclen = 0;
+        for (Long address : addressList) {
+            Long addressOffset = address >> 16 & 0xFFFF;
 
-                if (!addressOffset.equals(startOffset)) { // Starting a new address segment
-                    startOffset = addressOffset;
+            if (!addressOffset.equals(startOffset)) { // Starting a new address segment
+                startOffset = addressOffset;
 
-                    if (reclen > 0) {
-                        pw.println(dataRecord(recordChunk, reclen, lineAddress));
-                        reclen = 0;
-                        lineAddress = address;
-                    }
-
-                    pw.println(String.format(":02000004%02x%02x%02x",
-                        startOffset >> 8 % 0xFF,
-                        startOffset & 0xFF,
-                        csum((int)(2+0+0+4+(startOffset >> 8 & 0xFF) + (startOffset & 0xFF)))
-                    ));
-                }
-
-                if (!(address.equals(lastAddress + 4L))) { // Gap
-                    if (reclen > 0) {
-                        pw.println(dataRecord(recordChunk, reclen, lineAddress));
-                        reclen = 0;
-                        lineAddress = address;
-                    }
-                }
-
-                if (reclen == 4) {
+                if (reclen > 0) {
                     pw.println(dataRecord(recordChunk, reclen, lineAddress));
                     reclen = 0;
                     lineAddress = address;
                 }
-                recordChunk[reclen++] = memory.get(address);
-                lastAddress = address;
+
+                pw.println(String.format(":02000004%02x%02x%02x",
+                    startOffset >> 8 % 0xFF,
+                    startOffset & 0xFF,
+                    csum((int)(2+0+0+4+(startOffset >> 8 & 0xFF) + (startOffset & 0xFF)))
+                ));
             }
 
-            if (reclen > 0) {
+            if (!(address.equals(lastAddress + 4L))) { // Gap
+                if (reclen > 0) {
+                    pw.println(dataRecord(recordChunk, reclen, lineAddress));
+                    reclen = 0;
+                    lineAddress = address;
+                }
+            }
+
+            if (reclen == 4) {
                 pw.println(dataRecord(recordChunk, reclen, lineAddress));
+                reclen = 0;
+                lineAddress = address;
             }
-
-            pw.println(":00000001FF");
-
-            pw.close();
-        } catch (Exception e) {
-            return false;
+            recordChunk[reclen++] = memory.get(address);
+            lastAddress = address;
         }
-        return false;
+
+        if (reclen > 0) {
+            pw.println(dataRecord(recordChunk, reclen, lineAddress));
+        }
+
+        pw.println(":00000001FF");
+
+        pw.close();
+        return true;
     }
 }

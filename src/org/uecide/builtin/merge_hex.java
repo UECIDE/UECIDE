@@ -35,17 +35,20 @@ import java.io.*;
 
 public class merge_hex implements BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
-        if (arg.length < 2) {
-            return false;
-        }
+        try {
+            if (arg.length < 2) {
+                return false;
+            }
 
-        HexFile hex = new HexFile();
-        for (int i = 1; i < arg.length; i++) {
-            hex.loadFile(new File(arg[i]));
-        }
-        hex.saveFile(new File(arg[0]));
+            HexFile hex = new HexFile();
+            for (int i = 1; i < arg.length; i++) {
+                hex.loadFile(new File(arg[i]));
+            }
+            hex.saveFile(new File(arg[0]));
 
-        return true;
+            return true;
+        } catch (Exception ex) { ctx.error(ex); }
+        return false;
     }
 
     public void kill() {

@@ -60,9 +60,9 @@ public class ProjectSearch {
     JPanel mainContainer;
     Editor editor;
     JScrollPane scroll;
-    JTextPane text;
-    HTMLDocument doc;
-    HTMLEditorKit kit;
+    JTextPane text = new JTextPane();
+    HTMLDocument doc = new HTMLDocument();
+    HTMLEditorKit kit = new HTMLEditorKit();
 
 
     JTextField searchTerm;

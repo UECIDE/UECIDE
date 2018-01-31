@@ -86,7 +86,7 @@ public class PluginManager implements PropertyChangeListener
 
     HashMap<String, String> familyNames = new HashMap<String, String>();
 
-    class ConsoleOutputStream extends OutputStream {
+    static class ConsoleOutputStream extends OutputStream {
         ConsoleTty thisTty;
 
         public ConsoleOutputStream(ConsoleTty tty) {
@@ -111,7 +111,7 @@ public class PluginManager implements PropertyChangeListener
         }
     }
 
-    public PluginManager() { 
+    public PluginManager() throws FileNotFoundException, IOException { 
         File dd = Base.getDataFolder();
 
         File aptFolder = new File(dd, "apt");
@@ -155,7 +155,6 @@ public class PluginManager implements PropertyChangeListener
         }
 
         apt = new APT(dd);
-
     }
 
     JComboBox familySelector;
@@ -169,7 +168,7 @@ public class PluginManager implements PropertyChangeListener
     JButton localUpgradeButton;
     JButton localHomepageButton;
 
-    class keyval {
+    static class keyval {
         public String key;
         public String val;
         public keyval(String k, String v) {
@@ -409,11 +408,11 @@ public class PluginManager implements PropertyChangeListener
 //        repoManager.setVisible(true);
 //    }
 
-    public void openWindow(Editor ed) {
+    public void openWindow(Editor ed) throws FileNotFoundException, IOException {
         openWindow(ed, false);
     }
 
-    public void openWindow(Editor ed, boolean doUpdate) {
+    public void openWindow(Editor ed, boolean doUpdate) throws FileNotFoundException, IOException {
         editor = ed; 
 
         frame = new JDialog(editor, JDialog.ModalityType.APPLICATION_MODAL);
@@ -514,7 +513,9 @@ public class PluginManager implements PropertyChangeListener
         refreshButton.setIcon(Base.getIcon("actions", "refresh", 24));
         refreshButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                downloadPluginList();
+                try {
+                    downloadPluginList();
+                } catch (Exception ex) { Base.error(ex); }
             }
         });
         toolbar.add(refreshButton);
@@ -565,7 +566,9 @@ public class PluginManager implements PropertyChangeListener
         familySelector = new JComboBox(fams.toArray(new keyval[0]));
         familySelector.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                updateTree();
+                try {
+                    updateTree();
+                } catch (Exception ex) { Base.error(ex); }
             }
         });
 
@@ -577,7 +580,9 @@ public class PluginManager implements PropertyChangeListener
             public void keyPressed(KeyEvent e) {
             }
             public void keyReleased(KeyEvent e) {
-                updateTree();
+                try {
+                    updateTree();
+                } catch (Exception ex) { Base.error(ex); }
             }
             public void keyTyped(KeyEvent e) {
             }
@@ -589,7 +594,9 @@ public class PluginManager implements PropertyChangeListener
         onlyUninstalled = new JCheckBox("Hide Installed");
         onlyUninstalled.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                updateTree();
+                try {
+                    updateTree();
+                } catch (Exception ex) { Base.error(ex); }
             }
         });
         optionsBox.add(onlyUninstalled);
@@ -777,7 +784,7 @@ public class PluginManager implements PropertyChangeListener
     public void addToolbarButtons(JToolBar toolbar, int flags) {
     }
 
-    public void downloadPluginList() {
+    public void downloadPluginList() throws FileNotFoundException, IOException{
         QueueWorker updatePluginsTask = new QueueWorker() {
             @Override
             public String getTaskName() { return "Update Repository"; }
@@ -794,10 +801,14 @@ public class PluginManager implements PropertyChangeListener
                 Package p = apt.getPackage("uecide-families");
                 if (p != null) {
                     if (!apt.isInstalled(p) || apt.isUpgradable(p)) {
-                        apt.installPackage(p);
+                        try {
+                            apt.installPackage(p);
+                        } catch (Exception e) { Base.error(e); }
                     }
                 }
-                updateTree();
+                try {
+                    updateTree();
+                } catch (Exception ex) { Base.error(ex); }
                 return null;
             }
 
@@ -882,8 +893,6 @@ public class PluginManager implements PropertyChangeListener
                     } else {
                         text.setOpaque(false);
                     }
-
-                    StringBuilder tt = new StringBuilder();
 
                     return container;
                 }
@@ -1029,7 +1038,7 @@ public class PluginManager implements PropertyChangeListener
         return fullNodeCount;
     }
 
-    public void updateTree() {
+    public void updateTree() throws FileNotFoundException, IOException {
         apt.initRepository();
         TreePath[] paths = editor.saveTreeState(tree);
 
@@ -1206,7 +1215,9 @@ public class PluginManager implements PropertyChangeListener
             public void done() {
                 Package p = (Package)getUserObject();
                 p.setState(0);
-                updateTree();
+                try {
+                    updateTree();
+                } catch (Exception ex) { Base.error(ex); }
             }
         };
 
@@ -1261,7 +1272,9 @@ public class PluginManager implements PropertyChangeListener
             public void done() {
                 Package p = (Package)getUserObject();
                 p.setState(0);
-                updateTree();
+                try {
+                    updateTree();
+                } catch (Exception ex) { Base.error(ex); }
             }
         };
 
@@ -1305,7 +1318,7 @@ public class PluginManager implements PropertyChangeListener
         return apt;
     }
 
-    class DebFileFilter extends javax.swing.filechooser.FileFilter {
+    static class DebFileFilter extends javax.swing.filechooser.FileFilter {
         public boolean accept(File f) {
             if(f.getName().endsWith(".deb")) {
                 return true;
@@ -1336,7 +1349,6 @@ public class PluginManager implements PropertyChangeListener
         if (rv == JFileChooser.APPROVE_OPTION) {
             final File f = fc.getSelectedFile();
             if (f.exists()) {
-                Package p = new Package("");
                 QueueWorker installPackageTask = new QueueWorker() {
                     @Override
                     public String getTaskName() { return "Extract " + f.getName(); }

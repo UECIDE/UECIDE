@@ -121,6 +121,7 @@ public class CommandLine {
 
         String[] arglist = parameterTypes.keySet().toArray(new String[0]);
         Arrays.sort(arglist);
+
         for (String s : arglist) {
             int thislen = s.length();
             if (parameterTypes.get(s) != Boolean.class) {
@@ -132,16 +133,17 @@ public class CommandLine {
             }
         }
         for (String s : arglist) {
+            StringBuffer sb = new StringBuffer();
             System.out.print("    --");
-            String pname = s;
+            sb.append(s);
             if (parameterTypes.get(s) != Boolean.class) {
-                pname += "=";
-                pname += parameterNames.get(s);
+                sb.append("=");
+                sb.append(parameterNames.get(s));
             }
-            while (pname.length() < maxlen) {
-                pname += " ";
+            while (sb.length() < maxlen) {
+                sb.append(" ");
             }
-            System.out.print(pname);
+            System.out.print(sb.toString());
             System.out.print("  ");
             System.out.println(Base.i18n.string(parameterComments.get(s)));
         }

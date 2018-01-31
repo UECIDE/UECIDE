@@ -76,7 +76,7 @@ public class SketchProperties extends JDialog {
 
     HashMap<String, JComponent> fields;
 
-    class KVPair {
+    static class KVPair {
         String k;
         String v;
         public KVPair(String kk, String vv) {
@@ -204,11 +204,6 @@ System.err.println("Confirmed");
         objectsPane = new JPanel();
         objectsPane.setLayout(new BoxLayout(objectsPane, BoxLayout.PAGE_AXIS));
         objectsPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        HashMap<String, String> boardNames = new HashMap<String, String>();
-        for (String b : Base.boards.keySet()) {
-            boardNames.put(b, Base.boards.get(b).getDescription());
-        }
 
         addTextField(objectsPane, "sketch.board", "Board:");
         addTextField(objectsPane, "sketch.core", "Core:");

@@ -112,7 +112,8 @@ public class Version implements Comparable, Cloneable {
     }
 
     @Override
-    public Version clone() {
+    public Version clone() throws CloneNotSupportedException {
+        super.clone();
         Version out = new Version(null);
         out.chunks = new ArrayList<Integer>(chunks);
         return out;

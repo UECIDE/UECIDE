@@ -78,7 +78,7 @@ public class code extends JPanel implements EditorBase {
 
     JToolBar toolbar;
 
-    class Flag {
+    static class Flag {
         Icon icon;
         int group;
         int line;
@@ -219,6 +219,8 @@ public class code extends JPanel implements EditorBase {
         sketch = s;
         this.setLayout(new BorderLayout());
 
+        if (f == null) return;
+
         rDocument = new RSyntaxDocument(FileType.getSyntaxStyle(f.getName()));
 
         textArea = new RSyntaxTextArea(rDocument) {
@@ -357,9 +359,7 @@ public class code extends JPanel implements EditorBase {
         refreshSettings();
         this.add(scrollPane, BorderLayout.CENTER);
 
-        if(f != null) {
-            loadFile(f);
-        }
+        loadFile(f);
 
         if(Preferences.getBoolean("editor.find.keep")) {
             openFindPanel();
@@ -1135,7 +1135,7 @@ public class code extends JPanel implements EditorBase {
         }
     }
 
-    public void addKeyword(String name, Integer type) {
+    public void addKeyword(String name, int type) {
         if (fileSyntax.equals(SyntaxConstants.SYNTAX_STYLE_EXTENDABLE_CPLUSPLUS)) {
             RSyntaxDocument d = (RSyntaxDocument)textArea.getDocument();
             ExtendableCPlusPlusTokenMaker tm = (ExtendableCPlusPlusTokenMaker)d.getTokenMaker();
