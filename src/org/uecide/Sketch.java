@@ -1145,7 +1145,9 @@ public class Sketch {
             ctx.set("filename", f.getName());
             ctx.set("sketch.root", f.getParentFile().getAbsolutePath());
             ctx.set("build.root", buildFolder.getAbsolutePath());
+            ctx.startBuffer(true);
             t.execute(ctx, "ctags.parse.ino");
+            ctx.endBuffer();
 
             File tags = new File(buildFolder, f.getName() + ".tags");
             if (tags.exists()) { // We got the tags

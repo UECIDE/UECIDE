@@ -143,7 +143,7 @@ public class DebFile {
 
                 to.flush();
                 to.close();
-                from.close();
+                //from.close();
                 dest.setLastModified(file.getLastModified());
                 filelist.put(name, dest);
             }

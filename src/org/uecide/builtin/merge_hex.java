@@ -33,6 +33,8 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
+import uk.co.majenko.hexfile.*;
+
 public class merge_hex implements BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         try {
