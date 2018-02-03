@@ -32,10 +32,13 @@
         <exec output="resources/org/uecide/changelog.html" executable="./mklog"/>
     </target>
 
-    <target name="compile" description="Compile" depends="git_contributors,changelog">
+    <target name="compile" description="Compile" depends="deps,git_contributors,changelog">
         <mkdir dir="bin" />
         <path id="class.path">
-            <fileset dir="lib">
+            <fileset dir="deps">
+                <include name="*.jar" />
+            </fileset>
+            <fileset dir="deps-bundle">
                 <include name="*.jar" />
             </fileset>
         </path>
@@ -78,7 +81,8 @@
         <jar basedir="bin" destfile="uecide.jar">
             <fileset dir="bin" />
             <fileset dir="resources" />
-            <zipgroupfileset dir="lib" includes="*.jar" />
+            <zipgroupfileset dir="deps" includes="*.jar" />
+            <zipgroupfileset dir="deps-bundle" includes="*.jar" />
             <manifest>
                 <attribute name="Main-Class" value="org.uecide.Base" />
                 <attribute name="Class-Path" value="uecide.jar" />
@@ -402,6 +406,135 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             </fileset>
         </foreach>
     </target>
+
+    <target name="maven">
+        <propertyregex property="grp" input="${group}" regexp="\." replace="/"/>
+        <get src="https://search.maven.org/remotecontent?filepath=${grp}/${artifact}/${version}/${artifact}-${version}.jar" dest="deps/${artifact}.jar" skipexisting="true" />
+        <if>
+            <isset property="native"/>
+            <then>
+                <for param="suffix" list="${native}">
+                    <sequential>
+                        <get src="https://search.maven.org/remotecontent?filepath=${grp}/${artifact}/${version}/${artifact}-${version}-@{suffix}.jar" dest="deps/${artifact}-@{suffix}.jar" skipexisting="true" />
+                    </sequential>
+                </for>
+            </then>
+        </if>
+    </target>
     
+    <target name="deps">
+        <mkdir dir="deps"/>
+
+        <antcall target="maven">
+            <param name="group" value="org.apache.commons" />
+            <param name="artifact" value="commons-compress" />
+            <param name="version" value="1.15" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.apache.commons" />
+            <param name="artifact" value="commons-io" />
+            <param name="version" value="1.3.2" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.apache.commons" />
+            <param name="artifact" value="commons-lang3" />
+            <param name="version" value="3.7" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="com.google.guava" />
+            <param name="artifact" value="guava" />
+            <param name="version" value="24.0-jre" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.javassist" />
+            <param name="artifact" value="javassist" />
+            <param name="version" value="3.22.0-GA" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.reflections" />
+            <param name="artifact" value="reflections" />
+            <param name="version" value="0.9.11" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.usb4java" />
+            <param name="artifact" value="usb4java-javax" />
+            <param name="version" value="1.2.0" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.usb4java" />
+            <param name="artifact" value="usb4java" />
+            <param name="version" value="1.2.0" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.usb4java" />
+            <param name="artifact" value="libusb4java" />
+            <param name="version" value="1.2.0" />
+            <param name="native" value="linux-x86,linux-arm,linux-x86_64,osx-x86,osx-x86_64,windows-x86,windows-x86_64"/>
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="com.googlecode.json-simple" />
+            <param name="artifact" value="json-simple" />
+            <param name="version" value="1.1.1" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.jmdns" />
+            <param name="artifact" value="jmdns" />
+            <param name="version" value="3.5.3" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.scream3r" />
+            <param name="artifact" value="jssc" />
+            <param name="version" value="2.8.0" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="com.sun.jna" />
+            <param name="artifact" value="jna" />
+            <param name="version" value="3.0.9" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.commonjava.googlecode.markdown4j" />
+            <param name="artifact" value="markdown4j" />
+            <param name="version" value="2.2-cj-1.1" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="com.jcraft" />
+            <param name="artifact" value="jsch" />
+            <param name="version" value="0.1.54" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.slf4j" />
+            <param name="artifact" value="slf4j-api" />
+            <param name="version" value="1.8.0-beta1" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.slf4j" />
+            <param name="artifact" value="slf4j-nop" />
+            <param name="version" value="1.8.0-beta1" />
+        </antcall>
+
+        <antcall target="maven">
+            <param name="group" value="org.tukaani" />
+            <param name="artifact" value="xz" />
+            <param name="version" value="1.8" />
+        </antcall>
+
+    </target>
+
 
 </project>
