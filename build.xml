@@ -457,6 +457,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <dependency group="org.slf4j"                               artifact="slf4j-nop"                version="1.8.0-beta1" />
             <dependency group="org.tukaani"                             artifact="xz"                       version="1.8" />
             <dependency group="org.jline"                               artifact="jline"                    version="3.6.0" />
+            <dependency group="com.apple"                               artifact="AppleJavaExtensions"      version="1.4" />
         </maven>
     </target>
 
