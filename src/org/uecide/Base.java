@@ -3283,7 +3283,7 @@ public class Base {
                     reqapt.installPackage(p);
                 }
             }
-            reqapt.save();
+//            reqapt.save();
 
         } catch (Exception e) {
             error(e);
