@@ -534,6 +534,12 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <param name="version" value="1.8" />
         </antcall>
 
+        <antcall target="maven">
+            <param name="group" value="org.jline" />
+            <param name="artifact" value="jline" />
+            <param name="version" value="3.6.0" />
+        </antcall>
+
     </target>
 
 

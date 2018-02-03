@@ -30,16 +30,24 @@
 
 package org.uecide;
 
-import jline.*;
 import java.io.*;
 import java.util.*;
 import java.lang.*;
 
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.ParsedLine;
+import org.jline.reader.Completer;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.impl.completer.FileNameCompleter;
+import org.jline.reader.impl.completer.StringsCompleter;
+import org.jline.builtins.Completers.TreeCompleter;
+
 public class InteractiveCLI {
     String[] _argv;
     Sketch _loadedSketch;
-    ConsoleReader _reader;
-    Completor _completor = null;
+    LineReader _reader;
+    Completer _completer = null;
     PluginManager _pman;
     APT _apt;
 
@@ -53,9 +61,6 @@ public class InteractiveCLI {
 
     public void updateComplete() {
         if (_loadedSketch != null) {
-            if (_completor != null) {
-                _reader.removeCompletor(_completor);
-            }
 
             ArrayList<String> flist = new ArrayList<String>();
             for (File f : _loadedSketch.sketchFiles) {
@@ -117,81 +122,61 @@ public class InteractiveCLI {
                 }
             }
         
-
-            _completor = new MultiCompletor(new Completor[] {
-                new ArgumentCompletor( 
-                    new Completor[] {
-                        new SimpleCompletor(new String[] { "vi", "edit"}),
-                        new SimpleCompletor(fileNames),
-                        new NullCompletor()
-                    }
+            _completer = new TreeCompleter(
+                TreeCompleter.node(
+                    new StringsCompleter(new String[] { "vi", "edit" }), 
+                        TreeCompleter.node(new StringsCompleter(fileNames))
                 ),
-                new SimpleCompletor(new String[] { "ls", "quit", "compile", "make", "upload", "info", "purge", "rescan", "pkg-update", "help" }),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor("pkg-install"),
-                        new SimpleCompletor(uninstalledPackages.toArray(new String[0]))
-                    }
+                TreeCompleter.node(
+                    new StringsCompleter((new String[] { "ls", "quit", "compile", "make", "upload", "info", "purge", "rescan", "pkg-update", "help" }))
                 ),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor("pkg-remove"),
-                        new SimpleCompletor(installedPackages.toArray(new String[0])),
-                        new NullCompletor()
-                    }
+                TreeCompleter.node(
+                    new StringsCompleter("pkg-install"), TreeCompleter.node(
+                        new StringsCompleter(uninstalledPackages.toArray(new String[0]))
+                    )
                 ),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor("load"),
-                        new FileNameCompletor(),
-                        new NullCompletor()
-                    }
+                TreeCompleter.node(   
+                    new StringsCompleter("pkg-remove"), TreeCompleter.node(
+                        new StringsCompleter(installedPackages.toArray(new String[0]))
+                    )
                 ),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor("board"),
-                        new SimpleCompletor(boardNames),
-                        new NullCompletor()
-                    }
+                TreeCompleter.node(
+                    new StringsCompleter("load"), TreeCompleter.node(
+                        new FileNameCompleter()
+                    )
                 ),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor("core"),
-                        new SimpleCompletor(coreNames),
-                        new NullCompletor()
-                    }
+                TreeCompleter.node(
+                    new StringsCompleter("board"), TreeCompleter.node(
+                        new StringsCompleter(boardNames)
+                    )
                 ),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor("compiler"),
-                        new SimpleCompletor(compNames),
-                        new NullCompletor()
-                    }
+                TreeCompleter.node(
+                    new StringsCompleter("core"), TreeCompleter.node(
+                        new StringsCompleter(coreNames)
+                    )
                 ),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor("programmer"),
-                        new SimpleCompletor(pl.keySet().toArray(new String[0])),
-                        new NullCompletor()
-                    }
+                TreeCompleter.node(
+                    new StringsCompleter("compiler"), TreeCompleter.node(
+                        new StringsCompleter(compNames)
+                    )
                 ),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor("port"),
-                        new SimpleCompletor(Serial.getPortList().toArray(new String[0])),
-                        new NullCompletor()
-                    }
+                TreeCompleter.node(
+                    new StringsCompleter("programmer"), TreeCompleter.node(
+                        new StringsCompleter(pl.keySet().toArray(new String[0]))
+                    )
                 ),
-                new ArgumentCompletor(
-                    new Completor[] {
-                        new SimpleCompletor(new String[] { "verbose" }),
-                        new SimpleCompletor(new String[] { "on", "off" }),
-                        new NullCompletor()
-                    }
+                TreeCompleter.node(
+                    new StringsCompleter("port"), TreeCompleter.node(
+                        new StringsCompleter(Serial.getPortList().toArray(new String[0]))
+                    )
                 ),
-                new NullCompletor()
-            });
-            _reader.addCompletor(_completor);
+                TreeCompleter.node(
+                    new StringsCompleter(new String[] { "verbose" }), TreeCompleter.node(
+                        new StringsCompleter(new String[] { "on", "off" })
+                    )
+                )
+        
+            );
         }
     }
 
@@ -219,9 +204,9 @@ public class InteractiveCLI {
             _apt = _pman.getApt();
 
             String line = null;
-            _reader = new ConsoleReader();
-
             updateComplete(); 
+            _reader = LineReaderBuilder.builder().completer(_completer).build();
+
             info();
 
             while ((line = _reader.readLine(genPrompt() + "> ")) != null) {
@@ -419,6 +404,8 @@ public class InteractiveCLI {
                     }
                 }
             }
+        } catch (EndOfFileException ex) {
+            System.out.println("Byebye.");
         } catch (Exception e) {
             e.printStackTrace();
         }
