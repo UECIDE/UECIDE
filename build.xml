@@ -48,8 +48,8 @@
                 <include name="*.jar" />
             </fileset>
         </path>
-        <javac target="1.7" 
-               source="1.7"
+        <javac target="1.8" 
+               source="1.8"
                debug="true"
                debuglevel="lines,vars,source"
                encoding="UTF-8"
@@ -59,6 +59,7 @@
                srcdir="src" 
                destdir="bin">
             <classpath refid="class.path" />
+            <compilerarg value="-Xlint:unchecked"/>
         </javac>
     </target>		
 

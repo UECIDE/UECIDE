@@ -39,7 +39,7 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.ParsedLine;
 import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
-import org.jline.reader.impl.completer.FileNameCompleter;
+import org.jline.builtins.Completers.FileNameCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.builtins.Completers.TreeCompleter;
 

@@ -563,7 +563,7 @@ public class PluginManager implements PropertyChangeListener
 
         JPanel optionsBox = new JPanel();
 
-        familySelector = new JComboBox(fams.toArray(new keyval[0]));
+        familySelector = new JComboBox<keyval>(fams.toArray(new keyval[0]));
         familySelector.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {

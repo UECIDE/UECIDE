@@ -247,6 +247,7 @@ System.err.println("Confirmed");
         panel.add(field);
     }
 
+    @SuppressWarnings("unchecked")
     void addComboField(JPanel panel, String key, String label, HashMap<String, String>list) {
         Context ctx = sketch.getContext();
         PropertyFile configFile = ctx.getSketchSettings();

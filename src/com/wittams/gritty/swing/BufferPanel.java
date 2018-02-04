@@ -27,7 +27,7 @@ public class BufferPanel extends JPanel {
 		
 		final BufferType[] choices = BufferType.values(); 
 		
-		final JComboBox chooser = new JComboBox(choices);
+		final JComboBox chooser = new JComboBox<BufferType>(choices);
 		add(chooser, BorderLayout.NORTH);
 		
 		area.setFont(Font.decode("Monospaced-14"));

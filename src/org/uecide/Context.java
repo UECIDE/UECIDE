@@ -68,7 +68,6 @@ public class Context {
     public PropertyFile sketchSettings = null;
 
     public Process runningProcess = null;
-    public ThreadRet runningThread = null;
 
     public PropertyFile savedSettings = null;
 
@@ -90,7 +89,6 @@ public class Context {
         buffer = src.buffer;
         bufferError = src.bufferError;
         runningProcess = src.runningProcess;
-        runningThread = src.runningThread;
         parser = src.parser;
         silence = src.silence;
 
@@ -960,32 +958,19 @@ public class Context {
 
             final Object[] aa = args;
 
+            Boolean retval = false;
             try {
-                runningThread = new ThreadRet() {
-                    public void run() {
-                        try {
-                            retval = m.invoke(p, aa);
-                        } catch (Exception e3) {
-                            Base.error(e3);
-                            retval = false;
-                        } 
-                    }
-                };
-                runningThread.start();
-                runningThread.join();
-                return runningThread.retval;
+                retval = (Boolean)m.invoke(p, aa);
             } catch (Exception e2) {
-                Base.error(e2);
-                runningThread = null;
+                error(e2);
                 return false;
             }
-
+            return retval;
 
         } catch(Exception e) {
             Base.error(e);
         }
 
-        runningThread = null;
         return false;
     }
 
@@ -1266,9 +1251,6 @@ public class Context {
     }
 
     public void killRunningProcess() {
-        if (runningThread != null) {
-            runningThread.stop();
-        }
         if(runningProcess != null) {
             runningProcess.destroy();
             Base.processes.remove(runningProcess);

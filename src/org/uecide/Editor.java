@@ -3958,7 +3958,7 @@ public class Editor extends JFrame {
                     panel.add(label, c);
 
 
-                    JComboBox cb = new JComboBox(dests.toArray(new String[0]));
+                    JComboBox cb = new JComboBox<String>(dests.toArray(new String[0]));
                     c.gridx = 1;
                     panel.add(cb, c);
                     libcheck.put(l, cb);
