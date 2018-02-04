@@ -55,6 +55,7 @@
                encoding="UTF-8"
                bootclasspath="${bootclass.path}"
                includeAntRuntime="false"
+               deprecation="true"
                srcdir="src" 
                destdir="bin">
             <classpath refid="class.path" />
@@ -435,7 +436,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
         <depends dir="deps">
             <maven group="org.apache.commons"                      artifact="commons-compress"         version="1.15" />
             <maven group="org.apache.commons"                      artifact="commons-io"               version="1.3.2" />
-            <maven group="org.apache.commons"                      artifact="commons-lang3"            version="3.7" />
+            <maven group="org.apache.commons"                      artifact="commons-text"             version="1.2" />
             <maven group="com.google.guava"                        artifact="guava"                    version="24.0-jre" />
             <maven group="org.javassist"                           artifact="javassist"                version="3.22.0-GA" />
             <maven group="org.reflections"                         artifact="reflections"              version="0.9.11" />

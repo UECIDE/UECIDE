@@ -2,7 +2,7 @@ package org.uecide;
 
 import java.util.*;
 import java.text.*;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.text.WordUtils;
 
 public class I18N {
     public static Locale locale;
