@@ -78,7 +78,11 @@ public class ExampleBrowser extends JDialog {
         openSketch.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (selectedExample != null) {
-                    editor.loadSketch(selectedExample.getFolder());
+                    try {
+                        editor.loadSketch(selectedExample.getFolder());
+                    } catch (IOException ex) {
+                        editor.error(ex);
+                    }
                     closeBrowser();
                 }
             }

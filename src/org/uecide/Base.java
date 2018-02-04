@@ -71,6 +71,9 @@ import org.reflections.*;
 import org.reflections.util.*;
 import org.reflections.scanners.*;
 
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.*;
+
 /*! The Base class provides the initial application
  *  startup code, parsing command line options, loading
  *  preferences, themes, etc, then scanning all the boards,
@@ -691,7 +694,13 @@ public class Base {
                 if (path.equals(".")) {
                     path = System.getProperty("user.dir");
                 }
-                Sketch s = new Sketch(path);
+                Sketch s = null;
+                try {
+                    s = new Sketch(path);
+                } catch (IOException ex) {
+                    error(ex);
+                    return;
+                }
                 s.loadConfig();
                 if(presetPort != null) {
                     s.setDevice(presetPort);
@@ -766,7 +775,12 @@ public class Base {
             File p = new File(path);
             Debug.message("Loading sketch " + p);
             if (p.exists()) {
-                opened = doOpenThings(p);
+                try {
+                    opened = doOpenThings(p);
+                } catch (IOException ex) {
+                    error(ex);
+                    return;
+                }
             }
         }
 
@@ -775,13 +789,23 @@ public class Base {
 
             if(lastFile != null) {
                 if (!headless && !opened)
-                opened = doOpenThings(lastFile);
+                try {
+                    opened = doOpenThings(lastFile);
+                } catch (IOException ex) {
+                    error(ex);
+                    return;
+                }
             }
         }
 
         // Create a new empty window (will be replaced with any files to be opened)
         if(!opened && !headless) {
-            handleNew();
+            try {
+                handleNew();
+            } catch (IOException ex) {
+                error(ex);
+                return;
+            }
         }
 
         if(!headless) {
@@ -918,7 +942,7 @@ public class Base {
     /*! Open a sketch in a new Editor (if not running headless) and set up any preset values
      *  specified on the command line.
      */
-    static boolean doOpenThings(File sketch) {
+    static boolean doOpenThings(File sketch) throws IOException {
         Sketch s = null;
         Editor e = null;
 
@@ -1258,7 +1282,7 @@ public class Base {
 //    };
 
     /*! Create a new untitled document in a new sketch window.  */
-    public static void handleNew() {
+    public static void handleNew() throws IOException {
         createNewEditor(null);
     }
 
@@ -1306,7 +1330,7 @@ public class Base {
     }
 
     /*! Opens a sketch given by *path* in a new Editor window */
-    public static Editor createNewEditor(String path) {
+    public static Editor createNewEditor(String path) throws IOException {
         Sketch s;
 
         if(path == null) {
@@ -1714,96 +1738,10 @@ public class Base {
         return new File(working, name);
     }
 
-
-    /**
-    * Get an image associated with the current color theme.
-    */
-    public static Image getThemeImage(String name, Component who) {
-        return getLibImage("theme/" + name, who);
-    }
-
-
-    /**
-    * Return an Image object from inside the Processing lib folder.
-    */
-    public static Image getLibImage(String name, Component who) {
-        Image image = null;
-        Toolkit tk = Toolkit.getDefaultToolkit();
-
-        File imageLocation = new File(getContentFile("lib"), name);
-        image = tk.getImage(imageLocation.getAbsolutePath());
-        MediaTracker tracker = new MediaTracker(who);
-        tracker.addImage(image, 0);
-
-        try {
-            tracker.waitForAll();
-        } catch(InterruptedException e) { }
-
-        return image;
-    }
-
-    public static BufferedImage getLibBufferedImage(String name) {
-        try {
-            BufferedImage image = ImageIO.read(new File(getContentFile("lib"), name));
-            return image;
-        } catch(Exception e) {
-            return null;
-        }
-    }
-
-
-    /**
-    * Return an InputStream for a file inside the Processing lib folder.
-    */
-    public static InputStream getLibStream(String filename) {
-        try {
-            return new FileInputStream(new File(getContentFile("lib"), filename));
-        } catch(Exception e) {
-            System.err.println("Unable to find " + filename + " in lib");
-            return null;
-        }
-    }
-
-
-    // ...................................................................
-
-
-    /**
-    * Get the number of lines in a file by counting the number of newline
-    * characters inside a String (and adding 1).
-    */
-    public static int countLines(String what) {
-        int count = 1;
-
-        for(char c : what.toCharArray()) {
-            if(c == '\n') count++;
-        }
-
-        return count;
-    }
-
     public static void copyFile(File sourceFile, File targetFile) {
         try {
-            if (sourceFile.getCanonicalPath().equals(targetFile.getCanonicalPath())) return;
-            InputStream from =
-                new BufferedInputStream(new FileInputStream(sourceFile));
-            OutputStream to =
-                new BufferedOutputStream(new FileOutputStream(targetFile));
-            byte[] buffer = new byte[16 * 1024];
-            int bytesRead;
-
-            while((bytesRead = from.read(buffer)) != -1) {
-                to.write(buffer, 0, bytesRead);
-            }
-
-            to.flush();
-            from.close();
-            to.close();
-
-            if (!targetFile.setLastModified(sourceFile.lastModified())) {
-                error("Unable to set modification date on " + sourceFile.getAbsolutePath());
-            }
-        } catch(Exception e) {
+            Files.copy(sourceFile.toPath(), targetFile.toPath(), REPLACE_EXISTING);
+        } catch (IOException e) {
             error(e);
         }
     }
@@ -1877,77 +1815,6 @@ public class Base {
                 Base.tryDelete(dead);
             } else {
                 removeDir(dead);
-            }
-        }
-    }
-
-    /**
-     * Calculate the size of the contents of a folder.
-     * Used to determine whether sketches are empty or not.
-     * Note that the function calls itself recursively.
-     */
-    public static int calcFolderSize(File folder) {
-        int size = 0;
-
-        String files[] = folder.list();
-
-        // null if folder doesn't exist, happens when deleting sketch
-        if(files == null) return -1;
-
-        for(int i = 0; i < files.length; i++) {
-            if(files[i].equals(".") || (files[i].equals("..")) ||
-                    files[i].equals(".DS_Store")) continue;
-
-            File fella = new File(folder, files[i]);
-
-            if(fella.isDirectory()) {
-                size += calcFolderSize(fella);
-            } else {
-                size += (int) fella.length();
-            }
-        }
-
-        return size;
-    }
-
-    /**
-     * Recursively creates a list of all files within the specified folder,
-     * and returns a list of their relative paths.
-     * Ignores any files/folders prefixed with a dot.
-     */
-    public static String[] listFiles(String path, boolean relative) {
-        return listFiles(new File(path), relative);
-    }
-
-    public static String[] listFiles(File folder, boolean relative) {
-        String path = folder.getAbsolutePath();
-        Vector<String> vector = new Vector<String>();
-        listFiles(relative ? (path + File.separator) : "", path, vector);
-        String outgoing[] = new String[vector.size()];
-        vector.copyInto(outgoing);
-        return outgoing;
-    }
-
-    static protected void listFiles(String basePath, String path, Vector<String> vector) {
-        File folder = new File(path);
-        String list[] = folder.list();
-
-        if(list == null) return;
-
-        for(int i = 0; i < list.length; i++) {
-            if(list[i].charAt(0) == '.') continue;
-
-            File file = new File(path, list[i]);
-            String newPath = file.getAbsolutePath();
-
-            if(newPath.startsWith(basePath)) {
-                newPath = newPath.substring(basePath.length());
-            }
-
-            vector.add(newPath);
-
-            if(file.isDirectory()) {
-                listFiles(basePath, newPath, vector);
             }
         }
     }
@@ -2189,18 +2056,6 @@ public class Base {
         System.arraycopy(a, 0, c, 0, a.length);
         System.arraycopy(b, 0, c, a.length, b.length);
         return c;
-    }
-
-
-
-    static public int[] expand(int list[]) {
-        return expand(list, list.length << 1);
-    }
-
-    static public int[] expand(int list[], int newSize) {
-        int temp[] = new int[newSize];
-        System.arraycopy(list, 0, temp, 0, Math.min(newSize, list.length));
-        return temp;
     }
 
     static public File getDataFolder() {
@@ -2528,51 +2383,6 @@ public class Base {
         return true;
     }
 
-//    private static ArrayList<String> getResourcesFromJarFile(File file, String root, String extension) {
-//        ArrayList<String> retval = new ArrayList<String>();
-//        ZipFile zf;
-//
-//        try {
-//            zf = new ZipFile(file);
-//            final Enumeration e = zf.entries();
-//
-//            while(e.hasMoreElements()) {
-//                final ZipEntry ze = (ZipEntry) e.nextElement();
-//                final String fileName = ze.getName();
-//
-//                if(fileName.startsWith(root) && fileName.endsWith(extension)) {
-//                    retval.add(fileName);
-//                }
-//            }
-//
-//            zf.close();
-//        } catch(Exception e) {
-//            error(e);
-//        }
-//
-//        return retval;
-//    }
-
-//    private String getBundleVersion(String path) {
-//        try {
-//            InputStream instr = Base.class.getResourceAsStream(path);
-//
-//            if(instr == null) {
-//                return "0.0.0a";
-//            }
-//
-//            JarInputStream jis = new JarInputStream(instr);
-//            Manifest manifest = jis.getManifest();
-//            Attributes manifestContents = manifest.getMainAttributes();
-//            jis.close();
-//            return manifestContents.getValue("Version");
-//        } catch(Exception e) {
-//            error(e);
-//        }
-//
-//        return "unknown";
-//    }
-
     public Version getLatestVersion() {
         try {
             URL url = new URL(Base.theme.get("version." + RELEASE + ".url"));
@@ -2722,160 +2532,6 @@ public class Base {
 
         return themeList;
     }
-/*
-    public static String runFunctionVariable(Sketch sketch, String command, String param) {
-        try {
-            Class<?> c = Class.forName("org.uecide.varcmd.vc_" + command);
-
-            if(c == null) {
-                return "";
-            }
-
-            Constructor<?> ctor = c.getConstructor();
-            VariableCommand  p = (VariableCommand)(ctor.newInstance());
-
-            Class[] param_types = new Class<?>[2];
-            param_types[0] = Sketch.class;
-            param_types[1] = String.class;
-            Method m = c.getMethod("main", param_types);
-
-            if(m == null) {
-                return "";
-            }
-
-            Object[] args = new Object[2];
-            args[0] = sketch;
-            args[1] = param;
-            return (String)m.invoke(p, args);
-        } catch(Exception e) {
-            Base.error(e);
-        }
-
-        return "";
-    }
-
-    public static boolean runBuiltinCommand(Sketch sketch, String commandline) {
-        try {
-            String[] split = commandline.split("::");
-            int argc = split.length - 1;
-
-            String cmdName = split[0];
-
-            String[] arg = new String[argc];
-
-            for(int i = 0; i < argc; i++) {
-                arg[i] = split[i + 1];
-            }
-
-            if(!cmdName.startsWith("__builtin_")) {
-                return false;
-            }
-
-            cmdName = cmdName.substring(10);
-            Class<?> c = Class.forName("org.uecide.builtin." + cmdName);
-
-            Constructor<?> ctor = c.getConstructor();
-            BuiltinCommand  p = (BuiltinCommand)(ctor.newInstance());
-
-            if(c == null) {
-                return false;
-            }
-
-            Class<?>[] param_types = new Class<?>[2];
-            param_types[0] = Sketch.class;
-            param_types[1] = String[].class;
-            Method m = c.getMethod("main", param_types);
-
-            Object[] args = new Object[2];
-            args[0] = sketch;
-            args[1] = arg;
-
-            return (Boolean)m.invoke(p, args);
-
-
-        } catch(Exception e) {
-            Base.error(e);
-        }
-
-        return false;
-    }
-
-
-    public static String parseString(String in, PropertyFile tokens, Sketch sketch) {
-        int iStart;
-        int iEnd;
-        int iTest;
-        String out;
-        String start;
-        String end;
-        String mid;
-
-        if(in == null) {
-            return null;
-        }
-
-        out = in;
-
-        iStart = out.indexOf("${");
-
-        if(iStart == -1) {
-            return out;
-        }
-
-        iEnd = out.indexOf("}", iStart);
-        iTest = out.indexOf("${", iStart + 1);
-
-        while((iTest > -1) && (iTest < iEnd)) {
-            iStart = iTest;
-            iTest = out.indexOf("${", iStart + 1);
-        }
-
-        while(iStart != -1) {
-            start = out.substring(0, iStart);
-            end = out.substring(iEnd + 1);
-            mid = out.substring(iStart + 2, iEnd);
-
-            if(mid.indexOf(":") > -1) {
-                String command = mid.substring(0, mid.indexOf(":"));
-                String param = mid.substring(mid.indexOf(":") + 1);
-
-                mid = runFunctionVariable(sketch, command, param);
-            } else {
-                String tmid = tokens.get(mid);
-
-                if(tmid == null) {
-                    tmid = "";
-                }
-
-                mid = tmid;
-            }
-
-
-            if(mid != null) {
-                out = start + mid + end;
-            } else {
-                out = start + end;
-            }
-
-            iStart = out.indexOf("${");
-            iEnd = out.indexOf("}", iStart);
-            iTest = out.indexOf("${", iStart + 1);
-
-            while((iTest > -1) && (iTest < iEnd)) {
-                iStart = iTest;
-                iTest = out.indexOf("${", iStart + 1);
-            }
-        }
-
-        // This shouldn't be needed as the methodology should always find any tokens put in
-        // by other token replacements.  But just in case, eh?
-        if(out != in) {
-            out = parseString(out, tokens, sketch);
-        }
-
-        return out;
-    }
-*/
 
     public static String getFileAsString(File f) {
         if (f == null) {

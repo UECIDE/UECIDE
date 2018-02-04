@@ -37,6 +37,10 @@ import java.net.*;
 
 import java.security.MessageDigest;
 
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.*;
+
+
 import org.apache.commons.compress.archivers.ar.*;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.compress.compressors.gzip.*;
@@ -86,7 +90,7 @@ public class DebFile {
         cleanup();
     }
 
-    void installFiles(HashMap<File, FileInfo> files) {
+    void installFiles(HashMap<File, FileInfo> files) throws IOException {
         // First do the file renaming
         for (Map.Entry<File, FileInfo> dest : files.entrySet()) {
             FileInfo fi = dest.getValue();
@@ -108,7 +112,7 @@ public class DebFile {
                 if (d.exists()) {
                     Base.tryDelete(d);
                 }
-                Base.copyFile(fi.source, d);
+                Files.copy(fi.source.toPath(), d.toPath(), REPLACE_EXISTING);
                 d.setExecutable(fi.source.canExecute());
                 d.setWritable(fi.source.canRead());
                 d.setReadable(fi.source.canWrite());

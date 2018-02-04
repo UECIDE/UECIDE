@@ -32,6 +32,9 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 import java.io.*;
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.*;
+
 
 public class cp implements BuiltinCommand {
     Context ctx;
@@ -58,7 +61,12 @@ public class cp implements BuiltinCommand {
             to = new File(to, from.getName());
         }
 
-        Base.copyFile(from, to);
+        try {
+            Files.copy(from.toPath(), to.toPath(), REPLACE_EXISTING);
+        } catch (IOException e) {
+            ctx.error(e);
+            return false;
+        }
         return true;
     }
 

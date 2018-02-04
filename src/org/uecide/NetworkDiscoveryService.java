@@ -78,16 +78,35 @@ System.err.println("No protocol entry");
                     System.err.println("  : " + k + " -> " + newPort.get(k));
                 }
 
+
+                int exist = -1;
                 synchronized(Base.communicationPorts) {
-                    Base.communicationPorts.add(newPort);
+
+                    int i = 0;
+        
+                    for (CommunicationPort cp : Base.communicationPorts) {
+                        if (cp instanceof SSHCommunicationPort) {
+                            if (cp.toString().equals(newPort.toString())) {
+                                exist = i;
+                                break;
+                            }
+                        }
+                        i++;
+                    }
+
+                    if (exist == -1) {
+                        Base.communicationPorts.add(newPort);
+                    }
                 }
-                Editor.broadcast(String.format("Found %s (%d.%d.%d.%d)",
-                    info.getName(),
-                    (int)ip[0] & 0xFF,
-                    (int)ip[1] & 0xFF,
-                    (int)ip[2] & 0xFF,
-                    (int)ip[3] & 0xFF
-                ));
+                if (exist == -1) {
+                    Editor.broadcast(String.format("Found %s (%d.%d.%d.%d)",
+                        info.getName(),
+                        (int)ip[0] & 0xFF,
+                        (int)ip[1] & 0xFF,
+                        (int)ip[2] & 0xFF,
+                        (int)ip[3] & 0xFF
+                    ));
+                }
             }
         }
         public void serviceAdded(ServiceEvent event) {

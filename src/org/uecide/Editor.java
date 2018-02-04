@@ -63,6 +63,9 @@ import java.util.zip.*;
 
 import java.util.List;
 
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.*;
+
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
@@ -236,7 +239,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public Editor(Sketch s) {
+    public Editor(Sketch s) throws IOException {
         super();
         Editor.registerEditor(this);
         loadedSketch = s;
@@ -499,7 +502,11 @@ public class Editor extends JFrame {
 
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                askCloseWindow();
+                try {
+                    askCloseWindow();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         });
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -591,7 +598,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public void updateToolbar() {
+    public void updateToolbar() throws IOException {
         toolbar.removeAll();
         abortButton = Editor.addToolbarButton(toolbar, "actions", "cancel", Base.i18n.string("toolbar.abort"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -606,7 +613,11 @@ public class Editor extends JFrame {
                     loadedSketch.purgeBuildFiles();
                 }
 
-                compile();
+                try {
+                    compile();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         });
 
@@ -616,7 +627,11 @@ public class Editor extends JFrame {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
-                program();
+                try {
+                    program();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         });
 
@@ -624,19 +639,31 @@ public class Editor extends JFrame {
 
         Editor.addToolbarButton(toolbar, "actions", "new", Base.i18n.string("toolbar.new"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.handleNew();
+                try {
+                    Base.handleNew();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         });
 
         Editor.addToolbarButton(toolbar, "actions", "open", Base.i18n.string("toolbar.open"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                handleOpenPrompt();
+                try {
+                    handleOpenPrompt();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         });
 
         Editor.addToolbarButton(toolbar, "actions", "save", Base.i18n.string("toolbar.save"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                saveAllTabs();
+                try {
+                    saveAllTabs();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         });
 
@@ -1147,7 +1174,7 @@ public class Editor extends JFrame {
                             if(file.isDirectory()) {
                                 Base.copyDir(file, destfile);
                             } else {
-                                Base.copyFile(file, destfile);
+                                Files.copy(file.toPath(), destfile.toPath(), REPLACE_EXISTING);
                             }
                         } catch(Exception e) {
                         }
@@ -2541,7 +2568,7 @@ public class Editor extends JFrame {
         return false;
     }
 
-    public boolean closeTab(int tab) {
+    public boolean closeTab(int tab) throws IOException {
         if(tab == -1) return false;
 
         if(editorTabs.getComponentAt(tab) instanceof EditorBase) {
@@ -2748,7 +2775,7 @@ public class Editor extends JFrame {
         return false;
     }
 
-    public void saveAllTabs() {
+    public void saveAllTabs() throws IOException {
         if(loadedSketch.isUntitled()) {
             saveAs();
             return;
@@ -2772,7 +2799,7 @@ public class Editor extends JFrame {
         refreshTreeModel();
     }
 
-    public boolean closeAllTabs() {
+    public boolean closeAllTabs() throws IOException {
         while(editorTabs.getTabCount() > 0) {
             if(!closeTab(0)) {
                 return false;
@@ -2795,7 +2822,7 @@ public class Editor extends JFrame {
         return JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_CANCEL_OPTION, type, null, options, options[2]);
     }
 
-    public boolean askCloseWindow() {
+    public boolean askCloseWindow() throws IOException {
 
         Preferences.save();
 
@@ -2857,7 +2884,11 @@ public class Editor extends JFrame {
                             String path = e.getActionCommand();
 
                             if(new File(path).exists()) {
-                                loadSketch(path);
+                                try {
+                                    loadSketch(path);
+                                } catch (IOException ex) {
+                                    error(ex);
+                                }
                             } else {
                                 error(Base.i18n.string("err.notfound", path));
                             }
@@ -2912,13 +2943,21 @@ public class Editor extends JFrame {
 
         fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.new"), KeyEvent.VK_N, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.handleNew();
+                try {
+                    Base.handleNew();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         }));
 
         fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.open"), KeyEvent.VK_O, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                handleOpenPrompt();
+                try {
+                    handleOpenPrompt();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         }));
 
@@ -2934,7 +2973,11 @@ public class Editor extends JFrame {
                     String path = e.getActionCommand();
 
                     if(new File(path).exists()) {
-                        loadSketch(path);
+                        try {
+                            loadSketch(path);
+                        } catch (IOException ex) {
+                            error(ex);
+                        }
                     } else {
                         error(Base.i18n.string("err.notfound", path));
                     }
@@ -2969,7 +3012,11 @@ public class Editor extends JFrame {
                             String path = e.getActionCommand();
 
                             if(new File(path).exists()) {
-                                loadSketch(path);
+                                try {
+                                    loadSketch(path);
+                                } catch (IOException ex) {
+                                    error(ex);
+                                }
                             } else {
                                 error(Base.i18n.string("err.notfound", path));
                             }
@@ -3058,19 +3105,31 @@ public class Editor extends JFrame {
 
         fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.close"), KeyEvent.VK_W, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                askCloseWindow();
+                try {
+                    askCloseWindow();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         }));
 
         fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.save"), KeyEvent.VK_S, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                saveAllTabs();
+                try {
+                    saveAllTabs();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         }));
 
         fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.saveas"), KeyEvent.VK_S, KeyEvent.SHIFT_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                saveAs();
+                try {
+                    saveAs();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         }));
 
@@ -3113,9 +3172,13 @@ public class Editor extends JFrame {
 
         fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.quit"), KeyEvent.VK_Q, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if(Editor.closeAllEditors()) {
-                    Preferences.save();
-                    System.exit(0);
+                try {
+                    if(Editor.closeAllEditors()) {
+                        Preferences.save();
+                        System.exit(0);
+                    }
+                } catch (IOException ex) {
+                    error(ex);
                 }
             }
         }));
@@ -3134,13 +3197,21 @@ public class Editor extends JFrame {
 
         sketchMenu.add(createMenuEntry("Compile", KeyEvent.VK_R, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                compile();
+                try {
+                    compile();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         }));
         
         sketchMenu.add(createMenuEntry("Compile and Program", KeyEvent.VK_U, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                program();
+                try {
+                    program();
+                } catch (IOException ex) {
+                    error(ex);
+                }
             }
         }));
         
@@ -4124,7 +4195,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public void saveAs() {
+    public void saveAs() throws IOException {
         JFileChooser fc = new JFileChooser();
         javax.swing.filechooser.FileFilter filter = new SketchFolderFilter();
         fc.setFileFilter(filter);
@@ -4286,7 +4357,11 @@ public class Editor extends JFrame {
                 }
             } catch (Exception eee) { }
 
-            Base.copyFile(src, dest);
+            try {
+                Files.copy(src.toPath(), dest.toPath(), REPLACE_EXISTING);
+            } catch (IOException ex) {
+                error(ex);
+            }
 
             if(type.equals("source") || type.equals("header")) {
                 loadedSketch.loadFile(dest);
@@ -4472,7 +4547,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public static boolean closeAllEditors() {
+    public static boolean closeAllEditors() throws IOException {
         ArrayList<Editor>localList = new ArrayList<Editor>();
         localList.addAll(editorList);
         for(Editor e : localList) {
@@ -4484,7 +4559,7 @@ public class Editor extends JFrame {
         return true;
     }
 
-    public void handleOpenPrompt() {
+    public void handleOpenPrompt() throws IOException {
         // get the frontmost window frame for placing file dialog
 
         JFileChooser fc = new JFileChooser();
@@ -4520,11 +4595,11 @@ public class Editor extends JFrame {
         }
     }
 
-    public void loadSketch(String f) {
+    public void loadSketch(String f) throws IOException {
         loadSketch(new File(f));
     }
 
-    public void loadSketch(File f) {
+    public void loadSketch(File f) throws IOException {
         if(loadedSketch.isUntitled() && !isModified()) {
             closeAllTabs();
             loadedSketch = new Sketch(f, this);
@@ -4567,7 +4642,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public static void refreshAllEditors() {
+    public static void refreshAllEditors() throws IOException {
         for(Editor e : editorList) {
             e.refreshEditors();
             e.updateToolbar();
@@ -5036,7 +5111,7 @@ public class Editor extends JFrame {
         */
     }
 
-    public void compile() {
+    public void compile() throws IOException {
         clearConsole();
 
         if(compilerRunning()) {
@@ -5055,7 +5130,7 @@ public class Editor extends JFrame {
         compilationThread.start();
     }
 
-    public void program() {
+    public void program() throws IOException {
         clearConsole();
 
         if(compilerRunning()) {

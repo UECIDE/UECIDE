@@ -34,6 +34,8 @@ import org.uecide.*;
 
 import com.apple.eawt.*;
 
+import java.io.IOException;
+
 
 /**
  * Deal with issues related to thinking different. This handles the basic
@@ -102,7 +104,11 @@ public class ThinkDifferent implements ApplicationListener {
     public void handleOpenFile(ApplicationEvent ae) {
 //    System.out.println("got open file event " + ae.getFilename());
         String filename = ae.getFilename();
-        Base.createNewEditor(filename);
+        try {
+            Base.createNewEditor(filename);
+        } catch (IOException ex) {
+            Base.error(ex);
+        }
         ae.setHandled(true);
     }
 
@@ -121,8 +127,12 @@ public class ThinkDifferent implements ApplicationListener {
             / on all platforms.  This example simply cancels the AppleEvent-based quit and
             / defers to that universal method.
             */
-            boolean result = Editor.closeAllEditors();
-            ae.setHandled(result);
+            try {
+                boolean result = Editor.closeAllEditors();
+                ae.setHandled(result);
+            } catch (IOException ex) {
+                Base.error(ex);
+            }
         } else {
             System.err.println("handleQuit: Base instance detached from listener");
         }

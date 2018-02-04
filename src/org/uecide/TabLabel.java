@@ -88,7 +88,11 @@ public class TabLabel extends JPanel {
         blab.addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
                 int tab = editor.getTabByFile(sketchFile);
-                editor.closeTab(tab);
+                try {
+                    editor.closeTab(tab);
+                } catch (IOException ex) {
+                    editor.error(ex);
+                }
             }
             public void mousePressed(MouseEvent e) {}
             public void mouseReleased(MouseEvent e) {}
@@ -120,7 +124,11 @@ public class TabLabel extends JPanel {
         blab.addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
                 int tab = editor.getTabByLabel(TabLabel.this);
-                editor.closeTab(tab);
+                try {
+                    editor.closeTab(tab);
+                } catch (Exception ex) {
+                    editor.error(ex);
+                }
             }
             public void mousePressed(MouseEvent e) {}
             public void mouseReleased(MouseEvent e) {}

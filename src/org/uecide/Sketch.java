@@ -58,6 +58,9 @@ import org.uecide.Compiler;
 
 import javax.script.*;
 
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.*;
+
 /**
  * The sketch class is the heart of the IDE.  It manages not only what files a
  * sketch consists of, but also deals with compilation of the sketch and uploading
@@ -156,15 +159,15 @@ public class Sketch {
         ctx.setSketch(this);
     }
 
-    public Sketch(String path) {
+    public Sketch(String path) throws IOException {
         this(new File(path));
     }
 
-    public Sketch(File path) {
+    public Sketch(File path) throws IOException {
         this(path, null);
     }
 
-    public Sketch(File path, Editor e) {
+    public Sketch(File path, Editor e) throws IOException {
         uuid = UUID.randomUUID().toString();
         ctx = new Context();
         ctx.setSketch(this);
@@ -204,7 +207,7 @@ public class Sketch {
                             File sb = new File(Base.getSketchbookFolder(), inoName);
                             sb.mkdirs();
                             File inof = new File(sb, inoName + ".ino");
-                            Base.copyFile(oldPath, inof);
+                            Files.copy(oldPath.toPath(), inof.toPath(), REPLACE_EXISTING);
                             path = sb;
                         } else {
                             path = createUntitledSketch();
@@ -1596,13 +1599,19 @@ public class Sketch {
             setCompilingProgress(0);
             return false;
         }
-
-        boolean done = compile();
-        setCompilingProgress(0);
-        return done;
+    
+        try {
+            boolean done = compile();
+            setCompilingProgress(0);
+            return done;
+        } catch (IOException ex) {
+            error(ex);
+            setCompilingProgress(0);
+            return false;
+        }
     }
 
-    public boolean saveAs(File newPath) {
+    public boolean saveAs(File newPath) throws IOException {
         if(newPath.exists()) {
             return false;
         }
@@ -1621,7 +1630,7 @@ public class Sketch {
         for(File f : files) {
             if(f.equals(oldMainFile)) {
                 Debug.message("Copy main file " + f.getAbsolutePath() + " to " + newMainFile.getAbsolutePath());
-                Base.copyFile(f, newMainFile);
+                Files.copy(f.toPath(), newMainFile.toPath(), REPLACE_EXISTING);
                 continue;
             }
 
@@ -1634,7 +1643,7 @@ public class Sketch {
             }
 
             Debug.message("Copy file " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
-            Base.copyFile(f, dest);
+            Files.copy(f.toPath(), dest.toPath(), REPLACE_EXISTING);
         }
 
         String oldPrefix = sketchFolder.getAbsolutePath();
@@ -1702,7 +1711,7 @@ public class Sketch {
         return true;
     }
 
-    public boolean save() {
+    public boolean save() throws IOException {
         // We can't really save it if it's untitled - there's no point.
         if(isUntitled()) {
             return false;
@@ -1746,7 +1755,7 @@ public class Sketch {
             for(File f : sketchFiles) {
                 File to = new File(bottom, f.getName());
                 Debug.message("    Backing up " + f.getAbsolutePath() + " to " + to.getAbsolutePath());
-                Base.copyFile(f, to);
+                Files.copy(f.toPath(), to.toPath(), REPLACE_EXISTING);
             }
         }
 
@@ -2082,7 +2091,7 @@ public class Sketch {
         }
     }
 
-    public boolean compile() {
+    public boolean compile() throws IOException {
 
         
         long startTime = System.currentTimeMillis();
@@ -2251,7 +2260,7 @@ public class Sketch {
 
                 if(src.exists()) {
                     File dest = new File(buildFolder, src.getName());
-                    Base.copyFile(src, dest);
+                    Files.copy(src.toPath(), dest.toPath(), REPLACE_EXISTING);
                     Debug.message("    ... ok");
                 } else {
                     Debug.message("    ... not found");
@@ -2317,7 +2326,7 @@ public class Sketch {
             try {
                 File lss = new File(buildFolder, sketchName + ".lss");
                 if (lss.exists()) {
-                    Base.copyFile(new File(buildFolder, sketchName + ".lss"), new File(sketchFolder, sketchName + ".lss"));
+                    Files.copy(new File(buildFolder, sketchName + ".lss").toPath(), new File(sketchFolder, sketchName + ".lss").toPath(), REPLACE_EXISTING);
 
                     if(editor != null) {
                         editor.updateFilesTree();
@@ -2339,7 +2348,7 @@ public class Sketch {
                     exeSuffix = ".hex";
                 }
                 File dest = new File(sketchFolder, sketchName + exeSuffix);
-                Base.copyFile(new File(buildFolder, sketchName + exeSuffix), dest);
+                Files.copy(new File(buildFolder, sketchName + exeSuffix).toPath(), dest.toPath(), REPLACE_EXISTING);
                 if (dest.exists()) {
                     dest.setExecutable(true);
                 }
@@ -2616,7 +2625,7 @@ public class Sketch {
         return out;
     }
 
-    public boolean compileCore() {
+    public boolean compileCore() throws IOException {
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
         PropertyFile props = ctx.getMerged();
 
@@ -2629,7 +2638,7 @@ public class Sketch {
                     File mainStubObject = compileFile(ctx, mainStubFile);
                     File cachedStubObject = getCacheFile(mainStubObject.getName());
                     if (mainStubObject.exists()) {
-                        Base.copyFile(mainStubObject, cachedStubObject);
+                        Files.copy(mainStubObject.toPath(), cachedStubObject.toPath(), REPLACE_EXISTING);
                         Base.tryDelete(mainStubObject);
                     }
                 }
@@ -2808,7 +2817,7 @@ public class Sketch {
         return true;
     }
 
-    private ArrayList<File> convertFiles(File dest, ArrayList<File> sources) {
+    private ArrayList<File> convertFiles(File dest, ArrayList<File> sources) throws IOException {
         ArrayList<File> objectPaths = new ArrayList<File>();
         PropertyFile props = ctx.getMerged();
 
@@ -2834,7 +2843,7 @@ public class Sketch {
             destObjects.mkdirs();
 
             File destFile = new File(destObjects, file.getName());
-            Base.copyFile(file, destFile);
+            Files.copy(file.toPath(), destFile.toPath(), REPLACE_EXISTING);
 
             ctx.set("source.name", sp);
             ctx.set("object.name", objectFile.getAbsolutePath());
@@ -2939,7 +2948,7 @@ public class Sketch {
         return objectPaths;
     }
 
-    private ArrayList<File> compileSketch() {
+    private ArrayList<File> compileSketch() throws IOException {
         ArrayList<File> sf = new ArrayList<File>();
 
         PropertyFile props = ctx.getMerged();
