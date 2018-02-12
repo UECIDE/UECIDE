@@ -3510,8 +3510,13 @@ public class Editor extends JFrame {
         for(Board board : Base.boards.values()) {
             String group = board.get("group");
 
-            if(out.indexOf(group) == -1) {
-                out.add(group);
+            if (group == null) {
+                System.err.println("No group for " + board);
+            } else {
+
+                if(out.indexOf(group) == -1) {
+                    out.add(group);
+                }
             }
         }
 

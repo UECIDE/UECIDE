@@ -1252,8 +1252,8 @@ public class Context {
 
     public void killRunningProcess() {
         if(runningProcess != null) {
-            runningProcess.destroy();
-            Base.processes.remove(runningProcess);
+//            runningProcess.destroy();
+//            Base.processes.remove(runningProcess);
         }
     }
 

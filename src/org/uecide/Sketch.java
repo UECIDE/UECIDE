@@ -1570,6 +1570,8 @@ public class Sketch {
 //            //reloadAllFiles();
 //        }
 
+        terminateExecution = false;
+
         if(getBoard() == null) {
             error(Base.i18n.string("err.noboard"));
             return false;

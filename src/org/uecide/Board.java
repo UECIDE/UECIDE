@@ -40,6 +40,9 @@ import java.util.regex.*;
 public class Board extends UObject {
     public Board(File folder) {
         super(folder);
+        if (get("group") == null) {
+            set("group", "Other");
+        }
     }
 
     public File getBootloader() {

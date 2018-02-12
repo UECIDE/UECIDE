@@ -170,6 +170,12 @@ public class UObject implements Comparable {
         return (String) _properties.get(k);
     }
 
+    public void set(String k, String v) {
+        if (_properties != null) {
+            _properties.set(k, v);
+        }
+    }
+
     public String get(String k, String d) {
         String dat = get(k);
 

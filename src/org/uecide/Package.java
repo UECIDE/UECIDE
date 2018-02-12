@@ -392,6 +392,7 @@ public class Package implements Comparable, Serializable {
                     if (checkFileIntegrity(folder)) {
                         return true;
                     }
+                } catch (FileNotFoundException ignore) {
                 } catch (Exception e) {
                     errorMessage = e.toString();
                     System.err.println();

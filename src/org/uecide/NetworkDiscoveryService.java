@@ -44,22 +44,18 @@ public class NetworkDiscoveryService extends Service {
     static class BoardServiceListener implements ServiceListener {
         public void serviceResolved(ServiceEvent event) {
             ServiceInfo info = event.getInfo();
-System.err.println(info);
 
             String board = info.getPropertyString("board");
             if (board == null) {
-System.err.println("No board entry");
                 return;
             }
             Board foundBoard = Base.boards.get(board);
             if (foundBoard == null) {
-System.err.println("No board found");
                 return;
             }
 
             String protocol = info.getPropertyString("protocol");
             if (protocol == null) {
-System.err.println("No protocol entry");
                 return;
             }
 
@@ -68,14 +64,11 @@ System.err.println("No protocol entry");
                 InetAddress[] ips = info.getInetAddresses();
                 byte[] ip = ips[0].getAddress();
                 String[] urls = info.getURLs();
-                System.err.println(urls[0]);
 
                 SSHCommunicationPort newPort = new SSHCommunicationPort(info.getName(), foundBoard, ips[0], info.getPort());
-                System.err.println("Added: " + foundBoard);
                 for (Enumeration<String> e = info.getPropertyNames(); e.hasMoreElements();) {
                     String k = e.nextElement();
                     newPort.set(k, info.getPropertyString(k));
-                    System.err.println("  : " + k + " -> " + newPort.get(k));
                 }
 
 
@@ -114,7 +107,6 @@ System.err.println("No protocol entry");
         public void serviceRemoved(ServiceEvent event) {
             ServiceInfo info = event.getInfo();
             String key = info.getName();
-                    System.err.println("Removed: " + key);
 
             synchronized(Base.communicationPorts) {
                 CommunicationPort fp = null;
