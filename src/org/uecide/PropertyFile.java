@@ -497,6 +497,15 @@ public class PropertyFile {
         }
     }
 
+    /*! Parse a key's value as an integer. If the parsing fails the default value *def* is returned. */
+    public float getFloat(String attribute, float def) {
+        try {
+            return Float.parseFloat(get(attribute));
+        } catch(Exception e) {
+            return def;
+        }
+    }
+
     /*! Parse a key's value as an integer. If the parsing fails the value 0 is returned. */
     public int getInteger(String attribute) {
         try {
@@ -506,7 +515,20 @@ public class PropertyFile {
         }
     }
 
+    /*! Parse a key's value as an integer. If the parsing fails the value 0 is returned. */
+    public float getFloat(String attribute) {
+        try {
+            return Float.parseFloat(get(attribute));
+        } catch(Exception e) {
+            return 0;
+        }
+    }
+
     /*! Set a key to the specified integer value. */
+    public void setFloat(String key, float value) {
+        set(key, String.valueOf(value));
+    }
+
     public void setInteger(String key, int value) {
         set(key, String.valueOf(value));
     }

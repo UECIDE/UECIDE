@@ -302,13 +302,6 @@ public class Editor extends JFrame {
         sidebarSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, sidebarPanel);
         topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sidebarSplit, consolePanel);
 
-
-// Uncomment these two lines to force a NullPointer exception to test
-// the creash reporting system
-
-//String forcedCrash = null;
-//System.err.println(forcedCrash.length());
-
         sidebarSplit.setOneTouchExpandable(true);
         leftRightSplit.setOneTouchExpandable(true);
         topBottomSplit.setOneTouchExpandable(true);
@@ -316,21 +309,8 @@ public class Editor extends JFrame {
         leftRightSplit.setContinuousLayout(true);
         topBottomSplit.setContinuousLayout(true);
 
-        leftRightSplit.setResizeWeight(0.1D);
-        topBottomSplit.setResizeWeight(0.7D);
-        sidebarSplit.setResizeWeight(0.9D);
 
-//        int dividerSize = Preferences.getInteger("editor.layout.split_sidebar");
-//        if (dividerSize < 10) {
-//            dividerSize = getWidth() - 200;
-//        }
-//        sidebarSplit.setDividerLocation(dividerSize);
-//
-//        dividerSize = Preferences.getInteger("editor.layout.split_console");
-//        topBottomSplit.setDividerLocation(dividerSize);
-//
-//        dividerSize = Preferences.getInteger("editor.layout.split_tree");
-//        leftRightSplit.setDividerLocation(dividerSize);
+        updateSplits();
 
         add(topBottomSplit, BorderLayout.CENTER);
 
@@ -375,12 +355,6 @@ public class Editor extends JFrame {
         console.setURLClickListener(this);
 
         consoleScroll.setViewportView(console);
-
-
-//        outputScroll.setViewportView(testConsole.getTermPanel()); //output);
-
-
-//        consolePanel.add(consoleScroll);
 
         toolbar = new JToolBar();
         treeToolBar = new JToolBar();
@@ -528,6 +502,8 @@ public class Editor extends JFrame {
                 Dimension windowSize = e.getComponent().getSize(null);
                 Preferences.setInteger("editor.window.width", windowSize.width);
                 Preferences.setInteger("editor.window.height", windowSize.height);
+
+                Editor.this.updateSplits();
             }
             public void componentHidden(ComponentEvent e) {
             }
@@ -536,40 +512,44 @@ public class Editor extends JFrame {
         });
 
         openOrSelectFile(loadedSketch.getMainFile());
-//        dividerSize = Preferences.getInteger("editor.layout.split_console");
-//        topBottomSplit.setDividerLocation(dividerSize);
-
-//        dividerSize = Preferences.getInteger("editor.layout.split_tree");
-//        leftRightSplit.setDividerLocation(dividerSize);
 
         // We want to do this last as the previous SETs trigger this change listener.
 
-//        sidebarSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-//            new PropertyChangeListener() {
-//                public void propertyChange(PropertyChangeEvent e) {
-//                    int pos = (Integer)(e.getNewValue());
-//                    Preferences.setInteger("editor.layout.split_sidebar", pos);
-//                }
-//            }
-//        );
-//
-//        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-//            new PropertyChangeListener() {
-//                public void propertyChange(PropertyChangeEvent e) {
-//                    int pos = (Integer)(e.getNewValue());
-//                    Preferences.setInteger("editor.layout.split_tree", pos);
-//                }
-//            }
-//        );
+        sidebarSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    // Calculate this as a percentage of the window width
+                    int pos = (Integer)(e.getNewValue());
+                    Dimension windowSize = Editor.this.getSize(null);
+                    float pct = (float)pos / (float)windowSize.width;
+                    Preferences.setFloat("editor.layout.splits.sidebar", pct);
+                }
+            }
+        );
 
-//        topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-//            new PropertyChangeListener() {
-//                public void propertyChange(PropertyChangeEvent e) {
-//                    int pos = (Integer)(e.getNewValue());
-//                    Preferences.setInteger("editor.layout.split_console", pos);
-//                }
-//            }
-//        );
+        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    // Calculate this as a percentage of the window width
+                    int pos = (Integer)(e.getNewValue());
+                    Dimension windowSize = Editor.this.getSize(null);
+                    float pct = (float)pos / (float)windowSize.width;
+                    Preferences.setFloat("editor.layout.splits.tree", pct);
+                }
+            }
+        );
+
+        topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+            new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    // Calculate this as a percentage of the window height
+                    int pos = (Integer)(e.getNewValue());
+                    Dimension windowSize = Editor.this.getSize(null);
+                    float pct = (float)pos / (float)windowSize.height;
+                    Preferences.setFloat("editor.layout.splits.console", pct);
+                }
+            }
+        );
 
         for (int i = 0; toolbar.getComponentAtIndex(i) != null; i++) {
             Component c = toolbar.getComponentAtIndex(i);
@@ -2564,7 +2544,6 @@ public class Editor extends JFrame {
     }
 
     public boolean closeTab(Component c) {
-        System.err.println(c.getClass());
         return false;
     }
 
@@ -5334,6 +5313,21 @@ public class Editor extends JFrame {
         editorPanel.revalidate();
         editorPanel.repaint();
         //pack();
+    }
+
+    void updateSplits() {
+        Dimension windowSize = getSize(null);
+        float splitDividerSize = Base.preferences.getFloat("editor.layout.splits.tree", 0.1F);
+        leftRightSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
+        leftRightSplit.setResizeWeight(splitDividerSize);
+
+        splitDividerSize = Base.preferences.getFloat("editor.layout.splits.sidebar", 0.9F);
+        sidebarSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
+        sidebarSplit.setResizeWeight(splitDividerSize);
+
+        splitDividerSize = Base.preferences.getFloat("editor.layout.splits.console", 0.7F);
+        topBottomSplit.setDividerLocation((int)(windowSize.height * splitDividerSize));
+        topBottomSplit.setResizeWeight(splitDividerSize);
     }
 }
 

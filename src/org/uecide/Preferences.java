@@ -824,6 +824,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
     public static void setFile(String key, File value) { Base.preferences.setFile(key, value); Base.preferences.saveDelay(); }
     public static void setFile(String key, Font value) { Base.preferences.setFont(key, value); Base.preferences.saveDelay(); }
     public static void setInteger(String key, int value) { Base.preferences.setInteger(key, value); Base.preferences.saveDelay(); }
+    public static void setFloat(String key, float value) { Base.preferences.setFloat(key, value); Base.preferences.saveDelay(); }
 
     public static void save() { Base.preferences.save(); }
 
