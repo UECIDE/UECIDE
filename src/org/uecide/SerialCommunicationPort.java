@@ -284,7 +284,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
             return true;
         } catch (Exception e) {
             lastError = e.getMessage();
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return false;
     }
