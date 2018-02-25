@@ -269,10 +269,10 @@ public class APT {
     }
 
     public void update() {
-        update(false);
+        update(false, false);
     }
 
-    public void update(boolean resOnly) {
+    public void update(boolean resOnly, boolean silent) {
         cachedPackages = new HashMap<String, Package>();
         int done = 0;
         for (Source s : sources) {
@@ -282,7 +282,7 @@ public class APT {
                 }
             }
 
-            Package[] packages = s.getPackages();
+            Package[] packages = s.getPackages(silent);
             done++;
 
             for (Package p : packages) {

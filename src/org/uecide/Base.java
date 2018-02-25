@@ -602,8 +602,6 @@ public class Base {
             loadAssets();
             System.out.println(i18n.string("msg.loading.done"));
 
-            System.out.println(i18n.string("msg.loading.done"));
-
             buildPreferencesTree();
 
             runInitScripts();
@@ -623,19 +621,11 @@ public class Base {
 
         if(!headless) {
             splashScreen = new Splash();
-
-//            if(RELEASE.equals("beta")) {
-//                splashScreen.setBetaMessage("** BETA VERSION **");
-//            }
-
             splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
         }
 
-        
-
         if (!headless) splashScreen.setMessage(i18n.string("splash.msg.packagemanager"), 15);
         initPackageManager();
-
 
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
@@ -1163,7 +1153,6 @@ public class Base {
         compilers.clear();
         compilerLoaderThread = new Thread() {
             public void run() {
-
                 ArrayList<File> compilerFiles = systemFileCache.getFilesByName("compiler.txt");
                 for (File cfile : compilerFiles) {
                     if(cfile.exists()) {
@@ -1895,25 +1884,27 @@ public class Base {
             ex.printStackTrace();
         }
 
-        pluginReflections = new Reflections("org.uecide.themes");
-        try {
-            // We're not going to store the theme control objects - just execute the "init" function in them.
-            Set<Class<? extends org.uecide.themes.ThemeControl>> controlClasses = pluginReflections.getSubTypesOf(org.uecide.themes.ThemeControl.class);
-            for (Class<? extends org.uecide.themes.ThemeControl> c : controlClasses) {
-                Method init = c.getMethod("init");
-                if (init != null) {
-                    Object[] noParameters = null;
-                    try {
-                        init.invoke(null, noParameters);
-                    } catch (Exception e) {
-                        error(e);
+        if (!headless) {
+            pluginReflections = new Reflections("org.uecide.themes");
+            try {
+                // We're not going to store the theme control objects - just execute the "init" function in them.
+                Set<Class<? extends org.uecide.themes.ThemeControl>> controlClasses = pluginReflections.getSubTypesOf(org.uecide.themes.ThemeControl.class);
+                for (Class<? extends org.uecide.themes.ThemeControl> c : controlClasses) {
+                    Method init = c.getMethod("init");
+                    if (init != null) {
+                        Object[] noParameters = null;
+                        try {
+                            init.invoke(null, noParameters);
+                        } catch (Exception e) {
+                            error(e);
+                        }
                     }
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
+        }
         loadJSPlugins();
     }
 
@@ -2263,8 +2254,10 @@ public class Base {
     }
 
     public static void rescanThemes() {
-        loadThemes();
-        theme.fullyParseFile();
+        if (!headless) {
+            loadThemes();
+            theme.fullyParseFile();
+        }
     }
     public static void rescanCompilers() {
         compilers = new TreeMap<String, Compiler>();
@@ -2466,41 +2459,44 @@ public class Base {
     }
 
     public static void loadThemes() {
+        if (!headless) {
 
-        themes = new TreeMap<String, PropertyFile>();
 
-        Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forPackage("org.uecide"))
-                .setScanners(new ResourcesScanner()));
+            themes = new TreeMap<String, PropertyFile>();
 
-        Pattern pat = Pattern.compile(".*\\.theme");
-        Set<String> thms = reflections.getResources(pat);
+            Reflections reflections = new Reflections(new ConfigurationBuilder()
+                    .setUrls(ClasspathHelper.forPackage("org.uecide"))
+                    .setScanners(new ResourcesScanner()));
 
-        for (String thm : thms) {
-            PropertyFile newTheme = new PropertyFile("/" + thm);
-            String name = newTheme.get("name");
-            if (name != null) {
-                Debug.message("Found embedded theme " + name);
-                PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
-                merged.mergeData(newTheme);
-                themes.put(newTheme.get("name"), merged);
+            Pattern pat = Pattern.compile(".*\\.theme");
+            Set<String> thms = reflections.getResources(pat);
+
+            for (String thm : thms) {
+                PropertyFile newTheme = new PropertyFile("/" + thm);
+                String name = newTheme.get("name");
+                if (name != null) {
+                    Debug.message("Found embedded theme " + name);
+                    PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
+                    merged.mergeData(newTheme);
+                    themes.put(newTheme.get("name"), merged);
+                }
             }
-        }
 
-        File[] tfs = getThemesFolders();
-        for (File tf : tfs) {
-            if (tf.exists()) {
-                File[] files = tf.listFiles();
+            File[] tfs = getThemesFolders();
+            for (File tf : tfs) {
+                if (tf.exists()) {
+                    File[] files = tf.listFiles();
 
-                for(File f : files) {
-                    if(f.getName().endsWith(".theme")) {
-                        PropertyFile newTheme = new PropertyFile(f);
-                        String name = newTheme.get("name");
-                        if (name != null) {
-                            Debug.message("Found external theme " + name);
-                            PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
-                            merged.mergeData(newTheme);
-                            themes.put(newTheme.get("name"), merged);
+                    for(File f : files) {
+                        if(f.getName().endsWith(".theme")) {
+                            PropertyFile newTheme = new PropertyFile(f);
+                            String name = newTheme.get("name");
+                            if (name != null) {
+                                Debug.message("Found external theme " + name);
+                                PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
+                                merged.mergeData(newTheme);
+                                themes.put(newTheme.get("name"), merged);
+                            }
                         }
                     }
                 }
@@ -2928,7 +2924,7 @@ public class Base {
 
             PluginManager reqpm = new PluginManager();
             APT reqapt = reqpm.getApt();
-            reqapt.update(true);
+            reqapt.update(true, true);
             Package[] reqpkgs = reqapt.getPackages();
             for (Package p : reqpkgs) {
                 if (reqapt.isInstalled(p)) {
@@ -2948,8 +2944,8 @@ public class Base {
     }
 
     public static void setLookAndFeel() {
-        String laf = getTheme().getPlatformSpecific("laf");
         if(!headless) {
+            String laf = getTheme().getPlatformSpecific("laf");
             try {
                 Class<?> plg = lookAndFeels.get(laf); //Preferences.get("theme.window"));
                 if (plg == null) {

@@ -1148,6 +1148,7 @@ public class Sketch {
             ctx.set("filename", f.getName());
             ctx.set("sketch.root", f.getParentFile().getAbsolutePath());
             ctx.set("build.root", buildFolder.getAbsolutePath());
+            ctx.set("build.path", buildFolder.getAbsolutePath());
             ctx.startBuffer(true);
             t.execute(ctx, "ctags.parse.ino");
             ctx.endBuffer();
@@ -1523,7 +1524,6 @@ public class Sketch {
                 sport.setDTR(false);
                 sport.setRTS(false);
                 sport.closePort();
-//                System.gc();
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
@@ -1556,7 +1556,6 @@ public class Sketch {
                 sport.setRTS(false);
                 sport.closePort();
                 Thread.sleep(postdelay);
-//                System.gc();
             }
         } catch (Exception e) {
             ctx.error(e);
@@ -1881,7 +1880,6 @@ public class Sketch {
     }
 
     public void cleanup() {
-//        System.gc();
         Base.removeDescendants(buildFolder);
     }
 
@@ -3085,16 +3083,6 @@ public class Sketch {
         return files;
     }
 
-//    static private boolean createFolder(File folder) {
-//        if(folder.isDirectory())
-//            return false;
-//
-//        if(!folder.mkdir())
-//            return false;
-//
-//        return true;
-//    }
-
     private boolean compileLink(List<File> objectFiles) {
         PropertyFile props = ctx.getMerged();
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
@@ -3155,30 +3143,6 @@ public class Sketch {
         return (Boolean)ctx.executeKey("compile.link");
     }
 
-//    private boolean compileEEP() {
-//        PropertyFile props = ctx.getMerged();
-//        if (!props.keyExists("compile.eep")) {
-//            return true;
-//        }
-//        return (Boolean)ctx.executeKey("compile.eep");
-//    }
-
-//    private boolean compileLSS() {
-//        PropertyFile props = ctx.getMerged();
-//        if (!props.keyExists("compile.lss")) {
-//            return true;
-//        }
-//        return (Boolean)ctx.executeKey("compile.lss");
-//    }
-
-//    private boolean compileHEX() {
-//        PropertyFile props = ctx.getMerged();
-//        if (!props.keyExists("compile.hex")) {
-//            return true;
-//        }
-//        return (Boolean)ctx.executeKey("compile.hex");
-//    }
-
     public boolean isUntitled() {
         return isUntitled;
     }
@@ -3206,7 +3170,6 @@ public class Sketch {
     }
 
     public void cleanBuild() {
-//        System.gc();
         Base.removeDescendants(buildFolder);
     }
 
@@ -3507,7 +3470,9 @@ public class Sketch {
         if(editor != null) {
             editor.command(s);
         } else {
-            System.out.print(s);
+            if (Base.cli.isSet("verbose")) {
+                System.out.print(s);
+            }
         }
     }        
 
@@ -4039,7 +4004,6 @@ public class Sketch {
             if(sub.isDirectory()) {
                 // directories are empty entries and have / at the end
                 ZipEntry entry = new ZipEntry(nowfar + "/");
-                //System.out.println(entry);
                 zos.putNextEntry(entry);
                 zos.closeEntry();
                 addTree(sub, nowfar, zos);
@@ -4551,11 +4515,15 @@ public class Sketch {
     }
 
     public void outputErrorStream(String msg) {
-        System.err.print(msg);
+        if (Base.cli.isSet("verbose")) {
+            System.err.print(msg);
+        }
     }
    
     public void outputMessageStream(String msg) {
-        System.out.print(msg);
+        if (Base.cli.isSet("verbose")) {
+            System.out.print(msg);
+        }
     }
 
 }

@@ -154,7 +154,7 @@ public class Library implements Comparable {
     }
 
     public void rescan() {
-        requiredLibraries = new ArrayList<String>();
+//        requiredLibraries = new ArrayList<String>();
         sourceFiles = new TreeSet<File>();
         archiveFiles = new TreeSet<File>();
         headerFiles = new TreeSet<File>();
@@ -223,13 +223,13 @@ public class Library implements Comparable {
 
         probedFiles = new ArrayList<String>();
 
-        for(File f : headerFiles) {
-            gatherIncludes(f);
-        }
-
-        for(File f : sourceFiles) {
-            gatherIncludes(f);
-        }
+//        for(File f : headerFiles) {
+//            gatherIncludes(f);
+//        }
+//
+//        for(File f : sourceFiles) {
+//            gatherIncludes(f);
+//        }
     }
 
     ArrayList<String> probedFiles;
@@ -363,6 +363,14 @@ public class Library implements Comparable {
     }
 
     public ArrayList<String> getRequiredLibraries() {
+        requiredLibraries = new ArrayList<String>();
+        for(File f : headerFiles) {
+            gatherIncludes(f);
+        }
+
+        for(File f : sourceFiles) {
+            gatherIncludes(f);
+        }
         return requiredLibraries;
     }
 
