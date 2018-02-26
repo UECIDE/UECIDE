@@ -532,7 +532,7 @@ public class Editor extends JFrame {
                 public void propertyChange(PropertyChangeEvent e) {
                     // Calculate this as a percentage of the window width
                     int pos = (Integer)(e.getNewValue());
-                    Dimension windowSize = Editor.this.getSize(null);
+                    Dimension windowSize = Editor.this.leftRightSplit.getSize(null);
                     float pct = (float)pos / (float)windowSize.width;
                     Preferences.setFloat("editor.layout.splits.tree", pct);
                 }
@@ -5317,17 +5317,23 @@ public class Editor extends JFrame {
 
     void updateSplits() {
         Dimension windowSize = getSize(null);
-        float splitDividerSize = Base.preferences.getFloat("editor.layout.splits.tree", 0.1F);
-        leftRightSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
-        leftRightSplit.setResizeWeight(splitDividerSize);
-
-        splitDividerSize = Base.preferences.getFloat("editor.layout.splits.sidebar", 0.9F);
+        float splitDividerSize = Base.preferences.getFloat("editor.layout.splits.sidebar", 0.9F);
+        if (splitDividerSize > 1F || splitDividerSize < 0F) splitDividerSize = 0.9F;
         sidebarSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
         sidebarSplit.setResizeWeight(splitDividerSize);
 
         splitDividerSize = Base.preferences.getFloat("editor.layout.splits.console", 0.7F);
+        if (splitDividerSize > 1F || splitDividerSize < 0F) splitDividerSize = 0.7F;
         topBottomSplit.setDividerLocation((int)(windowSize.height * splitDividerSize));
         topBottomSplit.setResizeWeight(splitDividerSize);
+
+        windowSize = leftRightSplit.getSize(null);
+
+        splitDividerSize = Base.preferences.getFloat("editor.layout.splits.tree", 0.1F);
+        if (splitDividerSize > 1F || splitDividerSize < 0F) splitDividerSize = 0.1F;
+        leftRightSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
+        leftRightSplit.setResizeWeight(splitDividerSize);
+
     }
 }
 

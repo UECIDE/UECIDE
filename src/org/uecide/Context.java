@@ -378,7 +378,9 @@ public class Context {
             sketch.command("\n" + e);
             return;
         }
-        System.out.print(e);
+        if (Base.cli.isSet("verbose")) {
+            System.out.print(e);
+        }
     }
         
     public void bullet(String e) {
