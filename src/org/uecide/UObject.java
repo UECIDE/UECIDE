@@ -50,6 +50,7 @@ public class UObject implements Comparable {
     protected String _revision;
     protected String _family;
     protected String _description;
+    protected UObject _related;
 
     public static final int None = 0;
     public static final int Board = 1;
@@ -57,6 +58,10 @@ public class UObject implements Comparable {
     public static final int Compiler = 3;
     public static final int Programmer = 4;
     public static final int Tool = 5;
+
+    public UObject() {
+        _properties = new PropertyFile();
+    }
 
     public UObject(File dir) {
         _valid = false;
@@ -173,6 +178,12 @@ public class UObject implements Comparable {
     public void set(String k, String v) {
         if (_properties != null) {
             _properties.set(k, v);
+        }
+    }
+
+    public void unset(String k) {
+        if (_properties != null) {
+            _properties.unset(k);
         }
     }
 
@@ -318,5 +329,16 @@ public class UObject implements Comparable {
         for (String prop : _properties.keySet()) {
             _properties.setSource(prop, _name);
         }
+    }
+
+    public UObject getRelatedObject() {
+        return _related;
+    }
+
+    public void setRelatedObject(UObject o) {
+        _related = o;
+    }
+
+    public void onSelected(Editor e) {
     }
 }

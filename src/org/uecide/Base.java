@@ -3136,5 +3136,9 @@ public class Base {
         cleanupSystem();
         waitForAssetLoading();
     }
+
+    public static boolean isHeadless() {
+        return headless;
+    }
 }
 

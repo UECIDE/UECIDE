@@ -30,134 +30,55 @@
 
 package org.uecide;
 
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceInfo;
-import javax.jmdns.ServiceListener;
-import javax.jmdns.ServiceEvent;
 import java.io.*;
 import java.util.*;
 import java.net.*;
 
+import net.posick.mDNS.*;
+
+
 public class NetworkDiscoveryService extends Service {
 
-
-    static class BoardServiceListener implements ServiceListener {
-        public void serviceResolved(ServiceEvent event) {
-            ServiceInfo info = event.getInfo();
-
-            String board = info.getPropertyString("board");
-            if (board == null) {
-                return;
-            }
-            Board foundBoard = Base.boards.get(board);
-            if (foundBoard == null) {
-                return;
-            }
-
-            String protocol = info.getPropertyString("protocol");
-            if (protocol == null) {
-                return;
-            }
-
-            if (protocol.equals("ssh")) {
-
-                InetAddress[] ips = info.getInetAddresses();
-                byte[] ip = ips[0].getAddress();
-                String[] urls = info.getURLs();
-
-                SSHCommunicationPort newPort = new SSHCommunicationPort(info.getName(), foundBoard, ips[0], info.getPort());
-                for (Enumeration<String> e = info.getPropertyNames(); e.hasMoreElements();) {
-                    String k = e.nextElement();
-                    newPort.set(k, info.getPropertyString(k));
-                }
-
-
-                int exist = -1;
-                synchronized(Base.communicationPorts) {
-
-                    int i = 0;
-        
-                    for (CommunicationPort cp : Base.communicationPorts) {
-                        if (cp instanceof SSHCommunicationPort) {
-                            if (cp.toString().equals(newPort.toString())) {
-                                exist = i;
-                                break;
-                            }
-                        }
-                        i++;
-                    }
-
-                    if (exist == -1) {
-                        Base.communicationPorts.add(newPort);
-                    }
-                }
-                if (exist == -1) {
-                    Editor.broadcast(String.format("Found %s (%d.%d.%d.%d)",
-                        info.getName(),
-                        (int)ip[0] & 0xFF,
-                        (int)ip[1] & 0xFF,
-                        (int)ip[2] & 0xFF,
-                        (int)ip[3] & 0xFF
-                    ));
-                }
-            }
-        }
-        public void serviceAdded(ServiceEvent event) {
-        }
-        public void serviceRemoved(ServiceEvent event) {
-            ServiceInfo info = event.getInfo();
-            String key = info.getName();
-
-            synchronized(Base.communicationPorts) {
-                CommunicationPort fp = null;
-                for (CommunicationPort cp  : Base.communicationPorts) {
-                    if (cp instanceof SSHCommunicationPort) {
-                        SSHCommunicationPort scp = (SSHCommunicationPort)cp;
-                        if (scp.getKey().equals(key)) {
-                            fp = cp;
-                        }
-                    }
-                }
-                if (fp != null) {
-                    Base.communicationPorts.remove(fp);
-                }
-            }
-        }
-    }
-
-    BoardServiceListener boardListener = new BoardServiceListener();
-
     public NetworkDiscoveryService() {
-        setInterval(10000);
+        setInterval(60000);
         setName("Network Discovery");
     }
 
-    JmDNS jmdns = null;
-
     public void setup() {
-        try {
-            byte[] ipAll = {0, 0, 0, 0};
-            jmdns = JmDNS.create(InetAddress.getByAddress(ipAll));
-        } catch (UnknownHostException ex) {
-        } catch (IOException ex) {
-        }
-        if (jmdns == null) {
-            System.err.println("JmDNS service unable to start");
-            stop();
-        }
-        ArrayList<String> fullServiceList = getServices();
-
-        jmdns.addServiceListener("_uecide._tcp.local.", boardListener);
-
-//        for (String service : fullServiceList) {
-//            jmdns.addServiceListener(service, boardListener);
-//        }
     }
 
     public void cleanup() {
     }
 
     public void loop() {
+
+        Lookup lookup = null;
+        try {
+            ArrayList<String> fullServiceList = getServices();
+            for (String svc : fullServiceList) {
+                ServiceName service = new ServiceName(svc);
+                lookup = new Lookup(service);
+                ServiceInstance[] services = lookup.lookupServices();
+                for (ServiceInstance s : services) {
+                    InetAddress[] addresses = s.getAddresses();
+                    int port = s.getPort();
+                    Map<String, String>txt = s.getTextAttributes();
+                    String serviceName = s.getName().getFullType() + "." + s.getName().getDomain();
+                    Board b = getBoardByService(serviceName, txt);
+                    if (b != null) {
+                        mDNSProgrammer p = new mDNSProgrammer(s, b);
+                        Programmer oldP = Base.programmers.get(p.getName());
+                        if (oldP == null) {
+                            Base.programmers.put(p.getName(), p);
+                            Editor.broadcast("Created programmer " + p.getName() + " [" + p.getDescription() + "]");
+                        }
+                    }
+                }
+                lookup.close();
+            }
+        } catch (Exception e) {
+        }
+
     }
 
     public ArrayList<String> getServices() {
@@ -178,7 +99,8 @@ public class NetworkDiscoveryService extends Service {
         return serviceList;
     }
 
-    public Board getBoardByService(ServiceInfo info) {
+    //public static Board getBoardByService(ServiceInfo info) {
+    public static Board getBoardByService(String svc, Map<String,String>txt) {
         for(Board board : Base.boards.values()) {
             String service = board.get("mdns.service");
 
@@ -186,10 +108,10 @@ public class NetworkDiscoveryService extends Service {
                 continue;
             }
 
-            if(service.equals(info.getTypeWithSubtype())) {
+            if(service.equals(svc)) { //info.getTypeWithSubtype())) {
                 String key = board.get("mdns.model.key");
                 String value = board.get("mdns.model.value");
-                String btype = info.getPropertyString(key);
+                String btype = txt.get(key); //info.getPropertyString(key);
                 if (btype != null) {
                     if(btype.equals(value)) {
                         return board;

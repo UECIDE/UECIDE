@@ -3289,11 +3289,22 @@ public class Editor extends JFrame {
             public void menuDeselected(MenuEvent e) {
             }
         });
+
         Base.setFont(serialPortsMenu, "menu.entry");
         hardwareMenu.add(serialPortsMenu);
 
         programmersSubmenu = new JMenu(Base.i18n.string("menu.hardware.programmers"));
         populateProgrammersMenu(programmersSubmenu);
+        programmersSubmenu.addMenuListener(new MenuListener() {
+            public void menuSelected(MenuEvent e) {
+                populateProgrammersMenu(programmersSubmenu);
+            }
+            public void menuCanceled(MenuEvent e) {
+            }
+            public void menuDeselected(MenuEvent e) {
+            }
+        });
+
 
         Base.setFont(programmersSubmenu, "menu.entry");
         hardwareMenu.add(programmersSubmenu);
@@ -3515,7 +3526,9 @@ public class Editor extends JFrame {
 
         for(Programmer prog : Base.programmers.values()) {
             if(prog.worksWith(board)) {
-                progList.add(prog);
+                if (prog.get("hidden") == null) {
+                    progList.add(prog);
+                }
             }
         }
 
@@ -3538,6 +3551,8 @@ public class Editor extends JFrame {
 
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
+                    Programmer p = Base.programmers.get(e.getActionCommand());
+                    p.onSelected(Editor.this);
                     loadedSketch.setProgrammer(e.getActionCommand());
                 }
             });

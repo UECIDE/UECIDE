@@ -463,6 +463,9 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <maven group="org.tukaani"                             artifact="xz"                       version="1.8" />
             <maven group="org.jline"                               artifact="jline"                    version="3.6.0" />
             <maven group="com.apple"                               artifact="AppleJavaExtensions"      version="1.4" />
+            <maven group="net.posick"                              artifact="mdnsjava"                 version="2.2.0" />
+            <!--maven group="org.dnsjava"                             artifact="dnsjava"                  version="2.1.5" /-->
+            <download url="http://www.dnsjava.org/download/dnsjava-2.1.5.jar" filename="dnsjava.jar" />
         </depends>
     </target>
 

@@ -42,9 +42,15 @@ public class Programmer extends UObject {
         super(folder);
     }
 
+    public Programmer() {
+        super();
+    }
+
     public boolean programFile(Context ctx, String file) {
         PropertyFile props = ctx.getMerged();
         if (!Base.isQuiet()) ctx.heading("Uploading firmware...");
+
+props.debugDump();
 
         ctx.set("filename", file);
 
