@@ -13,6 +13,7 @@ public class mDNSProgrammer extends Programmer {
     InetAddress _ip;
     Programmer _programmer;
 
+    @SuppressWarnings("unchecked")
     public mDNSProgrammer(ServiceInstance info, Board b) {
         _info = info;
         _board = b;
@@ -35,8 +36,9 @@ public class mDNSProgrammer extends Programmer {
 
         setRelatedObject(_board);
 
-        set("name", "mdns-programmer-" + _programmer.getName() + "-" + _ip.getHostAddress());
-        set("description", _board.getDescription() + " on " + _ip.getHostAddress());
+        set("name", _programmer.getName() + "-" + _ip.getHostAddress());
+        set("description", _board.getDescription() + " on " + _ip.getHostAddress() + " (" + _info.getName().getInstance() + ")");
+        set("mdns.created", "true");
         unset("hidden");
     }
 

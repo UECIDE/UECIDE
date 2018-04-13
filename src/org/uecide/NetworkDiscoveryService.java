@@ -35,12 +35,13 @@ import java.util.*;
 import java.net.*;
 
 import net.posick.mDNS.*;
+import org.xbill.DNS.Type;
 
 
 public class NetworkDiscoveryService extends Service {
 
     public NetworkDiscoveryService() {
-        setInterval(60000);
+        setInterval(15000);
         setName("Network Discovery");
     }
 
@@ -50,14 +51,14 @@ public class NetworkDiscoveryService extends Service {
     public void cleanup() {
     }
 
+    @SuppressWarnings("unchecked")
     public void loop() {
-
         Lookup lookup = null;
         try {
             ArrayList<String> fullServiceList = getServices();
             for (String svc : fullServiceList) {
                 ServiceName service = new ServiceName(svc);
-                lookup = new Lookup(service);
+                lookup = new Lookup(service, Type.PTR);
                 ServiceInstance[] services = lookup.lookupServices();
                 for (ServiceInstance s : services) {
                     InetAddress[] addresses = s.getAddresses();
@@ -70,15 +71,15 @@ public class NetworkDiscoveryService extends Service {
                         Programmer oldP = Base.programmers.get(p.getName());
                         if (oldP == null) {
                             Base.programmers.put(p.getName(), p);
-                            Editor.broadcast("Created programmer " + p.getName() + " [" + p.getDescription() + "]");
+                            Editor.broadcast("Found " + p.getDescription());
                         }
                     }
                 }
                 lookup.close();
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
-
     }
 
     public ArrayList<String> getServices() {
