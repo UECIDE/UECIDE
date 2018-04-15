@@ -3115,6 +3115,17 @@ public class Base {
         cleanupThread.start();
     }
 
+    public static String getFileExtension(File f) {
+        String fileName = f.getName();
+        String extension = "";
+
+        int i = fileName.lastIndexOf('.');
+        if (i >= 0) {
+            extension = fileName.substring(i+1);
+        }
+        return extension;
+    }
+
     public static Tool getTool(String name) {
         return tools.get(name);
     }

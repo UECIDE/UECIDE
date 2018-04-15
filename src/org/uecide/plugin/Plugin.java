@@ -55,6 +55,8 @@ public abstract class Plugin {
     public static final int MENU_TOOLS      = 0x0005;
     public static final int MENU_HELP       = 0x0006;
 
+    public static final int MENU_TREE_ID        = 0x0010;
+
     // Project tree folder entries
     public static final int MENU_TREE_SKETCH    = 0x0010; // Root level sketch folder
     public static final int MENU_TREE_SOURCE    = 0x0011; // Source files
