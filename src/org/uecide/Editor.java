@@ -5386,19 +5386,19 @@ public class Editor extends JFrame {
         Dimension windowSize = getSize(null);
         float splitDividerSize = Base.preferences.getFloat("editor.layout.splits.sidebar", 0.9F);
         if (splitDividerSize > 1F || splitDividerSize < 0F) splitDividerSize = 0.9F;
-        sidebarSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
+//        sidebarSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
         sidebarSplit.setResizeWeight(splitDividerSize);
 
         splitDividerSize = Base.preferences.getFloat("editor.layout.splits.console", 0.7F);
         if (splitDividerSize > 1F || splitDividerSize < 0F) splitDividerSize = 0.7F;
-        topBottomSplit.setDividerLocation((int)(windowSize.height * splitDividerSize));
+//        topBottomSplit.setDividerLocation((int)(windowSize.height * splitDividerSize));
         topBottomSplit.setResizeWeight(splitDividerSize);
 
         windowSize = leftRightSplit.getSize(null);
 
         splitDividerSize = Base.preferences.getFloat("editor.layout.splits.tree", 0.1F);
         if (splitDividerSize > 1F || splitDividerSize < 0F) splitDividerSize = 0.1F;
-        leftRightSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
+//        leftRightSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
         leftRightSplit.setResizeWeight(splitDividerSize);
 
     }

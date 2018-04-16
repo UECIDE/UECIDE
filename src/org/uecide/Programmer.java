@@ -50,8 +50,6 @@ public class Programmer extends UObject {
         PropertyFile props = ctx.getMerged();
         if (!Base.isQuiet()) ctx.heading("Uploading firmware...");
 
-props.debugDump();
-
         ctx.set("filename", file);
 
         if (props.get("programmer.message") != null) {
