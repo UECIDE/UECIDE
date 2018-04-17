@@ -578,6 +578,10 @@ public class Context {
     // Execute a key as a script in whatever way is needed.
 
     public Object executeKey(String key) {
+        return executeKey(key, false);
+    }
+
+    public Object executeKey(String key, boolean silent) {
         PropertyFile props = getMerged();
     
         // If there is a platform specific version of the key then we should switch to that instead.
@@ -601,28 +605,36 @@ public class Context {
                 String function = val[1];
                 String[] args = Arrays.copyOfRange(val, 2, val.length);
 
-                return executeJavaScript(script, function, args);
+                return executeJavaScript(script, function, args, silent);
             }
         }
 
         // If the key has a sub-key of .0 then run it as a UECIDE Script
         if (props.get(key + ".0") != null) {
-            return executeUScript(key);
+            return executeUScript(key, silent);
         }
 
         // Otherwise try and run it as a command (either built in or system).
         if (props.get(key) != null) {
-            return executeCommand(parseString(props.get(key)), parseString(props.get(key + ".environment")));
+            return executeCommand(parseString(props.get(key)), parseString(props.get(key + ".environment")), silent);
         }
 
         return false;
     }
 
+    public Object executeJavaScript(String script, String function, Object[] args, boolean silent) {
+        return executeJavaScript(null, script, function, args, silent);
+    }
+
     public Object executeJavaScript(String script, String function, Object[] args) {
-        return executeJavaScript(null, script, function, args);
+        return executeJavaScript(null, script, function, args, false);
     }
 
     public Object executeJavaScript(String filename, String script, String function, Object[] args) {
+        return executeJavaScript(filename, script, function, args, false);
+    }
+
+    public Object executeJavaScript(String filename, String script, String function, Object[] args, boolean silent) {
         if (function == null) {
             return false;
         }
@@ -651,7 +663,7 @@ public class Context {
                     }
                     argstr += s;
                 }
-//                command(function + "(" + argstr + ")");
+                //if (!silent) command(function + "(" + argstr + ")");
             }
 
             if (args == null) {
@@ -669,15 +681,23 @@ public class Context {
 
 
     public Object executeCommand(String command, String env) {
+        return executeCommand(command, env, false);
+    }
+
+    public Object executeCommand(String command, String env, boolean silent) {
         if(command.startsWith("__builtin_")) {
-            return runBuiltinCommand(command);
+            return runBuiltinCommand(command, silent);
         } else {
-            return runSystemCommand(command, env);
+            return runSystemCommand(command, env, silent);
         }
     }
 
 
     public Object executeUScript(String key) {
+        return executeUScript(key, false);
+    }
+
+    public Object executeUScript(String key, boolean silent) {
         PropertyFile props = getMerged();
         PropertyFile script = props.getChildren(key);
         int lineno = 0;
@@ -703,7 +723,7 @@ public class Context {
                     error(ld);
                     if (script.keyExists("fail")) {
                         String failKey = String.format("%s.fail", key);
-                        executeKey(failKey);
+                        executeKey(failKey, silent);
                     }
                     return false;
                 }
@@ -719,7 +739,7 @@ public class Context {
                     error(ld);
                     if (script.keyExists("fail")) {
                         String failKey = String.format("%s.fail", key);
-                        res = executeKey(failKey);
+                        res = executeKey(failKey, silent);
                     }
                     return false;
                 }
@@ -734,7 +754,7 @@ public class Context {
             if(ld.equals("fail")) {
                 if (script.keyExists("fail")) {
                     String failKey = String.format("%s.fail", key);
-                    res = executeKey(failKey);
+                    res = executeKey(failKey, silent);
                 }
                 return false;
             }
@@ -742,18 +762,18 @@ public class Context {
             if(ld.equals("end")) {
                 if (script.keyExists("end")) {
                     String endKey = String.format("%s.end", key);
-                    res = executeKey(endKey);
+                    res = executeKey(endKey, silent);
                 }
                 return res;
             }
 
-            res = executeKey(lk);
+            res = executeKey(lk, silent);
 
             if (res instanceof Boolean) {
                 if((Boolean)res == false) {
                     if (script.keyExists("fail")) {
                         String failKey = String.format("%s.fail", key);
-                        res = executeKey(failKey);
+                        res = executeKey(failKey, silent);
                     }
                     return false;
                 }
@@ -763,7 +783,7 @@ public class Context {
         }
         if (script.keyExists("end")) {
             String endKey = String.format("%s.end", key);
-            res = executeKey(endKey);
+            res = executeKey(endKey, silent);
         }
 
         return res;
@@ -908,6 +928,10 @@ public class Context {
     }
 
     public Object runBuiltinCommand(String commandline) {
+        return runBuiltinCommand(commandline, false);
+    }
+
+    public Object runBuiltinCommand(String commandline, boolean silent) {
         try {
             String[] split = commandline.split("::");
             int argc = split.length - 1;
@@ -935,7 +959,7 @@ public class Context {
                     args.append(" ");
                     args.append(s);
                 }
-                command(args.toString());
+                if (!silent) command(args.toString());
             }
 
             Class<?> c = Class.forName("org.uecide.builtin." + cmdName);
@@ -979,6 +1003,10 @@ public class Context {
 
 
     public Object runSystemCommand(String command, String env) {
+        return runSystemCommand(command, env, false);
+    }
+
+    public Object runSystemCommand(String command, String env, boolean silent) {
         PropertyFile props = getMerged();
 
         Object res;
@@ -1029,7 +1057,7 @@ public class Context {
             Debug.message("Execute: " + sb.toString());
         }
         if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
-            command(sb.toString());
+            if (!silent) command(sb.toString());
         }
 
         try {

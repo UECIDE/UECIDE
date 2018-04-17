@@ -3595,7 +3595,7 @@ public class Editor extends JFrame {
         Arrays.sort(boardList);
 
         for(Board board : boardList) {
-            JMenuItem item = new JRadioButtonMenuItem(board.getDescription());
+            JMenuItem item = new UObjectMenuItem(board);
             boardMenuButtonGroup.add(item);
 
             if(loadedSketch.getContext().getBoard() != null) {
@@ -3604,26 +3604,14 @@ public class Editor extends JFrame {
                 }
             }
 
-            ImageIcon i = board.getIcon(16);
-
-            if(i == null) {
-                Core c = board.getCore();
-
-                if(c != null) {
-                    i = c.getIcon(16);
-                }
-            }
-
-            if(i != null) {
-                item.setIcon(i);
-            }
-
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    loadedSketch.setBoard(e.getActionCommand());
+                    Board b = (Board)((UObjectMenuItem)e.getSource()).getObject();
+                    loadedSketch.setBoard(b);
+                    b.onSelected(Editor.this);
                 }
             });
-            item.setActionCommand(board.getName());
+//            item.setActionCommand(board.getName());
             Base.setFont(item, "menu.entry");
             menu.add(item);
         }
@@ -3644,25 +3632,20 @@ public class Editor extends JFrame {
         Arrays.sort(cores);
 
         for(Core core : cores) {
-            JMenuItem item = new JRadioButtonMenuItem(core.toString());
+            JMenuItem item = new UObjectMenuItem(core);
             coreGroup.add(item);
 
             if(loadedSketch.getContext().getCore() != null) {
                 item.setSelected(loadedSketch.getContext().getCore().equals(core));
             }
 
-            ImageIcon i = core.getIcon(16);
-
-            if(i != null) {
-                item.setIcon(i);
-            }
-
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    loadedSketch.setCore(e.getActionCommand());
+                    Core c = (Core)((UObjectMenuItem)e.getSource()).getObject();
+                    loadedSketch.setCore(c);
+                    c.onSelected(Editor.this);
                 }
             });
-            item.setActionCommand(core.getName());
             Base.setFont(item, "menu.entry");
             menu.add(item);
         }
@@ -3688,15 +3671,16 @@ public class Editor extends JFrame {
         Arrays.sort(compilers);
 
         for(Compiler compiler : compilers) {
-            JMenuItem item = new JRadioButtonMenuItem(compiler.getDescription());
+            JMenuItem item = new UObjectMenuItem(compiler);
             compilerGroup.add(item);
             item.setSelected(loadedSketch.getContext().getCompiler().equals(compiler));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    loadedSketch.setCompiler(e.getActionCommand());
+                    Compiler c = (Compiler)((UObjectMenuItem)e.getSource()).getObject();
+                    loadedSketch.setCompiler(c);
+                    c.onSelected(Editor.this);
                 }
             });
-            item.setActionCommand(compiler.getName());
             Base.setFont(item, "menu.entry");
             menu.add(item);
         }
@@ -3728,6 +3712,25 @@ public class Editor extends JFrame {
         }
 
         addPluginsToMenu(menu, filterFlags);
+    }
+
+    class UObjectMenuItem extends JRadioButtonMenuItem {
+        UObject _object;
+
+        public UObjectMenuItem(UObject o) {
+            super(o.getDescription());
+            _object = o;
+
+            ImageIcon i = _object.getIcon(16);
+
+            if(i != null) {
+                setIcon(i);
+            }
+        }
+
+        public UObject getObject() {
+            return _object;
+        }
     }
 
     class JMenuItemWithFileAndTool extends JMenuItem {
