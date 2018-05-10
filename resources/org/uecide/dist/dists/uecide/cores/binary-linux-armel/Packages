@@ -1,15 +1,15 @@
 Package: ctags
-Version: 1.0.0
+Version: 1.0.1
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 1999
+Installed-Size: 2221
 Priority: required
 Section: tools
-Filename: pool/cores/c/ctags/ctags_1.0.0_all.deb
-Size: 409444
-SHA256: 56dddd62eb8038e854db7bc823a28e92f7e463ba62d10bf0985b1982c54b995a
-SHA1: af3c727b568ffaf885c0f8aaa11737bde0ca7679
-MD5sum: 3654656a76b66e6e3b91fd8940461b1d
+Filename: pool/cores/c/ctags/ctags_1.0.1_all.deb
+Size: 409490
+SHA256: 2d530f007b27087185be8ccee6433c50c4e8a4109b1a2581bdbbe559712cb6b4
+SHA1: 4423c49032e9691feb8322e036f923390bf99eb0
+MD5sum: a355dc378f462f1cf9963c4ec82010b5
 Description: Exuberant CTags Parser
  This is the main parser for INO files used for gathering function prototypes.
 Group: Core

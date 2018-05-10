@@ -1297,7 +1297,10 @@ public class Context {
     }
 
     public String endBuffer() {
-        String b = buffer.toString();
+        String b = "";
+        if (buffer != null) {
+            b = buffer.toString();
+        }
         buffer = null;
         return b;
     }
