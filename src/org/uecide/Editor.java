@@ -3673,7 +3673,9 @@ public class Editor extends JFrame {
         for(Compiler compiler : compilers) {
             JMenuItem item = new UObjectMenuItem(compiler);
             compilerGroup.add(item);
-            item.setSelected(loadedSketch.getContext().getCompiler().equals(compiler));
+            if (loadedSketch.getContext().getCompiler() != null) {
+                item.setSelected(loadedSketch.getContext().getCompiler().equals(compiler));
+            }
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Compiler c = (Compiler)((UObjectMenuItem)e.getSource()).getObject();
@@ -5363,16 +5365,16 @@ public class Editor extends JFrame {
             public void run() {
                 tickUpdateBlocker();
             }
-        }, 10, 50);
+        }, 0, 250);
 
     }
 
-    int spinPos = 0;
+    int spinPos = 1;
     public void tickUpdateBlocker() {
         spinPos++;
-        if (spinPos == 36) spinPos = 0;
-        String iname = "Spinner" + (spinPos * 10);
-        ImageIcon i = Base.getIcon("spinner", iname, 64);
+        if (spinPos == 5) spinPos = 1;
+        String iname = "circle" + spinPos;
+        ImageIcon i = Base.getIcon("spinner", iname, 48);
         updateLabel.setIcon(i);
     }
 
