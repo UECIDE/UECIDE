@@ -616,6 +616,13 @@ public class PropertyFile {
         String s = get(attr);
 
         if(s != null) {
+            String hostname = "";
+            try {
+                InetAddress myHost = InetAddress.getLocalHost();
+                hostname = myHost.getHostName();
+            } catch (Exception e) {
+            }
+            s = s.replace("${hostname}", hostname);
             return new File(s);
         }
 
