@@ -2305,7 +2305,6 @@ public class Sketch {
 
         setCompilingProgress(50);
 
-        setCompilingProgress(60);
 
         PropertyFile autogen = props.getChildren("compile.autogen");
         String[] types = autogen.childKeys();
@@ -2673,7 +2672,7 @@ public class Sketch {
         File coreBuildFolder = new File(buildFolder, "libCore_" + name);
         coreBuildFolder.mkdirs();
 
-        ArrayList<File> fileList = new ArrayList<File>();
+        TreeSet<File> fileList = new TreeSet<File>(new CaseInsensitiveFileComparator());
 
         for(File f : core) {
             if(f.exists() && f.isDirectory()) {
@@ -4523,6 +4522,25 @@ public class Sketch {
     public void outputMessageStream(String msg) {
         if (Base.cli.isSet("verbose")) {
             System.out.print(msg);
+        }
+    }
+
+
+
+    class CaseInsensitiveFileComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            if ((o1 instanceof File) && (o2 instanceof File)) {
+                File f1 = (File)o1;
+                File f2 = (File)o2;
+                String n1 = f1.getName().toLowerCase();
+                String n2 = f2.getName().toLowerCase();
+                return n1.compareTo(n2);
+            }
+            return 0;
+        }
+
+        public boolean equals(Object o) {
+            return this == o;
         }
     }
 
