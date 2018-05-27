@@ -1180,12 +1180,18 @@ public class Sketch {
                     String line = "";
                     String signature = "";
 
+                    boolean ignore = false;
+
                     for (String rightBit : rightBits) {
                         String[] rightBitParts = rightBit.split(":");
 
                         if (rightBitParts[0].length() == 1) {
                             type = rightBitParts[0];
                             continue;
+                        }
+
+                        if (rightBitParts[0].equals("class")) {
+                            ignore = true;
                         }
 
                         if (rightBitParts[0].equals("line")) {
@@ -1197,7 +1203,7 @@ public class Sketch {
                         }
                     }
 
-                    if (type.equals("f")) { // It's a function
+                    if (type.equals("f") && !ignore) { // It's a function
                         if (signature.equals("")) {
                             error("Unable to get signature for " + name);
                             return null;
