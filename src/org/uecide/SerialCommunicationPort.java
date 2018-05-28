@@ -34,7 +34,10 @@ import jssc.*;
 import java.io.*;
 import java.util.*;
 
-public class SerialCommunicationPort implements CommunicationPort,SerialPortEventListener {
+import java.util.regex.*;
+
+
+public class SerialCommunicationPort implements CommunicationPort,SerialPortEventListener,Comparable {
 
     String portName = null;
     SerialPort serialPort = null;
@@ -68,20 +71,121 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     }
 
     public String getName() {
-        if (Base.isLinux()) {
-            return getNameLinux();
-        } else if (Base.isMacOS()) {
-            return getNameMacOS();
-        } else {
+        HashMap<String, String> attributes = getUSBAttributes();
+
+        if (attributes == null) {
             return portName;
         }
+
+
+        String man = attributes.get("manufacturer");
+        String prod = attributes.get("product");
+
+        if (man == null && prod == null) {
+            return portName;
+        }
+
+        if (man == null) {
+            return portName + " (" + prod + ")";
+        }
+
+        if (prod == null) {
+            prod = "Unknown";
+            return portName + " (" + man + ")";
+        }
+        return portName + " (" + man + " " + prod + ")";
     }
 
     public String toString() {
         return portName;
     }
 
+    public HashMap<String, String> getUSBAttributes() {
+        if (Base.isLinux()) {
+            return getUSBAttributesLinux();
+        } else if (Base.isMacOS()) {
+            return getUSBAttributesMacOS();
+        }
+        return null;
+    }
+
     HashMap<String, String>macPortNameCache = new HashMap<String,String>();
+    HashMap<String, HashMap<String, String>>portAttributeCache = new HashMap<String,HashMap<String, String>>();
+
+    HashMap<String, String> getUSBAttributesMacOS() {
+        HashMap<String, String> attributes = new HashMap<String, String>();
+
+        String deviceName = serialPort.getPortName();
+        if (macPortNameCache.get(deviceName) != null) {
+            return portAttributeCache.get(deviceName);
+        }
+
+        String subName = deviceName;
+        if (subName.startsWith("/dev/tty.")) {
+            subName = subName.substring(9);
+        } else if (subName.startsWith("/dev/cu.")) {
+            subName = subName.substring(8);
+        }
+
+        IOKit.parseRegistry();
+        ArrayList<IOKitNode> list = IOKit.findByClass("IOSerialBSDClient");
+        try {
+            for (IOKitNode n : list) {
+                if (n.get("IOTTYDevice").equals(subName)) {
+
+                    IOKitNode par = n.getParentNode();
+                    while (par != null) {
+
+                        HashMap<String, String> parAttr = par.getAttributes();
+
+                        for (String attr : parAttr.keySet()) {
+                            if (attributes.get(attr) == null) {
+                                attributes.put(attr, parAttr.get(attr));
+                            }
+                        }
+
+                        par = par.getParentNode();
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        portAttributeCache.put(deviceName, attributes);
+        return attributes;
+    }
+
+    HashMap<String, String> getUSBAttributesLinux() {
+        HashMap<String, String> attributes = new HashMap<String, String>();
+
+        String deviceName = serialPort.getPortName();
+
+        Pattern pat = Pattern.compile("ATTRS\\{(.*)\\}==\"(.*)\"");
+
+        try {
+            String line;
+            Process p = Runtime.getRuntime().exec("udevadm info -a " + deviceName);
+            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while ((line = input.readLine()) != null) {
+
+                Matcher m = pat.matcher(line);
+                if (m.find()) {
+                    String k = m.group(1);
+                    String v = m.group(2);
+                    if (attributes.get(k) == null) {
+                        attributes.put(k, v);
+                    }
+                }
+            }
+            input.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        portAttributeCache.put(deviceName, attributes);
+        return attributes;
+    }
 
     String getNameMacOS() {
         String deviceName = serialPort.getPortName();
@@ -509,4 +613,13 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     }
 
 
+    public int compareTo(Object a) {
+        if (a instanceof SerialCommunicationPort) {
+            SerialCommunicationPort pa = (SerialCommunicationPort)a;
+            return getName().compareTo(pa.getName());
+        }
+        return 0;
+    }
+
+    
 }

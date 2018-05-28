@@ -107,6 +107,10 @@ public class IOKitNode {
         attributes.put(k, v);
     }
 
+    public HashMap<String, String>getAttributes() {
+        return attributes;
+    }
+
     public String get(String k) {
         return attributes.get(k);
     }

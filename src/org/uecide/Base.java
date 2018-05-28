@@ -144,7 +144,7 @@ public class Base {
 
     public static boolean onlineMode = true;
 
-    public static ArrayList<CommunicationPort> communicationPorts = new ArrayList<CommunicationPort>();
+    public static TreeSet<CommunicationPort> communicationPorts = new TreeSet<CommunicationPort>();
 
     public static TreeMap<String, Class<?>> lookAndFeels = new TreeMap<String, Class<?>>();
 
