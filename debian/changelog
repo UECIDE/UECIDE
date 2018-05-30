@@ -1,3 +1,80 @@
+uecide (0.9.2) unstable; urgency=low 
+
+  * Accelerated boot sequence with multithreading
+  * Added concurrent compilation of libraries
+  * Added port disconnect support
+  * Updated serial terminal
+  * Added Tool UObject. Switched to ctags for parsing. Accelerate boot with file cache.
+  * Cleanup excess debugging
+  * Bundled ctags and overhauled boot installation of packages
+  * Removed save-before-compile requirement (it broke examples). Cleaned up parsing and build file copying
+  * Fixed tab in function prototype issue
+  * Scrapped redundant FunctionPrototype and switched to FunctionBookmark
+  * Overhauled function bookmarks
+  * Removed redundant function list functions
+  * Cleaned up with FindBugs scanning
+  * Optimizing string catenations
+  * Overhauled hex file handling
+  * Build time download of many deps
+  * Upgrade to jline3
+  * Switched maven deps to maven-ant
+  * Removed apt saving in boot
+  * Added apple stubs to maven list
+  * Imported jfontchooser into the core source
+  * Switch to ant-dep
+  * Switch custom file copy to NIO and pass exceptions up the call chain properly
+  * Switch to commons-text instead of commons-lang3
+  * Fixed deprecated and unchecked warnings
+  * Solve double cancel of compilation. Clean up network discovery. Remove extraneous exceptions
+  * New split location saving system
+  * Accelerate boot more and quieter startup
+  * Improved missing port error handling
+  * Made tree split as proportion of sub-window not entire window
+  * Added missing lang3 dependency
+  * Overhauled mDNS board discovery
+  * :Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Added tool-based context menu entries
+  * Package updates
+  * Hidden tool execution spam
+  * Solved random null pointer when compiling
+  * Improved busy spinner
+  * Added hostname support to data location preference
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 30 Oct 2017 20:41:07 +0000
+
+uecide (0.9.1) unstable; urgency=low 
+
+  * Fixed local libraries and implemented delete delay/retry code for locked files
+  * Prevent last sketch opening if either headless or a sketch given on command line
+  * Released 0.9.1
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 30 Oct 2017 11:28:44 +0000
+
+uecide (0.9.0) unstable; urgency=low 
+
+  * Added realtime SHA checking of downloads
+  * Improved error reporting in apt
+  * Fixed excepion on remove not found
+  * Added "portable" folder support
+  * Added extra baud rates and improved Ecma execution
+  * Removed unneeded import
+  * Adopted new sensible numbering schema
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Thu, 24 Aug 2017 21:16:34 +0100
+
+uecide (0.8.9-pre17) unstable; urgency=low 
+
+  * Deprecated outdated java tests
+  * Implemented Gritty terminal for output and deb installation progress
+  * Removed unneeded jsch
+  * Rotated markdown editor
+  * Cleaned up apt
+  * Linked mouse wheel on output console to scroll
+  * Removed superfluous output and updated serial terminal
+  * Released 0.8.9-pre17
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 22 Jul 2017 14:44:35 +0100
+
 uecide (0.8.9-pre16) unstable; urgency=low 
 
   * Improved library recursion for non-preproc compilers

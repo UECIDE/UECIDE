@@ -1144,7 +1144,7 @@ public class Sketch {
         
         Tool t = Base.getTool("ctags");
         if (t != null) {
-            Pattern pat = Pattern.compile("\\^(.*)\\(");
+            Pattern pat = Pattern.compile("\\^([^\\(]+)\\(");
             ctx.set("filename", f.getName());
             ctx.set("sketch.root", f.getParentFile().getAbsolutePath());
             ctx.set("build.root", buildFolder.getAbsolutePath());

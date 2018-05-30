@@ -6,7 +6,7 @@ Label: UECIDE Internal
 Suite: stable
 Codename: uecide
 Version: 3.1
-Date: Sat, 28 Apr 2018 19:04:57 UTC
+Date: Sun, 13 May 2018 11:20:45 UTC
 Architectures: windows-i386 windows-amd64 linux-amd64 linux-i386 linux-armhf linux-armel darwin-amd64
 Components: cores boards compilers plugins themes extra libraries repos main
 Description: Internal repository for distribution of plugins
@@ -179,29 +179,29 @@ MD5Sum:
  d41d8cd98f00b204e9800998ecf8427e 0 libraries/source/Sources
  7029066c27ac6f5ef18d660d5741979a 20 libraries/source/Sources.gz
  313dc5e482b6414317b83ae69ddf5eb4 170 libraries/source/Release
- 4596280f4568e284fb8594280ecdc3de 507 repos/binary-windows-i386/Packages
- d522349f586e160ab1cabcd8b8dcb52f 370 repos/binary-windows-i386/Packages.gz
+ b67f8e962eedf64fc8ac452261cc2fd1 1254 repos/binary-windows-i386/Packages
+ 889dd5916a034d37d7b6603c01a1e82b 674 repos/binary-windows-i386/Packages.gz
  d48fdb08ecc43783c1ac7d34d9c9a047 172 repos/binary-windows-i386/Release
- 4596280f4568e284fb8594280ecdc3de 507 repos/binary-windows-amd64/Packages
- d522349f586e160ab1cabcd8b8dcb52f 370 repos/binary-windows-amd64/Packages.gz
+ b67f8e962eedf64fc8ac452261cc2fd1 1254 repos/binary-windows-amd64/Packages
+ 889dd5916a034d37d7b6603c01a1e82b 674 repos/binary-windows-amd64/Packages.gz
  d6cfcf37c3d98339517c9e937692948f 173 repos/binary-windows-amd64/Release
- 4596280f4568e284fb8594280ecdc3de 507 repos/binary-linux-amd64/Packages
- d522349f586e160ab1cabcd8b8dcb52f 370 repos/binary-linux-amd64/Packages.gz
+ b67f8e962eedf64fc8ac452261cc2fd1 1254 repos/binary-linux-amd64/Packages
+ 889dd5916a034d37d7b6603c01a1e82b 674 repos/binary-linux-amd64/Packages.gz
  8bdc335d2d359219a9399ae177f8aaa1 171 repos/binary-linux-amd64/Release
- 4596280f4568e284fb8594280ecdc3de 507 repos/binary-linux-i386/Packages
- d522349f586e160ab1cabcd8b8dcb52f 370 repos/binary-linux-i386/Packages.gz
+ b67f8e962eedf64fc8ac452261cc2fd1 1254 repos/binary-linux-i386/Packages
+ 889dd5916a034d37d7b6603c01a1e82b 674 repos/binary-linux-i386/Packages.gz
  e03ef0f48c1519fd5e2980d8c582c68a 170 repos/binary-linux-i386/Release
- 4596280f4568e284fb8594280ecdc3de 507 repos/binary-linux-armhf/Packages
- d522349f586e160ab1cabcd8b8dcb52f 370 repos/binary-linux-armhf/Packages.gz
+ b67f8e962eedf64fc8ac452261cc2fd1 1254 repos/binary-linux-armhf/Packages
+ 889dd5916a034d37d7b6603c01a1e82b 674 repos/binary-linux-armhf/Packages.gz
  f606db5cc21a7ae68bd80fab0726948b 171 repos/binary-linux-armhf/Release
- 4596280f4568e284fb8594280ecdc3de 507 repos/binary-linux-armel/Packages
- d522349f586e160ab1cabcd8b8dcb52f 370 repos/binary-linux-armel/Packages.gz
+ b67f8e962eedf64fc8ac452261cc2fd1 1254 repos/binary-linux-armel/Packages
+ 889dd5916a034d37d7b6603c01a1e82b 674 repos/binary-linux-armel/Packages.gz
  2cec88fc3985c35ec67a5fa8c5fbb483 171 repos/binary-linux-armel/Release
- 4596280f4568e284fb8594280ecdc3de 507 repos/binary-darwin-amd64/Packages
- d522349f586e160ab1cabcd8b8dcb52f 370 repos/binary-darwin-amd64/Packages.gz
+ b67f8e962eedf64fc8ac452261cc2fd1 1254 repos/binary-darwin-amd64/Packages
+ 889dd5916a034d37d7b6603c01a1e82b 674 repos/binary-darwin-amd64/Packages.gz
  9d37cad06432ca32535d742b98dc5fbd 172 repos/binary-darwin-amd64/Release
- d117276d01998f8a9fe26f778c00c225 824 repos/source/Sources
- 6e673bfb37a2cdaac70cbca9ae2725aa 494 repos/source/Sources.gz
+ 0b44acd075da09c32b28dd000d4555d4 882 repos/source/Sources
+ 02a07b03f2fe59f4265ec6bf120ae5c1 505 repos/source/Sources.gz
  a682c9998341149eeabeb3ca13be2ebe 166 repos/source/Release
  d41d8cd98f00b204e9800998ecf8427e 0 main/binary-windows-i386/Packages
  7029066c27ac6f5ef18d660d5741979a 20 main/binary-windows-i386/Packages.gz
@@ -227,20 +227,20 @@ MD5Sum:
  d41d8cd98f00b204e9800998ecf8427e 0 main/source/Sources
  7029066c27ac6f5ef18d660d5741979a 20 main/source/Sources.gz
  ef86ffee4ea66f63e424e008b8e064b7 165 main/source/Release
- 31c3ebc2b9addddddcf302aac425bbcf 2910 Contents-windows-i386
- 5f8c2562d048cba7dde3bc6d36471041 457 Contents-windows-i386.gz
- 31c3ebc2b9addddddcf302aac425bbcf 2910 Contents-windows-amd64
- 5f8c2562d048cba7dde3bc6d36471041 457 Contents-windows-amd64.gz
- 31c3ebc2b9addddddcf302aac425bbcf 2910 Contents-linux-amd64
- 5f8c2562d048cba7dde3bc6d36471041 457 Contents-linux-amd64.gz
- 31c3ebc2b9addddddcf302aac425bbcf 2910 Contents-linux-i386
- 5f8c2562d048cba7dde3bc6d36471041 457 Contents-linux-i386.gz
- 31c3ebc2b9addddddcf302aac425bbcf 2910 Contents-linux-armhf
- 5f8c2562d048cba7dde3bc6d36471041 457 Contents-linux-armhf.gz
- 31c3ebc2b9addddddcf302aac425bbcf 2910 Contents-linux-armel
- 5f8c2562d048cba7dde3bc6d36471041 457 Contents-linux-armel.gz
- 31c3ebc2b9addddddcf302aac425bbcf 2910 Contents-darwin-amd64
- 5f8c2562d048cba7dde3bc6d36471041 457 Contents-darwin-amd64.gz
+ 267326f6abddc0bbcb0a7e937b5f86aa 3027 Contents-windows-i386
+ fba92346613efaea94b3d0fccfb9a5e8 477 Contents-windows-i386.gz
+ 267326f6abddc0bbcb0a7e937b5f86aa 3027 Contents-windows-amd64
+ fba92346613efaea94b3d0fccfb9a5e8 477 Contents-windows-amd64.gz
+ 267326f6abddc0bbcb0a7e937b5f86aa 3027 Contents-linux-amd64
+ fba92346613efaea94b3d0fccfb9a5e8 477 Contents-linux-amd64.gz
+ 267326f6abddc0bbcb0a7e937b5f86aa 3027 Contents-linux-i386
+ fba92346613efaea94b3d0fccfb9a5e8 477 Contents-linux-i386.gz
+ 267326f6abddc0bbcb0a7e937b5f86aa 3027 Contents-linux-armhf
+ fba92346613efaea94b3d0fccfb9a5e8 477 Contents-linux-armhf.gz
+ 267326f6abddc0bbcb0a7e937b5f86aa 3027 Contents-linux-armel
+ fba92346613efaea94b3d0fccfb9a5e8 477 Contents-linux-armel.gz
+ 267326f6abddc0bbcb0a7e937b5f86aa 3027 Contents-darwin-amd64
+ fba92346613efaea94b3d0fccfb9a5e8 477 Contents-darwin-amd64.gz
 SHA1:
  4402c6046cfa9dc12800b593ed0dcf49a2887b19 1007 cores/binary-windows-i386/Packages
  f7e7beac09094e2760f2bdfb0faae63898496212 577 cores/binary-windows-i386/Packages.gz
@@ -410,29 +410,29 @@ SHA1:
  da39a3ee5e6b4b0d3255bfef95601890afd80709 0 libraries/source/Sources
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 libraries/source/Sources.gz
  771cab2ad284daf949fbb82f2b01764fdf7eace2 170 libraries/source/Release
- acf4078a29d09d64ca1bfc75b9a86877cd0f8504 507 repos/binary-windows-i386/Packages
- 9b1ce17216f78c46479e35286c5ff90c288af464 370 repos/binary-windows-i386/Packages.gz
+ dfa36e44e7ad0f5fc2a1b60e2a7cf6e119254a25 1254 repos/binary-windows-i386/Packages
+ 2a23c85014bc0575ad9d2b5f8fb9a538035af2d8 674 repos/binary-windows-i386/Packages.gz
  387830430e6b0e75cc186b95de1e4ccfa0daf8b0 172 repos/binary-windows-i386/Release
- acf4078a29d09d64ca1bfc75b9a86877cd0f8504 507 repos/binary-windows-amd64/Packages
- 9b1ce17216f78c46479e35286c5ff90c288af464 370 repos/binary-windows-amd64/Packages.gz
+ dfa36e44e7ad0f5fc2a1b60e2a7cf6e119254a25 1254 repos/binary-windows-amd64/Packages
+ 2a23c85014bc0575ad9d2b5f8fb9a538035af2d8 674 repos/binary-windows-amd64/Packages.gz
  ee0d7f59d05760b913c13e7d996eeab6de5a5b8c 173 repos/binary-windows-amd64/Release
- acf4078a29d09d64ca1bfc75b9a86877cd0f8504 507 repos/binary-linux-amd64/Packages
- 9b1ce17216f78c46479e35286c5ff90c288af464 370 repos/binary-linux-amd64/Packages.gz
+ dfa36e44e7ad0f5fc2a1b60e2a7cf6e119254a25 1254 repos/binary-linux-amd64/Packages
+ 2a23c85014bc0575ad9d2b5f8fb9a538035af2d8 674 repos/binary-linux-amd64/Packages.gz
  17e42747ad96f058cfa83f8f1b4b84ac7f38c4a3 171 repos/binary-linux-amd64/Release
- acf4078a29d09d64ca1bfc75b9a86877cd0f8504 507 repos/binary-linux-i386/Packages
- 9b1ce17216f78c46479e35286c5ff90c288af464 370 repos/binary-linux-i386/Packages.gz
+ dfa36e44e7ad0f5fc2a1b60e2a7cf6e119254a25 1254 repos/binary-linux-i386/Packages
+ 2a23c85014bc0575ad9d2b5f8fb9a538035af2d8 674 repos/binary-linux-i386/Packages.gz
  1c4c78b4ac3cc66263fc121f644926d192da54b9 170 repos/binary-linux-i386/Release
- acf4078a29d09d64ca1bfc75b9a86877cd0f8504 507 repos/binary-linux-armhf/Packages
- 9b1ce17216f78c46479e35286c5ff90c288af464 370 repos/binary-linux-armhf/Packages.gz
+ dfa36e44e7ad0f5fc2a1b60e2a7cf6e119254a25 1254 repos/binary-linux-armhf/Packages
+ 2a23c85014bc0575ad9d2b5f8fb9a538035af2d8 674 repos/binary-linux-armhf/Packages.gz
  f688bf921c5dbaf58d0e8b2443593e2707fe3c8b 171 repos/binary-linux-armhf/Release
- acf4078a29d09d64ca1bfc75b9a86877cd0f8504 507 repos/binary-linux-armel/Packages
- 9b1ce17216f78c46479e35286c5ff90c288af464 370 repos/binary-linux-armel/Packages.gz
+ dfa36e44e7ad0f5fc2a1b60e2a7cf6e119254a25 1254 repos/binary-linux-armel/Packages
+ 2a23c85014bc0575ad9d2b5f8fb9a538035af2d8 674 repos/binary-linux-armel/Packages.gz
  ddc5a5cb8c1dca9caa7decd7e1e99394c29e1259 171 repos/binary-linux-armel/Release
- acf4078a29d09d64ca1bfc75b9a86877cd0f8504 507 repos/binary-darwin-amd64/Packages
- 9b1ce17216f78c46479e35286c5ff90c288af464 370 repos/binary-darwin-amd64/Packages.gz
+ dfa36e44e7ad0f5fc2a1b60e2a7cf6e119254a25 1254 repos/binary-darwin-amd64/Packages
+ 2a23c85014bc0575ad9d2b5f8fb9a538035af2d8 674 repos/binary-darwin-amd64/Packages.gz
  d778149d5af00e0693891f95160b1785bfb928cd 172 repos/binary-darwin-amd64/Release
- a8bab1f83e6293e23ad2aba33235d09122a6af79 824 repos/source/Sources
- 01d84af38a3be074b09cef7556fb8d432c32bbe8 494 repos/source/Sources.gz
+ a0bcec9830791b67d4fdb1b7bab3e0316517bd54 882 repos/source/Sources
+ 12be9435e751b7e0197465067438a9ad605789d7 505 repos/source/Sources.gz
  c228fd4d90667e60dd50c42159a637afa86a5fe0 166 repos/source/Release
  da39a3ee5e6b4b0d3255bfef95601890afd80709 0 main/binary-windows-i386/Packages
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 main/binary-windows-i386/Packages.gz
@@ -458,20 +458,20 @@ SHA1:
  da39a3ee5e6b4b0d3255bfef95601890afd80709 0 main/source/Sources
  46c6643f07aa7f6bfe7118de926b86defc5087c4 20 main/source/Sources.gz
  f2321d10a996fb10905fef833f1f975f3ec107e3 165 main/source/Release
- e6ef8781859d558acafc1ef658d8e749421295a1 2910 Contents-windows-i386
- 4dc0d2caa25ede308c5b0c33e5173bd2b6e8e64a 457 Contents-windows-i386.gz
- e6ef8781859d558acafc1ef658d8e749421295a1 2910 Contents-windows-amd64
- 4dc0d2caa25ede308c5b0c33e5173bd2b6e8e64a 457 Contents-windows-amd64.gz
- e6ef8781859d558acafc1ef658d8e749421295a1 2910 Contents-linux-amd64
- 4dc0d2caa25ede308c5b0c33e5173bd2b6e8e64a 457 Contents-linux-amd64.gz
- e6ef8781859d558acafc1ef658d8e749421295a1 2910 Contents-linux-i386
- 4dc0d2caa25ede308c5b0c33e5173bd2b6e8e64a 457 Contents-linux-i386.gz
- e6ef8781859d558acafc1ef658d8e749421295a1 2910 Contents-linux-armhf
- 4dc0d2caa25ede308c5b0c33e5173bd2b6e8e64a 457 Contents-linux-armhf.gz
- e6ef8781859d558acafc1ef658d8e749421295a1 2910 Contents-linux-armel
- 4dc0d2caa25ede308c5b0c33e5173bd2b6e8e64a 457 Contents-linux-armel.gz
- e6ef8781859d558acafc1ef658d8e749421295a1 2910 Contents-darwin-amd64
- 4dc0d2caa25ede308c5b0c33e5173bd2b6e8e64a 457 Contents-darwin-amd64.gz
+ da57d7ad7ff7a86ade41c7af1f03082825b80057 3027 Contents-windows-i386
+ 2eed9089e382ae97a7e9fb9fe0ca3e4702562ce6 477 Contents-windows-i386.gz
+ da57d7ad7ff7a86ade41c7af1f03082825b80057 3027 Contents-windows-amd64
+ 2eed9089e382ae97a7e9fb9fe0ca3e4702562ce6 477 Contents-windows-amd64.gz
+ da57d7ad7ff7a86ade41c7af1f03082825b80057 3027 Contents-linux-amd64
+ 2eed9089e382ae97a7e9fb9fe0ca3e4702562ce6 477 Contents-linux-amd64.gz
+ da57d7ad7ff7a86ade41c7af1f03082825b80057 3027 Contents-linux-i386
+ 2eed9089e382ae97a7e9fb9fe0ca3e4702562ce6 477 Contents-linux-i386.gz
+ da57d7ad7ff7a86ade41c7af1f03082825b80057 3027 Contents-linux-armhf
+ 2eed9089e382ae97a7e9fb9fe0ca3e4702562ce6 477 Contents-linux-armhf.gz
+ da57d7ad7ff7a86ade41c7af1f03082825b80057 3027 Contents-linux-armel
+ 2eed9089e382ae97a7e9fb9fe0ca3e4702562ce6 477 Contents-linux-armel.gz
+ da57d7ad7ff7a86ade41c7af1f03082825b80057 3027 Contents-darwin-amd64
+ 2eed9089e382ae97a7e9fb9fe0ca3e4702562ce6 477 Contents-darwin-amd64.gz
 SHA256:
  5639964fe8a82ec92f836f7635b5da9e353c9a9ec0e4f6ceaf57c24b56a41b99 1007 cores/binary-windows-i386/Packages
  e6726718bc5d0549cb871173235560a02cdb303cd48653c965fe1b7a834fe8a3 577 cores/binary-windows-i386/Packages.gz
@@ -641,29 +641,29 @@ SHA256:
  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 libraries/source/Sources
  59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 libraries/source/Sources.gz
  46fdb88c56c7320889a28de980a9fda078c393ec7dc335207778cf9635e7fafc 170 libraries/source/Release
- ace9a9c1386a0396ae41737aadccf7b5b6261f2fa45fb211aadb8631de965b4f 507 repos/binary-windows-i386/Packages
- 95a3552da94342311f3c5de7c035ecc2830f4dbec3df9227358ef50d0d0299da 370 repos/binary-windows-i386/Packages.gz
+ 4b9c52a743ba8b160cd7eba29d1ef7ece1dd5ba167cd25d9015eaeffb51d1431 1254 repos/binary-windows-i386/Packages
+ 0df95f14a5302b38d0aeba0e9a5f33f94c1c7c842aaa423582a26c99396970c2 674 repos/binary-windows-i386/Packages.gz
  3419a2b8eab0be4da915fd3191b8a300a4aaf4f6fc57f6ac233c5b39f4faabbb 172 repos/binary-windows-i386/Release
- ace9a9c1386a0396ae41737aadccf7b5b6261f2fa45fb211aadb8631de965b4f 507 repos/binary-windows-amd64/Packages
- 95a3552da94342311f3c5de7c035ecc2830f4dbec3df9227358ef50d0d0299da 370 repos/binary-windows-amd64/Packages.gz
+ 4b9c52a743ba8b160cd7eba29d1ef7ece1dd5ba167cd25d9015eaeffb51d1431 1254 repos/binary-windows-amd64/Packages
+ 0df95f14a5302b38d0aeba0e9a5f33f94c1c7c842aaa423582a26c99396970c2 674 repos/binary-windows-amd64/Packages.gz
  000afe3b16d8a89d2982beae707442ca56910f9329e88200be32e3d792d4275d 173 repos/binary-windows-amd64/Release
- ace9a9c1386a0396ae41737aadccf7b5b6261f2fa45fb211aadb8631de965b4f 507 repos/binary-linux-amd64/Packages
- 95a3552da94342311f3c5de7c035ecc2830f4dbec3df9227358ef50d0d0299da 370 repos/binary-linux-amd64/Packages.gz
+ 4b9c52a743ba8b160cd7eba29d1ef7ece1dd5ba167cd25d9015eaeffb51d1431 1254 repos/binary-linux-amd64/Packages
+ 0df95f14a5302b38d0aeba0e9a5f33f94c1c7c842aaa423582a26c99396970c2 674 repos/binary-linux-amd64/Packages.gz
  369dc0d20302dc3150c80c01dccf884a0d85ede97c13b5e75ac14907a76c3f6e 171 repos/binary-linux-amd64/Release
- ace9a9c1386a0396ae41737aadccf7b5b6261f2fa45fb211aadb8631de965b4f 507 repos/binary-linux-i386/Packages
- 95a3552da94342311f3c5de7c035ecc2830f4dbec3df9227358ef50d0d0299da 370 repos/binary-linux-i386/Packages.gz
+ 4b9c52a743ba8b160cd7eba29d1ef7ece1dd5ba167cd25d9015eaeffb51d1431 1254 repos/binary-linux-i386/Packages
+ 0df95f14a5302b38d0aeba0e9a5f33f94c1c7c842aaa423582a26c99396970c2 674 repos/binary-linux-i386/Packages.gz
  a6a4dd3ade42cc7ba1b32dee87691cf9999f517a48b626c21885866a44ba5a9e 170 repos/binary-linux-i386/Release
- ace9a9c1386a0396ae41737aadccf7b5b6261f2fa45fb211aadb8631de965b4f 507 repos/binary-linux-armhf/Packages
- 95a3552da94342311f3c5de7c035ecc2830f4dbec3df9227358ef50d0d0299da 370 repos/binary-linux-armhf/Packages.gz
+ 4b9c52a743ba8b160cd7eba29d1ef7ece1dd5ba167cd25d9015eaeffb51d1431 1254 repos/binary-linux-armhf/Packages
+ 0df95f14a5302b38d0aeba0e9a5f33f94c1c7c842aaa423582a26c99396970c2 674 repos/binary-linux-armhf/Packages.gz
  535121de852fa8463d2b9d87fd4026458b1a77ed5865f35ed5b9a3de432d564b 171 repos/binary-linux-armhf/Release
- ace9a9c1386a0396ae41737aadccf7b5b6261f2fa45fb211aadb8631de965b4f 507 repos/binary-linux-armel/Packages
- 95a3552da94342311f3c5de7c035ecc2830f4dbec3df9227358ef50d0d0299da 370 repos/binary-linux-armel/Packages.gz
+ 4b9c52a743ba8b160cd7eba29d1ef7ece1dd5ba167cd25d9015eaeffb51d1431 1254 repos/binary-linux-armel/Packages
+ 0df95f14a5302b38d0aeba0e9a5f33f94c1c7c842aaa423582a26c99396970c2 674 repos/binary-linux-armel/Packages.gz
  dbf9053a265680df0ceba7608d3835d938d18fb82f00615e40285a71ccfe04df 171 repos/binary-linux-armel/Release
- ace9a9c1386a0396ae41737aadccf7b5b6261f2fa45fb211aadb8631de965b4f 507 repos/binary-darwin-amd64/Packages
- 95a3552da94342311f3c5de7c035ecc2830f4dbec3df9227358ef50d0d0299da 370 repos/binary-darwin-amd64/Packages.gz
+ 4b9c52a743ba8b160cd7eba29d1ef7ece1dd5ba167cd25d9015eaeffb51d1431 1254 repos/binary-darwin-amd64/Packages
+ 0df95f14a5302b38d0aeba0e9a5f33f94c1c7c842aaa423582a26c99396970c2 674 repos/binary-darwin-amd64/Packages.gz
  1f53995e24d50931c6fcc9e25aef0ecf1f17c9a88209493d9eabd1e449c0998c 172 repos/binary-darwin-amd64/Release
- db47f2586b85c983e062443b31aa876c45bffb98329ae475d2048f413f1e935f 824 repos/source/Sources
- 3383b2b7faddad945b72cb8b83e976262f536af6e2e9b2b187cec92f30e59644 494 repos/source/Sources.gz
+ 580f265a53a32654895b11f762f16423e6781f169f3b2299a9c3ad3205a10e64 882 repos/source/Sources
+ 37b478f6b21a080570d9df0d656092448c7a443abc8a7001b2c4b413be80b0f3 505 repos/source/Sources.gz
  2e98590986c45fe91baae88f7e8dd298a44de3131dc2f2efbaed91b91030fdb5 166 repos/source/Release
  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 main/binary-windows-i386/Packages
  59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 main/binary-windows-i386/Packages.gz
@@ -689,23 +689,23 @@ SHA256:
  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 0 main/source/Sources
  59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2 20 main/source/Sources.gz
  6fdefe137bdb38740a07d2cbe1befb8cad328b9d0692545da751277d85283f37 165 main/source/Release
- 7a8f44cde3fe218dd4441fed1d09f78812837e09eb314f6378c85e78c931067d 2910 Contents-windows-i386
- 020752c0f1fccb13bb6e214d0b182694eb4c2afe6ffbc8c2589fc9742afbd442 457 Contents-windows-i386.gz
- 7a8f44cde3fe218dd4441fed1d09f78812837e09eb314f6378c85e78c931067d 2910 Contents-windows-amd64
- 020752c0f1fccb13bb6e214d0b182694eb4c2afe6ffbc8c2589fc9742afbd442 457 Contents-windows-amd64.gz
- 7a8f44cde3fe218dd4441fed1d09f78812837e09eb314f6378c85e78c931067d 2910 Contents-linux-amd64
- 020752c0f1fccb13bb6e214d0b182694eb4c2afe6ffbc8c2589fc9742afbd442 457 Contents-linux-amd64.gz
- 7a8f44cde3fe218dd4441fed1d09f78812837e09eb314f6378c85e78c931067d 2910 Contents-linux-i386
- 020752c0f1fccb13bb6e214d0b182694eb4c2afe6ffbc8c2589fc9742afbd442 457 Contents-linux-i386.gz
- 7a8f44cde3fe218dd4441fed1d09f78812837e09eb314f6378c85e78c931067d 2910 Contents-linux-armhf
- 020752c0f1fccb13bb6e214d0b182694eb4c2afe6ffbc8c2589fc9742afbd442 457 Contents-linux-armhf.gz
- 7a8f44cde3fe218dd4441fed1d09f78812837e09eb314f6378c85e78c931067d 2910 Contents-linux-armel
- 020752c0f1fccb13bb6e214d0b182694eb4c2afe6ffbc8c2589fc9742afbd442 457 Contents-linux-armel.gz
- 7a8f44cde3fe218dd4441fed1d09f78812837e09eb314f6378c85e78c931067d 2910 Contents-darwin-amd64
- 020752c0f1fccb13bb6e214d0b182694eb4c2afe6ffbc8c2589fc9742afbd442 457 Contents-darwin-amd64.gz
+ 1a81337b91d88c2d0f0b69d67c1c81c38a306a7299d7e4311f9c63de76bf9d6f 3027 Contents-windows-i386
+ 66d4950f00e6d8750f417626b0ea49c8f36b256a4f2c9404b58aee3f24277838 477 Contents-windows-i386.gz
+ 1a81337b91d88c2d0f0b69d67c1c81c38a306a7299d7e4311f9c63de76bf9d6f 3027 Contents-windows-amd64
+ 66d4950f00e6d8750f417626b0ea49c8f36b256a4f2c9404b58aee3f24277838 477 Contents-windows-amd64.gz
+ 1a81337b91d88c2d0f0b69d67c1c81c38a306a7299d7e4311f9c63de76bf9d6f 3027 Contents-linux-amd64
+ 66d4950f00e6d8750f417626b0ea49c8f36b256a4f2c9404b58aee3f24277838 477 Contents-linux-amd64.gz
+ 1a81337b91d88c2d0f0b69d67c1c81c38a306a7299d7e4311f9c63de76bf9d6f 3027 Contents-linux-i386
+ 66d4950f00e6d8750f417626b0ea49c8f36b256a4f2c9404b58aee3f24277838 477 Contents-linux-i386.gz
+ 1a81337b91d88c2d0f0b69d67c1c81c38a306a7299d7e4311f9c63de76bf9d6f 3027 Contents-linux-armhf
+ 66d4950f00e6d8750f417626b0ea49c8f36b256a4f2c9404b58aee3f24277838 477 Contents-linux-armhf.gz
+ 1a81337b91d88c2d0f0b69d67c1c81c38a306a7299d7e4311f9c63de76bf9d6f 3027 Contents-linux-armel
+ 66d4950f00e6d8750f417626b0ea49c8f36b256a4f2c9404b58aee3f24277838 477 Contents-linux-armel.gz
+ 1a81337b91d88c2d0f0b69d67c1c81c38a306a7299d7e4311f9c63de76bf9d6f 3027 Contents-darwin-amd64
+ 66d4950f00e6d8750f417626b0ea49c8f36b256a4f2c9404b58aee3f24277838 477 Contents-darwin-amd64.gz
 -----BEGIN PGP SIGNATURE-----
 
-iF4EAREIAAYFAlrkxdkACgkQg4ak0MqfAKEX2AD/RSdzKSt/3Z1S6i0ZskgNrEk4
-wj+ebKQjD0ktt5C50l8A/00PbNyrNJpjIrMy8HUp3mCYTmVi90BVwucwT4Y8sAun
-=Ta7q
+iF4EAREIAAYFAlr4H40ACgkQg4ak0MqfAKE/QQEAkuawSAqd6dRC5ptSvaiu5ire
+QPv9h0Mcscm149lXb88BALhqpFe5kCWqGhebwE3Cdcw25nUM7Gsq3HVdncM5ggWA
+=xehO
 -----END PGP SIGNATURE-----
