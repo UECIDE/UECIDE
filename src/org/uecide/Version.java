@@ -57,6 +57,8 @@ public class Version implements Comparable, Cloneable {
                 data = data.replaceAll("_", ".");
                 data = data.replaceAll("pl", ".");
                 data = data.replaceAll("rev", ".");
+                data = data.replaceAll("(\\d+)p(\\d+)", "$1.$2");
+                data = data.replaceAll("(\\d+)r(\\d+)", "$1.$2");
 
                 // Now let's split it into bits
                 String[] parts = data.split("\\.");

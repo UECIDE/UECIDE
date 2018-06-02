@@ -986,6 +986,56 @@ public class PluginManager implements PropertyChangeListener
         return out.toArray(new Package[0]);
     }
 
+    public int addGroupsToTree(DefaultMutableTreeNode root) {
+        int fullNodeCount = 0;
+        String searchCriteria = searchBox.getText();
+        String familyCriteria = ((keyval)(familySelector.getSelectedItem())).key;
+
+        Package[] packages = apt.getPackages();
+
+        if (!searchCriteria.equals("")) {
+            packages = searchPackages(packages, searchCriteria);
+        }
+
+        if (!familyCriteria.equals("all")) {
+            packages = filterPackagesByFamily(packages, familyCriteria);
+        }
+
+        Arrays.sort(packages);
+
+        String[] groups = getKeyValues(packages, "Group");
+
+        for (String group : groups) {
+            DefaultMutableTreeNode groupNode = new DefaultMutableTreeNode(group);
+            Package[] gPacks = filterPackages(packages, "Group", group);
+            DefaultMutableTreeNode gNode = new DefaultMutableTreeNode(group);
+            String[] subGroups = getKeyValues(gPacks, "Subgroup");
+            for (String subGroup : subGroups) {
+                Package[] sgPacks = filterPackages(gPacks, "Subgroup", subGroup);
+                DefaultMutableTreeNode sgNode = new DefaultMutableTreeNode(subGroup);
+                String[] subSubGroups = getKeyValues(sgPacks, "Subsubgroup");
+                for (String subSubGroup : subSubGroups) {
+                    Package[] ssgPacks = filterPackages(sgPacks, "Subsubgroup", subSubGroup);
+                    DefaultMutableTreeNode ssgNode = new DefaultMutableTreeNode(subSubGroup);
+                    fullNodeCount += addPackagesToNode(ssgPacks, ssgNode);
+                    sgNode.add(ssgNode);
+                }
+
+                Package[] ssgNullPacks = filterPackages(sgPacks, "Subsubgroup", null);
+                fullNodeCount += addPackagesToNode(ssgNullPacks, sgNode);
+                if (sgNode.getChildCount() > 0) {
+                    gNode.add(sgNode);
+                }
+            }
+            Package[] sgNullPacks = filterPackages(gPacks, "Subgroup", null);
+            fullNodeCount += addPackagesToNode(sgNullPacks, gNode);
+            if (gNode.getChildCount() > 0) {
+                root.add(gNode);
+            }
+        }
+        return fullNodeCount;
+    }
+
     public int addSectionToTree(DefaultMutableTreeNode node, String section)  {
         int fullNodeCount = 0;
         String searchCriteria = searchBox.getText();
@@ -1044,39 +1094,7 @@ public class PluginManager implements PropertyChangeListener
 
         treeRoot.removeAllChildren();
 
-
-        int fullNodeCount = 0;
-        lastAdded = null;
-
-        PropertyFile sections;
-
-        File sf = Base.getDataFile("apt/db/sections.db");
-        if (sf.exists()) {
-            sections = new PropertyFile(Base.getDataFile("apt/db/sections.db"));
-        } else {
-            sections = new PropertyFile();
-        }
-
-        // Add any missing entries. This whole file could do with being moved to a plugin. That way
-        // it can be updated at will in future without having to add new entries to the code.
-        if (sections.get("plugins") == null) { sections.set("plugins", "Plugins"); }
-        if (sections.get("boards") == null) { sections.set("boards", "Boards"); }
-        if (sections.get("cores") == null) { sections.set("cores", "Cores"); }
-        if (sections.get("compilers") == null) { sections.set("compilers", "Compilers"); }
-        if (sections.get("programmers") == null) { sections.set("programmers", "Programmers"); }
-        if (sections.get("tools") == null) { sections.set("tools", "Tools"); }
-        if (sections.get("extra") == null) { sections.set("extra", "System"); }
-        if (sections.get("themes") == null) { sections.set("themes", "Themes"); }
-        if (sections.get("libraries") == null) { sections.set("libraries", "Libraries"); }
-        if (sections.get("repos") == null) { sections.set("repos", "Repositories"); }
-
-        for (String key : sections.keySet()) {
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(sections.get(key));
-            fullNodeCount += addSectionToTree(node, key);
-            if (node.getChildCount() > 0) {
-                treeRoot.add(node);
-            }
-        }
+        int fullNodeCount = addGroupsToTree(treeRoot);
 
         TreeSet<Package> localPkg = new TreeSet<Package>();
 
@@ -1095,6 +1113,7 @@ public class PluginManager implements PropertyChangeListener
             treeRoot.add(loc);
         }
 
+
         treeModel.nodeStructureChanged(treeRoot);
 
         if (fullNodeCount < 5) {
@@ -1110,6 +1129,7 @@ public class PluginManager implements PropertyChangeListener
                 updateDescription(lastAdded);
             }
         }
+
     }
 
     public void propertyChange(PropertyChangeEvent e) {
