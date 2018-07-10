@@ -1171,10 +1171,10 @@ public class Sketch {
                     String file = leftBits[1];
                     String body = leftBits[2];
 
+
                     for (int i = 3; i < leftBits.length; i++) {
                         body += " " + leftBits[i];
                     }
-
 
                     String type = "";
                     String line = "";
@@ -1223,9 +1223,21 @@ public class Sketch {
 
                             String rt = "";
                             for (String rtb : rtBits) {
-                                if (!rtb.equals(name)) {
-                                    rt += rtb + " ";
+                                if (rtb.equals(name)) {
+                                    continue;
                                 }
+
+                                if (rtb.equals("*" + name)) {
+                                    rt += "* ";
+                                    continue;
+                                }
+
+                                if (rtb.equals("&" + name)) {
+                                    rt += "& ";
+                                    continue;
+                                }
+
+                                rt += rtb + " ";
                             }
 
                             FunctionBookmark prototypeBm = new FunctionBookmark(f, lineNo, name, rt.trim(), signature);
