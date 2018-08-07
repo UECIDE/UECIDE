@@ -1587,6 +1587,8 @@ public class Sketch {
 //            //reloadAllFiles();
 //        }
 
+        checkForSettings();
+
         terminateExecution = false;
 
         if(getBoard() == null) {
@@ -1866,23 +1868,67 @@ public class Sketch {
     public void checkForSettings() {
         File mainFile = getMainFile();
 
-        Pattern p = Pattern.compile("^#pragma\\s+parameter\\s+([^\\s]+)\\s*=\\s*(.*)$");
+        Pattern param = Pattern.compile("^#pragma\\s+parameter\\s+([^\\s]+)\\s*=\\s*(.*)$");
+        Pattern option = Pattern.compile("^#pragma\\s+option\\s+([^\\s]+)\\s*=\\s*(.*)$");
+        Pattern pcompiler = Pattern.compile("^#pragma\\s+compiler\\s+(.*)$");
+        Pattern pcore = Pattern.compile("^#pragma\\s+core\\s+(.*)$");
+        Pattern pboard = Pattern.compile("^#pragma\\s+board\\s+(.*)$");
 
         String[] data = getFileContent(mainFile).split("\n");
 
+
+        for(String line : data) {
+            Matcher m = pcompiler.matcher(line);
+            if (m.find()) {
+                setCompiler(m.group(1));
+            }
+            m = pcore.matcher(line);
+            if (m.find()) {
+                setCore(m.group(1));
+            }
+            m = pboard.matcher(line);
+            if (m.find()) {
+                setBoard(m.group(1));
+            }
+        }
+
         for(String line : data) {
             line = line.trim();
-            Matcher m = p.matcher(line);
+            Matcher m = param.matcher(line);
 
             if(m.find()) {
                 String key = m.group(1);
                 String value = m.group(2);
 
-                if(key.equals("board")) {
-                    setBoard(value);
+                ctx.set(key, value);
+            }
+
+        }
+
+        boolean updateMenu = false;
+        for(String line : data) {
+            line = line.trim();
+            Matcher m = option.matcher(line);
+
+            if(m.find()) {
+                String key = m.group(1);
+                String value = m.group(2);
+
+                String oldOption = getOption(key);
+                if (!oldOption.equals(value)) {
+                    setOption(key, value);
+                    updateMenu = true;
                 }
             }
+
         }
+
+        if (updateMenu) {
+            if (editor != null) {
+                editor.updateOptionsMenu();
+            }
+        }
+
     }
 
     public File getCode(int i) {
@@ -2114,6 +2160,8 @@ public class Sketch {
         
         long startTime = System.currentTimeMillis();
 
+//        ctx.clearSettings();
+//        checkForSettings();
         PropertyFile props = ctx.getMerged();
 
         ctx.set("cache.root", getCacheFolder().getAbsolutePath());

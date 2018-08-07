@@ -3418,6 +3418,10 @@ public class Editor extends JFrame {
 
     }
 
+    public synchronized void updateOptionsMenu() {
+        populateOptionsMenu(optionsMenu);
+    }
+
     public synchronized void populateOptionsMenu(JMenu menu) {
         TreeMap<String, String> opts = loadedSketch.getOptionGroups();
 
@@ -3452,6 +3456,27 @@ public class Editor extends JFrame {
             Base.setFont(submenu, "menu.entry");
             menu.add(submenu);
         }
+
+        JMenuItem copyOptions = new JMenuItem(Base.i18n.string("menu.options.copy"));
+        copyOptions.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                StringBuilder sb = new StringBuilder();
+
+                for (String opt : opts.keySet()) {
+                    sb.append("#pragma option ");
+                    sb.append(opt);
+                    sb.append(" = ");
+                    sb.append(loadedSketch.getOption(opt));
+                    sb.append("\n");
+                }
+                StringSelection sel = new StringSelection(sb.toString());
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(sel, sel);
+                message(Base.i18n.string("menu.options.copy.done"));
+            }
+        });
+        menu.add(copyOptions);
     }
 
     static class JSerialMenuItem extends JRadioButtonMenuItem {

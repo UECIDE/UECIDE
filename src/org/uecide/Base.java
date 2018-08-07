@@ -236,6 +236,7 @@ public class Base {
 
     static public void cacheSystemFilesFromList(File[] list) {
         for (File f : list) {
+            Debug.message("Caching " + f);
             systemFileCache.add(f);
         }
     }
@@ -247,8 +248,8 @@ public class Base {
         cacheSystemFilesFromList(getToolsFolders());
         cacheSystemFilesFromList(getProgrammersFolders());
         cacheSystemFilesFromList(getBoardsFolders());
-        cacheSystemFilesFromList(getThemesFolders());
-        cacheSystemFilesFromList(getPluginsFolders());
+//        cacheSystemFilesFromList(getThemesFolders());
+//        cacheSystemFilesFromList(getPluginsFolders());
         cacheSystemFilesFromList(getCompilersFolders());
 // I'd love to cache the library tree and parse it, but that would make
 // categories suck big time.
@@ -1151,8 +1152,8 @@ public class Base {
 
     public static void loadCompilers() {
         compilers.clear();
-        compilerLoaderThread = new Thread() {
-            public void run() {
+//        compilerLoaderThread = new Thread() {
+//            public void run() {
                 ArrayList<File> compilerFiles = systemFileCache.getFilesByName("compiler.txt");
                 for (File cfile : compilerFiles) {
                     if(cfile.exists()) {
@@ -1166,15 +1167,15 @@ public class Base {
                         }
                     }
                 }
-            }
-        };
-        compilerLoaderThread.start();
+//            }
+//        };
+//        compilerLoaderThread.start();
     }
 
     public static void loadCores() {
         cores.clear();
-        coreLoaderThread = new Thread() {
-            public void run() {
+//        coreLoaderThread = new Thread() {
+//            public void run() {
 
                 ArrayList<File> coreFiles = systemFileCache.getFilesByName("core.txt");
                 for (File cfile : coreFiles) {
@@ -1189,15 +1190,15 @@ public class Base {
                         }
                     }
                 }
-            }
-        };
-        coreLoaderThread.start();
+//            }
+//        };
+//        coreLoaderThread.start();
     }
 
     public static void loadBoards() {
         boards.clear();
-        boardLoaderThread = new Thread() {
-            public void run() {
+//        boardLoaderThread = new Thread() {
+//            public void run() {
 
                 ArrayList<File> boardFiles = systemFileCache.getFilesByName("board.txt");
                 for (File bfile : boardFiles) {
@@ -1212,15 +1213,15 @@ public class Base {
                         }
                     }
                 }
-            }
-        };
-        boardLoaderThread.start();
+//            }
+//        };
+//        boardLoaderThread.start();
     }
 
     public static void loadProgrammers() {
         programmers.clear();
-        programmerLoaderThread = new Thread() {
-            public void run() {
+//        programmerLoaderThread = new Thread() {
+//            public void run() {
 
                 ArrayList<File> programmerFiles = systemFileCache.getFilesByName("programmer.txt");
                 for (File pfile : programmerFiles) {
@@ -1235,15 +1236,15 @@ public class Base {
                         }
                     }
                 }
-            }
-        };
-        programmerLoaderThread.start();
+//            }
+//        };
+//        programmerLoaderThread.start();
     }
 
     public static void loadTools() {
         tools.clear();
-        toolLoaderThread = new Thread() {
-            public void run() {
+//        toolLoaderThread = new Thread() {
+//            public void run() {
 
                 ArrayList<File> toolFiles = systemFileCache.getFilesByName("tool.txt");
                 for (File tfile : toolFiles) {
@@ -1258,9 +1259,9 @@ public class Base {
                         }
                     }
                 }
-            }
-        };
-        toolLoaderThread.start();
+//            }
+//        };
+//        toolLoaderThread.start();
     }
 
 
@@ -1345,12 +1346,12 @@ public class Base {
 
     /*! Load all the libraries in the system */
     public static void gatherLibraries() {
-        libraryLoaderThread = new Thread() {
-            public void run() {
+//        libraryLoaderThread = new Thread() {
+//            public void run() {
                 Library.loadLibraries();
-            }
-        };
-        libraryLoaderThread.start();
+//            }
+//        };
+//        libraryLoaderThread.start();
     }
 
     public static Platform getPlatform() {
@@ -3027,92 +3028,64 @@ public class Base {
 
         // If it deleted then return
         if (!file.exists()) return;
-
-        // Otherwise let's try and rename it.
-
-        try {
-            String name = file.getName();
-            File folder = file.getParentFile();
-            File dest = new File(folder, name + ".delete");
-            file.renameTo(dest);
-            if (!file.exists() && dest.exists()) {
-                dest.deleteOnExit();
-                return;
-            }
-        } catch (Exception ee) {
-        }
-       
-        error("Error deleting " + file);
     }
 
     public static void waitForAssetLoading() {
-        while (coreLoaderThread != null) {
-            try {
-                coreLoaderThread.join();
-                coreLoaderThread = null;
-            } catch (Exception e) {
-            }
-        }
-
-        while (compilerLoaderThread != null) {
-            try {
-                compilerLoaderThread.join();
-                compilerLoaderThread = null;
-            } catch (Exception e) {
-            }
-        }
-
-        while (boardLoaderThread != null) {
-            try {
-                boardLoaderThread.join();
-                boardLoaderThread = null;
-            } catch (Exception e) {
-            }
-        }
-       
-        while (programmerLoaderThread != null) {
-            try {
-                programmerLoaderThread.join();
-                programmerLoaderThread = null;
-            } catch (Exception e) {
-            }
-        }
-       
-        while (toolLoaderThread != null) {
-            try {
-                toolLoaderThread.join();
-                toolLoaderThread = null;
-            } catch (Exception e) {
-            }
-        }
-       
-        while (libraryLoaderThread != null) {
-            try {
-                libraryLoaderThread.join();
-                libraryLoaderThread = null;
-            } catch (Exception e) {
-            }
-        }
-
-        while (cleanupThread != null) {
-            try {
-                cleanupThread.join();
-                cleanupThread = null;
-            } catch (Exception e) {
-            }
-        }
-    }
-
-    public static void cleanupSystem() {
-        cleanupThread = new Thread() {
-            public void run() {
-                ArrayList<File> flist = systemFileCache.getFilesByExtension("delete");
-                for (File f : flist) {
-                    f.delete();
-                }
-            }
-        };
-        cleanupThread.start();
+//        while (coreLoaderThread != null) {
+//            try {
+//                coreLoaderThread.join();
+//                coreLoaderThread = null;
+//            } catch (Exception e) {
+//            }
+//        }
+//
+//        while (compilerLoaderThread != null) {
+//            try {
+//                compilerLoaderThread.join();
+//                compilerLoaderThread = null;
+//            } catch (Exception e) {
+//            }
+//        }
+//
+//        while (boardLoaderThread != null) {
+//            try {
+//                boardLoaderThread.join();
+//                boardLoaderThread = null;
+//            } catch (Exception e) {
+//            }
+//        }
+//       
+//        while (programmerLoaderThread != null) {
+//            try {
+//                programmerLoaderThread.join();
+//                programmerLoaderThread = null;
+//            } catch (Exception e) {
+//            }
+//        }
+//       
+//        while (toolLoaderThread != null) {
+//            try {
+//                toolLoaderThread.join();
+//                toolLoaderThread = null;
+//            } catch (Exception e) {
+//            }
+//        }
+//       
+//        while (libraryLoaderThread != null) {
+//            try {
+//                libraryLoaderThread.join();
+//                libraryLoaderThread = null;
+//            } catch (Exception e) {
+//            }
+//        }
+//
+//        while (cleanupThread != null) {
+//            try {
+//                cleanupThread.join();
+//                cleanupThread = null;
+//            } catch (Exception e) {
+//            }
+//        }
     }
 
     public static String getFileExtension(File f) {
@@ -3131,21 +3104,42 @@ public class Base {
     }
 
     public static void loadAssets() {
+        Debug.message("Loading assets");
+        Debug.message("Caching system files");
         cacheSystemFiles();
 
+        Debug.message("Loading cores");
         loadCores();
-        waitForAssetLoading();
+//        waitForAssetLoading();
 
+        Debug.message("Loading compilers");
         loadCompilers();
+
+        Debug.message("Loading boards");
         loadBoards();
+
+        Debug.message("Loading programmers");
         loadProgrammers();
+
+        Debug.message("Loading tools");
         loadTools();
+
+        Debug.message("Loading plugins");
         loadPlugins();
+
+        Debug.message("Loading icon sets");
         loadIconSets();
+
+        Debug.message("Loading themes");
         loadThemes();
+
+
+        Debug.message("Loading libraries");
         gatherLibraries();
-        cleanupSystem();
-        waitForAssetLoading();
+
+//        waitForAssetLoading();
+
+        Debug.message("Loading assets done");
     }
 
     public static boolean isHeadless() {

@@ -174,6 +174,10 @@ public class Context {
 
     // Settings can be manipulated with these:
 
+    public void clearSettings() {
+        settings = new PropertyFile();
+    }
+
     public void set(String k, String v) {
         settings.set(k, v);
     }

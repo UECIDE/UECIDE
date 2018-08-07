@@ -184,7 +184,8 @@ public class Debug {
         Thread t = Thread.currentThread();
         StackTraceElement[] st = t.getStackTrace();
         StackTraceElement caller = st[2];
-        String tag = caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): ";
+
+        String tag = "[" + getCurrentLocalDateTimeStamp() + "] " + caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): ";
 
         debugText.append(tag);
 
@@ -213,7 +214,11 @@ public class Debug {
 
             if(!pauseButton.isSelected()) {
                 try {
-                    textArea.setCaretPosition(debugText.length());
+                    if (debugText != null) {
+                        if (debugText.length() > 0) {
+                            textArea.setCaretPosition(debugText.length());
+                        }
+                    }
                 } catch(Exception e) {
                 }
             }
@@ -234,6 +239,10 @@ public class Debug {
 
     public static String getText() {
         return debugText.toString();
+    }
+
+    public static String getCurrentLocalDateTimeStamp() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
     }
 
 }

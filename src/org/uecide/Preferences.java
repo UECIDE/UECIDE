@@ -818,12 +818,38 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return val;
     }
 
+    public static Float getFloat(String key) {
+        String data = get(key);
+        if (data == null || data.equals("")) {
+            return 0.0f;
+        }
+        float val = 0.0f;
+        try {
+            val = Float.parseFloat(data);
+        } catch (Exception e) {
+        }
+        return val;
+    }
+
     public static void set(String key, String value) { Base.preferences.set(key, value); Base.preferences.saveDelay(); }
     public static void setBoolean(String key, Boolean value) { Base.preferences.setBoolean(key, value); Base.preferences.saveDelay(); }
     public static void setColor(String key, Color value) { Base.preferences.setColor(key, value); Base.preferences.saveDelay(); }
     public static void setFile(String key, File value) { Base.preferences.setFile(key, value); Base.preferences.saveDelay(); }
-    public static void setFile(String key, Font value) { Base.preferences.setFont(key, value); Base.preferences.saveDelay(); }
-    public static void setInteger(String key, int value) { Base.preferences.setInteger(key, value); Base.preferences.saveDelay(); }
+
+    public static void setFile(String key, Font value) { 
+        if (Base.preferences != null) {
+            Base.preferences.setFont(key, value); 
+            Base.preferences.saveDelay(); 
+        }
+    }
+
+    public static void setInteger(String key, int value) { 
+        if (Base.preferences != null) {
+            Base.preferences.setInteger(key, value); 
+            Base.preferences.saveDelay(); 
+        }
+    }
+
     public static void setFloat(String key, float value) { Base.preferences.setFloat(key, value); Base.preferences.saveDelay(); }
 
     public static void save() { Base.preferences.save(); }

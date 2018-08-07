@@ -13,12 +13,39 @@ public class FileCache {
 
     public void add(File root) {
         File[] list = root.listFiles();
+        ArrayList<File>dirs = new ArrayList<File>();
+
         if (list == null) return;
         for (File f : list) {
-            files.add(f.getAbsolutePath());
             if (f.isDirectory()) {
-                add(f);
+                dirs.add(f);
+                continue;
             }
+
+            if (f.getName().equals("compiler.txt")) {
+                files.add(f.getAbsolutePath());
+                return;
+            }
+            if (f.getName().equals("core.txt")) {
+                files.add(f.getAbsolutePath());
+                return;
+            }
+            if (f.getName().equals("board.txt")) {
+                files.add(f.getAbsolutePath());
+                return;
+            }
+            if (f.getName().equals("programmer.txt")) {
+                files.add(f.getAbsolutePath());
+                return;
+            }
+            if (f.getName().equals("tool.txt")) {
+                files.add(f.getAbsolutePath());
+                return;
+            }
+
+        }
+        for (File d : dirs) {
+            add(d);
         }
     }
 
