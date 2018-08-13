@@ -1,3 +1,30 @@
+uecide (0.9.5) unstable; urgency=low 
+
+  * Updated source format
+  * Improved pragma handling
+  * Released 0.9.5
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 10 Jul 2018 10:14:40 +0100
+
+uecide (0.9.4) unstable; urgency=low 
+
+  * Released 0.9.3
+  * Fixed prototype return type formatting
+  * Updated version
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 02 Jun 2018 13:53:47 +0100
+
+uecide (0.9.3) unstable; urgency=low 
+
+  * Ordered core file compilation
+  * Ignore class members in tags parsing
+  * Better USB attribute handling
+  * Refined ctags regex
+  * Updated bundled ctags
+  * Improvements to plugin manager tree system
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Thu, 10 May 2018 23:55:27 +0100
+
 uecide (0.9.2) unstable; urgency=low 
 
   * Accelerated boot sequence with multithreading

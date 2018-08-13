@@ -20,18 +20,18 @@ Group: System
 Subgroup: Scriptlets
 
 Package: uecide-families
-Version: 1.0.6
+Version: 1.0.7
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 35
+Installed-Size: 13
 Homepage: http://uecide.org
 Priority: extra
 Section: extra
-Filename: pool/extra/u/uecide-families/uecide-families_1.0.6_all.deb
-Size: 2738
-SHA256: 168d7a5a79929afe7241f8390f8c1d3f3ab99cda9868537f7250d34eb5503da1
-SHA1: 4ddda1c8f2831b6370689af0723f044cd8801c52
-MD5sum: dc93147ad9093d8cac1c2f8c14758cfb
+Filename: pool/extra/u/uecide-families/uecide-families_1.0.7_all.deb
+Size: 2816
+SHA256: 8f9be6b7043b8f746c41121ff56c3403972f16bcc4a8c62cc6b25370398bd054
+SHA1: 98d47d354ee7ccc9ab39b3d28ee87c6f0d48d7a0
+MD5sum: 93495b35b8683d2ee74b738599f7c4e7
 Description: Family grouping control
  Family grouping control
 Family: pic32
