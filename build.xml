@@ -3,6 +3,8 @@
 
     <property name="launch4j.dir" location="launch4j" />
 
+    <taskdef name="jarbundler" classname="com.ultramixer.jarbundler.JarBundler" classpath="antlib/jarbundler-2.3.2.jar" />
+
     <taskdef resource="net/sf/antcontrib/antcontrib.properties">
         <classpath>
             <pathelement location="antlib/ant-contrib.jar"/>
@@ -211,21 +213,27 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
     </target>
   
     <target name="macosx-dmg" depends="build">
-        <mkdir dir="bundle/macosx/UECIDE.app" />
 
-        <copy todir="bundle/macosx/UECIDE.app">
-            <fileset dir="dist/macosx/template.app" includes="*/**"/>
-        </copy>
+        <mkdir dir="bundle/macosx"/>
 
-        <replace file="bundle/macosx/UECIDE.app/Contents/Info.plist" token="{product.cap}" value="UECIDE" />
-        <replace file="bundle/macosx/UECIDE.app/Contents/Info.plist" token="{version}" value="${Version}" />
-
-        <copy file="dist/macosx/icon.icns" tofile="bundle/macosx/UECIDE.app/Contents/Resources/uecide.icns" overwrite="true" />
-        <copy file="dist/macosx/doc.icns" tofile="bundle/macosx/UECIDE.app/Contents/Resources/doc.icns" overwrite="true" />
-
-        <chmod file="bundle/macosx/UECIDE.app/Contents/MacOS/JavaApplicationStub" perm="755" />
-
-        <copy file="uecide.jar" todir="bundle/macosx/UECIDE.app/Contents/Resources/Java" />
+    <jarbundler
+        name="UECIDE"
+        shortname="UECIDE"
+        icon="dist/macosx/icon.icns"
+        stubfile="universalJavaApplicationStub/src/universalJavaApplicationStub"
+        dir="bundle/macosx"
+        jar="uecide.jar"
+        mainclass="org.uecide.Base"
+        jvmversion="1.7+"
+        >
+        <documenttype
+            name="UECIDE Sketch"
+            extensions="ino pde"
+            iconfile="dist/macosx/doc.icns"
+            mimetypes="application/x-uecide"
+            role="editor"
+            ostypes="skch"/>
+    </jarbundler>
 
         <symlink link="bundle/macosx/Applications" resource="/Applications" overwrite="true" />
 
@@ -245,7 +253,7 @@ xdg-icon-resource install --size 128 --novendor /usr/share/icons/uecide.png
             <arg value="bundle/macosx" />
         </exec>
 
-        <delete dir="bundle/macosx" />
+        <!--delete dir="bundle/macosx" /-->
 
     </target>
 

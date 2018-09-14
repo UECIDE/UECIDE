@@ -608,6 +608,14 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
 
 
     public boolean exists() {
+        if (Base.isWindows()) {
+            return true;
+//            ArrayList<String> ports = Serial.getPortListDefault();
+//            if (ports.indexOf(serialPort.getPortName()) >= 0) {
+//                return true;
+//            }
+//            return false;
+        } 
         File f = new File(serialPort.getPortName());
         return f.exists();
     }
