@@ -81,7 +81,9 @@ public class DebFile {
         installFiles(pendingFiles);
 
         // Step four, extract the control information
-        pendingFiles = extractTarGzFile(files.get("control.tar.gz"), db);
+        if (files.get("control.tar.gz") != null) pendingFiles = extractTarGzFile(files.get("control.tar.gz"), db);
+        if (files.get("control.tar.xz") != null) pendingFiles = extractTarXzFile(files.get("control.tar.xz"), db);
+        if (files.get("control.tar.bz2") != null) pendingFiles = extractTarBz2File(files.get("control.tar.bz2"), db);
 
 
         installFiles(pendingFiles);
