@@ -1873,6 +1873,7 @@ public class Sketch {
         Pattern pcompiler = Pattern.compile("^#pragma\\s+compiler\\s+(.*)$");
         Pattern pcore = Pattern.compile("^#pragma\\s+core\\s+(.*)$");
         Pattern pboard = Pattern.compile("^#pragma\\s+board\\s+(.*)$");
+        Pattern pport = Pattern.compile("^#pragma\\s+port\\s+(.*)$");
 
         String[] data = getFileContent(mainFile).split("\n");
 
@@ -1889,6 +1890,10 @@ public class Sketch {
             m = pboard.matcher(line);
             if (m.find()) {
                 setBoard(m.group(1));
+            }
+            m = pport.matcher(line);
+            if (m.find()) {
+                setDevice(m.group(1));
             }
         }
 
