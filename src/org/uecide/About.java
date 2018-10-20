@@ -176,7 +176,7 @@ public class About {
 
         s.append("<html><body>");
 
-        s.append("<h1>" + Base.theme.get("product.cap") + "</h1>");
+        s.append("<h1>UECIDE</h1>");
         s.append("<h4>Version " + Base.systemVersion + "</h4>");
         s.append("<br/>");
         s.append("<h4>Contributors:</h4><ul>");

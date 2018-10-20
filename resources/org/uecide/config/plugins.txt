@@ -1,0 +1,54 @@
+serialterminal.class=org.uecide.plugin.SerialTerminal
+serialterminal.name=Serial Terminal
+serialterminal.description=A proper interactive screen-oriented serial terminal
+serialterminal.enabled=true
+serialterminal.released=true
+
+astyle.class=org.uecide.plugin.AStyle
+astyle.name=AStyle Code Formatter
+astyle.description=Auto-format your code using the AStyle code formatter
+astyle.enabled=true
+astyle.released=true
+
+copyforforum.class=org.uecide.plugin.CopyForForum
+copyforforum.name=Copy for Forum (BBCode)
+copyforforum.description=Copy your code to the clipboard in a format ready to be pasted to a phpBB forum
+copyforforum.enabled=false
+copyforforum.released=true
+
+elfinspector.class=org.uecide.plugin.ElfInspector
+elfinspector.name=ELF Inspector
+elfinspector.description=Examine the contents of ELF files
+elfinspector.enabled=false
+elfinspector.released=false
+
+gitlink.class=org.uecide.plugin.GitLink
+gitlink.name=GIT Link
+gitlink.description=Connect to a GIT repository
+gitlink.enabled=false
+gitlink.released=true
+
+navigator.class=org.uecide.plugin.Navigator
+navigator.name=Graphical Navigator
+navigator.description=Display your whole file as a single graphical panel for navigation
+navigator.enabled=false
+navigator.released=false
+
+snippets.class=org.uecide.plugin.Snippets
+snippets.name=Code Snippets
+snippets.description=Store snippets of code for rapid insertion
+snippets.enabled=false
+snippets.released=true
+
+uploadlasthex.class=org.uecide.plugin.UploadLastHex
+uploadlasthex.name=Upload Last HEX
+uploadlasthex.description=Upload the last compiled HEX file without recompiling
+uploadlasthex.enabled=false
+uploadlasthex.released=true
+
+virtuallcd.class=org.uecide.plugin.VirtualLCD
+virtuallcd.name=Virtual LCD Display
+virtuallcd.description=A Virtual LED display on your computer
+virtuallcd.enabled=false
+virtuallcd.released=true
+

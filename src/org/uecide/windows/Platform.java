@@ -63,16 +63,6 @@ public class Platform extends org.uecide.Platform {
     static final String shellFolders = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
 
     public void setLookAndFeel() {
-        try {
-            // Use the Quaqua L & F on OS X to make JFileChooser less awful
-            String laf = Base.theme.get("window.laf.windows");
-
-            if((laf != null) && (!laf.equals("default"))) {
-                UIManager.setLookAndFeel(laf);
-            }
-        } catch(Exception e) {
-            Base.error(e);
-        }
     }
 
     public void init(Base base) {
@@ -243,8 +233,8 @@ public class Platform extends org.uecide.Platform {
             String localAppDataPath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, shellFolders, "Local AppData");
             String roamingAppDataPath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, shellFolders, "AppData");
 
-            File localDataFolder = new File(localAppDataPath, Base.theme.get("product.cap"));
-            File roamingDataFolder = new File(roamingAppDataPath, Base.theme.get("product.cap"));
+            File localDataFolder = new File(localAppDataPath, "UECIDE");
+            File roamingDataFolder = new File(roamingAppDataPath, "UECIDE");
 
             // We don't want old installations to suddenly lose all their data, so stick with the roaming if it
             // already exists.  A user can delete it or move it if they want.
@@ -266,7 +256,7 @@ public class Platform extends org.uecide.Platform {
         try {
             String personalPath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, shellFolders, "Personal");
 
-            return new File(personalPath, Base.theme.get("product.cap"));
+            return new File(personalPath, "UECIDE");
         } catch(Exception e) {
             Base.error(e);
             return null;

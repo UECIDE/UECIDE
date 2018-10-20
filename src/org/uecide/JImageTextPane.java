@@ -74,10 +74,10 @@ public class JImageTextPane extends JTextPane {
 
         int w = getWidth();
         int h = getHeight();
-        Color color1 = Base.getTheme().getColor("pluginmanager.shade.top");
-        Color color2 = Base.getTheme().getColor("pluginmanager.shade.bottom");
-        GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
-        g2d.setPaint(gp);
+//        Color color1 = Base.getTheme().getColor("pluginmanager.shade.top");
+//        Color color2 = Base.getTheme().getColor("pluginmanager.shade.bottom");
+//        GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+//        g2d.setPaint(gp);
         g2d.fillRect(0, 0, w, h);
         if (backgroundImage != null) {
             int iw = backgroundImage.getWidth();

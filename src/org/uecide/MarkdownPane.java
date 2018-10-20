@@ -3,6 +3,7 @@ package org.uecide;
 import javax.swing.*;
 import java.awt.*;
 import org.markdown4j.Markdown4jProcessor;
+import java.util.*;
 
 public class MarkdownPane extends JTextPane {
 
@@ -34,17 +35,45 @@ public class MarkdownPane extends JTextPane {
         renderIt();
     }
 
+    String generateCSSForFont(Font f, Color c) {
+        HashMap<String, String> values = new HashMap<String, String>();
+
+        values.put("font-family", f.getFamily());
+        values.put("font-size", f.getSize() + "px"); 
+
+        if (f.isBold()) {
+            values.put("font-weight", "bold");
+        }
+
+        if (f.isItalic()) {
+            values.put("font-style", "italic");
+        }
+
+        values.put("color", String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue()));
+
+        StringBuilder out = new StringBuilder();
+
+        for (String k : values.keySet()) {
+            out.append(k);
+            out.append(": ");
+            out.append(values.get(k));
+            out.append(";\n");
+        }
+
+        return out.toString();
+        
+    }
+
     void renderIt() {
         try {
             setContentType("text/html");
             setEditable(false);
-            String fp = Base.getTheme().getFontCSS("editor.markdown.font.p");
-            String fli = Base.getTheme().getFontCSS("editor.markdown.font.li");
-            String fh1 = Base.getTheme().getFontCSS("editor.markdown.font.h1");
-            String fh2 = Base.getTheme().getFontCSS("editor.markdown.font.h2");
-            String fh3 = Base.getTheme().getFontCSS("editor.markdown.font.h3");
-            String fpre = Base.getTheme().getFontCSS("editor.markdown.font.pre");
-
+            String fp = generateCSSForFont(Preferences.getFont("theme.markdown.font.p"), Preferences.getColor("theme.markdown.color.p"));
+            String fli = generateCSSForFont(Preferences.getFont("theme.markdown.font.li"), Preferences.getColor("theme.markdown.color.li"));
+            String fh1 = generateCSSForFont(Preferences.getFont("theme.markdown.font.h1"), Preferences.getColor("theme.markdown.color.h1"));
+            String fh2 = generateCSSForFont(Preferences.getFont("theme.markdown.font.h2"), Preferences.getColor("theme.markdown.color.h2"));
+            String fh3 = generateCSSForFont(Preferences.getFont("theme.markdown.font.h3"), Preferences.getColor("theme.markdown.color.h3"));
+            String fpre = generateCSSForFont(Preferences.getFont("theme.markdown.font.pre"), Preferences.getColor("theme.markdown.color.pre"));
             String html = new Markdown4jProcessor()
                 .addHtmlAttribute("style", fpre, "pre")
                 .addHtmlAttribute("style", fp, "p")

@@ -46,17 +46,11 @@ public class Platform extends org.uecide.Platform {
     // TODO Need to be smarter here since KDE people ain't gonna like that GTK.
     public void setLookAndFeel() {
         try {
-            String laf = Base.theme.get("window.laf");
-
-            if((laf != null) && (!laf.equals("default"))) {
-                UIManager.setLookAndFeel(laf);
-            }
-
             Toolkit xToolkit = Toolkit.getDefaultToolkit();
             java.lang.reflect.Field awtAppClassNameField =
                 xToolkit.getClass().getDeclaredField("awtAppClassName");
             awtAppClassNameField.setAccessible(true);
-            awtAppClassNameField.set(xToolkit, Base.theme.get("product.cap"));
+            awtAppClassNameField.set(xToolkit, "UECIDE");
         } catch(Exception e) {
             Base.error(e);
         }

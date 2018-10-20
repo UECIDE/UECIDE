@@ -160,7 +160,8 @@ public class PluginManager implements PropertyChangeListener
     JComboBox familySelector;
     JCheckBox onlyUninstalled;
     JTextField searchBox;
-    JImageTextPane infoBrowser;
+//    JImageTextPane infoBrowser;
+    MarkdownPane infoBrowser;
     JScrollPane infoScroller;
 
     JButton localInstallButton;
@@ -206,18 +207,18 @@ public class PluginManager implements PropertyChangeListener
         String heading = descLines[0];
         String longDesc = "";
 
-        String imageData = pe.get("Image");
-        if (imageData != null) {
-            try {
-                byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(imageData);
-                BufferedImage img = ImageIO.read(new ByteArrayInputStream(binary));
-                infoBrowser.setBackgroundImage(img);
-                
-            } catch (Exception e) {
-            }
-        } else {
-            infoBrowser.setBackgroundImage(null);
-        }
+//        String imageData = pe.get("Image");
+//        if (imageData != null) {
+//            try {
+//                byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(imageData);
+//                BufferedImage img = ImageIO.read(new ByteArrayInputStream(binary));
+//                infoBrowser.setBackgroundImage(img);
+//                
+//            } catch (Exception e) {
+//            }
+//        } else {
+//            infoBrowser.setBackgroundImage(null);
+//        }
 
         for (int i = 1; i < descLines.length; i++) {
             String dl = descLines[i];
@@ -261,24 +262,24 @@ public class PluginManager implements PropertyChangeListener
             longDesc += "\n";
         }
 
-        try {
-            String fp = Base.getTheme().getFontCSS("pluginmanager.browser.font.p");
-            String fli = Base.getTheme().getFontCSS("pluginmanager.browser.font.li");
-            String fh1 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h1");
-            String fh2 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h2");
-            String fh3 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h3");
+//        try {
+//            String fp = Base.getTheme().getFontCSS("pluginmanager.browser.font.p");
+//            String fli = Base.getTheme().getFontCSS("pluginmanager.browser.font.li");
+//            String fh1 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h1");
+//            String fh2 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h2");
+//            String fh3 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h3");
 
-            longDesc = new Markdown4jProcessor()
-                .addHtmlAttribute("style", fp, "p")
-                .addHtmlAttribute("style", fli, "li")
-                .addHtmlAttribute("style", fh1, "h1")
-                .addHtmlAttribute("style", fh2, "h2")
-                .addHtmlAttribute("style", fh3, "h3")
-                .process(longDesc);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        infoBrowser.setText("<html><body>" + longDesc + "</body></html>");
+//            longDesc = new Markdown4jProcessor()
+//                .addHtmlAttribute("style", fp, "p")
+//                .addHtmlAttribute("style", fli, "li")
+//                .addHtmlAttribute("style", fh1, "h1")
+//                .addHtmlAttribute("style", fh2, "h2")
+//                .addHtmlAttribute("style", fh3, "h3")
+//                .process(longDesc);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+        infoBrowser.setText(longDesc);
         infoBrowser.setCaretPosition(0);
         JScrollBar sb = infoScroller.getVerticalScrollBar();
         sb.setValue(sb.getMinimum());
@@ -475,7 +476,7 @@ public class PluginManager implements PropertyChangeListener
 
         outputConsole = new GrittyTerminal();
         outputConsole.getTermPanel().setAntiAliasing(true);
-        outputConsole.getTermPanel().setFont(Base.getTheme().getFont("console.command.font"));
+        outputConsole.getTermPanel().setFont(Preferences.getFont("theme.console.fonts.comnmand"));
         outputTty = new ConsoleTty();
 
         JPanel p = new JPanel();
@@ -603,8 +604,7 @@ public class PluginManager implements PropertyChangeListener
         topsection.add(optionsBox, BorderLayout.CENTER);
 
         upper.add(topsection, BorderLayout.NORTH);
-        infoBrowser = new JImageTextPane();
-        infoBrowser.setContentType("text/html");
+        infoBrowser = new MarkdownPane();
         infoBrowser.setEditable(false);
 
         JPanel infoPanel = new JPanel();

@@ -262,7 +262,7 @@ public class ProjectSearch {
                 if(line.toLowerCase().contains(term)) {
                     foundText = true;
                     if (eb != null) {
-                        eb.highlightLine(lineno - 1, Base.getTheme().getColor("editor.searchall.bgcolor"));
+                        eb.highlightLine(lineno - 1, Preferences.getColor("theme.editor.highlight.search"));
                     }
 
                     SearchResult res = new SearchResult(f, term, line, lineno);

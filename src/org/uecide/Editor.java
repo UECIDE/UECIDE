@@ -317,13 +317,13 @@ public class Editor extends JFrame {
         final Editor me = this;
 
         consoleScroll = new JShadowScrollPane(
-            Base.getTheme().getInteger("console.shadow.top"),
-            Base.getTheme().getInteger("console.shadow.bottom")
+            Preferences.getInteger("theme.console.shadow.top"),
+            Preferences.getInteger("theme.console.shadow.bottom")
         );
 
         outputScroll = new JShadowScrollPane(
-            Base.getTheme().getInteger("console.shadow.top"),
-            Base.getTheme().getInteger("console.shadow.bottom")
+            Preferences.getInteger("theme.console.shadow.top"),
+            Preferences.getInteger("theme.console.shadow.bottom")
         );
 
         console = new Console();
@@ -332,7 +332,7 @@ public class Editor extends JFrame {
         outputTty = new ConsoleTty();
         testConsole.getTermPanel().setSize(new Dimension(100, 100));
         testConsole.getTermPanel().setAntiAliasing(true);
-        testConsole.getTermPanel().setFont(Base.getTheme().getFont("console.command.font"));
+        testConsole.getTermPanel().setFont(Preferences.getFont("theme.console.fonts.command"));
 
         testConsole.getTermPanel().addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
@@ -446,30 +446,23 @@ public class Editor extends JFrame {
         toolbar.addSeparator();
 
         menuBar = new JMenuBar();
-        Base.setFont(menuBar, "menu.bar");
 
         fileMenu = new JMenu(Base.i18n.string("menu.file"));
-        Base.setFont(fileMenu, "menu.bar");
         menuBar.add(fileMenu);
 
         editMenu = new JMenu(Base.i18n.string("menu.edit"));
-        Base.setFont(editMenu, "menu.bar");
         menuBar.add(editMenu);
 
         sketchMenu = new JMenu(Base.i18n.string("menu.sketch"));
-        Base.setFont(sketchMenu, "menu.bar");
         menuBar.add(sketchMenu);
 
         hardwareMenu = new JMenu(Base.i18n.string("menu.hardware"));
-        Base.setFont(hardwareMenu, "menu.bar");
         menuBar.add(hardwareMenu);
 
         toolsMenu = new JMenu(Base.i18n.string("menu.tools"));
-        Base.setFont(toolsMenu, "menu.bar");
         menuBar.add(toolsMenu);
 
         helpMenu = new JMenu(Base.i18n.string("menu.help"));
-        Base.setFont(helpMenu, "menu.bar");
         menuBar.add(helpMenu);
 
         setJMenuBar(menuBar);
@@ -587,6 +580,7 @@ public class Editor extends JFrame {
         });
         abortButton.setVisible(false);
         runButton = Editor.addToolbarButton(toolbar, "actions", "run", Base.i18n.string("toolbar.run"), new ActionListener() {
+            @SuppressWarnings("deprecation")
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -602,6 +596,7 @@ public class Editor extends JFrame {
         });
 
         programButton = Editor.addToolbarButton(toolbar, "actions", "program", Base.i18n.string("toolbar.program"), new ActionListener() {
+            @SuppressWarnings("deprecation")
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -657,7 +652,7 @@ public class Editor extends JFrame {
         DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
 
-            Color textColor = Base.getTheme().getColor("editor.fgcolor");
+            Color textColor = Preferences.getColor("theme.editor.colors.foreground");
 
             if((value != null) && (value instanceof DefaultMutableTreeNode)) {
                 JPanel container = new JPanel();
@@ -1654,7 +1649,6 @@ public class Editor extends JFrame {
                                 Base.openURL(loadedSketch.getFolder().getAbsolutePath());
                             }
                         });
-                        Base.setFont(openInOS, "menu.entry");
                         menu.add(openInOS);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_SKETCH | Plugin.MENU_TOP, o);
@@ -1666,27 +1660,22 @@ public class Editor extends JFrame {
                         JMenuItem item = new JMenuItem(Base.i18n.string("menu.create.ino"));
                         item.setActionCommand("ino");
                         item.addActionListener(createNewAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem(Base.i18n.string("menu.create.cpp"));
                         item.setActionCommand("cpp");
                         item.addActionListener(createNewAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem(Base.i18n.string("menu.create.c"));
                         item.setActionCommand("c");
                         item.addActionListener(createNewAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem(Base.i18n.string("menu.create.asm"));
                         item.setActionCommand("S");
                         item.addActionListener(createNewAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem(Base.i18n.string("menu.import.source"));
                         item.setActionCommand("source");
                         item.addActionListener(importFileAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_SOURCE | Plugin.MENU_TOP, o);
@@ -1698,12 +1687,10 @@ public class Editor extends JFrame {
                         JMenuItem item = new JMenuItem(Base.i18n.string("menu.create.header"));
                         item.setActionCommand("h");
                         item.addActionListener(createNewAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         item = new JMenuItem(Base.i18n.string("menu.import.header"));
                         item.setActionCommand("header");
                         item.addActionListener(importFileAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_HEADERS | Plugin.MENU_TOP, o);
@@ -1724,7 +1711,6 @@ public class Editor extends JFrame {
                         JMenuItem item = new JMenuItem(Base.i18n.string("menu.import.binary"));
                         item.setActionCommand("binary");
                         item.addActionListener(importFileAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_TOP, o);
@@ -1740,7 +1726,6 @@ public class Editor extends JFrame {
                                 updateOutputTree();
                             }
                         });
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_TOP, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
@@ -1750,7 +1735,6 @@ public class Editor extends JFrame {
                         JMenuItem item = new JMenuItem(Base.i18n.string("menu.create.markdown"));
                         item.setActionCommand("md");
                         item.addActionListener(createNewAction);
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_TOP, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_OUTPUT | Plugin.MENU_MID, o);
@@ -1777,7 +1761,6 @@ public class Editor extends JFrame {
                                 Base.exec(c.split("::"));
                             }
                         });
-                        Base.setFont(openExternal, "menu.entry");
                         menu.add(openExternal);
                     }
 
@@ -1810,7 +1793,6 @@ public class Editor extends JFrame {
                         }
                     });
                     renameItem.setActionCommand(thisFile.getAbsolutePath());
-                    Base.setFont(renameItem, "menu.entry");
                     menu.add(renameItem);
 
                     JMenuItem deleteItem = new JMenuItem(Base.i18n.string("menu.file.delete"));
@@ -1851,7 +1833,6 @@ public class Editor extends JFrame {
                         }
                     });
                     deleteItem.setActionCommand(thisFile.getAbsolutePath());
-                    Base.setFont(deleteItem, "menu.entry");
                     menu.add(deleteItem);
 
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_TOP, o);
@@ -1871,7 +1852,6 @@ public class Editor extends JFrame {
                     infoMenu.add(filePath);
                     JMenuItem fileSize = new JMenuItem(Base.i18n.string("menu.file.info.size", thisFile.length()));
                     infoMenu.add(fileSize);
-                    Base.setFont(infoMenu, "menu.entry");
                     menu.add(infoMenu);
 
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_MID, o);
@@ -1894,7 +1874,6 @@ public class Editor extends JFrame {
                                 }
                             });
                             insertRef.setActionCommand(thisFile.getName());
-                            Base.setFont(insertRef, "menu.entry");
                             menu.add(insertRef);
                         }
                     }
@@ -1916,7 +1895,6 @@ public class Editor extends JFrame {
                             updateLibrariesTree();
                         }
                     });
-                    Base.setFont(item, "menu.entry");
                     menu.add(item);
                     item = new JMenuItem(Base.i18n.string("menu.library.recompile"));
                     item.setEnabled(!compilerRunning());
@@ -1936,7 +1914,6 @@ public class Editor extends JFrame {
                             compilationThread.start();
                         }
                     });
-                    Base.setFont(item, "menu.entry");
                     menu.add(item);
 
                     if(lib.isLocal(loadedSketch.getFolder())) {
@@ -1946,7 +1923,6 @@ public class Editor extends JFrame {
                                 exportLocalLibrary(lib);
                             }
                         });
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                     } else {
                         item = new JMenuItem(Base.i18n.string("menu.library.localize"));
@@ -1965,7 +1941,6 @@ public class Editor extends JFrame {
                                 updateTree();
                             }
                         });
-                        Base.setFont(item, "menu.entry");
                         menu.add(item);
                     }
 
@@ -2030,7 +2005,6 @@ public class Editor extends JFrame {
                                 Base.openURL(e.getActionCommand());
                             }
                         });
-                        Base.setFont(openInOS, "menu.entry");
                         menu.add(openInOS);
 
                         JMenuItem mkdirItem = new JMenuItem(Base.i18n.string("menu.dir.create"));
@@ -2048,7 +2022,6 @@ public class Editor extends JFrame {
                                 }
                             }
                         });
-                        Base.setFont(mkdirItem, "menu.entry");
                         menu.add(mkdirItem);
                         JMenuItem unzipItem = new JMenuItem(Base.i18n.string("menu.dir.unzip"));
                         unzipItem.setActionCommand(thisFile.getAbsolutePath());
@@ -2057,7 +2030,6 @@ public class Editor extends JFrame {
                                 findAndUnzipZipFile(e.getActionCommand());
                             }
                         });
-                        Base.setFont(unzipItem, "menu.entry");
                         menu.add(unzipItem);
                     } else {
                         String ee = Preferences.get("editor.external.command");
@@ -2074,7 +2046,6 @@ public class Editor extends JFrame {
                                     Base.exec(c.split("::"));
                                 }
                             });
-                            Base.setFont(openExternal, "menu.entry");
                             menu.add(openExternal);
                         }
                     }
@@ -2110,7 +2081,6 @@ public class Editor extends JFrame {
                             }
                         }
                     });
-                    Base.setFont(renameItem, "menu.entry");
                     menu.add(renameItem);
 
                     JMenuItem deleteItem = new JMenuItem(Base.i18n.string("menu.file.delete"));
@@ -2151,7 +2121,6 @@ public class Editor extends JFrame {
                     });
                     deleteItem.setActionCommand(thisFile.getAbsolutePath());
 
-                    Base.setFont(deleteItem, "menu.entry");
                     menu.add(deleteItem);
 
                     menu.addSeparator();
@@ -2171,7 +2140,6 @@ public class Editor extends JFrame {
                     infoMenu.add(filePath);
                     JMenuItem fileSize = new JMenuItem(Base.i18n.string("menu.file.info.size", thisFile.length()));
                     infoMenu.add(fileSize);
-                    Base.setFont(infoMenu, "menu.entry");
                     menu.add(infoMenu);
 
                     menu.addSeparator();
@@ -2449,6 +2417,7 @@ public class Editor extends JFrame {
     }
 
     public void warning(String msg) {
+        if (msg == null) return;
         Debug.message(msg);
 
         if(!msg.endsWith("\n")) {
@@ -2459,6 +2428,7 @@ public class Editor extends JFrame {
     }
 
     public void error(String msg) {
+        if (msg == null) return;
         Debug.message(msg);
 
         if(!msg.endsWith("\n")) {
@@ -2598,10 +2568,11 @@ public class Editor extends JFrame {
             }
 
             setCursor(new Cursor(Cursor.WAIT_CURSOR));
-            Class<?> edClass = Class.forName(className);
-            Constructor<?> edConst = edClass.getConstructor(Sketch.class, File.class, Editor.class);
+//            Class<?> edClass = Class.forName(className);
+//            Constructor<?> edConst = edClass.getConstructor(Sketch.class, File.class, Editor.class);
 
-            EditorBase ed = (EditorBase)edConst.newInstance(loadedSketch, sf, this);
+            EditorBase ed = new org.uecide.editors.code(loadedSketch, sf, this);
+//(EditorBase)edConst.newInstance(loadedSketch, sf, this);
 
             editorTabs.addTab(sf.getName(), (JPanel) ed);
             int tabno = editorTabs.getTabCount() - 1;
@@ -2874,14 +2845,12 @@ public class Editor extends JFrame {
                         }
                     });
                     item.setActionCommand(file.getAbsolutePath());
-                    Base.setFont(item, "menu.entry");
                     menu.add(item);
                 } else {
                     JMenu submenu = new JMenu(file.getName());
                     addSketchesFromFolder(submenu, file);
 
                     if(submenu.getItemCount() > 0) {
-                        Base.setFont(submenu, "menu.entry");
                         menu.add(submenu);
                     }
                 }
@@ -2893,9 +2862,9 @@ public class Editor extends JFrame {
         return createMenuEntry(name, shortcut, mods, action, null);
     }
 
+    @SuppressWarnings("deprecation")
     public JMenuItem createMenuEntry(String name, int shortcut, int mods, ActionListener action, String command) {
         JMenuItem menuItem = new JMenuItem(name);
-        Base.setFont(menuItem, "menu.entry");
         if (action != null) {
             menuItem.addActionListener(action);
         }
@@ -2909,6 +2878,7 @@ public class Editor extends JFrame {
         return menuItem;
     }
 
+    @SuppressWarnings("deprecation")
     public void updateMenus() {
         fileMenu.removeAll();
         editMenu.removeAll();
@@ -2943,7 +2913,6 @@ public class Editor extends JFrame {
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_TOP);
 
         JMenu recentSketchesMenu = new JMenu(Base.i18n.string("menu.file.recent"));
-        Base.setFont(recentSketchesMenu, "menu.entry");
         fileMenu.add(recentSketchesMenu);
 
         for(File m : Base.MRUList) {
@@ -2969,7 +2938,6 @@ public class Editor extends JFrame {
         }
 
         JMenu frequentSketchesMenu = new JMenu(Base.i18n.string("menu.file.frequent"));
-        Base.setFont(frequentSketchesMenu, "menu.entry");
         fileMenu.add(frequentSketchesMenu);
 
         ArrayList<Integer> tmpArr = new ArrayList<Integer>();
@@ -3069,14 +3037,12 @@ public class Editor extends JFrame {
                             }
                         }
 
-                        Base.setFont(top, "menu.entry");
                         examplesMenu.add(top);
                     }
                 }
             }
         }
 
-        Base.setFont(examplesMenu, "menu.entry");
         fileMenu.add(examplesMenu);
 
         fileMenu.addSeparator();
@@ -3230,7 +3196,6 @@ public class Editor extends JFrame {
 
         librariesSubmenu.addSeparator();
         populateLibrariesMenu(librariesSubmenu);
-        Base.setFont(librariesSubmenu, "menu.entry");
         sketchMenu.add(librariesSubmenu);
 
 
@@ -3258,23 +3223,19 @@ public class Editor extends JFrame {
 
         JMenu boardsSubmenu = new JMenu(Base.i18n.string("menu.hardware.boards") + boardName);
         populateBoardsMenu(boardsSubmenu);
-        Base.setFont(boardsSubmenu, "menu.entry");
         hardwareMenu.add(boardsSubmenu);
 
         JMenu coresSubmenu = new JMenu(Base.i18n.string("menu.hardware.cores") + coreName);
         populateCoresMenu(coresSubmenu);
-        Base.setFont(coresSubmenu, "menu.entry");
         hardwareMenu.add(coresSubmenu);
 
         JMenu compilersSubmenu = new JMenu(Base.i18n.string("menu.hardware.compilers") + compilerName);
         populateCompilersMenu(compilersSubmenu);
-        Base.setFont(compilersSubmenu, "menu.entry");
         hardwareMenu.add(compilersSubmenu);
 
         optionsMenu = new JMenu(Base.i18n.string("menu.hardware.options"));
         populateOptionsMenu(optionsMenu);
         optionsMenu.setEnabled(optionsMenu.getItemCount() > 0);
-        Base.setFont(optionsMenu, "menu.entry");
         hardwareMenu.add(optionsMenu);
 
         serialPortsMenu = new JMenu(Base.i18n.string("menu.hardware.devices") + portName);
@@ -3290,7 +3251,6 @@ public class Editor extends JFrame {
             }
         });
 
-        Base.setFont(serialPortsMenu, "menu.entry");
         hardwareMenu.add(serialPortsMenu);
 
         programmersSubmenu = new JMenu(Base.i18n.string("menu.hardware.programmers"));
@@ -3306,7 +3266,6 @@ public class Editor extends JFrame {
         });
 
 
-        Base.setFont(programmersSubmenu, "menu.entry");
         hardwareMenu.add(programmersSubmenu);
 
         addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_TOP);
@@ -3362,27 +3321,27 @@ public class Editor extends JFrame {
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
 
-        PropertyFile links = Base.theme.getChildren("links");
+//        PropertyFile links = Base.theme.getChildren("links");
+//
+//        for(String link : links.childKeys()) {
+//            helpMenu.add(createMenuEntry(links.get(link + ".name"), 0, 0, (new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    String link = e.getActionCommand();
+//                    Base.openURL(link);
+//                }
+//            }), links.get(link + ".url")));
+//        }
 
-        for(String link : links.childKeys()) {
-            helpMenu.add(createMenuEntry(links.get(link + ".name"), 0, 0, (new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    String link = e.getActionCommand();
-                    Base.openURL(link);
-                }
-            }), links.get(link + ".url")));
-        }
-
-        links = loadedSketch.getContext().getMerged().getChildren("links");
-
-        for(String link : links.childKeys()) {
-            helpMenu.add(createMenuEntry(links.get(link + ".name"), 0, 0, (new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    String link = e.getActionCommand();
-                    Base.openURL(link);
-                }
-            }), links.get(link + ".url")));
-        }
+//        links = loadedSketch.getContext().getMerged().getChildren("links");
+//
+//        for(String link : links.childKeys()) {
+//            helpMenu.add(createMenuEntry(links.get(link + ".name"), 0, 0, (new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    String link = e.getActionCommand();
+//                    Base.openURL(link);
+//                }
+//            }), links.get(link + ".url")));
+//        }
 
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_MID);
         helpMenu.addSeparator();
@@ -3413,7 +3372,6 @@ public class Editor extends JFrame {
             }
         }));
 
-        Base.setFont(debugSubmenu, "menu.entry");
         helpMenu.add(debugSubmenu);
 
     }
@@ -3449,11 +3407,9 @@ public class Editor extends JFrame {
                     }
                 });
 
-                Base.setFont(item, "menu.entry");
                 submenu.add(item);
             }
 
-            Base.setFont(submenu, "menu.entry");
             menu.add(submenu);
         }
 
@@ -3512,7 +3468,6 @@ public class Editor extends JFrame {
                     }
                 }
             });
-            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
 
@@ -3582,7 +3537,6 @@ public class Editor extends JFrame {
                 }
             });
             item.setActionCommand(prog.getName());
-            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
     }
@@ -3600,7 +3554,6 @@ public class Editor extends JFrame {
             fillGroupMenu(groupmenu, group);
 
             if(groupmenu.getItemCount() > 0) {
-                Base.setFont(groupmenu, "menu.entry");
                 menu.add(groupmenu);
             }
         }
@@ -3637,7 +3590,6 @@ public class Editor extends JFrame {
                 }
             });
 //            item.setActionCommand(board.getName());
-            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
     }
@@ -3671,7 +3623,6 @@ public class Editor extends JFrame {
                     c.onSelected(Editor.this);
                 }
             });
-            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
 
@@ -3708,7 +3659,6 @@ public class Editor extends JFrame {
                     c.onSelected(Editor.this);
                 }
             });
-            Base.setFont(item, "menu.entry");
             menu.add(item);
         }
     }
@@ -4495,7 +4445,6 @@ public class Editor extends JFrame {
                 libsMenu.add(item);
             }
 
-            Base.setFont(libsMenu, "menu.entry");
             menu.add(libsMenu);
         }
     }
@@ -4710,10 +4659,10 @@ public class Editor extends JFrame {
 
     public void refreshScrolls() {
         testConsole.getTermPanel().setAntiAliasing(true);
-        testConsole.getTermPanel().setFont(Base.getTheme().getFont("console.command.font"));
+        testConsole.getTermPanel().setFont(Preferences.getFont("theme.console.fonts.command"));
         consoleScroll.setShadow(
-            Base.getTheme().getInteger("console.shadow.top"),
-            Base.getTheme().getInteger("console.shadow.bottom")
+            Preferences.getInteger("theme.console.shadow.top"),
+            Preferences.getInteger("theme.console.shadow.bottom")
         );
     }
 

@@ -48,6 +48,8 @@ import javax.swing.tree.*;
 import org.json.simple.*;
 import org.json.simple.parser.*;
 
+import javax.swing.filechooser.*;
+
 
 import say.swing.*;
 
@@ -164,11 +166,48 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
         // setup dialog for the prefs
 
+        JMenuBar menuBar = new JMenuBar();
+        JMenu themeMenu = new JMenu("Theme");
+        JMenuItem importTheme = new JMenuItem("Import Theme");
+        JMenuItem exportTheme = new JMenuItem("Export Theme");
+        menuBar.add(themeMenu);
+        themeMenu.add(importTheme);
+        themeMenu.add(exportTheme);
+
+        importTheme.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+    
+                FileNameExtensionFilter ff = new FileNameExtensionFilter("UECIDE Theme", "utheme");
+                JFileChooser fc = new JFileChooser();
+                fc.addChoosableFileFilter(ff);
+                fc.setFileFilter(ff);
+                int n = fc.showOpenDialog(Preferences.this);
+                if (n == JFileChooser.APPROVE_OPTION) {
+                    importThemeData(fc.getSelectedFile());
+                }
+            }
+        });
+
+        exportTheme.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                FileNameExtensionFilter ff = new FileNameExtensionFilter("UECIDE Theme", "utheme");
+                JFileChooser fc = new JFileChooser();
+                fc.addChoosableFileFilter(ff);
+                fc.setFileFilter(ff);
+                int n = fc.showSaveDialog(Preferences.this);
+                if (n == JFileChooser.APPROVE_OPTION) {
+                    exportThemeData(fc.getSelectedFile());
+                }
+            }
+        });
+
+
         setTitle(Base.i18n.string("win.preferences"));
         setResizable(true);
         setLayout(new BorderLayout());
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel outer = new JPanel();
+        add(menuBar, BorderLayout.NORTH);
 
         outer.setBorder(new EmptyBorder(10, 10, 10, 10));
         outer.setLayout(new BorderLayout());
@@ -176,6 +215,12 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         Box buttonLine = Box.createHorizontalBox();
         buttonLine.add(Box.createHorizontalGlue());
 
+        JButton applyButton = new JButton(Base.i18n.string("misc.apply"));
+        applyButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                applyFrame();
+            }
+        });
         JButton cancelButton = new JButton(Base.i18n.string("misc.cancel"));
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -191,6 +236,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         });
 
         buttonLine.add(cancelButton);
+        buttonLine.add(applyButton);
         buttonLine.add(okButton);
 
         outer.add(buttonLine, BorderLayout.SOUTH);
@@ -453,6 +499,73 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                 }
             });
             b.add(btn);
+        } else if (type.equals("colorselect")) {
+            b.add(new JLabel(name + ": "));
+
+            final JTextField f = new JTextField();
+
+            final JLabel sample = new JLabel("   ");
+            sample.setOpaque(true);
+            f.setText(value);
+            try {
+                sample.setBackground(Color.decode(f.getText()));
+            } catch (Exception e) {
+            }
+
+            f.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                    try {
+                        sample.setBackground(Color.decode(f.getText()));
+                    } catch (Exception ex) {
+                    }
+                }
+            });
+
+            f.addKeyListener(new KeyListener() {
+                public void keyReleased(KeyEvent e) {
+                    changedPrefs.set(fkey, f.getText());
+                    try {
+                        sample.setBackground(Color.decode(f.getText()));
+                    } catch (Exception ex) {
+                    }
+                }
+
+                public void keyPressed(KeyEvent e) {
+                }
+
+                public void keyTyped(KeyEvent e) {
+                }
+            });
+
+            b.add(f);
+            b.add(sample);
+
+            JButton btn = new JButton("Select...");
+            btn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+
+
+                    JColorChooser fc = new JColorChooser();
+
+                    Color orig = Color.BLACK;
+
+                    try {
+                        orig = Color.decode(f.getText());
+                    } catch (Exception ex) {
+                    }
+                    Color clr = fc.showDialog(Preferences.this, "Select Color", orig);
+
+                    if(clr != null) {
+                        changedPrefs.setColor(fkey, clr);
+                        f.setText(String.format("#%02x%02x%02x", clr.getRed(), clr.getGreen(), clr.getBlue()));
+                        sample.setBackground(clr);
+                    }
+                }
+            });
+            b.add(btn);
+
+                
         } else if (type.equals("fontselect")) {
             b.add(new JLabel(name + ": "));
             final JTextField f = new JTextField();
@@ -725,9 +838,13 @@ public class Preferences extends JDialog implements TreeSelectionListener {
     }
 
     public static Boolean getBoolean(String key) {
+        return getBoolean(key, false);
+    }
+
+    public static Boolean getBoolean(String key, boolean def) {
         String data = get(key);
         if (data == null || data.equals("")) {
-            return false;
+            return def;
         }
         data = data.toLowerCase();
         if (data.startsWith("y") || data.startsWith("t")) {
@@ -890,6 +1007,43 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
         advancedTreeBody.validate();
         advancedTreeBody.repaint();
+    }
+
+    public void importThemeData(File f) {
+        PropertyFile pf = new PropertyFile(f);
+        changedPrefs.mergeData(pf);
+    }
+
+    public void exportThemeData(File f) {
+        String fpath = f.getAbsolutePath();
+        if (!fpath.endsWith(".utheme")) {
+            fpath = fpath + ".utheme";
+            f = new File(fpath);
+        }
+
+        PropertyFile pf = Base.preferencesTree.getChildren("theme");
+        PropertyFile newFile = new PropertyFile();
+
+        ArrayList<String> keys = pf.keySet();
+
+        for (String key : keys) {
+            if (key.endsWith(".default")) {
+                String trimmed = "theme." + key.substring(0, key.length()-8);
+                String value = get(trimmed);
+                System.err.println(trimmed + "=" + value);
+
+                newFile.set(trimmed, get(trimmed));
+            }
+        }
+
+        if (f.exists()) {
+            int n = JOptionPane.showConfirmDialog(this, "File exists. Overwrite?", "Warning", JOptionPane.WARNING_MESSAGE);
+            if (n == JOptionPane.OK_OPTION) {
+                newFile.save(f);
+            }
+        } else {
+            newFile.save(f);
+        }
     }
 }
 

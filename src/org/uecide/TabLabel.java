@@ -73,8 +73,7 @@ public class TabLabel extends JPanel {
         name = sketchFile.getName();
         this.setLayout(new BorderLayout());
         nameLabel = new JLabel(name);
-        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
-        Base.setFont(nameLabel, "tab.unmodified.label");
+//        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
         fileIcon = Base.getIcon("mime",(FileType.getIcon(sketchFile)), 16);
 
         if(fileIcon != null) {
@@ -115,11 +114,10 @@ public class TabLabel extends JPanel {
         name = tabname;
         this.setLayout(new BorderLayout());
         nameLabel = new JLabel(name);
-        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
+//        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
         JLabel blab = new JLabel();
         nameLabel.setOpaque(false);
         blab.setIcon(Base.loadIconFromResource("tabs/close.png"));
-        Base.setFont(nameLabel, "tab.unmodified.label");
 
         blab.addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
@@ -149,16 +147,10 @@ public class TabLabel extends JPanel {
         name = sketchFile.getName();
         nameLabel.setText(name);
 
-        if(modified) {
-            Base.setFont(nameLabel, "tab.modified.label");
-        } else {
-            Base.setFont(nameLabel, "tab.unmodified.label");
-        }
-
         if (isSelected) {
-            nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
+//            nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
         } else {
-            nameLabel.setForeground(Base.getTheme().getColor("tab.deselected.fgcolor"));
+//            nameLabel.setForeground(Base.getTheme().getColor("tab.deselected.fgcolor"));
         }
     }
 
@@ -232,9 +224,9 @@ public class TabLabel extends JPanel {
     public void changeState(boolean state) {
         isSelected = state;
         if (isSelected) {
-            nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
+//            nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
         } else {
-            nameLabel.setForeground(Base.getTheme().getColor("tab.deselected.fgcolor"));
+//            nameLabel.setForeground(Base.getTheme().getColor("tab.deselected.fgcolor"));
         }
     } 
 }

@@ -20,6 +20,8 @@ import com.wittams.gritty.swing.GrittyTerminal.BufferType;
 
 
 public class BufferPanel extends JPanel {
+
+    @SuppressWarnings("unchecked")
 	public BufferPanel(final GrittyTerminal terminal){
 		super(new BorderLayout());
 		final JTextArea area = new JTextArea();
@@ -27,7 +29,7 @@ public class BufferPanel extends JPanel {
 		
 		final BufferType[] choices = BufferType.values(); 
 		
-		final JComboBox chooser = new JComboBox<BufferType>(choices);
+		final JComboBox chooser = new JComboBox(choices);
 		add(chooser, BorderLayout.NORTH);
 		
 		area.setFont(Font.decode("Monospaced-14"));

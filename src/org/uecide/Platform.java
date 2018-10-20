@@ -90,7 +90,7 @@ public class Platform {
         try {
             // otherwise make a .uecide directory int the user's home dir
             File home = new File(System.getProperty("user.home"));
-            File dataFolder = new File(home, "." + Base.theme.get("product"));
+            File dataFolder = new File(home, ".uecide");
 
             if(!dataFolder.exists()) {
                 dataFolder.mkdirs();
@@ -109,7 +109,7 @@ public class Platform {
      */
     public File getDefaultSketchbookFolder() {
         File docs = new File(System.getProperty("user.home"), "Documents");
-        return new File(docs, Base.theme.get("product.cap"));
+        return new File(docs, "UECIDE");
     }
 
     public void setSettingsFolderEnvironmentVariable() {

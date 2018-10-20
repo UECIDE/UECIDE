@@ -105,14 +105,11 @@ public class Splash extends JDialog { //Window {
         int my = 0;
 
         try {
-            x = Base.theme.getInteger("splash.version.x");
-            y = Base.theme.getInteger("splash.version.y");
+            x = 270;
+            y = 145;
 
-            mx = Base.theme.getInteger("splash.message.x");
-            my = Base.theme.getInteger("splash.message.y");
-
-            bx = Base.theme.getInteger("splash.beta.x");
-            by = Base.theme.getInteger("splash.beta.y");
+            mx = 170;
+            my = 170;
         } catch(Exception e) {
         }
 
@@ -130,13 +127,9 @@ public class Splash extends JDialog { //Window {
 
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2.setFont(Base.theme.getFontNatural("splash.version.font"));
-        g2.setColor(Base.theme.getColor("splash.version.color"));
+        g2.setFont(new Font("SansSerif", Font.BOLD, 16)); //Base.theme.getFontNatural("splash.version.font"));
+        g2.setColor(new Color(0x2b, 0xbe, 0xbe)); //Base.theme.getColor("splash.version.color"));
         g2.drawString("v" + Base.systemVersion, x, y);
-
-        if(Base.theme.get("splash.message.font") != null) {
-            g2.setFont(Base.theme.getFontNatural("splash.message.font"));
-        }
 
         int barHeight = 20;
 
@@ -151,25 +144,13 @@ public class Splash extends JDialog { //Window {
         g2.setColor(new Color(150, 0, 0));
         g2.fillRect(0, h - barHeight, (int)(((float)percent / 100.0) * (float)w) , h - 1);
 
-        if(Base.theme.get("splash.message.color") != null) {
-            g2.setColor(Base.theme.getColor("splash.message.color"));
-        } else {
-            g2.setColor(Color.white);
-        }
+        g2.setColor(Color.white);
         g2.drawString(message, mx, my);
 
         if(bx == -1) {
             bounds = getStringBounds(g2, betaMessage);
             sw = bounds.width;
             bx = w / 2 - sw / 2;
-        }
-
-        if(Base.theme.get("splash.beta.font") != null) {
-            g2.setFont(Base.theme.getFontNatural("splash.beta.font"));
-        }
-
-        if(Base.theme.get("splash.beta.color") != null) {
-            g2.setColor(Base.theme.getColor("splash.beta.color"));
         }
 
         g2.drawString(betaMessage, bx, by);

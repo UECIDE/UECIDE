@@ -40,7 +40,6 @@ import java.util.zip.*;
 import java.util.jar.*;
 import java.text.*;
 import org.uecide.plugin.*;
-import org.uecide.themes.*;
 
 import javax.script.*;
 
@@ -85,7 +84,7 @@ public class Base {
 
     public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
 
-    public static final String defaultIconSet = "Gnomic";
+    public static final String defaultIconSet = "gnomic";
 
     public static String RELEASE = "release";
 
@@ -136,7 +135,6 @@ public class Base {
 
     public static PropertyFile preferences;
     public static PropertyFile session = new PropertyFile();
-    public static Theme theme;
 
     public static PropertyFile preferencesTree = new PropertyFile();
 
@@ -147,8 +145,6 @@ public class Base {
     public static TreeSet<CommunicationPort> communicationPorts = new TreeSet<CommunicationPort>();
 
     public static TreeMap<String, Class<?>> lookAndFeels = new TreeMap<String, Class<?>>();
-
-    public static TreeMap<String, PropertyFile> themes = new TreeMap<String, PropertyFile>();
 
     public static I18N i18n = new I18N("Core");
 
@@ -248,8 +244,6 @@ public class Base {
         cacheSystemFilesFromList(getToolsFolders());
         cacheSystemFilesFromList(getProgrammersFolders());
         cacheSystemFilesFromList(getBoardsFolders());
-//        cacheSystemFilesFromList(getThemesFolders());
-//        cacheSystemFilesFromList(getPluginsFolders());
         cacheSystemFilesFromList(getCompilersFolders());
 // I'd love to cache the library tree and parse it, but that would make
 // categories suck big time.
@@ -380,10 +374,6 @@ public class Base {
             System.out.println(i18n.string("msg.version", systemVersion));
             System.exit(0);
         }
-
-        // Get the initial basic theme data
-        theme = new Theme("/org/uecide/config/theme.txt");
-        theme.setPlatformAutoOverride(true);
 
         initPlatform();
 
@@ -615,14 +605,9 @@ public class Base {
         Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
         Debug.setSize(new Dimension(preferences.getInteger("debug.window.width"), preferences.getInteger("debug.window.height")));
 
-        // Now we reload the theme data with user overrides
-        // (we didn't know where they were before)
-        theme = new Theme(getDataFile("theme.txt"), "/org/uecide/config/theme.txt");
-        theme.setPlatformAutoOverride(true);
-
         if(!headless) {
             splashScreen = new Splash();
-            splashScreen.setMessage("Loading " + theme.get("product.cap") + "...", 10);
+            splashScreen.setMessage("Loading UECIDE...", 10);
         }
 
         if (!headless) splashScreen.setMessage(i18n.string("splash.msg.packagemanager"), 15);
@@ -849,7 +834,7 @@ public class Base {
             if(isNewVersionAvailable()) {
                 if(headless) {
                     System.err.println(i18n.string("msg.version.available"));
-                    System.err.println(i18n.string("msg.version.download", Base.theme.get("version." + RELEASE + ".download")));
+                    System.err.println(i18n.string("msg.version.download", "https://uecide.org/download"));
                 } else {
                     String[] options = {"Yes", "No"};
                     int n = JOptionPane.showOptionDialog(
@@ -864,7 +849,7 @@ public class Base {
                     );
 
                     if(n == 0) {
-                        openURL(Base.theme.get("version." + RELEASE + ".download"));
+                        openURL("https://uecide.org/download");
                     }
                 }
             }
@@ -1006,17 +991,20 @@ public class Base {
     /*! Initialize any platform specific settings */
     static protected void initPlatform() {
         try {
-            Class<?> platformClass = Class.forName("org.uecide.Platform");
+//            Class<?> platformClass = Class.forName("org.uecide.Platform");
 
             if(Base.isMacOS()) {
-                platformClass = Class.forName("org.uecide.macosx.Platform");
+                platform = new org.uecide.macosx.Platform();
+//                platformClass = Class.forName("org.uecide.macosx.Platform");
             } else if(Base.isWindows()) {
-                platformClass = Class.forName("org.uecide.windows.Platform");
+                platform = new org.uecide.windows.Platform();
+//                platformClass = Class.forName("org.uecide.windows.Platform");
             } else if(Base.isUnix()) {
-                platformClass = Class.forName("org.uecide.unix.Platform");
+                platform = new org.uecide.unix.Platform();
+//                platformClass = Class.forName("org.uecide.unix.Platform");
             }
 
-            platform = (Platform) platformClass.newInstance();
+//            platform = (Platform) platformClass.newInstance();
         } catch(Exception e) {
             Base.showError("Problem Setting the Platform",
                            "An unknown error occurred while trying to load\n" +
@@ -1621,6 +1609,7 @@ public class Base {
     * Registers key events for a Ctrl-W and ESC with an ActionListener
     * that will take care of disposing the window.
     */
+    @SuppressWarnings("deprecation")
     public static void registerWindowCloseKeys(JRootPane root, ActionListener disposer) {
         KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
         root.registerKeyboardAction(disposer, stroke,
@@ -1811,101 +1800,25 @@ public class Base {
 
     public static void loadPlugins() {
 
-        File[] folders = getPluginsFolders();
-        for (File folder : folders) {
-            Debug.message("Loading plugins from " + folder);
-            File[] files = folder.listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    Debug.message("  Loading " + f);
-                    try {
-                        URL u = f.toURI().toURL();
-                        addURL(u);
-                    } catch (Exception ex) {
-                        error(ex);
-                    }
+        PropertyFile availablePlugins = new PropertyFile("/org/uecide/config/plugins.txt");
+
+        for (String k : availablePlugins.childKeys()) {
+            String pluginClass = availablePlugins.get(k + ".class");
+            String pluginName = availablePlugins.get(k + ".name");
+            boolean pluginDefaultEnabled = availablePlugins.getBoolean(k + ".enabled");
+            boolean pluginIsEnabled = Preferences.getBoolean("plugins.enable." + k, pluginDefaultEnabled);
+
+            if (pluginIsEnabled) {
+                try {
+                    Debug.message("Enabling plugin " + pluginName);
+                    Class cl = Class.forName(pluginClass);
+                    plugins.put(cl.getName(), cl);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
 
-        folders = getThemesFolders();
-        for (File folder : folders) {
-            Debug.message("Loading plugins from " + folder);
-            File[] files = folder.listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    Debug.message("  Loading " + f);
-                    if (f.getName().endsWith(".jar")) {
-                        try {
-                            URL u = f.toURI().toURL();
-                            addURL(u);
-                        } catch (Exception ex) {
-                            error(ex);
-                        }
-                    }
-                }
-            }
-        }
-
-        Reflections pluginReflections = new Reflections("org.uecide.plugin");
-        try {
-            Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
-            for (Class<? extends Plugin> c : pluginClasses) {
-                Debug.message("Found plugin class " + c.getName());
-                if (c.getName().equals("org.uecide.plugin.PluginManager")) {
-                    continue;
-                }
-                plugins.put(c.getName(), c);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        pluginReflections = new Reflections("com.ardublock");
-        try {
-            Set<Class<? extends Plugin>> pluginClasses = pluginReflections.getSubTypesOf(Plugin.class);
-            for (Class<? extends Plugin> c : pluginClasses) {
-                Debug.message("Found plugin class " + c.getName());
-                if (c.getName().equals("org.uecide.plugin.PluginManager")) {
-                    continue;
-                }
-                plugins.put(c.getName(), c);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        pluginReflections = new Reflections("org.uecide");
-        try {
-            Set<Class<? extends LookAndFeel>> pluginClasses = pluginReflections.getSubTypesOf(LookAndFeel.class);
-            for (Class<? extends LookAndFeel> c : pluginClasses) {
-                Debug.message("Found look and feel class " + c.getName());
-                lookAndFeels.put(c.getName(), c);
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        if (!headless) {
-            pluginReflections = new Reflections("org.uecide.themes");
-            try {
-                // We're not going to store the theme control objects - just execute the "init" function in them.
-                Set<Class<? extends org.uecide.themes.ThemeControl>> controlClasses = pluginReflections.getSubTypesOf(org.uecide.themes.ThemeControl.class);
-                for (Class<? extends org.uecide.themes.ThemeControl> c : controlClasses) {
-                    Method init = c.getMethod("init");
-                    if (init != null) {
-                        Object[] noParameters = null;
-                        try {
-                            init.invoke(null, noParameters);
-                        } catch (Exception e) {
-                            error(e);
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-
-        }
         loadJSPlugins();
     }
 
@@ -2102,7 +2015,6 @@ public class Base {
     static public File[] getToolsFolders() { return getAnyFolders("tools"); }
     static public File[] getProgrammersFolders() { return getAnyFolders("programmers"); }
     static public File[] getBoardsFolders() { return getAnyFolders("boards"); }
-    static public File[] getThemesFolders() { return getAnyFolders("themes"); }
     static public File[] getPluginsFolders() { return getAnyFolders("plugins"); }
     static public File[] getCompilersFolders() { return getAnyFolders("compilers"); }
     static public File[] getLibrariesFolders() { return getAnyFolders("libraries"); }
@@ -2219,8 +2131,7 @@ public class Base {
                     rescanBoards();
                     rescanProgrammers();
                     rescanTools();
-                    rescanPlugins();
-                    rescanThemes();
+//                    rescanPlugins();
                     rescanLibraries();
 
                     waitForAssetLoading();
@@ -2248,18 +2159,12 @@ public class Base {
     }
 
     public static void rescanPlugins() {
-        plugins = new TreeMap<String, Class<?>>();
-        lookAndFeels = new TreeMap<String, Class<?>>();
-        pluginInstances = new ArrayList<Plugin>();
-        loadPlugins();
+//        plugins = new TreeMap<String, Class<?>>();
+//        lookAndFeels = new TreeMap<String, Class<?>>();
+//        pluginInstances = new ArrayList<Plugin>();
+//        loadPlugins();
     }
 
-    public static void rescanThemes() {
-        if (!headless) {
-            loadThemes();
-            theme.fullyParseFile();
-        }
-    }
     public static void rescanCompilers() {
         compilers = new TreeMap<String, Compiler>();
         loadCompilers();
@@ -2379,7 +2284,7 @@ public class Base {
 
     public Version getLatestVersion() {
         try {
-            URL url = new URL(Base.theme.get("version." + RELEASE + ".url"));
+            URL url = new URL("https://uecide.org/version.txt");
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
             String data = in.readLine();
             in.close();
@@ -2459,77 +2364,6 @@ public class Base {
         System.err.print(caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): " + msg);
     }
 
-    public static void loadThemes() {
-        if (!headless) {
-
-
-            themes = new TreeMap<String, PropertyFile>();
-
-            Reflections reflections = new Reflections(new ConfigurationBuilder()
-                    .setUrls(ClasspathHelper.forPackage("org.uecide"))
-                    .setScanners(new ResourcesScanner()));
-
-            Pattern pat = Pattern.compile(".*\\.theme");
-            Set<String> thms = reflections.getResources(pat);
-
-            for (String thm : thms) {
-                PropertyFile newTheme = new PropertyFile("/" + thm);
-                String name = newTheme.get("name");
-                if (name != null) {
-                    Debug.message("Found embedded theme " + name);
-                    PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
-                    merged.mergeData(newTheme);
-                    themes.put(newTheme.get("name"), merged);
-                }
-            }
-
-            File[] tfs = getThemesFolders();
-            for (File tf : tfs) {
-                if (tf.exists()) {
-                    File[] files = tf.listFiles();
-
-                    for(File f : files) {
-                        if(f.getName().endsWith(".theme")) {
-                            PropertyFile newTheme = new PropertyFile(f);
-                            String name = newTheme.get("name");
-                            if (name != null) {
-                                Debug.message("Found external theme " + name);
-                                PropertyFile merged = new PropertyFile("/org/uecide/themes/Default.theme");
-                                merged.mergeData(newTheme);
-                                themes.put(newTheme.get("name"), merged);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public static PropertyFile getTheme() {
-        String selectedTheme = Preferences.get("theme.editor");
-        if (themes.get(selectedTheme) != null) {
-            return themes.get(selectedTheme);
-        } else {    
-            return themes.get("Default");
-        }
-    }
-
-    public static void setTheme(String t) {
-        if (themes.get(t) != null) {
-            Preferences.set("theme.editor", t);
-        }
-    }
-
-    public static HashMap<String, String> getThemeList() {
-        HashMap<String, String> themeList = new HashMap<String, String>();
-
-        for(String key : themes.keySet()) {
-            themeList.put(key, key);
-        }
-
-        return themeList;
-    }
-
     public static String getFileAsString(File f) {
         if (f == null) {
             return "";
@@ -2557,16 +2391,14 @@ public class Base {
     }
 
     public static String getIconsPath(String name) {
-        PropertyFile pf = iconSets.get(name);
-        if (pf == null) {
-            return null;
-        }
-        return pf.get("path");
+        return "/org/uecide/icons/" + name;
     }
 
     public static ImageIcon getIcon(String category, String name, int size) {
 
-        String path = getIconsPath(getIconSet());
+        String iconSet = getIconSet();
+
+        String path = getIconsPath(iconSet);
         if (path == null) {
             return null;
         }
@@ -2584,10 +2416,7 @@ public class Base {
     }
 
     public static String getIconSet() {
-        if (getTheme() == null) {
-            return null;
-        }
-        return getTheme().get("icon");
+        return Preferences.get("theme.icons");
     }
 
     public static void loadIconSets() {
@@ -2606,78 +2435,6 @@ public class Base {
                 iconSets.put(pf.get("name"), pf);
             }
         }
-    }
-
-    // Set a font on a component using the newer style font specification
-
-    public static void setFont(JComponent comp, String key) {
-
-        PropertyFile theme = getTheme();
-
-        String fontData = preferences.get(key);
-        if (fontData == null) {
-            fontData = theme.get(key);
-        }
-        if (fontData == null) {
-            return;
-        }
-
-        String[] bits = fontData.split(",");
-
-        Font f = comp.getFont();
-        Color fg = comp.getForeground();
-
-        // Work through each "bit" of the font and decide what it represents, then
-        // set the font data accordingly.
-        
-        for (String bit : bits) {
-            bit = bit.trim();
-
-            // Is it just a number?  If so it represents the size.
-            if (bit.matches("^\\d+$")) {
-                int size = 10;
-                try {
-                    size = Integer.parseInt(bit);
-                } catch (Exception ex) {
-                }
-                f = new Font(f.getFamily(), f.getStyle(), size);
-                continue;
-            }
-
-            // Now look for the style of the font
-            if (bit.equals("plain")) {
-                f = new Font(f.getFamily(), Font.PLAIN, f.getSize());
-                continue;
-            }
-            if (bit.equals("bold")) {
-                f = new Font(f.getFamily(), Font.BOLD, f.getSize());
-                continue;
-            }
-            if (bit.equals("italic")) {
-                f = new Font(f.getFamily(), Font.ITALIC, f.getSize());
-                continue;
-            }
-            if (bit.equals("bolditalic")) {
-                f = new Font(f.getFamily(), Font.BOLD | Font.ITALIC, f.getSize());
-                continue;
-            }
-
-            // Check for a colour starting with a #
-            if (bit.startsWith("#")) {
-                try {
-                    fg = new Color(Integer.parseInt(bit.substring(1), 16));
-                } catch(Exception ex) { 
-                }
-                continue;
-            }
-
-            // Anything else must be the name.
-            f = new Font(bit, f.getStyle(), f.getSize());
-        }
-
-        comp.setFont(f);
-        comp.setForeground(fg);
-
     }
 
     public static boolean yesno(String title, String question) {
@@ -2808,30 +2565,6 @@ public class Base {
         return out;
     }
 
-    public static HashMap<String, String> getLookAndFeelList() {
-        HashMap<String, String>lafs = new HashMap<String, String>();
-
-        for (Map.Entry<String, Class<?>> p : lookAndFeels.entrySet()) {
-            try {
-                Class<?> plg = p.getValue();
-                Method m = plg.getMethod("isCompatible");
-                Object[] foo = null;
-                boolean compat = (Boolean)m.invoke(null, foo);
-
-                if (compat) {
-                    m = plg.getMethod("getName");
-                    String name = (String)m.invoke(null, foo);
-                    lafs.put(p.getKey(), name);
-                }
-
-            } catch (Exception e) {
-            }
-
-        }
-
-        return lafs;
-    }
-
     public static HashMap<String, String> getIconSets() {
         HashMap<String, String> hash = new HashMap<String, String>();
 
@@ -2944,23 +2677,79 @@ public class Base {
 
     }
 
+    static String jTattooTheme(String name) {
+        String fontData = Preferences.get("theme.jtattoo.aafont");
+        String colourData = Preferences.get("theme.jtattoo.themes." + name);
+
+        if (fontData == null) fontData = "Default";
+        if (colourData == null) colourData = "Default";
+
+        String full = colourData + "-" + fontData;
+
+        full = full.replace("Default-", "");
+        full = full.replace("-Default", "");
+
+        return full;
+    }
+
     public static void setLookAndFeel() {
-        if(!headless) {
-            String laf = getTheme().getPlatformSpecific("laf");
-            try {
-                Class<?> plg = lookAndFeels.get(laf); //Preferences.get("theme.window"));
-                if (plg == null) {
-                    System.err.println("LAF " + laf + " NOT FOUND!");
-                    return;
-                }
-                Method m = plg.getMethod("applyLAF");
-                Object[] foo = null;
-                m.invoke(null, foo);
+        String lafname = Preferences.get("theme.laf");
 
-            } catch (Exception e) {
-            }
+        LookAndFeel laf = null;
 
+        if (lafname.equals("gnome")) { 
+            new GnomeLAF().applyLAF(); 
+        } else if (lafname.equals("acryl")) { 
+            com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme(jTattooTheme("acryl"));
+            new JTattooAcrylLAF().applyLAF(); 
+        } else if (lafname.equals("aero")) { 
+            com.jtattoo.plaf.aero.AeroLookAndFeel.setTheme(jTattooTheme("aero"));
+            new JTattooAeroLAF().applyLAF();
+        } else if (lafname.equals("aluminium")) { 
+            com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme(jTattooTheme("aluminium"));
+            new JTattooAluminiumLAF().applyLAF(); 
+        } else if (lafname.equals("bernstein")) { 
+            com.jtattoo.plaf.bernstein.BernsteinLookAndFeel.setTheme(jTattooTheme("bernstein"));
+            new JTattooBernsteinLAF().applyLAF(); 
+        } else if (lafname.equals("fast")) { 
+            com.jtattoo.plaf.fast.FastLookAndFeel.setTheme(jTattooTheme("fast"));
+            new JTattooFastLAF().applyLAF(); 
+        } else if (lafname.equals("graphite")) { 
+            com.jtattoo.plaf.graphite.GraphiteLookAndFeel.setTheme(jTattooTheme("graphite"));
+            new JTattooGraphiteLAF().applyLAF(); 
+        } else if (lafname.equals("hifi")) { 
+            com.jtattoo.plaf.hifi.HiFiLookAndFeel.setTheme(jTattooTheme("hifi"));
+            new JTattooHiFiLAF().applyLAF(); 
+        } else if (lafname.equals("luna")) { 
+            com.jtattoo.plaf.luna.LunaLookAndFeel.setTheme(jTattooTheme("luna"));
+            new JTattooLunaLAF().applyLAF(); 
+        } else if (lafname.equals("mcwin")) { 
+            com.jtattoo.plaf.mcwin.McWinLookAndFeel.setTheme(jTattooTheme("mcwin"));
+            new JTattooMcWinLAF().applyLAF(); 
+        } else if (lafname.equals("mint")) { 
+            com.jtattoo.plaf.mint.MintLookAndFeel.setTheme(jTattooTheme("mint"));
+            new JTattooMintLAF().applyLAF(); 
+        } else if (lafname.equals("noire")) { 
+            com.jtattoo.plaf.noire.NoireLookAndFeel.setTheme(jTattooTheme("noire"));
+            new JTattooNoireLAF().applyLAF(); 
+        } else if (lafname.equals("smart")) { 
+            com.jtattoo.plaf.smart.SmartLookAndFeel.setTheme(jTattooTheme("smart"));
+            new JTattooSmartLAF().applyLAF(); 
         }
+        else if (lafname.equals("liquid")) { new LiquidLAF().applyLAF(); }
+        else if (lafname.equals("metal")) { new MetalLAF().applyLAF(); }
+        else if (lafname.equals("motif")) { new MotifLAF().applyLAF(); }
+        else if (lafname.equals("nimbus")) { new NimbusLAF().applyLAF(); }
+        else if (lafname.equals("office2003")) { new Office2003LAF().applyLAF(); }
+        else if (lafname.equals("officexp")) { new OfficeXPLAF().applyLAF(); }
+        else if (lafname.equals("systemdefault")) { new SystemDefaultLAF().applyLAF(); }
+        else if (lafname.equals("tinyforest")) { new TinyForestLAF().applyLAF(); }
+        else if (lafname.equals("tinygolden")) { new TinyGoldenLAF().applyLAF(); }
+        else if (lafname.equals("tinynightly")) { new TinyNightlyLAF().applyLAF(); }
+        else if (lafname.equals("tinyplastic")) { new TinyPlasticLAF().applyLAF(); }
+        else if (lafname.equals("tinysilver")) { new TinySilverLAF().applyLAF(); }
+        else if (lafname.equals("tinyunicode")) { new TinyUnicodeLAF().applyLAF(); }
+        else if (lafname.equals("vs2005")) { new VisualStudio2005LAF().applyLAF(); }
     }
 
     public static boolean isQuiet() {
@@ -3129,9 +2918,6 @@ public class Base {
 
         Debug.message("Loading icon sets");
         loadIconSets();
-
-        Debug.message("Loading themes");
-        loadThemes();
 
 
         Debug.message("Loading libraries");

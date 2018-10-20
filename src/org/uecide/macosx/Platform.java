@@ -51,15 +51,6 @@ public class Platform extends org.uecide.Platform {
 
     public void setLookAndFeel() {
         try {
-            // Use the Quaqua L & F on OS X to make JFileChooser less awful
-            String laf = Base.theme.get("window.laf.macosx");
-
-            if((laf != null) && (!laf.equals("default"))) {
-                UIManager.setLookAndFeel(laf);
-            } else {
-                UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
-            }
-
             // undo quaqua trying to fix the margins, since we've already
             // hacked that in, bit by bit, over the years
             UIManager.put("Component.visualMargin", new Insets(1, 1, 1, 1));
@@ -77,15 +68,16 @@ public class Platform extends org.uecide.Platform {
 
 
     public File getSettingsFolder() {
-        return new File(getLibraryFolder(), Base.theme.get("product"));
+        return new File(getLibraryFolder(), "uecide");
     }
 
 
     public File getDefaultSketchbookFolder() {
-        return new File(getDocumentsFolder(), Base.theme.get("product"));
+        return new File(getDocumentsFolder(), "uecide");
     }
 
 
+    @SuppressWarnings("deprecation")
     public void openURL(String url) {
         try {
             Float javaVersion = new Float(System.getProperty("java.version").substring(0, 3)).floatValue();

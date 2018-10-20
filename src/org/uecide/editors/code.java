@@ -290,8 +290,8 @@ public class code extends JPanel implements EditorBase {
                     if (scale < 1) scale = 1;
                     if (scale > 1000) scale = 1000;
                     Preferences.setInteger("theme.fonts.scale", scale);
-                    textArea.setFont(Base.getTheme().getFont("editor.font"));
-                    gutter.setLineNumberFont(Base.getTheme().getFont("editor.font.linenumber"));
+                    textArea.setFont(Preferences.getFont("theme.editor.fonts.default.font"));
+                    gutter.setLineNumberFont(Preferences.getFont("theme.gutter.font"));
                 } else if (e.isShiftDown()) {
                     // Horizontal scrolling
                     Adjustable adj = scrollPane.getHorizontalScrollBar();
@@ -384,11 +384,8 @@ public class code extends JPanel implements EditorBase {
         boolean external = Preferences.getBoolean("editor.external");
         textArea.setEditable(!external);
         textArea.setCodeFoldingEnabled(true);
-        textArea.setAntiAliasingEnabled(false);
-        textArea.setAntiAliasingEnabled(Preferences.getBoolean("theme.fonts.editor_aa"));
-
-
-        PropertyFile theme = Base.getTheme();
+        textArea.setAntiAliasingEnabled(true);
+//        textArea.setAntiAliasingEnabled(Preferences.getBoolean("theme.fonts.editor_aa"));
 
         textArea.setMarkOccurrences(Preferences.getBoolean("editor.mark"));
 
@@ -407,116 +404,67 @@ public class code extends JPanel implements EditorBase {
 
         scrollPane.setFoldIndicatorEnabled(true);
         scrollPane.setIconRowHeaderEnabled(true);
-        setBackground(theme.getColor("editor.bgcolor"));
-        textArea.setBackground(theme.getColor("editor.bgcolor"));
+        setBackground(Preferences.getColor("theme.editor.colors.background"));
+        textArea.setBackground(Preferences.getColor("theme.editor.colors.background"));
 
-        textArea.setForeground(theme.getColor("editor.fgcolor"));
-        textArea.setFont(theme.getFont("editor.font"));
+        textArea.setForeground(Preferences.getColor("theme.editor.colors.foreground"));
+        textArea.setFont(Preferences.getFont("theme.editor.fonts.default.font"));
 
         gutter = scrollPane.getGutter();
-        gutter.setAntiAliasingEnabled(false);
-        gutter.setAntiAliasingEnabled(Preferences.getBoolean("theme.fonts.editor_aa"));
+        gutter.setAntiAliasingEnabled(true);
+//        gutter.setAntiAliasingEnabled(Preferences.getBoolean("theme.fonts.editor_aa"));
 
 
-        gutter.setLineNumberFont(theme.getFont("editor.font.linenumber"));
+        gutter.setLineNumberFont(Preferences.getFont("theme.editor.gutter.font"));
+        gutter.setBackground(Preferences.getColor("theme.editor.gutter.background"));
+        gutter.setLineNumberColor(Preferences.getColor("theme.editor.gutter.foreground"));
+        gutter.setBorderColor(Preferences.getColor("theme.editor.gutter.foreground"));
+        gutter.setFoldBackground(Preferences.getColor("theme.editor.gutter.background"));
+        gutter.setFoldIndicatorForeground(Preferences.getColor("theme.editor.gutter.foreground"));
 
-        if(theme.get("editor.gutter.bgcolor") != null) {
-            gutter.setBackground(theme.getColor("editor.gutter.bgcolor"));
+        textArea.setCurrentLineHighlightColor(Preferences.getColor("theme.editor.highlight.linecolor"));
+        textArea.setFadeCurrentLineHighlight(Preferences.getBoolean("theme.editor.highlight.linefade"));
+        textArea.setHighlightCurrentLine(Preferences.getBoolean("theme.editor.highlight.lineenabled"));
+        textArea.setRoundedSelectionEdges(Preferences.getBoolean("theme.editor.highliht.rounded"));
+
+        textArea.setCaretColor(Preferences.getColor("theme.editor.caret.color"));
+
+        String caretStyle = Preferences.get("theme.editor.caret.insert");
+
+        if(caretStyle.equals("box")) {
+            textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_BORDER_STYLE);
+        } else if(caretStyle.equals("block")) {
+            textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_STYLE);
+        } else if(caretStyle.equals("line")) {
+            textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.VERTICAL_LINE_STYLE);
+        } else if(caretStyle.equals("thick")) {
+            textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
+        } else if(caretStyle.equals("underline")) {
+            textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.UNDERLINE_STYLE);
         }
 
-        if(theme.get("editor.gutter.fgcolor") != null) {
-            gutter.setLineNumberColor(theme.getColor("editor.gutter.fgcolor"));
+        caretStyle = Preferences.get("theme.editor.caret.replace");
+        if(caretStyle.equals("box")) {
+            textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.BLOCK_BORDER_STYLE);
+        } else if(caretStyle.equals("block")) {
+            textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.BLOCK_STYLE);
+        } else if(caretStyle.equals("line")) {
+            textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.VERTICAL_LINE_STYLE);
+        } else if(caretStyle.equals("thick")) {
+            textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
+        } else if(caretStyle.equals("underline")) {
+            textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.UNDERLINE_STYLE);
         }
 
-        if(theme.get("editor.gutter.bordercolor") != null) {
-            gutter.setBorderColor(theme.getColor("editor.gutter.bordercolor"));
-        }
+        textArea.setMarkOccurrencesColor(Preferences.getColor("theme.editor.highlight.markall"));
+        textArea.setMarkAllHighlightColor(Preferences.getColor("theme.editor.highlight.markall"));
+        textArea.setPaintMarkOccurrencesBorder(Preferences.getBoolean("theme.editor.highlight.markallborder"));
 
-        if(theme.get("editor.fold.bgcolor") != null) {
-            gutter.setFoldBackground(theme.getColor("editor.fold.bgcolor"));
-        }
-
-        if(theme.get("editor.fold.fgcolor") != null) {
-            gutter.setFoldIndicatorForeground(theme.getColor("editor.fold.fgcolor"));
-        }
-
-        if(theme.get("editor.line.bgcolor") != null) {
-            textArea.setCurrentLineHighlightColor(theme.getColor("editor.line.bgcolor"));
-        }
-
-
-        textArea.setFadeCurrentLineHighlight(theme.getBoolean("editor.line.fade"));
-        textArea.setHighlightCurrentLine(theme.getBoolean("editor.line.enabled"));
-        textArea.setRoundedSelectionEdges(theme.getBoolean("editor.select.rounded"));
-
-        if(theme.get("editor.caret.fgcolor") != null) {
-            textArea.setCaretColor(theme.getColor("editor.caret.fgcolor"));
-        }
-
-        if(theme.get("editor.caret.style.insert") != null) {
-            if(theme.get("editor.caret.style.insert").equals("box")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_BORDER_STYLE);
-            }
-
-            if(theme.get("editor.caret.style.insert").equals("block")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.BLOCK_STYLE);
-            }
-
-            if(theme.get("editor.caret.style.insert").equals("line")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.VERTICAL_LINE_STYLE);
-            }
-
-            if(theme.get("editor.caret.style.insert").equals("thick")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
-            }
-
-            if(theme.get("editor.caret.style.insert").equals("underline")) {
-                textArea.setCaretStyle(RSyntaxTextArea.INSERT_MODE, CaretStyle.UNDERLINE_STYLE);
-            }
-        }
-
-        if(theme.get("editor.caret.style.replace") != null) {
-            if(theme.get("editor.caret.style.replace").equals("box")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.BLOCK_BORDER_STYLE);
-            }
-
-            if(theme.get("editor.caret.style.replace").equals("block")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.BLOCK_STYLE);
-            }
-
-            if(theme.get("editor.caret.style.replace").equals("line")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.VERTICAL_LINE_STYLE);
-            }
-
-            if(theme.get("editor.caret.style.replace").equals("thick")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.THICK_VERTICAL_LINE_STYLE);
-            }
-
-            if(theme.get("editor.caret.style.replace").equals("underline")) {
-                textArea.setCaretStyle(RSyntaxTextArea.OVERWRITE_MODE, CaretStyle.UNDERLINE_STYLE);
-            }
-        }
-
-        if(theme.get("editor.markall.bgcolor") != null) {
-            textArea.setMarkOccurrencesColor(theme.getColor("editor.markall.bgcolor"));
-            textArea.setMarkAllHighlightColor(theme.getColor("editor.markall.bgcolor"));
-        }
-
-        textArea.setPaintMarkOccurrencesBorder(theme.getBoolean("editor.markall.border"));
-
-        if(theme.get("editor.bracket.bgcolor") != null) {
-            textArea.setMatchedBracketBGColor(theme.getColor("editor.bracket.bgcolor"));
-        }
-
-        if(theme.get("editor.bracket.bordercolor") != null) {
-            textArea.setMatchedBracketBorderColor(theme.getColor("editor.bracket.bordercolor"));
-        }
-
-        textArea.setPaintMatchedBracketPair(theme.getBoolean("editor.bracket.pair"));
-
-        if(theme.get("editor.select.bgcolor") != null) {
-            textArea.setSelectionColor(theme.getColor("editor.select.bgcolor"));
-        }
+        textArea.setMatchedBracketBGColor(Preferences.getColor("theme.editor.highlight.bracketbg"));
+        textArea.setMatchedBracketBorderColor(Preferences.getColor("theme.editor.highlight.bracketborder"));
+        textArea.setPaintMatchedBracketPair(Preferences.getBoolean("theme.editor.highlight.border"));
+        textArea.setSelectionColor(Preferences.getColor("theme.editor.highlight.select"));
+        
 
         scheme = textArea.getSyntaxScheme();
         applyThemeSettings();
@@ -576,268 +524,112 @@ public class code extends JPanel implements EditorBase {
     }
 
     public void applyThemeFGColor(int index, String cs) {
-        if(Base.getTheme().get(cs) != null) {
-            Color c = Base.getTheme().getColor(cs);
-            org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
-            s.foreground = c;
-            scheme.setStyle(index, s);
+        String cspec = Preferences.get(cs);
+        if (cspec == null) return;
+        if (cspec.equals("transparent")) return;
+        if (cspec.equals("")) return;
+        if (cspec.equals("none")) return;
+
+        if (cspec.equals("default")) {
+            cs = "theme.editor.colors.foreground";
         }
+        
+        Color c = Preferences.getColor(cs);
+        org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
+        s.foreground = c;
+        scheme.setStyle(index, s);
     }
 
     public void applyThemeBGColor(int index, String cs) {
-        if(Base.getTheme().get(cs) != null) {
-            Color c = Base.getTheme().getColor(cs);
-            org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
-            s.background = c;
-            scheme.setStyle(index, s);
+        String cspec = Preferences.get(cs);
+        if (cspec == null) return;
+        if (cspec.equals("transparent")) return;
+        if (cspec.equals("")) return;
+        if (cspec.equals("none")) return;
+
+        if (cspec.equals("default")) {
+            cs = "theme.editor.colors.background";
         }
+
+        Color c = Preferences.getColor(cs);
+        org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
+        s.background = c;
+        scheme.setStyle(index, s);
     }
 
-    public void applyThemeFont(int index, String fs) {
-        if(Base.getTheme().get(fs) != null) {
-            Font f = Base.getTheme().getFont(fs);
-            org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
-            s.font = f;
-            scheme.setStyle(index, s);
+    public void applyThemeFontFace(int index, String fs) {
+        String fspec = Preferences.get(fs);
+        Font f = Preferences.getFont(fs);
+        if (fspec == null) {
+            f = Preferences.getFont("theme.editor.fonts.default.font");
+        } else if (fspec.equals("default")) {
+            f = Preferences.getFont("theme.editor.fonts.default.font");
+        } else if (fspec.equals("")) {
+            f = Preferences.getFont("theme.editor.fonts.default.font");
         }
+
+        org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
+        s.font = f;
+        scheme.setStyle(index, s);
     }
 
     public void applyThemeUnderline(int index, String us) {
-        if(Base.getTheme().get(us) != null) {
-            boolean u = Base.getTheme().getBoolean(us);
-            org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
-            s.underline = u;
-            scheme.setStyle(index, s);
+        boolean u = Preferences.getBoolean(us);
+        org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
+        s.underline = u;
+        scheme.setStyle(index, s);
+    }
+
+    public void applyThemeBold(int index, String us) {
+        boolean b = Preferences.getBoolean(us);
+        org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
+        Font f = s.font;
+        if (b) {
+            s.font = f.deriveFont(Font.BOLD);
         }
+        scheme.setStyle(index, s);
+    }
+
+
+    public void applyThemeFont(int section, String type) {
+        applyThemeFGColor(section, "theme.editor.fonts." + type + ".foreground");
+        applyThemeBGColor(section, "theme.editor.fonts." + type + ".background");
+        applyThemeFontFace(section, "theme.editor.fonts." + type + ".font");
+        applyThemeUnderline(section, "theme.editor.fonts." + type + ".underline");
+        applyThemeBold(section, "theme.editor.fonts." + type + ".bold");
     }
 
     public void applyThemeSettings() {
 
-        // Annotations
-        applyThemeFGColor(SyntaxScheme.ANNOTATION,                      "editor.annotation.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ANNOTATION,                      "editor.annotation.bgcolor");
-        applyThemeFont(SyntaxScheme.ANNOTATION,                         "editor.annotation.font");
-        applyThemeUnderline(SyntaxScheme.ANNOTATION,                    "editor.annotation.underline");
-
-        // Global comments
-        applyThemeFGColor(SyntaxScheme.COMMENT_DOCUMENTATION,           "editor.comment.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_DOCUMENTATION,           "editor.comment.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_DOCUMENTATION,              "editor.comment.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_DOCUMENTATION,         "editor.comment.underline");
-        applyThemeFGColor(SyntaxScheme.COMMENT_EOL,                     "editor.comment.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_EOL,                     "editor.comment.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_EOL,                        "editor.comment.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_EOL,                   "editor.comment.underline");
-        applyThemeFGColor(SyntaxScheme.COMMENT_KEYWORD,                 "editor.comment.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_KEYWORD,                 "editor.comment.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_KEYWORD,                    "editor.comment.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_KEYWORD,               "editor.comment.underline");
-        applyThemeFGColor(SyntaxScheme.COMMENT_MARKUP,                  "editor.comment.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_MARKUP,                  "editor.comment.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_MARKUP,                     "editor.comment.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_MARKUP,                "editor.comment.underline");
-        applyThemeFGColor(SyntaxScheme.COMMENT_MULTILINE,               "editor.comment.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_MULTILINE,               "editor.comment.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_MULTILINE,                  "editor.comment.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_MULTILINE,             "editor.comment.underline");
-
-        applyThemeFGColor(SyntaxScheme.MARKUP_TAG_NAME,                 "editor.header.fgcolor");
-        applyThemeBGColor(SyntaxScheme.MARKUP_TAG_NAME,                 "editor.header.bgcolor");
-        applyThemeFont(SyntaxScheme.MARKUP_TAG_NAME,                    "editor.header.font");
-        applyThemeUnderline(SyntaxScheme.MARKUP_TAG_NAME,               "editor.header.underline");
-
-
-        // Fine granied comments
-        applyThemeFGColor(SyntaxScheme.COMMENT_DOCUMENTATION,           "editor.comment.documentation.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_DOCUMENTATION,           "editor.comment.documentation.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_DOCUMENTATION,              "editor.comment.documentation.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_DOCUMENTATION,         "editor.comment.documentation.underline");
-        applyThemeFGColor(SyntaxScheme.COMMENT_EOL,                     "editor.comment.eol.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_EOL,                     "editor.comment.eol.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_EOL,                        "editor.comment.eol.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_EOL,                   "editor.comment.eol.underline");
-        applyThemeFGColor(SyntaxScheme.COMMENT_KEYWORD,                 "editor.comment.keyword.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_KEYWORD,                 "editor.comment.keyword.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_KEYWORD,                    "editor.comment.keyword.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_KEYWORD,               "editor.comment.keyword.underline");
-        applyThemeFGColor(SyntaxScheme.COMMENT_MARKUP,                  "editor.comment.markup.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_MARKUP,                  "editor.comment.markup.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_MARKUP,                     "editor.comment.markup.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_MARKUP,                "editor.comment.markup.underline");
-        applyThemeFGColor(SyntaxScheme.COMMENT_MULTILINE,               "editor.comment.multiline.fgcolor");
-        applyThemeBGColor(SyntaxScheme.COMMENT_MULTILINE,               "editor.comment.multiline.bgcolor");
-        applyThemeFont(SyntaxScheme.COMMENT_MULTILINE,                  "editor.comment.multiline.font");
-        applyThemeUnderline(SyntaxScheme.COMMENT_MULTILINE,             "editor.comment.multiline.underline");
-
-        // Data Type
-        applyThemeFGColor(SyntaxScheme.DATA_TYPE,                       "editor.datatype.fgcolor");
-        applyThemeBGColor(SyntaxScheme.DATA_TYPE,                       "editor.datatype.bgcolor");
-        applyThemeFont(SyntaxScheme.DATA_TYPE,                          "editor.datatype.font");
-        applyThemeUnderline(SyntaxScheme.DATA_TYPE,                     "editor.datatype.underline");
-
-        // Errors global
-        applyThemeFGColor(SyntaxScheme.ERROR_CHAR,                      "editor.error.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ERROR_CHAR,                      "editor.error.bgcolor");
-        applyThemeFont(SyntaxScheme.ERROR_CHAR,                         "editor.error.font");
-        applyThemeUnderline(SyntaxScheme.ERROR_CHAR,                    "editor.error.underline");
-        applyThemeFGColor(SyntaxScheme.ERROR_IDENTIFIER,                "editor.error.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ERROR_IDENTIFIER,                "editor.error.bgcolor");
-        applyThemeFont(SyntaxScheme.ERROR_IDENTIFIER,                   "editor.error.font");
-        applyThemeUnderline(SyntaxScheme.ERROR_IDENTIFIER,              "editor.error.underline");
-        applyThemeFGColor(SyntaxScheme.ERROR_NUMBER_FORMAT,             "editor.error.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ERROR_NUMBER_FORMAT,             "editor.error.bgcolor");
-        applyThemeFont(SyntaxScheme.ERROR_NUMBER_FORMAT,                "editor.error.font");
-        applyThemeUnderline(SyntaxScheme.ERROR_NUMBER_FORMAT,           "editor.error.underline");
-        applyThemeFGColor(SyntaxScheme.ERROR_STRING_DOUBLE,             "editor.error.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ERROR_STRING_DOUBLE,             "editor.error.bgcolor");
-        applyThemeFont(SyntaxScheme.ERROR_STRING_DOUBLE,                "editor.error.font");
-        applyThemeUnderline(SyntaxScheme.ERROR_STRING_DOUBLE,           "editor.error.underline");
-
-        // Errors fine grained
-        applyThemeFGColor(SyntaxScheme.ERROR_CHAR,                      "editor.error.char.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ERROR_CHAR,                      "editor.error.char.bgcolor");
-        applyThemeFont(SyntaxScheme.ERROR_CHAR,                         "editor.error.char.font");
-        applyThemeUnderline(SyntaxScheme.ERROR_CHAR,                    "editor.error.char.underline");
-        applyThemeFGColor(SyntaxScheme.ERROR_IDENTIFIER,                "editor.error.identifier.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ERROR_IDENTIFIER,                "editor.error.identifier.bgcolor");
-        applyThemeFont(SyntaxScheme.ERROR_IDENTIFIER,                   "editor.error.identifier.font");
-        applyThemeUnderline(SyntaxScheme.ERROR_IDENTIFIER,              "editor.error.identifier.underline");
-        applyThemeFGColor(SyntaxScheme.ERROR_NUMBER_FORMAT,             "editor.error.number.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ERROR_NUMBER_FORMAT,             "editor.error.number.bgcolor");
-        applyThemeFont(SyntaxScheme.ERROR_NUMBER_FORMAT,                "editor.error.number.font");
-        applyThemeUnderline(SyntaxScheme.ERROR_NUMBER_FORMAT,           "editor.error.number.underline");
-        applyThemeFGColor(SyntaxScheme.ERROR_STRING_DOUBLE,             "editor.error.string.fgcolor");
-        applyThemeBGColor(SyntaxScheme.ERROR_STRING_DOUBLE,             "editor.error.string.bgcolor");
-        applyThemeFont(SyntaxScheme.ERROR_STRING_DOUBLE,                "editor.error.string.font");
-        applyThemeUnderline(SyntaxScheme.ERROR_STRING_DOUBLE,           "editor.error.string.underline");
-
-        // Function
-        applyThemeFGColor(SyntaxScheme.FUNCTION,                        "editor.function.fgcolor");
-        applyThemeBGColor(SyntaxScheme.FUNCTION,                        "editor.function.bgcolor");
-        applyThemeFont(SyntaxScheme.FUNCTION,                           "editor.function.font");
-        applyThemeUnderline(SyntaxScheme.FUNCTION,                      "editor.function.underline");
-
-        // Identifier
-        applyThemeFGColor(SyntaxScheme.IDENTIFIER,                      "editor.identifier.fgcolor");
-        applyThemeBGColor(SyntaxScheme.IDENTIFIER,                      "editor.identifier.bgcolor");
-        applyThemeFont(SyntaxScheme.IDENTIFIER,                         "editor.identifier.font");
-        applyThemeUnderline(SyntaxScheme.IDENTIFIER,                    "editor.identifier.underline");
-
-        // Literal globals
-        applyThemeFGColor(SyntaxScheme.LITERAL_BACKQUOTE,               "editor.literal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_BACKQUOTE,               "editor.literal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_BACKQUOTE,                  "editor.literal.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_BACKQUOTE,             "editor.literal.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_BOOLEAN,                 "editor.literal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_BOOLEAN,                 "editor.literal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_BOOLEAN,                    "editor.literal.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_BOOLEAN,               "editor.literal.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_CHAR,                    "editor.literal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_CHAR,                    "editor.literal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_CHAR,                       "editor.literal.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_CHAR,                  "editor.literal.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_BINARY,           "editor.literal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_BINARY,           "editor.literal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_BINARY,              "editor.literal.font");
-        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,      "editor.literal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,      "editor.literal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,         "editor.literal.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,    "editor.literal.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_FLOAT,            "editor.literal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_FLOAT,            "editor.literal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_FLOAT,               "editor.literal.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_NUMBER_FLOAT,          "editor.literal.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL,      "editor.literal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL,      "editor.literal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL,         "editor.literal.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL,    "editor.literal.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE,     "editor.literal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE,     "editor.literal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE,        "editor.literal.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE,   "editor.literal.underline");
-
-        // Literal fine grained
-        applyThemeFGColor(SyntaxScheme.LITERAL_BACKQUOTE,               "editor.literal.backquote.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_BACKQUOTE,               "editor.literal.backquote.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_BACKQUOTE,                  "editor.literal.backquote.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_BACKQUOTE,             "editor.literal.backquote.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_BOOLEAN,                 "editor.literal.boolean.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_BOOLEAN,                 "editor.literal.boolean.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_BOOLEAN,                    "editor.literal.boolean.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_BOOLEAN,               "editor.literal.boolean.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_CHAR,                    "editor.literal.char.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_CHAR,                    "editor.literal.char.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_CHAR,                       "editor.literal.char.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_CHAR,                  "editor.literal.char.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_BINARY,           "editor.literal.binary.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_BINARY,           "editor.literal.binary.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_BINARY,              "editor.literal.binary.font");
-        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,      "editor.literal.decimal.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,      "editor.literal.decimal.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,         "editor.literal.decimal.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT,    "editor.literal.decimal.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_FLOAT,            "editor.literal.float.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_FLOAT,            "editor.literal.float.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_FLOAT,               "editor.literal.float.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_NUMBER_FLOAT,          "editor.literal.float.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL,      "editor.literal.hex.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL,      "editor.literal.hex.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL,         "editor.literal.hex.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL,    "editor.literal.hex.underline");
-        applyThemeFGColor(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE,     "editor.literal.string.fgcolor");
-        applyThemeBGColor(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE,     "editor.literal.string.bgcolor");
-        applyThemeFont(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE,        "editor.literal.string.font");
-        applyThemeUnderline(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE,   "editor.literal.string.underline");
-
-        // Operators
-        applyThemeFGColor(SyntaxScheme.OPERATOR,                        "editor.operator.fgcolor");
-        applyThemeBGColor(SyntaxScheme.OPERATOR,                        "editor.operator.bgcolor");
-        applyThemeFont(SyntaxScheme.OPERATOR,                           "editor.operator.font");
-        applyThemeUnderline(SyntaxScheme.OPERATOR,                      "editor.operator.underline");
-
-        // Preprocessor
-        applyThemeFGColor(SyntaxScheme.PREPROCESSOR,                    "editor.preprocessor.fgcolor");
-        applyThemeBGColor(SyntaxScheme.PREPROCESSOR,                    "editor.preprocessor.bgcolor");
-        applyThemeFont(SyntaxScheme.PREPROCESSOR,                       "editor.preprocessor.font");
-        applyThemeUnderline(SyntaxScheme.PREPROCESSOR,                  "editor.preprocessor.underline");
-
-        // Regex
-        applyThemeFGColor(SyntaxScheme.REGEX,                           "editor.regex.fgcolor");
-        applyThemeBGColor(SyntaxScheme.REGEX,                           "editor.regex.bgcolor");
-        applyThemeFont(SyntaxScheme.REGEX,                              "editor.regex.font");
-        applyThemeUnderline(SyntaxScheme.REGEX,                         "editor.regex.underline");
-
-        // Reserved Word global
-        applyThemeFGColor(SyntaxScheme.RESERVED_WORD,                   "editor.reserved.fgcolor");
-        applyThemeBGColor(SyntaxScheme.RESERVED_WORD,                   "editor.reserved.bgcolor");
-        applyThemeFont(SyntaxScheme.RESERVED_WORD,                      "editor.reserved.font");
-        applyThemeUnderline(SyntaxScheme.RESERVED_WORD,                 "editor.reserved.underline");
-        applyThemeFGColor(SyntaxScheme.RESERVED_WORD_2,                 "editor.reserved.fgcolor");
-        applyThemeBGColor(SyntaxScheme.RESERVED_WORD_2,                 "editor.reserved.bgcolor");
-        applyThemeFont(SyntaxScheme.RESERVED_WORD_2,                    "editor.reserved.font");
-        applyThemeUnderline(SyntaxScheme.RESERVED_WORD_2,               "editor.reserved.underline");
-
-        // Reserved Word fine grained
-        applyThemeFGColor(SyntaxScheme.RESERVED_WORD,                   "editor.reserved.1.fgcolor");
-        applyThemeBGColor(SyntaxScheme.RESERVED_WORD,                   "editor.reserved.1.bgcolor");
-        applyThemeFont(SyntaxScheme.RESERVED_WORD,                      "editor.reserved.1.font");
-        applyThemeUnderline(SyntaxScheme.RESERVED_WORD,                 "editor.reserved.1.underline");
-        applyThemeFGColor(SyntaxScheme.RESERVED_WORD_2,                 "editor.reserved.2.fgcolor");
-        applyThemeBGColor(SyntaxScheme.RESERVED_WORD_2,                 "editor.reserved.2.bgcolor");
-        applyThemeFont(SyntaxScheme.RESERVED_WORD_2,                    "editor.reserved.2.font");
-        applyThemeUnderline(SyntaxScheme.RESERVED_WORD_2,               "editor.reserved.2.underline");
-
-        // Variable
-        applyThemeFGColor(SyntaxScheme.VARIABLE,                        "editor.variable.fgcolor");
-        applyThemeBGColor(SyntaxScheme.VARIABLE,                        "editor.variable.bgcolor");
-        applyThemeFont(SyntaxScheme.VARIABLE,                           "editor.variable.font");
-        applyThemeUnderline(SyntaxScheme.VARIABLE,                      "editor.variable.underline");
-
-        applyThemeFGColor(SyntaxScheme.SEPARATOR,                       "editor.brackets.fgcolor");
-        applyThemeBGColor(SyntaxScheme.SEPARATOR,                       "editor.brackets.bgcolor");
-        applyThemeFont(SyntaxScheme.SEPARATOR,                          "editor.brackets.font");
-        applyThemeUnderline(SyntaxScheme.SEPARATOR,                     "editor.brackets.underline");
-
+        applyThemeFont(SyntaxScheme.ANNOTATION, "annotation");
+        applyThemeFont(SyntaxScheme.COMMENT_DOCUMENTATION,  "comment");
+        applyThemeFont(SyntaxScheme.COMMENT_EOL,  "comment");
+        applyThemeFont(SyntaxScheme.COMMENT_KEYWORD, "comment");
+        applyThemeFont(SyntaxScheme.COMMENT_MARKUP, "comment");
+        applyThemeFont(SyntaxScheme.COMMENT_MULTILINE, "comment");
+        applyThemeFont(SyntaxScheme.MARKUP_TAG_NAME, "tags");
+        applyThemeFont(SyntaxScheme.DATA_TYPE, "datatype");
+        applyThemeFont(SyntaxScheme.ERROR_CHAR, "error");
+        applyThemeFont(SyntaxScheme.ERROR_IDENTIFIER, "error");
+        applyThemeFont(SyntaxScheme.ERROR_NUMBER_FORMAT, "error");
+        applyThemeFont(SyntaxScheme.ERROR_STRING_DOUBLE, "error");
+        applyThemeFont(SyntaxScheme.FUNCTION, "function");
+        applyThemeFont(SyntaxScheme.IDENTIFIER, "identifier");
+        applyThemeFont(SyntaxScheme.LITERAL_BACKQUOTE, "literal");
+        applyThemeFont(SyntaxScheme.LITERAL_BOOLEAN, "literal");
+        applyThemeFont(SyntaxScheme.LITERAL_CHAR, "literal");
+        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_BINARY, "literal");
+        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_DECIMAL_INT, "literal");
+        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_FLOAT, "literal");
+        applyThemeFont(SyntaxScheme.LITERAL_NUMBER_HEXADECIMAL, "literal");
+        applyThemeFont(SyntaxScheme.LITERAL_STRING_DOUBLE_QUOTE, "literal");
+        applyThemeFont(SyntaxScheme.OPERATOR, "operator");
+        applyThemeFont(SyntaxScheme.PREPROCESSOR, "preprocessor");
+        applyThemeFont(SyntaxScheme.REGEX, "regex");
+        applyThemeFont(SyntaxScheme.RESERVED_WORD, "reserved");
+        applyThemeFont(SyntaxScheme.RESERVED_WORD_2, "reserved");
+        applyThemeFont(SyntaxScheme.VARIABLE, "variable");
+        applyThemeFont(SyntaxScheme.SEPARATOR, "brackets");
 
         textArea.setSyntaxScheme(scheme);
     }
@@ -860,7 +652,8 @@ public class code extends JPanel implements EditorBase {
 
         reloadFile();
     }
-
+    
+    @SuppressWarnings("deprecation")
     public void populateMenu(JMenu menu, int flags) {
         JMenuItem item;
         int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();

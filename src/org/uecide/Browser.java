@@ -127,13 +127,11 @@ public class Browser extends JTextPane implements HyperlinkListener {
         sb.append("<head>\n");
         sb.append("<style>\n");
 
-        PropertyFile themeData = Base.getTheme().getChildren("browser");
-
-        for (Object keyo : themeData.keySet()) {
-            String key = (String)keyo;
-            String data = themeData.get(key);
-            sb.append(key + " {" + data + "}\n");
-        }
+//        for (Object keyo : themeData.keySet()) {
+//            String key = (String)keyo;
+//            String data = themeData.get(key);
+//            sb.append(key + " {" + data + "}\n");
+//        }
 
         sb.append("</style>\n");
         sb.append("</head>\n");

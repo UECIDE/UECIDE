@@ -453,11 +453,16 @@ public class PropertyFile {
      *  * 1
      *  All other values are false.
      */
+
     public boolean getBoolean(String attribute) {
+        return getBoolean(attribute, false);
+    }
+
+    public boolean getBoolean(String attribute, boolean def) {
         String value = get(attribute);
 
         if(value == null) {
-            return false;
+            return def;
         }
 
         if(value.toLowerCase().equals("true")) {

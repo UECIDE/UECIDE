@@ -37,7 +37,7 @@ import java.util.UUID;
 public class vc_uecide implements VariableCommand {
     public String main(Context sketch, String args) {
         if (args.equals("name")) {
-            return Base.theme.get("product");
+            return "UECIDE";
         }
         if (args.equals("version")) {
             return Base.systemVersion.toString();

@@ -459,7 +459,7 @@ public class Sketch {
         editor = e;
         ctx.setEditor(e);
         if (editor != null) {
-            editor.setTitle(Base.theme.get("product.cap") + " | " + sketchName);
+            editor.setTitle("UECIDE | " + sketchName);
             PropertyFile props = ctx.getMerged();
             if (props.get("sketch.window.x") != null) {
                 editor.setXPosition(props.getInteger("sketch.window.x"));
@@ -1725,7 +1725,7 @@ public class Sketch {
             }
 
             editor.updateTree();
-            editor.setTitle(Base.theme.get("product.cap") + " | " + sketchName);
+            editor.setTitle("UECIDE | " + sketchName);
         }
 
         save();
@@ -2726,6 +2726,7 @@ public class Sketch {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     public boolean compileCore(ArrayList<File> core, String name) {
         PropertyFile props = ctx.getMerged();
         String prefix = ctx.parseString(props.get("compiler.library.prefix","lib"));
@@ -3352,7 +3353,6 @@ public class Sketch {
             return;
         }
 
-        PropertyFile theme = Base.getTheme();
         PropertyFile props = ctx.getMerged();
 
         String eRec = props.get("compiler.error");
@@ -3380,7 +3380,7 @@ public class Sketch {
 
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(errorLineNumber, theme.getColor("editor.compile.error.bgcolor"));
+                            eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.error"));
                             eb.flagLine(errorLineNumber, Base.getIcon("flags", "fixme", 16), 0x1000);
                         }
 
@@ -3409,7 +3409,7 @@ public class Sketch {
 
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(warningLineNumber, theme.getColor("editor.compile.warning.bgcolor"));
+                            eb.highlightLine(warningLineNumber, Preferences.getColor("theme.editor.colors.warning"));
                             eb.flagLine(warningLineNumber, Base.getIcon("flags", "todo", 16), 0x1001);
                             link("uecide://error/" + warningLineNumber + "/" + warningFile.getAbsolutePath() + "|Warning at line " + warningLineNumber + " in file " + warningFile.getName());
                         }
@@ -4325,12 +4325,11 @@ public class Sketch {
             int errorLineNumber = Integer.parseInt(m.group(2));
             if (editor != null) {
                 try {
-                    PropertyFile theme = Base.getTheme();
                     int tabNumber = editor.getTabByFile(errorFile);
 
                     if(tabNumber > -1) {
                         EditorBase eb = editor.getTab(tabNumber);
-                        eb.highlightLine(errorLineNumber, theme.getColor("editor.compile.error.bgcolor"));
+                        eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.error"));
                         eb.flagLine(errorLineNumber, Base.getIcon("flags", "fixme", 16), 0x1000);
                     }
 
@@ -4368,12 +4367,11 @@ public class Sketch {
             int errorLineNumber = Integer.parseInt(m.group(2));
             if (editor != null) {
                 try {
-                    PropertyFile theme = Base.getTheme();
                     int tabNumber = editor.getTabByFile(errorFile);
 
                     if(tabNumber > -1) {
                         EditorBase eb = editor.getTab(tabNumber);
-                        eb.highlightLine(errorLineNumber, theme.getColor("editor.compile.warning.bgcolor"));
+                        eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.warning"));
                         eb.flagLine(errorLineNumber, Base.getIcon("flags", "todo", 16), 0x1001);
                     }
                     String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();

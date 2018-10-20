@@ -127,10 +127,8 @@ public class Console extends JTextPane implements ClipboardOwner {
 
         int w = getWidth();
         int h = getHeight();
-        if (Base.getTheme() == null) {
-            return;
-        }
-        g2d.setPaint(Base.getTheme().getColor("console.color"));
+
+        g2d.setPaint(Preferences.getColor("theme.console.background"));
         g2d.fillRect(0, 0, w, h);
 
         int fillStart = 0;
@@ -274,18 +272,16 @@ public class Console extends JTextPane implements ClipboardOwner {
         StyleConstants.setForeground(fgWhite,   new Color(255, 255, 255));
 
         setBackground(new Color(1,1,1, (float) 0.01));
-//        setBackground(Base.getTheme().getColor("console.color"));
-
-        PropertyFile theme = Base.getTheme();
-        topLeft = loadImage(theme.get("console.background.image.topleft"));
-        topMiddle = loadImage(theme.get("console.background.image.topmiddle"));
-        topRight = loadImage(theme.get("console.background.image.topright"));
-        middleLeft = loadImage(theme.get("console.background.image.left"));
-        middleMiddle = loadImage(theme.get("console.background.image.middle"));
-        middleRight = loadImage(theme.get("console.background.image.right"));
-        bottomLeft = loadImage(theme.get("console.background.image.bottomleft"));
-        bottomMiddle = loadImage(theme.get("console.background.image.bottommiddle"));
-        bottomRight = loadImage(theme.get("console.background.image.bottomright"));
+//        PropertyFile theme = Base.getTheme();
+//        topLeft = loadImage(theme.get("console.background.image.topleft"));
+//        topMiddle = loadImage(theme.get("console.background.image.topmiddle"));
+//        topRight = loadImage(theme.get("console.background.image.topright"));
+//        middleLeft = loadImage(theme.get("console.background.image.left"));
+//        middleMiddle = loadImage(theme.get("console.background.image.middle"));
+//        middleRight = loadImage(theme.get("console.background.image.right"));
+//        bottomLeft = loadImage(theme.get("console.background.image.bottomleft"));
+//        bottomMiddle = loadImage(theme.get("console.background.image.bottommiddle"));
+//        bottomRight = loadImage(theme.get("console.background.image.bottomright"));
 
         repaint();
     }
@@ -311,40 +307,34 @@ public class Console extends JTextPane implements ClipboardOwner {
         StyleConstants.setFontFamily(set, font.getFamily());
         StyleConstants.setBold(set, font.isBold());
         StyleConstants.setItalic(set, font.isItalic());
-        StyleConstants.setUnderline(set, Base.theme.getBoolean("console." + name + ".underline"));
+//        StyleConstants.setUnderline(set, Base.theme.getBoolean("console." + name + ".underline"));
         StyleConstants.setAlignment(set, StyleConstants.ALIGN_LEFT);
         StyleConstants.setLeftIndent(set, getIndent(name));
     }
 
     Color getColor(String name) {
-        PropertyFile theme = Base.getTheme();
-
-        Color color = theme.getColor("console.output.color");
-        if (theme.get("console." + name + ".color") != null) {
-            color = theme.getColor("console." + name + ".color");
+        Color c = Preferences.getColor("theme.console.colors." + name);
+        if (c == null) {
+            System.err.println("Unknown colour: theme.console.colors." + name);
         }
-        return color;
+        return c;
     }
 
     Font getFont(String name) {
-        PropertyFile theme = Base.getTheme();
-
-        Font font = Preferences.getFontNatural("theme.fonts.console");
-
-        if (theme.get("console." + name + ".font") != null) {
-            font = theme.getFontNatural("console." + name + ".font");
+        Font f = Preferences.getFont("theme.console.fonts." + name);
+        if (f == null) {
+            System.err.println("Unknown font: theme.console.fonts." + name);
         }
-        return font;
+        return f;
     }
 
     int getIndent(String name) {
-        PropertyFile theme = Base.getTheme();
-
-        int indent = theme.getInteger("console.indent", 5);
-        if (theme.get("console." + name + ".indent") != null) {
-            indent = theme.getInteger("console." + name + ".indent");
+        Integer i = Preferences.getInteger("theme.console.indents." + name);
+        if (i == null) {
+            System.err.println("Unknown indent: theme.console.indents." + name);
+            return 0;
         }
-        return indent;
+        return i;
     }
 
     void doAppendString(String message, MutableAttributeSet type) {
@@ -393,22 +383,13 @@ public class Console extends JTextPane implements ClipboardOwner {
         } else if (type == COMMAND) {
             doAppendString(message, command);
         } else if (type == BULLET) {
-            String bchar = Base.getTheme().get("console.bullet.character");
-            if (bchar == null) {
-                bchar = "\u2022";
-            }
+            String bchar = Preferences.get("theme.console.characters.bullet1");
             doAppendString(bchar + " " + message, bullet);
         } else if (type == BULLET2) {
-            String bchar = Base.getTheme().get("console.bullet2.character");
-            if (bchar == null) {
-                bchar = "\u2023";
-            }
+            String bchar = Preferences.get("theme.console.characters.bullet2");
             doAppendString(bchar + " " + message, bullet2);
         } else if (type == BULLET3) {
-            String bchar = Base.getTheme().get("console.bullet3.character");
-            if (bchar == null) {
-                bchar = "\u25E6";
-            }
+            String bchar = Preferences.get("theme.console.characters.bullet3");
             doAppendString(bchar + " " + message, bullet3);
         } else if (type == LINK) {
             String[] chunks = message.split("\\|");
@@ -559,6 +540,7 @@ public class Console extends JTextPane implements ClipboardOwner {
             }
         }
 
+        @SuppressWarnings("deprecation")
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 try {
@@ -575,6 +557,7 @@ public class Console extends JTextPane implements ClipboardOwner {
     }
 
     private class TextMotionListener extends MouseInputAdapter {
+        @SuppressWarnings("deprecation")
         public void mouseMoved(MouseEvent e) {
             Element elem = document.getCharacterElement(Console.this.viewToModel(e.getPoint()));
             AttributeSet as = elem.getAttributes();

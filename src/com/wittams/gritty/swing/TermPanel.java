@@ -51,6 +51,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.FocusEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.awt.Color;
 
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
@@ -124,6 +125,8 @@ public class TermPanel extends JComponent implements TerminalDisplay, ClipboardO
     public static final int CURSOR_BLOCK = 1;
 
     private int cursorStyle = CURSOR_BLOCK;
+
+    private boolean isEnabled = true;
 
 	public TermPanel(BackBuffer backBuffer, ScrollBuffer scrollBuffer, StyleState styleState) {
 		this.scrollBuffer = scrollBuffer;
@@ -293,7 +296,7 @@ public class TermPanel extends JComponent implements TerminalDisplay, ClipboardO
 		gfx = img.createGraphics();
         gfx.setRenderingHints(new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON));
 		gfx.fillRect(0, 0, getPixelWidth(), getPixelHeight());
-		
+
 		if (oldImage != null){
 			gfx.drawImage(oldImage, 0, img.getHeight() - oldImage.getHeight(),
 					oldImage.getWidth(), oldImage.getHeight(), termComponent);
@@ -371,8 +374,23 @@ public class TermPanel extends JComponent implements TerminalDisplay, ClipboardO
         gfx.setRenderingHints(new RenderingHints(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON));
 		super.paintComponent(g);
 		if (img != null){
+		
 			gfx.drawImage(img, 0, 0, termComponent);
 			if (shouldDrawCursor) drawCursor(gfx);
+
+            if (!isEnabled) {
+                Color gray = new Color(128, 128, 128);
+                for (int y = 0; y < getPixelHeight(); y++) {
+                    for (int x = 0; x < getPixelWidth(); x++) {
+                        if ((((y & 1) == 0) && ((x & 1) == 0)) ||
+                            (((y & 1) == 1) && ((x & 1) == 1))) {
+                            img.setRGB(x, y, gray.getRGB());
+                        }
+                    }
+                }
+            }
+
+
 			drawSelection(gfx);
 		}
 	}
@@ -681,6 +699,16 @@ public class TermPanel extends JComponent implements TerminalDisplay, ClipboardO
         shouldDrawCursor = ce;
         cursorChanged = true;
 //        redrawFromDamage();
+    }
+
+    public void enableDisplay() {
+        isEnabled = true;
+        repaint();
+    }
+
+    public void disableDisplay() {
+        isEnabled = false;
+        repaint();
     }
 	
 }

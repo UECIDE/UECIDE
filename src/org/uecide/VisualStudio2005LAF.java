@@ -6,6 +6,10 @@ class VisualStudio2005LAF extends LookAndFeel {
     public static String getName() { return "Office XP"; }
 
     public static void applyLAF() {
+        if (!Base.isWindows()) {
+            Base.error("The selected Look and Feel is only compatible with Windows. Select another.");
+            return;
+        }
         try {
             UIManager.setLookAndFeel("org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel");
         } catch (Exception e) {

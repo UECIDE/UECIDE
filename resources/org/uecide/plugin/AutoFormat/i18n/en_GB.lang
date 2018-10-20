@@ -1,0 +1,5 @@
+plugin.autoformat.name = Auto Format
+plugin.autoformat.nochange = Auto Format: No changes needed
+plugin.autoformat.toomany.paren = Auto Format: Failed - Too many %1 parentheses
+plugin.autoformat.toomany.brace = Auto Format: Failed - Too many %1 curly braces
+plugin.autoformat.done = Auto Format: Finished
