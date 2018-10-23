@@ -317,7 +317,8 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
         };
 
         lineEntryBox = new JTextField();
-        lineEntryBox.setBackground(new Color(255, 255, 255));
+        lineEntryBox.setBackground(Color.WHITE);
+        lineEntryBox.setForeground(Color.BLACK);
         lineEntryBox.addActionListener(al);
 
         lineEntryBox.addKeyListener(new KeyListener() {
