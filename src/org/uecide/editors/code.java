@@ -285,13 +285,14 @@ public class code extends JPanel implements EditorBase {
         scrollPane.addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (e.isControlDown()) {
-                    int scale = Preferences.getInteger("theme.fonts.scale");
-                    scale -= e.getWheelRotation() * 5;
+                    Adjustable adj = scrollPane.getVerticalScrollBar();
+                    int scale = Preferences.getInteger("theme.editor.fonts.scale");
+                    int rscale = e.getWheelRotation() * 5;
+                    scale -= rscale;
                     if (scale < 1) scale = 1;
                     if (scale > 1000) scale = 1000;
-                    Preferences.setInteger("theme.fonts.scale", scale);
-                    textArea.setFont(Preferences.getFont("theme.editor.fonts.default.font"));
-                    gutter.setLineNumberFont(Preferences.getFont("theme.gutter.font"));
+                    Preferences.setInteger("theme.editor.fonts.scale", scale);
+                    refreshSettings();
                 } else if (e.isShiftDown()) {
                     // Horizontal scrolling
                     Adjustable adj = scrollPane.getHorizontalScrollBar();
@@ -356,7 +357,6 @@ public class code extends JPanel implements EditorBase {
         toolbar.addSeparator();
         editor.addPluginsToToolbar(toolbar, Plugin.TOOLBAR_TAB);
 
-        refreshSettings();
         this.add(scrollPane, BorderLayout.CENTER);
 
         loadFile(f);
@@ -372,6 +372,7 @@ public class code extends JPanel implements EditorBase {
                 b.setBorderPainted(false);
             }
         }
+        refreshSettings();
 
     }
 
@@ -384,8 +385,6 @@ public class code extends JPanel implements EditorBase {
         boolean external = Preferences.getBoolean("editor.external");
         textArea.setEditable(!external);
         textArea.setCodeFoldingEnabled(true);
-        textArea.setAntiAliasingEnabled(true);
-//        textArea.setAntiAliasingEnabled(Preferences.getBoolean("theme.fonts.editor_aa"));
 
         textArea.setMarkOccurrences(Preferences.getBoolean("editor.mark"));
 
@@ -408,14 +407,12 @@ public class code extends JPanel implements EditorBase {
         textArea.setBackground(Preferences.getColor("theme.editor.colors.background"));
 
         textArea.setForeground(Preferences.getColor("theme.editor.colors.foreground"));
-        textArea.setFont(Preferences.getFont("theme.editor.fonts.default.font"));
+        textArea.setFont(Preferences.getScaledFont("theme.editor.fonts.default.font"));
 
         gutter = scrollPane.getGutter();
-        gutter.setAntiAliasingEnabled(true);
-//        gutter.setAntiAliasingEnabled(Preferences.getBoolean("theme.fonts.editor_aa"));
 
 
-        gutter.setLineNumberFont(Preferences.getFont("theme.editor.gutter.font"));
+        gutter.setLineNumberFont(Preferences.getScaledFont("theme.editor.gutter.font"));
         gutter.setBackground(Preferences.getColor("theme.editor.gutter.background"));
         gutter.setLineNumberColor(Preferences.getColor("theme.editor.gutter.foreground"));
         gutter.setBorderColor(Preferences.getColor("theme.editor.gutter.foreground"));
@@ -469,6 +466,10 @@ public class code extends JPanel implements EditorBase {
         scheme = textArea.getSyntaxScheme();
         applyThemeSettings();
 
+        textArea.setAntiAliasingEnabled(false);
+        gutter.setAntiAliasingEnabled(false);
+        textArea.setAntiAliasingEnabled(Preferences.getBoolean("theme.editor.fonts.editor_aa"));
+        gutter.setAntiAliasingEnabled(Preferences.getBoolean("theme.editor.fonts.editor_aa"));
     }
 
     public boolean loadFile(File f) {
@@ -559,13 +560,13 @@ public class code extends JPanel implements EditorBase {
 
     public void applyThemeFontFace(int index, String fs) {
         String fspec = Preferences.get(fs);
-        Font f = Preferences.getFont(fs);
+        Font f = Preferences.getScaledFont(fs);
         if (fspec == null) {
-            f = Preferences.getFont("theme.editor.fonts.default.font");
+            f = Preferences.getScaledFont("theme.editor.fonts.default.font");
         } else if (fspec.equals("default")) {
-            f = Preferences.getFont("theme.editor.fonts.default.font");
+            f = Preferences.getScaledFont("theme.editor.fonts.default.font");
         } else if (fspec.equals("")) {
-            f = Preferences.getFont("theme.editor.fonts.default.font");
+            f = Preferences.getScaledFont("theme.editor.fonts.default.font");
         }
 
         org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);

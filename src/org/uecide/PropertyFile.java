@@ -568,10 +568,10 @@ public class PropertyFile {
         return font;
     }
 
-    public Font getFont(String attr) {
+    public Font getScaledFont(String attr) {
         Font font = stringToFont(get(attr));
         float size = font.getSize();
-        int scale = Preferences.getInteger("theme.fonts.scale");
+        int scale = Preferences.getInteger("theme.editor.fonts.scale");
         if (scale == 0) {
             scale = 100;
         }
@@ -580,6 +580,11 @@ public class PropertyFile {
             out = font.deriveFont(1f);
         }
         return out;
+    }
+
+    public Font getFont(String attr) {
+        Font font = stringToFont(get(attr));
+        return font;
     }
 
     public String getFontCSS(String key) {
