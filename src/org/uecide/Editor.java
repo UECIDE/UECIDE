@@ -310,7 +310,7 @@ public class Editor extends JFrame {
         topBottomSplit.setContinuousLayout(true);
 
 
-        updateSplits();
+//        updateSplits();
 
         add(topBottomSplit, BorderLayout.CENTER);
 
@@ -496,7 +496,7 @@ public class Editor extends JFrame {
                 Preferences.setInteger("editor.window.width", windowSize.width);
                 Preferences.setInteger("editor.window.height", windowSize.height);
 
-                Editor.this.updateSplits();
+//                Editor.this.updateSplits();
             }
             public void componentHidden(ComponentEvent e) {
             }
@@ -770,11 +770,11 @@ public class Editor extends JFrame {
                         icon = Base.getIcon("bookmarks", "folder", 16);
                     }
                 }
-                container.setOpaque(true);
+                container.setOpaque(false);
 
                 if (text != null) {
                     text.setBorder(paddingBorder);
-                    text.setOpaque(true);
+                    text.setOpaque(false);
                     container.add(text, BorderLayout.CENTER);
                     if (selected) {
                         Color bg = defaults.getColor("List.selectionBackground");
@@ -791,7 +791,7 @@ public class Editor extends JFrame {
                 }
                 if (icon != null) {
                     JLabel i = new JLabel(icon);
-                    i.setOpaque(true);
+                    i.setOpaque(false);
                     container.add(i, BorderLayout.WEST);
                     if (selected) {
                         Color bg = defaults.getColor("List.selectionBackground");
@@ -808,7 +808,7 @@ public class Editor extends JFrame {
 
                 if (bar != null) {
                     container.add(bar, BorderLayout.CENTER);
-                    bar.setOpaque(true);
+                    bar.setOpaque(false);
                     if (selected) {
                         Color bg = defaults.getColor("List.selectionBackground");
                         Color fg = defaults.getColor("List.selectionForeground");
@@ -877,8 +877,8 @@ public class Editor extends JFrame {
 
 
         treeScroll.setViewportView(sketchContentTree);
-        treeScroll.setOpaque(true);
-        sketchContentTree.setOpaque(true);
+        treeScroll.setOpaque(false);
+        sketchContentTree.setOpaque(false);
         sketchContentTree.addMouseListener(new TreeMouseListener());
 
         filesTreeRoot = new DefaultMutableTreeNode(loadedSketch.getName());
@@ -3372,6 +3372,15 @@ public class Editor extends JFrame {
             }
         }));
 
+        debugSubmenu.add(createMenuEntry("Prep for screenshot", 0, 0, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Editor.this.setSize(new Dimension(800, 600));
+                sidebarSplit.setDividerLocation(1.0F);
+                topBottomSplit.setDividerLocation(0.8F);
+                leftRightSplit.setDividerLocation(0.2F);
+            }
+        }));
+
         helpMenu.add(debugSubmenu);
 
     }
@@ -5362,6 +5371,7 @@ public class Editor extends JFrame {
     }
 
     void updateSplits() {
+/*
         Dimension windowSize = getSize(null);
         float splitDividerSize = Base.preferences.getFloat("editor.layout.splits.sidebar", 0.9F);
         if (splitDividerSize > 1F || splitDividerSize < 0F) splitDividerSize = 0.9F;
@@ -5379,7 +5389,7 @@ public class Editor extends JFrame {
         if (splitDividerSize > 1F || splitDividerSize < 0F) splitDividerSize = 0.1F;
 //        leftRightSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
         leftRightSplit.setResizeWeight(splitDividerSize);
-
+*/
     }
 }
 
