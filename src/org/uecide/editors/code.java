@@ -543,16 +543,19 @@ public class code extends JPanel implements EditorBase {
 
     public void applyThemeBGColor(int index, String cs) {
         String cspec = Preferences.get(cs);
-        if (cspec == null) return;
-        if (cspec.equals("transparent")) return;
-        if (cspec.equals("")) return;
-        if (cspec.equals("none")) return;
+        if (cspec == null) cspec = "transparent";
+        if (cspec.equals("")) cspec = "transparent";
+        if (cspec.equals("none")) cspec = "transparent";
+        if (cspec.equals("default")) cspec = "transparent";
 
-        if (cspec.equals("default")) {
-            cs = "theme.editor.colors.background";
+        Color c;
+            
+        if (cspec.equals("transparent")) {
+            c = new Color(0f, 0f, 0f, 0f);
+        } else {
+            c = Preferences.getColor(cs);
         }
 
-        Color c = Preferences.getColor(cs);
         org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);
         s.background = c;
         scheme.setStyle(index, s);

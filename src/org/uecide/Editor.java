@@ -162,29 +162,6 @@ public class Editor extends JFrame {
         return dataStore.get(s);
     }
 
-    static class FlaggedList {
-        String name;
-        int color;
-
-        public static final int Red = 1;
-        public static final int Green = 2;
-        public static final int Yellow = 3;
-        public static final int Blue = 4;
-
-        public FlaggedList(int c, String n) {
-            color = c;
-            name = n;
-        }
-
-        public String toString() {
-            return name;
-        }
-     
-        public int getColor() {
-            return color;
-        }
-    }
-
     class DefaultRunHandler implements Runnable {
         boolean upload = false;
         public DefaultRunHandler(boolean doUpload) {
@@ -599,186 +576,6 @@ public class Editor extends JFrame {
 
     }
 
-    class FileCellRenderer implements TreeCellRenderer {
-        DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
-        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-
-            Color textColor = Preferences.getColor("theme.editor.colors.foreground");
-
-            if((value != null) && (value instanceof DefaultMutableTreeNode)) {
-                JPanel container = new JPanel();
-
-                container.setLayout(new BorderLayout());
-                ImageIcon icon = null;
-                JLabel text = null;
-                JProgressBar bar = null;
-
-                UIDefaults defaults = javax.swing.UIManager.getDefaults();
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-                Object userObject = node.getUserObject();
-                Border noBorder = BorderFactory.createEmptyBorder(0, 0, 0, 0);
-                Border paddingBorder = BorderFactory.createEmptyBorder(2, 2, 2, 2);
-
-                container.setBorder(noBorder);
-
-                if (userObject instanceof FlaggedList) {
-                    FlaggedList ent = (FlaggedList)userObject;
-
-                    text = new JLabel(ent.toString());
-                    if (ent.getColor() == FlaggedList.Red) {
-                        icon = Base.getIcon("flags", "fixme", 16);
-                    } else if (ent.getColor() == FlaggedList.Green) {
-                        icon = Base.getIcon("flags", "note", 16);
-                    } else if (ent.getColor() == FlaggedList.Yellow) {
-                        icon = Base.getIcon("flags", "todo", 16);
-                    } else if (ent.getColor() == FlaggedList.Blue) {
-                        icon = Base.getIcon("flags", "info", 16);
-                    }
-
-                    Font f = text.getFont();
-                    text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
-                } else if (userObject instanceof TodoEntry) {
-                    TodoEntry ent = (TodoEntry)userObject;
-
-                    text = new JLabel(ent.toString());
-                    icon = Base.getIcon("bookmarks", "todo", 16);
-
-                    Font f = text.getFont();
-                    text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
-                } else if (userObject instanceof FunctionBookmark) {
-                    FunctionBookmark bm = (FunctionBookmark)userObject;
-                    text = new JLabel(bm.briefFormatted());
-                    icon = Base.getIcon("bookmarks", "function", 16);
-
-                    Font f = text.getFont();
-                    text.setFont(new Font(f.getFamily(), Font.PLAIN, f.getSize() - 2));
-                } else if (userObject instanceof File) {
-                    File file = (File)userObject;
-                    text = new JLabel(file.getName());
-
-                    if(file.isDirectory()) {
-                        if(expanded) {
-                            icon = Base.getIcon("bookmarks", "folder-open", 16);
-                        } else {
-                            icon = Base.getIcon("bookmarks", "folder", 16);
-                        }
-                    } else {
-                        OverlayIcon oicon = new OverlayIcon(Base.getIcon("mime", FileType.getIcon(file), 16));
-
-                        for(Plugin plugin : plugins) {
-                            try {
-                                ImageIcon fi = plugin.getFileIconOverlay(file);
-
-                                if(fi != null) {
-                                    oicon.add(fi);
-                                }
-                            } catch(AbstractMethodError e) {
-                            } catch(Exception e) {
-                            }
-                        }
-
-                        icon = (ImageIcon)oicon;
-                    }
-                } else if (userObject instanceof Library) {
-                    Library lib = (Library)userObject;
-                    int pct = lib.getCompiledPercent();
-
-                    if(loadedSketch.libraryIsCompiled(lib) && (pct >= 100 || pct <= 0)) {
-                        icon = Base.getIcon("bookmarks", "library-good", 16);
-                    } else {
-                        if (pct >= 50) {
-                            icon = Base.getIcon("bookmarks", "library-semi", 16);
-                        } else {
-                            icon = Base.getIcon("bookmarks", "library-bad", 16);
-                        }
-                    }
-
-                    if(pct > 0 && pct < 100) {
-                        bar = new JProgressBar();
-                        bar.setString(lib.getName());
-                        Dimension d = bar.getSize();
-                        d.width = 80;
-                        bar.setPreferredSize(d);
-                        bar.setStringPainted(true);
-                        bar.setValue(pct);
-                    } else {
-                        text = new JLabel(lib.getName());
-                    }
-                } else if (userObject instanceof Sketch) {
-                    Sketch so = (Sketch)userObject;
-                    text = new JLabel(so.getName());
-                    icon = so.getIcon(16);
-
-                    if(icon == null) {
-                        icon = Base.loadIconFromResource("icon16.png");
-                    }
-                } else {
-                    text = new JLabel(userObject.toString());
-
-                    if(expanded) {
-                        icon = Base.getIcon("bookmarks", "folder-open", 16);
-                    } else {
-                        icon = Base.getIcon("bookmarks", "folder", 16);
-                    }
-                }
-                container.setOpaque(false);
-
-                if (text != null) {
-                    text.setBorder(paddingBorder);
-                    text.setOpaque(false);
-                    container.add(text, BorderLayout.CENTER);
-                    if (selected) {
-                        Color bg = defaults.getColor("List.selectionBackground");
-                        Color fg = defaults.getColor("List.selectionForeground");
-                        text.setBackground(bg);
-                        text.setForeground(fg);
-                    } else {
-                        Color bg = defaults.getColor("List.background");
-                        Color fg = defaults.getColor("List.foreground");
-                        text.setBackground(bg);
-                        text.setForeground(fg);
-                    }
-
-                }
-                if (icon != null) {
-                    JLabel i = new JLabel(icon);
-                    i.setOpaque(false);
-                    container.add(i, BorderLayout.WEST);
-                    if (selected) {
-                        Color bg = defaults.getColor("List.selectionBackground");
-                        Color fg = defaults.getColor("List.selectionForeground");
-                        i.setBackground(bg);
-                        i.setForeground(fg);
-                    } else {
-                        Color bg = defaults.getColor("List.background");
-                        Color fg = defaults.getColor("List.foreground");
-                        i.setBackground(bg);
-                        i.setForeground(fg);
-                    }
-                }
-
-                if (bar != null) {
-                    container.add(bar, BorderLayout.CENTER);
-                    bar.setOpaque(false);
-                    if (selected) {
-                        Color bg = defaults.getColor("List.selectionBackground");
-                        Color fg = defaults.getColor("List.selectionForeground");
-                        bar.setBackground(bg);
-                        bar.setForeground(fg);
-                    } else {
-                        Color bg = defaults.getColor("List.background");
-                        Color fg = defaults.getColor("List.foreground");
-                        bar.setBackground(bg);
-                        bar.setForeground(fg);
-                    }
-                }
-                return container;
-            }
-
-            return defaultRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-        }
-    }
-
     public void addFileTreeToNode(DefaultMutableTreeNode treenode, File dir) {
         if(!dir.exists() || !dir.isDirectory()) {
             return;
@@ -814,7 +611,7 @@ public class Editor extends JFrame {
         treeBinaries = new DefaultMutableTreeNode(Base.i18n.string("tree.binaries"));
         treeOutput = new DefaultMutableTreeNode(Base.i18n.string("tree.output"));
         treeDocs = new DefaultMutableTreeNode(Base.i18n.string("tree.docs"));
-        TreeCellRenderer renderer = new FileCellRenderer();
+        TreeCellRenderer renderer = new FileCellRenderer(this);
         sketchContentTree.setCellRenderer(renderer);
         treeRoot.add(treeSource);
         treeRoot.add(treeHeaders);
@@ -828,8 +625,6 @@ public class Editor extends JFrame {
 
 
         treeScroll.setViewportView(sketchContentTree);
-        treeScroll.setOpaque(false);
-        sketchContentTree.setOpaque(false);
         sketchContentTree.addMouseListener(new TreeMouseListener());
 
         filesTreeRoot = new DefaultMutableTreeNode(loadedSketch.getName());
