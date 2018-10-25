@@ -308,53 +308,56 @@ public class code extends JPanel implements EditorBase {
         });
         toolbar = new JToolBar();
         toolbar.setFloatable(false);
-        toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden"));
+        toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden") && !Preferences.getBoolean("editor.layout.minimal"));
         this.add(toolbar, BorderLayout.NORTH);
 
-        Editor.addToolbarButton(toolbar, "actions", "copy", "Copy", new ActionListener() {
+        toolbar.add(new ToolbarButton("actions", "copy", "Copy", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.copy();
             }
-        });
-        Editor.addToolbarButton(toolbar, "actions", "cut", "Cut", new ActionListener() {
+        }));
+        toolbar.add(new ToolbarButton("actions", "cut", "Cut", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.cut();
             }
-        });
+        }));
 
-        Editor.addToolbarButton(toolbar, "actions", "paste", "Paste", new ActionListener() {
+        toolbar.add(new ToolbarButton("actions", "paste", "Paste", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.paste();
             }
-        });
+        }));
 
-        toolbar.addSeparator();
-        Editor.addToolbarButton(toolbar, "actions", "undo", "Undo", new ActionListener() {
+        toolbar.add(new ToolbarSpacer(12, 16)); //Separator();
+
+        toolbar.add(new ToolbarButton("actions", "undo", "Undo", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.undoLastAction();
             }
-        });
+        }));
 
-        JButton redoButton = Editor.addToolbarButton(toolbar, "actions", "redo", "Redo", new ActionListener() {
+        toolbar.add(new ToolbarButton("actions", "redo", "Redo", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.redoLastAction();
             }
-        });
+        }));
 
-        toolbar.addSeparator();
-        JButton indentButton = Editor.addToolbarButton(toolbar, "actions", "indent-more", "Increase Indent");
-        indentButton.addActionListener(new ActionListener() {
+        toolbar.add(new ToolbarSpacer(12, 16)); //Separator();
+
+        toolbar.add(new ToolbarButton("actions", "indent-more", "Increase Indent", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 increaseIndent(e);
             }
-        });
-        JButton outdentButton = Editor.addToolbarButton(toolbar, "actions", "indent-less", "Decrease Indent");
-        outdentButton.addActionListener(new ActionListener() {
+        }));
+        
+        toolbar.add(new ToolbarButton("actions", "indent-less", "Decrease Indent", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 decreaseIndent(e);
             }
-        });
-        toolbar.addSeparator();
+        }));
+
+        toolbar.add(new ToolbarSpacer(12, 16)); //Separator();
+
         editor.addPluginsToToolbar(toolbar, Plugin.TOOLBAR_TAB);
 
         this.add(scrollPane, BorderLayout.CENTER);
@@ -365,13 +368,6 @@ public class code extends JPanel implements EditorBase {
             openFindPanel();
         }
 
-        for (int i = 0; toolbar.getComponentAtIndex(i) != null; i++) {
-            Component c = toolbar.getComponentAtIndex(i);
-            if (c instanceof JButton) {
-                JButton b = (JButton)c;
-                b.setBorderPainted(false);
-            }
-        }
         refreshSettings();
 
     }
@@ -385,6 +381,7 @@ public class code extends JPanel implements EditorBase {
         boolean external = Preferences.getBoolean("editor.external");
         textArea.setEditable(!external);
         textArea.setCodeFoldingEnabled(true);
+        toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden") && !Preferences.getBoolean("editor.layout.minimal"));
 
         textArea.setMarkOccurrences(Preferences.getBoolean("editor.mark"));
 

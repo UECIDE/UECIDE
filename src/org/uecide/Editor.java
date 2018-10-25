@@ -99,6 +99,7 @@ public class Editor extends JFrame {
     JMenu programmersSubmenu; 
 
     JToolBar toolbar;
+    JToolBar miniBar;
     JToolBar treeToolBar;
 
     JPanel treePanel;
@@ -271,8 +272,8 @@ public class Editor extends JFrame {
 
         editorPanel.add(editorTabs, BorderLayout.CENTER);
 
-        int width = Preferences.getInteger("editor.window.width");
-        int height = Preferences.getInteger("editor.window.height");
+        int width = Preferences.getInteger("editor.layout.window.width");
+        int height = Preferences.getInteger("editor.layout.window.height");
 
 
         // Check for old preference types and convert them
@@ -372,7 +373,7 @@ public class Editor extends JFrame {
 
         this.add(statusBar, BorderLayout.SOUTH);
 
-        JButton refreshButton = Editor.addToolbarButton(treeToolBar, "actions", "refresh", "Refresh Project Tree", new ActionListener() {
+        JButton refreshButton = new ToolbarButton("actions", "refresh", "Refresh Project Tree", 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (!compilerRunning()) {
                     loadedSketch.rescanFileTree();
@@ -382,7 +383,7 @@ public class Editor extends JFrame {
         });
         treeToolBar.add(refreshButton);
 
-        JButton projectSearchButton = Editor.addToolbarButton(treeToolBar, "actions", "search", "Search entire project", new ActionListener() {
+        JButton projectSearchButton = new ToolbarButton("actions", "search", "Search entire project", 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new ProjectSearch(Editor.this);
             }
@@ -419,9 +420,77 @@ public class Editor extends JFrame {
 
         updateToolbar();
 
-        toolbar.addSeparator();
+        toolbar.add(new ToolbarSpacer()); //Separator();
+        toolbar.setVisible(!Preferences.getBoolean("editor.layout.minimal"));
+
+        miniBar = new JToolBar();
+        miniBar.setFloatable(false);
+        miniBar.setVisible(Preferences.getBoolean("editor.layout.minimal"));
+
+        miniBar.add(new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 16, new ActionListener() {
+            @SuppressWarnings("deprecation")
+            public void actionPerformed(ActionEvent e) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                    loadedSketch.purgeCache();
+                    loadedSketch.purgeBuildFiles();
+                }
+
+                try {
+                    compile();
+                } catch (IOException ex) {
+                    error(ex);
+                }
+            }
+        }));
+
+       miniBar.add(new ToolbarButton("actions", "program", Base.i18n.string("toolbar.program"), 16, new ActionListener() {
+            @SuppressWarnings("deprecation")
+            public void actionPerformed(ActionEvent e) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                    loadedSketch.purgeCache();
+                    loadedSketch.purgeBuildFiles();
+                }
+                try {
+                    program();
+                } catch (IOException ex) {
+                    error(ex);
+                }
+            }
+        }));
+
+        miniBar.add(new ToolbarButton("actions", "new", Base.i18n.string("toolbar.new"), 16, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Base.handleNew();
+                } catch (IOException ex) {
+                    error(ex);
+                }
+            }
+        }));
+
+        miniBar.add(new ToolbarButton("actions", "open", Base.i18n.string("toolbar.open"), 16, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    handleOpenPrompt();
+                } catch (IOException ex) {
+                    error(ex);
+                }
+            }
+        }));
+
+        miniBar.add(new ToolbarButton("actions", "save", Base.i18n.string("toolbar.save"), 16, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    saveAllTabs();
+                } catch (IOException ex) {
+                    error(ex);
+                }
+            }
+        }));
+
 
         menuBar = new JMenuBar();
+
 
         fileMenu = new JMenu(Base.i18n.string("menu.file"));
         menuBar.add(fileMenu);
@@ -441,6 +510,9 @@ public class Editor extends JFrame {
         helpMenu = new JMenu(Base.i18n.string("menu.help"));
         menuBar.add(helpMenu);
 
+        menuBar.add(Box.createHorizontalGlue());
+        menuBar.add(miniBar);
+
         setJMenuBar(menuBar);
 
         addWindowListener(new WindowAdapter() {
@@ -457,20 +529,20 @@ public class Editor extends JFrame {
         this.pack();
 
         setSize(width, height);
-        setLocation(Preferences.getInteger("editor.window.x"), Preferences.getInteger("editor.window.y"));
+        setLocation(Preferences.getInteger("editor.layout.window.x"), Preferences.getInteger("editor.layout.window.y"));
         setProgress(0);
         updateAll();
 
         addComponentListener(new ComponentListener() {
             public void componentMoved(ComponentEvent e) {
                 Point windowPos = e.getComponent().getLocation(null);
-                Preferences.setInteger("editor.window.x", windowPos.x);
-                Preferences.setInteger("editor.window.y", windowPos.y);
+                Preferences.setInteger("editor.layout.window.x", windowPos.x);
+                Preferences.setInteger("editor.layout.window.y", windowPos.y);
             }
             public void componentResized(ComponentEvent e) {
                 Dimension windowSize = e.getComponent().getSize(null);
-                Preferences.setInteger("editor.window.width", windowSize.width);
-                Preferences.setInteger("editor.window.height", windowSize.height);
+                Preferences.setInteger("editor.layout.window.width", windowSize.width);
+                Preferences.setInteger("editor.layout.window.height", windowSize.height);
 
 //                Editor.this.updateSplits();
             }
@@ -481,7 +553,7 @@ public class Editor extends JFrame {
         });
 
         openOrSelectFile(loadedSketch.getMainFile());
-
+/*
         for (int i = 0; toolbar.getComponentAtIndex(i) != null; i++) {
             Component c = toolbar.getComponentAtIndex(i);
             if (c instanceof JButton) {
@@ -489,6 +561,7 @@ public class Editor extends JFrame {
                 b.setBorderPainted(false);
             }
         }
+*/
         s.attachToEditor(this);
         this.setVisible(true);
 
@@ -511,13 +584,15 @@ public class Editor extends JFrame {
 
     public void updateToolbar() throws IOException {
         toolbar.removeAll();
-        abortButton = Editor.addToolbarButton(toolbar, "actions", "cancel", Base.i18n.string("toolbar.abort"), new ActionListener() {
+        abortButton = new ToolbarButton("actions", "cancel", Base.i18n.string("toolbar.abort"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 abortCompilation();
             }
         });
         abortButton.setVisible(false);
-        runButton = Editor.addToolbarButton(toolbar, "actions", "run", Base.i18n.string("toolbar.run"), new ActionListener() {
+        toolbar.add(abortButton);
+
+        runButton = new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 24, new ActionListener() {
             @SuppressWarnings("deprecation")
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
@@ -532,8 +607,10 @@ public class Editor extends JFrame {
                 }
             }
         });
+        toolbar.add(runButton);
+        runButton.setBorderPainted(false);
 
-        programButton = Editor.addToolbarButton(toolbar, "actions", "program", Base.i18n.string("toolbar.program"), new ActionListener() {
+        programButton = new ToolbarButton("actions", "program", Base.i18n.string("toolbar.program"), 24, new ActionListener() {
             @SuppressWarnings("deprecation")
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
@@ -547,10 +624,10 @@ public class Editor extends JFrame {
                 }
             }
         });
+        toolbar.add(programButton);
+        toolbar.add(new ToolbarSpacer()); //Separator();
 
-        toolbar.addSeparator();
-
-        Editor.addToolbarButton(toolbar, "actions", "new", Base.i18n.string("toolbar.new"), new ActionListener() {
+        toolbar.add(new ToolbarButton("actions", "new", Base.i18n.string("toolbar.new"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     Base.handleNew();
@@ -558,9 +635,9 @@ public class Editor extends JFrame {
                     error(ex);
                 }
             }
-        });
+        }));
 
-        Editor.addToolbarButton(toolbar, "actions", "open", Base.i18n.string("toolbar.open"), new ActionListener() {
+        toolbar.add(new ToolbarButton("actions", "open", Base.i18n.string("toolbar.open"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     handleOpenPrompt();
@@ -568,9 +645,9 @@ public class Editor extends JFrame {
                     error(ex);
                 }
             }
-        });
+        }));
 
-        Editor.addToolbarButton(toolbar, "actions", "save", Base.i18n.string("toolbar.save"), new ActionListener() {
+        toolbar.add(new ToolbarButton("actions", "save", Base.i18n.string("toolbar.save"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAllTabs();
@@ -578,9 +655,9 @@ public class Editor extends JFrame {
                     error(ex);
                 }
             }
-        });
+        }));
 
-        toolbar.addSeparator();
+        toolbar.add(new ToolbarSpacer()); //Separator();
 
         addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
 
@@ -2235,40 +2312,6 @@ public class Editor extends JFrame {
         }
     }
 
-    public static JButton addToolbarButton(JToolBar tb, String path, String tooltip) {
-        return addToolbarButton(tb, path, tooltip, (ActionListener)null);
-    }
-
-    public static JButton addToolbarButton(JToolBar tb, String path, String tooltip, ActionListener al) {
-        ImageIcon buttonIcon = Base.loadIconFromResource(path);
-        JButton button = new JButton(buttonIcon);
-        button.setToolTipText(tooltip);
-
-        if(al != null) {
-            button.addActionListener(al);
-        }
-
-        tb.add(button);
-        return button;
-    }
-
-    public static JButton addToolbarButton(JToolBar tb, String cat, String name, String tooltip) {
-        return addToolbarButton(tb, cat, name, tooltip, (ActionListener)null);
-    }
-
-    public static JButton addToolbarButton(JToolBar tb, String cat, String name, String tooltip, ActionListener al) {
-        ImageIcon buttonIcon = Base.getIcon(cat, name, 24);
-        JButton button = new JButton(buttonIcon);
-        button.setToolTipText(tooltip);
-
-        if(al != null) {
-            button.addActionListener(al);
-        }
-
-        tb.add(button);
-        return button;
-    }
-
     public boolean closeTab(Component c) {
         return false;
     }
@@ -2875,6 +2918,51 @@ public class Editor extends JFrame {
                 createNewSketchFile(e.getActionCommand());
             }
         };
+
+        JMenu sketchFilesMenu = new JMenu("Files");
+        sketchMenu.add(sketchFilesMenu);
+        JMenu sketchFilesSource = new JMenu("Source");
+        sketchFilesMenu.add(sketchFilesSource);
+        JMenu sketchFilesHeaders = new JMenu("Headers");
+        sketchFilesMenu.add(sketchFilesHeaders);
+
+        File[] flist = loadedSketch.sketchFiles.toArray(new File[0]);
+
+        Arrays.sort(flist);
+
+        for(File f : flist) {
+            int type = FileType.getType(f);
+    
+            JMenuItem item;
+
+            switch(type) {
+                case FileType.CSOURCE:
+                case FileType.CPPSOURCE:
+                case FileType.ASMSOURCE:
+                case FileType.SKETCH:
+                    item = new JMenuItemWithObject(f.getName(), f);
+                    sketchFilesSource.add(item);
+                    item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            JMenuItemWithObject m = (JMenuItemWithObject)e.getSource();
+                            File f = (File)(m.getObject());
+                            openOrSelectFile(f);
+                        }
+                    });
+                    break;
+                case FileType.HEADER:
+                    item = new JMenuItemWithObject(f.getName(), f);
+                    sketchFilesHeaders.add(item);
+                    item.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            JMenuItemWithObject m = (JMenuItemWithObject)e.getSource();
+                            File f = (File)(m.getObject());
+                            openOrSelectFile(f);
+                        }
+                    });
+                    break;
+            }
+        }
 
         sketchMenu.add(new ActiveMenuItem("Compile", KeyEvent.VK_R, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -3579,7 +3667,7 @@ public class Editor extends JFrame {
                 if (icons != null) {
                     for (JSAction action : icons) {
                         String[] icodat = action.icon.split("/");
-                        JButton b = Editor.addToolbarButton(toolbar, icodat[0], icodat[1], action.tooltip);
+                        JButton b = new ToolbarButton(icodat[0], icodat[1], action.tooltip);
                         JSActionListener l = new JSActionListener(this, action);
                         b.addActionListener(l);
                     }
@@ -4439,6 +4527,9 @@ public class Editor extends JFrame {
             EditorBase eb = getTab(i);
             eb.refreshSettings();
         }
+
+        toolbar.setVisible(!Preferences.getBoolean("editor.layout.minimal"));
+        miniBar.setVisible(Preferences.getBoolean("editor.layout.minimal"));
     }
 
     public void handleAbout() {

@@ -781,44 +781,22 @@ public class GitLink extends Plugin {
                 }
             };
 
-            toolbar.addSeparator();
+            toolbar.add(new ToolbarSpacer()); //Separator();
             hasFile(null);
 
-            Version iconTest = new Version("0.8.7z31");
-
-            if (Base.systemVersion.compareTo(iconTest) > 0) {
-                pullButton = editor.addToolbarButton(toolbar, "actions", "pull", "Pull from remote repository", pullAction);
-                pushButton = editor.addToolbarButton(toolbar, "actions", "push", "Push to remote repository", pushAction);
-                commitButton = editor.addToolbarButton(toolbar, "actions", "commit", "Commit all changes", commitAction);
-                branchButton = editor.addToolbarButton(toolbar, "actions", "branch", "Branch", branchAction);
-            } else {
-                pullButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/pull.png"));
-                pullButton.setToolTipText("Pull from remote repository");
-                pullButton.addActionListener(pullAction);
-                toolbar.add(pullButton);
-
-                pushButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/push.png"));
-                pushButton.setToolTipText("Push to remote repository");
-                pushButton.addActionListener(pushAction);
-                toolbar.add(pushButton);
-
-                commitButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/commit.png"));
-                commitButton.setToolTipText("Commit all changes");
-                commitButton.addActionListener(commitAction);
-                toolbar.add(commitButton);
-
-                branchButton = new JButton(Base.loadIconFromResource("/org/uecide/plugin/GitLink/branch.png"));
-                branchButton.setToolTipText("Branch");
-                branchButton.addActionListener(branchAction);
-
-                toolbar.add(branchButton);
-
-            }
+            pullButton = new ToolbarButton("actions", "pull", "Pull from remote repository", pullAction);
+            pushButton = new ToolbarButton("actions", "push", "Push to remote repository", pushAction);
+            commitButton = new ToolbarButton("actions", "commit", "Commit all changes", commitAction);
+            branchButton = new ToolbarButton("actions", "branch", "Branch", branchAction);
+            toolbar.add(pullButton);
+            toolbar.add(pushButton);
+            toolbar.add(commitButton);
+            toolbar.add(branchButton);
             pullButton.setEnabled(hasRepo);
             pushButton.setEnabled(hasRepo);
             commitButton.setEnabled(hasRepo);
             branchButton.setEnabled(hasRepo);
-            toolbar.addSeparator();
+            toolbar.add(new ToolbarSpacer()); // Separator();
         }
     }
 

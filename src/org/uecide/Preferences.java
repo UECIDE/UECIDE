@@ -319,6 +319,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         JScrollPane bscroll = new JScrollPane(advancedTreeBody, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tscroll, bscroll);
+        split.setDividerLocation(250);
 
         advancedTreeBody.setAlignmentX(Component.LEFT_ALIGNMENT);
 

@@ -521,25 +521,11 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
     
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == Plugin.TOOLBAR_EDITOR) {
-
-            Version iconTest = new Version("0.8.7z31");
-
-            if (Base.systemVersion.compareTo(iconTest) > 0) {
-                editor.addToolbarButton(toolbar, "apps", "serial", "Serial Terminal", new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        run();
-                    }
-                });
-            } else {
-                JButton b = new JButton(Base.loadIconFromResource("/org/uecide/plugin/SerialTerminal/console.png"));
-                b.setToolTipText("Serial Terminal");
-                b.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        run();
-                    }
-                });
-                toolbar.add(b);
-            }
+            toolbar.add(new ToolbarButton("apps", "serial", "Serial Terminal", new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    run();
+                }
+            }));
         }
     }
 
