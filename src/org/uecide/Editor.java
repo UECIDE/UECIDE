@@ -77,9 +77,9 @@ public class Editor extends JFrame {
 
     Box mainDecorationContainer;
 
-    JSplitPane topBottomSplit;
-    JSplitPane leftRightSplit;
-    JSplitPane sidebarSplit;
+    FixedSplitPane topBottomSplit;
+    FixedSplitPane leftRightSplit;
+    FixedSplitPane sidebarSplit;
 
     JTree sketchContentTree;
     JTree sketchFilesTree;
@@ -95,7 +95,6 @@ public class Editor extends JFrame {
     JMenu toolsMenu;
     JMenu helpMenu;
     JMenu serialPortsMenu;
-//    JMenu discoveredBoardsMenu;
     JMenu optionsMenu;
     JMenu programmersSubmenu; 
 
@@ -298,19 +297,9 @@ public class Editor extends JFrame {
         int width = Preferences.getInteger("editor.window.width");
         int height = Preferences.getInteger("editor.window.height");
 
-        leftRightSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, projectPanel, editorPanel);
-        sidebarSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, sidebarPanel);
-        topBottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, sidebarSplit, consolePanel);
-
-        sidebarSplit.setOneTouchExpandable(true);
-        leftRightSplit.setOneTouchExpandable(true);
-        topBottomSplit.setOneTouchExpandable(true);
-
-        leftRightSplit.setContinuousLayout(true);
-        topBottomSplit.setContinuousLayout(true);
-
-
-//        updateSplits();
+        leftRightSplit = new FixedSplitPane(JSplitPane.HORIZONTAL_SPLIT, projectPanel, editorPanel, "editor.layout.splits.tree", FixedSplitPane.LEFT);
+        sidebarSplit = new FixedSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, sidebarPanel, "editor.layout.splits.sidebar", FixedSplitPane.RIGHT);
+        topBottomSplit = new FixedSplitPane(JSplitPane.VERTICAL_SPLIT, sidebarSplit, consolePanel, "editor.layout.splits.console", FixedSplitPane.BOTTOM);
 
         add(topBottomSplit, BorderLayout.CENTER);
 
@@ -505,44 +494,6 @@ public class Editor extends JFrame {
         });
 
         openOrSelectFile(loadedSketch.getMainFile());
-
-        // We want to do this last as the previous SETs trigger this change listener.
-
-        sidebarSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    // Calculate this as a percentage of the window width
-                    int pos = (Integer)(e.getNewValue());
-                    Dimension windowSize = Editor.this.getSize(null);
-                    float pct = (float)pos / (float)windowSize.width;
-                    Preferences.setFloat("editor.layout.splits.sidebar", pct);
-                }
-            }
-        );
-
-        leftRightSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    // Calculate this as a percentage of the window width
-                    int pos = (Integer)(e.getNewValue());
-                    Dimension windowSize = Editor.this.leftRightSplit.getSize(null);
-                    float pct = (float)pos / (float)windowSize.width;
-                    Preferences.setFloat("editor.layout.splits.tree", pct);
-                }
-            }
-        );
-
-        topBottomSplit.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
-            new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    // Calculate this as a percentage of the window height
-                    int pos = (Integer)(e.getNewValue());
-                    Dimension windowSize = Editor.this.getSize(null);
-                    float pct = (float)pos / (float)windowSize.height;
-                    Preferences.setFloat("editor.layout.splits.console", pct);
-                }
-            }
-        );
 
         for (int i = 0; toolbar.getComponentAtIndex(i) != null; i++) {
             Component c = toolbar.getComponentAtIndex(i);
@@ -1838,7 +1789,7 @@ public class Editor extends JFrame {
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_TOP, o);
                     menu.addSeparator();
 
-                    JMenu infoMenu = new JMenu(Base.i18n.string("menu.file.info"));
+                    JMenuItem infoMenu = new JMenu(Base.i18n.string("menu.file.info"));
                     JMenuItem filePath = new JMenuItem(thisFile.getAbsolutePath());
                     filePath.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -2126,7 +2077,7 @@ public class Editor extends JFrame {
                     menu.addSeparator();
                     populateContextMenu(menu, Plugin.MENU_FILE_FILE | Plugin.MENU_MID, o);
 
-                    JMenu infoMenu = new JMenu(Base.i18n.string("menu.file.info"));
+                    JMenuItem infoMenu = new JMenu(Base.i18n.string("menu.file.info"));
                     JMenuItem filePath = new JMenuItem(thisFile.getAbsolutePath());
                     filePath.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
@@ -2858,26 +2809,6 @@ public class Editor extends JFrame {
         }
     }
 
-    public JMenuItem createMenuEntry(String name, int shortcut, int mods, ActionListener action) {
-        return createMenuEntry(name, shortcut, mods, action, null);
-    }
-
-    @SuppressWarnings("deprecation")
-    public JMenuItem createMenuEntry(String name, int shortcut, int mods, ActionListener action, String command) {
-        JMenuItem menuItem = new JMenuItem(name);
-        if (action != null) {
-            menuItem.addActionListener(action);
-        }
-        if (command != null) {
-            menuItem.setActionCommand(command);
-        }
-        if (shortcut != 0) {
-            int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-            menuItem.setAccelerator(KeyStroke.getKeyStroke(shortcut, modifiers | mods));
-        }
-        return menuItem;
-    }
-
     @SuppressWarnings("deprecation")
     public void updateMenus() {
         fileMenu.removeAll();
@@ -2890,7 +2821,7 @@ public class Editor extends JFrame {
         JMenu submenu;
         int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.new"), KeyEvent.VK_N, 0, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.new"), KeyEvent.VK_N, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     Base.handleNew();
@@ -2900,7 +2831,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.open"), KeyEvent.VK_O, 0, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.open"), KeyEvent.VK_O, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     handleOpenPrompt();
@@ -2916,7 +2847,7 @@ public class Editor extends JFrame {
         fileMenu.add(recentSketchesMenu);
 
         for(File m : Base.MRUList) {
-            JMenuItem recentitem = createMenuEntry(m.getName(), 0, 0, new ActionListener() {
+            JMenuItem recentitem = new ActiveMenuItem(m.getName(), 0, 0, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String path = e.getActionCommand();
 
@@ -2954,7 +2885,7 @@ public class Editor extends JFrame {
             for(Map.Entry<File, Integer> m : Base.MCUList.entrySet()) {
                 if (m.getValue().equals(hits)) {
                     File mf = m.getKey();
-                    JMenuItem recentitem = createMenuEntry(mf.getName(), 0, 0, new ActionListener() {
+                    JMenuItem recentitem = new ActiveMenuItem(mf.getName(), 0, 0, new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
                             String path = e.getActionCommand();
 
@@ -3048,7 +2979,7 @@ public class Editor extends JFrame {
         fileMenu.addSeparator();
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_MID);
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.close"), KeyEvent.VK_W, 0, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.close"), KeyEvent.VK_W, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     askCloseWindow();
@@ -3058,7 +2989,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.save"), KeyEvent.VK_S, 0, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.save"), KeyEvent.VK_S, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAllTabs();
@@ -3068,7 +2999,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.saveas"), KeyEvent.VK_S, KeyEvent.SHIFT_MASK, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.saveas"), KeyEvent.VK_S, KeyEvent.SHIFT_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAs();
@@ -3078,13 +3009,13 @@ public class Editor extends JFrame {
             }
         }));
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.export"), 0, 0, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.export"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 exportSar();
             }
         }));
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.import"), 0, 0, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.import"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 importSar();
             }
@@ -3106,7 +3037,7 @@ public class Editor extends JFrame {
         });
         fileMenu.add(cbitem);
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.preferences"), KeyEvent.VK_MINUS, 0, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.preferences"), KeyEvent.VK_MINUS, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new Preferences(Editor.this);
             }
@@ -3115,7 +3046,7 @@ public class Editor extends JFrame {
         addMenuChunk(fileMenu, Plugin.MENU_FILE | Plugin.MENU_BOTTOM);
 
 
-        fileMenu.add(createMenuEntry(Base.i18n.string("menu.file.quit"), KeyEvent.VK_Q, 0, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.quit"), KeyEvent.VK_Q, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     if(Editor.closeAllEditors()) {
@@ -3140,7 +3071,7 @@ public class Editor extends JFrame {
             }
         };
 
-        sketchMenu.add(createMenuEntry("Compile", KeyEvent.VK_R, 0, new ActionListener() {
+        sketchMenu.add(new ActiveMenuItem("Compile", KeyEvent.VK_R, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     compile();
@@ -3150,7 +3081,7 @@ public class Editor extends JFrame {
             }
         }));
         
-        sketchMenu.add(createMenuEntry("Compile and Program", KeyEvent.VK_U, 0, new ActionListener() {
+        sketchMenu.add(new ActiveMenuItem("Compile and Program", KeyEvent.VK_U, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     program();
@@ -3164,31 +3095,31 @@ public class Editor extends JFrame {
         sketchMenu.addSeparator();
 
         JMenu createSubmenu = new JMenu(Base.i18n.string("menu.sketch.create"));
-        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.ino"), 0, 0, createNewAction, "ino"));
-        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.cpp"), 0, 0, createNewAction, "cpp"));
-        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.c"), 0, 0, createNewAction, "c"));
-        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.header"), 0, 0, createNewAction, "h"));
-        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.asm"), 0, 0, createNewAction, "S"));
-        createSubmenu.add(createMenuEntry(Base.i18n.string("menu.create.library"), 0, 0, createNewAction, "lib"));
+        createSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.create.ino"), 0, 0, createNewAction, "ino"));
+        createSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.create.cpp"), 0, 0, createNewAction, "cpp"));
+        createSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.create.c"), 0, 0, createNewAction, "c"));
+        createSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.create.header"), 0, 0, createNewAction, "h"));
+        createSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.create.asm"), 0, 0, createNewAction, "S"));
+        createSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.create.library"), 0, 0, createNewAction, "lib"));
         sketchMenu.add(createSubmenu);
 
         JMenu importSubmenu = new JMenu(Base.i18n.string("menu.sketch.import"));
-        importSubmenu.add(createMenuEntry(Base.i18n.string("menu.sketch.import.source"), 0, 0, new ActionListener() {
+        importSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.sketch.import.source"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
-        importSubmenu.add(createMenuEntry(Base.i18n.string("menu.sketch.import.header"), 0, 0, new ActionListener() {
+        importSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.sketch.import.header"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
-        importSubmenu.add(createMenuEntry(Base.i18n.string("menu.sketch.import.binary"), 0, 0, new ActionListener() {
+        importSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.sketch.import.binary"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
             }
         }));
         sketchMenu.add(importSubmenu);
 
         JMenu librariesSubmenu = new JMenu(Base.i18n.string("menu.sketch.import.libraries"));
-        librariesSubmenu.add(createMenuEntry(Base.i18n.string("menu.sketch.import.libraries.install"), 0, 0, new ActionListener() {
+        librariesSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.sketch.import.libraries.install"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 installLibraryArchive();
             }
@@ -3203,7 +3134,7 @@ public class Editor extends JFrame {
         sketchMenu.addSeparator();
         addMenuChunk(sketchMenu, Plugin.MENU_SKETCH | Plugin.MENU_BOTTOM);
 
-        sketchMenu.add(createMenuEntry(Base.i18n.string("menu.sketch.properties"), 0, 0, new ActionListener() {
+        sketchMenu.add(new ActiveMenuItem(Base.i18n.string("menu.sketch.properties"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 new SketchProperties(Editor.this, loadedSketch);
             }
@@ -3274,7 +3205,7 @@ public class Editor extends JFrame {
         hardwareMenu.addSeparator();
         addMenuChunk(hardwareMenu, Plugin.MENU_HARDWARE | Plugin.MENU_BOTTOM);
 
-        toolsMenu.add(createMenuEntry(Base.i18n.string("menu.tools.pm"), 0, 0, new ActionListener() {
+        toolsMenu.add(new ActiveMenuItem(Base.i18n.string("menu.tools.pm"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     PluginManager pm = new PluginManager();
@@ -3287,7 +3218,7 @@ public class Editor extends JFrame {
         toolsMenu.addSeparator();
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_MID);
 
-        toolsMenu.add(createMenuEntry(Base.i18n.string("menu.tools.sm"), 0, 0, new ActionListener() {
+        toolsMenu.add(new ActiveMenuItem(Base.i18n.string("menu.tools.sm"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 ServiceManager.open(Editor.this);
             }
@@ -3312,7 +3243,7 @@ public class Editor extends JFrame {
             toolsMenu.add(item);
         }
 
-        helpMenu.add(createMenuEntry(Base.i18n.string("menu.help.about"), 0, 0, new ActionListener() {
+        helpMenu.add(new ActiveMenuItem(Base.i18n.string("menu.help.about"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleAbout();
             }
@@ -3324,7 +3255,7 @@ public class Editor extends JFrame {
 //        PropertyFile links = Base.theme.getChildren("links");
 //
 //        for(String link : links.childKeys()) {
-//            helpMenu.add(createMenuEntry(links.get(link + ".name"), 0, 0, (new ActionListener() {
+//            helpMenu.add(new ActiveMenuItem(links.get(link + ".name"), 0, 0, (new ActionListener() {
 //                public void actionPerformed(ActionEvent e) {
 //                    String link = e.getActionCommand();
 //                    Base.openURL(link);
@@ -3335,7 +3266,7 @@ public class Editor extends JFrame {
 //        links = loadedSketch.getContext().getMerged().getChildren("links");
 //
 //        for(String link : links.childKeys()) {
-//            helpMenu.add(createMenuEntry(links.get(link + ".name"), 0, 0, (new ActionListener() {
+//            helpMenu.add(new ActiveMenuItem(links.get(link + ".name"), 0, 0, (new ActionListener() {
 //                public void actionPerformed(ActionEvent e) {
 //                    String link = e.getActionCommand();
 //                    Base.openURL(link);
@@ -3348,36 +3279,36 @@ public class Editor extends JFrame {
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_BOTTOM);
         JMenu debugSubmenu = new JMenu(Base.i18n.string("menu.help.debug"));
 
-        debugSubmenu.add(createMenuEntry(Base.i18n.string("menu.help.debug.console"), 0, 0, new ActionListener() {
+        debugSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.help.debug.console"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Debug.show();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry(Base.i18n.string("menu.help.debug.rebuild"), 0, 0, new ActionListener() {
+        debugSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.help.debug.rebuild"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.cleanAndScanAllSettings();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry(Base.i18n.string("menu.help.debug.purge"), 0, 0, new ActionListener() {
+        debugSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.help.debug.purge"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 loadedSketch.purgeCache();
             }
         }));
 
-        debugSubmenu.add(createMenuEntry(Base.i18n.string("menu.help.debug.opendata"), 0, 0, new ActionListener() {
+        debugSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.help.debug.opendata"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Base.openURL(Base.getDataFolder().getAbsolutePath());
             }
         }));
 
-        debugSubmenu.add(createMenuEntry("Prep for screenshot", 0, 0, new ActionListener() {
+        debugSubmenu.add(new ActiveMenuItem("Prep for screenshot", 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Editor.this.setSize(new Dimension(800, 600));
-                sidebarSplit.setDividerLocation(1.0F);
-                topBottomSplit.setDividerLocation(0.8F);
-                leftRightSplit.setDividerLocation(0.2F);
+                sidebarSplit.setSplitSize(0);
+                topBottomSplit.setSplitSize(100);
+                leftRightSplit.setSplitSize(200);
             }
         }));
 
