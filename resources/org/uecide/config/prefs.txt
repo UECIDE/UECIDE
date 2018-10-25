@@ -857,22 +857,38 @@ debug.window.y.default=100
 editor.layout.name=Layout
 editor.layout.type=section
 
-editor.layout.split_console.name=Console Split Position
-editor.layout.split_console.type=string
-editor.layout.split_console.default=200
+editor.layout.splits.name=Splits
+editor.layout.splits.type=section
 
-editor.layout.split_manual.name=Manual Split Position
-editor.layout.split_manual.type=string
-editor.layout.split_manual.default=400
+editor.layout.splits.console.name=Console height
+editor.layout.splits.console.type=range
+editor.layout.splits.console.default=200
+editor.layout.splits.console.min=0
+editor.layout.splits.console.max=9999999
 
-editor.layout.split_tree.name=Tree Split Position
-editor.layout.split_tree.type=string
-editor.layout.split_tree.default=200
+editor.layout.splits.console_lock.name=Lock console height
+editor.layout.splits.console_lock.type=checkbox
+editor.layout.splits.console_lock.default=false;
 
-editor.layout.visible_manual.name=Manual Visible
-editor.layout.visible_manual.type=checkbox
-editor.layout.visible_manual.default=false
+editor.layout.splits.sidebar.name=Sidebar width
+editor.layout.splits.sidebar.type=range
+editor.layout.splits.sidebar.default=0
+editor.layout.splits.sidebar.min=0
+editor.layout.splits.sidebar.max=9999999
 
+editor.layout.splits.sidebar_lock.name=Lock sidebar width
+editor.layout.splits.sidebar_lock.type=checkbox
+editor.layout.splits.sidebar_lock.default=false;
+
+editor.layout.splits.tree.name=Project tree width
+editor.layout.splits.tree.type=range
+editor.layout.splits.tree.default=200
+editor.layout.splits.tree.min=0
+editor.layout.splits.tree.max=9999999
+
+editor.layout.splits.tree_lock.name=Lock project tree width
+editor.layout.splits.tree_lock.type=checkbox
+editor.layout.splits.tree_lock.default=false;
 
 editor.window.name=Window
 editor.window.type=section

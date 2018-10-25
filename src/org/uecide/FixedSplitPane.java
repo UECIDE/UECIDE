@@ -39,7 +39,9 @@ public class FixedSplitPane extends JSplitPane implements ComponentListener, Mou
     }
 
     public void setSplitSize(int size) {
-        splitSize = size;
+        if (!Preferences.getBoolean(propertyKey + "_lock")) {
+            splitSize = size;
+        }
         recalculateSplit();
     }
 
@@ -74,22 +76,26 @@ public class FixedSplitPane extends JSplitPane implements ComponentListener, Mou
     }
 
     public void mouseReleased(MouseEvent e) {
-        if (orientation == JSplitPane.VERTICAL_SPLIT) {
-            if (anchor == TOP) {
-                splitSize = getDividerLocation();
-            } else {
-                Dimension size = getSize();
-                splitSize = size.height - getDividerLocation();
-            }
+        if (Preferences.getBoolean(propertyKey + "_lock")) {
+            recalculateSplit();
         } else {
-            if (anchor == LEFT) {
-                splitSize = getDividerLocation();
+            if (orientation == JSplitPane.VERTICAL_SPLIT) {
+                if (anchor == TOP) {
+                    splitSize = getDividerLocation();
+                } else {
+                    Dimension size = getSize();
+                    splitSize = size.height - getDividerLocation();
+                }
             } else {
-                Dimension size = getSize();
-                splitSize = size.width - getDividerLocation();
+                if (anchor == LEFT) {
+                    splitSize = getDividerLocation();
+                } else {
+                    Dimension size = getSize();
+                    splitSize = size.width - getDividerLocation();
+                }
             }
+            Preferences.setInteger(propertyKey, splitSize);
         }
-        Preferences.setInteger(propertyKey, splitSize);
     }
 
     public void componentMoved(ComponentEvent e) {

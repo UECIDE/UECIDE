@@ -3789,6 +3789,9 @@ public class Editor extends JFrame {
     }
 
     public void updateAll() {
+        leftRightSplit.recalculateSplit();
+        topBottomSplit.recalculateSplit();
+        sidebarSplit.recalculateSplit();
         updateMenus();
         updateTree();
         setStatus();
