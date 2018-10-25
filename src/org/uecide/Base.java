@@ -2395,7 +2395,14 @@ public class Base {
     }
 
     public static ImageIcon getIcon(String category, String name, int size) {
-
+        try {
+            return new InternalIcon(category, name, size); 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    
+/*
         String iconSet = getIconSet();
 
         String path = getIconsPath(iconSet);
@@ -2413,6 +2420,7 @@ public class Base {
         }
 
         return new ImageIcon(loc);
+*/
     }
 
     public static String getIconSet() {

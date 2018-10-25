@@ -148,6 +148,8 @@ public class Editor extends JFrame {
 
     HashMap<String, Object> dataStore = new HashMap<String, Object>();
 
+    AnimatedIcon abortIcon;
+
     public static ArrayList<Editor>editorList = new ArrayList<Editor>();
 
     ArrayList<Plugin> plugins = new ArrayList<Plugin>();
@@ -163,16 +165,29 @@ public class Editor extends JFrame {
         return dataStore.get(s);
     }
 
+    public void indicateStartCompiling() {
+        abortIcon.start(abortButton);
+        runButton.setEnabled(false);
+        programButton.setEnabled(false);
+        runButton.setVisible(false);
+        abortButton.setVisible(true);
+    }
+
+    public void indicateStopCompiling() {
+        runButton.setEnabled(true);
+        programButton.setEnabled(true);
+        runButton.setVisible(true);
+        abortButton.setVisible(false);
+        abortIcon.stop();
+    }
+
     class DefaultRunHandler implements Runnable {
         boolean upload = false;
         public DefaultRunHandler(boolean doUpload) {
             upload = doUpload;
         }
         public void run() {
-            runButton.setEnabled(false);
-            programButton.setEnabled(false);
-            runButton.setVisible(false);
-            abortButton.setVisible(true);
+            indicateStartCompiling();
 
             try {
                 if(loadedSketch.build()) {
@@ -185,10 +200,7 @@ public class Editor extends JFrame {
                 error(e);
             }
 
-            runButton.setEnabled(true);
-            programButton.setEnabled(true);
-            runButton.setVisible(true);
-            abortButton.setVisible(false);
+            indicateStopCompiling();
         }
     }
 
@@ -198,10 +210,7 @@ public class Editor extends JFrame {
             library = lib;
         }
         public void run() {
-            runButton.setEnabled(false);
-            programButton.setEnabled(false);
-            runButton.setVisible(false);
-            abortButton.setVisible(true);
+            indicateStartCompiling();
 
             try {
                 loadedSketch.precompileLibrary(library);
@@ -209,10 +218,7 @@ public class Editor extends JFrame {
                 error(e);
             }
 
-            runButton.setEnabled(true);
-            programButton.setEnabled(true);
-            runButton.setVisible(true);
-            abortButton.setVisible(false);
+            indicateStopCompiling();
         }
     }
 
@@ -584,7 +590,16 @@ public class Editor extends JFrame {
 
     public void updateToolbar() throws IOException {
         toolbar.removeAll();
-        abortButton = new ToolbarButton("actions", "cancel", Base.i18n.string("toolbar.abort"), 24, new ActionListener() {
+
+        abortIcon = new AnimatedIcon(100,
+            new InternalIcon("spinner", "circle1", 24),
+            new InternalIcon("spinner", "circle2", 24),
+            new InternalIcon("spinner", "circle3", 24),
+            new InternalIcon("spinner", "circle4", 24)
+        );
+
+        //"actions", "cancel", Base.i18n.string("toolbar.abort"), 24, new ActionListener() {
+        abortButton = new ToolbarButton(abortIcon, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 abortCompilation();
             }
@@ -3118,6 +3133,16 @@ public class Editor extends JFrame {
         }));
 
         toolsMenu.addSeparator();
+        toolsMenu.add(new ActiveMenuItem("Toggle minimalist mode", KeyEvent.VK_M, KeyEvent.SHIFT_MASK, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Preferences.setBoolean("editor.layout.minimal", !Preferences.getBoolean("editor.layout.minimal"));
+                try {
+                    refreshAllEditors();
+                } catch (Exception ex) {
+                }
+            }
+        }));
+
         addMenuChunk(toolsMenu, Plugin.MENU_TOOLS | Plugin.MENU_BOTTOM);
 
         PropertyFile pf = loadedSketch.getContext().getMerged();

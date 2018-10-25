@@ -10,6 +10,20 @@ public class ToolbarButton extends JButton {
 
     ImageIcon buttonIcon;
 
+    public ToolbarButton(ImageIcon ico) {
+        this(ico, null);
+    }
+
+    public ToolbarButton(ImageIcon ico, ActionListener al) {
+        super();
+        buttonIcon = ico;
+        setIcon(ico);
+    //    setToolTipText(null);
+        if (al != null) {
+            addActionListener(al);
+        }
+    }
+
     public ToolbarButton(String cat, String name, String tooltip, int size) {
         this(cat, name, tooltip, size, null);
     }
@@ -33,5 +47,6 @@ public class ToolbarButton extends JButton {
     }
 
     public boolean isBorderPainted() { return false; }
-    public Insets getInsets() { return new Insets(2, 5, 2, 5); }
+    public boolean isFocusPainted() { return false; }
+    public Insets getInsets() { return new Insets(2, 2, 2, 2); }
 }
