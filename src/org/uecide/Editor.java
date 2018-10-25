@@ -274,6 +274,16 @@ public class Editor extends JFrame {
         int width = Preferences.getInteger("editor.window.width");
         int height = Preferences.getInteger("editor.window.height");
 
+
+        // Check for old preference types and convert them
+
+        if (Preferences.getFloat("editor.layout.splits.tree") > 0f && Preferences.getFloat("editor.layout.splits.tree") < 1f) {
+
+            Preferences.setInteger("editor.layout.splits.tree", 200);
+            Preferences.setInteger("editor.layout.splits.console", 200);
+            Preferences.setInteger("editor.layout.splits.sidebar", 0);
+        }
+
         leftRightSplit = new FixedSplitPane(JSplitPane.HORIZONTAL_SPLIT, projectPanel, editorPanel, "editor.layout.splits.tree", FixedSplitPane.LEFT);
         sidebarSplit = new FixedSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftRightSplit, sidebarPanel, "editor.layout.splits.sidebar", FixedSplitPane.RIGHT);
         topBottomSplit = new FixedSplitPane(JSplitPane.VERTICAL_SPLIT, sidebarSplit, consolePanel, "editor.layout.splits.console", FixedSplitPane.BOTTOM);

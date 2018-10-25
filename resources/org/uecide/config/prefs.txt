@@ -739,7 +739,7 @@ theme.editor.colors.background.default=#FFFFFF
 
 theme.editor.colors.error.name=Error
 theme.editor.colors.error.type=colorselect
-theme.editor.colors.error.default=#ff0000
+theme.editor.colors.error.default=#ff8888
 
 theme.editor.colors.warning.name=Warning
 theme.editor.colors.warning.type=colorselect
