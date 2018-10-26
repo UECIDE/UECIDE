@@ -61,5 +61,7 @@ public class text extends code {
 
     public void populateMenu(JPopupMenu menu, int flags) {
     }
+    public boolean getUpdateFlag() { return false; }
+
 }
 

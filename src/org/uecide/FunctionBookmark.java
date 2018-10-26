@@ -67,13 +67,53 @@ public class FunctionBookmark {
     String returnType;
     String name;
     String paramList;
+    String parentClass;
 
-    public FunctionBookmark(File f, int l, String n, String rt, String pl) {
+    int type;
+
+    public static final int FUNCTION = 0;
+    public static final int VARIABLE = 1;
+    public static final int MEMBER_FUNCTION = 2;
+    public static final int MEMBER_VARIABLE = 3;
+    public static final int DEFINE = 4;
+    public static final int CLASS = 5;
+
+    public FunctionBookmark(int t, File f, int l, String n, String rt, String pl, String pc) {
+        type = t;
         file = f;
         line = l;
-        name = n;
-        returnType = rt;
-        paramList = pl.trim();
+        name = n != null ? n.trim() : null;
+        returnType = rt != null ? rt.trim() : null;
+        paramList = pl != null ? pl.trim() : null;
+        parentClass = pc != null ? pc.trim() : null;
+    }
+
+    public boolean isFunction() {
+        return type == FUNCTION;
+    }
+
+    public boolean isVariable() {
+        return type == VARIABLE;
+    }
+
+    public boolean isMemberFunction() {
+        return type == MEMBER_FUNCTION;
+    }
+
+    public boolean isMemberVariable() {
+        return type == MEMBER_VARIABLE;
+    }
+
+    public boolean isDefine() {
+        return type == DEFINE;
+    }
+
+    public boolean isClass() {
+        return type == CLASS;
+    }
+    
+    public int getType() {
+        return type;
     }
 
     public String getName() {
@@ -81,15 +121,43 @@ public class FunctionBookmark {
     }
 
     public String formatted() {
-        return returnType + " " + name + paramList;
+        switch (type) {
+            case FUNCTION:
+                return returnType + " " + name + paramList;
+            case VARIABLE:
+                return returnType + " " + name;
+            case MEMBER_FUNCTION:
+                return returnType + " " + parentClass + "::" + name + paramList;
+            case MEMBER_VARIABLE:
+                return returnType + " " + parentClass + "::" + name;
+            case DEFINE:
+                return "#define " + name;
+            case CLASS:
+                return "class " + name;
+        }
+        return name;
     }
 
     public String briefFormatted() {
-        return name + paramList;
+        switch (type) {
+            case FUNCTION:
+                return name + paramList;
+            case VARIABLE:
+                return name;
+            case MEMBER_FUNCTION:
+                return parentClass + "::" + name + paramList;
+            case MEMBER_VARIABLE:
+                return parentClass + "::" + name;
+            case DEFINE:
+                return name;
+            case CLASS:
+                return name;
+        }
+        return name;
     }
 
     public String toString() {
-        return returnType.trim() + " " + name.trim() + paramList.trim();
+        return formatted().trim();
     }
 
     public File getFile() {
@@ -101,11 +169,27 @@ public class FunctionBookmark {
     }
 
     public String getFunction() {
-        return returnType.trim() + " " + name.trim() + paramList.trim();
+        return formatted().trim();
+    }
+
+    public String getVariable() {
+        return formatted().trim();
+    }
+
+    public String getMember() {
+        return formatted().trim();
+    }
+
+    public String getDefine() {
+        return formatted().trim();
     }
 
     public String dump() {
-        return returnType + " " + name + paramList + " @ " + file.getAbsolutePath() + " line " + line;
+        return formatted().trim() + " @ " + file.getAbsolutePath() + " line " + line + " type " + type;
+    }
+
+    public String getParentClass() {
+        return parentClass;
     }
 }
 

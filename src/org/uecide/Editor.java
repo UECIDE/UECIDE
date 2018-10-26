@@ -1465,16 +1465,10 @@ public class Editor extends JFrame {
                 if(e.getClickCount() == 2) {
                     if(userObject instanceof FunctionBookmark) {
                         FunctionBookmark bm = (FunctionBookmark)userObject;
-                        int tab = openOrSelectFile(bm.getFile());
-                        EditorBase eb = getTab(tab);
-                        eb.gotoLine(bm.getLine());
-                        eb.requestFocus();
+                        goToLineInFile(bm.getFile(), bm.getLine());
                     } else if (userObject instanceof TodoEntry) {
                         TodoEntry ent = (TodoEntry)userObject;
-                        int tab = openOrSelectFile(ent.getFile());
-                        EditorBase eb = getTab(tab);
-                        eb.gotoLine(ent.getLine());
-                        eb.requestFocus();
+                        goToLineInFile(ent.getFile(), ent.getLine());
                     }
                 }
 
@@ -5132,14 +5126,19 @@ public class Editor extends JFrame {
         if (m.find()) {
             try {
                 int line = Integer.parseInt(m.group(1));
-                int tab = openOrSelectFile(new File(m.group(2)));
-                if (tab != -1) {
-                    EditorBase eb = getTab(tab);
-                    eb.gotoLine(line);
-                }
+                goToLineInFile(new File(m.group(2)), line);
 
             } catch (Exception e) {
             }
+        }
+    }
+
+    public void goToLineInFile(File f, int l) {
+        int tab = openOrSelectFile(f);
+        if (tab != -1) {
+            EditorBase eb = getTab(tab);
+            eb.gotoLine(l);
+            eb.requestFocus();
         }
     }
 
@@ -5245,6 +5244,19 @@ public class Editor extends JFrame {
 //        leftRightSplit.setDividerLocation((int)(windowSize.width * splitDividerSize));
         leftRightSplit.setResizeWeight(splitDividerSize);
 */
+    }
+
+    public boolean getUpdateFlag() {
+        boolean update = false;
+        int ntabs = editorTabs.getTabCount();
+
+        for(int i = 0; i < ntabs; i++) {
+            EditorBase eb = getTab(i);
+            if (eb.getUpdateFlag()) {
+                update = true;
+            }
+        }
+        return update;
     }
 }
 

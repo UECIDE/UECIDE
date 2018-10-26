@@ -978,7 +978,19 @@ public class Sketch {
     public TreeSet<String> getAllFunctionNames() {
         TreeSet<String>funcs = new TreeSet<String>();
         for (FunctionBookmark bm : functionListBm) {
-            funcs.add(bm.getName());
+            if (bm.isFunction()) {
+                funcs.add(bm.getName());
+            }
+        }
+        return funcs;
+    }
+
+    public TreeSet<String> getAllVariableNames() {
+        TreeSet<String>funcs = new TreeSet<String>();
+        for (FunctionBookmark bm : functionListBm) {
+            if (bm.isVariable()) {
+                funcs.add(bm.getName());
+            }
         }
         return funcs;
     }
@@ -987,7 +999,21 @@ public class Sketch {
         ArrayList<FunctionBookmark>funcs = new ArrayList<FunctionBookmark>();
         for (FunctionBookmark bm : functionListBm) {
             if (bm.getFile().getName().equals(f.getName())) {
-                funcs.add(bm);
+                if (bm.isFunction()) {
+                    funcs.add(bm);
+                }
+            }
+        }
+        return funcs;
+    }
+
+    public ArrayList<FunctionBookmark> getVariablesForFile(File f) {
+        ArrayList<FunctionBookmark>funcs = new ArrayList<FunctionBookmark>();
+        for (FunctionBookmark bm : functionListBm) {
+            if (bm.getFile().getName().equals(f.getName())) {
+                if (bm.isVariable()) {
+                    funcs.add(bm);
+                }
             }
         }
         return funcs;
@@ -1040,11 +1066,14 @@ public class Sketch {
             return;
         }
 
+System.err.println("Finding functions in " + getFolder());
+
         functionListBm = new ArrayList<FunctionBookmark>();
         String data;
         HashMap<Integer, String>funcs = null;
 
         for(File f : sketchFiles) {
+System.err.println("Checking " + f);
             switch(FileType.getType(f)) {
             case FileType.SKETCH:
             case FileType.CSOURCE:
@@ -1138,6 +1167,28 @@ public class Sketch {
 
     }
 
+    public String getReturnTypeFromProtoAndName(String proto, String name) {
+        if (proto.startsWith("/^")) {
+            String trimmed = proto.substring(2).trim();
+            trimmed.replaceAll("\\s+", " ");
+            int nameLoc = trimmed.indexOf(name);
+            if (nameLoc == -1) return "";
+            return trimmed.substring(0, nameLoc);
+        }
+        return "";
+    }
+
+    public File translateBuildFileToSketchFile(String filename) {
+        File bf = getBuildFolder();
+        File skf = getFolder();
+        String bfname = bf.getAbsolutePath();
+        if (filename.startsWith(bfname)) {
+            int offset = bfname.length();
+            return new File(skf, filename.substring(offset));
+        }
+        return null;
+    }
+
     public ArrayList<FunctionBookmark> scanForFunctions(File f) {
 
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
@@ -1160,89 +1211,97 @@ public class Sketch {
 
                 for (String tagLine : tagLines) {
 
-                    String halves[] = tagLine.split(";\"\t"); // Get the two halves - left is the name, path and pattern, right is the type, line and signature.
+                    String[] chunks = tagLine.split("\t");
 
-                    if (halves.length != 2) continue;
+                    if (chunks[0].startsWith("!")) continue;
 
-                    String[] leftBits = halves[0].split("\t");
-                    String[] rightBits = halves[1].split("\t");
+                    String itemName = chunks[0].trim();
+                    String fileName = chunks[1].trim();
+                    String objectType = chunks[3].trim();
 
-                    String name = leftBits[0];
-                    String file = leftBits[1];
-                    String body = leftBits[2];
+                    HashMap<String, String> params = new HashMap<String, String>();
 
-
-                    for (int i = 3; i < leftBits.length; i++) {
-                        body += " " + leftBits[i];
-                    }
-
-                    String type = "";
-                    String line = "";
-                    String signature = "";
-
-                    boolean ignore = false;
-
-                    for (String rightBit : rightBits) {
-                        String[] rightBitParts = rightBit.split(":");
-
-                        if (rightBitParts[0].length() == 1) {
-                            type = rightBitParts[0];
-                            continue;
-                        }
-
-                        if (rightBitParts[0].equals("class")) {
-                            ignore = true;
-                        }
-
-                        if (rightBitParts[0].equals("line")) {
-                            line = rightBitParts[1];
-                        }
-
-                        if (rightBitParts[0].equals("signature")) {
-                            signature = rightBitParts[1];
+                    for (int i = 4; i < chunks.length; i++) {
+                        String[] parts = chunks[i].split(":", 2);
+                        if (parts.length == 2) {
+                            params.put(parts[0], parts[1]);
                         }
                     }
 
-                    if (type.equals("f") && !ignore) { // It's a function
-                        if (signature.equals("")) {
-                            error("Unable to get signature for " + name);
-                            return null;
+                    if (objectType.equals("f")) { // Function
+                        if (params.get("class") != null) { // Class member function
+                            String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                            FunctionBookmark bm = new FunctionBookmark(
+                                FunctionBookmark.MEMBER_FUNCTION,
+                                translateBuildFileToSketchFile(fileName),
+                                Utils.s2i(params.get("line")),
+                                itemName,
+                                returnType,
+                                params.get("signature"),
+                                params.get("class")
+                            );
+                            protos.add(bm);
+                        } else { // Global function
+                            String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                            FunctionBookmark bm = new FunctionBookmark(
+                                FunctionBookmark.FUNCTION,
+                                translateBuildFileToSketchFile(fileName),
+                                Utils.s2i(params.get("line")),
+                                itemName,
+                                returnType,
+                                params.get("signature"),
+                                null
+                            );
+                            protos.add(bm);
                         }
-                        Matcher m = pat.matcher(body);
-                        if (m.find()) {
-                            String proto = m.group(1) + signature + ";";
-                            int lineNo = -1;
-                            try {
-                                lineNo = Integer.parseInt(line);
-                            } catch (Exception e) {
-                            }
-
-                            String firstBit = m.group(1).replaceAll("\\s+", " ");
-
-                            String[] rtBits = firstBit.split(" ");
-
-                            String rt = "";
-                            for (String rtb : rtBits) {
-                                if (rtb.equals(name)) {
-                                    continue;
-                                }
-
-                                if (rtb.equals("*" + name)) {
-                                    rt += "* ";
-                                    continue;
-                                }
-
-                                if (rtb.equals("&" + name)) {
-                                    rt += "& ";
-                                    continue;
-                                }
-
-                                rt += rtb + " ";
-                            }
-
-                            FunctionBookmark prototypeBm = new FunctionBookmark(f, lineNo, name, rt.trim(), signature);
-                            protos.add(prototypeBm);
-                        }
+                    } else if (objectType.equals("v")) { // Variable
+                        String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                        FunctionBookmark bm = new FunctionBookmark(
+                            FunctionBookmark.VARIABLE,
+                            translateBuildFileToSketchFile(fileName),
+                            Utils.s2i(params.get("line")),
+                            itemName,
+                            returnType,
+                            null,
+                            null
+                        );
+                        protos.add(bm);
+                    } else if (objectType.equals("m")) { // Class member variable
+                        String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                        FunctionBookmark bm = new FunctionBookmark(
+                            FunctionBookmark.MEMBER_VARIABLE,
+                            translateBuildFileToSketchFile(fileName),
+                            Utils.s2i(params.get("line")),
+                            itemName,
+                            returnType,
+                            params.get("class"),
+                            null
+                        );
+                        protos.add(bm);
+                    } else if (objectType.equals("d")) { // Preprocessor macro
+                        FunctionBookmark bm = new FunctionBookmark(
+                            FunctionBookmark.DEFINE,
+                            translateBuildFileToSketchFile(fileName),
+                            Utils.s2i(params.get("line")),
+                            itemName,
+                            null,
+                            null,
+                            null
+                        );
+                        protos.add(bm);
+                    } else if (objectType.equals("c")) { // Class definition
+                        FunctionBookmark bm = new FunctionBookmark(
+                            FunctionBookmark.CLASS,
+                            translateBuildFileToSketchFile(fileName),
+                            Utils.s2i(params.get("line")),
+                            itemName,
+                            null,
+                            null,
+                            null
+                        );
+                        protos.add(bm);
+                    } else { // Something we don't know about
+System.err.println("Unknown type " + objectType + " (" + itemName + ")");
                     }
                 }
             }
@@ -1302,7 +1361,12 @@ public class Sketch {
         for (String fn : getFileNames()) {
             File f = getBuildFileByName(fn);
             if(FileType.getType(f) == FileType.SKETCH) {
-                protos.addAll(scanForFunctions(f));
+                ArrayList<FunctionBookmark> bms = scanForFunctions(f);
+                for (FunctionBookmark bm : bms) {
+                    if (bm.isFunction()) {
+                        protos.add(bm);
+                    }
+                }
             }
         }
 
@@ -4261,7 +4325,12 @@ public class Sketch {
             addKeywordsFromFile(l.getKeywords());
         }
         for (FunctionBookmark bm : functionListBm) {
-            keywords.put(bm.getName(), KeywordTypes.KEYWORD3);
+            if (bm.isFunction()) {
+                keywords.put(bm.getName(), KeywordTypes.KEYWORD3);
+            }
+            if (bm.isMemberFunction()) {
+                keywords.put(bm.getName(), KeywordTypes.KEYWORD3);
+            }
         }
 
     }
@@ -4613,4 +4682,14 @@ public class Sketch {
         }
     }
 
+    public ArrayList<FunctionBookmark> getBookmarkList() {
+        return functionListBm;
+    }
+
+
+    public void dumpAllBookmarks() {
+        for (FunctionBookmark bm : functionListBm) {
+            System.err.println(bm.dump());
+        }
+    }
 }

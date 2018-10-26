@@ -71,4 +71,5 @@ public interface EditorBase {
     public Component getContentPane();
     public Rectangle getViewRect();
     public void setViewPosition(Point p);
+    public boolean getUpdateFlag();
 }

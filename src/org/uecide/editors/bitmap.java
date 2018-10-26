@@ -253,4 +253,5 @@ public class bitmap extends JPanel implements EditorBase {
         return scrollPane.getViewport().getViewRect();
     }
 
+    public boolean getUpdateFlag() { return false; }
 }

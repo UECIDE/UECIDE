@@ -96,6 +96,8 @@ public class Base {
 
     static Platform platform;
 
+    public static PropertyFile manualPages;
+
     static private boolean headless;
 
     // these are static because they're used by Sketch
@@ -2905,6 +2907,8 @@ public class Base {
         Debug.message("Caching system files");
         cacheSystemFiles();
 
+        loadManualPages();
+
         Debug.message("Loading cores");
         loadCores();
 //        waitForAssetLoading();
@@ -2938,6 +2942,10 @@ public class Base {
 
     public static boolean isHeadless() {
         return headless;
+    }
+
+    public static void loadManualPages() {
+        manualPages = new PropertyFile("/org/uecide/manual.txt");
     }
 }
 

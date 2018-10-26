@@ -128,7 +128,7 @@ public class Splash extends JDialog { //Window {
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         g2.setFont(new Font("SansSerif", Font.BOLD, 16)); //Base.theme.getFontNatural("splash.version.font"));
-        g2.setColor(new Color(0x2b, 0xbe, 0xbe)); //Base.theme.getColor("splash.version.color"));
+        g2.setColor(new Color(0xbe, 0xbe, 0xbe)); //Base.theme.getColor("splash.version.color"));
         g2.drawString("v" + Base.systemVersion, x, y);
 
         int barHeight = 20;

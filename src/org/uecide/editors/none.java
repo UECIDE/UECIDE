@@ -51,4 +51,6 @@ public class none { //implements EditorBase {
 
     public void populateMenu(JPopupMenu menu, int flags) {
     }
+    public boolean getUpdateFlag() { return false; }
+
 }

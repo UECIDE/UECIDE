@@ -77,6 +77,7 @@ public class code extends JPanel implements EditorBase {
     String fileSyntax;
 
     JToolBar toolbar;
+    JMenu gotoMenu;
 
     static class Flag {
         Icon icon;
@@ -103,6 +104,8 @@ public class code extends JPanel implements EditorBase {
     }
 
     ArrayList<Flag> flagList = new ArrayList<Flag>();
+
+    boolean updateFlag = false;
 
     public void openFindPanel() {
         if(findPanel == null) {
@@ -223,6 +226,18 @@ public class code extends JPanel implements EditorBase {
 
         rDocument = new RSyntaxDocument(FileType.getSyntaxStyle(f.getName()));
 
+        rDocument.addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                updateFlag = true;
+            }
+            public void removeUpdate(DocumentEvent e) {
+                updateFlag = true;
+            }
+            public void insertUpdate(DocumentEvent e) {
+                updateFlag = true;
+            }
+        });
+
         textArea = new RSyntaxTextArea(rDocument) {
             public String getToolTipText(MouseEvent e) {
                 try {
@@ -273,9 +288,62 @@ public class code extends JPanel implements EditorBase {
 
         JPopupMenu pm = textArea.getPopupMenu();
 
+        gotoMenu = new JMenu("Go to...");
+        pm.add(gotoMenu);
+
         editor.addMenuChunk(pm, Plugin.MENU_POPUP_EDITOR | Plugin.MENU_TOP);
         editor.addMenuChunk(pm, Plugin.MENU_POPUP_EDITOR | Plugin.MENU_MID);
         editor.addMenuChunk(pm, Plugin.MENU_POPUP_EDITOR | Plugin.MENU_BOTTOM);
+
+        textArea.addMouseListener(new MouseListener() {
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == 3) {
+                    gotoMenu.removeAll();
+                    Token token = textArea.viewToToken(e.getPoint());
+                    if (token != null) {
+                        String tokenName = token.getLexeme();
+
+                        String url = Base.manualPages.get(tokenName);
+                        if (url != null) {
+                            JMenuItem m = new JMenuItem("Manual page");
+                            m.setActionCommand(url);
+                            m.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent evt) {
+                                    JMenuItem i = (JMenuItem)evt.getSource();
+                                    Utils.browse(i.getActionCommand());
+                                }
+                            });
+                            gotoMenu.add(m);
+                        }
+
+                        ArrayList<FunctionBookmark>bms = editor.getSketch().getBookmarkList();
+                        for (FunctionBookmark bm : bms) {
+                            if (bm.getName().equals(tokenName)) {
+                                JMenuItem m = new JMenuItem(bm.toString());
+                                m.addActionListener(new ActionListener() {
+                                    public void actionPerformed(ActionEvent evt) {
+                                        editor.goToLineInFile(bm.getFile(), bm.getLine());
+                                    }
+                                });
+                                gotoMenu.add(m);
+                            }
+                        }
+                    }
+                }
+            }
+        
+            public void mouseReleased(MouseEvent e) {
+            }
+       
+            public void mouseEntered(MouseEvent e) {
+            }
+      
+            public void mouseExited(MouseEvent e) {
+            }
+
+            public void mouseClicked(MouseEvent e) {
+            }
+        });
 
 
         scrollPane = new RTextScrollPane(textArea);
@@ -980,4 +1048,9 @@ public class code extends JPanel implements EditorBase {
         scrollPane.getViewport().setViewPosition(p);
     }
 
+    public boolean getUpdateFlag() {
+        boolean u = updateFlag;
+        updateFlag = false;
+        return u;
+    }
 }
