@@ -238,7 +238,7 @@ public class code extends JPanel implements EditorBase {
             }
         });
 
-        textArea = new RSyntaxTextArea(rDocument) {
+        textArea = new RSyntaxTextArea(rDocument) /*{
             public String getToolTipText(MouseEvent e) {
                 try {
                     HashMap<Integer, String> comments = sketch.getLineComments(file);
@@ -265,7 +265,7 @@ public class code extends JPanel implements EditorBase {
 
                 return null;
             }
-        };
+        }*/;
 
         fileSyntax = FileType.getSyntaxStyle(f.getName());
         if (fileSyntax == null) {
@@ -1053,4 +1053,5 @@ public class code extends JPanel implements EditorBase {
         updateFlag = false;
         return u;
     }
+
 }

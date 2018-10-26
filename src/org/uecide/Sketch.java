@@ -1066,14 +1066,12 @@ public class Sketch {
             return;
         }
 
-System.err.println("Finding functions in " + getFolder());
 
         functionListBm = new ArrayList<FunctionBookmark>();
         String data;
         HashMap<Integer, String>funcs = null;
 
         for(File f : sketchFiles) {
-System.err.println("Checking " + f);
             switch(FileType.getType(f)) {
             case FileType.SKETCH:
             case FileType.CSOURCE:
@@ -1301,7 +1299,6 @@ System.err.println("Checking " + f);
                         );
                         protos.add(bm);
                     } else { // Something we don't know about
-System.err.println("Unknown type " + objectType + " (" + itemName + ")");
                     }
                 }
             }
