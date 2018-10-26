@@ -255,9 +255,9 @@ theme.console.foreground.default=#eeeeee
 theme.console.colors.name=Colors
 theme.console.colors.type=section
 
-theme.console.colors.body.name=Body color
-theme.console.colors.body.type=colorselect
-theme.console.colors.body.default=#eeeeee
+theme.console.colors.background.name=Body color
+theme.console.colors.background.type=colorselect
+theme.console.colors.background.default=#eeeeee
 
 theme.console.colors.warning.name=Warning color
 theme.console.colors.warning.type=colorselect
@@ -995,6 +995,10 @@ theme.markdown.font.pre.default=Monospaced,plain,12
 
 theme.markdown.color.name=Colors
 theme.markdown.color.type=section
+
+theme.markdown.color.background=Background
+theme.markdown.color.background.type=colorselect
+theme.markdown.color.background.default=#ffffff
 
 theme.markdown.color.p.name=Paragraph
 theme.markdown.color.p.type=colorselect

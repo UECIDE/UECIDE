@@ -64,10 +64,16 @@ public class MarkdownPane extends JTextPane {
         
     }
 
+    String generateBackgroundColor(Color c) {
+        return String.format("background-color: #%02x%02x%02x;", c.getRed(), c.getGreen(), c.getBlue());
+    }
+
     void renderIt() {
         try {
             setContentType("text/html");
             setEditable(false);
+            setBackground(Preferences.getColor("theme.markdown.color.background"));
+            String body = generateBackgroundColor(Preferences.getColor("theme.markdown.color.background"));
             String fp = generateCSSForFont(Preferences.getFont("theme.markdown.font.p"), Preferences.getColor("theme.markdown.color.p"));
             String fli = generateCSSForFont(Preferences.getFont("theme.markdown.font.li"), Preferences.getColor("theme.markdown.color.li"));
             String fh1 = generateCSSForFont(Preferences.getFont("theme.markdown.font.h1"), Preferences.getColor("theme.markdown.color.h1"));
@@ -75,6 +81,7 @@ public class MarkdownPane extends JTextPane {
             String fh3 = generateCSSForFont(Preferences.getFont("theme.markdown.font.h3"), Preferences.getColor("theme.markdown.color.h3"));
             String fpre = generateCSSForFont(Preferences.getFont("theme.markdown.font.pre"), Preferences.getColor("theme.markdown.color.pre"));
             String html = new Markdown4jProcessor()
+                .addHtmlAttribute("style", body, "body")
                 .addHtmlAttribute("style", fpre, "pre")
                 .addHtmlAttribute("style", fp, "p")
                 .addHtmlAttribute("style", fli, "li")

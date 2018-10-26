@@ -38,6 +38,8 @@ public class ExampleBrowser extends JDialog {
         String codebody;
         String desc;
 
+        boolean hasReadme = false;
+
         public ExampleSketch(File f, File s) {
             folder = f;
             name = f.getName();
@@ -45,8 +47,10 @@ public class ExampleBrowser extends JDialog {
             File rm = new File(f, "README.md");
             if (rm.exists()) {
                 desc = Base.getFileAsString(rm);
+                hasReadme = true;
             } else {
                 desc = "No Description Available\n========================\n\nSorry.";
+                hasReadme = false;
             }
         }
         public String toString() {
@@ -56,6 +60,11 @@ public class ExampleBrowser extends JDialog {
             edPane.setText(codebody);
             readme.setText(desc);
             edPane.setCaretPosition(0);
+            if (hasReadme) {
+                topBottom.setDividerLocation(0.5f);
+            } else {
+                topBottom.setDividerLocation(0);
+            }
         }
         public File getFolder() {
             return folder;
@@ -101,7 +110,7 @@ public class ExampleBrowser extends JDialog {
 
         leftRight = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, topBottom);
 
-        topBottom.setDividerLocation(300);
+        topBottom.setDividerLocation(0);
         leftRight.setDividerLocation(300);
 
         add(leftRight, BorderLayout.CENTER);
