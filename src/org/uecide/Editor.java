@@ -427,11 +427,10 @@ public class Editor extends JFrame {
         updateToolbar();
 
         toolbar.add(new ToolbarSpacer()); //Separator();
-        toolbar.setVisible(!Preferences.getBoolean("editor.layout.minimal"));
+
 
         miniBar = new JToolBar();
         miniBar.setFloatable(false);
-        miniBar.setVisible(Preferences.getBoolean("editor.layout.minimal"));
 
         miniBar.add(new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 16, new ActionListener() {
             @SuppressWarnings("deprecation")
@@ -531,6 +530,12 @@ public class Editor extends JFrame {
             }
         });
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        if (Preferences.getBoolean("editor.layout.minimal")) {
+            enableMinimalMode();
+        } else {
+            disableMinimalMode();
+        }
 
         this.pack();
 
@@ -4547,8 +4552,12 @@ public class Editor extends JFrame {
             eb.refreshSettings();
         }
 
-        toolbar.setVisible(!Preferences.getBoolean("editor.layout.minimal"));
-        miniBar.setVisible(Preferences.getBoolean("editor.layout.minimal"));
+        if (Preferences.getBoolean("editor.layout.minimal")) {
+            enableMinimalMode();
+        } else {
+            disableMinimalMode();
+        }
+
     }
 
     public void handleAbout() {
@@ -5257,6 +5266,20 @@ public class Editor extends JFrame {
             }
         }
         return update;
+    }
+
+    public void enableMinimalMode() {
+        toolbar.setVisible(false);
+        leftRightSplit.hideOne();
+        sidebarSplit.hideTwo();
+        miniBar.setVisible(true);
+    }
+
+    public void disableMinimalMode() {
+        toolbar.setVisible(true);
+        leftRightSplit.showOne();
+        sidebarSplit.showTwo();
+        miniBar.setVisible(false);
     }
 }
 

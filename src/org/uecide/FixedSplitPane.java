@@ -29,10 +29,11 @@ public class FixedSplitPane extends JSplitPane implements ComponentListener, Mou
         orientation = o;
         panelOne = one;
         panelTwo = two;
+        panelOne.setMinimumSize(new Dimension(0, 0));
+        panelTwo.setMinimumSize(new Dimension(0, 0));
         propertyKey = prop;
         anchor = anch;
         splitSize = Preferences.getInteger(propertyKey);
-//        addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
         ((BasicSplitPaneUI)getUI()).getDivider().addMouseListener(this);
         addComponentListener(this);
         setContinuousLayout(true);
@@ -45,6 +46,22 @@ public class FixedSplitPane extends JSplitPane implements ComponentListener, Mou
         recalculateSplit();
     }
 
+    public void hideOne() {
+        panelOne.setVisible(false);
+    }
+
+    public void hideTwo() {
+        panelTwo.setVisible(false);
+    }
+
+    public void showOne() {
+        panelOne.setVisible(true);
+    }
+
+    public void showTwo() {
+        panelTwo.setVisible(true);
+    }
+
     public void recalculateSplit() {
         if (orientation == JSplitPane.VERTICAL_SPLIT) {
             if (anchor == TOP) {
@@ -54,9 +71,6 @@ public class FixedSplitPane extends JSplitPane implements ComponentListener, Mou
                 setDividerLocation(size.height - splitSize);
             }
         } else {
-            if (Preferences.getBoolean("editor.layout.minimal")) {
-                splitSize = 0;
-            }
             if (anchor == LEFT) {
                 setDividerLocation(splitSize);
             } else {
@@ -64,6 +78,7 @@ public class FixedSplitPane extends JSplitPane implements ComponentListener, Mou
                 setDividerLocation(size.width - splitSize);
             }
         }
+        System.err.println(splitSize);
     }
 
     public void mouseClicked(MouseEvent e) {
