@@ -579,8 +579,8 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
 
     public void populateMenu(JMenu menu, int flags) {
         if (flags == (Plugin.MENU_TOOLS | Plugin.MENU_MID)) {
-            JMenuItem item = new JMenuItem("Serial Terminal");
-            item.addActionListener(new ActionListener() {
+
+            JMenuItem item = new ActiveMenuItem("Serial Terminal", KeyEvent.VK_T, KeyEvent.SHIFT_MASK, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     run();
                 }
