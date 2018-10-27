@@ -42,6 +42,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.zip.*;
+import java.util.regex.*;
+
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -311,13 +313,53 @@ public class code extends JPanel implements EditorBase {
                 if (e.getButton() == 3) {
                     gotoMenu.removeAll();
                     Token token = textArea.viewToToken(e.getPoint());
-                    if (token != null) {
-                        String tokenName = token.getLexeme();
+                    Object[] obs = analyseToken(token);
+                    for (Object ob : obs) {
+                        if (ob instanceof Library) {
+                            Library lib = (Library)ob;
+                            JMenuItem m = new JMenuItem("Library folder");
+                            m.setActionCommand(lib.getFolder().getAbsolutePath());
+                            m.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent evt) {
+                                    JMenuItem i = (JMenuItem)evt.getSource();
+                                    Utils.open(i.getActionCommand());
+                                }
+                            });
+                            gotoMenu.add(m);
+                            continue;
+                        }
 
-                        String url = Base.manualPages.get(tokenName);
-                        if (url != null) {
+                        if (ob instanceof File) {
+                            File f = (File)ob;
+                            JMenuItem m = new JMenuItem("Open File");
+                            m.setActionCommand(f.getAbsolutePath());
+                            m.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent evt) {
+                                    JMenuItem i = (JMenuItem)evt.getSource();
+                                    File thisFile = new File(i.getActionCommand());
+                                    editor.openOrSelectFile(thisFile);
+                                }
+                            });
+                            gotoMenu.add(m);
+                            continue;
+                        }
+
+                        if (ob instanceof FunctionBookmark) {
+                            FunctionBookmark bm = (FunctionBookmark)ob;
+                            JMenuItem m = new JMenuItem(bm.toString());
+                            m.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent evt) {
+                                    editor.goToLineInFile(bm.getFile(), bm.getLine());
+                                }
+                            });
+                            gotoMenu.add(m);
+                            continue;
+                        }
+
+                        if (ob instanceof URL) {
+                            URL url = (URL)ob;
                             JMenuItem m = new JMenuItem("Manual page");
-                            m.setActionCommand(url);
+                            m.setActionCommand(url.toString());
                             m.addActionListener(new ActionListener() {
                                 public void actionPerformed(ActionEvent evt) {
                                     JMenuItem i = (JMenuItem)evt.getSource();
@@ -325,19 +367,6 @@ public class code extends JPanel implements EditorBase {
                                 }
                             });
                             gotoMenu.add(m);
-                        }
-
-                        ArrayList<FunctionBookmark>bms = editor.getSketch().getBookmarkList();
-                        for (FunctionBookmark bm : bms) {
-                            if (bm.getName().equals(tokenName)) {
-                                JMenuItem m = new JMenuItem(bm.toString());
-                                m.addActionListener(new ActionListener() {
-                                    public void actionPerformed(ActionEvent evt) {
-                                        editor.goToLineInFile(bm.getFile(), bm.getLine());
-                                    }
-                                });
-                                gotoMenu.add(m);
-                            }
                         }
                     }
                 }
@@ -450,6 +479,147 @@ public class code extends JPanel implements EditorBase {
         refreshSettings();
 
     }
+
+    Object[] analyseToken(Token t) {
+        ArrayList<Object> out = new ArrayList<Object>();
+        
+        if (t != null) {
+            try {
+                int tokenStart = t.getOffset();
+                int line = textArea.getLineOfOffset(tokenStart);
+
+                Token lineTokens = textArea.getTokenListForLine(line);
+                ArrayList<Token> tokenList = new ArrayList<Token>();
+                Token thisToken = lineTokens;
+                while (thisToken != null) {
+                    if ((thisToken.getType() != 21) && (thisToken.getType() != 0)) {
+                        tokenList.add(thisToken);
+                    }
+                    thisToken = thisToken.getNextToken();
+                }
+
+                Pattern includePattern = Pattern.compile("^#\\s*include$");
+
+                Matcher m = includePattern.matcher(tokenList.get(0).getLexeme());
+                if (m.matches()) {
+                    String header = "";
+                    if (tokenList.get(1).getType() == 13) {
+                        header = tokenList.get(1).getLexeme();
+                        header = header.substring(1, header.length() - 1);
+                    } else {
+                        header = tokenList.get(2).getLexeme() + tokenList.get(3).getLexeme() + tokenList.get(4).getLexeme();
+                    }
+                    Library l = Library.getLibraryByInclude(header, editor.getSketch().getCore().getName());
+                    if (l != null) {
+                        out.add(l);
+                    }
+                    File f = editor.getSketch().getFileByName(header);
+                    if (f != null) {
+                        out.add(f);
+                    }
+                }
+
+                int tokenNumber = 0;
+                for (Token tkn : tokenList) {
+                    if (tkn.getOffset() == t.getOffset()) {
+                        break;
+                    }
+                    tokenNumber++;
+                }
+
+                if (tokenNumber > 1) { // Must be at least two tokens before for a class prefix
+                    if (tokenList.get(tokenNumber-1).getLexeme().equals(".")) { // Is prefixed with a dot
+                        String objectName = tokenList.get(tokenNumber-2).getLexeme();
+                        String functionName = t.getLexeme();
+
+                        String manualName = objectName + "." + functionName;
+                        String url = Base.manualPages.get(manualName);
+                        if (url != null) {
+                            out.add(new URL(url));
+                        }
+
+                        String className = getTypeForVariable(objectName);
+                        if (className != null) {
+                            for (FunctionBookmark bm : editor.getSketch().getBookmarkList()) {
+                                if ((bm.getType() == FunctionBookmark.MEMBER_FUNCTION) || (bm.getType() == FunctionBookmark.MEMBER_VARIABLE)) {
+                                    String bmParentClass = bm.getParentClass();
+                                    String bmName = bm.getName();
+                                    if ((bmParentClass != null) && (bmName != null)) {
+                                        if (bmParentClass.equals(className) && bmName.equals(functionName)) {
+                                            out.add(bm);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (tokenNumber < tokenList.size()-2) { // Must be at least two tokens after for a class prefix
+                    if (tokenList.get(tokenNumber+1).getLexeme().equals(".")) { // Is prefixed with a dot
+                        String functionName = tokenList.get(tokenNumber+2).getLexeme();
+                        String objectName = t.getLexeme();
+
+                        String manualName = objectName + "." + functionName;
+                        String url = Base.manualPages.get(manualName);
+                        if (url != null) {
+                            out.add(new URL(url));
+                        }
+
+                        String className = getTypeForVariable(objectName);
+                        if (className != null) {
+                            for (FunctionBookmark bm : editor.getSketch().getBookmarkList()) {
+                                if ((bm.getType() == FunctionBookmark.MEMBER_FUNCTION) || (bm.getType() == FunctionBookmark.MEMBER_VARIABLE)) {
+                                    String bmParentClass = bm.getParentClass();
+                                    String bmName = bm.getName();
+                                    if ((bmParentClass != null) && (bmName != null)) {
+                                        if (bmParentClass.equals(className) && bmName.equals(functionName)) {
+                                            out.add(bm);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                for (FunctionBookmark bm : editor.getSketch().getBookmarkList()) {
+                    if ((bm.getType() == FunctionBookmark.FUNCTION) || (bm.getType() == FunctionBookmark.VARIABLE) || (bm.getType() == FunctionBookmark.DEFINE) || (bm.getType() == FunctionBookmark.CLASS)) {
+                        String bmName = bm.getName();
+                        if (bmName != null) {
+                            if (bmName.equals(t.getLexeme())) {
+                                out.add(bm);
+                            }
+                        }
+                    }
+                }
+
+                String aurl = Base.manualPages.get(t.getLexeme());
+                if (aurl != null) {
+                    out.add(new URL(aurl));
+                }
+
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return out.toArray(new Object[0]);
+    }
+
+    String getTypeForVariable(String varName) {
+        for (FunctionBookmark bm : editor.getSketch().getBookmarkList()) {
+            if (bm.getType() == FunctionBookmark.VARIABLE) {
+                if (bm.getName().equals(varName)) {
+                    return bm.getReturnType();
+                }
+            }
+        }
+        return null;
+    }
+
 
     public void requestFocus() {
         textArea.requestFocus();

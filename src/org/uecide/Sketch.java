@@ -1298,6 +1298,18 @@ public class Sketch {
                             null
                         );
                         protos.add(bm);
+                    } else if (objectType.equals("p")) { // Function prototype - may be a class instantiation
+                        String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                        FunctionBookmark bm = new FunctionBookmark(
+                            FunctionBookmark.VARIABLE,
+                            translateBuildFileToSketchFile(fileName),
+                            Utils.s2i(params.get("line")),
+                            itemName,
+                            returnType,
+                            null,
+                            null
+                        );
+                        protos.add(bm);
                     } else { // Something we don't know about
                     }
                 }

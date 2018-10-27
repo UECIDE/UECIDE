@@ -2945,7 +2945,17 @@ public class Base {
     }
 
     public static void loadManualPages() {
-        manualPages = new PropertyFile("/org/uecide/manual.txt");
+        manualPages = new PropertyFile();
+        PropertyFile manualIndex = new PropertyFile("/org/uecide/manual.txt");
+        for (String k : manualIndex.keySet()) {
+            String filename = manualIndex.get(k);
+            PropertyFile partFile = new PropertyFile("/org/uecide/manual/" + filename + ".txt");
+            if (k.equals("Global")) {
+                manualPages.mergeData(partFile);
+            } else {
+                manualPages.mergeData(partFile, k);
+            }
+        }
     }
 }
 

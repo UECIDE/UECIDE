@@ -191,5 +191,9 @@ public class FunctionBookmark {
     public String getParentClass() {
         return parentClass;
     }
+
+    public String getReturnType() {
+        return returnType;
+    }
 }
 

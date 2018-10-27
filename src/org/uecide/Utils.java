@@ -55,4 +55,13 @@ public class Utils {
             }
         }
     }
+
+    public static void open(String url) {
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().open(new File(url));
+            } catch (Exception ex) {
+            }
+        }
+    }
 }
