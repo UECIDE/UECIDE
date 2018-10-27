@@ -78,7 +78,6 @@ public class FixedSplitPane extends JSplitPane implements ComponentListener, Mou
                 setDividerLocation(size.width - splitSize);
             }
         }
-        System.err.println(splitSize);
     }
 
     public void mouseClicked(MouseEvent e) {

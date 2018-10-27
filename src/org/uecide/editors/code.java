@@ -238,7 +238,7 @@ public class code extends JPanel implements EditorBase {
             }
         });
 
-        textArea = new RSyntaxTextArea(rDocument) /*{
+        textArea = new RSyntaxTextArea(rDocument) {
             public String getToolTipText(MouseEvent e) {
                 try {
                     HashMap<Integer, String> comments = sketch.getLineComments(file);
@@ -265,13 +265,24 @@ public class code extends JPanel implements EditorBase {
 
                 return null;
             }
-        }*/;
+        };
 
         fileSyntax = FileType.getSyntaxStyle(f.getName());
         if (fileSyntax == null) {
             fileSyntax = SyntaxConstants.SYNTAX_STYLE_NONE;
         }
         textArea.setSyntaxEditingStyle(fileSyntax);
+
+        textArea.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("shift ctrl C"), "togglecomment");
+        textArea.getActionMap().put("togglecomment", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    toggleComment();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
 
         Document d = textArea.getDocument();
         d.addDocumentListener(new DocumentListener() {
@@ -1052,6 +1063,61 @@ public class code extends JPanel implements EditorBase {
         boolean u = updateFlag;
         updateFlag = false;
         return u;
+    }
+
+    String getLineContent(int line) throws BadLocationException {
+        int lineStart = textArea.getLineStartOffset(line);
+        int lineEnd = textArea.getLineEndOffset(line) - 1;
+        return textArea.getText(lineStart, lineEnd - lineStart);
+    }
+
+    boolean isLineCommented(int line) throws BadLocationException {
+        String lineContent = getLineContent(line);
+        String trimmed = lineContent.trim();
+        if (trimmed.startsWith("//")) {
+            return true;
+        }
+        return false;
+    }
+
+    public void toggleComment() throws BadLocationException {
+        int start = getSelectionStart();
+        int end = getSelectionEnd();
+
+        int startLine = textArea.getLineOfOffset(start);
+        int endLine = textArea.getLineOfOffset(end);
+
+        boolean isCurrentlyCommented = isLineCommented(startLine);
+
+        for (int i = startLine; i <= endLine; i++) {
+            toggleComment(i, !isCurrentlyCommented);
+        }
+
+        if (start != end) {
+            textArea.setSelectionStart(start);
+        } else {
+            textArea.setCaretPosition(start);
+        }
+    }
+
+    public void toggleComment(int line, boolean addComments) throws BadLocationException {
+        boolean isCommented = isLineCommented(line);
+        if (isCommented == addComments) return; // Nothing to do
+
+        String content = getLineContent(line);
+        if (addComments) {
+            content = "//" + content;
+        } else {
+            int loc = content.indexOf("//");
+            String a = content.substring(0, loc);
+            String b = content.substring(loc + 2);
+            content = a + b;
+        }
+
+        int lineStart = textArea.getLineStartOffset(line);
+        int lineEnd = textArea.getLineEndOffset(line) - 1;
+
+        textArea.replaceRange(content, lineStart, lineEnd);
     }
 
 }
