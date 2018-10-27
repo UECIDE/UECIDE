@@ -1382,9 +1382,11 @@ public class Sketch {
         // Work out which the first prototype in the main file is.
         int lineno = Integer.MAX_VALUE;
         for (FunctionBookmark p : protos) {
-            if (p.getFile().getAbsolutePath().equals(getBuildFileByName(getMainFile().getName()).getAbsolutePath())) {
-                if (p.getLine() < lineno) {
-                    lineno = p.getLine();
+            if (p.getFile().getAbsolutePath().equals(getMainFile().getAbsolutePath())) {
+                if (p.getType() == FunctionBookmark.FUNCTION) {
+                    if (p.getLine() < lineno) {
+                        lineno = p.getLine();
+                    }
                 }
             }
         }
