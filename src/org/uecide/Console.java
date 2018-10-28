@@ -119,7 +119,7 @@ public class Console extends JTextPane implements ClipboardOwner {
     public void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        if (Preferences.getBoolean("theme.fonts.editor_aa")) {
+        if (Preferences.getBoolean("theme.editor.fonts.editor_aa")) {
             Graphics2D graphics2d = (Graphics2D) g;
             graphics2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);

@@ -21,7 +21,7 @@ public class MarkdownPane extends JTextPane {
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (Preferences.getBoolean("theme.fonts.editor_aa")) {
+        if (Preferences.getBoolean("theme.editor.fonts.editor_aa")) {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                     RenderingHints.VALUE_ANTIALIAS_ON);
