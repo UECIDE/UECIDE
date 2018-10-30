@@ -2381,11 +2381,28 @@ public class Editor extends JFrame {
             }
 
             setCursor(new Cursor(Cursor.WAIT_CURSOR));
-//            Class<?> edClass = Class.forName(className);
-//            Constructor<?> edConst = edClass.getConstructor(Sketch.class, File.class, Editor.class);
 
-            EditorBase ed = new org.uecide.editors.code(loadedSketch, sf, this);
-//(EditorBase)edConst.newInstance(loadedSketch, sf, this);
+            EditorBase ed = null;
+
+            if (className.equals("org.uecide.editors.code")) {
+                ed = new org.uecide.editors.code(loadedSketch, sf, this);
+            } else if (className.equals("org.uecide.editors.markdown")) {
+                ed = new org.uecide.editors.text(loadedSketch, sf, this); // TODO: Reimplement the markdown editor
+            } else if (className.equals("org.uecide.editors.bitmap")) {
+                ed = new org.uecide.editors.bitmap(loadedSketch, sf, this);
+//            } else if (className.equals("org.uecide.editors.none")) {
+//                ed = new org.uecide.editors.none(loadedSketch, sf, this);
+            } else if (className.equals("org.uecide.editors.object")) {
+                ed = new org.uecide.editors.object(loadedSketch, sf, this);
+            } else if (className.equals("org.uecide.editors.text")) {
+                ed = new org.uecide.editors.text(loadedSketch, sf, this);
+            }
+
+            if (ed == null) {
+                error(Base.i18n.string("err.badfile", sf.getName()));
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                return -1;
+            }
 
             editorTabs.addTab(sf.getName(), (JPanel) ed);
             int tabno = editorTabs.getTabCount() - 1;
