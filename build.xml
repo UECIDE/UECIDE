@@ -384,6 +384,9 @@
             <maven group="org.jline"                               artifact="jline"                    version="3.6.0" />
             <maven group="com.apple"                               artifact="AppleJavaExtensions"      version="1.4" />
             <maven group="net.posick"                              artifact="mdnsjava"                 version="2.2.0" />
+            <maven group="jfree"                                   artifact="jcommon"                  version="1.0.16" />
+            <maven group="jfree"                                   artifact="jfreechart"               version="1.0.13" />
+            <!--maven group="junit"                                   artifact="junit"                    version="4.10" /-->
             <!--maven group="org.dnsjava"                             artifact="dnsjava"                  version="2.1.5" /-->
             <download url="http://www.dnsjava.org/download/dnsjava-2.1.5.jar" filename="dnsjava.jar" />
         </depends>

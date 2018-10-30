@@ -541,12 +541,27 @@ public class Sketch {
     }
 
     public void createNewFile(String filename) {
+        createNewFile(filename, null);
+    }
+
+    public void createNewFile(String filename, String content) {
         if(filename.endsWith(".lib")) {
             createNewLibrary(filename.substring(0, filename.lastIndexOf(".")));
             return;
         }
 
         File f = createBlankFile(filename);
+
+        if (content != null) {
+            try {
+                PrintWriter pw = new PrintWriter(f);
+                pw.print(content);
+                pw.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         sketchFiles.add(f);
 
         if(editor != null) {
@@ -811,6 +826,17 @@ public class Sketch {
                     EditorBase eb = editor.getTab(tabNumber);
                     return eb.getText();
                 }
+            }
+        }
+
+        if (f.getName().endsWith(".blk")) { // Special case for ardublock files...
+            try {
+                com.ardublock.core.Context c = com.ardublock.core.Context.getContext();
+                c.loadArduBlockFile(f);
+                return org.uecide.editors.ardublock.generateCode(c, editor);
+            } catch (Exception e) {
+                error(e);
+                return "";
             }
         }
 

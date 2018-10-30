@@ -577,6 +577,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void populateMenu(JMenu menu, int flags) {
         if (flags == (Plugin.MENU_TOOLS | Plugin.MENU_MID)) {
 

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Schema definition for open blocks Author: Philippe Cadé -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://education.mit.edu/openblocks/ns"
+	targetNamespace="http://education.mit.edu/openblocks/ns"
+	elementFormDefault="unqualified" attributeFormDefault="unqualified">
+	<xs:element name="CODEBLOCKS" type="CODEBLOCKSType">
+		<xs:annotation>
+			<xs:documentation>Root element</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:simpleType name="yesNoType">
+		<xs:restriction base="xs:NMTOKENS">
+			<xs:enumeration value="yes" />
+			<xs:enumeration value="no" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="emptyType">
+		<xs:complexContent>
+			<xs:restriction base="xs:anyType">
+				<xs:anyAttribute />
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="BlockType">
+		<xs:sequence>
+			<xs:element name="Label" type="xs:string" minOccurs="0" />
+			<xs:element name="PageLabel" type="xs:string" minOccurs="0" />
+			<xs:element name="CompilerErrorMsg" type="xs:string"
+				minOccurs="0" />
+			<xs:element name="Location">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="X" type="xs:integer" />
+						<xs:element name="Y" type="xs:integer" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Collapsed" type="emptyType" minOccurs="0" />
+			<xs:element name="Comment" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Text" type="xs:string" />
+						<xs:element name="Location">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="X" type="xs:integer" />
+									<xs:element name="Y" type="xs:integer" />
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="BoxSize">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Width" type="xs:integer" />
+									<xs:element name="Height" type="xs:integer" />
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="Collapsed" type="emptyType"
+							minOccurs="0">
+							<!-- This complex type just to make sure that dynamic is empty -->
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="BeforeBlockId" type="xs:long" minOccurs="0" />
+			<xs:element name="AfterBlockId" type="xs:long" minOccurs="0" />
+			<xs:element name="Plug" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="BlockConnector" type="BlockConnectorType" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Sockets" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence maxOccurs="unbounded">
+						<xs:element name="BlockConnector" type="BlockConnectorType" />
+					</xs:sequence>
+					<xs:attribute name="num-sockets" type="xs:integer"
+						use="required" />
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="LangSpecProperties" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="LangSpecProperty" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:attribute name="key" type="xs:string" use="required" />
+								<xs:attribute name="value" type="xs:string" use="required" />
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:long" use="required" />
+		<xs:attribute name="genus-name" type="xs:string" use="required" />
+		<xs:attribute name="has-focus" type="yesNoType" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="BlockConnectorType">
+		<xs:attribute name="connector-kind" use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="plug" />
+					<xs:enumeration value="socket" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="connector-type" type="xs:string" use="required" />
+		<xs:attribute name="init-type" type="xs:string" use="required" />
+		<xs:attribute name="label" type="xs:string" use="required" />
+		<xs:attribute name="expand-group" type="xs:string" use="optional" />
+		<xs:attribute name="is-expandable" type="yesNoType" use="optional" />
+		<xs:attribute name="position-type" use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:NMTOKENS">
+					<xs:enumeration value="single" />
+					<xs:enumeration value="mirror" />
+					<xs:enumeration value="bottom" />
+					<xs:enumeration value="top" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="label-editable" type="xs:boolean"
+			use="optional" />
+		<xs:attribute name="con-block-id" type="xs:long" use="optional" />
+	</xs:complexType>
+	<xs:complexType name="CODEBLOCKSType">
+		<xs:sequence minOccurs="0">
+			<xs:element name="Pages">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Page">
+							<xs:complexType>
+								<xs:sequence minOccurs="0">
+									<xs:element name="PageBlocks">
+										<xs:complexType>
+											<xs:choice>
+												<xs:element name="Block" type="BlockType"
+													maxOccurs="unbounded" />
+												<xs:element name="BlockStub" minOccurs="0" maxOccurs="unbounded">
+													<xs:complexType>
+														<xs:sequence>
+															<xs:element name="StubParentName" type="xs:string" />
+															<xs:element name="StubParentGenus" type="xs:string" />
+															<xs:element name="Block" type="BlockType" />
+														</xs:sequence>
+													</xs:complexType>
+												</xs:element>
+											</xs:choice>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+								<xs:attribute name="page-name" type="xs:string"
+									use="required" />
+								<xs:attribute name="page-color" use="required">
+									<xs:annotation>
+										<xs:documentation>Restricted to format: "r g b" where r, g and
+											b are between 0 and 255</xs:documentation>
+									</xs:annotation>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:pattern
+												value="((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?) ){2}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" />
+										</xs:restriction>
+									</xs:simpleType>
+								</xs:attribute>
+								<xs:attribute name="page-width" type="xs:double"
+									use="required" />
+								<xs:attribute name="page-drawer" type="xs:string" />
+								<xs:attribute name="page-infullview" type="yesNoType" />
+								<xs:attribute name="page-id" type="xs:string" />
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+					<xs:attribute name="drawer-with-page" type="yesNoType" />
+					<xs:attribute name="is-blank-page" type="yesNoType" />
+					<xs:attribute name="collapsible-pages" type="yesNoType">
+						<xs:annotation>
+							<xs:documentation>Whether pages should display a control to
+								collapse them or not.</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

@@ -63,5 +63,7 @@ public class text extends code {
     }
     public boolean getUpdateFlag() { return false; }
 
+    public static String emptyFile() { return ""; }
+
 }
 

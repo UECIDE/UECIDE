@@ -254,4 +254,6 @@ public class bitmap extends JPanel implements EditorBase {
     }
 
     public boolean getUpdateFlag() { return false; }
+
+    public static String emptyFile() { return ""; }
 }

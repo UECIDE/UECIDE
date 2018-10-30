@@ -89,4 +89,7 @@ public class object extends text {
     }
     public boolean getUpdateFlag() { return false; }
 
+    public static String emptyFile() { return ""; }
+
+
 }

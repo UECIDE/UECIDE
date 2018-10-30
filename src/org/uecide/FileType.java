@@ -134,6 +134,8 @@ public class FileType {
         fileTypeList.put("png", new FileTypeInfo(FileType.GRAPHIC, "org.uecide.editors.bitmap", null, "png", GROUP_GRAPHIC));
         fileTypeList.put("jpg", new FileTypeInfo(FileType.GRAPHIC, "org.uecide.editors.bitmap", null, "jpg", GROUP_GRAPHIC));
 
+        fileTypeList.put("blk", new FileTypeInfo(FileType.SKETCH, "org.uecide.editors.ardublock", null, "blk", GROUP_SOURCE));
+
     }
 
     public static int getType(File f) {

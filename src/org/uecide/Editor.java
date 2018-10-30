@@ -1520,6 +1520,10 @@ public class Editor extends JFrame {
                         item.setActionCommand("S");
                         item.addActionListener(createNewAction);
                         menu.add(item);
+                        item = new JMenuItem(Base.i18n.string("menu.create.blk"));
+                        item.setActionCommand("blk");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
                         item = new JMenuItem(Base.i18n.string("menu.import.source"));
                         item.setActionCommand("source");
                         item.addActionListener(importFileAction);
@@ -2394,6 +2398,8 @@ public class Editor extends JFrame {
 //                ed = new org.uecide.editors.none(loadedSketch, sf, this);
             } else if (className.equals("org.uecide.editors.object")) {
                 ed = new org.uecide.editors.object(loadedSketch, sf, this);
+            } else if (className.equals("org.uecide.editors.ardublock")) {
+                ed = new org.uecide.editors.ardublock(loadedSketch, sf, this);
             } else if (className.equals("org.uecide.editors.text")) {
                 ed = new org.uecide.editors.text(loadedSketch, sf, this);
             }
@@ -4194,7 +4200,26 @@ public class Editor extends JFrame {
             );
         }
 
-        loadedSketch.createNewFile(name + "." + extension);
+        String className = FileType.getEditor(name + "." + extension);
+
+        String content = null;
+        if(className != null) {
+            if (className.equals("org.uecide.editors.code")) {
+                content = org.uecide.editors.code.emptyFile();
+            } else if (className.equals("org.uecide.editors.markdown")) {
+                content = org.uecide.editors.text.emptyFile();
+            } else if (className.equals("org.uecide.editors.bitmap")) {
+                content = org.uecide.editors.bitmap.emptyFile();
+            } else if (className.equals("org.uecide.editors.object")) {
+                content = org.uecide.editors.object.emptyFile();
+            } else if (className.equals("org.uecide.editors.ardublock")) {
+                content = org.uecide.editors.ardublock.emptyFile();
+            } else if (className.equals("org.uecide.editors.text")) {
+                content = org.uecide.editors.text.emptyFile();
+            }
+        }
+
+        loadedSketch.createNewFile(name + "." + extension, content);
     }
 
     File importFileDefaultDir = null;

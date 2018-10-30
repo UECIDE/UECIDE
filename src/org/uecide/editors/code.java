@@ -1290,4 +1290,6 @@ public class code extends JPanel implements EditorBase {
         textArea.replaceRange(content, lineStart, lineEnd);
     }
 
+    public static String emptyFile() { return ""; }
+
 }
