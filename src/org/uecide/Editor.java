@@ -2391,11 +2391,9 @@ public class Editor extends JFrame {
             if (className.equals("org.uecide.editors.code")) {
                 ed = new org.uecide.editors.code(loadedSketch, sf, this);
             } else if (className.equals("org.uecide.editors.markdown")) {
-                ed = new org.uecide.editors.text(loadedSketch, sf, this); // TODO: Reimplement the markdown editor
+                ed = new org.uecide.editors.markdown(loadedSketch, sf, this); // TODO: Reimplement the markdown editor
             } else if (className.equals("org.uecide.editors.bitmap")) {
                 ed = new org.uecide.editors.bitmap(loadedSketch, sf, this);
-//            } else if (className.equals("org.uecide.editors.none")) {
-//                ed = new org.uecide.editors.none(loadedSketch, sf, this);
             } else if (className.equals("org.uecide.editors.object")) {
                 ed = new org.uecide.editors.object(loadedSketch, sf, this);
             } else if (className.equals("org.uecide.editors.ardublock")) {
@@ -4206,12 +4204,12 @@ public class Editor extends JFrame {
         if(className != null) {
             if (className.equals("org.uecide.editors.code")) {
                 content = org.uecide.editors.code.emptyFile();
-            } else if (className.equals("org.uecide.editors.markdown")) {
-                content = org.uecide.editors.text.emptyFile();
             } else if (className.equals("org.uecide.editors.bitmap")) {
                 content = org.uecide.editors.bitmap.emptyFile();
             } else if (className.equals("org.uecide.editors.object")) {
                 content = org.uecide.editors.object.emptyFile();
+            } else if (className.equals("org.uecide.editors.markdown")) {
+                content = org.uecide.editors.markdown.emptyFile();
             } else if (className.equals("org.uecide.editors.ardublock")) {
                 content = org.uecide.editors.ardublock.emptyFile();
             } else if (className.equals("org.uecide.editors.text")) {
