@@ -51,6 +51,39 @@ import javax.swing.JToolBar;
 
 import javax.imageio.*;
 
+import uk.co.majenko.bmpedit.*;
+
+public class bitmap extends JPanel implements EditorBase {
+    File file = null;
+    JScrollPane scrollPane;
+    Sketch sketch;
+    Editor editor;
+    BMPEdit bmpEditor;
+    
+    public bitmap(Sketch s, File f, Editor e) {
+        sketch = s;
+        file = f;
+        editor = e;
+
+        scrollPane = new JScrollPane();
+        bmpEditor = new BMPEdit();
+        loadFile(f);
+//        scrollPane.setViewportView(bmpEditor);
+        setLayout(new BorderLayout());
+        add(bmpEditor, BorderLayout.CENTER);
+    }
+
+    public boolean loadFile(File f) {
+        try {
+            bmpEditor.loadImage(f);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+/*
 
 public class bitmap extends JPanel implements EditorBase {
     File file = null;
@@ -122,9 +155,10 @@ public class bitmap extends JPanel implements EditorBase {
 
         return true;
     }
+*/
 
     public boolean isModified() {
-        return false;
+        return bmpEditor.isModified();
     }
 
     public String getText() {
@@ -139,6 +173,7 @@ public class bitmap extends JPanel implements EditorBase {
     }
 
     public void setModified(boolean m) {
+        bmpEditor.setModified(m);
     }
 
     public void scrollTo(final int pos) {
@@ -157,7 +192,12 @@ public class bitmap extends JPanel implements EditorBase {
 
     // Save the file contents to disk
     public boolean save() {
-        return true;
+        try {
+            return bmpEditor.saveImage(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void reloadFile() {
@@ -243,7 +283,7 @@ public class bitmap extends JPanel implements EditorBase {
     }
 
     public Component getContentPane() {
-        return label;
+        return bmpEditor;
     }
 
     public void setViewPosition(Point p) {
@@ -257,3 +297,4 @@ public class bitmap extends JPanel implements EditorBase {
 
     public static String emptyFile() { return ""; }
 }
+

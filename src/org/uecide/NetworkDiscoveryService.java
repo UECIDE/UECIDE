@@ -78,7 +78,6 @@ public class NetworkDiscoveryService extends Service {
                 lookup.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

@@ -54,6 +54,7 @@ import java.lang.reflect.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import java.awt.*;
 import org.uecide.Compiler;
 
 import javax.script.*;
@@ -111,6 +112,8 @@ public class Sketch {
     // Do we want to purge the cache files before building?  This is set by the
     // options system.
     public boolean doPrePurge = false;
+
+    PropertyFile settings;
 
     /**************************************************************************
      * CONSTRUCTORS                                                           *
@@ -187,6 +190,13 @@ public class Sketch {
         if(!path.exists()) {
             path.mkdirs();
             createBlankFile(path.getName() + ".ino");
+        }
+
+        File sketchPropertyFile = new File(sketchFolder, "sketch.properties");
+        if (sketchPropertyFile.exists()) {
+            settings = new PropertyFile(sketchPropertyFile);
+        } else {
+            settings = new PropertyFile();
         }
 
         String fn = path.getName().toLowerCase();
@@ -1365,6 +1375,8 @@ public class Sketch {
 
         filesToCompile = new ArrayList<File>();
 
+        
+
         for (String fn : getFileNames()) {
             File f = getFileByName(fn);
             int ft = FileType.getType(f);
@@ -1387,6 +1399,30 @@ public class Sketch {
         if (Preferences.getBoolean("compiler.generate_makefile")) {
             if (props.get("makefile.template") != null) {
                 generateMakefile();
+            }
+        }
+
+        bullet("Converting binary files");
+        HashMap<File, String[]> binFiles = convertBinaryFiles();
+
+        if (binFiles.size() > 0) {
+            filesToCompile.addAll(binFiles.keySet());
+            try {
+                PrintWriter bh = new PrintWriter(new File(buildFolder, "binary/binaries.h"));
+                bh.println("#ifndef _UECIDE_BINARY_BINARIES_H");
+                bh.println("#define _UECIDE_BINARY_BINARIES_H");
+                bh.println();
+                for (String[] lines : binFiles.values()) {
+                    for (String line : lines) {
+                        bh.println(line);
+                    }
+                    bh.println();
+                }
+                bh.println("#endif");
+                bh.close();
+            } catch (Exception ex) {
+                error(ex);
+                return false;
             }
         }
 
@@ -1430,6 +1466,7 @@ public class Sketch {
                 pw.println(p + ";");
             }
             pw.println();
+
             pw.println("#endif");
             pw.close();
         } catch (Exception e) {
@@ -1452,6 +1489,9 @@ public class Sketch {
             String hdr = props.get("core.header");
             if (hdr != null) {
                 pw.println("#include <" + hdr + ">");
+                if (binFiles.size() > 0) {
+                    pw.println("#include <binary/binaries.h>");
+                }
             }
             pw.println("#line 1 \"" + getMainFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
 
@@ -2723,6 +2763,14 @@ public class Sketch {
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
         String objExt = localCtx.parseString(props.get("compiler.object","o"));
+
+        String bfPath = fileBuildFolder.getAbsolutePath();
+        String srcPath = src.getParentFile().getAbsolutePath();
+
+        if (srcPath.startsWith(bfPath + "/")) {
+            fileBuildFolder = src.getParentFile();
+        }
+
         File dest = new File(fileBuildFolder, fileName + "." +objExt);
 
         if(dest.exists()) {
@@ -2885,11 +2933,11 @@ public class Sketch {
         return true;
     }
 
-    public void put(String k, String v) {
+    public void putToContext(String k, String v) {
         ctx.set(k, v);
     }
 
-    public String get(String k) {
+    public String getFromContext(String k) {
         return ctx.get(k);
     }
 
@@ -3124,21 +3172,6 @@ public class Sketch {
         ArrayList<File> sf = new ArrayList<File>();
 
         PropertyFile props = ctx.getMerged();
-
-        // We can only do this if the core supports binary conversions
-        if(props.get("compile.bin") != null) {
-            File obj = new File(sketchFolder, "objects");
-
-            if(obj.exists()) {
-                File buf = new File(buildFolder, "objects");
-                buf.mkdirs();
-                ArrayList<File> uf = convertFiles(buildFolder, findFilesInFolder(obj, null, true));
-
-                if(uf != null) {
-                    sf.addAll(uf);
-                }
-            }
-        }
 
         String ext = ctx.parseString(props.get("build.extension"));
         if (ext == null) {
@@ -3965,6 +3998,46 @@ public class Sketch {
         return new File(sketchFolder, "objects");
     }
 
+    public HashMap<File, String[]> convertBinaryFiles() {
+
+        // File +_ "extern [type] prefix_data[];"
+        //      |_ "extern int prefix_len;"
+        //      |_ "extern int prefix_width;" [images only]
+        //      |_ "extern int prefix_height;" [images only]
+        //      |_ ... etc
+        HashMap<File, String[]> conversionData = new HashMap<File, String[]>();
+
+        File dir = getBinariesFolder();
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            if (getInteger("binary." + file.getName() + ".conversion") > 0) {
+                int type = FileType.getType(file);
+
+                FileConverter conv = null;
+
+                switch (type) {
+                    case FileType.GRAPHIC:
+                        conv = new ImageFileConverter(file, getInteger("binary." + file.getName() + ".conversion"), get("binary." + file.getName() + ".datatype"), get("binary." + file.getName() + ".prefix"), getColor("binary." + file.getName() + ".transparency"));
+                        break;
+
+                    default:
+                        conv = new BasicFileConverter(file, get("binary." + file.getName() + ".prefix"));
+                        break;
+                }
+
+                if (conv != null) {
+                    if (conv.convertFile(getBuildFolder())) {
+                        File cppFile = conv.getFile();
+                        String[] headerLines = conv.getHeaderLines();
+                        conversionData.put(cppFile, headerLines);
+                    }
+                }
+            }
+        }
+
+        return conversionData;
+    }
+
     public boolean libraryIsCompiled(Library l) {
         if(l == null) return false;
 
@@ -4728,5 +4801,22 @@ public class Sketch {
         for (FunctionBookmark bm : functionListBm) {
             System.err.println(bm.dump());
         }
+    }
+
+    public void set(String key, String value) { settings.set(key, value); saveSettings(); }
+    public void set(String key, int value) { settings.setInteger(key, value); saveSettings(); }
+    public void set(String key, float value) { settings.setFloat(key, value); saveSettings(); }
+    public void set(String key, boolean value) { settings.setBoolean(key, value); saveSettings(); }
+    public void set(String key, Color value) { settings.setColor(key, value); saveSettings(); }
+
+    public String get(String key) { return settings.get(key); }
+    public int getInteger(String key) { return settings.getInteger(key); }
+    public float getFloat(String key) { return settings.getFloat(key); }
+    public boolean getBoolean(String key) { return settings.getBoolean(key); }
+    public Color getColor(String key) { return settings.getColor(key); }
+
+    public void saveSettings() {
+        File sketchPropertyFile = new File(sketchFolder, "sketch.properties");
+        settings.save(sketchPropertyFile);
     }
 }

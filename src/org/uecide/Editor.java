@@ -1711,21 +1711,33 @@ public class Editor extends JFrame {
                         String ptext = (String)p.getUserObject();
 
                         if(ptext.equals(Base.i18n.string("tree.binaries"))) {
-                            JMenuItem insertRef = new JMenuItem(Base.i18n.string("menu.file.reference"));
-                            insertRef.addActionListener(new ActionListener() {
-                                public void actionPerformed(ActionEvent e) {
-                                    String filename = e.getActionCommand();
-                                    filename = filename.replaceAll("\\.", "_");
-                                    int at = getActiveTab();
 
-                                    if(at > -1) {
-                                        EditorBase eb = getTab(at);
-                                        eb.insertAtCursor("extern const char " + filename + "[] asm(\"_binary_objects_" + filename + "_start\");\n");
-                                    }
-                                }
-                            });
-                            insertRef.setActionCommand(thisFile.getName());
-                            menu.add(insertRef);
+                            switch (FileType.getType(thisFile)) {
+                                case FileType.GRAPHIC: {
+                                    JMenuItem imageConversion = new JMenuItem("Image conversion options");
+                                    imageConversion.addActionListener(new ActionListener() {
+                                        public void actionPerformed(ActionEvent e) {
+                                            String filename = e.getActionCommand();
+                                            Editor.this.openImageConversionSettings(filename);
+                                        }
+                                    });
+                                    imageConversion.setActionCommand(thisFile.getName());
+                                    menu.add(imageConversion);
+                                } break;
+
+                                default: {
+                                    JMenuItem binaryConversion = new JMenuItem("Binary conversion options");
+                                    binaryConversion.addActionListener(new ActionListener() {
+                                        public void actionPerformed(ActionEvent e) {
+                                            String filename = e.getActionCommand();
+                                            Editor.this.openBinaryConversionSettings(filename);
+                                        }
+                                    });
+                                    binaryConversion.setActionCommand(thisFile.getName());
+                                    menu.add(binaryConversion);
+                                } break;
+
+                            }
                         }
                     }
 
@@ -2367,6 +2379,7 @@ public class Editor extends JFrame {
     }
 
     public int openNewTab(File sf) {
+        if (sf.isDirectory()) return -1;
         if (sf == null) {
             error("No file specified");
             return -1;
@@ -5320,6 +5333,47 @@ public class Editor extends JFrame {
         leftRightSplit.showOne();
         sidebarSplit.showTwo();
         miniBar.setVisible(false);
+    }
+
+    public void openImageConversionSettings(String filename) {
+
+        ImageConversionSettings settings = new ImageConversionSettings(this, filename);
+        int res = JOptionPane.showConfirmDialog(this, settings, "Image Conversion Settings", JOptionPane.OK_CANCEL_OPTION);
+
+        if (res == JOptionPane.OK_OPTION) {
+            int selectedConversionOption = settings.getConversionType();
+            String prefix = settings.getPrefix();
+            Color color = settings.getTransparency();
+            String dataType = settings.getDataType();
+            if (prefix.trim().equals("")) {
+                JOptionPane.showMessageDialog(this, "You haven't specified a valid variable prefix!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            loadedSketch.set("binary." + filename + ".prefix", prefix);
+            loadedSketch.set("binary." + filename + ".transparency", color);
+            loadedSketch.set("binary." + filename + ".conversion", selectedConversionOption);
+            loadedSketch.set("binary." + filename + ".datatype", dataType);
+        }
+    }
+
+
+    public void openBinaryConversionSettings(String filename) {
+
+        BasicConversionSettings settings = new BasicConversionSettings(this, filename);
+        int res = JOptionPane.showConfirmDialog(this, settings, "Binary Conversion Settings", JOptionPane.OK_CANCEL_OPTION);
+
+        if (res == JOptionPane.OK_OPTION) {
+            int selectedConversionOption = settings.getConversionType();
+            String prefix = settings.getPrefix();
+            if (prefix.trim().equals("")) {
+                JOptionPane.showMessageDialog(this, "You haven't specified a valid variable prefix!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            loadedSketch.set("binary." + filename + ".prefix", prefix);
+            loadedSketch.set("binary." + filename + ".conversion", selectedConversionOption);
+        }
     }
 }
 

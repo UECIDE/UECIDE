@@ -57,6 +57,7 @@ public class text extends code {
     public text(Sketch s, File f, Editor e) {
         super(s, f, e);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+        textArea.setLineWrap(true);
     }
 
     public void populateMenu(JPopupMenu menu, int flags) {

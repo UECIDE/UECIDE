@@ -80,6 +80,7 @@ public class markdown extends JPanel implements EditorBase {
 
         textArea = new RSyntaxTextArea(rDocument);
         output = new MarkdownPane();
+        textArea.setLineWrap(true);
 
         rDocument.addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
