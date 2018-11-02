@@ -271,4 +271,9 @@ public class ZoomableBitmap extends JPanel implements MouseListener, MouseMotion
         return image;
     }
 
+
+    public boolean isRubberbandShown() {
+        return rubberbandShown;
+    }
+
 }

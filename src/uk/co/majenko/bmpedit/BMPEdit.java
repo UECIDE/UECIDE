@@ -250,4 +250,109 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
         return imagePanel;
     }
 
+    double[] userMatrix = {
+        0,  0,  0,
+        0,  1,  0, 
+        0,  0,  0
+    };
+
+    public void conv() {
+        JPanel convOptions = new JPanel();
+        convOptions.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 1;
+
+        convOptions.add(new JLabel("Preset: "), c);
+
+        String[] presets = {
+            "Select...",
+            "Blur",
+            "Edge Detect",
+            "Sharpen",
+            "Lighten",
+            "Darken"
+        };
+
+        JComboBox<String> preset = new JComboBox<String>(presets);
+
+        c.gridx = 1;
+        c.gridwidth = 2;
+        convOptions.add(preset, c);
+
+        JTextField matrix[] = {
+            new JTextField(5), new JTextField(5), new JTextField(5),
+            new JTextField(5), new JTextField(5), new JTextField(5),
+            new JTextField(5), new JTextField(5), new JTextField(5)
+        };
+
+        for (int i = 0; i < 9; i++) {
+            matrix[i].setText(String.format("%.3f", userMatrix[i]));
+        }
+
+        for (int i = 0; i < 9; i++) {
+            c.gridx = i % 3;
+            c.gridy = i / 3 + 1;
+            c.gridwidth = 1;
+
+            convOptions.add(matrix[i], c);
+        }
+
+        preset.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String sel = (String)preset.getSelectedItem();
+                if (sel.equals("Blur")) for (int i = 0; i < 9; i++) matrix[i].setText(String.format("%.3f", Convolution.BLUR[i]));
+                if (sel.equals("Edge Detect")) for (int i = 0; i < 9; i++) matrix[i].setText(String.format("%.3f", Convolution.EDGE[i]));
+                if (sel.equals("Sharpen")) for (int i = 0; i < 9; i++) matrix[i].setText(String.format("%.3f", Convolution.SHARPEN[i]));
+                if (sel.equals("Lighten")) for (int i = 0; i < 9; i++) matrix[i].setText(String.format("%.3f", Convolution.LIGHTEN[i]));
+                if (sel.equals("Darken")) for (int i = 0; i < 9; i++) matrix[i].setText(String.format("%.3f", Convolution.DARKEN[i]));
+                preset.setSelectedIndex(0);
+            }
+        });
+
+        int rv = JOptionPane.showConfirmDialog(this, convOptions, "Apply Convolution Matrix", JOptionPane.OK_CANCEL_OPTION);
+
+        if (rv == JOptionPane.OK_OPTION) {
+            for (int i = 0; i < 9; i++) {
+                try {
+                    userMatrix[i] = Double.parseDouble(matrix[i].getText());
+                } catch (Exception ignored) {
+                    userMatrix[i] = 0;
+                }
+            }
+        
+
+            storeHistory();
+            Convolution convolution = new Convolution(userMatrix);
+
+            if (imagePanel.isRubberbandShown()) {
+
+                Rectangle r = imagePanel.getRubberband();
+                
+                BufferedImage newImage = new BufferedImage(r.width, r.height, image.getType());
+                Graphics2D g = newImage.createGraphics();
+                g.drawImage(image,
+                    0, 0, /* by */ r.width, r.height,
+                    r.x, r.y, /* by */ r.x + r.width, r.y + r.height,
+                    null
+                );
+                g.dispose();
+
+                BufferedImage convolved = convolution.apply(newImage);
+
+                g = image.createGraphics();
+                g.drawImage(convolved, r.x, r.y, r.x + r.width, r.y + r.height,
+                                       0, 0, r.width, r.height,
+                                        null);
+                g.dispose();
+                imagePanel.updateImage(image);
+            } else {
+                image = convolution.apply(image);
+                imagePanel.updateImage(image);
+            }
+        }
+    }
+
 }

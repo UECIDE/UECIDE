@@ -57,6 +57,21 @@ public class EditBar extends JToolBar {
             crop.setToolTipText("Crop image");
             add(crop);
 
+            JButton conv = new JButton(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/uk/co/majenko/bmpedit/icons/conv.png"))));
+            conv.setSize(new Dimension(32, 32));
+            conv.setMinimumSize(new Dimension(32, 32));
+            conv.setMaximumSize(new Dimension(32, 32));
+            conv.setPreferredSize(new Dimension(32, 32));
+            conv.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    editor.conv();
+                }
+            });
+            conv.setToolTipText("Apply convolution matrix");
+            add(conv);
+
+            
+
         } catch (Exception ignored) {
         }
 
