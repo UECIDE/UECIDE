@@ -8,6 +8,8 @@ import java.awt.event.*;
 
 import java.util.*;
 
+import king.lib.util.*;
+
 public class ZoomableBitmap extends JPanel implements MouseListener, MouseMotionListener {
     BufferedImage image;
     double zoomFactor = 1.0d;
@@ -248,4 +250,17 @@ public class ZoomableBitmap extends JPanel implements MouseListener, MouseMotion
         if (height < 1) height = 1;
         return new Rectangle(x, y, width, height);
     }
+
+    public void fill(int x, int y, Color c) {
+        FloodFill f = new FloodFill(image);
+        f.setAntialiased(false);
+        f.fill(x, y, c);
+        image = f.getImage();
+        repaint();
+    }
+
+    public BufferedImage getImage() {
+        return image;
+    }
+
 }

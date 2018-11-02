@@ -18,15 +18,15 @@ public class ToolsPanel extends JToolBar { //JPanel {
     public static final int PICK = 2;
     public static final int ERASE = 3;
     public static final int SELECT = 4;
+    public static final int FILL = 5;
 
     static final Color selectedColor = new Color(0, 100, 0);
-
-    public int selectedTool = NONE;
 
     ToolButton draw;
     ToolButton erase;
     ToolButton pick;
     ToolButton select;
+    ToolButton fill;
 
     JButton foreground;
     JButton background;
@@ -34,6 +34,17 @@ public class ToolsPanel extends JToolBar { //JPanel {
     BMPEdit editor;
 
     JSlider toolSize;
+    JPanel toolSizePanel;
+
+    Tool[] tools = {
+        new DrawTool(this),
+        new EraseTool(this),
+        new FillTool(this),
+        new SelectTool(this),
+        new PickTool(this)
+    };
+
+    Tool selectedTool;
 
     public ToolsPanel(BMPEdit ed) throws IOException {
         super();
@@ -44,9 +55,36 @@ public class ToolsPanel extends JToolBar { //JPanel {
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
+
         c.gridy = 0;
-        c.fill = GridBagConstraints.VERTICAL;
+
+        for (int i = 0; i < tools.length; i++) {
+            c.gridx = 0;
+
+            ToolButton b = tools[i].getButton();
+            b.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    ToolButton btn = (ToolButton)e.getSource();
+                    selectTool(btn.getTool());
+                }
+            });
+            add(b, c);
+            c.gridy++;
+        }
+        for (int i = 0; i < tools.length; i++) {
+            c.gridx = 0;
+
+            JPanel b = tools[i].getOptionsPanel();
+            if (b != null) {
+                add(b, c);
+                c.gridy++;
+            }
+        }
+
+        selectTool(tools[0]);
+
+/*
+            c.fill = GridBagConstraints.VERTICAL;
 
         draw = new ToolButton("/uk/co/majenko/bmpedit/icons/draw.png", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -88,15 +126,25 @@ public class ToolsPanel extends JToolBar { //JPanel {
         add(select, c);
         c.gridy++;
 
+        fill = new ToolButton("/uk/co/majenko/bmpedit/icons/fill.png", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                selectedTool = FILL;
+                updateTools();
+            }
+        });
+        fill.setSelectedColor(selectedColor);
+        add(fill, c);
+        c.gridy++;
+
 //        addSeparator();
 
-        JPanel p = new JPanel();
-        p.setLayout(new BorderLayout());
-        p.setBackground(Color.WHITE);
-        p.setSize(new Dimension(32, 128));
-        p.setMinimumSize(new Dimension(32, 128));
-        p.setMaximumSize(new Dimension(32, 128));
-        p.setPreferredSize(new Dimension(32, 128));
+        toolSizePanel = new JPanel();
+        toolSizePanel.setLayout(new BorderLayout());
+        toolSizePanel.setBackground(Color.WHITE);
+        toolSizePanel.setSize(new Dimension(32, 128));
+        toolSizePanel.setMinimumSize(new Dimension(32, 128));
+        toolSizePanel.setMaximumSize(new Dimension(32, 128));
+        toolSizePanel.setPreferredSize(new Dimension(32, 128));
 
         toolSize = new JSlider(1, 32, 1);
         toolSize.setOrientation(JSlider.VERTICAL);
@@ -106,7 +154,7 @@ public class ToolsPanel extends JToolBar { //JPanel {
         toolSize.setPaintLabels(false);
         toolSize.setSnapToTicks(true);
         toolSize.setBorder(new EmptyBorder(0, 0, 0, 0));
-        p.add(toolSize, BorderLayout.CENTER);
+        toolSizePanel.add(toolSize, BorderLayout.CENTER);
 
         JTextField sizeValue = new JTextField(4);
         sizeValue.setText("1");
@@ -128,11 +176,12 @@ public class ToolsPanel extends JToolBar { //JPanel {
         });
     
 
-        p.add(sizeValue, BorderLayout.SOUTH);
+        toolSizePanel.add(sizeValue, BorderLayout.SOUTH);
 
-        add(p, c);
+        add(toolSizePanel, c);
         c.gridy++;
 
+*/
         c.weighty = 1f;
 //        addSeparator();
         add(Box.createVerticalGlue(), c);
@@ -177,11 +226,6 @@ public class ToolsPanel extends JToolBar { //JPanel {
                 }
             }
         });
-
-
-        selectedTool = DRAW;
-
-        updateTools();
     }
 
     public Color getForegroundColor() {
@@ -192,20 +236,36 @@ public class ToolsPanel extends JToolBar { //JPanel {
         return bgColor;
     }
 
+/*
     public void updateTools() {
         draw.setSelected(selectedTool == DRAW);
         erase.setSelected(selectedTool == ERASE);
         pick.setSelected(selectedTool == PICK);
         select.setSelected(selectedTool == SELECT);
+        fill.setSelected(selectedTool == FILL);
 
-        if (selectedTool == SELECT) {
-            editor.getImagePanel().showRubberband();
-        } else {
-            editor.getImagePanel().hideRubberband();
+        switch (selectedTool) {
+            case DRAW:
+            case ERASE:
+                toolSizePanel.setVisible(true);
+                editor.getImagePanel().hideRubberband();
+                break;
+            case PICK:
+            case FILL:
+                toolSizePanel.setVisible(false);
+                editor.getImagePanel().hideRubberband();
+                break;
+
+            case SELECT:
+                toolSizePanel.setVisible(false);
+                editor.getImagePanel().showRubberband();
+                break;
+
         }
     }
 
-    public int getSelectedTool() { 
+*/
+    public Tool getSelectedTool() { 
         return selectedTool;
     }
 
@@ -219,12 +279,21 @@ public class ToolsPanel extends JToolBar { //JPanel {
         background.setBackground(bgColor);
     }
 
-    public void setSelectedTool(int t) {
+    public void setSelectedTool(Tool t) {
         selectedTool = t;
-        updateTools();
     }
 
     public int getToolSize() { 
         return toolSize.getValue();
+    }
+
+    public void selectTool(Tool t) {
+        for (int i = 0; i < tools.length; i++) {
+            if (tools[i] != t) {
+                tools[i].deselect(editor.getImagePanel());
+            }
+        }
+        selectedTool = t;
+        t.select(editor.getImagePanel());
     }
 }

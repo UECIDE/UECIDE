@@ -110,7 +110,7 @@ public class ImageFileConverter implements FileConverter {
             }
 
             headerLines.add("static const int " + prefix + "_width = " + width + ";");
-            headerLines.add("static const int " + prefix + "_height = " + width + ";");
+            headerLines.add("static const int " + prefix + "_height = " + height + ";");
             headerLines.add("extern " + dataType + " " + prefix + "_data[];");
 
             PrintWriter pw = new PrintWriter(outputFile);

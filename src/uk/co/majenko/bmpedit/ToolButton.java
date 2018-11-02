@@ -10,16 +10,18 @@ public class ToolButton extends JButton {
     Color selectedColor = Color.BLACK;
     Color backgroundColor;
 
-    public ToolButton(String icon, ActionListener l) {
+    Tool tool;
+
+    public ToolButton(String icon, Tool t) {
         super();
+
+        tool = t;
 
         try {
             ImageIcon iconImage = new ImageIcon(ImageIO.read(getClass().getResourceAsStream(icon)));
             setIcon(iconImage);
         } catch (Exception ignored) {
         }
-
-        addActionListener(l);
 
         setSize(new Dimension(32, 32));
         setMinimumSize(new Dimension(32, 32));
@@ -45,5 +47,9 @@ public class ToolButton extends JButton {
         } else {
             super.setBackground(backgroundColor);
         }
+    }
+
+    public Tool getTool() { 
+        return tool;
     }
 }
