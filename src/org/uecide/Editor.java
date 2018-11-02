@@ -1565,6 +1565,22 @@ public class Editor extends JFrame {
                         menu.add(item);
 
                         populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_TOP, o);
+
+                        item = new JMenuItem("Create new PNG");
+                        item.setActionCommand("png");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
+
+                        item = new JMenuItem("Create new JPEG");
+                        item.setActionCommand("jpg");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
+
+                        item = new JMenuItem("Create new GIF");
+                        item.setActionCommand("gif");
+                        item.addActionListener(createNewAction);
+                        menu.add(item);
+
                         populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_MID, o);
                         populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_BOTTOM, o);
 
@@ -4182,7 +4198,72 @@ public class Editor extends JFrame {
         return true;
     }
 
+    public void createNewGraphicFile(String extension) {
+        JPanel p = new JPanel();
+        p.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+
+        p.add(new JLabel("Filename:"), c);
+        c.gridy++;
+        p.add(new JLabel("Width:"), c);
+        c.gridy++;
+        p.add(new JLabel("Height:"), c);
+        c.gridx = 1;
+        c.gridy = 0;
+        JTextField name = new JTextField(30);
+        JTextField width = new JTextField(30);
+        JTextField height = new JTextField(30);
+
+        width.setText("64");
+        height.setText("64");
+
+        p.add(name, c);
+        c.gridy++;
+        p.add(width, c);
+        c.gridy++;
+        p.add(height, c);
+
+        name.requestFocus();
+
+        int rc = JOptionPane.showConfirmDialog(this, p, "New Image", JOptionPane.OK_CANCEL_OPTION);
+        if (rc == JOptionPane.OK_OPTION) {
+            try {
+                int w = Integer.parseInt(width.getText());
+                int h = Integer.parseInt(height.getText());
+                String n = name.getText();
+                BufferedImage i = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                if (!n.endsWith("." + extension)) {
+                    n += "." + extension;
+                }
+                File o = new File(loadedSketch.getBinariesFolder(), n);
+                if (extension.equals("png")) {
+                    ImageIO.write(i, "PNG", o);
+                } else if (extension.equals("jpg")) {
+                    ImageIO.write(i, "JPEG", o);
+                } else if (extension.equals("gif")) {
+                    ImageIO.write(i, "GIF", o);
+                }
+            } catch (Exception ex) {
+                error(ex);
+            }
+
+            if (!compilerRunning()) {
+                loadedSketch.rescanFileTree();
+                updateTree();
+            }
+
+        }
+    }
+
     public void createNewSketchFile(String extension) {
+
+        if (extension.equals("png")) { createNewGraphicFile(extension); return; }
+        if (extension.equals("jpg")) { createNewGraphicFile(extension); return; }
+        if (extension.equals("gif")) { createNewGraphicFile(extension); return; }
+
+
         String name = (String)JOptionPane.showInputDialog(
             this,
             Base.i18n.string("msg.create.body"),
