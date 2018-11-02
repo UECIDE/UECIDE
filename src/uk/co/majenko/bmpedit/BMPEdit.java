@@ -89,6 +89,9 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
             case ToolsPanel.PICK:
                 processPick(e);
                 break;
+            case ToolsPanel.SELECT:
+                processSelect(e);
+                break;
         }
     }
 
@@ -134,6 +137,19 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
                     paintPixel(e.getPixel());
                 }
             } break;
+        }
+    }
+
+    public void processSelect(PixelClickEvent e) {
+        int x = e.getPixel().x;
+        int y = e.getPixel().y;
+
+        if ((e.getButton() == 1) || (paintMode == 1)) {
+            imagePanel.setRubberbandTopLeft(x, y);
+            paintMode = 1;
+        } else if ((e.getButton() == 3) || (paintMode == 2)) {
+            imagePanel.setRubberbandBottomRight(x, y);
+            paintMode = 2;
         }
     }
 
@@ -225,8 +241,17 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
     }
 
     public void pixelEntered(PixelClickEvent e) {
-        if (paintMode != 0) {
-            drawLine(e.getPreviousPixel(), e.getPixel());
+        switch (toolsPanel.getSelectedTool()) {
+            case ToolsPanel.DRAW:
+                if (paintMode != 0) {
+                    drawLine(e.getPreviousPixel(), e.getPixel());
+                }
+                break;
+            case ToolsPanel.SELECT:
+                if (paintMode != 0) {
+                    processSelect(e);
+                }
+                break;
         }
     }
     
@@ -331,7 +356,7 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
         scalePanel.add(heightField, c);
 
         String[] options = { "Bilinear", "Bicubic", "Nearest" };
-        JComboBox scaling = new JComboBox(options);
+        JComboBox<String> scaling = new JComboBox<String>(options);
         c.gridx = 1;
         c.gridy = 2;
         scalePanel.add(scaling, c);
@@ -366,5 +391,28 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
     }
 
     public void crop() {
+        Rectangle r = imagePanel.getRubberband();
+        cropImage(r);
     }
+
+    public void cropImage(Rectangle r) {
+        BufferedImage newImage = new BufferedImage(r.width, r.height, image.getType());
+        Graphics2D g = newImage.createGraphics();
+        g.drawImage(image, 
+            0, 0, /* by */ r.width, r.height,
+            r.x, r.y, /* by */ r.x + r.width, r.y + r.height,
+            null
+        );
+        g.dispose();
+        storeHistory();
+        image = newImage;
+        imagePanel.setRubberbandTopLeft(0, 0);
+        imagePanel.setRubberbandBottomRight(r.width, r.height);
+        imagePanel.updateImage(image);
+    }
+
+    public ZoomableBitmap getImagePanel() {
+        return imagePanel;
+    }
+
 }

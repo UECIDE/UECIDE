@@ -17,12 +17,17 @@ public class ToolsPanel extends JToolBar { //JPanel {
     public static final int DRAW = 1;
     public static final int PICK = 2;
     public static final int ERASE = 3;
+    public static final int SELECT = 4;
+
+    static final Color selectedColor = new Color(0, 100, 0);
 
     public int selectedTool = NONE;
 
-    JButton draw;
-    JButton erase;
-    JButton pick;
+    ToolButton draw;
+    ToolButton erase;
+    ToolButton pick;
+    ToolButton select;
+
     JButton foreground;
     JButton background;
 
@@ -43,46 +48,44 @@ public class ToolsPanel extends JToolBar { //JPanel {
         c.gridy = 0;
         c.fill = GridBagConstraints.VERTICAL;
 
-        draw = new JButton(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/uk/co/majenko/bmpedit/icons/draw.png"))));
-        draw.setSize(new Dimension(32, 32));
-        draw.setMinimumSize(new Dimension(32, 32));
-        draw.setMaximumSize(new Dimension(32, 32));
-        draw.setPreferredSize(new Dimension(32, 32));
-        draw.addActionListener(new ActionListener() {
+        draw = new ToolButton("/uk/co/majenko/bmpedit/icons/draw.png", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 selectedTool = DRAW;
                 updateTools();
             }
         });
+        draw.setSelectedColor(selectedColor);
         add(draw, c);
         c.gridy++;
 
-        erase = new JButton(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/uk/co/majenko/bmpedit/icons/erase.png"))));
-        erase.setSize(new Dimension(32, 32));
-        erase.setMinimumSize(new Dimension(32, 32));
-        erase.setMaximumSize(new Dimension(32, 32));
-        erase.setPreferredSize(new Dimension(32, 32));
-        erase.addActionListener(new ActionListener() {
+        erase = new ToolButton("/uk/co/majenko/bmpedit/icons/erase.png", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 selectedTool = ERASE;
                 updateTools();
             }
         });
+        erase.setSelectedColor(selectedColor);
         add(erase, c);
         c.gridy++;
 
-        pick = new JButton(new ImageIcon(ImageIO.read(getClass().getResourceAsStream("/uk/co/majenko/bmpedit/icons/pick.png"))));
-        pick.setSize(new Dimension(32, 32));
-        pick.setMinimumSize(new Dimension(32, 32));
-        pick.setMaximumSize(new Dimension(32, 32));
-        pick.setPreferredSize(new Dimension(32, 32));
-        pick.addActionListener(new ActionListener() {
+        pick = new ToolButton("/uk/co/majenko/bmpedit/icons/pick.png", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 selectedTool = PICK;
                 updateTools();
             }
         });
+        pick.setSelectedColor(selectedColor);
         add(pick, c);
+        c.gridy++;
+
+        select = new ToolButton("/uk/co/majenko/bmpedit/icons/select.png", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                selectedTool = SELECT;
+                updateTools();
+            }
+        });
+        select.setSelectedColor(selectedColor);
+        add(select, c);
         c.gridy++;
 
 //        addSeparator();
@@ -190,9 +193,16 @@ public class ToolsPanel extends JToolBar { //JPanel {
     }
 
     public void updateTools() {
-        draw.setBackground(selectedTool == DRAW ? Color.GREEN : Color.BLACK);
-        erase.setBackground(selectedTool == ERASE ? Color.GREEN : Color.BLACK);
-        pick.setBackground(selectedTool == PICK ? Color.GREEN : Color.BLACK);
+        draw.setSelected(selectedTool == DRAW);
+        erase.setSelected(selectedTool == ERASE);
+        pick.setSelected(selectedTool == PICK);
+        select.setSelected(selectedTool == SELECT);
+
+        if (selectedTool == SELECT) {
+            editor.getImagePanel().showRubberband();
+        } else {
+            editor.getImagePanel().hideRubberband();
+        }
     }
 
     public int getSelectedTool() { 

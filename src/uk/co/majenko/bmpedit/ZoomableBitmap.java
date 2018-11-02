@@ -16,7 +16,9 @@ public class ZoomableBitmap extends JPanel implements MouseListener, MouseMotion
 
     Point lastPixelEntered = new Point(0, 0);
 
-    Rectangle rubberband = null;
+    Point rubberbandTL = new Point(0, 0);
+    Point rubberbandBR = new Point(0, 0);
+    boolean rubberbandShown = false;
 
     public ZoomableBitmap(BufferedImage i) {
         super();
@@ -64,16 +66,25 @@ public class ZoomableBitmap extends JPanel implements MouseListener, MouseMotion
             }
         }
 
-        if (rubberband != null) {
+        if (rubberbandShown) {
             float[] dash1 = {4f};
             BasicStroke dashBlack = new BasicStroke(1.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, dash1, 0f);
             BasicStroke dashWhite = new BasicStroke(1.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, dash1, 4f);
             g2d.setColor(Color.BLACK);
             g2d.setStroke(dashBlack);
-            g2d.drawRect((int)(rubberband.x * zoomFactor), (int)(rubberband.y * zoomFactor), (int)(rubberband.width * zoomFactor), (int)(rubberband.height * zoomFactor));
+
+            int x = rubberbandTL.x;
+            int y = rubberbandTL.y;
+            int width = rubberbandBR.x - x;
+            int height = rubberbandBR.y - y;
+
+            if (width < 1) width = 1;
+            if (height < 1) height = 1;
+
+            g2d.drawRect((int)(x * zoomFactor), (int)(y * zoomFactor), (int)(width * zoomFactor) - 1, (int)(height * zoomFactor) - 1);
             g2d.setColor(Color.WHITE);
             g2d.setStroke(dashWhite);
-            g2d.drawRect((int)(rubberband.x * zoomFactor), (int)(rubberband.y * zoomFactor), (int)(rubberband.width * zoomFactor), (int)(rubberband.height * zoomFactor));
+            g2d.drawRect((int)(x * zoomFactor), (int)(y * zoomFactor), (int)(width * zoomFactor) - 1, (int)(height * zoomFactor) - 1);
 
         }
 
@@ -205,4 +216,36 @@ public class ZoomableBitmap extends JPanel implements MouseListener, MouseMotion
         }
     }
 
+    public void setRubberbandTopLeft(int x, int y) {
+        rubberbandTL.x = x;
+        rubberbandTL.y = y;
+        repaint();
+    }
+
+    public void setRubberbandBottomRight(int x, int y) {
+        rubberbandBR.x = x;
+        rubberbandBR.y = y;
+        repaint();
+    }
+
+    public void showRubberband() {
+        rubberbandShown = true;
+        repaint();
+    }
+
+    public void hideRubberband() {
+        rubberbandShown = false;
+        repaint();
+    }
+
+    public Rectangle getRubberband() {
+        int x = rubberbandTL.x;
+        int y = rubberbandTL.y;
+        int width = rubberbandBR.x - x;
+        int height = rubberbandBR.y - y;
+
+        if (width < 1) width = 1;
+        if (height < 1) height = 1;
+        return new Rectangle(x, y, width, height);
+    }
 }
