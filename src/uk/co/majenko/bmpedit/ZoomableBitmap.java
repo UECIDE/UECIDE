@@ -219,12 +219,20 @@ public class ZoomableBitmap extends JPanel implements MouseListener, MouseMotion
     }
 
     public void setRubberbandTopLeft(int x, int y) {
+        if (x > image.getWidth()) x = image.getWidth();
+        if (x < 0) x = 0;
+        if (y > image.getHeight()) y = image.getHeight();
+        if (y < 0) y = 0;
         rubberbandTL.x = x;
         rubberbandTL.y = y;
         repaint();
     }
 
     public void setRubberbandBottomRight(int x, int y) {
+        if (x > image.getWidth()) x = image.getWidth();
+        if (x < 0) x = 0;
+        if (y > image.getHeight()) y = image.getHeight();
+        if (y < 0) y = 0;
         rubberbandBR.x = x;
         rubberbandBR.y = y;
         repaint();

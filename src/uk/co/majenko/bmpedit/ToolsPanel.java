@@ -59,7 +59,8 @@ public class ToolsPanel extends JToolBar { //JPanel {
         c.gridy = 0;
 
         for (int i = 0; i < tools.length; i++) {
-            c.gridx = 0;
+            c.gridx = i % 2;
+            c.gridy = i / 2;
 
             ToolButton b = tools[i].getButton();
             b.addActionListener(new ActionListener() {
@@ -69,10 +70,15 @@ public class ToolsPanel extends JToolBar { //JPanel {
                 }
             });
             add(b, c);
-            c.gridy++;
         }
+        c.gridy++;
+        c.gridwidth = 2;
+        c.gridx = 0;
+
+        add(new JLabel(" "), c);
+
+        c.gridy++;
         for (int i = 0; i < tools.length; i++) {
-            c.gridx = 0;
 
             JPanel b = tools[i].getOptionsPanel();
             if (b != null) {
@@ -80,6 +86,7 @@ public class ToolsPanel extends JToolBar { //JPanel {
                 c.gridy++;
             }
         }
+        c.gridwidth = 1;
 
         selectTool(tools[0]);
 
@@ -185,6 +192,7 @@ public class ToolsPanel extends JToolBar { //JPanel {
         c.weighty = 1f;
 //        addSeparator();
         add(Box.createVerticalGlue(), c);
+        c.gridx = 0;
         c.gridy++;
         c.weighty = 0f;
 
@@ -195,7 +203,7 @@ public class ToolsPanel extends JToolBar { //JPanel {
         foreground.setPreferredSize(new Dimension(32, 32));
         foreground.setBackground(fgColor);
         add(foreground, c);
-        c.gridy++;
+        c.gridx = 1;
 
         foreground.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {

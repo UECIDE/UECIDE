@@ -26,6 +26,7 @@ public class DrawTool implements Tool {
         toolsPanel = tb;
         button = new ToolButton("/uk/co/majenko/bmpedit/icons/draw.png", this);
         button.setSelectedColor(new Color(0, 200, 0));
+        button.setToolTipText("Draw");
     }
 
     public ToolButton getButton() {
@@ -36,10 +37,15 @@ public class DrawTool implements Tool {
         toolSizePanel = new JPanel();
         toolSizePanel.setLayout(new BorderLayout());
         toolSizePanel.setBackground(Color.WHITE);
-        toolSizePanel.setSize(new Dimension(32, 128));
-        toolSizePanel.setMinimumSize(new Dimension(32, 128));
-        toolSizePanel.setMaximumSize(new Dimension(32, 128));
-        toolSizePanel.setPreferredSize(new Dimension(32, 128));
+        toolSizePanel.setSize(new Dimension(64, 128));
+        toolSizePanel.setMinimumSize(new Dimension(64, 128));
+        toolSizePanel.setMaximumSize(new Dimension(64, 128));
+        toolSizePanel.setPreferredSize(new Dimension(64, 128));
+
+        JLabel l = new JLabel("Draw");
+        l.setHorizontalAlignment(JLabel.CENTER);
+        l.setForeground(Color.BLACK);
+        toolSizePanel.add(l, BorderLayout.NORTH);
 
         toolSize = new JSlider(1, 32, 1);
         toolSize.setOrientation(JSlider.VERTICAL);
@@ -53,6 +59,11 @@ public class DrawTool implements Tool {
 
         JTextField sizeValue = new JTextField(4);
         sizeValue.setText("1");
+
+        sizeValue.setBackground(Color.WHITE);
+        sizeValue.setForeground(Color.BLACK);
+        sizeValue.setBorder(new EmptyBorder(0, 0, 0, 0));
+        sizeValue.setHorizontalAlignment(JTextField.CENTER);
 
         toolSize.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {

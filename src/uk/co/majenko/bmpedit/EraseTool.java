@@ -26,6 +26,7 @@ public class EraseTool implements Tool {
         toolsPanel = tb;
         button = new ToolButton("/uk/co/majenko/bmpedit/icons/erase.png", this);
         button.setSelectedColor(new Color(0, 200, 0));
+        button.setToolTipText("Erase");
     }
 
     public ToolButton getButton() {
@@ -36,10 +37,15 @@ public class EraseTool implements Tool {
         toolSizePanel = new JPanel();
         toolSizePanel.setLayout(new BorderLayout());
         toolSizePanel.setBackground(Color.WHITE);
-        toolSizePanel.setSize(new Dimension(32, 128));
-        toolSizePanel.setMinimumSize(new Dimension(32, 128));
-        toolSizePanel.setMaximumSize(new Dimension(32, 128));
-        toolSizePanel.setPreferredSize(new Dimension(32, 128));
+        toolSizePanel.setSize(new Dimension(64, 128));
+        toolSizePanel.setMinimumSize(new Dimension(64, 128));
+        toolSizePanel.setMaximumSize(new Dimension(64, 128));
+        toolSizePanel.setPreferredSize(new Dimension(64, 128));
+
+        JLabel l = new JLabel("Erase");
+        l.setHorizontalAlignment(JLabel.CENTER);
+        l.setForeground(Color.BLACK);
+        toolSizePanel.add(l, BorderLayout.NORTH);
 
         toolSize = new JSlider(1, 32, 1);
         toolSize.setOrientation(JSlider.VERTICAL);
@@ -53,6 +59,11 @@ public class EraseTool implements Tool {
 
         JTextField sizeValue = new JTextField(4);
         sizeValue.setText("1");
+
+        sizeValue.setBackground(Color.WHITE);
+        sizeValue.setForeground(Color.BLACK);
+        sizeValue.setBorder(new EmptyBorder(0, 0, 0, 0));
+        sizeValue.setHorizontalAlignment(JTextField.CENTER);
 
         toolSize.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -109,8 +120,10 @@ public class EraseTool implements Tool {
 
         switch (paintMode) {
             case 1:
+                Color c = toolsPanel.getBackgroundColor();
+                Color bg = new Color(c.getRed(), c.getGreen(), c.getBlue(), 0);
                 g.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-                g.setColor(new Color(0, 0, 0, 0));
+                g.setColor(bg);
                 g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, 1.0f));
                 if (size == 1) {
                     g.fillRect(p.x, p.y, 1, 1);
@@ -126,8 +139,10 @@ public class EraseTool implements Tool {
         int size = toolSize.getValue();
         switch (paintMode) {
             case 1:
+                Color c = toolsPanel.getBackgroundColor();
+                Color bg = new Color(c.getRed(), c.getGreen(), c.getBlue(), 0);
                 g.setStroke(new BasicStroke(size, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                g.setColor(new Color(0, 0, 0, 0));
+                g.setColor(bg);
                 g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, 1.0f));
                 g.drawLine(from.x, from.y, to.x, to.y);
                 break;

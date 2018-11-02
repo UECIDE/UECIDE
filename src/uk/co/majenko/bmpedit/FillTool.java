@@ -26,6 +26,7 @@ public class FillTool implements Tool {
         toolsPanel = tb;
         button = new ToolButton("/uk/co/majenko/bmpedit/icons/fill.png", this);
         button.setSelectedColor(new Color(0, 200, 0));
+        button.setToolTipText("Fill");
     }
 
     public ToolButton getButton() {

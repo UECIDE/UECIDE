@@ -26,6 +26,7 @@ public class SelectTool implements Tool {
         toolsPanel = tb;
         button = new ToolButton("/uk/co/majenko/bmpedit/icons/select.png", this);
         button.setSelectedColor(new Color(0, 200, 0));
+        button.setToolTipText("Rectangle Selection");
     }
 
     public ToolButton getButton() {

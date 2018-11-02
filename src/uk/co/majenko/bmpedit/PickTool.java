@@ -21,6 +21,7 @@ public class PickTool implements Tool {
         toolsPanel = tb;
         button = new ToolButton("/uk/co/majenko/bmpedit/icons/pick.png", this);
         button.setSelectedColor(new Color(0, 200, 0));
+        button.setToolTipText("Color Picker");
     }
 
     public ToolButton getButton() {
