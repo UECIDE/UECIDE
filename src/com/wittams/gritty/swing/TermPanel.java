@@ -305,6 +305,11 @@ public class TermPanel extends JComponent implements TerminalDisplay, ClipboardO
 
 	private void sizeTerminalFromComponent() {
 		if (emulator != null) {
+            // I had a situation where one of these was 0 and caused a divide-by-zero.
+            // No idea how it happened, but to be safe, if either are 0 then set them to
+            // a default of 8.   -- Majenko
+            if (charSize.width <= 0) charSize.width = 8;
+            if (charSize.height <= 0) charSize.height = 8;
 			int newWidth = getWidth() / charSize.width ;
 			int newHeight = getHeight() / charSize.height;
 
