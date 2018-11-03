@@ -298,6 +298,8 @@ public class Base {
         cli.addParameter("preferences",         "",         Boolean.class,  "cli.help.preferences");
         cli.addParameter("quiet",               "",         Boolean.class,  "cli.help.quiet");
 
+        cli.addParameter("reset-preferences",   "",         Boolean.class,  "cli.help.reset.prefs");
+
         cli.addParameter("locale",              "name",     String.class,   "cli.help.locale");
 
         String[] argv = cli.process(args);
@@ -379,8 +381,20 @@ public class Base {
 
         initPlatform();
 
+        if (cli.isSet("reset-preferences")) {
+            File prefsFile = getDataFile("preferences.txt");
+            try {
+                prefsFile.delete();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(10);
+            }
+            System.out.println(">>> All preferences reset to default! <<<");
+        }
+
         preferences = new PropertyFile(getDataFile("preferences.txt"), "/org/uecide/config/preferences.txt");
         preferences.setPlatformAutoOverride(true);
+
 
         platform.setSettingsFolderEnvironmentVariable();
 

@@ -4008,7 +4008,13 @@ public class Sketch {
         HashMap<File, String[]> conversionData = new HashMap<File, String[]>();
 
         File dir = getBinariesFolder();
+        if (!dir.exists()) {
+            return conversionData;
+        }
         File[] files = dir.listFiles();
+        if (files == null) {
+            return conversionData;
+        }
         for (File file : files) {
             if (getInteger("binary." + file.getName() + ".conversion") > 0) {
                 int type = FileType.getType(file);
