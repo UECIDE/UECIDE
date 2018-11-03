@@ -14,3 +14,6 @@ documentation/
 thirdparty
 uecide.jar
 resources/org/uecide/changelog.html
+UECIDE-l4j-cli.xml
+UECIDE-l4j-gui.xml
+deps

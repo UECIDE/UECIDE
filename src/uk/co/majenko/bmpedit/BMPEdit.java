@@ -12,8 +12,6 @@ import java.util.*;
 
 public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelListener {
 
-    BufferedImage image;
-
     JScrollPane mainPanel;
 
     ZoomableBitmap imagePanel;
@@ -31,9 +29,8 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
 
     public BMPEdit() {
         super();
-        image = new BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB);
 
-        imagePanel = new ZoomableBitmap(image);
+        imagePanel = new ZoomableBitmap(new BufferedImage(640, 480, BufferedImage.TYPE_INT_RGB));
 
         mainPanel = new JScrollPane();
         JPanel outerPanel = new JPanel();
@@ -70,8 +67,7 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
     }
 
     public void loadImage(File f) throws IOException {
-        image = ImageIO.read(f);
-        imagePanel.updateImage(image);
+        imagePanel.updateImage(ImageIO.read(f));
     }
 
     public void pixelClicked(PixelClickEvent e) {
@@ -95,8 +91,8 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
 
     public void storeHistory() {
         setModified(true);
-        BufferedImage i = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-        i.setData(image.getData());
+        BufferedImage i = new BufferedImage(imagePanel.getImage().getWidth(), imagePanel.getImage().getHeight(), imagePanel.getImage().getType());
+        i.setData(imagePanel.getImage().getData());
         history.add(i);
         if (history.size() > 100) {
             history.remove(0);
@@ -106,8 +102,7 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
     public void undo() {
         if (history.size() == 0) return;
         BufferedImage i = history.remove(history.size()-1);
-        image = i;
-        imagePanel.updateImage(image);
+        imagePanel.updateImage(i);
     }
 
 
@@ -146,15 +141,15 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
     public boolean saveImage(File to) throws IOException {
         String lcname = to.getName().toLowerCase();
         if (lcname.endsWith(".gif")) {
-            ImageIO.write(image, "gif", to);
+            ImageIO.write(imagePanel.getImage(), "gif", to);
             setModified(false);
             return true;
         } else if (lcname.endsWith(".jpg")) {
-            ImageIO.write(image, "jpeg", to);
+            ImageIO.write(imagePanel.getImage(), "jpeg", to);
             setModified(false);
             return true;
         } else if (lcname.endsWith(".png")) {
-            ImageIO.write(image, "png", to);
+            ImageIO.write(imagePanel.getImage(), "png", to);
             setModified(false);
             return true;
         }
@@ -179,13 +174,13 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
         scalePanel.add(new JLabel("Scaling:"), c);
 
         JTextField widthField = new JTextField(10);
-        widthField.setText("" + image.getWidth());
+        widthField.setText("" + imagePanel.getImage().getWidth());
         c.gridx = 1;
         c.gridy = 0;
         scalePanel.add(widthField, c);
 
         JTextField heightField = new JTextField(10);
-        heightField.setText("" + image.getHeight());
+        heightField.setText("" + imagePanel.getImage().getHeight());
         c.gridx = 1;
         c.gridy = 1;
         scalePanel.add(heightField, c);
@@ -205,7 +200,7 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
                 int w = Integer.parseInt(widthField.getText());
                 int h = Integer.parseInt(heightField.getText());
 
-                BufferedImage i = new BufferedImage(w, h, image.getType());
+                BufferedImage i = new BufferedImage(w, h, imagePanel.getImage().getType());
 
                 Graphics2D g = i.createGraphics();
                 if (((String)scaling.getSelectedItem()).equals("Bilinear")) {
@@ -215,10 +210,9 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
                 } else if (((String)scaling.getSelectedItem()).equals("Nearest")) {
                     g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
                 } 
-                g.drawImage(image, 0, 0, w, h, 0, 0, image.getWidth(), image.getHeight(), null);
+                g.drawImage(imagePanel.getImage(), 0, 0, w, h, 0, 0, imagePanel.getImage().getWidth(), imagePanel.getImage().getHeight(), null);
                 g.dispose();
-                image = i;
-                imagePanel.updateImage(image);
+                imagePanel.updateImage(i);
             } catch (Exception e) {
             }
         }
@@ -231,19 +225,18 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
     }
 
     public void cropImage(Rectangle r) {
-        BufferedImage newImage = new BufferedImage(r.width, r.height, image.getType());
+        BufferedImage newImage = new BufferedImage(r.width, r.height, imagePanel.getImage().getType());
         Graphics2D g = newImage.createGraphics();
-        g.drawImage(image, 
+        g.drawImage(imagePanel.getImage(), 
             0, 0, /* by */ r.width, r.height,
             r.x, r.y, /* by */ r.x + r.width, r.y + r.height,
             null
         );
         g.dispose();
         storeHistory();
-        image = newImage;
         imagePanel.setRubberbandTopLeft(0, 0);
         imagePanel.setRubberbandBottomRight(r.width, r.height);
-        imagePanel.updateImage(image);
+        imagePanel.updateImage(newImage);
     }
 
     public ZoomableBitmap getImagePanel() {
@@ -331,9 +324,9 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
 
                 Rectangle r = imagePanel.getRubberband();
                 
-                BufferedImage newImage = new BufferedImage(r.width, r.height, image.getType());
+                BufferedImage newImage = new BufferedImage(r.width, r.height, imagePanel.getImage().getType());
                 Graphics2D g = newImage.createGraphics();
-                g.drawImage(image,
+                g.drawImage(imagePanel.getImage(),
                     0, 0, /* by */ r.width, r.height,
                     r.x, r.y, /* by */ r.x + r.width, r.y + r.height,
                     null
@@ -342,15 +335,13 @@ public class BMPEdit extends JPanel implements PixelClickListener, MouseWheelLis
 
                 BufferedImage convolved = convolution.apply(newImage);
 
-                g = image.createGraphics();
+                g = imagePanel.getImage().createGraphics();
                 g.drawImage(convolved, r.x, r.y, r.x + r.width, r.y + r.height,
                                        0, 0, r.width, r.height,
                                         null);
                 g.dispose();
-                imagePanel.updateImage(image);
             } else {
-                image = convolution.apply(image);
-                imagePanel.updateImage(image);
+                imagePanel.updateImage(convolution.apply(imagePanel.getImage()));
             }
         }
     }
