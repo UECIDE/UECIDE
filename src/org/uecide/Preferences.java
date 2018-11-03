@@ -903,7 +903,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return font;
     }
 
-    public static Font getScaledFont(String key) {
+    public static Font getScaledFont(String key, int scale) {
         String data = get(key);
         Font font = null;
         if (data == null || data.equals("")) {
@@ -912,7 +912,6 @@ public class Preferences extends JDialog implements TreeSelectionListener {
             font = Base.preferences.stringToFont(data);
         }
         float size = font.getSize();
-        int scale = getInteger("theme.editor.fonts.scale");
         if (scale == 0) {
             scale = 100;
         }

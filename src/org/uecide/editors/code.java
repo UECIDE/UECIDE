@@ -81,6 +81,8 @@ public class code extends JPanel implements EditorBase {
     JToolBar toolbar;
     JMenu gotoMenu;
 
+    int fontScale = 100;
+
     static class Flag {
         Icon icon;
         int group;
@@ -394,12 +396,12 @@ public class code extends JPanel implements EditorBase {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (e.isControlDown()) {
                     Adjustable adj = scrollPane.getVerticalScrollBar();
-                    int scale = Preferences.getInteger("theme.editor.fonts.scale");
+                    int scale = fontScale;
                     int rscale = e.getWheelRotation() * 5;
                     scale -= rscale;
                     if (scale < 1) scale = 1;
                     if (scale > 1000) scale = 1000;
-                    Preferences.setInteger("theme.editor.fonts.scale", scale);
+                    fontScale = scale;
                     refreshSettings();
                 } else if (e.isShiftDown()) {
                     // Horizontal scrolling
@@ -653,12 +655,12 @@ public class code extends JPanel implements EditorBase {
         textArea.setBackground(Preferences.getColor("theme.editor.colors.background"));
 
         textArea.setForeground(Preferences.getColor("theme.editor.colors.foreground"));
-        textArea.setFont(Preferences.getScaledFont("theme.editor.fonts.default.font"));
+        textArea.setFont(Preferences.getScaledFont("theme.editor.fonts.default.font", fontScale));
 
         gutter = scrollPane.getGutter();
 
 
-        gutter.setLineNumberFont(Preferences.getScaledFont("theme.editor.gutter.font"));
+        gutter.setLineNumberFont(Preferences.getScaledFont("theme.editor.gutter.font", fontScale));
         gutter.setBackground(Preferences.getColor("theme.editor.gutter.background"));
         gutter.setLineNumberColor(Preferences.getColor("theme.editor.gutter.foreground"));
         gutter.setBorderColor(Preferences.getColor("theme.editor.gutter.foreground"));
@@ -809,13 +811,13 @@ public class code extends JPanel implements EditorBase {
 
     public void applyThemeFontFace(int index, String fs) {
         String fspec = Preferences.get(fs);
-        Font f = Preferences.getScaledFont(fs);
+        Font f = Preferences.getScaledFont(fs, fontScale);
         if (fspec == null) {
-            f = Preferences.getScaledFont("theme.editor.fonts.default.font");
+            f = Preferences.getScaledFont("theme.editor.fonts.default.font", fontScale);
         } else if (fspec.equals("default")) {
-            f = Preferences.getScaledFont("theme.editor.fonts.default.font");
+            f = Preferences.getScaledFont("theme.editor.fonts.default.font", fontScale);
         } else if (fspec.equals("")) {
-            f = Preferences.getScaledFont("theme.editor.fonts.default.font");
+            f = Preferences.getScaledFont("theme.editor.fonts.default.font", fontScale);
         }
 
         org.fife.ui.rsyntaxtextarea.Style s = scheme.getStyle(index);

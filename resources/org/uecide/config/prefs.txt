@@ -436,12 +436,6 @@ theme.editor.fonts.type=section
 theme.editor.fonts.default.name=Default
 theme.editor.fonts.default.type=section
 
-theme.editor.fonts.scale.name=Font Scale %
-theme.editor.fonts.scale.type=range
-theme.editor.fonts.scale.min=1
-theme.editor.fonts.scale.max=1000
-theme.editor.fonts.scale.default=100
-
 theme.editor.fonts.editor_aa.name=Anti-aliasing
 theme.editor.fonts.editor_aa.type=checkbox
 theme.editor.fonts.editor_aa.default=true

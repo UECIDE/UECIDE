@@ -69,6 +69,8 @@ public class markdown extends JPanel implements EditorBase {
 
     Gutter gutter;
 
+    int fontScale = 100;
+
     public markdown(Sketch s, File f, Editor e) {
         editor = e;
         sketch = s;
@@ -139,12 +141,12 @@ public class markdown extends JPanel implements EditorBase {
         textArea.setBackground(Preferences.getColor("theme.editor.colors.background"));
 
         textArea.setForeground(Preferences.getColor("theme.editor.colors.foreground"));
-        textArea.setFont(Preferences.getScaledFont("theme.editor.fonts.default.font"));
+        textArea.setFont(Preferences.getScaledFont("theme.editor.fonts.default.font", fontScale));
 
         gutter = scrollPane.getGutter();
 
 
-        gutter.setLineNumberFont(Preferences.getScaledFont("theme.editor.gutter.font"));
+        gutter.setLineNumberFont(Preferences.getScaledFont("theme.editor.gutter.font", fontScale));
         gutter.setBackground(Preferences.getColor("theme.editor.gutter.background"));
         gutter.setLineNumberColor(Preferences.getColor("theme.editor.gutter.foreground"));
         gutter.setBorderColor(Preferences.getColor("theme.editor.gutter.foreground"));
