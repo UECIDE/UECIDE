@@ -15,7 +15,8 @@ public class Changelog extends JDialog {
         setTitle(Base.i18n.string("win.changelog"));
         setLayout(new BorderLayout());
 
-        JPanel mainPanel = new JPanel();
+        MarkdownPane mainPanel = new MarkdownPane();
+
         JScrollPane mainScroll = new JScrollPane(mainPanel);
         add(mainScroll, BorderLayout.CENTER);
 
@@ -38,19 +39,13 @@ public class Changelog extends JDialog {
             }
         });
 
-        JTextPane info = new JTextPane();
-        info.setContentType("text/html");
-        mainScroll.setViewportView(info);
-
-        String content = Base.getResourceAsString("/org/uecide/changelog.html");
-        info.setText(content);
+        String content = Base.getResourceAsString("/org/uecide/changelog.md");
+        mainPanel.setText(content);
 
         setIconImage(Base.loadImageFromResource("icons/icon.png"));
 
         setSize(600, 500);
         setLocationRelativeTo(editor);
-
-
 
         setVisible(true);
     }

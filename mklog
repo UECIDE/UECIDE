@@ -1,17 +1,101 @@
-#!/bin/bash
-TAGS=$(git tag -l --sort=-v:refname)
-CTAG=""
-echo "<h1>Changelog</h1>" 
-echo 
-for TAG in $TAGS; do
-    echo "<h2>$CTAG</h2>" 
-    echo 
-    echo "<ul>" 
-    git log $CTAG...$TAG --oneline --pretty=format:"<li>%s</li>" --date=short 
-    echo 
-    echo "<ul>" 
-    echo 
-    CTAG=$TAG
-done
+#!/usr/bin/perl
+
+use strict;
+use Data::Dumper;
+
+my @order = ("HEAD");
+my $versions;
+
+#push(@{$versions->{"HEAD"}}, "HEAD");
+
+print "Changelog\n";
+print "=========\n\n";
+
+my $last = "HEAD";
+
+my $tags = `git tag -l --sort=-v:refname`;
+open(TAGS, "git tag -l --sort=-v:refname |");
+
+while (my $tag = <TAGS>) {
+    chomp($tag);
+    
+    my $cleantag = $tag;
+    if ($cleantag =~ /^([^a-z\-]*)[a-z\-]+/) {
+        $cleantag = $1;
+    }
+
+    if ($cleantag ne $last) {
+        push(@order, $cleantag);
+        $last = $cleantag;
+    }
+
+    push(@{$versions->{$cleantag}}, $tag);
+
+}
+
+my @majorVersions;
+
+shift(@order);
+unshift(@{$versions->{$order[0]}}, "HEAD");
+
+my $slice = 0;
+my $slices = @order;
+
+while ($slice < $slices) {
+    my $start = $versions->{$order[$slice]}->[0];
+    my $end = $versions->{$order[$slice+1]}->[0];
+
+    print $order[$slice] . "\n";
+    for (my $i = 0; $i < length($order[$slice]); $i++) {
+        print "-";
+    }
+    print "\n";
+    print "\n";
+
+    open(LOG, "git log $start...$end --oneline --pretty=format:\"%s\" --date=short |");
+    while (my $log = <LOG>) {
+        chomp($log);
+
+        if ($log =~ /^Released /) {
+            next;
+        }
+
+        if ($log =~ /\*/) {
+            my @ll = split(/\*/, $log);
+            for my $line (@ll) {
+                $line =~ s/^\s+|\s+$//g;
+                if ($line ne "") {
+                    print "* $line\n";
+                }
+            }
+        } else {
+            print "* $log\n";
+        }
+    }
+    print "\n\n";
+
+    $slice++;
+}
+
+
+
+#TAGS=$(git tag -l --sort=-v:refname)
+#CTAG=""
+#LTAG=""
+#echo "<h1>Changelog</h1>" 
+#echo 
+#for TAG in $TAGS; do
+#    MTAG=$(echo $TAG | cut -f1 -d'-')
+#    if [ "x$MTAG" != "x$LTAG" ]; then
+#        echo ""
+#        echo ""
+#        echo "$CTAG" 
+#        echo "----"
+#        echo ""
+#        LTAG=$MTAG
+#    fi
+#    git log $CTAG...$TAG --oneline --pretty=format:"* %s" --date=short 
+#    CTAG=$TAG
+#done
 
 
