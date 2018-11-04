@@ -1110,6 +1110,7 @@ public class Sketch {
         for(File f : sketchFiles) {
             switch(FileType.getType(f)) {
             case FileType.SKETCH:
+            case FileType.HEADER:
             case FileType.CSOURCE:
             case FileType.CPPSOURCE:
                 File tf = dumpFileData(buildFolder, f.getName());
@@ -1212,6 +1213,29 @@ public class Sketch {
         return "";
     }
 
+    public String getReturnTypeFromProtoAndSignature(String proto, String signature) {
+        if (signature == null) return "";
+        if (proto.startsWith("/^")) {
+            proto = proto.substring(2).trim();
+        }
+        if (proto.endsWith("$/;\"")) {
+            proto = proto.substring(0, proto.length() - 4);
+        }
+        proto = proto.trim();
+        int sigpos = proto.indexOf(signature);
+        if (sigpos > 0) {
+            String front = proto.substring(0, sigpos);
+            String[] parts = front.split("\\s+");
+            String out = "";
+            for (int i = 0; i < parts.length - 1; i++) {
+                if (i > 0) out += " ";
+                out += parts[i];
+            }
+            return out;
+        }
+        return "";
+    }
+
     public File translateBuildFileToSketchFile(String filename) {
         File bf = getBuildFolder();
         File skf = getFolder();
@@ -1262,9 +1286,13 @@ public class Sketch {
                         }
                     }
 
+
                     if (objectType.equals("f")) { // Function
                         if (params.get("class") != null) { // Class member function
-                            String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                            String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
+                            if (itemName.indexOf("::") > 0) {
+                                itemName = itemName.substring(itemName.indexOf("::") + 2);
+                            }
                             FunctionBookmark bm = new FunctionBookmark(
                                 FunctionBookmark.MEMBER_FUNCTION,
                                 translateBuildFileToSketchFile(fileName),
@@ -1276,7 +1304,7 @@ public class Sketch {
                             );
                             protos.add(bm);
                         } else { // Global function
-                            String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                            String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
                             FunctionBookmark bm = new FunctionBookmark(
                                 FunctionBookmark.FUNCTION,
                                 translateBuildFileToSketchFile(fileName),
@@ -1335,7 +1363,7 @@ public class Sketch {
                         );
                         protos.add(bm);
                     } else if (objectType.equals("p")) { // Function prototype - may be a class instantiation
-                        String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                        String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
                         FunctionBookmark bm = new FunctionBookmark(
                             FunctionBookmark.VARIABLE,
                             translateBuildFileToSketchFile(fileName),
@@ -1431,13 +1459,19 @@ public class Sketch {
 
         for (String fn : getFileNames()) {
             File f = getBuildFileByName(fn);
-            if(FileType.getType(f) == FileType.SKETCH) {
-                ArrayList<FunctionBookmark> bms = scanForFunctions(f);
-                for (FunctionBookmark bm : bms) {
-                    if (bm.isFunction()) {
-                        protos.add(bm);
+            switch (FileType.getType(f)) {
+                case FileType.CSOURCE:
+                case FileType.CPPSOURCE:
+                case FileType.ASMSOURCE:
+                case FileType.HEADER:
+                case FileType.SKETCH: {
+                    ArrayList<FunctionBookmark> bms = scanForFunctions(f);
+                    for (FunctionBookmark bm : bms) {
+                        if (bm.isFunction()) {
+                            protos.add(bm);
+                        }
                     }
-                }
+                } break;
             }
         }
 
