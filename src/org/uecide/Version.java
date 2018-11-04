@@ -44,7 +44,7 @@ public class Version implements Comparable, Cloneable {
 
     public Version(String data) {
         if(data == null) {
-            data = "0.0.0a";
+            data = "0.0.0";
         }
 
         try {
@@ -123,5 +123,10 @@ public class Version implements Comparable, Cloneable {
 
     public String toString() {
         return versionString;
+    }
+
+    public String majorVersion() {
+        String[] parts = versionString.split("-");
+        return parts[0];
     }
 };

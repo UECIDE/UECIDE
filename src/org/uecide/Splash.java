@@ -67,8 +67,7 @@ public class Splash extends JDialog { //Window {
 
     public Splash() {
         try {
-            URL loc = Splash.class.getResource("/org/uecide/icons/about.png");
-            image = ImageIO.read(loc);
+            image = ImageIO.read(Splash.class.getResource("/org/uecide/icons/about.png"));
             w = image.getWidth();
             h = image.getHeight();
 
@@ -97,65 +96,34 @@ public class Splash extends JDialog { //Window {
 
     @Override
     public void paint(Graphics g) {
-        int x = 0;
-        int y = 0;
-        int bx = 0;
-        int by = 0;
-        int mx = 0;
-        int my = 0;
-
-        try {
-            x = 270;
-            y = 145;
-
-            mx = 170;
-            my = 170;
-        } catch(Exception e) {
-        }
-
-        BufferedImage temp = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2 = temp.createGraphics();
+        Graphics2D g2 = (Graphics2D)g;
         g2.drawImage(image, 0, 0, null);
-
-        if(x < 0) {
-            x = w + x;
-        }
-
-        if(y < 0) {
-            y = h + y;
-        }
-
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        g2.setFont(new Font("SansSerif", Font.BOLD, 16)); //Base.theme.getFontNatural("splash.version.font"));
-        g2.setColor(new Color(0xbe, 0xbe, 0xbe)); //Base.theme.getColor("splash.version.color"));
-        g2.drawString("v" + Base.systemVersion, x, y);
+        g2.setFont(new Font("SansSerif", Font.BOLD, 14));
+        g2.setColor(new Color(0xbe, 0xbe, 0xbe));
+        drawCenteredString(g2, 285, 135, "v" + Base.systemVersion, new Color(0xbe, 0xbe, 0xbe), new Color(0, 0, 0, 96));
 
         int barHeight = 20;
 
-        Rectangle bounds = getStringBounds(g2, message);
-
-        int sw = bounds.width;
-        mx = w / 2 - sw / 2;
-        my = h - (barHeight/2) + (bounds.height/2);
-
-        g2.setColor(new Color(50, 0, 0));
+        g2.setColor(new Color(50, 10, 0));
         g2.fillRect(0, h - barHeight, w , h - 1);
-        g2.setColor(new Color(150, 0, 0));
+        g2.setColor(new Color(150, 40, 10));
         g2.fillRect(0, h - barHeight, (int)(((float)percent / 100.0) * (float)w) , h - 1);
-
         g2.setColor(Color.white);
-        g2.drawString(message, mx, my);
+        drawCenteredString(g2, w / 2, h - (barHeight / 2), message, new Color(0xbe, 0xbe, 0xbe), new Color(0, 0, 0, 64));
+    }
 
-        if(bx == -1) {
-            bounds = getStringBounds(g2, betaMessage);
-            sw = bounds.width;
-            bx = w / 2 - sw / 2;
-        }
+    public void drawCenteredString(Graphics2D g, int x, int y, String message, Color fg, Color shad) {
+        Rectangle r = getStringBounds(g, message);
+        
+        int px = x - (r.width / 2);
+        int py = y - (r.height / 2) + r.height; // Text goes *up* from here, everything else goes down.
 
-        g2.drawString(betaMessage, bx, by);
-
-        g.drawImage(temp, 0, 0, null);
+        g.setColor(shad);
+        g.drawString(message, px + 3, py + 3);
+        g.setColor(fg);
+        g.drawString(message, px, py);
     }
 
     public void setMessage(String m) {
