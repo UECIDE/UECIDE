@@ -1,2 +1,3 @@
-Version=0.10.0-beta6
+Version=0.10.0-rc1
+VersionName=0.10.0 Release Candidate 1
 Release=beta

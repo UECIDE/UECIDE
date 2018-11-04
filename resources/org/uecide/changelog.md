@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* New changelog formatter using Markdown
 * Cleanup of function bookmark parsing
 * Tidy up of splash screen
 * Add --reset-preferences CLI option
@@ -592,6 +593,7 @@ Changelog
 0.8.5
 -----
 
+* New changelog formatter using Markdown
 * Cleanup of function bookmark parsing
 * Tidy up of splash screen
 * Add --reset-preferences CLI option

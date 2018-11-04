@@ -392,4 +392,103 @@
         </depends>
     </target>
 
+    <target name="release" depends="tag,dist">
+        <echo>Creating release v${Version}</echo>
+        <exec executable="./mkrel" outputproperty="changelog">
+            <arg value="${Version}" />
+        </exec>
+        <echo>${changelog}</echo>
+        <exec executable="github-release">
+            <arg value="release"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-n"/> <arg value="${VersionName}"/>
+            <arg value="-d"/> <arg value="${changelog}"/>
+            <arg value="-p"/>
+        </exec>
+
+        <echo>Uploading uecide-${Version}-bundle.exe</echo>
+        <exec executable="github-release">
+            <arg value="upload"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-f"/> <arg value="uecide-${Version}-bundle.exe"/>
+            <arg value="-n"/> <arg value="uecide-${Version}-bundle.exe"/>
+        </exec>
+
+        <echo>Uploading uecide-${Version}-full.exe</echo>
+        <exec executable="github-release">
+            <arg value="upload"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-f"/> <arg value="uecide-${Version}-full.exe"/>
+            <arg value="-n"/> <arg value="uecide-${Version}-full.exe"/>
+        </exec>
+
+        <echo>Uploading uecide-${Version}-lite.exe</echo>
+        <exec executable="github-release">
+            <arg value="upload"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-f"/> <arg value="uecide-${Version}-lite.exe"/>
+            <arg value="-n"/> <arg value="uecide-${Version}-lite.exe"/>
+        </exec>
+
+        <echo>Uploading uecide-${Version}-linux.zip</echo>
+        <exec executable="github-release">
+            <arg value="upload"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-f"/> <arg value="uecide-${Version}-linux.zip"/>
+            <arg value="-n"/> <arg value="uecide-${Version}-linux.zip"/>
+        </exec>
+
+        <echo>Uploading uecide-${Version}-macosx.dmg</echo>
+        <exec executable="github-release">
+            <arg value="upload"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-f"/> <arg value="uecide-${Version}-macosx.dmg"/>
+            <arg value="-n"/> <arg value="uecide-${Version}-macosx.dmg"/>
+        </exec>
+
+        <echo>Uploading uecide-${Version}-windows-full.zip</echo>
+        <exec executable="github-release">
+            <arg value="upload"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-f"/> <arg value="uecide-${Version}-windows-full.zip"/>
+            <arg value="-n"/> <arg value="uecide-${Version}-windows-full.zip"/>
+        </exec>
+
+        <echo>Uploading uecide-${Version}-windows-lite.zip</echo>
+        <exec executable="github-release">
+            <arg value="upload"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-f"/> <arg value="uecide-${Version}-windows-lite.zip"/>
+            <arg value="-n"/> <arg value="uecide-${Version}-windows-lite.zip"/>
+        </exec>
+
+        <echo>Uploading uecide.jar</echo>
+        <exec executable="github-release">
+            <arg value="upload"/>
+            <arg value="-u"/> <arg value="UECIDE"/>
+            <arg value="-r"/> <arg value="UECIDE"/>
+            <arg value="-t"/> <arg value="${Version}"/>
+            <arg value="-f"/> <arg value="uecide.jar"/>
+            <arg value="-n"/> <arg value="uecide.jar"/>
+        </exec>
+
+    </target>
+
+
 </project>

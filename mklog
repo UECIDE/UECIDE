@@ -41,6 +41,11 @@ unshift(@{$versions->{$order[0]}}, "HEAD");
 my $slice = 0;
 my $slices = @order;
 
+my $wanted = shift;
+
+my $major;
+my $minor;
+
 while ($slice < $slices) {
     my $start = $versions->{$order[$slice]}->[0];
     my $end = $versions->{$order[$slice+1]}->[0];
