@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* Added automatic release generation
 * New changelog formatter using Markdown
 * Cleanup of function bookmark parsing
 * Tidy up of splash screen
@@ -593,6 +594,7 @@ Changelog
 0.8.5
 -----
 
+* Added automatic release generation
 * New changelog formatter using Markdown
 * Cleanup of function bookmark parsing
 * Tidy up of splash screen

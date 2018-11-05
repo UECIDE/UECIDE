@@ -26,6 +26,7 @@ public class ImageFileConverter implements FileConverter {
         
     public static final int NONE        = 0x0000;
     public static final int RAW         = 0x0001;
+    public static final int XBM         = 0x0100;
     public static final int RGB555      = 0x0F00;
     public static final int BGR555      = 0x0F01;
     public static final int RGB565      = 0x1000;
@@ -53,7 +54,8 @@ public class ImageFileConverter implements FileConverter {
         new KeyValuePair(BGR555, "BGR 555 (16 bit)"),
         new KeyValuePair(BGR888, "BGR 888 (24 bit)"),
         new KeyValuePair(ABGR8888, "ABGR 8888 (32 bit)"),
-        new KeyValuePair(BGRA8888, "BGRA 8888 (32 bit)")
+        new KeyValuePair(BGRA8888, "BGRA 8888 (32 bit)"),
+        new KeyValuePair(XBM, "XBM (1 bit, u8glib)")
     };
 
     public ImageFileConverter(File in, int type, String dt, String pref, Color trans) {
@@ -117,27 +119,75 @@ public class ImageFileConverter implements FileConverter {
             pw.println("#include <Arduino.h>\n");
             pw.println("const " + dataType + " " + prefix + "_data[] PROGMEM = {");
 
-            boolean start = true;
-            int len = 0;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    Color c = new Color(image.getRGB(x, y));
-                    String formatted = formatColor(c, conversionType, format);
-                    if (start) {
-                        pw.print("    ");
-                        start = false;
-                    } else {
-                        if (len >= 80) {
-                            pw.print(",\n    ");
-                            len = 0;
-                        } else {
-                            pw.print(",");
+            if (conversionType == XBM) {
+                boolean start = true;
+                int len = 0;
+                int out = 0;
+
+                pw.print("    ");
+
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x += 8) {
+                        out = 0;
+                        for (int z = 0; z < 8; z++) {
+                            int px = x + z;
+                            Color c;
+                            if (px < width) {
+                                c = new Color(image.getRGB(px, y));
+                            } else {
+                                c = Color.BLACK;
+                            }
+
+                            int tot = (c.getRed() + c.getGreen() + c.getBlue()) / 3;
+
+                            out <<= 1;
+                            if (tot > 127) {
+                                out |= 1;
+                            }
                         }
+
+                        if (start) {
+                            pw.print("    ");
+                            start = false;
+                        } else {
+                            if (len >= 80) {
+                                pw.print(",\n    ");
+                                len = 0;
+                            } else {
+                                pw.print(", ");
+                            }
+                        }
+
+                        pw.print(String.format("0x%02x", out));
+                        len += 6;
                     }
-                    pw.print(formatted);
-                    len += formatted.length();
+                }
+
+            } else {
+                boolean start = true;
+                int len = 0;
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        Color c = new Color(image.getRGB(x, y));
+                        String formatted = formatColor(c, conversionType, format);
+                        if (start) {
+                            pw.print("    ");
+                            start = false;
+                        } else {
+                            if (len >= 80) {
+                                pw.print(",\n    ");
+                                len = 0;
+                            } else {
+                                pw.print(",");
+                            }
+                        }
+                        pw.print(formatted);
+                        len += formatted.length();
+                    }
                 }
             }
+
+            pw.println();
 
             pw.println("};");
 
