@@ -5426,6 +5426,7 @@ public class Editor extends JFrame {
             String prefix = settings.getPrefix();
             Color color = settings.getTransparency();
             String dataType = settings.getDataType();
+            int threshold = settings.getThreshold();
             if (prefix.trim().equals("")) {
                 JOptionPane.showMessageDialog(this, "You haven't specified a valid variable prefix!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -5435,6 +5436,7 @@ public class Editor extends JFrame {
             loadedSketch.set("binary." + filename + ".transparency", color);
             loadedSketch.set("binary." + filename + ".conversion", selectedConversionOption);
             loadedSketch.set("binary." + filename + ".datatype", dataType);
+            loadedSketch.set("binary." + filename + ".threshold", threshold);
         }
     }
 

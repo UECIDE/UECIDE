@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* Added XBM target image conversion format for u8glib et al
 * Added automatic release generation
 * New changelog formatter using Markdown
 * Cleanup of function bookmark parsing
@@ -594,6 +595,7 @@ Changelog
 0.8.5
 -----
 
+* Added XBM target image conversion format for u8glib et al
 * Added automatic release generation
 * New changelog formatter using Markdown
 * Cleanup of function bookmark parsing

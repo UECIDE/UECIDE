@@ -1,6 +1,7 @@
 package org.uecide;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -16,32 +17,59 @@ public class ImageConversionSettings extends JPanel {
     JTextField prefix;
     JButton color;
 
+    JLabel prefixLabel;
+    JLabel dataTypeLabel;
+    JLabel transpLabel;
+
+    JSlider threshold;
+    JLabel thresholdLabel;
+    JLabel thresholdValue;
+    JPanel thresholdPanel;
+
     ImageConversionSettings(Editor ed, String file) {
         super();
         editor = ed;
         filename = file;
 
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
+
+        JPanel inner = new JPanel();
+        inner.setLayout(new GridBagLayout());
+
+        add(inner, BorderLayout.CENTER);
+
         GridBagConstraints c = new GridBagConstraints();
+
+        c.fill = GridBagConstraints.HORIZONTAL;
 
         c.gridx = 0;
         c.gridy = 0;
+        c.anchor = GridBagConstraints.PAGE_START;
 
-        add(new JLabel("Convert to:"), c);
+        c.weightx = 0.5;
+        inner.add(new JLabel("Convert to:"), c);
         c.gridy++;
 
-        add(new JLabel("Data type:"), c);
+        dataTypeLabel = new JLabel("Data type:");
+        inner.add(dataTypeLabel, c);
         c.gridy++;
 
-        add(new JLabel("Variable prefix:"), c);
+        prefixLabel = new JLabel("Variable prefix:");
+        inner.add(prefixLabel, c);
         c.gridy++;
 
-        add(new JLabel("Transparecy color:"), c);
+        transpLabel = new JLabel("Transparecy color:");
+        inner.add(transpLabel, c);
+        c.gridy++;
+
+        thresholdLabel = new JLabel("Threshold:");
+        inner.add(thresholdLabel, c);
+        c.gridy++;
 
         convertAs = new JComboBox<KeyValuePair>(ImageFileConverter.conversionOptions);
         c.gridx = 1;
         c.gridy = 0;
-        add(convertAs, c);
+        inner.add(convertAs, c);
         c.gridy++;
 
         int selectedConversion = editor.loadedSketch.getInteger("binary." + filename + ".conversion");
@@ -52,6 +80,16 @@ public class ImageConversionSettings extends JPanel {
                 convertAs.setSelectedIndex(i);
             }
         }
+
+        convertAs.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                KeyValuePair kv = (KeyValuePair)convertAs.getSelectedItem();
+                showTransparency(ImageFileConverter.wantsTransparencyColor((Integer)kv.getKey()));
+                showDataType(ImageFileConverter.wantsDataType((Integer)kv.getKey()));
+                showThreshold(ImageFileConverter.wantsThreshold((Integer)kv.getKey()));
+                showPrefix((Integer)kv.getKey() != 0);
+            }
+        });
 
         String[] dataTypes = {
             "uint8_t",
@@ -68,7 +106,7 @@ public class ImageConversionSettings extends JPanel {
             }
         }
 
-        add(dataType, c);
+        inner.add(dataType, c);
         c.gridy++;
 
         prefix = new JTextField(20);
@@ -78,7 +116,7 @@ public class ImageConversionSettings extends JPanel {
             existingPrefix = createPrefix(filename);
         }
         prefix.setText(existingPrefix);
-        add(prefix, c);
+        inner.add(prefix, c);
         c.gridy++;
 
         color = new JButton();
@@ -97,7 +135,7 @@ public class ImageConversionSettings extends JPanel {
         color.setBorderPainted(false);
         color.setFocusPainted(false);
 
-        add(color, c);
+        inner.add(color, c);
         c.gridy++;
 
         color.addActionListener(new ActionListener() {
@@ -109,7 +147,51 @@ public class ImageConversionSettings extends JPanel {
                 }
             }
         });
+
+        thresholdPanel = new JPanel();
+        thresholdPanel.setLayout(new BorderLayout());
+
+        threshold = new JSlider(0, 255);
+        int thresh = 127;
+        if (editor.loadedSketch.get("binary." + filename + ".threshold") != null) {
+            thresh = editor.loadedSketch.getInteger("binary." + filename + ".threshold");
+        }
+        threshold.setOrientation(JSlider.HORIZONTAL);
+        threshold.setValue(thresh);
+
+        thresholdPanel.add(threshold, BorderLayout.CENTER);
+
+        thresholdValue = new JLabel();
+        thresholdValue.setSize(new Dimension(50, 0));
+        thresholdValue.setPreferredSize(new Dimension(50, 0));
+        thresholdValue.setText("" + thresh);
+        thresholdValue.setHorizontalAlignment(JLabel.RIGHT);
+        thresholdPanel.add(thresholdValue, BorderLayout.EAST); 
+
+        inner.add(thresholdPanel, c);
+
+        threshold.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                thresholdValue.setText("" + threshold.getValue());
+            }
+        });
+
+
+        showTransparency(ImageFileConverter.wantsTransparencyColor(selectedConversion));
+        showDataType(ImageFileConverter.wantsDataType(selectedConversion));
+        showPrefix(selectedConversion != 0);
+        showThreshold(ImageFileConverter.wantsThreshold(selectedConversion));
+
+        setSize(new Dimension(300, 200));
     }
+
+    public Dimension getSize() {
+        return new Dimension(400, 150);
+    }
+
+    public Dimension getPreferredSize() { return getSize(); }
+    public Dimension getMaximumSize() { return getSize(); }
+    public Dimension getMinimumSize() { return getSize(); }
 
     public int getConversionType() {
         KeyValuePair pair = (KeyValuePair)(convertAs.getSelectedItem());
@@ -139,4 +221,30 @@ public class ImageConversionSettings extends JPanel {
     public String getDataType() {
         return (String)dataType.getSelectedItem();
     }
+
+    public int getThreshold() {
+        return threshold.getValue();
+    }
+
+    void showTransparency(boolean s) {
+        transpLabel.setVisible(s);
+        color.setVisible(s);
+    }
+
+    void showDataType(boolean s) {
+        dataTypeLabel.setVisible(s);
+        dataType.setVisible(s);
+    }
+
+    void showPrefix(boolean s) {
+        prefixLabel.setVisible(s);
+        prefix.setVisible(s);
+    }
+
+    void showThreshold(boolean s) {
+        thresholdLabel.setVisible(s);
+        thresholdPanel.setVisible(s);
+    }
+
+        
 }

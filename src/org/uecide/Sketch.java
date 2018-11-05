@@ -4058,7 +4058,7 @@ public class Sketch {
                 switch (type) {
                     case FileType.GRAPHIC:
                         if (getInteger("binary." + file.getName() + ".conversion") > 1) {
-                            conv = new ImageFileConverter(file, getInteger("binary." + file.getName() + ".conversion"), get("binary." + file.getName() + ".datatype"), get("binary." + file.getName() + ".prefix"), getColor("binary." + file.getName() + ".transparency"));
+                            conv = new ImageFileConverter(file, getInteger("binary." + file.getName() + ".conversion"), get("binary." + file.getName() + ".datatype"), get("binary." + file.getName() + ".prefix"), getColor("binary." + file.getName() + ".transparency"), getInteger("binary." + file.getName() + ".threshold"));
                         } else {
                             conv = new BasicFileConverter(file, get("binary." + file.getName() + ".prefix"));
                         }

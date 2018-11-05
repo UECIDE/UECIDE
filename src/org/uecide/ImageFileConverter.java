@@ -14,6 +14,7 @@ public class ImageFileConverter implements FileConverter {
     Color transparency = null;
     int conversionType = 0;
     String dataType;
+    int threshold;
 
     File outputFile = null;
     ArrayList<String> headerLines = null;
@@ -58,10 +59,11 @@ public class ImageFileConverter implements FileConverter {
         new KeyValuePair(XBM, "XBM (1 bit, u8glib)")
     };
 
-    public ImageFileConverter(File in, int type, String dt, String pref, Color trans) {
+    public ImageFileConverter(File in, int type, String dt, String pref, Color trans, int thresh) {
         inputFile = in;
         conversionType = type;
         dataType = dt;
+        threshold = thresh;
         if (dataType == null) {
             dataType = "uint8_t";
         }
@@ -141,7 +143,7 @@ public class ImageFileConverter implements FileConverter {
                             int tot = (c.getRed() + c.getGreen() + c.getBlue()) / 3;
 
                             out <<= 1;
-                            if (tot > 127) {
+                            if (tot > threshold) {
                                 out |= 1;
                             }
                         }
@@ -338,4 +340,38 @@ public class ImageFileConverter implements FileConverter {
         return headerLines.toArray(new String[0]);
     }
 
+    public static boolean wantsDataType(int type) {
+        switch (type) {
+            case NONE:
+            case RAW:
+            case XBM:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    public static boolean wantsTransparencyColor(int type) {
+        switch (type) {
+            case NONE:
+            case RAW:
+            case XBM:
+            case ARGB8888:
+            case RGBA8888:
+            case ABGR8888:
+            case BGRA8888:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    public static boolean wantsThreshold(int type) {
+        switch (type) {
+            case XBM:
+                return true;
+            default:
+                return false;
+        }
+    }
 }
