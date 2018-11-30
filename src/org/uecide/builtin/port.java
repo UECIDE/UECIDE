@@ -99,6 +99,7 @@ public class port implements BuiltinCommand {
                         }
                     }
                 }
+                return true;
             } else if (action.equals("clear")) {
                 if (arg[1].equals("dtr")) {
                     if (comPort != null) {
@@ -115,6 +116,7 @@ public class port implements BuiltinCommand {
                         }
                     }
                 }
+                return true;
             } else if (action.equals("find")) {
                 // Find a new USB COM port that has the specified
                 // VID/PID pair. The port should not exist when the
