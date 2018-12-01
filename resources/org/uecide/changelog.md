@@ -4,6 +4,10 @@ Changelog
 0.10.0
 ------
 
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Added missing true return on port set/clear
+* Update issue templates
+* Cleaned up image conversion settings dialog and added threshold setting
 * Added XBM target image conversion format for u8glib et al
 * Added automatic release generation
 * New changelog formatter using Markdown
@@ -595,6 +599,10 @@ Changelog
 0.8.5
 -----
 
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Added missing true return on port set/clear
+* Update issue templates
+* Cleaned up image conversion settings dialog and added threshold setting
 * Added XBM target image conversion format for u8glib et al
 * Added automatic release generation
 * New changelog formatter using Markdown

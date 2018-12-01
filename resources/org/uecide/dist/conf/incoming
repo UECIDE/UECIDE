@@ -1,6 +1,6 @@
 Name: default
 IncomingDir: incoming
 TempDir: tmp
-Cleanup: on_deny on_error
+Cleanup: on_deny on_error unused_files
 Allow: uecide
-
+Permit: unused_files
