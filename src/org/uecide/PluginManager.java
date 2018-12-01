@@ -651,7 +651,20 @@ public class PluginManager implements PropertyChangeListener
         localUninstallButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String pkg = e.getActionCommand();
-                Package pe = apt.getPackage(pkg);
+                Package pe = null; //apt.getPackage(pkg);
+
+                for (Package p : apt.getInstalledPackages()) {
+                    if (p.getName().equals(pkg)) {
+                        pe = p;
+                        break;
+                    }
+                }
+
+                if (pe == null) {
+                    System.err.println("Error: no package found to uninstall");
+                    return;
+                }
+
                 if (pe != null) {
                     if (pe.get("Priority").equals("required")) {
                         Base.showMessage("Uninstall Error", pe.getName() + " is a required component.\nIt cannot be uninstalled.");
