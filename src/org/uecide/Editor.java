@@ -541,6 +541,7 @@ public class Editor extends JFrame {
 
         setSize(width, height);
         setLocation(Preferences.getInteger("editor.layout.window.x"), Preferences.getInteger("editor.layout.window.y"));
+        setLocationRelativeTo(null);
         setProgress(0);
         updateAll();
 
@@ -574,6 +575,8 @@ public class Editor extends JFrame {
         }
 */
         s.attachToEditor(this);
+
+        this.setMaximumSize(new Dimension(9999,9999));
         this.setVisible(true);
 
     }

@@ -56,27 +56,12 @@ public class Source {
     }
 
     String getCompressedFileHTTP(String url) {
-        StringBuilder inData = new StringBuilder();
         try {
-            byte[] buffer = new byte[1024];
-            URI uri = new URI(url);
-            HttpURLConnection conn = (HttpURLConnection)(uri.toURL().openConnection());
-            int contentLength = conn.getContentLength();
-            InputStream rawIn = (InputStream)conn.getInputStream();
-            GZIPInputStream in = new GZIPInputStream(rawIn);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            int n;
-            while ((n = in.read(buffer)) > 0) {
-                out.write(buffer, 0, n);
-            }
-            in.close();
-            inData.append(out.toString("UTF-8"));
-        } catch (FileNotFoundException e) {
+            HttpRequest req = new HttpRequest(url);
+            return req.getCompressedText();
         } catch (Exception e) {
-            Base.error(e);
-            System.err.println("Error downloading " + url + ": " + e.getMessage());
+            return "";
         }
-        return inData.toString();
     }
 
     String getCompressedFileRes(String url) {

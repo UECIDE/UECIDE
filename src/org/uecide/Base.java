@@ -2300,11 +2300,16 @@ public class Base {
 
     public Version getLatestVersion() {
         try {
+            HttpRequest req = new HttpRequest("https://uecide.org/version.txt");
+            String ver = req.getText();
+            return new Version(ver);
+/*
             URL url = new URL("https://uecide.org/version.txt");
             BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
             String data = in.readLine();
             in.close();
             return new Version(data);
+*/
         } catch(Exception e) {
             // Unable to get new version details - return nothing.
             // Also switch to offline mode since there was an error.

@@ -4,6 +4,9 @@ Changelog
 0.10.0
 ------
 
+* Ignored file not found error on HTTP get
+* Updated repos master package
+* Fixed uninstall of local install files
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Added missing true return on port set/clear
 * Update issue templates
@@ -599,6 +602,9 @@ Changelog
 0.8.5
 -----
 
+* Ignored file not found error on HTTP get
+* Updated repos master package
+* Fixed uninstall of local install files
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Added missing true return on port set/clear
 * Update issue templates
