@@ -3740,14 +3740,14 @@ public class Editor extends JFrame {
 
         if (filterFlags == Plugin.TOOLBAR_EDITOR) {
             for (JSPlugin p : Base.jsplugins.values()) {
+                
                 ArrayList<JSAction> icons = p.getMainToolbarIcons();
-                if (icons != null) {
-                    for (JSAction action : icons) {
-                        String[] icodat = action.icon.split("/");
-                        JButton b = new ToolbarButton(icodat[0], icodat[1], action.tooltip);
-                        JSActionListener l = new JSActionListener(this, action);
-                        b.addActionListener(l);
-                    }
+                for (JSAction action : icons) {
+                    String[] icodat = action.icon.split("/");
+                    JButton b = new ToolbarButton(icodat[0], icodat[1], action.tooltip);
+                    JSActionListener l = new JSActionListener(this, action);
+                    b.addActionListener(l);
+                    tb.add(b);
                 }
             }
         } else {

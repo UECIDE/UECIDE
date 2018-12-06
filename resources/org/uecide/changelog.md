@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* Abstracted HTTP requests to set proper user agent
 * Ignored file not found error on HTTP get
 * Updated repos master package
 * Fixed uninstall of local install files
@@ -602,6 +603,7 @@ Changelog
 0.8.5
 -----
 
+* Abstracted HTTP requests to set proper user agent
 * Ignored file not found error on HTTP get
 * Updated repos master package
 * Fixed uninstall of local install files
