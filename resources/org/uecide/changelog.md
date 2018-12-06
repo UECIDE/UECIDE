@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* Optimized windows startup time
 * Release candidate 3
 * Moved initial serial port probing into separate thread
 * Added missing Javascript plugin icons
@@ -606,6 +607,7 @@ Changelog
 0.8.5
 -----
 
+* Optimized windows startup time
 * Release candidate 3
 * Moved initial serial port probing into separate thread
 * Added missing Javascript plugin icons

@@ -786,6 +786,32 @@ theme.editor.highlight.bracketborder.name=Bracket border color
 theme.editor.highlight.bracketborder.type=colorselect
 theme.editor.highlight.bracketborder.default=#6600cc
 
+theme.editor.margins.name=Margins
+theme.editor.margins.type=section
+
+theme.editor.margins.top.name=Top
+theme.editor.margins.top.type=range
+theme.editor.margins.top.min=0
+theme.editor.margins.top.max=1000
+theme.editor.margins.top.default=0
+
+theme.editor.margins.bottom.name=Bottom
+theme.editor.margins.bottom.type=range
+theme.editor.margins.bottom.min=0
+theme.editor.margins.bottom.max=1000
+theme.editor.margins.bottom.default=0
+
+theme.editor.margins.left.name=Left
+theme.editor.margins.left.type=range
+theme.editor.margins.left.min=0
+theme.editor.margins.left.max=1000
+theme.editor.margins.left.default=0
+
+theme.editor.margins.right.name=Right
+theme.editor.margins.right.type=range
+theme.editor.margins.right.min=0
+theme.editor.margins.right.max=1000
+theme.editor.margins.right.default=0
 
 
 

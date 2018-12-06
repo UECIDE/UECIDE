@@ -646,6 +646,13 @@ public class code extends JPanel implements EditorBase {
             textArea.setTabSize(4);
         }
 
+        textArea.setBorder(new EmptyBorder(
+            Preferences.getInteger("theme.editor.margins.top"),
+            Preferences.getInteger("theme.editor.margins.left"),
+            Preferences.getInteger("theme.editor.margins.bottom"),
+            Preferences.getInteger("theme.editor.margins.right")
+        ));
+
         textArea.setTabsEmulated(Preferences.getBoolean("editor.tabs.expand"));
         textArea.setPaintTabLines(Preferences.getBoolean("editor.tabs.show"));
 
