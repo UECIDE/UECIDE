@@ -1496,7 +1496,7 @@ public class Editor extends JFrame {
                         JMenuItem openInOS = new JMenuItem("Open in OS");
                         openInOS.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
-                                Base.openURL(loadedSketch.getFolder().getAbsolutePath());
+                                Utils.browse(loadedSketch.getFolder().getAbsolutePath());
                             }
                         });
                         menu.add(openInOS);
@@ -1884,7 +1884,7 @@ public class Editor extends JFrame {
                         openInOS.setActionCommand(thisFile.getAbsolutePath());
                         openInOS.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
-                                Base.openURL(e.getActionCommand());
+                                Utils.browse(e.getActionCommand());
                             }
                         });
                         menu.add(openInOS);
@@ -3228,7 +3228,7 @@ public class Editor extends JFrame {
 //            helpMenu.add(new ActiveMenuItem(links.get(link + ".name"), 0, 0, (new ActionListener() {
 //                public void actionPerformed(ActionEvent e) {
 //                    String link = e.getActionCommand();
-//                    Base.openURL(link);
+//                    Utils.browse(link);
 //                }
 //            }), links.get(link + ".url")));
 //        }
@@ -3239,7 +3239,7 @@ public class Editor extends JFrame {
 //            helpMenu.add(new ActiveMenuItem(links.get(link + ".name"), 0, 0, (new ActionListener() {
 //                public void actionPerformed(ActionEvent e) {
 //                    String link = e.getActionCommand();
-//                    Base.openURL(link);
+//                    Utils.browse(link);
 //                }
 //            }), links.get(link + ".url")));
 //        }
@@ -3269,7 +3269,7 @@ public class Editor extends JFrame {
 
         debugSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.help.debug.opendata"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.openURL(Base.getDataFolder().getAbsolutePath());
+                Utils.browse(Base.getDataFolder().getAbsolutePath());
             }
         }));
 

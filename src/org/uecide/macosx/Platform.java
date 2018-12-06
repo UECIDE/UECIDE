@@ -77,55 +77,6 @@ public class Platform extends org.uecide.Platform {
     }
 
 
-    @SuppressWarnings("deprecation")
-    public void openURL(String url) {
-        try {
-            Float javaVersion = new Float(System.getProperty("java.version").substring(0, 3)).floatValue();
-
-            if(javaVersion < 1.6f) {
-                if(url.startsWith("http://")) {
-                    // formerly com.apple.eio.FileManager.openURL(url);
-                    // but due to deprecation, instead loading dynamically
-                    try {
-                        Class<?> eieio = Class.forName("com.apple.eio.FileManager");
-                        Method openMethod =
-                            eieio.getMethod("openURL", new Class[] { String.class });
-                        openMethod.invoke(null, new Object[] { url });
-                    } catch(Exception e) {
-                        Base.error(e);
-                    }
-                } else {
-                    // Assume this is a file instead, and just open it.
-                    // Extension of http://dev.processing.org/bugs/show_bug.cgi?id=1010
-                    Base.open(url);
-                }
-            } else {
-                try {
-                    Class<?> desktopClass = Class.forName("java.awt.Desktop");
-                    Method getMethod = desktopClass.getMethod("getDesktop");
-                    Object desktop = getMethod.invoke(null, new Object[] { });
-
-                    // for Java 1.6, replacing with java.awt.Desktop.browse()
-                    // and java.awt.Desktop.open()
-                    if(url.startsWith("http://")) {   // browse to a location
-                        Method browseMethod =
-                            desktopClass.getMethod("browse", new Class[] { URI.class });
-                        browseMethod.invoke(desktop, new Object[] { new URI(url) });
-                    } else {  // open a file
-                        Method openMethod =
-                            desktopClass.getMethod("open", new Class[] { File.class });
-                        openMethod.invoke(desktop, new Object[] { new File(url) });
-                    }
-                } catch(Exception e) {
-                    Base.error(e);
-                }
-            }
-        } catch(Exception ex) {
-            Base.error(ex);
-        }
-    }
-
-
     public boolean openFolderAvailable() {
         return true;
     }

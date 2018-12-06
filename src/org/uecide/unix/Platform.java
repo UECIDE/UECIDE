@@ -29,12 +29,13 @@
  */
 
 package org.uecide.unix;
-import org.uecide.Base;
+import org.uecide.*;
 
 import java.io.File;
 
 import javax.swing.UIManager;
 import java.awt.*;
+import java.util.regex.*;
 
 
 /**
@@ -56,18 +57,41 @@ public class Platform extends org.uecide.Platform {
         }
     }
 
+    public void init() {
+        probeInfo();
+    }
 
-    public void openURL(String url) {
-        try {
-            if(openFolderAvailable()) {
-                String launcher = Base.session.get("launcher");
+    public void probeInfo() {
+        File f = new File("/etc/os-release");
+        if (f.exists()) {
+            PropertyFile p = new PropertyFile(f);
+            String flav = p.get("ID");
+            if (flav == null) {
+                return;
+            }
+            platformInfo.set("flavour", flav);
 
-                if(launcher != null) {
-                    Runtime.getRuntime().exec(new String[] { launcher, url });
+            if (flav.equals("debian")) {
+                String v = p.get("VERSION");
+                if (v == null) {
+                    v = "unknown";
+                }
+                Pattern pat = Pattern.compile("\\d+\\s+\\((.*)\\)");
+                Matcher m = pat.matcher(v);
+                if (m.find()) {
+                    platformInfo.set("version", m.group(1).toLowerCase());
+                }
+            } else if (flav.equals("ubuntu")) {
+                String v = p.get("VERSION");
+                if (v == null) {
+                    v = "unknown";
+                }
+                Pattern pat = Pattern.compile(",\\s+([^\\s]+)\\s+.+");
+                Matcher m = pat.matcher(v);
+                if (m.find()) {
+                    platformInfo.set("version", m.group(1).toLowerCase());
                 }
             }
-        } catch(Exception e) {
-            Base.error(e);
         }
     }
 

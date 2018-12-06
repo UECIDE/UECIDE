@@ -82,6 +82,8 @@ public class Platform {
 
     public void init(Base base) {
         this.base = base;
+        Debug.message("-> Platform Init Start");
+        Debug.message("-> Probe Info (Super)");
         probeInfo();
     }
 
@@ -175,22 +177,6 @@ public class Platform {
         }
     }
 
-
-    public void openURL(String url) {
-        try {
-            String launcher = Base.session.get("launcher");
-
-            if(launcher != null) {
-                Runtime.getRuntime().exec(new String[] { launcher, url });
-            } else {
-                showLauncherWarning();
-            }
-        } catch(Exception e) {
-            Base.error(e);
-        }
-    }
-
-
     public boolean openFolderAvailable() {
         return Base.session.get("launcher") != null;
     }
@@ -256,37 +242,6 @@ public class Platform {
     public PropertyFile platformInfo = new PropertyFile();
 
     public void probeInfo() {
-        File f = new File("/etc/os-release");
-        if (f.exists()) {
-            PropertyFile p = new PropertyFile(f);
-            String flav = p.get("ID");
-            if (flav == null) {
-                return;
-            }
-            platformInfo.set("flavour", flav);
-
-            if (flav.equals("debian")) {
-                String v = p.get("VERSION");
-                if (v == null) {
-                    v = "unknown";
-                }
-                Pattern pat = Pattern.compile("\\d+\\s+\\((.*)\\)");
-                Matcher m = pat.matcher(v);
-                if (m.find()) {
-                    platformInfo.set("version", m.group(1).toLowerCase());
-                }
-            } else if (flav.equals("ubuntu")) {
-                String v = p.get("VERSION");
-                if (v == null) {
-                    v = "unknown";
-                }
-                Pattern pat = Pattern.compile(",\\s+([^\\s]+)\\s+.+");
-                Matcher m = pat.matcher(v);
-                if (m.find()) {
-                    platformInfo.set("version", m.group(1).toLowerCase());
-                }
-            }
-        }
     }
 
     public String getVersion() {

@@ -107,7 +107,7 @@ public class About {
                         frame.dispose();
                         return;
                     }
-                    Base.openURL(e.getURL().toString());
+                    Utils.browse(e.getURL().toString());
                 }
             }
         });

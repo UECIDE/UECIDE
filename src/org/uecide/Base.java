@@ -635,13 +635,16 @@ public class Base {
         untitledFolder = createTempFolder("untitled");
         untitledFolder.deleteOnExit();
 
+        Debug.message("Application section start");
         if(!headless) splashScreen.setMessage(i18n.string("splash.msg.application"), 20);
 
+        Debug.message("Platform init");
         platform.init(this);
 
         // Get paths for the libraries and examples in the Processing folder
         //String workingDirectory = System.getProperty("user.dir");
 
+        Debug.message("Get system folders");
         examplesFolder = getContentFile("examples");
         toolsFolder = getContentFile("tools");
 
@@ -661,6 +664,8 @@ public class Base {
             if (!sketchbookFolder.mkdirs()) { error("Unable to make sketchbook folder " + sketchbookFolder.getAbsolutePath()); }
         }
 
+        Debug.message("Create trees");
+
         compilers = new TreeMap<String, Compiler>();
         cores = new TreeMap<String, Core>();
         tools = new TreeMap<String, Tool>();
@@ -670,6 +675,7 @@ public class Base {
         lookAndFeels = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
 
+        Debug.message("Scan ports");
         Thread t = new Thread() {
             public void run() {
                 Serial.updatePortList();
@@ -677,6 +683,8 @@ public class Base {
             }
         };
         t.start();
+
+        Debug.message("Application section done");
 
         if(!headless) splashScreen.setMessage(i18n.string("splash.msg.assets"), 40);
 
@@ -870,7 +878,7 @@ public class Base {
                     );
 
                     if(n == 0) {
-                        openURL("https://uecide.org/download");
+                        Utils.browse("https://uecide.org/download");
                     }
                 }
             }
@@ -1510,27 +1518,6 @@ public class Base {
     }
 
     /**
-    * Implements the cross-platform headache of opening URLs
-    * TODO This code should be replaced by PApplet.link(),
-    * however that's not a static method (because it requires
-    * an AppletContext when used as an applet), so it's mildly
-    * trickier than just removing this method.
-    */
-    public static void openURL(String url) {
-        try {
-            platform.openURL(url);
-
-        } catch(Exception e) {
-            showWarning(
-                i18n.string("err.badurl.title"),
-                i18n.string("err.badurl.body", url),
-                e
-            );
-        }
-    }
-
-
-    /**
     * Used to determine whether to disable the "Show Sketch Folder" option.
     * @return true If a means of opening a folder is known to be available.
     */
@@ -1642,15 +1629,6 @@ public class Base {
                                     JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
 
-
-    // .................................................................
-
-
-    public static void showReference(String filename) {
-        File referenceFolder = Base.getContentFile("reference");
-        File referenceFile = new File(referenceFolder, filename);
-        openURL(referenceFile.getAbsolutePath());
-    }
 
     // .................................................................
 

@@ -695,7 +695,7 @@ public class PluginManager implements PropertyChangeListener
 
         localHomepageButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.openURL(e.getActionCommand());
+                Utils.browse(e.getActionCommand());
             }
         });
 

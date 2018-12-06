@@ -4,6 +4,8 @@ Changelog
 0.10.0
 ------
 
+* Release candidate 3
+* Moved initial serial port probing into separate thread
 * Added missing Javascript plugin icons
 * Abstracted HTTP requests to set proper user agent
 * Ignored file not found error on HTTP get
@@ -604,6 +606,8 @@ Changelog
 0.8.5
 -----
 
+* Release candidate 3
+* Moved initial serial port probing into separate thread
 * Added missing Javascript plugin icons
 * Abstracted HTTP requests to set proper user agent
 * Ignored file not found error on HTTP get

@@ -41,6 +41,7 @@ import javax.swing.*;
 import java.util.regex.*;
 
 import org.uecide.Base;
+import org.uecide.Debug;
 import org.uecide.Preferences;
 import org.uecide.PropertyFile;
 import org.uecide.windows.Registry.REGISTRY_ROOT_KEY;
@@ -56,111 +57,9 @@ import javax.swing.UIManager;
 
 public class Platform extends org.uecide.Platform {
 
-    static final String openCommand =
-        System.getProperty("user.dir").replace('/', '\\') +
-        "\\processing.exe \"%1\"";
-    static final String DOC = "Processing.Document";
     static final String shellFolders = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders";
 
     public void setLookAndFeel() {
-    }
-
-    public void init(Base base) {
-        super.init(base);
-
-        checkAssociations();
-        checkQuickTime();
-        checkPath();
-        probeInfo();
-    }
-
-
-    /**
-     * Make sure that .pde files are associated with processing.exe.
-     */
-    protected void checkAssociations() {
-        try {
-            String knownCommand =
-                Registry.getStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                        DOC + "\\shell\\open\\command", "");
-
-            if(knownCommand == null) {
-                if(Preferences.getBoolean("platform.auto_file_type_associations")) {
-                    setAssociations();
-                }
-
-            } else if(!knownCommand.equals(openCommand)) {
-                // If the value is set differently, just change the registry setting.
-                if(Preferences.getBoolean("platform.auto_file_type_associations")) {
-                    setAssociations();
-                }
-            }
-        } catch(Exception e) {
-            Base.error(e);
-        }
-    }
-
-
-    /**
-     * Associate .pde files with this version of Processing.
-     */
-    protected void setAssociations() {
-        try {
-            if(Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                  "", ".pde") &&
-                    Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                            ".pde", "", DOC) &&
-
-                    Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT, "", DOC) &&
-                    Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT, DOC, "",
-                                            "Processing Source Code") &&
-
-                    Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                       DOC, "shell") &&
-                    Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                       DOC + "\\shell", "open") &&
-                    Registry.createKey(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                       DOC + "\\shell\\open", "command") &&
-                    Registry.setStringValue(REGISTRY_ROOT_KEY.CLASSES_ROOT,
-                                            DOC + "\\shell\\open\\command", "",
-                                            openCommand)) {
-                // everything ok
-                // hooray!
-
-            } else {
-                Preferences.setBoolean("platform.auto_file_type_associations", false);
-            }
-        } catch(Exception e) {
-            Base.error(e);
-        }
-    }
-
-
-    /**
-     * Find QuickTime for Java installation.
-     */
-    protected void checkQuickTime() {
-        try {
-            String qtsystemPath =
-                Registry.getStringValue(REGISTRY_ROOT_KEY.LOCAL_MACHINE,
-                                        "Software\\Apple Computer, Inc.\\QuickTime",
-                                        "QTSysDir");
-
-            // Could show a warning message here if QT not installed, but that
-            // would annoy people who don't want anything to do with QuickTime.
-            if(qtsystemPath != null) {
-                File qtjavaZip = new File(qtsystemPath, "QTJava.zip");
-
-                if(qtjavaZip.exists()) {
-                    String qtjavaZipPath = qtjavaZip.getAbsolutePath();
-                    String cp = System.getProperty("java.class.path");
-                    System.setProperty("java.class.path",
-                                       cp + File.pathSeparator + qtjavaZipPath);
-                }
-            }
-        } catch(Exception e) {
-            Base.error(e);
-        }
     }
 
     public void setSettingsFolderEnvironmentVariable() {
@@ -169,59 +68,6 @@ public class Platform extends org.uecide.Platform {
 
         if(variablePath == null || !(variablePath.equals(settingsFolder.getAbsolutePath()))) {
             Registry.setStringExpandValue(REGISTRY_ROOT_KEY.CURRENT_USER, "Environment", "UECIDE", settingsFolder.getAbsolutePath());
-        }
-    }
-
-
-    /**
-     * Remove extra quotes, slashes, and garbage from the Windows PATH.
-     */
-    protected void checkPath() {
-        ArrayList<String> legit = new ArrayList<String>();
-        String path = System.getProperty("java.library.path");
-        String[] pieces = path.split(File.pathSeparator);
-
-        for(String item : pieces) {
-            if(item.startsWith("\"")) {
-                item = item.substring(1);
-            }
-
-            if(item.endsWith("\"")) {
-                item = item.substring(0, item.length() - 1);
-            }
-
-            if(item.endsWith(File.separator)) {
-                item = item.substring(0, item.length() - File.separator.length());
-            }
-
-            File directory = new File(item);
-
-            if(!directory.exists()) {
-                continue;
-            }
-
-            if(item.trim().length() == 0) {
-                continue;
-            }
-
-            legit.add(item);
-        }
-
-        StringBuilder newPath = new StringBuilder();
-
-        for(String s : legit) {
-            newPath.append(s);
-            newPath.append(File.separator);
-        }
-
-        String calcPath = newPath.toString();
-
-        if(calcPath.endsWith(File.separator)) {
-            calcPath = calcPath.substring(0, calcPath.length() - 1 - File.separator.length());
-        }
-
-        if(!calcPath.equals(path)) {
-            System.setProperty("java.library.path", calcPath);
         }
     }
 
@@ -260,19 +106,6 @@ public class Platform extends org.uecide.Platform {
         } catch(Exception e) {
             Base.error(e);
             return null;
-        }
-    }
-
-
-    public void openURL(String url) {
-        try {
-            if(url.startsWith("http://") || url.startsWith("https://") || url.startsWith("ftp://")) {
-                Runtime.getRuntime().exec("cmd /c start " + url);
-            } else {
-                Runtime.getRuntime().exec("explorer \"" + url + "\""); //if not a URL, open with explorer.exe - I have test built this and it cures the problem in Windows.
-            }
-        } catch(Exception e) {
-            Base.error(e);
         }
     }
 
@@ -324,41 +157,6 @@ public class Platform extends org.uecide.Platform {
         //clib._putenv(variable + "=");
         //return 0;
         return clib._putenv(variable + "=");
-    }
-
-    public void probeInfo() {
-        Runtime rt; 
-        Process pr; 
-        BufferedReader in;
-        String line = "";
-        String sysInfo = "";
-        String edition = "";
-        String version = "";
-        final String   SEARCH_TERM = "OS Name:";
-
-        try {
-            rt = Runtime.getRuntime();
-            pr = rt.exec("SYSTEMINFO");
-            in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-
-            Pattern pat = Pattern.compile("Microsoft Windows ([^\\s]+) ([^\\s]+)");
-
-            //add all the lines into a variable
-            while((line=in.readLine()) != null) {
-                Matcher mat = pat.matcher(line);
-                if (mat.find()) {
-                    version = mat.group(1).toLowerCase().trim();
-                    edition = mat.group(2).toLowerCase().trim();
-                } 
-            }
-
-            in.close();
-            platformInfo.set("version", version);
-            platformInfo.set("flavour", edition);
-
-        } catch (IOException ioe) {   
-            System.err.println(ioe.getMessage());
-        }
     }
 
     public String getVersion() {

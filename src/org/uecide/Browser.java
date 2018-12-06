@@ -210,15 +210,15 @@ public class Browser extends JTextPane implements HyperlinkListener {
                 return;
             }
             if (e.getDescription().startsWith("http://")) {
-                Base.openURL(e.getDescription());
+                Utils.browse(e.getDescription());
                 return;
             }
             if (e.getDescription().startsWith("https://")) {
-                Base.openURL(e.getDescription());
+                Utils.browse(e.getDescription());
                 return;
             }
             if (e.getDescription().startsWith("ftp://")) {
-                Base.openURL(e.getDescription());
+                Utils.browse(e.getDescription());
                 return;
             }
             navigate(e.getDescription());
