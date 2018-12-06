@@ -670,8 +670,13 @@ public class Base {
         lookAndFeels = new TreeMap<String, Class<?>>();
         pluginInstances = new ArrayList<Plugin>();
 
-        Serial.updatePortList();
-        Serial.fillExtraPorts();
+        Thread t = new Thread() {
+            public void run() {
+                Serial.updatePortList();
+                Serial.fillExtraPorts();
+            }
+        };
+        t.start();
 
         if(!headless) splashScreen.setMessage(i18n.string("splash.msg.assets"), 40);
 

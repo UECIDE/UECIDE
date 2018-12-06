@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* Added missing Javascript plugin icons
 * Abstracted HTTP requests to set proper user agent
 * Ignored file not found error on HTTP get
 * Updated repos master package
@@ -603,6 +604,7 @@ Changelog
 0.8.5
 -----
 
+* Added missing Javascript plugin icons
 * Abstracted HTTP requests to set proper user agent
 * Ignored file not found error on HTTP get
 * Updated repos master package
