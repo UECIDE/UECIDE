@@ -1,0 +1,11 @@
+forums.name=UECIDE Forums
+forums.url=https://uecide.org/forum
+
+home.name=UECIDE Website
+home.url=https://uecide.org
+
+wiki.name=UECIDE WiKi
+wiki.url=https://uecide.org/wiki/wiki-index
+
+ref.name=Arduino Language Reference
+ref.url=https://www.arduino.cc/reference/en/

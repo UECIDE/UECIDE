@@ -52,6 +52,7 @@ public class Utils {
             try {
                 Desktop.getDesktop().browse(new URI(url));
             } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
     }

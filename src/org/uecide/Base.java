@@ -140,6 +140,8 @@ public class Base {
 
     public static PropertyFile preferencesTree = new PropertyFile();
 
+    public static PropertyFile webLinks;
+
 //    public static HashMap<Object, DiscoveredBoard> discoveredBoards = new HashMap<Object, DiscoveredBoard>();
 
     public static boolean onlineMode = true;
@@ -665,6 +667,8 @@ public class Base {
         }
 
         Debug.message("Create trees");
+
+        webLinks = new PropertyFile("/org/uecide/config/links.txt");
 
         compilers = new TreeMap<String, Compiler>();
         cores = new TreeMap<String, Core>();

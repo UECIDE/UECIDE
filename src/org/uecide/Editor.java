@@ -3222,6 +3222,22 @@ public class Editor extends JFrame {
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
 
+System.err.println(Base.webLinks);
+
+        for (String link : Base.webLinks.childKeys()) {
+            String name = Base.webLinks.get(link + ".name");
+            String url = Base.webLinks.get(link + ".url");
+            if ((name != null) && (url != null)) {
+                helpMenu.add(new ActiveMenuItem(name, 0, 0, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        String link = e.getActionCommand();
+                        System.err.println(link);
+                        Utils.browse(link);
+                    }
+                }, url));
+            }
+        }
+
 //        PropertyFile links = Base.theme.getChildren("links");
 //
 //        for(String link : links.childKeys()) {

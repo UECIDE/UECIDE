@@ -4,6 +4,8 @@ Changelog
 0.10.0
 ------
 
+* Switched data folder open to open not browse
+* Added editor margin theme settings
 * Optimized windows startup time
 * Release candidate 3
 * Moved initial serial port probing into separate thread
@@ -607,6 +609,8 @@ Changelog
 0.8.5
 -----
 
+* Switched data folder open to open not browse
+* Added editor margin theme settings
 * Optimized windows startup time
 * Release candidate 3
 * Moved initial serial port probing into separate thread
