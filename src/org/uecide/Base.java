@@ -2134,7 +2134,7 @@ public class Base {
                     rescanBoards();
                     rescanProgrammers();
                     rescanTools();
-//                    rescanPlugins();
+                    rescanPlugins();
                     rescanLibraries();
 
                     waitForAssetLoading();
@@ -2165,7 +2165,7 @@ public class Base {
 //        plugins = new TreeMap<String, Class<?>>();
 //        lookAndFeels = new TreeMap<String, Class<?>>();
 //        pluginInstances = new ArrayList<Plugin>();
-//        loadPlugins();
+        loadPlugins();
     }
 
     public static void rescanCompilers() {

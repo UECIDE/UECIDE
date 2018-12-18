@@ -114,6 +114,23 @@
     </target>
 
 
+    <target name="linux-tar" depends="build">
+        <mkdir dir="bundle/linux/uecide-${Version}" />
+        <copy file="uecide.jar" todir="bundle/linux/uecide-${Version}" />
+        <copy file="dist/linux/uecide" tofile="bundle/linux/uecide-${Version}/uecide" />
+        <chmod perm="0755" file="bundle/linux/uecide-${Version}/uecide" />
+
+        <exec executable="tar">
+            <arg value="-C" />
+            <arg value="bundle/linux" />
+            <arg value="-zcvf" />
+            <arg value="uecide-${Version}-linux.tgz" />
+            <arg value="uecide-${Version}" />
+        </exec>
+
+        <!--delete dir="bundle/linux" /-->
+    </target>
+
     <target name="linux-zip" depends="build">
         <mkdir dir="bundle/linux/uecide-${Version}" />
         <copy file="uecide.jar" todir="bundle/linux/uecide-${Version}" />
@@ -260,7 +277,7 @@
         <delete dir="windows" />
     </target>
 
-    <target name="dist" depends="linux-zip, windows-zip-lite, windows-exe-lite, windows-zip-full, windows-exe-full, bundle, macosx-dmg" />
+    <target name="dist" depends="linux-tar, windows-zip-lite, windows-exe-lite, windows-zip-full, windows-exe-full, bundle, macosx-dmg" />
 
     <target name="dist-release" depends="dist" if="isRelease">
         <move todir="/var/www/uecide/downloads">
@@ -438,14 +455,14 @@
             <arg value="-n"/> <arg value="uecide-${Version}-lite.exe"/>
         </exec>
 
-        <echo>Uploading uecide-${Version}-linux.zip</echo>
+        <echo>Uploading uecide-${Version}-linux.tgz</echo>
         <exec executable="github-release">
             <arg value="upload"/>
             <arg value="-u"/> <arg value="UECIDE"/>
             <arg value="-r"/> <arg value="UECIDE"/>
             <arg value="-t"/> <arg value="${Version}"/>
-            <arg value="-f"/> <arg value="uecide-${Version}-linux.zip"/>
-            <arg value="-n"/> <arg value="uecide-${Version}-linux.zip"/>
+            <arg value="-f"/> <arg value="uecide-${Version}-linux.tgz"/>
+            <arg value="-n"/> <arg value="uecide-${Version}-linux.tgz"/>
         </exec>
 
         <echo>Uploading uecide-${Version}-macosx.dmg</echo>

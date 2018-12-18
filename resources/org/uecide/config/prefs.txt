@@ -135,6 +135,10 @@ editor.version_check.name=Check for a new version at startup
 editor.version_check.type=checkbox
 editor.version_check.default=true
 
+editor.newonclose.name=Create new empty editor when last one closes
+editor.newonclose.type=checkbox
+editor.newonclose.default=false
+
 theme.name=Theme
 theme.type=section
 

@@ -523,7 +523,17 @@ public class Editor extends JFrame {
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 try {
-                    askCloseWindow();
+                    if (askCloseWindow()) {
+                        if(Editor.shouldQuit()) {
+                            Preferences.save();
+                            // Do we want to open a new empty editor?
+                            if (Preferences.getBoolean("editor.newonclose")) {
+                                Base.handleNew();
+                            } else {
+                                System.exit(0); 
+                            }
+                        }
+                    }
                 } catch (IOException ex) {
                     error(ex);
                 }
@@ -576,7 +586,6 @@ public class Editor extends JFrame {
 */
         s.attachToEditor(this);
 
-        this.setMaximumSize(new Dimension(9999,9999));
         this.setVisible(true);
 
     }
@@ -2670,11 +2679,6 @@ public class Editor extends JFrame {
         Editor.unregisterEditor(this);
         this.dispose();
 
-        if(Editor.shouldQuit()) {
-            Preferences.save();
-            System.exit(0);
-        }
-
         return true;
     }
 
@@ -2898,6 +2902,15 @@ public class Editor extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     askCloseWindow();
+                    if(Editor.shouldQuit()) {
+                        Preferences.save();
+                        // Do we want to open a new empty editor?
+                        if (Preferences.getBoolean("editor.newonclose")) {
+                            Base.handleNew();
+                        } else {
+                            System.exit(0); 
+                        }
+                    }
                 } catch (IOException ex) {
                     error(ex);
                 }
@@ -3222,8 +3235,6 @@ public class Editor extends JFrame {
         addMenuChunk(helpMenu, Plugin.MENU_HELP | Plugin.MENU_TOP);
         helpMenu.addSeparator();
 
-System.err.println(Base.webLinks);
-
         for (String link : Base.webLinks.childKeys()) {
             String name = Base.webLinks.get(link + ".name");
             String url = Base.webLinks.get(link + ".url");
@@ -3231,7 +3242,6 @@ System.err.println(Base.webLinks);
                 helpMenu.add(new ActiveMenuItem(name, 0, 0, new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         String link = e.getActionCommand();
-                        System.err.println(link);
                         Utils.browse(link);
                     }
                 }, url));

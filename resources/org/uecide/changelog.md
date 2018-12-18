@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* Reinstated updated web links in help menu
 * Switched data folder open to open not browse
 * Added editor margin theme settings
 * Optimized windows startup time
@@ -609,6 +610,7 @@ Changelog
 0.8.5
 -----
 
+* Reinstated updated web links in help menu
 * Switched data folder open to open not browse
 * Added editor margin theme settings
 * Optimized windows startup time

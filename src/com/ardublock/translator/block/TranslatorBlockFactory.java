@@ -32,7 +32,7 @@ public class TranslatorBlockFactory
 	}
 	
 	
-    @SuppressWarnings("unckecked")
+    @SuppressWarnings("unchecked")
 	public TranslatorBlock buildTranslatorBlock(Translator translator, Long blockId, String blockName, String codePrefix, String codeSuffix, String label)
 	{
 //		System.out.println("block name : " + blockName + " captured");
