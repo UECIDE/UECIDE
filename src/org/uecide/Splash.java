@@ -34,27 +34,9 @@ import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
 import java.awt.font.*;
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.util.zip.*;
-import java.util.jar.*;
-import org.uecide.plugin.*;
-
-
 import javax.swing.*;
 import javax.imageio.*;
 
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-
-/**
- * The base class for the main uecide.application.
- * Primary role of this class is for platform identification and
- * general interaction with the system (launching URLs, loading
- * files and images, etc) that comes from that.
- */
 public class Splash extends JDialog { //Window {
     BufferedImage image;
 
@@ -66,27 +48,42 @@ public class Splash extends JDialog { //Window {
     int h;
 
     public Splash() {
+        super(null, JDialog.ModalityType.MODELESS);
         try {
             image = ImageIO.read(Splash.class.getResource("/org/uecide/icons/about.png"));
             w = image.getWidth();
             h = image.getHeight();
 
             setUndecorated(true);
+            setResizable(false);
+    
+            setTitle("Loading UECIDE");
 
-            GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
-
-            GraphicsDevice device = g.getDefaultScreenDevice();
-            Rectangle screen = device.getDefaultConfiguration().getBounds();
-
-            int x = (screen.width / 2) - (w / 2);
-            int y = (screen.height / 2) - (h / 2);
             setSize(new Dimension(w, h));
+            setPreferredSize(new Dimension(w, h));
+            setMaximumSize(new Dimension(w, h));
+            setMinimumSize(new Dimension(w, h));
+            setLocationRelativeTo(null);
             setVisible(true);
-            Point winLoc = new Point(screen.x + x, screen.y + y);
-            setLocation(winLoc);
         } catch(Exception e) {
+e.printStackTrace();
             Base.error(e);
         }
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return new Dimension(w, h);
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(w, h);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(w, h);
     }
 
     @Override
