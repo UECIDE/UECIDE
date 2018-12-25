@@ -433,9 +433,8 @@ public class Editor extends JFrame {
         miniBar.setFloatable(false);
 
         miniBar.add(new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 16, new ActionListener() {
-            @SuppressWarnings("deprecation")
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                if ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0) {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
@@ -449,9 +448,8 @@ public class Editor extends JFrame {
         }));
 
        miniBar.add(new ToolbarButton("actions", "program", Base.i18n.string("toolbar.program"), 16, new ActionListener() {
-            @SuppressWarnings("deprecation")
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                if ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0) {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
@@ -625,9 +623,8 @@ public class Editor extends JFrame {
         toolbar.add(abortButton);
 
         runButton = new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 24, new ActionListener() {
-            @SuppressWarnings("deprecation")
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                if ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0) {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
@@ -643,9 +640,8 @@ public class Editor extends JFrame {
         runButton.setBorderPainted(false);
 
         programButton = new ToolbarButton("actions", "program", Base.i18n.string("toolbar.program"), 24, new ActionListener() {
-            @SuppressWarnings("deprecation")
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+                if ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0) {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
@@ -2728,7 +2724,6 @@ public class Editor extends JFrame {
         }
     }
 
-    @SuppressWarnings("deprecation")
     public void updateMenus() {
         fileMenu.removeAll();
         editMenu.removeAll();
@@ -2738,7 +2733,7 @@ public class Editor extends JFrame {
         helpMenu.removeAll();
 
         JMenu submenu;
-        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
         fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.new"), KeyEvent.VK_N, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -2927,7 +2922,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.saveas"), KeyEvent.VK_S, KeyEvent.SHIFT_MASK, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.saveas"), KeyEvent.VK_S, KeyEvent.SHIFT_DOWN_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAs();
@@ -3198,7 +3193,7 @@ public class Editor extends JFrame {
         }));
 
         toolsMenu.addSeparator();
-        toolsMenu.add(new ActiveMenuItem("Toggle minimalist mode", KeyEvent.VK_M, KeyEvent.SHIFT_MASK, new ActionListener() {
+        toolsMenu.add(new ActiveMenuItem("Toggle minimalist mode", KeyEvent.VK_M, KeyEvent.SHIFT_DOWN_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Preferences.setBoolean("editor.layout.minimal", !Preferences.getBoolean("editor.layout.minimal"));
                 try {

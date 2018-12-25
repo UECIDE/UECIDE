@@ -49,8 +49,7 @@ public class NoFocusButton extends JButton {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    public boolean isFocusTraversable() {
+    public boolean isFocusable() {
         return false;
     }
 

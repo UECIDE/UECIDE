@@ -909,7 +909,6 @@ public class BaseRootPaneUI extends BasicRootPaneUI {
             }
         }
 
-        @SuppressWarnings("deprecation")
         public void mouseClicked(MouseEvent ev) {
             if (ev.getSource() instanceof Window) {
                 Window window = (Window) ev.getSource();
@@ -920,7 +919,7 @@ public class BaseRootPaneUI extends BasicRootPaneUI {
                 Point convertedPoint = SwingUtilities.convertPoint(window, ev.getPoint(), internalGetTitlePane());
                 int state = DecorationHelper.getExtendedState(frame);
                 if (titlePane != null && titlePane instanceof TitlePane && titlePane.contains(convertedPoint) && frame.isResizable()) {
-                    if ((ev.getClickCount() % 2) == 0 && ((ev.getModifiers() & InputEvent.BUTTON1_MASK) != 0)) {
+                    if ((ev.getClickCount() % 2) == 0 && ((ev.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0)) {
                         if ((state & BaseRootPaneUI.MAXIMIZED_BOTH) != 0) {
                             ((TitlePane) titlePane).restore();
                         } else {

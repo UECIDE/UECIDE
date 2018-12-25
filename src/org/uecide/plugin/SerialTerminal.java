@@ -183,7 +183,6 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
             shortcuts[i] = new JButton(name);
             shortcuts[i].setActionCommand(Integer.toString(i));
             shortcuts[i].addActionListener(new ActionListener() {
-                @SuppressWarnings("deprecation")
                 public void actionPerformed(ActionEvent e) {
                     int i = 0;
                     try {
@@ -191,7 +190,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                     } catch (Exception ex) {
                     }
             
-                    if ((e.getModifiers() & InputEvent.CTRL_MASK) != 0) {
+                    if ((e.getModifiers() & InputEvent.CTRL_DOWN_MASK) != 0) {
                         JTextField scname = new JTextField(Preferences.get("plugins.serialterminal.shortcut." + i + ".name"));
                         JTextField scstr = new JTextField(Preferences.get("plugins.serialterminal.shortcut." + i + ".string"));
                         JCheckBox docr = new JCheckBox("CR");
@@ -577,11 +576,10 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
         }
     }
 
-    @SuppressWarnings("deprecation")
     public void populateMenu(JMenu menu, int flags) {
         if (flags == (Plugin.MENU_TOOLS | Plugin.MENU_MID)) {
 
-            JMenuItem item = new ActiveMenuItem("Serial Terminal", KeyEvent.VK_T, KeyEvent.SHIFT_MASK, new ActionListener() {
+            JMenuItem item = new ActiveMenuItem("Serial Terminal", KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     run();
                 }

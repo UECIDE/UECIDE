@@ -53,12 +53,11 @@ public class BaseEditorPaneUI extends BasicEditorPaneUI {
         updateBackground();
     }
 
-    @SuppressWarnings("deprecation")
     protected void installKeyboardActions() {
         super.installKeyboardActions();
         if (JTattooUtilities.isMac()) {
             InputMap im = (InputMap) UIManager.get("TextField.focusInputMap");
-            int commandKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+            int commandKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, commandKey), DefaultEditorKit.copyAction);
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, commandKey), DefaultEditorKit.pasteAction);
             im.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, commandKey), DefaultEditorKit.cutAction);

@@ -395,12 +395,11 @@ public abstract class LabelWidget extends JComponent {
             '-', '=', '{', '}', '|', '[', ']', '\\', ' ',
             ':', '"', ';', '\'', '<', '>', '?', ',', '.', '/', '`', '~'};
         /** These Key inputs are processed by all this text field */
-        @SuppressWarnings("deprecation")
         private final int[] validMasks = {KeyEvent.VK_BACK_SPACE,
             KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT,
             KeyEvent.VK_RIGHT, KeyEvent.VK_END, KeyEvent.VK_HOME,
             '-', KeyEvent.VK_DELETE, KeyEvent.VK_SHIFT, KeyEvent.VK_CONTROL,
-            InputEvent.SHIFT_MASK, InputEvent.SHIFT_DOWN_MASK};
+            InputEvent.SHIFT_DOWN_MASK};
 
         /**
          * Contructs new block label text field
@@ -466,7 +465,6 @@ public abstract class LabelWidget extends JComponent {
          * either perform some action that should be triggered by
          * that key or
          */
-        @SuppressWarnings("deprecation")
         protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
             if (isNumber) {
                 if (e.getKeyChar() == '-' && canProcessNegativeSign()) {
@@ -492,7 +490,7 @@ public abstract class LabelWidget extends JComponent {
                     return super.processKeyBinding(ks, e, condition, pressed);
                 }
             }
-            if ((e.getModifiers() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0) {
+            if ((e.getModifiersEx() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()) != 0) {
                 return super.processKeyBinding(ks, e, condition, pressed);
             }
             return false;

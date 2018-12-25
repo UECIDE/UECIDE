@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* Forced splash to float in AwesomeWM
 * Moved JTattoo into core and upgraded to 1.6.11
 * Reinstated updated web links in help menu
 * Switched data folder open to open not browse
@@ -611,6 +612,7 @@ Changelog
 0.8.5
 -----
 
+* Forced splash to float in AwesomeWM
 * Moved JTattoo into core and upgraded to 1.6.11
 * Reinstated updated web links in help menu
 * Switched data folder open to open not browse

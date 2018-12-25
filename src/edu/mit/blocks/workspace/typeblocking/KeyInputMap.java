@@ -76,15 +76,13 @@ public class KeyInputMap {
      * @param workspace The workspace in use
      * @param key
      */
-    @SuppressWarnings("deprecation")
     public static void processKeyChar(Workspace workspace, KeyEvent key) {
 
 //=====================================================================
 //======Process COUPLED Virtual Key Modifers + ALPHANUMERIC character
 //=====================================================================
         //handle virtual modifiers: CONTROL DOWN or COMMAND (FOR MAC) DOWN
-        if ((key.getModifiers() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0) {
-            //if(key.getModifiers() == Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()){
+        if ((key.getModifiersEx() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()) != 0) {
             switch (key.getKeyCode()) {
                 case KeyEvent.VK_C:
                     //This is already accounted for the SLMenu

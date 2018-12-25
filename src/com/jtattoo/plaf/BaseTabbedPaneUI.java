@@ -41,6 +41,8 @@ import javax.swing.plaf.*;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
+import java.awt.ContainerOrderFocusTraversalPolicy;
+
 
 /**
  * This class is a modified copy of the javax.swing.plaf.basic.BasicTabbedPaneUI
@@ -505,12 +507,11 @@ public class BaseTabbedPaneUI extends TabbedPaneUI implements SwingConstants {
     /**
      * Adds the specified mnemonic at the specified index.
      */
-    @SuppressWarnings("deprecation")
     private void addMnemonic(int index, int mnemonic) {
         if (mnemonicToIndexMap == null) {
             initMnemonics();
         }
-        mnemonicInputMap.put(KeyStroke.getKeyStroke(mnemonic, Event.ALT_MASK), "setSelectedIndex");
+        mnemonicInputMap.put(KeyStroke.getKeyStroke(mnemonic, InputEvent.ALT_DOWN_MASK), "setSelectedIndex");
         mnemonicToIndexMap.put(mnemonic, index);
     }
 
@@ -2112,14 +2113,16 @@ public class BaseTabbedPaneUI extends TabbedPaneUI implements SwingConstants {
         }
     }
 
-    @SuppressWarnings("deprecation")
     protected boolean requestFocusForVisibleComponent() {
         Component vc = getVisibleComponent();
-        if (vc.isFocusTraversable()) {
+        if (vc.isFocusable()) {
             vc.requestFocus();
             return true;
         } else if (vc instanceof JComponent) {
-            if (((JComponent) vc).requestDefaultFocus()) {
+            FocusTraversalPolicy fc = new ContainerOrderFocusTraversalPolicy();
+            JComponent defaultComponent = (JComponent)fc.getDefaultComponent((JComponent)vc);
+            if (defaultComponent.isFocusable()) {
+                defaultComponent.requestFocus();
                 return true;
             }
         }
@@ -2460,7 +2463,6 @@ public class BaseTabbedPaneUI extends TabbedPaneUI implements SwingConstants {
             return total;
         }
 
-        @SuppressWarnings("deprecation")
         public void layoutContainer(Container parent) {
             /* Some of the code in this method deals with changing the
              * visibility of components to hide and show the contents for the
@@ -2508,7 +2510,8 @@ public class BaseTabbedPaneUI extends TabbedPaneUI implements SwingConstants {
             //
             if (selectedComponent != null) {
                 if (selectedComponent != visibleComponent && visibleComponent != null) {
-                    if (SwingUtilities.findFocusOwner(visibleComponent) != null) {
+                    KeyboardFocusManager fm = new DefaultKeyboardFocusManager();
+                    if (fm.getFocusOwner() != null) { // SwingUtilities.findFocusOwner(visibleComponent) != null) {
                         shouldChangeFocus = true;
                     }
                 }
@@ -2925,7 +2928,6 @@ public class BaseTabbedPaneUI extends TabbedPaneUI implements SwingConstants {
             return calculateMaxTabWidth(tabPlacement);
         }
 
-        @SuppressWarnings("deprecation")
         public void layoutContainer(Container parent) {
             int tabPlacement = tabPane.getTabPlacement();
             int tc = tabPane.getTabCount();
@@ -2960,7 +2962,8 @@ public class BaseTabbedPaneUI extends TabbedPaneUI implements SwingConstants {
             //
             if (selectedComponent != null) {
                 if (selectedComponent != visibleComponent && visibleComponent != null) {
-                    if (SwingUtilities.findFocusOwner(visibleComponent) != null) {
+                    KeyboardFocusManager fm = new DefaultKeyboardFocusManager();
+                    if (fm.getFocusOwner() != null) { // SwingUtilities.findFocusOwner(visibleComponent) != null) {
                         shouldChangeFocus = true;
                     }
                 }
@@ -3515,8 +3518,7 @@ public class BaseTabbedPaneUI extends TabbedPaneUI implements SwingConstants {
             return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
         }
 
-        @SuppressWarnings("deprecation")
-        public boolean isFocusTraversable() {
+        public boolean isFocusable() {
             return false;
         }
 

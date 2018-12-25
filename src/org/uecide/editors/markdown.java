@@ -274,10 +274,9 @@ public class markdown extends JPanel implements EditorBase {
         reloadFile();
     }
     
-    @SuppressWarnings("deprecation")
     public void populateMenu(JMenu menu, int flags) {
         JMenuItem item;
-        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
 
         switch(flags) {

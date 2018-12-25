@@ -10,7 +10,6 @@ public class ActiveMenuItem extends JMenuItem {
         this(name, shortcut, mods, action, null);
     }
 
-    @SuppressWarnings("deprecation")
     public ActiveMenuItem(String name, int shortcut, int mods, ActionListener action, String command) {
         super(name);
         if (action != null) {
@@ -18,7 +17,7 @@ public class ActiveMenuItem extends JMenuItem {
         }
         setActionCommand(command);
         if (shortcut != 0) {
-            int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+            int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
             setAccelerator(KeyStroke.getKeyStroke(shortcut, modifiers | mods));
         }
     }
