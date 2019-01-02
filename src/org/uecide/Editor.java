@@ -2733,7 +2733,7 @@ public class Editor extends JFrame {
         helpMenu.removeAll();
 
         JMenu submenu;
-        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
         fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.new"), KeyEvent.VK_N, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {

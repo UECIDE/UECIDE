@@ -490,7 +490,7 @@ public abstract class LabelWidget extends JComponent {
                     return super.processKeyBinding(ks, e, condition, pressed);
                 }
             }
-            if ((e.getModifiersEx() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()) != 0) {
+            if ((e.getModifiersEx() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0) {
                 return super.processKeyBinding(ks, e, condition, pressed);
             }
             return false;

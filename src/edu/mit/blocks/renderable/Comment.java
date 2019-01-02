@@ -135,7 +135,7 @@ public class Comment extends JPanel {
             public void keyPressed(KeyEvent e) {
                 Comment.this.workspace.notifyListeners(new WorkspaceEvent(Comment.this.workspace, getCommentSource().getParentWidget(), WorkspaceEvent.BLOCK_COMMENT_CHANGED));
 
-                if (e.isControlDown() || ((e.getModifiersEx() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()) != 0)) {
+                if (e.isControlDown() || ((e.getModifiersEx() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0)) {
                     if (e.getKeyCode() == KeyEvent.VK_Z) {
                         try {
                             undoManager.undo();

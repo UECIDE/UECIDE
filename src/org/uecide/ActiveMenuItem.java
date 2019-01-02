@@ -17,7 +17,7 @@ public class ActiveMenuItem extends JMenuItem {
         }
         setActionCommand(command);
         if (shortcut != 0) {
-            int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+            int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
             setAccelerator(KeyStroke.getKeyStroke(shortcut, modifiers | mods));
         }
     }

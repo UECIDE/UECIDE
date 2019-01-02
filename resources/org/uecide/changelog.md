@@ -4,6 +4,7 @@ Changelog
 0.10.0
 ------
 
+* Cleaned up all deprecation warnings
 * Forced splash to float in AwesomeWM
 * Moved JTattoo into core and upgraded to 1.6.11
 * Reinstated updated web links in help menu
@@ -612,6 +613,7 @@ Changelog
 0.8.5
 -----
 
+* Cleaned up all deprecation warnings
 * Forced splash to float in AwesomeWM
 * Moved JTattoo into core and upgraded to 1.6.11
 * Reinstated updated web links in help menu

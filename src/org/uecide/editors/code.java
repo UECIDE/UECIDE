@@ -914,7 +914,7 @@ public class code extends JPanel implements EditorBase {
     
     public void populateMenu(JMenu menu, int flags) {
         JMenuItem item;
-        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
 
         switch(flags) {

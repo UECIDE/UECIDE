@@ -82,7 +82,7 @@ public class KeyInputMap {
 //======Process COUPLED Virtual Key Modifers + ALPHANUMERIC character
 //=====================================================================
         //handle virtual modifiers: CONTROL DOWN or COMMAND (FOR MAC) DOWN
-        if ((key.getModifiersEx() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()) != 0) {
+        if ((key.getModifiersEx() & Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()) != 0) {
             switch (key.getKeyCode()) {
                 case KeyEvent.VK_C:
                     //This is already accounted for the SLMenu

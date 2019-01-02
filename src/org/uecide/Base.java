@@ -1626,7 +1626,7 @@ public class Base {
         root.registerKeyboardAction(disposer, stroke,
                                     JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
         stroke = KeyStroke.getKeyStroke('W', modifiers);
         root.registerKeyboardAction(disposer, stroke,
                                     JComponent.WHEN_IN_FOCUSED_WINDOW);

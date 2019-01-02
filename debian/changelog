@@ -1,3 +1,159 @@
+uecide (0.10.0) unstable; urgency=low 
+
+  * Ignored file not found error on HTTP get
+  * Abstracted HTTP requests to set proper user agent
+  * Added missing Javascript plugin icons
+  * Moved initial serial port probing into separate thread
+  * Release candidate 3
+  * Update issue templates
+  * Added missing true return on port set/clear
+  * Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Fixed uninstall of local install files
+  * Updated repos master package
+  * Added automatic release generation
+  * Added XBM target image conversion format for u8glib et al
+  * Cleaned up image conversion settings dialog and added threshold setting
+  * Protect against divide-by-zero with zero sized font
+  * Add --reset-preferences CLI option
+  * Tidy up of splash screen
+  * Cleanup of function bookmark parsing
+  * New changelog formatter using Markdown
+  * Implemented crop
+  * Broken tools out into individual classes
+  * Fixed overflow of rubberband and added tooltips to tools
+  * Added create new png/jpg/gif file
+  * Added convolution matrix
+  * Removed duplication of image object
+  * Made font scale temporary and local to each editor instance
+  * Fixed unable to select no conversion for images
+  * Basic gfx editor, and binary file conversion system
+  * Fixed prototype insertion location bug that crept in with new function prototype scanning
+  * Fixed anti-aliasing on markdown panels
+  * Reworked editor selection code
+  * Tightly integrated ardublocks
+  * Rework markdown editor
+  * Shift+Ctrl+C now toggles single-line comments for the current line or selection
+  * Advanced token parser allows more context-aware options in popup menu
+  * Assign CTRL-SHIFT-T to Serial Terminal
+  * Cleaned up old deb packaging target
+  * Shift+Ctrl+C now toggles single-line comments for the current line or selection
+  * Advanced token parser allows more context-aware options in popup menu
+  * Assign CTRL-SHIFT-T to Serial Terminal
+  * Cleaned up old deb packaging target
+  * Fixed prototype insertion location bug that crept in with new function prototype scanning
+  * Fixed anti-aliasing on markdown panels
+  * Reworked editor selection code
+  * Tightly integrated ardublocks
+  * Rework markdown editor
+  * Basic gfx editor, and binary file conversion system
+  * Implemented crop
+  * Broken tools out into individual classes
+  * Fixed overflow of rubberband and added tooltips to tools
+  * Added create new png/jpg/gif file
+  * Added convolution matrix
+  * Removed duplication of image object
+  * Made font scale temporary and local to each editor instance
+  * Fixed unable to select no conversion for images
+  * Protect against divide-by-zero with zero sized font
+  * Add --reset-preferences CLI option
+  * Tidy up of splash screen
+  * Cleanup of function bookmark parsing
+  * New changelog formatter using Markdown
+  * Added automatic release generation
+  * Added XBM target image conversion format for u8glib et al
+  * Cleaned up image conversion settings dialog and added threshold setting
+  * Update issue templates
+  * Added missing true return on port set/clear
+  * Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Fixed uninstall of local install files
+  * Updated repos master package
+  * Ignored file not found error on HTTP get
+  * Abstracted HTTP requests to set proper user agent
+  * Added missing Javascript plugin icons
+  * Moved initial serial port probing into separate thread
+  * Release candidate 3
+  * Optimized windows startup time
+  * Added editor margin theme settings
+  * Switched data folder open to open not browse
+  * Reinstated updated web links in help menu
+  * Moved JTattoo into core and upgraded to 1.6.11
+  * Forced splash to float in AwesomeWM
+  * Cleaned up all deprecation warnings
+  * Released 0.10.0
+  * Add port pragma support
+  * Re-write of the theme system
+  * Plugins now in the core
+  * Removed serial terminal from internal repo
+  * Fixed serial terminal input line color with dark theme
+  * Fix antialiasing problem and console incorrect font scaling
+  * Fixed tree background colour
+  * Fixed split positions
+  * Fixed split layout prefs and added split lock option
+  * Improved tree cell rendering
+  * Auto conversion of old float split sizes
+  * Added minimalist mode
+  * Improved icon handling and made animated icons
+  * Added token-aware context menu. Added manual page links. Improved token parsing. Added variable and class bookmarks
+  * Cleanup of syntax code
+  * Improve markdown display and example browser
+  * Fix divider not changing after minimal mode
+  * Shift+Ctrl+C now toggles single-line comments for the current line or selection
+  * Advanced token parser allows more context-aware options in popup menu
+  * Assign CTRL-SHIFT-T to Serial Terminal
+  * Cleaned up old deb packaging target
+  * Fixed prototype insertion location bug that crept in with new function prototype scanning
+  * Fixed anti-aliasing on markdown panels
+  * Reworked editor selection code
+  * Tightly integrated ardublocks
+  * Rework markdown editor
+  * Basic gfx editor, and binary file conversion system
+  * Implemented crop
+  * Broken tools out into individual classes
+  * Fixed overflow of rubberband and added tooltips to tools
+  * Added create new png/jpg/gif file
+  * Added convolution matrix
+  * Removed duplication of image object
+  * Made font scale temporary and local to each editor instance
+  * Fixed unable to select no conversion for images
+  * Protect against divide-by-zero with zero sized font
+  * Add --reset-preferences CLI option
+  * Tidy up of splash screen
+  * Cleanup of function bookmark parsing
+  * New changelog formatter using Markdown
+  * Added automatic release generation
+  * Added XBM target image conversion format for u8glib et al
+  * Cleaned up image conversion settings dialog and added threshold setting
+  * Update issue templates
+  * Added missing true return on port set/clear
+  * Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Fixed uninstall of local install files
+  * Updated repos master package
+  * Ignored file not found error on HTTP get
+  * Abstracted HTTP requests to set proper user agent
+  * Added missing Javascript plugin icons
+  * Moved initial serial port probing into separate thread
+  * Release candidate 3
+  * Optimized windows startup time
+  * Added editor margin theme settings
+  * Switched data folder open to open not browse
+  * Reinstated updated web links in help menu
+  * Moved JTattoo into core and upgraded to 1.6.11
+  * Forced splash to float in AwesomeWM
+  * Cleaned up all deprecation warnings
+  * Released 0.10.0
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 16 Oct 2018 11:09:01 +0100
+
+uecide (0.9.6) unstable; urgency=low 
+
+  * Updated bundled packages
+  * Improved OS X bundling
+  * Fixed bug with extracting control file that isn't specifically gzipped
+  * Updated families database
+  * Released 0.9.6
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 13 Aug 2018 11:22:24 +0100
+
 uecide (0.9.5) unstable; urgency=low 
 
   * Updated source format
