@@ -543,7 +543,7 @@ public class Console extends JTextPane implements ClipboardOwner {
         public void mouseClicked(MouseEvent e) {
             if (e.getButton() == MouseEvent.BUTTON1) {
                 try {
-                    Element elem = document.getCharacterElement(Console.this.viewToModel2D(e.getPoint()));
+                    Element elem = document.getCharacterElement(Console.this.viewToModel(e.getPoint()));
                     AttributeSet as = elem.getAttributes();
                     URLLinkAction fla = (URLLinkAction)as.getAttribute(LINK_ATTRIBUTE);
                     if (fla != null) {
@@ -557,7 +557,7 @@ public class Console extends JTextPane implements ClipboardOwner {
 
     private class TextMotionListener extends MouseInputAdapter {
         public void mouseMoved(MouseEvent e) {
-            Element elem = document.getCharacterElement(Console.this.viewToModel2D(e.getPoint()));
+            Element elem = document.getCharacterElement(Console.this.viewToModel(e.getPoint()));
             AttributeSet as = elem.getAttributes();
             if (StyleConstants.isUnderline(as)) {
                 Console.this.setCursor(new Cursor(Cursor.HAND_CURSOR));

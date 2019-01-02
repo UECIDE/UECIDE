@@ -55,7 +55,7 @@
                debug="true"
                debuglevel="lines,vars,source"
                encoding="UTF-8"
-               bootclasspath="${bootclass.path}"
+               bootclasspath="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"
                includeAntRuntime="false"
                deprecation="true"
                srcdir="src" 

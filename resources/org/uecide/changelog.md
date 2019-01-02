@@ -1,9 +1,10 @@
 Changelog
 =========
 
-0.10.0
+0.10.1
 ------
 
+* Removed usage of extended menu shortcut function
 * Cleaned up all deprecation warnings
 * Forced splash to float in AwesomeWM
 * Moved JTattoo into core and upgraded to 1.6.11
@@ -11,6 +12,11 @@ Changelog
 * Switched data folder open to open not browse
 * Added editor margin theme settings
 * Optimized windows startup time
+
+
+0.10.0
+------
+
 * Release candidate 3
 * Moved initial serial port probing into separate thread
 * Added missing Javascript plugin icons
@@ -613,6 +619,7 @@ Changelog
 0.8.5
 -----
 
+* Removed usage of extended menu shortcut function
 * Cleaned up all deprecation warnings
 * Forced splash to float in AwesomeWM
 * Moved JTattoo into core and upgraded to 1.6.11
