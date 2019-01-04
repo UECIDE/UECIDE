@@ -868,7 +868,6 @@ public class Sketch {
         } catch(Exception e) {
             error(e);
         }
-
         return sb.toString();
     }
 
@@ -1412,8 +1411,7 @@ public class Sketch {
                 case FileType.ASMSOURCE:
                 case FileType.CSOURCE:
                 case FileType.CPPSOURCE:
-                    dumpFileData(buildFolder, fn);
-                    filesToCompile.add(f);
+                    filesToCompile.add(dumpFileData(buildFolder, fn));
                     break;
                 case FileType.SKETCH:
                     dumpFileData(buildFolder, fn);
@@ -2762,6 +2760,7 @@ public class Sketch {
     }
 
     private File compileFile(Context localCtx, File src, File fileBuildFolder) {
+
     
         String fileName = src.getName();
         String recipe = null;
