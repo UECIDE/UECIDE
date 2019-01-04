@@ -434,7 +434,7 @@ public class Editor extends JFrame {
 
         miniBar.add(new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
@@ -449,7 +449,7 @@ public class Editor extends JFrame {
 
        miniBar.add(new ToolbarButton("actions", "program", Base.i18n.string("toolbar.program"), 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
@@ -624,7 +624,7 @@ public class Editor extends JFrame {
 
         runButton = new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
@@ -641,7 +641,7 @@ public class Editor extends JFrame {
 
         programButton = new ToolbarButton("actions", "program", Base.i18n.string("toolbar.program"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.SHIFT_DOWN_MASK) != 0) {
+                if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
                     loadedSketch.purgeBuildFiles();
                 }
@@ -2922,7 +2922,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.saveas"), KeyEvent.VK_S, KeyEvent.SHIFT_DOWN_MASK, new ActionListener() {
+        fileMenu.add(new ActiveMenuItem(Base.i18n.string("menu.file.saveas"), KeyEvent.VK_S, KeyEvent.SHIFT_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAs();
@@ -3193,7 +3193,7 @@ public class Editor extends JFrame {
         }));
 
         toolsMenu.addSeparator();
-        toolsMenu.add(new ActiveMenuItem("Toggle minimalist mode", KeyEvent.VK_M, KeyEvent.SHIFT_DOWN_MASK, new ActionListener() {
+        toolsMenu.add(new ActiveMenuItem("Toggle minimalist mode", KeyEvent.VK_M, KeyEvent.SHIFT_MASK, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Preferences.setBoolean("editor.layout.minimal", !Preferences.getBoolean("editor.layout.minimal"));
                 try {
