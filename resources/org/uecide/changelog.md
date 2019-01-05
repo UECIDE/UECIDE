@@ -4,6 +4,7 @@ Changelog
 0.10.2
 ------
 
+* Fixed local package install
 * Fixed bug compiling cpp file from open tab
 * Removed _DOWN_ from masks
 * Fixed other invalid function
@@ -627,6 +628,7 @@ Changelog
 0.8.5
 -----
 
+* Fixed local package install
 * Fixed bug compiling cpp file from open tab
 * Removed _DOWN_ from masks
 * Fixed other invalid function

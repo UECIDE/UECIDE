@@ -54,6 +54,7 @@ public class JSPlugin {
 
         try {
             engine.put("context", ctx);
+            engine.put("ctx", ctx);
             engine.put("editor", ed);
 
             Invocable inv = (Invocable)engine;

@@ -10,12 +10,6 @@ astyle.description=Auto-format your code using the AStyle code formatter
 astyle.enabled=true
 astyle.released=true
 
-copyforforum.class=org.uecide.plugin.CopyForForum
-copyforforum.name=Copy for Forum (BBCode)
-copyforforum.description=Copy your code to the clipboard in a format ready to be pasted to a phpBB forum
-copyforforum.enabled=false
-copyforforum.released=true
-
 elfinspector.class=org.uecide.plugin.ElfInspector
 elfinspector.name=ELF Inspector
 elfinspector.description=Examine the contents of ELF files

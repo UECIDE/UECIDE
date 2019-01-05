@@ -654,6 +654,8 @@ public class Context {
             if (script.equals("")) { return false; }
 
             engine.put("ctx", this);
+            engine.put("context", this);
+            engine.put("editor", editor);
             engine.eval(script);
 
             Invocable inv = (Invocable)engine;
