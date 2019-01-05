@@ -92,6 +92,31 @@ public class DebFile {
         cleanup();
     }
 
+    public String getPackageName() throws IOException, FileNotFoundException {
+        HashMap<String, File> files = extractOuterFiles();
+        HashMap<File, FileInfo> pendingFiles = null;
+        File db = Base.createTempFolder("udeb_");
+        if (files.get("control.tar.gz") != null) pendingFiles = extractTarGzFile(files.get("control.tar.gz"), db);
+        if (files.get("control.tar.xz") != null) pendingFiles = extractTarXzFile(files.get("control.tar.xz"), db);
+        if (files.get("control.tar.bz2") != null) pendingFiles = extractTarBz2File(files.get("control.tar.bz2"), db);
+
+        File c = new File(db, "control.udeb-new");
+        String packageName = null;
+        if (c.exists()) {
+            String data = Utils.getFileAsString(c);
+            String[] lines = data.split("\n");
+            for (String line : lines) {
+                String[] bits = line.split(" ");
+                if (bits[0].equals("Package:")) {
+                    packageName = bits[1];
+                }
+            }
+            Base.removeDir(db);
+        }
+
+        return packageName;
+    }
+
     void installFiles(HashMap<File, FileInfo> files) throws IOException {
         // First do the file renaming
         for (Map.Entry<File, FileInfo> dest : files.entrySet()) {

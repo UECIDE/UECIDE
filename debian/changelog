@@ -1,3 +1,11 @@
+uecide (0.10.2) unstable; urgency=low 
+
+  * Fixed other invalid function
+  * Removed _DOWN_ from masks
+  * Fixed bug compiling cpp file from open tab
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Wed, 02 Jan 2019 15:15:56 +0000
+
 uecide (0.10.1) unstable; urgency=low 
 
   * Optimized windows startup time

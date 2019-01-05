@@ -1,11 +1,17 @@
 Changelog
 =========
 
+0.10.2
+------
+
+* Fixed bug compiling cpp file from open tab
+* Removed _DOWN_ from masks
+* Fixed other invalid function
+
+
 0.10.1
 ------
 
-* Removed _DOWN_ from masks
-* Fixed other invalid function
 * Removed usage of extended menu shortcut function
 * Cleaned up all deprecation warnings
 * Forced splash to float in AwesomeWM
@@ -621,6 +627,7 @@ Changelog
 0.8.5
 -----
 
+* Fixed bug compiling cpp file from open tab
 * Removed _DOWN_ from masks
 * Fixed other invalid function
 * Removed usage of extended menu shortcut function

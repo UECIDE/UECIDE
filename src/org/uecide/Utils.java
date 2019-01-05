@@ -65,4 +65,26 @@ public class Utils {
             }
         }
     }
+
+    public static String getFileAsString(File f) throws IOException, FileNotFoundException {
+        if (f == null) {
+            return "";
+        }
+        if (!f.exists()) {
+            return "";
+        }
+        if (f.isDirectory()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        String line;
+        BufferedReader reader = new BufferedReader(new FileReader(f));
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+            sb.append("\n");
+        }
+        reader.close();
+        return sb.toString();
+
+    }
 }

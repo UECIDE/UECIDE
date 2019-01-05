@@ -1394,8 +1394,22 @@ public class PluginManager implements PropertyChangeListener
 
                     @Override
                     public Void doInBackground() {
-                        Package p = new Package();
-                        p.doExtractPackage(f, Base.getDataFile("apt/db/packages"), Base.getDataFolder());
+                        try {
+                            DebFile df = new DebFile(f);
+                            String pn = df.getPackageName();
+                            if (pn == null) {
+                                Base.error("Error: invalid package file!");
+                                return null;
+                            }
+                            System.out.print("Installing " + pn + " ... ");
+                            File pf = new File(Base.getDataFile("apt/db/packages"), pn);
+                            pf.mkdirs();
+                            df.extract(pf, Base.getDataFolder());
+                            System.out.println("done");
+                        } catch (Exception e) {
+                            Base.error(e);
+                        }
+
                         return null;
                     }
 
