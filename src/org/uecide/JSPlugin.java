@@ -7,9 +7,19 @@ import javax.script.*;
 
 public class JSPlugin {
 
-    String program;
-    ScriptEngine engine;
-    String progname;
+    protected String program;
+    protected ScriptEngine engine;
+    protected String progname;
+    protected Editor editor;
+    protected Context context;
+
+    public JSPlugin(JSPlugin orig, Editor e) {
+        program = orig.program;
+        progname = orig.progname;
+        editor = e;
+        context = e.getSketch().getContext();
+        initEngine();
+    }
 
     public JSPlugin(File f) {
         program = Base.getFileAsString(f);
@@ -31,6 +41,9 @@ public class JSPlugin {
 
             engine.put("plugin", this);
             engine.put("engine", engine.getFactory().getNames());
+            engine.put("ctx", context);
+            engine.put("context", context);
+            engine.put("editor", editor);
             engine.eval(program);
         } catch (Exception e) {
             Base.error(e);
@@ -53,9 +66,13 @@ public class JSPlugin {
         Object ret = null;
 
         try {
-            engine.put("context", ctx);
-            engine.put("ctx", ctx);
-            engine.put("editor", ed);
+            if (ctx != null) {
+                engine.put("context", ctx);
+                engine.put("ctx", ctx);
+            }
+            if (ed != null) {
+                engine.put("editor", ed);
+            }
 
             Invocable inv = (Invocable)engine;
 

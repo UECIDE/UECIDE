@@ -153,6 +153,7 @@ public class Editor extends JFrame {
     public static ArrayList<Editor>editorList = new ArrayList<Editor>();
 
     ArrayList<Plugin> plugins = new ArrayList<Plugin>();
+    ArrayList<JSPlugin> jsplugins = new ArrayList<JSPlugin>();
 
     Thread compilationThread = null;
 
@@ -238,6 +239,11 @@ public class Editor extends JFrame {
 //                e.printStackTrace();
             }
         }
+
+        for (JSPlugin plugin : Base.jsplugins.values()) {
+            JSPlugin newCopy = new JSPlugin(plugin, this);
+            jsplugins.add(newCopy);
+        }       
 
         this.setLayout(new BorderLayout());
 
@@ -3714,7 +3720,7 @@ public class Editor extends JFrame {
             }
         }
 
-        for (JSPlugin p : Base.jsplugins.values()) {
+        for (JSPlugin p : jsplugins) {
             ArrayList<JSAction> ents = p.getMenuActions(filterFlags);
             if (ents != null) {
                 for (JSAction act : ents) {
@@ -3736,7 +3742,7 @@ public class Editor extends JFrame {
             }
         }
 
-        for (JSPlugin p : Base.jsplugins.values()) {
+        for (JSPlugin p : jsplugins) {
             ArrayList<JSAction> ents = p.getMenuActions(filterFlags);
             if (ents != null) {
                 for (JSAction act : ents) {
@@ -3760,20 +3766,21 @@ public class Editor extends JFrame {
         }
 
         if (filterFlags == Plugin.TOOLBAR_EDITOR) {
-            for (JSPlugin p : Base.jsplugins.values()) {
+            for (JSPlugin p : jsplugins) {
                 
                 ArrayList<JSAction> icons = p.getMainToolbarIcons();
                 for (JSAction action : icons) {
                     String[] icodat = action.icon.split("/");
-                    JButton b = new ToolbarButton(icodat[0], icodat[1], action.tooltip);
-                    JSActionListener l = new JSActionListener(this, action);
-                    b.addActionListener(l);
-                    tb.add(b);
+                    tb.add(new ToolbarButton(icodat[0], icodat[1], action.tooltip, 24, new JSActionListener(this, action)));
                 }
             }
         } else {
-            for (JSPlugin p : Base.jsplugins.values()) {
+            for (JSPlugin p : jsplugins) {
                 ArrayList<JSAction> icons = p.getEditorToolbarIcons();
+                for (JSAction action : icons) {
+                    String[] icodat = action.icon.split("/");
+                    tb.add(new ToolbarButton(icodat[0], icodat[1], action.tooltip, 16, new JSActionListener(this, action)));
+                }
             }
         }
 
@@ -3785,6 +3792,7 @@ public class Editor extends JFrame {
         sidebarSplit.recalculateSplit();
         updateMenus();
         updateTree();
+        attachPluginTabs();
         setStatus();
     }
 
@@ -5480,6 +5488,44 @@ public class Editor extends JFrame {
 
             loadedSketch.set("binary." + filename + ".prefix", prefix);
             loadedSketch.set("binary." + filename + ".conversion", selectedConversionOption);
+        }
+    }
+
+    public void attachPluginTabs() {
+        removePluginTabs(editorTabs);
+        removePluginTabs(projectTabs);
+        removePluginTabs(sidebarTabs);
+        removePluginTabs(consoleTabs);
+        attachPluginTabs(editorTabs, Plugin.TABS_EDITOR);
+        attachPluginTabs(projectTabs, Plugin.TABS_PROJECT);
+        attachPluginTabs(sidebarTabs, Plugin.TABS_SIDEBAR);
+        attachPluginTabs(consoleTabs, Plugin.TABS_CONSOLE);
+    }
+
+    public void removePluginTabs(JTabbedPane p) {
+        ArrayList<JSTab> existingTabs = new ArrayList<JSTab>();
+        for (int i = 0; i < p.getTabCount(); i++) {
+            Component c = p.getComponentAt(i);
+            if (c instanceof JSTab) {
+                existingTabs.add((JSTab)c);
+            }
+        }
+
+        for (JSTab c : existingTabs) {
+            p.remove(c);
+            c.getPlugin().call("detachFromTab", this.loadedSketch.getContext(), this);
+        }
+    }
+
+    public void attachPluginTabs(JTabbedPane p, int location) {
+        for (JSPlugin plugin : jsplugins) {
+            String tabName = (String)plugin.call("getTabName", this.loadedSketch.getContext(), this, new Object[]{location});
+
+            if (tabName != null) {
+                JSTab t = new JSTab(plugin);
+                plugin.call("attachToTab", this.loadedSketch.getContext(), this, new Object[]{p, t, location});
+                p.add(tabName, t);
+            }
         }
     }
 }

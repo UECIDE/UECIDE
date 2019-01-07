@@ -1299,5 +1299,4 @@ public class code extends JPanel implements EditorBase {
     }
 
     public static String emptyFile() { return ""; }
-
 }

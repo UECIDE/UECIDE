@@ -87,6 +87,7 @@ public abstract class Plugin {
     public static final int TABS_PROJECT = 0x0001;
     public static final int TABS_CONSOLE = 0x0002;
     public static final int TABS_SIDEBAR = 0x0003;
+    public static final int TABS_EDITOR  = 0x0004;
 
 
     public Plugin() { }

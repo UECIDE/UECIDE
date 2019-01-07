@@ -14,6 +14,11 @@ public class JSAction {
     }
 
     public Object activate(Editor ed) {
-        return plugin.call(function, null, ed, null);
+        Sketch s = ed.getSketch();
+        Context ctx = null;
+        if (s != null) {
+            ctx = s.getContext();
+        }
+        return plugin.call(function, ctx, ed, null);
     }
 }

@@ -4,6 +4,7 @@ Changelog
 0.10.2
 ------
 
+* Removed obsolete copy for forum plugin
 * Fixed local package install
 * Fixed bug compiling cpp file from open tab
 * Removed _DOWN_ from masks
@@ -628,6 +629,7 @@ Changelog
 0.8.5
 -----
 
+* Removed obsolete copy for forum plugin
 * Fixed local package install
 * Fixed bug compiling cpp file from open tab
 * Removed _DOWN_ from masks
