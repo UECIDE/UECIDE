@@ -240,10 +240,14 @@ public class Editor extends JFrame {
             }
         }
 
+/*
+        jsplugins = new ArrayList<JSPlugin>();
+
         for (JSPlugin plugin : Base.jsplugins.values()) {
             JSPlugin newCopy = new JSPlugin(plugin, this);
             jsplugins.add(newCopy);
         }       
+*/
 
         this.setLayout(new BorderLayout());
 
@@ -3790,9 +3794,21 @@ public class Editor extends JFrame {
         leftRightSplit.recalculateSplit();
         topBottomSplit.recalculateSplit();
         sidebarSplit.recalculateSplit();
-        updateMenus();
-        updateTree();
-        attachPluginTabs();
+        jsplugins = new ArrayList<JSPlugin>();
+
+        for (JSPlugin plugin : Base.jsplugins.values()) {
+            JSPlugin newCopy = new JSPlugin(plugin, this);
+            jsplugins.add(newCopy);
+        }
+        try {
+            updateToolbar();
+            updateConsole();
+            updateMenus();
+            updateTree();
+            attachPluginTabs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setStatus();
     }
 

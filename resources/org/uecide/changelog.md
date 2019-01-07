@@ -4,6 +4,7 @@ Changelog
 0.10.2
 ------
 
+* Major improvements to javascript plugin system
 * Removed obsolete copy for forum plugin
 * Fixed local package install
 * Fixed bug compiling cpp file from open tab
@@ -629,6 +630,7 @@ Changelog
 0.8.5
 -----
 
+* Major improvements to javascript plugin system
 * Removed obsolete copy for forum plugin
 * Fixed local package install
 * Fixed bug compiling cpp file from open tab
