@@ -1,7 +1,0 @@
-Archive: stable
-Version: 3.1
-Component: boards
-Origin: UECIDE
-Label: UECIDE Internal
-Architecture: windows-amd64
-Description: Internal repository for distribution of plugins

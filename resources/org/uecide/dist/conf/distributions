@@ -5,7 +5,7 @@ Codename: uecide
 Contents: allcomponents .gz
 Version: 3.1
 Architectures: source windows-i386 windows-amd64 linux-amd64 linux-i386 linux-armhf linux-armel darwin-amd64
-Components: cores boards compilers plugins themes extra libraries repos main
+Components: main
 Description: Internal repository for distribution of plugins
 SignWith: CA9F00A1
 

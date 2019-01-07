@@ -1,3 +1,41 @@
+Package: core-varcmd
+Version: 1.0.8
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 84
+Homepage: http://uecide.org
+Priority: extra
+Section: main
+Filename: pool/main/c/core-varcmd/core-varcmd_1.0.8_all.deb
+Size: 6724
+SHA256: c41a15ff7c4accf488718fc86824a338acf79ad931b7f930b5aab1171f1a2aa5
+SHA1: 584c837e87e599c10dcb81ef5654257be37bea0e
+MD5sum: e7178c13c0b7cbf6873b3ac3e1e06c11
+Description: Core varcmd scriptlets
+ Varcmd scriptlets are used to enhance the ability of the
+ config and control files handling. They are called as the
+ ${cmd:...} format of variables.
+Family: pic32
+Group: System
+Subgroup: Scriptlets
+
+Package: ctags
+Version: 1.0.4
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 2745
+Priority: required
+Section: main
+Filename: pool/main/c/ctags/ctags_1.0.4_all.deb
+Size: 409908
+SHA256: de25fb8759c5f6b3a79a25db896e8fbe03d0b5e73358af9bf5ae85c4552f0347
+SHA1: 2cb36307422ca27bae3f423e7ae0ceffa3c8cd31
+MD5sum: 305d2e4d15f0ceac60cd3d28533ad8f7
+Description: Exuberant CTags Parser
+ This is the main parser for INO files used for gathering function prototypes.
+Group: System
+Subgroup: Tools
+
 Package: repos-master
 Source: repos-core
 Version: 1.0.6
@@ -16,24 +54,22 @@ Description: Master UECIDE Repository
 Group: System
 Subgroup: Repositories
 
-Package: repos-nightly
-Source: repos-core
-Version: 1.0.6
+Package: uecide-families
+Version: 1.1.0
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 11
+Installed-Size: 13
+Homepage: http://uecide.org
 Priority: extra
 Section: main
-Filename: pool/main/r/repos-core/repos-nightly_1.0.6_all.deb
-Size: 1568
-SHA256: 60fcd0b1e1431fef15e5f3387839fee878898dd5e737c7079bf99384895edd18
-SHA1: 9b2e6415048609dfe498f081c16d4e875bb7bf50
-MD5sum: 4cedf224a4f1a4b6347d8ac10346ed62
-Description: Nightly builds of cores
- Cores that are automatically built from their parent github repositories
- or other regularly updated sources every night. Great for tracking the
- absolute latest changes to a core.  There are, of course, no guarantees
- that these cores will remain working properly from one day to the next.
+Filename: pool/main/u/uecide-families/uecide-families_1.1.0_all.deb
+Size: 2912
+SHA256: ed145c72ebdee5465d2b9ecfcc1153b2b4e6fb1f6ed945bdddf17be32ab7549d
+SHA1: 640e95f9816b4b3b36159b6a70cfc7d67b4ff832
+MD5sum: b3e43ba53435c78d45637166b228674c
+Description: Family grouping control
+ Family grouping control
+Family: all
 Group: System
-Subgroup: Repositories
+Subgroup: Configuration
 

@@ -1,7 +1,0 @@
-Archive: stable
-Version: 3.1
-Component: plugins
-Origin: UECIDE
-Label: UECIDE Internal
-Architecture: source
-Description: Internal repository for distribution of plugins

@@ -1,7 +1,0 @@
-Archive: stable
-Version: 3.1
-Component: compilers
-Origin: UECIDE
-Label: UECIDE Internal
-Architecture: darwin-amd64
-Description: Internal repository for distribution of plugins
