@@ -38,17 +38,17 @@ Subgroup: Tools
 
 Package: repos-master
 Source: repos-core
-Version: 1.0.6
+Version: 1.0.7
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 12
+Installed-Size: 11
 Priority: extra
 Section: main
-Filename: pool/main/r/repos-core/repos-master_1.0.6_all.deb
-Size: 1520
-SHA256: 30518aa423c359a7943f28c8fcb5da240996d68b9365d42d78be72cc24363bd7
-SHA1: ebd5485bb6b2409a639f513b7081e4ec88b8e80d
-MD5sum: b95ec96a00ca41dcc784e1a470c1cf72
+Filename: pool/main/r/repos-core/repos-master_1.0.7_all.deb
+Size: 1388
+SHA256: 259807ea6bd88723867f021b59f68aaeff448066c15e62a6fdacfa4aaf1bfe54
+SHA1: d1a8d97d618de4b36019cfac7cb5a12c57ec3337
+MD5sum: 764e3d4bacad463dadd27fc6af506855
 Description: Master UECIDE Repository
  This is the main repository for UECIDE plugins etc.
 Group: System

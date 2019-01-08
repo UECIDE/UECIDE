@@ -124,36 +124,6 @@ public class PluginManager implements PropertyChangeListener
             dbFolder.mkdirs();
         }
     
-        File sourcesFile = new File(dbFolder, "sources.db");
-        if  (!sourcesFile.exists()) {
-            try {
-                PrintWriter pw = new PrintWriter(sourcesFile);
-                int i = 0;
-                String key = "repository." + i;
-                while (Preferences.get(key) != null) {
-                    String repo = Preferences.get(key);
-                    String parts[] = repo.split("::");
-                    String url = parts[0];
-                    String codename = parts[1];
-                    String sections = parts[2];
-                    String sects[] = sections.split(",");
-
-
-                    pw.print("deb " + url + " " + codename);
-                    for (String s : sects) {
-                        pw.print(" " + s);
-                    }
-                    pw.println();
-                    
-                    i++;
-                    key = "repository." + i;
-                }
-                pw.close();
-            } catch (Exception e) {
-                Base.error(e);
-            }
-        }
-
         apt = new APT(dd);
     }
 
@@ -207,19 +177,6 @@ public class PluginManager implements PropertyChangeListener
         String heading = descLines[0];
         String longDesc = "";
 
-//        String imageData = pe.get("Image");
-//        if (imageData != null) {
-//            try {
-//                byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(imageData);
-//                BufferedImage img = ImageIO.read(new ByteArrayInputStream(binary));
-//                infoBrowser.setBackgroundImage(img);
-//                
-//            } catch (Exception e) {
-//            }
-//        } else {
-//            infoBrowser.setBackgroundImage(null);
-//        }
-
         for (int i = 1; i < descLines.length; i++) {
             String dl = descLines[i];
             if (dl.startsWith(" ")) {
@@ -262,23 +219,6 @@ public class PluginManager implements PropertyChangeListener
             longDesc += "\n";
         }
 
-//        try {
-//            String fp = Base.getTheme().getFontCSS("pluginmanager.browser.font.p");
-//            String fli = Base.getTheme().getFontCSS("pluginmanager.browser.font.li");
-//            String fh1 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h1");
-//            String fh2 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h2");
-//            String fh3 = Base.getTheme().getFontCSS("pluginmanager.browser.font.h3");
-
-//            longDesc = new Markdown4jProcessor()
-//                .addHtmlAttribute("style", fp, "p")
-//                .addHtmlAttribute("style", fli, "li")
-//                .addHtmlAttribute("style", fh1, "h1")
-//                .addHtmlAttribute("style", fh2, "h2")
-//                .addHtmlAttribute("style", fh3, "h3")
-//                .process(longDesc);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
         infoBrowser.setText(longDesc);
         infoBrowser.setCaretPosition(0);
         JScrollBar sb = infoScroller.getVerticalScrollBar();
@@ -294,120 +234,6 @@ public class PluginManager implements PropertyChangeListener
         localHomepageButton.setEnabled(pe.get("Homepage") != null);
 
     }
-
-//    class RepoEntry extends JPanel {
-//        PropertyFile props;
-//        String key;
-//        JCheckBox enabled;
-//        JLabel nameLabel;
-//        JTextArea descLabel;
-//        JLabel locLabel;
-//        JLabel flagLabel;
-//
-//        RepoEntry(PropertyFile p, String k) {
-//            key = k;
-//            props = p;
-//
-//
-//            setLayout(new BorderLayout());
-//            JPanel inner = new JPanel();
-//            inner.setOpaque(false);
-//            inner.setLayout(new BorderLayout());
-//            inner.setBorder(new EmptyBorder(4, 4, 4, 4));
-//
-//            enabled = new JCheckBox();
-//            add(enabled, BorderLayout.WEST);
-//
-//            nameLabel = new JLabel(props.get("name"));
-//            inner.add(nameLabel, BorderLayout.NORTH);
-//
-//            if (!props.get("country").equals("NONE")) {
-//                flagLabel = new JLabel(props.get("country"));
-//                flagLabel.setIcon(Base.getIcon("flags", props.get("country").toLowerCase(), 16));
-//                add(flagLabel, BorderLayout.EAST);
-//            }
-//
-//            descLabel = new JTextArea(props.get("description"));
-//            descLabel.setLineWrap(true);
-//            descLabel.setWrapStyleWord(true);
-//            descLabel.setEditable(false);
-//            descLabel.setOpaque(false);
-//            inner.add(descLabel, BorderLayout.CENTER);
-//
-//            add(inner, BorderLayout.CENTER);
-//
-//            Font f = nameLabel.getFont();
-//            nameLabel.setFont(new Font(f.getName(), Font.BOLD, f.getSize()));
-//
-//            setBorder(BorderFactory.createLineBorder(new Color(180, 180, 180), 1));
-//
-//            enabled.setSelected(apt.hasSource(props.get("url"), props.get("codename")));
-//
-//            enabled.addActionListener(new ActionListener() {
-//                public void actionPerformed(ActionEvent e) {
-//                    if (enabled.isSelected()) {
-//                        apt.addSource(props.get("url"), props.get("codename"), getCleanOSName(), props.get("sections").split("::"));
-//                    } else {
-//                        apt.removeSource(props.get("url"), props.get("codename"));
-//                    }
-//                    apt.saveSources();
-//                }
-//            });
-//        }
-//
-//
-//        @Override
-//        protected void paintComponent(Graphics g) {
-//            super.paintComponent(g);
-//            Graphics2D g2d = (Graphics2D) g;
-//            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-//            int w = getWidth();
-//            int h = getHeight();
-//            Color color1 = Base.getTheme().getColor("pluginmanager.shade.top");
-//            Color color2 = Base.getTheme().getColor("pluginmanager.shade.bottom");
-//            GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
-//            g2d.setPaint(gp);
-//            g2d.fillRect(0, 0, w, h);
-//        }
-//
-//    }
-//
-//    public void openRepoManager() {
-//        JDialog repoManager = new JDialog(frame, JDialog.ModalityType.APPLICATION_MODAL);
-//        repoManager.setTitle("Available Repositories");
-//        JPanel repoContainer = new JPanel();
-//        repoContainer.setLayout(new BorderLayout());
-//
-//        JPanel list = new JPanel();
-//        list.setLayout(new BoxLayout(list, BoxLayout.PAGE_AXIS));
-//
-//        JScrollPane sb = new JScrollPane(list,
-//            JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-//            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-//
-//        repoContainer.add(sb, BorderLayout.CENTER);
-//
-//        File dd = Base.getDataFolder();
-//        File reps = new File(dd, "apt/db/repositories.db");
-//        if (!reps.exists()) {
-//            Base.copyResourceToFile("/org/uecide/config/repositories.db", reps);
-//        }
-//
-//        PropertyFile props = new PropertyFile(reps);
-//
-//        for (String key : props.childKeys()) {
-//            PropertyFile pf = props.getChildren(key);
-//            RepoEntry re = new RepoEntry(pf, key);
-//            list.add(re);
-//        }
-//
-//        repoContainer.add(sb, BorderLayout.CENTER);
-//        repoManager.add(repoContainer);
-//        repoManager.pack();
-//        repoManager.setSize(new Dimension(500, 300));
-//        repoManager.setLocationRelativeTo(frame);
-//        repoManager.setVisible(true);
-//    }
 
     public void openWindow(Editor ed) throws FileNotFoundException, IOException {
         openWindow(ed, false);
@@ -446,14 +272,6 @@ public class PluginManager implements PropertyChangeListener
             }
         });
 
-//        JMenuItem repoMenu = new JMenuItem("Repositories");
-//        fileMenu.add(repoMenu);
-//        repoMenu.addActionListener(new ActionListener() {
-//            public void actionPerformed(ActionEvent e) {
-//                openRepoManager();
-//            }
-//        });
-
         JMenuItem closeMenu = new JMenuItem("Close");
         fileMenu.add(closeMenu);
         closeMenu.addActionListener(new ActionListener() {
@@ -461,7 +279,6 @@ public class PluginManager implements PropertyChangeListener
                 askCloseWindow();
             }
         });
-        
 
         upper = new JPanel();
         lower = new JPanel();
@@ -486,10 +303,6 @@ public class PluginManager implements PropertyChangeListener
 
         lower.add(p);
         queue.addPropertyChangeListener(this);
-
-//        Dimension dim = consoleScroll.getPreferredSize();
-//        dim.height = 2000;
-//        consoleScroll.setSize(dim);
 
         outputConsole.setTty(outputTty);
         outputConsole.start();
@@ -743,13 +556,6 @@ public class PluginManager implements PropertyChangeListener
 
         if (apt.getPackageCount() == 0) {
             downloadPluginList();
-//            apt.update();
-//            Package p = apt.getPackage("uecide-families");
-//            if (p != null) {
-//                if (!apt.isInstalled(p) || apt.isUpgradable(p)) {
-//                    apt.installPackage(p);
-//                }
-//            }
         }
         updateTree();
 

@@ -4,6 +4,8 @@ Changelog
 0.10.2
 ------
 
+* Update internal repository
+* Adjustment to refresh strategy
 * Major improvements to javascript plugin system
 * Removed obsolete copy for forum plugin
 * Fixed local package install
@@ -630,6 +632,8 @@ Changelog
 0.8.5
 -----
 
+* Update internal repository
+* Adjustment to refresh strategy
 * Major improvements to javascript plugin system
 * Removed obsolete copy for forum plugin
 * Fixed local package install

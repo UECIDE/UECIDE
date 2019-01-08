@@ -52,35 +52,6 @@ public class PackageAnalyser extends JDialog {
             dbFolder.mkdirs();
         }
 
-        File sourcesFile = new File(dbFolder, "sources.db");
-        if  (!sourcesFile.exists()) {
-            try {
-                PrintWriter pw = new PrintWriter(sourcesFile);
-                int i = 0;
-                String key = "repository." + i;
-                while (Preferences.get(key) != null) {
-                    String repo = Preferences.get(key);
-                    String parts[] = repo.split("::");
-                    String url = parts[0];
-                    String codename = parts[1];
-                    String sections = parts[2];
-                    String sects[] = sections.split(",");
-
-                    pw.print("deb " + url + " " + codename);
-                    for (String s : sects) {
-                        pw.print(" " + s);
-                    }
-                    pw.println();
-
-                    i++;
-                    key = "repository." + i;
-                }
-                pw.close();
-            } catch (Exception e) {
-                Base.error(e);
-            }
-        }
-
         text.append("Package Analysis Started\n\n", Console.BODY);
         APT apt = new APT(dd);
         Collection<Package> packages = apt.getInstalledPackages();

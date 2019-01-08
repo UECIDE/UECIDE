@@ -2652,23 +2652,8 @@ public class Base {
             File sourcesFile = new File(sourcesDir, "internal.db");
             if (!sourcesFile.exists()) {
                 PrintWriter pw = new PrintWriter(sourcesFile);
-                pw.println("deb res://org/uecide/dist uecide boards cores compilers plugins extra libraries main");
+                pw.println("deb res://org/uecide/dist uecide main");
                 pw.close();
-//                PluginManager pm = new PluginManager();
-//                APT apt = pm.getApt();
-//                apt.update();
-//                Package[] packages = apt.getPackages();
-//                for (Package p : packages) {
-//                    apt.installPackage(p);
-//                    System.err.println("Installing " + p);
-//                }
-//                apt.save();
-
-//                PropertyFile props = new PropertyFile(new File(dbFolder, "repositories.db"));
-//                apt.addSource(props.get("master.url"), props.get("master.codename"), pm.getCleanOSName(), props.get("master.sections").split("::"));
-//                apt.saveSources();
-//                apt.update();
-//                apt.save();
             }
 
             PluginManager reqpm = new PluginManager();
