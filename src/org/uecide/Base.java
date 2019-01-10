@@ -2510,6 +2510,16 @@ public class Base {
         }
 
         loadPreferencesTree("/org/uecide/config/prefs.txt");
+        Context ctx = new Context();
+
+        for (JSPlugin p : jsplugins.values()) {
+            PropertyFile pf = (PropertyFile)p.call("getPreferencesTree", ctx, null);
+            if (pf != null) {
+                Base.preferencesTree.mergeData(pf);
+            }
+            p.onBoot();
+        }
+
     }
 
     public static void registerPreference(String key, String type, String name, String def) {

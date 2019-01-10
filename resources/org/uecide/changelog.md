@@ -4,6 +4,7 @@ Changelog
 0.10.2
 ------
 
+* Cleaned up embedded repsitory creation
 * Update internal repository
 * Adjustment to refresh strategy
 * Major improvements to javascript plugin system
@@ -632,6 +633,7 @@ Changelog
 0.8.5
 -----
 
+* Cleaned up embedded repsitory creation
 * Update internal repository
 * Adjustment to refresh strategy
 * Major improvements to javascript plugin system
