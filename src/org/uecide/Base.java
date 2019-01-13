@@ -748,7 +748,7 @@ public class Base {
 
         if(!headless) splashScreen.setMessage(i18n.string("splash.msg.editor"), 80);
 
-        setLookAndFeel();
+        if (!headless) setLookAndFeel();
 
         if (cli.isSet("preferences")) {
             if(!headless) splashScreen.setMessage(i18n.string("splash.msg.complete"), 100);

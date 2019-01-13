@@ -4,6 +4,7 @@ Changelog
 0.10.2
 ------
 
+* Fixed js plugin preferences tree bug
 * Cleaned up embedded repsitory creation
 * Update internal repository
 * Adjustment to refresh strategy
@@ -633,6 +634,7 @@ Changelog
 0.8.5
 -----
 
+* Fixed js plugin preferences tree bug
 * Cleaned up embedded repsitory creation
 * Update internal repository
 * Adjustment to refresh strategy
