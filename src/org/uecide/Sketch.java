@@ -1292,19 +1292,21 @@ public class Sketch {
                     if (objectType.equals("f")) { // Function
                         if (params.get("class") != null) { // Class member function
                             String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
-                            if (itemName.indexOf("::") > 0) {
-                                itemName = itemName.substring(itemName.indexOf("::") + 2);
+                            if ((returnType != null) && (!returnType.equals(""))) {
+                                if (itemName.indexOf("::") > 0) {
+                                    itemName = itemName.substring(itemName.indexOf("::") + 2);
+                                }
+                                FunctionBookmark bm = new FunctionBookmark(
+                                    FunctionBookmark.MEMBER_FUNCTION,
+                                    translateBuildFileToSketchFile(fileName),
+                                    Utils.s2i(params.get("line")),
+                                    itemName,
+                                    returnType,
+                                    params.get("signature"),
+                                    params.get("class")
+                                );
+                                protos.add(bm);
                             }
-                            FunctionBookmark bm = new FunctionBookmark(
-                                FunctionBookmark.MEMBER_FUNCTION,
-                                translateBuildFileToSketchFile(fileName),
-                                Utils.s2i(params.get("line")),
-                                itemName,
-                                returnType,
-                                params.get("signature"),
-                                params.get("class")
-                            );
-                            protos.add(bm);
                         } else { // Global function
                             String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
                             FunctionBookmark bm = new FunctionBookmark(
