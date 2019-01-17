@@ -1,9 +1,10 @@
 Changelog
 =========
 
-0.10.2
+0.10.3
 ------
 
+* Fixed headless LAF crash
 * Fixed js plugin preferences tree bug
 * Cleaned up embedded repsitory creation
 * Update internal repository
@@ -11,6 +12,11 @@ Changelog
 * Major improvements to javascript plugin system
 * Removed obsolete copy for forum plugin
 * Fixed local package install
+
+
+0.10.2
+------
+
 * Fixed bug compiling cpp file from open tab
 * Removed _DOWN_ from masks
 * Fixed other invalid function
@@ -634,6 +640,7 @@ Changelog
 0.8.5
 -----
 
+* Fixed headless LAF crash
 * Fixed js plugin preferences tree bug
 * Cleaned up embedded repsitory creation
 * Update internal repository

@@ -1,3 +1,16 @@
+uecide (0.10.3) unstable; urgency=low 
+
+  * Fixed local package install
+  * Removed obsolete copy for forum plugin
+  * Major improvements to javascript plugin system
+  * Adjustment to refresh strategy
+  * Update internal repository
+  * Cleaned up embedded repsitory creation
+  * Fixed js plugin preferences tree bug
+  * Fixed headless LAF crash
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Fri, 04 Jan 2019 21:36:06 +0000
+
 uecide (0.10.2) unstable; urgency=low 
 
   * Fixed other invalid function

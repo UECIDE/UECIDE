@@ -1214,6 +1214,9 @@ public class Sketch {
 
     public String getReturnTypeFromProtoAndSignature(String proto, String signature) {
         if (signature == null) return "";
+        proto = proto.replaceAll("\\s+"," ");
+        signature = signature.replaceAll("\\s+"," ");
+
         if (proto.startsWith("/^")) {
             proto = proto.substring(2).trim();
         }
