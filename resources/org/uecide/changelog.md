@@ -1,10 +1,16 @@
 Changelog
 =========
 
+0.10.4
+------
+
+* Added protection against missing prototype return types
+* Converted multiple spaces to single space in ctags protos
+
+
 0.10.3
 ------
 
-* Converted multiple spaces to single space in ctags protos
 * Fixed headless LAF crash
 * Fixed js plugin preferences tree bug
 * Cleaned up embedded repsitory creation
@@ -641,6 +647,7 @@ Changelog
 0.8.5
 -----
 
+* Added protection against missing prototype return types
 * Converted multiple spaces to single space in ctags protos
 * Fixed headless LAF crash
 * Fixed js plugin preferences tree bug

@@ -175,6 +175,17 @@ public class code extends JPanel implements EditorBase {
             });
         }
 
+        String sel = textArea.getSelectedText();
+        if ((sel != null) && (!sel.equals(""))) {
+            searchTerm.setText(sel);
+            if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
+                searchTerm.setBackground(UIManager.getColor("TextField.background"));
+            } else {
+                searchTerm.setBackground(textArea.getSyntaxScheme().getStyle(SyntaxScheme.ERROR_IDENTIFIER).background);
+            }
+
+        }
+
         searchTerm.requestFocus();
     }
 

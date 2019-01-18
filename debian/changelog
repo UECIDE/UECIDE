@@ -1,3 +1,11 @@
+uecide (0.10.4) unstable; urgency=low 
+
+  * Converted multiple spaces to single space in ctags protos
+  * Added protection against missing prototype return types
+  * Released 0.10.4
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sun, 13 Jan 2019 22:31:36 +0000
+
 uecide (0.10.3) unstable; urgency=low 
 
   * Fixed local package install
