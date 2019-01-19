@@ -399,13 +399,6 @@ public class Editor extends JFrame {
         });
         treeToolBar.add(refreshButton);
 
-        JButton projectSearchButton = new ToolbarButton("actions", "search", "Search entire project", 24, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new ProjectSearch(Editor.this);
-            }
-        });
-        treeToolBar.add(projectSearchButton);
-
         treeScroll = new JScrollPane();
         treePanel.add(treeToolBar, BorderLayout.NORTH);
         treePanel.add(treeScroll, BorderLayout.CENTER);

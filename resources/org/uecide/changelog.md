@@ -4,6 +4,7 @@ Changelog
 0.10.4
 ------
 
+* Improved search and replace interaction
 * Added protection against missing prototype return types
 * Converted multiple spaces to single space in ctags protos
 
@@ -647,6 +648,7 @@ Changelog
 0.8.5
 -----
 
+* Improved search and replace interaction
 * Added protection against missing prototype return types
 * Converted multiple spaces to single space in ctags protos
 * Fixed headless LAF crash
