@@ -213,6 +213,42 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         outer.setLayout(new BorderLayout());
 
         Box buttonLine = Box.createHorizontalBox();
+
+        buttonLine.add(new JLabel(Base.i18n.string("misc.theme") + ": "));
+
+        JButton themeLoad = new JButton(Base.i18n.string("misc.load"));
+        themeLoad.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                FileNameExtensionFilter ff = new FileNameExtensionFilter("UECIDE Theme", "utheme");
+                JFileChooser fc = new JFileChooser();
+                fc.addChoosableFileFilter(ff);
+                fc.setFileFilter(ff);
+                int n = fc.showOpenDialog(Preferences.this);
+                if (n == JFileChooser.APPROVE_OPTION) {
+                    importThemeData(fc.getSelectedFile());
+                }
+            }
+        });
+
+        buttonLine.add(themeLoad);
+
+        JButton themeSave = new JButton(Base.i18n.string("misc.save"));
+        themeSave.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                FileNameExtensionFilter ff = new FileNameExtensionFilter("UECIDE Theme", "utheme");
+                JFileChooser fc = new JFileChooser();
+                fc.addChoosableFileFilter(ff);
+                fc.setFileFilter(ff);
+                int n = fc.showSaveDialog(Preferences.this);
+                if (n == JFileChooser.APPROVE_OPTION) {
+                    exportThemeData(fc.getSelectedFile());
+                }
+            }
+        });
+
+        buttonLine.add(themeSave);
+
         buttonLine.add(Box.createHorizontalGlue());
 
         JButton applyButton = new JButton(Base.i18n.string("misc.apply"));
