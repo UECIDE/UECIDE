@@ -397,6 +397,13 @@ public class Base {
         preferences = new PropertyFile(getDataFile("preferences.txt"), "/org/uecide/config/preferences.txt");
         preferences.setPlatformAutoOverride(true);
 
+        if (preferences.getBoolean("editor.hwaccel")) {
+            Properties props = System.getProperties();
+            props.setProperty("sun.java2d.opengl", "true");
+        } else {
+            Properties props = System.getProperties();
+            props.setProperty("sun.java2d.opengl", "false");
+        }
 
         platform.setSettingsFolderEnvironmentVariable();
 

@@ -139,6 +139,10 @@ editor.newonclose.name=Create new empty editor when last one closes
 editor.newonclose.type=checkbox
 editor.newonclose.default=false
 
+editor.hwaccel.name=Enable hardware acceleration
+editor.hwaccel.type=checkbox
+editor.hwaccel.default=false
+
 theme.name=Theme
 theme.type=section
 
