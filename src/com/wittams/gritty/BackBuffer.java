@@ -230,16 +230,19 @@ public class BackBuffer {
 					if(location < 0 || location > styleBuf.length ){
 						continue;
 					}
-					final Style cellStyle = styleBuf[ location ];
-					if(lastStyle == null){
-						//begin line
-						lastStyle = cellStyle;
-					}else if(!cellStyle.equals(lastStyle)){ 
-						//start of new run
-						consumer.consumeRun(beginRun, row, lastStyle, buf, row * width + beginRun, col - beginRun);
-						beginRun = col;
-						lastStyle = cellStyle;
-					}
+                    if (location < styleBuf.length) {
+                        final Style cellStyle = styleBuf[ location ];
+                        if(lastStyle == null){
+                            //begin line
+                            lastStyle = cellStyle;
+                    
+                        }else if(!cellStyle.equals(lastStyle)){ 
+                            //start of new run
+                            consumer.consumeRun(beginRun, row, lastStyle, buf, row * width + beginRun, col - beginRun);
+                            beginRun = col;
+                            lastStyle = cellStyle;
+                        }
+                    }
 				}
 				//end row
 				if(lastStyle == null) {

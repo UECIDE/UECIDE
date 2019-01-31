@@ -176,5 +176,11 @@ public class ScrollBuffer implements StyledRunConsumer {
 		if(currentLine < lastLine)
 			currentSection.pumpRunsCurrent(currentLine, Math.max(firstLine, currentLine) , lastLine, consumer, bufPos);
 	}
+
+    public void clear() {
+        completeSections.clear();
+        newSection();
+        totalLines = 0;
+    }
 	
 }

@@ -4,6 +4,9 @@ Changelog
 0.10.4
 ------
 
+* Add hardware acceleration
+* Added theme load/save buttons in preferences
+* Fixed JTattoo custom decorator setting
 * Removed obsolete and broken project search code
 * Improved search and replace interaction
 * Added protection against missing prototype return types
@@ -649,6 +652,9 @@ Changelog
 0.8.5
 -----
 
+* Add hardware acceleration
+* Added theme load/save buttons in preferences
+* Fixed JTattoo custom decorator setting
 * Removed obsolete and broken project search code
 * Improved search and replace interaction
 * Added protection against missing prototype return types

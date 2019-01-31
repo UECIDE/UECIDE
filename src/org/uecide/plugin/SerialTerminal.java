@@ -43,7 +43,8 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
     JCheckBox showCursor;
     JCheckBox localEcho;
     JCheckBox lineEntry;
-    JScrollBar scrollbackBar;
+
+    JToolBar toolbar;
 
     Context ctx;
 
@@ -52,6 +53,8 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
     static JTextField heightField;
     static JCheckBox  autoCrIn;
     static JCheckBox  autoCrOut;
+
+    FileOutputStream captureFile = null;
 
     JTextField lineEntryBox;
     JComboBox lineEndings;
@@ -145,13 +148,62 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
 
 
 
-
         term = new GrittyTerminal();
         tty = new SerialTty(port);
         term.setFont(Preferences.getFont("plugins.serialterminal.font"));
         term.getTermPanel().setSize(new Dimension(100, 100));
         term.getTermPanel().setAntiAliasing(true);
         term.setTty(tty);
+        term.getTermPanel().getBackBuffer().clear();
+        term.getTermPanel().getScrollBuffer().clear();
+
+        toolbar = new JToolBar();
+
+        toolbar.setFloatable(false);
+
+        toolbar.add(new ToolbarButton("actions", "save", Base.i18n.string("serial.save"), 24, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    saveSession();
+                } catch (Exception ex) {
+                    Base.error(ex);
+                }
+            }
+        }));
+        
+        toolbar.add(new ToolbarToggleButton("actions", "install", Base.i18n.string("serial.capture"), 24, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
+                if (b.isSelected()) {
+                    startCapture();
+                } else {
+                    endCapture();
+                }
+            }
+        }));
+
+        toolbar.add(new ToolbarSpacer());
+
+        toolbar.add(new ToolbarButton("actions", "trash-empty", Base.i18n.string("serial.clear"), 24, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                term.getTermPanel().getBackBuffer().clear();
+                term.getTermPanel().getScrollBuffer().clear();
+                term.getTermPanel().updateRangeProperties();
+            }
+        }));
+
+        ToolbarToggleButton as = new ToolbarToggleButton("actions", "media-playback-pause", Base.i18n.string("serial.pause"), 24, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
+                tty.discardInput(b.isSelected());
+            }
+        });
+
+        as.setSelected(false);
+
+        toolbar.add(as);
+
+        win.add(toolbar, BorderLayout.NORTH);
 
         term.start();
 
@@ -393,7 +445,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
         });
 
 
-        win.getContentPane().add(menu, BorderLayout.NORTH);
+        //win.getContentPane().add(menu, BorderLayout.NORTH);
 
         int width = Preferences.getInteger("plugins.serialterminal.window.width");
         int height = Preferences.getInteger("plugins.serialterminal.window.height");
@@ -666,6 +718,38 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
             } catch (Exception ex) {
             }
             tries--;
+        }
+    }
+
+    void startCapture() {
+        JFileChooser fc = new JFileChooser();
+        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        fc.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
+        int n = fc.showSaveDialog(win);
+        if (n == JFileChooser.APPROVE_OPTION) {
+            File f = fc.getSelectedFile();
+            if (f.exists()) {
+                int conf = JOptionPane.showConfirmDialog(win, "File exists. Overwrite?", "Overwrite?", JOptionPane.YES_NO_OPTION);
+                if (conf == JOptionPane.OK_OPTION) {
+                    f.delete();
+                } else {
+                    return;
+                }
+            }
+
+            try {
+                captureFile = new FileOutputStream(f);
+                tty.captureToFile(captureFile);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    void endCapture() {
+        try {
+            tty.endCapture();
+            captureFile.close();
+        } catch (Exception e) {
         }
     }
 

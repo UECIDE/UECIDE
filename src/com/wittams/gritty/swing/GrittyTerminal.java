@@ -79,7 +79,7 @@ public class GrittyTerminal extends JPanel{
 		scrollBar.setModel(termPanel.getBoundedRangeModel() );
 		sessionRunning.set(false);
 	}
-	
+
 	public TermPanel getTermPanel(){
 		return termPanel;
 	}
@@ -95,6 +95,10 @@ public class GrittyTerminal extends JPanel{
 		emulator = new Emulator(terminalWriter, ttyChannel);
 		this.termPanel.setEmulator(emulator);
 	}
+
+    public void setAutoScroll(boolean as) {
+        terminalWriter.setAutoScroll(as);
+    }
 
 	public void start(){
 		if(!sessionRunning.get()){

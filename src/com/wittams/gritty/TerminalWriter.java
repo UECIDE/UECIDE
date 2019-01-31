@@ -119,20 +119,28 @@ public class TerminalWriter {
 	
 	
 	public void scrollY() {
-		backBuffer.lock();
-		try {
-			if (cursorY > scrollRegionBottom) {
-				final int dy = scrollRegionBottom - cursorY;
-				cursorY = scrollRegionBottom;
-				scrollArea(scrollRegionTop, scrollRegionBottom
-						- scrollRegionTop, dy);
-				backBuffer.clearArea(0, cursorY - 1, termWidth, cursorY);
-				display.setCursor(cursorX, cursorY);
-			}
-		} finally {
-			backBuffer.unlock();
-		}
+        backBuffer.lock();
+        try {
+            if (cursorY > scrollRegionBottom) {
+                final int dy = scrollRegionBottom - cursorY;
+                cursorY = scrollRegionBottom;
+                scrollArea(scrollRegionTop, scrollRegionBottom
+                        - scrollRegionTop, dy);
+                backBuffer.clearArea(0, cursorY - 1, termWidth, cursorY);
+                display.setCursor(cursorX, cursorY);
+            }
+        } finally {
+            backBuffer.unlock();
+        }
 	}
+
+    boolean willAutoScroll = true;
+
+    public void setAutoScroll(boolean as) {
+        willAutoScroll = as;
+        System.err.println("Autoscroll: " + as);
+        scrollY();
+    }
 
 	public void newLine() {
 		cursorY += 1;
@@ -295,8 +303,10 @@ public class TerminalWriter {
 
 	// Dodgy ?
 	private void scrollArea(int y, int h, int dy){
-		display.scrollArea(y,h,dy);
-		backBuffer.scrollArea(y, h, dy);
+        if (willAutoScroll) {
+            display.scrollArea(y,h,dy);
+        }
+        backBuffer.scrollArea(y, h, dy);
 	}
 
 	public void nextLine() {

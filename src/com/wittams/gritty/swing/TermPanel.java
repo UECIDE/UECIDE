@@ -715,5 +715,9 @@ public class TermPanel extends JComponent implements TerminalDisplay, ClipboardO
         isEnabled = false;
         repaint();
     }
+
+    public void updateRangeProperties() {
+        brm.setRangeProperties(0, termSize.height, - scrollBuffer.getLineCount() , termSize.height, false );
+    }
 	
 }

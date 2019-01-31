@@ -7,14 +7,18 @@ import com.wittams.gritty.Tty;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.io.FileOutputStream;
 import java.util.concurrent.LinkedTransferQueue;
 
 public class SerialTty implements Tty, CommsListener {
 
     CommunicationPort port;
     boolean addcr = false;
+    boolean doDiscardInput = false;
 
     LinkedTransferQueue<Byte> buffer = new LinkedTransferQueue<Byte>();
+
+    FileOutputStream captureFile = null;
 
     SerialTty(CommunicationPort p) {
         port = p;
@@ -62,6 +66,7 @@ public class SerialTty implements Tty, CommsListener {
     }
 
     public void feed(byte[] arr) {
+        if (doDiscardInput) return;
         for (int i = 0; i < arr.length; i++) {
             if ((arr[i] == 10) && addcr) {
                 buffer.add((byte)13);
@@ -71,6 +76,7 @@ public class SerialTty implements Tty, CommsListener {
     }
 
     public void feed(byte b) {
+        if (doDiscardInput) return;
         if (b == 10) {
             buffer.add((byte)13);
         }
@@ -78,6 +84,12 @@ public class SerialTty implements Tty, CommsListener {
     }
 
     public void commsDataReceived(byte[] bytes) {
+        if (captureFile != null) {
+            try {
+                captureFile.write(bytes);
+            } catch (Exception e) {
+            }
+        }
         feed(bytes);
     }
 
@@ -86,6 +98,18 @@ public class SerialTty implements Tty, CommsListener {
 
     public void setAddCR(boolean ac) {
         addcr = ac;
+    }
+
+    public void discardInput(boolean di) {
+        doDiscardInput = di;
+    }
+
+    public void captureToFile(FileOutputStream f) {
+        captureFile = f;
+    }
+
+    public void endCapture() {
+        captureFile = null;
     }
 }
 
