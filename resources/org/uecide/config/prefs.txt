@@ -450,7 +450,7 @@ theme.editor.fonts.editor_aa.default=true
 
 theme.editor.fonts.default.font.name=Font
 theme.editor.fonts.default.font.type=fontselect
-theme.editor.fonts.default.font.default=SansSerif,plain,14
+theme.editor.fonts.default.font.default=Monotype,plain,14
 theme.editor.fonts.default.underline.name=Underlined
 theme.editor.fonts.default.underline.type=checkbox
 theme.editor.fonts.default.underline.default=false
