@@ -657,7 +657,7 @@ public class code extends JPanel implements EditorBase {
             textArea.setTabSize(4);
         }
 
-        textArea.setBorder(new EmptyBorder(
+        textArea.setMargin(new Insets(
             Preferences.getInteger("theme.editor.margins.top"),
             Preferences.getInteger("theme.editor.margins.left"),
             Preferences.getInteger("theme.editor.margins.bottom"),
