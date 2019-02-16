@@ -3,7 +3,7 @@
 
     <property name="launch4j.dir" location="launch4j" />
 
-    <taskdef name="jarbundler" classname="com.ultramixer.jarbundler.JarBundler" classpath="antlib/jarbundler-2.3.2.jar" />
+    <taskdef name="jarbundler" classname="com.ultramixer.jarbundler.JarBundler" classpath="antlib/jarbundler-core-3.3.0.jar" />
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties">
         <classpath>
@@ -150,9 +150,10 @@
         icon="dist/macosx/icon.icns"
         stubfile="universalJavaApplicationStub/src/universalJavaApplicationStub"
         dir="bundle/macosx"
+        useJavaXKey="true"
         jar="uecide.jar"
         mainclass="org.uecide.Base"
-        jvmversion="1.7+"
+        jvmversion="1.8+"
         >
         <documenttype
             name="UECIDE Sketch"

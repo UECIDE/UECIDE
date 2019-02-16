@@ -62,7 +62,7 @@ public class Platform extends org.uecide.Platform {
 
     public void init(Base base) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-        ThinkDifferent.init(base);
+//        ThinkDifferent.init(base);
         probeInfo();
     }
 
