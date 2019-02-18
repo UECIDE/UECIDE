@@ -901,19 +901,11 @@ public class Base {
             System.exit(0);
         }
 
-        Reflections mainReflections = new Reflections("");
-        Set<Class<? extends Service>> serviceClasses = mainReflections.getSubTypesOf(Service.class);
-        for (Class<? extends Service> c : serviceClasses) {
-            try {
-                Constructor<?> ctor = c.getConstructor();
-                Service s = (Service)(ctor.newInstance());
-                ServiceManager.addService(s);
-            } catch (NoSuchMethodException ex) {
-            } catch (InstantiationException ex) {
-            } catch (IllegalAccessException ex) {
-            } catch (InvocationTargetException ex) {
-            }
-        }
+        ServiceManager.addService(new UsbDiscoveryService());
+        ServiceManager.addService(new BackgroundLibraryCompileService());
+        ServiceManager.addService(new ChangedFileService());
+        ServiceManager.addService(new NetworkDiscoveryService());
+        ServiceManager.addService(new TreeUpdaterService());        
     }
 
     public static void addJarFile(File f) {

@@ -4431,6 +4431,7 @@ public class Sketch {
     }
 
     public void addKeywordsFromFile(File f) {
+
         String kwd = Base.getFileAsString(f);
 
         String[] lines = kwd.split("\n");
