@@ -111,7 +111,7 @@ public class Editor extends JFrame {
     JPanel consolePanel;
 
     Console console;
-    GrittyTerminal testConsole;
+    GrittyTerminal outputConsole;
     ConsoleTty outputTty;
 
     JTabbedPane editorTabs;
@@ -143,6 +143,9 @@ public class Editor extends JFrame {
     JButton abortButton;
     JButton runButton;
     JButton programButton;
+
+    JToolBar consoleToolbar;
+    JToolBar outputToolbar;
 
     JScrollPane sidebarScroll;
 
@@ -321,16 +324,16 @@ public class Editor extends JFrame {
 
         console = new Console();
 
-        testConsole = new GrittyTerminal();
+        outputConsole = new GrittyTerminal();
         outputTty = new ConsoleTty();
-        testConsole.getTermPanel().setSize(new Dimension(100, 100));
-        testConsole.getTermPanel().setAntiAliasing(true);
-        testConsole.getTermPanel().setFont(Preferences.getFont("theme.console.fonts.command"));
+        outputConsole.getTermPanel().setSize(new Dimension(100, 100));
+        outputConsole.getTermPanel().setAntiAliasing(true);
+        outputConsole.getTermPanel().setFont(Preferences.getFont("theme.console.fonts.command"));
 
-        testConsole.getTermPanel().addMouseWheelListener(new MouseWheelListener() {
+        outputConsole.getTermPanel().addMouseWheelListener(new MouseWheelListener() {
             public void mouseWheelMoved(MouseWheelEvent e) {
-                testConsole.getScrollBar().setValue(
-                    testConsole.getScrollBar().getValue() + (
+                outputConsole.getScrollBar().setValue(
+                    outputConsole.getScrollBar().getValue() + (
                         e.getScrollAmount() * e.getWheelRotation()
                     )
                 );
@@ -339,11 +342,37 @@ public class Editor extends JFrame {
 
         JPanel outputPanel = new JPanel();
         outputPanel.setLayout(new BorderLayout());
-        outputPanel.add(testConsole.getTermPanel(), BorderLayout.CENTER);
-        outputPanel.add(testConsole.getScrollBar(), BorderLayout.EAST);
+        outputPanel.add(outputConsole.getTermPanel(), BorderLayout.CENTER);
+        outputPanel.add(outputConsole.getScrollBar(), BorderLayout.EAST);
 
-        testConsole.setTty(outputTty);
-        testConsole.start();
+        outputToolbar = new JToolBar();
+        outputToolbar.setFloatable(false);
+        outputToolbar.setOrientation(JToolBar.VERTICAL);
+
+        outputToolbar.add(new ToolbarButton("actions", "trash-empty", "Clear Console", 24, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                outputConsole.getTermPanel().getBackBuffer().clear();
+                outputConsole.getTermPanel().getScrollBuffer().clear();
+            }
+        }));
+        outputToolbar.add(new ToolbarButton("actions", "copy", "Copy Console Text", 24, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String scroll = outputConsole.getBufferText(GrittyTerminal.BufferType.Scroll);
+                String back = outputConsole.getBufferText(GrittyTerminal.BufferType.Back);
+                
+                StringSelection sel = new StringSelection(scroll + back);
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(sel, sel);
+            }
+        }));
+
+
+
+
+        outputPanel.add(outputToolbar, BorderLayout.WEST);
+
+        outputConsole.setTty(outputTty);
+        outputConsole.start();
 
         console.setURLClickListener(this);
 
@@ -419,7 +448,13 @@ public class Editor extends JFrame {
 
         consolePanel.add(consoleTabs, BorderLayout.CENTER);
 
-        consoleTabs.add(consoleScroll, Base.i18n.string("tab.console"));
+        JPanel consoleScrollContainer = new JPanel();
+        consoleScrollContainer.setLayout(new BorderLayout());
+
+        consoleScrollContainer.add(consoleScroll, BorderLayout.CENTER);
+
+        consoleTabs.add(consoleScrollContainer, Base.i18n.string("tab.console"));
+
         consoleTabs.add(outputPanel, Base.i18n.string("tab.output"));
 
         addPanelsToTabs(consoleTabs, Plugin.TABS_CONSOLE);
@@ -430,6 +465,25 @@ public class Editor extends JFrame {
         updateToolbar();
 
         toolbar.add(new ToolbarSpacer()); //Separator();
+
+        consoleToolbar = new JToolBar();
+        consoleToolbar.setFloatable(false);
+        consoleToolbar.setOrientation(JToolBar.VERTICAL);
+
+        consoleToolbar.add(new ToolbarButton("actions", "trash-empty", "Clear Console", 24, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                console.clear();
+            }
+        }));
+        consoleToolbar.add(new ToolbarButton("actions", "copy", "Copy Console Text", 24, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                StringSelection sel = new StringSelection(console.getText());
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(sel, sel);
+            }
+        }));
+
+        consoleScrollContainer.add(consoleToolbar, BorderLayout.WEST);
 
 
         miniBar = new JToolBar();
@@ -2339,8 +2393,9 @@ public class Editor extends JFrame {
 
     public void clearConsole() {
         console.clear();
-//        output.clear();
-        outputTty.feed("[2J[1;1H");
+        outputConsole.getTermPanel().getBackBuffer().clear();
+        outputConsole.getTermPanel().getScrollBuffer().clear();
+
     }
 
     public void setProgress(int x) {
@@ -4693,8 +4748,8 @@ public class Editor extends JFrame {
     }
 
     public void refreshScrolls() {
-        testConsole.getTermPanel().setAntiAliasing(true);
-        testConsole.getTermPanel().setFont(Preferences.getFont("theme.console.fonts.command"));
+        outputConsole.getTermPanel().setAntiAliasing(true);
+        outputConsole.getTermPanel().setFont(Preferences.getFont("theme.console.fonts.command"));
         consoleScroll.setShadow(
             Preferences.getInteger("theme.console.shadow.top"),
             Preferences.getInteger("theme.console.shadow.bottom")

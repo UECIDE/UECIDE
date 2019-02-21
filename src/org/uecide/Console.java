@@ -575,4 +575,12 @@ public class Console extends JTextPane implements ClipboardOwner {
     @Override 
     public void lostOwnership(Clipboard aClipboard, Transferable aContents) {
     }
+
+    public String getText() {
+        try {
+            return document.getText(0, document.getLength());
+        } catch (Exception e) {
+            return "";
+        }
+    }
 }

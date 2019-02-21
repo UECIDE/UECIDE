@@ -115,11 +115,21 @@ public class Preferences extends JDialog implements TreeSelectionListener {
     static public Font stringToFont(String value) {
         if(value == null) {
             value = "Monospaced,plain,12";
+            System.err.println("Warning: NULL font requested");
+        }
+
+        if (value.equals("default")) {
+            if (get("theme.editor.fonts.default.font").equals("default")) {
+                System.err.println("Warning: default font loop detected!");
+                return new Font("Monospaced", Font.PLAIN, 12);
+            } 
+            return stringToFont(get("theme.editor.fonts.default.font"));
         }
 
         String[] pieces = value.split(",");
 
         if(pieces.length != 3) {
+            System.err.println("Warning: Badly formatted font: [" + value + "]");
             return new Font("Monospaced", Font.PLAIN, 12);
         }
 
@@ -144,9 +154,15 @@ public class Preferences extends JDialog implements TreeSelectionListener {
             size = 12;
         }
 
+        if (!fontExists(name)) {
+            System.err.println("Warning: substituting default font for missing font " + name);
+            return new Font("Monospaced", Font.PLAIN, 12);
+        }
+
         Font font = new Font(name, style, size);
 
         if(font == null) {
+            System.err.println("Warning: something untoward happened when creating the font object");
             font = new Font("Monospaced", Font.PLAIN, 12);
         }
 
@@ -941,20 +957,39 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         String data = get(key);
         Font font = null;
         if (data == null || data.equals("")) {
-            font = Base.preferences.stringToFont("Monospaced,plain,12");
+            font = stringToFont("Monospaced,plain,12");
         } else {
-            font = Base.preferences.stringToFont(data);
+            font = stringToFont(data);
         }
         return font;
+    }
+
+    static HashMap<String, Boolean> cachedFontList = new HashMap<String, Boolean>();
+
+    public static boolean fontExists(String fontName) {
+        if (cachedFontList.get(fontName) != null) {
+            return cachedFontList.get(fontName);
+        }
+        GraphicsEnvironment g = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String[] fonts = g.getAvailableFontFamilyNames();
+        for (String availableFont : fonts) {
+            if (availableFont.equals(fontName)) {
+                cachedFontList.put(fontName, true);
+                return true;
+            }
+        }
+        cachedFontList.put(fontName, false);
+        System.err.println("Warning: missing font " + fontName);
+        return false;
     }
 
     public static Font getScaledFont(String key, int scale) {
         String data = get(key);
         Font font = null;
         if (data == null || data.equals("")) {
-            font = Base.preferences.stringToFont("Monospaced,plain,12");
+            font = stringToFont("Monospaced,plain,12");
         } else {
-            font = Base.preferences.stringToFont(data);
+            font = stringToFont(data);
         }
         float size = font.getSize();
         if (scale == 0) {
@@ -971,9 +1006,9 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         String data = get(key);
         Font font = null;
         if (data == null || data.equals("")) {
-            font = Base.preferences.stringToFont("Monospaced,plain,12");
+            font = stringToFont("Monospaced,plain,12");
         } else {
-            font = Base.preferences.stringToFont(data);
+            font = stringToFont(data);
         }
         return font;
     }
