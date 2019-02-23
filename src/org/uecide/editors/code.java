@@ -139,7 +139,7 @@ public class code extends JPanel implements EditorBase {
                     if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
                         searchTerm.setBackground(UIManager.getColor("TextField.background"));
                     } else {
-                        searchTerm.setBackground(textArea.getSyntaxScheme().getStyle(SyntaxScheme.ERROR_IDENTIFIER).background);
+                        searchTerm.setBackground(Preferences.getColor("theme.editor.colors.error"));
                     }
                 }
             });
@@ -148,7 +148,7 @@ public class code extends JPanel implements EditorBase {
                     if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
                         searchTerm.setBackground(UIManager.getColor("TextField.background"));
                     } else {
-                        searchTerm.setBackground(textArea.getSyntaxScheme().getStyle(SyntaxScheme.ERROR_IDENTIFIER).background);
+                        searchTerm.setBackground(Preferences.getColor("theme.editor.colors.error"));
                     }
                 }
             });
@@ -181,7 +181,7 @@ public class code extends JPanel implements EditorBase {
             if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
                 searchTerm.setBackground(UIManager.getColor("TextField.background"));
             } else {
-                searchTerm.setBackground(textArea.getSyntaxScheme().getStyle(SyntaxScheme.ERROR_IDENTIFIER).background);
+                searchTerm.setBackground(Preferences.getColor("theme.editor.colors.error"));
             }
 
         }
