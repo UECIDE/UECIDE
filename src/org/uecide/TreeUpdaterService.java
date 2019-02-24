@@ -31,7 +31,6 @@
 package org.uecide;
 
 public class TreeUpdaterService extends Service {
-    boolean wasUpdated = false;
 
     public TreeUpdaterService() {
         setName("Tree Updater");
@@ -50,17 +49,12 @@ public class TreeUpdaterService extends Service {
             for (Editor e : Editor.editorList) {
                 if (!e.compilerRunning()) {
                     if (e.getUpdateFlag()) {
-                        wasUpdated = true;
-                    } else {
-                        if (wasUpdated) {
-                            e.loadedSketch.findAllFunctions();
-                            e.loadedSketch.updateKeywords();
-                            e.loadedSketch.updateLibraryList();
-                            e.updateKeywords();
-                            e.updateLibrariesTree();
-                            e.updateSourceTree();
-                            wasUpdated = false;
-                        }
+                        e.loadedSketch.findAllFunctions();
+                        e.loadedSketch.updateKeywords();
+                        e.loadedSketch.updateLibraryList();
+                        e.updateKeywords();
+                        e.updateLibrariesTree();
+                        e.updateSourceTree();
                     }
                 }
             }
