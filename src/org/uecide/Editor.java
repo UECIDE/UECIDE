@@ -289,6 +289,28 @@ public class Editor extends JFrame {
             }
         });
 
+        editorTabs.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == 3) { // Right click
+                    JPopupMenu tabsMenu = new JPopupMenu();
+
+                    for (int i = 0; i < editorTabs.getTabCount(); i++) {
+                        JMenuItem m = new JMenuItem(editorTabs.getTitleAt(i));
+                        m.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent evt) {
+                                openOrSelectFile(new File(evt.getActionCommand()));
+                            }
+                        });
+                        m.setActionCommand(getTab(i).getFile().getAbsolutePath());
+                        tabsMenu.add(m);
+                    }
+
+                    tabsMenu.show(editorTabs, e.getX(), e.getY());
+                    e.consume();
+                }
+            }
+        });
+
         editorPanel.add(editorTabs, BorderLayout.CENTER);
 
         int width = Preferences.getInteger("editor.layout.window.width");
