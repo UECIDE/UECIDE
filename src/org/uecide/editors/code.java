@@ -65,16 +65,16 @@ public class code extends JPanel implements EditorBase {
     Sketch sketch;
     Editor editor;
     JPanel findPanel = null;
-    JTextField searchTerm = new JTextField();
-    JButton findButton = new JButton(Base.i18n.string("misc.find"));
+    JTextField searchTerm;
     SearchContext search = new SearchContext();
-    JCheckBox matchCase = new JCheckBox(Base.i18n.string("misc.case"));
-    JCheckBox searchBackwards = new JCheckBox(Base.i18n.string("misc.back"));
-    JTextField replaceWith = new JTextField();
+    JTextField replaceWith;
     JButton replaceButton = new JButton(Base.i18n.string("misc.replace"));
     JButton replaceAllButton = new JButton(Base.i18n.string("misc.all"));
-    JButton findCloseButton;
     Gutter gutter;
+
+    ToolbarButton findPanelBurgerMenu;
+    JCheckBox matchCase  = new JCheckBox(Base.i18n.string("search.case"));
+    JCheckBox wholeWord = new JCheckBox(Base.i18n.string("search.word"));
 
     String fileSyntax;
 
@@ -113,8 +113,9 @@ public class code extends JPanel implements EditorBase {
 
     public void openFindPanel() {
         if(findPanel == null) {
+
             ImageIcon closeIcon = Base.getIcon("actions", "close", 16);
-            findCloseButton = new JButton(closeIcon);
+            JButton findCloseButton = new JButton(closeIcon);
             findCloseButton.setBorder(new EmptyBorder(0, 2, 0, 2));
             findCloseButton.setContentAreaFilled(false);
             findPanel = new JPanel();
@@ -124,28 +125,56 @@ public class code extends JPanel implements EditorBase {
                 findPanel.add(findCloseButton);
             }
 
+            findPanelBurgerMenu = new ToolbarButton("actions", "format-list-unordered", "Search Options", 24, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        JPopupMenu menu = new JPopupMenu();
+                        menu.add(matchCase);
+                        menu.add(wholeWord);
+                        menu.show(findPanelBurgerMenu, 0, 0);
+                        
+                    }
+            });
+
+            findPanel.add(new JLabel("Search: "));
+
+            searchTerm = new JTextField();
             findPanel.add(searchTerm);
-            findPanel.add(findButton);
-            findPanel.add(matchCase);
-            findPanel.add(searchBackwards);
+
+            findPanel.add(findPanelBurgerMenu);
+
+            findPanel.add(new ToolbarButton("actions", "arrow-left-double", "Find Previous", 24, new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if(findNext(searchTerm.getText(), true)) {
+                        searchTerm.setBackground(UIManager.getColor("TextField.background"));
+                    } else {
+                        searchTerm.setBackground(Preferences.getColor("theme.editor.colors.error"));
+                    }
+                }
+            }));
+
+            findPanel.add(new ToolbarButton("actions", "arrow-right-double", "Find Next", 24, new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if(findNext(searchTerm.getText(), false)) {
+                        searchTerm.setBackground(UIManager.getColor("TextField.background"));
+                    } else {
+                        searchTerm.setBackground(Preferences.getColor("theme.editor.colors.error"));
+                    }
+                }
+            }));
+
+
+            findPanel.add(new JLabel(" Replace: "));
+            replaceWith = new JTextField();
+
             findPanel.add(replaceWith);
             findPanel.add(replaceButton);
             findPanel.add(replaceAllButton);
             add(findPanel, BorderLayout.SOUTH);
             revalidate();
             repaint();
-            findButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
-                        searchTerm.setBackground(UIManager.getColor("TextField.background"));
-                    } else {
-                        searchTerm.setBackground(Preferences.getColor("theme.editor.colors.error"));
-                    }
-                }
-            });
             searchTerm.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
+                    if(findNext(searchTerm.getText(), false)) {
                         searchTerm.setBackground(UIManager.getColor("TextField.background"));
                     } else {
                         searchTerm.setBackground(Preferences.getColor("theme.editor.colors.error"));
@@ -154,17 +183,17 @@ public class code extends JPanel implements EditorBase {
             });
             replaceWith.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    replaceNext(searchTerm.getText(), replaceWith.getText(), matchCase.isSelected(), searchBackwards.isSelected());
+                    replaceNext(searchTerm.getText(), replaceWith.getText(), false);
                 }
             });
             replaceButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    replaceNext(searchTerm.getText(), replaceWith.getText(), matchCase.isSelected(), searchBackwards.isSelected());
+                    replaceNext(searchTerm.getText(), replaceWith.getText(), false);
                 }
             });
             replaceAllButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    replaceAll(searchTerm.getText(), replaceWith.getText(), matchCase.isSelected(), searchBackwards.isSelected());
+                    replaceAll(searchTerm.getText(), replaceWith.getText(), false);
                 }
             });
 
@@ -178,7 +207,7 @@ public class code extends JPanel implements EditorBase {
         String sel = textArea.getSelectedText();
         if ((sel != null) && (!sel.equals(""))) {
             searchTerm.setText(sel);
-            if(findNext(searchTerm.getText(), matchCase.isSelected(), searchBackwards.isSelected())) {
+            if(findNext(searchTerm.getText(), false)) {
                 searchTerm.setBackground(UIManager.getColor("TextField.background"));
             } else {
                 searchTerm.setBackground(Preferences.getColor("theme.editor.colors.error"));
@@ -196,9 +225,10 @@ public class code extends JPanel implements EditorBase {
         repaint();
     }
 
-    public boolean findNext(String text, boolean mc, boolean back) {
+    public boolean findNext(String text, boolean back) {
         search.setSearchFor(text);
-        search.setMatchCase(mc);
+        search.setMatchCase(matchCase.isSelected());
+        search.setWholeWord(wholeWord.isSelected());
         search.setSearchForward(!back);
         SearchResult res = SearchEngine.find(textArea, search);
 
@@ -216,18 +246,20 @@ public class code extends JPanel implements EditorBase {
         return true;
     }
 
-    public void replaceNext(String text, String rep, boolean mc, boolean back) {
+    public void replaceNext(String text, String rep, boolean back) {
         search.setSearchFor(text);
         search.setReplaceWith(rep);
-        search.setMatchCase(mc);
+        search.setMatchCase(matchCase.isSelected());
+        search.setWholeWord(wholeWord.isSelected());
         search.setSearchForward(!back);
         SearchEngine.replace(textArea, search);
     }
 
-    public void replaceAll(String text, String rep, boolean mc, boolean back) {
+    public void replaceAll(String text, String rep, boolean back) {
         search.setSearchFor(text);
         search.setReplaceWith(rep);
-        search.setMatchCase(mc);
+        search.setMatchCase(matchCase.isSelected());
+        search.setWholeWord(wholeWord.isSelected());
         search.setSearchForward(!back);
         SearchEngine.replaceAll(textArea, search);
     }

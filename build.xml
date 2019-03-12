@@ -406,7 +406,7 @@
             <maven group="jfree"                                   artifact="jfreechart"               version="1.0.13" />
             <!--maven group="junit"                                   artifact="junit"                    version="4.10" /-->
             <!--maven group="org.dnsjava"                             artifact="dnsjava"                  version="2.1.5" /-->
-            <download url="http://www.dnsjava.org/download/dnsjava-2.1.5.jar" filename="dnsjava.jar" />
+            <download url="http://www.dnsjava.org/download/dnsjava-2.1.8.jar" filename="dnsjava.jar" />
         </depends>
     </target>
 

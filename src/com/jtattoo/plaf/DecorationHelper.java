@@ -36,73 +36,26 @@ public class DecorationHelper {
     }
 
     public static void decorateWindows(Boolean decorate) {
-        if (JTattooUtilities.getJavaVersion() >= 1.4) {
-            try {
-                Class classParams[] = {Boolean.TYPE};
-                Method m = JFrame.class.getMethod("setDefaultLookAndFeelDecorated", classParams);
-                Object methodParams[] = {decorate};
-                m.invoke(null, methodParams);
-                m = JDialog.class.getMethod("setDefaultLookAndFeelDecorated", classParams);
-                m.invoke(null, methodParams);
-                System.setProperty("sun.awt.noerasebackground", "true");
-                System.setProperty("sun.awt.erasebackgroundonresize", "false");
-            } catch (Exception ex) {
-            }
-        }
+        JFrame.setDefaultLookAndFeelDecorated(decorate);
+        JDialog.setDefaultLookAndFeelDecorated(decorate);
+        System.setProperty("sun.awt.noerasebackground", "true");
+        System.setProperty("sun.awt.erasebackgroundonresize", "false");
     }
 
     public static int getWindowDecorationStyle(JRootPane root) {
-        if (JTattooUtilities.getJavaVersion() >= 1.4) {
-            try {
-                Class paramTypes[] = null;
-                Object args[] = null;
-                Method m = root.getClass().getMethod("getWindowDecorationStyle", paramTypes);
-                Integer i = (Integer) m.invoke(root, args);
-                return i.intValue();
-            } catch (Exception ex) {
-            }
-        }
-        return 0;
+        return root.getWindowDecorationStyle();
     }
 
     public static int getExtendedState(Frame frame) {
-        if (JTattooUtilities.getJavaVersion() >= 1.4) {
-            try {
-                Class paramTypes[] = null;
-                Object args[] = null;
-                Method m = frame.getClass().getMethod("getExtendedState", paramTypes);
-                Integer i = (Integer) m.invoke(frame, args);
-                return i.intValue();
-            } catch (Exception ex) {
-            }
-        }
-        return 0;
+        return frame.getExtendedState();
     }
 
     public static void setExtendedState(Frame frame, int state) {
-        if (JTattooUtilities.getJavaVersion() >= 1.4) {
-            try {
-                Class classParams[] = {Integer.TYPE};
-                Method m = frame.getClass().getMethod("setExtendedState", classParams);
-                Object methodParams[] = {state};
-                m.invoke(frame, methodParams);
-            } catch (Exception ex) {
-            }
-        }
+        frame.setExtendedState(state);
     }
 
     public static boolean isFrameStateSupported(Toolkit tk, int state) {
-        if (JTattooUtilities.getJavaVersion() >= 1.4) {
-            try {
-                Class classParams[] = {Integer.TYPE};
-                Method m = tk.getClass().getMethod("isFrameStateSupported", classParams);
-                Object methodParams[] = {state};
-                Boolean b = (Boolean) m.invoke(tk, methodParams);
-                return b.booleanValue();
-            } catch (Exception ex) {
-            }
-        }
-        return false;
+        return tk.isFrameStateSupported(state);
     }
 
     public static boolean isTranslucentWindowSupported() {
@@ -112,29 +65,13 @@ public class DecorationHelper {
     @SuppressWarnings("unchecked")
     public static void setTranslucentWindow(Window wnd, boolean translucent) {
         if (isTranslucentWindowSupported()) {
-            if (JTattooUtilities.getJavaVersion() >= 1.7) {
-                if (translucent) {
-                    if (wnd.getBackground() == null || !wnd.getBackground().equals(new Color(0, 0, 0, 0))) {
-                        wnd.setBackground(new Color(0, 0, 0, 0));
-                    }
-                } else {
-                    if (wnd.getBackground() == null || !wnd.getBackground().equals(new Color(0, 0, 0, 0xff))) {
-                        wnd.setBackground(new Color(0, 0, 0, 0xff));
-                    }
+            if (translucent) {
+                if (wnd.getBackground() == null || !wnd.getBackground().equals(new Color(0, 0, 0, 0))) {
+                    wnd.setBackground(new Color(0, 0, 0, 0));
                 }
-            } else if (JTattooUtilities.getJavaVersion() >= 1.6010) {
-                try {
-                    Class clazz = Class.forName("com.sun.awt.AWTUtilities");
-                    Class classParams[] = {Window.class, Boolean.TYPE};
-                    Method method = clazz.getMethod("setWindowOpaque", classParams);
-                    if (translucent) {
-                        Object methodParams[] = {wnd, Boolean.FALSE};
-                        method.invoke(wnd, methodParams);
-                    } else {
-                        Object methodParams[] = {wnd, Boolean.TRUE};
-                        method.invoke(wnd, methodParams);
-                    }
-                } catch (Exception ex) {
+            } else {
+                if (wnd.getBackground() == null || !wnd.getBackground().equals(new Color(0, 0, 0, 0xff))) {
+                    wnd.setBackground(new Color(0, 0, 0, 0xff));
                 }
             }
         }

@@ -1,14 +1,36 @@
 Changelog
 =========
 
-0.10.4
+0.10.6
 ------
 
+* Fixed tree updating sequence
+* Fix background issue with search box "not foun" status
+* Cleanup of font replacement. Added copy and clear as toolbars to console
+* Fix background service starting
+* Fixed execution on OS X JVM > 8
+* Fixed missing no programmer error message
+* Fix code border messing with cursor positioning
+* Fix default editor font
+
+
+0.10.5
+------
+
+* #126 Pause button for serial terminal
+* #127 Clear button for Serial Terminal
+* #128 Explicit save button for Serial Terminal
+* Capture serial data to file
 * Add hardware acceleration
 * Added theme load/save buttons in preferences
 * Fixed JTattoo custom decorator setting
 * Removed obsolete and broken project search code
 * Improved search and replace interaction
+
+
+0.10.4
+------
+
 * Added protection against missing prototype return types
 * Converted multiple spaces to single space in ctags protos
 
@@ -652,6 +674,18 @@ Changelog
 0.8.5
 -----
 
+* Fixed tree updating sequence
+* Fix background issue with search box "not foun" status
+* Cleanup of font replacement. Added copy and clear as toolbars to console
+* Fix background service starting
+* Fixed execution on OS X JVM > 8
+* Fixed missing no programmer error message
+* Fix code border messing with cursor positioning
+* Fix default editor font
+* #126 Pause button for serial terminal
+* #127 Clear button for Serial Terminal
+* #128 Explicit save button for Serial Terminal
+* Capture serial data to file
 * Add hardware acceleration
 * Added theme load/save buttons in preferences
 * Fixed JTattoo custom decorator setting
