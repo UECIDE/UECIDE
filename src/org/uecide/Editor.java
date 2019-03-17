@@ -58,6 +58,8 @@ import org.uecide.Compiler;
 
 import java.beans.*;
 
+import org.apache.commons.text.WordUtils;
+
 import java.util.jar.*;
 import java.util.zip.*;
 
@@ -2457,13 +2459,15 @@ public class Editor extends JFrame {
             EditorBase eb = (EditorBase)editorTabs.getComponentAt(tab);
 
             if(eb.isModified()) {
+                this.requestFocus();
+                selectTab(tab);
                 int option = threeOptionBox(
                                  JOptionPane.WARNING_MESSAGE,
                                  Base.i18n.string("msg.unsaved.title"),
-                                 Base.i18n.string("msg.unsaved.body"),
-                                 Base.i18n.string("misc.yes"),
-                                 Base.i18n.string("misc.no"),
-                                 Base.i18n.string("misc.cancel")
+                                 Base.i18n.string("msg.unsaved.body", getTabName(tab), loadedSketch.getName()),
+                                 Base.i18n.string("misc.save"),
+                                 Base.i18n.string("misc.dontsave"),
+                                 Base.i18n.string("misc.dontclose")
                              );
 
                 if(option == 2) return false;
@@ -2710,17 +2714,36 @@ public class Editor extends JFrame {
     }
 
     public void alert(String message) {
-        JOptionPane.showMessageDialog(this, message, Base.i18n.string("misc.alert"), JOptionPane.WARNING_MESSAGE);
+        oneOptionBox(JOptionPane.WARNING_MESSAGE, Base.i18n.string("misc.alert"), message);
+    }
+
+    public void oneOptionBox(int type, String title, String message) {
+        JPanel container = new JPanel();
+        container.setLayout(new BorderLayout());
+        message = "<html>" + WordUtils.wrap(message, 50, "<br/>", false) + "</html>";
+        container.add(new JLabel(message), BorderLayout.CENTER);
+        container.setBorder(new EmptyBorder(10, 10, 10, 10));
+        JOptionPane.showMessageDialog(this, container, title, type);
     }
 
     public int twoOptionBox(int type, String title, String message, String option0, String option1) {
         Object[] options = { option0, option1 };
-        return JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, type, null, options, options[1]);
+        JPanel container = new JPanel();
+        container.setLayout(new BorderLayout());
+        message = "<html>" + WordUtils.wrap(message, 50, "<br/>", false) + "</html>";
+        container.add(new JLabel(message), BorderLayout.CENTER);
+        container.setBorder(new EmptyBorder(10, 10, 10, 10));
+        return JOptionPane.showOptionDialog(this, container, title, JOptionPane.YES_NO_OPTION, type, null, options, options[1]);
     }
 
     public int threeOptionBox(int type, String title, String message, String option0, String option1, String option2) {
         Object[] options = { option0, option1, option2 };
-        return JOptionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_CANCEL_OPTION, type, null, options, options[2]);
+        JPanel container = new JPanel();
+        container.setLayout(new BorderLayout());
+        message = "<html>" + WordUtils.wrap(message, 50, "<br/>", false) + "</html>";
+        container.add(new JLabel(message), BorderLayout.CENTER);
+        container.setBorder(new EmptyBorder(10, 10, 10, 10));
+        return JOptionPane.showOptionDialog(this, container, title, JOptionPane.YES_NO_CANCEL_OPTION, type, null, options, options[2]);
     }
 
     public boolean askCloseWindow() throws IOException {
@@ -2729,16 +2752,14 @@ public class Editor extends JFrame {
 
         if(editorList.size() == 1) {
             if(Base.isMacOS()) {
-                Object[] options = { Base.i18n.string("misc.yes"), Base.i18n.string("misc.cancel") };
+                Object[] optioens = { Base.i18n.string("misc.yes"), Base.i18n.string("misc.cancel") };
 
-                int result = JOptionPane.showOptionDialog(this,
-                             Base.i18n.string("msg.quit.body"),
-                             Base.i18n.string("msg.quit.title"),
-                             JOptionPane.YES_NO_OPTION,
-                             JOptionPane.QUESTION_MESSAGE,
-                             null,
-                             options,
-                             options[0]);
+                int result = twoOptionBox(JOptionPane.WARNING_MESSAGE,
+                                Base.i18n.string("msg.quit.title"),
+                                Base.i18n.string("msg.quit.body"),
+                                Base.i18n.string("misc.yes"),
+                                Base.i18n.string("misc.no")
+                            );
 
                 if(result == JOptionPane.NO_OPTION ||
                         result == JOptionPane.CLOSED_OPTION
@@ -4061,16 +4082,13 @@ public class Editor extends JFrame {
                     int n = 0;
 
                     if(targetDir.exists()) {
-                        Object[] options = { "Yes", "No" };
-                        n = JOptionPane.showOptionDialog(this,
-                                                         "The sketch " + sketchName + " already exists.\n" +
-                                                         "Do you want to overwrite it?",
-                                                         "Sketch Exists",
-                                                         JOptionPane.YES_NO_OPTION,
-                                                         JOptionPane.QUESTION_MESSAGE,
-                                                         null,
-                                                         options,
-                                                         options[1]);
+                        n = twoOptionBox(
+                            JOptionPane.WARNING_MESSAGE,
+                            Base.i18n.string("msg.overwrite.sketch.title"),
+                            Base.i18n.string("msg.overwrite.sketch.body", targetDir.getName()),
+                            Base.i18n.string("misc.yes"),
+                            Base.i18n.string("misc.no")
+                        );
 
                         if(n == 0) {
                             Base.removeDir(targetDir);
@@ -4394,11 +4412,8 @@ public class Editor extends JFrame {
                 return;
             }
 
-            JOptionPane.showMessageDialog(this,
-                Base.i18n.string("err.invalid.body"),
-                Base.i18n.string("err.invalid.title"),
-                JOptionPane.ERROR_MESSAGE
-            );
+            oneOptionBox(JOptionPane.ERROR_MESSAGE, Base.i18n.string("err.invalid.title"), Base.i18n.string("err.invalid.body"));
+
             name = (String)JOptionPane.showInputDialog(
                 this,
                 Base.i18n.string("msg.create.body"),
@@ -4465,11 +4480,7 @@ public class Editor extends JFrame {
             }
 
             if(!src.exists()) {
-                JOptionPane.showMessageDialog(this, 
-                    Base.i18n.string("err.notfound.title"),
-                    Base.i18n.string("err.notfound", src.getName()), 
-                    JOptionPane.ERROR_MESSAGE
-                );
+                oneOptionBox(JOptionPane.ERROR_MESSAGE, Base.i18n.string("err.notfound.title"), Base.i18n.string("err.notfound", src.getName()));
                 return;
             }
 
@@ -4491,11 +4502,7 @@ public class Editor extends JFrame {
 
             try {
                 if (src.getCanonicalPath().equals(dest.getCanonicalPath())) {
-                    JOptionPane.showMessageDialog(this, 
-                        Base.i18n.string("err.samefile", src.getName(), dest.getName()), 
-                        Base.i18n.string("err.samefile.title"),
-                        JOptionPane.ERROR_MESSAGE
-                    );
+                    oneOptionBox(JOptionPane.ERROR_MESSAGE, Base.i18n.string("err.samefile.title"), Base.i18n.string("err.samefile", src.getName(), dest.getName()));
                     return;
                 }
             } catch (Exception eee) { }

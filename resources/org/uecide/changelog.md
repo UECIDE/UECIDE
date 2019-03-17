@@ -4,6 +4,8 @@ Changelog
 0.10.6
 ------
 
+* Provide right-click menu on tabs for easier navigation on themes that don't provide a tab menu button
+* Improved search panel
 * Fixed tree updating sequence
 * Fix background issue with search box "not foun" status
 * Cleanup of font replacement. Added copy and clear as toolbars to console
@@ -674,6 +676,8 @@ Changelog
 0.8.5
 -----
 
+* Provide right-click menu on tabs for easier navigation on themes that don't provide a tab menu button
+* Improved search panel
 * Fixed tree updating sequence
 * Fix background issue with search box "not foun" status
 * Cleanup of font replacement. Added copy and clear as toolbars to console
