@@ -528,7 +528,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
 //        term.showCursor(Preferences.getBoolean("plugins.serialterminal.cursor"));
 //        port.addCommsListener(this);
 
-        win.setTitle(Translate.t("Serial Terminal") + " :: " + port);
+        win.setTitle(Translate.t("Serial Terminal") + " :: " + editor.getSketch().getName() + " :: " + port);
         win.setVisible(true);
         ready = true;
     }
