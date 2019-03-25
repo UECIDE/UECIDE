@@ -196,8 +196,9 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
             public void actionPerformed(ActionEvent e) {
                 ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
                 tty.discardInput(b.isSelected());
+                b.setAlternateIcon(b.isSelected());
             }
-        });
+        }, "actions", "media-playback-start");
 
         as.setSelected(false);
 
