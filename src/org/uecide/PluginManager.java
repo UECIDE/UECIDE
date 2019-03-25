@@ -276,7 +276,11 @@ public class PluginManager implements PropertyChangeListener
         fileMenu.add(closeMenu);
         closeMenu.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                askCloseWindow();
+                try {
+                    askCloseWindow();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
@@ -324,7 +328,7 @@ public class PluginManager implements PropertyChangeListener
         tree.setCellRenderer(new PluginTreeCellRenderer());
 
         JButton refreshButton = new JButton("Refresh");
-        refreshButton.setIcon(Base.getIcon("actions", "refresh", 24));
+        refreshButton.setIcon(IconManager.getIcon(24, "pim.refresh"));
         refreshButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -335,7 +339,7 @@ public class PluginManager implements PropertyChangeListener
         toolbar.add(refreshButton);
 
         upgradeButton = new JButton("Upgrade All");
-        upgradeButton.setIcon(Base.getIcon("actions", "upgrade-all", 24));
+        upgradeButton.setIcon(IconManager.getIcon(24, "pim.upgrade-all"));
         upgradeButton.setEnabled(true);
         upgradeButton.setToolTipText("Upgrade All Plugins");
         upgradeButton.addActionListener(new ActionListener() {
@@ -349,7 +353,11 @@ public class PluginManager implements PropertyChangeListener
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                askCloseWindow();
+                try {
+                    askCloseWindow();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
         //toolbar.add(closeButton);
@@ -432,10 +440,10 @@ public class PluginManager implements PropertyChangeListener
         localHomepageButton = new JButton("Homepage");
 
 
-        localInstallButton.setIcon(Base.getIcon("actions", "install", 24));
-        localUninstallButton.setIcon(Base.getIcon("actions", "close", 24));
-        localUpgradeButton.setIcon(Base.getIcon("actions", "upgrade", 24)); 
-        localHomepageButton.setIcon(Base.getIcon("apps", "web", 24));
+        localInstallButton.setIcon(IconManager.getIcon(24, "pim.install"));
+        localUninstallButton.setIcon(IconManager.getIcon(24, "pim.uninstall"));
+        localUpgradeButton.setIcon(IconManager.getIcon(24, "pim.upgrade")); 
+        localHomepageButton.setIcon(IconManager.getIcon(24, "pim.browser"));
 
         localInstallButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -549,7 +557,11 @@ public class PluginManager implements PropertyChangeListener
 
         frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                askCloseWindow();
+                try {
+                    askCloseWindow();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -577,7 +589,7 @@ public class PluginManager implements PropertyChangeListener
 
     }
 
-    public void askCloseWindow() {
+    public void askCloseWindow() throws IOException {
         if (queue.getQueueSize() > 0) {
             Object[] options = {"Yes", "No"};
             int n = JOptionPane.showOptionDialog(
@@ -643,79 +655,83 @@ public class PluginManager implements PropertyChangeListener
         DefaultTreeCellRenderer defaultRenderer = new DefaultTreeCellRenderer();
 
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-            if ((value != null) && (value instanceof DefaultMutableTreeNode)) {
-                JPanel container = new JPanel();
-                container.setLayout(new BorderLayout());
-                ImageIcon icon = null;
-                UIDefaults defaults = javax.swing.UIManager.getDefaults();
-                Color bg = defaults.getColor("List.selectionBackground");
-                Color fg = defaults.getColor("List.selectionForeground");
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-                Object userObject = node.getUserObject();
-                Border noBorder = BorderFactory.createEmptyBorder(0,0,0,0);
-                Border paddingBorder = BorderFactory.createEmptyBorder(2,2,2,2);
+            try {
+                if ((value != null) && (value instanceof DefaultMutableTreeNode)) {
+                    JPanel container = new JPanel();
+                    container.setLayout(new BorderLayout());
+                    ImageIcon icon = null;
+                    UIDefaults defaults = javax.swing.UIManager.getDefaults();
+                    Color bg = defaults.getColor("List.selectionBackground");
+                    Color fg = defaults.getColor("List.selectionForeground");
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+                    Object userObject = node.getUserObject();
+                    Border noBorder = BorderFactory.createEmptyBorder(0,0,0,0);
+                    Border paddingBorder = BorderFactory.createEmptyBorder(2,2,2,2);
 
-                if (!leaf) {
-                    JLabel text = new JLabel(node.toString());
-                    if(expanded) {
-                        icon = Base.getIcon("bookmarks", "folder-open", 16);
-                    } else {
-                        icon = Base.getIcon("bookmarks", "folder", 16);
+                    if (!leaf) {
+                        JLabel text = new JLabel(node.toString());
+                        if(expanded) {
+                            icon = IconManager.getIcon(16, "tree.folder-open");
+                        } else {
+                            icon = IconManager.getIcon(16, "tree.folder-closed");
+                        }
+
+                        text.setBorder(paddingBorder);
+                        if (selected) {
+                            text.setBackground(bg);
+                            text.setForeground(fg);
+                            text.setOpaque(true);
+                        } else {
+                            text.setOpaque(false);
+                        }
+
+                        container.setOpaque(false);
+                        container.setBorder(noBorder);
+                        JLabel i = new JLabel(icon);
+                        container.add(i, BorderLayout.WEST);
+                        container.add(text, BorderLayout.CENTER);
+                        return container;
                     }
 
-                    text.setBorder(paddingBorder);
-                    if (selected) {
-                        text.setBackground(bg);
-                        text.setForeground(fg);
-                        text.setOpaque(true);
-                    } else {
+                    if (userObject instanceof Package) {
+                        Package pe = (Package)userObject;
+                        String descString = pe.getDescription();
+                        if (descString == null) {
+                            descString = "Description Missing";
+                        }
+                        String[] descLines = descString.split("\n");
+                        JLabel text = new JLabel(descLines[0]);
+                        if (pe.getState() != 0) {
+                            icon = IconManager.getIcon(16, "pim.busy");
+                        } else if (!apt.isInstalled(pe)) {
+                            icon = IconManager.getIcon(16, "pim.install");
+                        } else if (apt.isUpgradable(pe)) {
+                            icon = IconManager.getIcon(16, "pim.upgrade");
+                        } else {
+                            icon = IconManager.getIcon(16, "pim.installed");
+                        }
+                        text.setBorder(paddingBorder);
+                        container.setOpaque(false);
                         text.setOpaque(false);
+
+                        JLabel i = new JLabel(icon);
+                        container.add(i, BorderLayout.WEST);
+                        container.add(text, BorderLayout.CENTER);
+
+                        if (selected) {
+                            text.setBackground(bg);
+                            text.setForeground(fg);
+                            text.setOpaque(true);
+                        } else {
+                            text.setOpaque(false);
+                        }
+
+                        return container;
                     }
 
-                    container.setOpaque(false);
-                    container.setBorder(noBorder);
-                    JLabel i = new JLabel(icon);
-                    container.add(i, BorderLayout.WEST);
-                    container.add(text, BorderLayout.CENTER);
-                    return container;
                 }
-
-                if (userObject instanceof Package) {
-                    Package pe = (Package)userObject;
-                    String descString = pe.getDescription();
-                    if (descString == null) {
-                        descString = "Description Missing";
-                    }
-                    String[] descLines = descString.split("\n");
-                    JLabel text = new JLabel(descLines[0]);
-                    if (pe.getState() != 0) {
-                        icon = Base.getIcon("flags", "busy", 16);
-                    } else if (!apt.isInstalled(pe)) {
-                        icon = Base.getIcon("actions", "install", 16);
-                    } else if (apt.isUpgradable(pe)) {
-                        icon = Base.getIcon("actions", "upgrade", 16);
-                    } else {
-                        icon = Base.getIcon("flags", "yes", 16);
-                    }
-                    text.setBorder(paddingBorder);
-                    container.setOpaque(false);
-                    text.setOpaque(false);
-
-                    JLabel i = new JLabel(icon);
-                    container.add(i, BorderLayout.WEST);
-                    container.add(text, BorderLayout.CENTER);
-
-                    if (selected) {
-                        text.setBackground(bg);
-                        text.setForeground(fg);
-                        text.setOpaque(true);
-                    } else {
-                        text.setOpaque(false);
-                    }
-
-                    return container;
-                }
-
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
             return defaultRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         }

@@ -102,11 +102,15 @@ public class VirtualLCD extends Plugin implements CommsListener
 
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == Plugin.TOOLBAR_EDITOR) {
-            toolbar.add(new ToolbarButton("apps", "vlcd", "Virtual LCD", new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    run();
-                }
-            }));
+            try {
+                toolbar.add(new ToolbarButton("apps.vlcd", "Virtual LCD", new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        run();
+                    }
+                }));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

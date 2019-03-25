@@ -67,14 +67,14 @@ public class TabLabel extends JPanel {
 
     boolean isSelected = false;
 
-    public TabLabel(Editor e, File sf) {
+    public TabLabel(Editor e, File sf) throws IOException {
         editor = e;
         sketchFile = sf;
         name = sketchFile.getName();
         this.setLayout(new BorderLayout());
         nameLabel = new JLabel(name);
 //        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
-        fileIcon = Base.getIcon("mime",(FileType.getIcon(sketchFile)), 16);
+        fileIcon = IconManager.getIcon(16, "mime." + FileType.getIcon(sketchFile));
 
         if(fileIcon != null) {
             nameLabel.setIcon(fileIcon);
@@ -82,7 +82,7 @@ public class TabLabel extends JPanel {
 
         JLabel blab = new JLabel();
         nameLabel.setOpaque(false);
-        blab.setIcon(Base.getIcon("actions", "close", 16));
+        blab.setIcon(IconManager.getIcon(16, "tabs.close"));
 
         blab.addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {
@@ -108,7 +108,7 @@ public class TabLabel extends JPanel {
         update();
     }
 
-    public TabLabel(Editor e, String tabname) {
+    public TabLabel(Editor e, String tabname) throws IOException {
         editor = e;
         sketchFile = null;
         name = tabname;
@@ -117,7 +117,7 @@ public class TabLabel extends JPanel {
 //        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
         JLabel blab = new JLabel();
         nameLabel.setOpaque(false);
-        blab.setIcon(Base.loadIconFromResource("tabs/close.png"));
+        blab.setIcon(IconManager.getIcon(16, "tabs.close"));
 
         blab.addMouseListener(new MouseListener() {
             public void mouseClicked(MouseEvent e) {

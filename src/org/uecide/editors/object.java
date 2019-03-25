@@ -54,7 +54,7 @@ import org.fife.ui.rtextarea.*;
 
 public class object extends text {
 
-    public object(Sketch s, File f, Editor e) {
+    public object(Sketch s, File f, Editor e) throws IOException {
         super(s, f, e);
         textArea.setEditable(false);
     }

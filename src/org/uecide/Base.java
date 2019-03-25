@@ -84,8 +84,6 @@ public class Base {
 
     public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
 
-    public static final String defaultIconSet = "gnomic";
-
     public static String RELEASE = "release";
 
     public static String overrideSettingsFolder = null;
@@ -160,8 +158,6 @@ public class Base {
     static Thread libraryLoaderThread = null;
     static Thread cleanupThread = null;
 
-    public static FileCache systemFileCache = null;
-
 
     /*! Get a Board from the internal boards list by its short name. */
     public static Board getBoard(String name) {
@@ -182,7 +178,11 @@ public class Base {
      *  object and passes the command line arguments.
      */
     public static void main(String args[]) {
-        new Base(args);
+        try {
+            new Base(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /*! Return a File representing the location of the JAR file the
@@ -237,25 +237,24 @@ public class Base {
     static public void cacheSystemFilesFromList(File[] list) {
         for (File f : list) {
             Debug.message("Caching " + f);
-            systemFileCache.add(f);
+            FileCache.add(f);
         }
     }
 
     static public void cacheSystemFiles() {
-        systemFileCache = new FileCache();
-
         cacheSystemFilesFromList(getCoresFolders());
         cacheSystemFilesFromList(getToolsFolders());
         cacheSystemFilesFromList(getProgrammersFolders());
         cacheSystemFilesFromList(getBoardsFolders());
         cacheSystemFilesFromList(getCompilersFolders());
+        cacheSystemFilesFromList(getIconsFolders());
 // I'd love to cache the library tree and parse it, but that would make
 // categories suck big time.
 //        cacheSystemFilesFromList(getLibrariesFolders()); 
     }
 
     /*! The constructor is the main execution routine. */
-    public Base(String[] args) {
+    public Base(String[] args) throws IOException {
         cli.addParameter("debug",               "",         Boolean.class,  "cli.help.debug");
         cli.addParameter("verbose",             "",         Boolean.class,  "cli.help.verbose");
         cli.addParameter("exceptions",          "",         Boolean.class,  "cli.help.exceptions");
@@ -308,11 +307,9 @@ public class Base {
 
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                System.err.println(getRequestingURL());
                 Pattern pat = Pattern.compile(":\\/\\/([a-zA-Z0-9]+):([a-zA-Z0-9]+)@");
                 Matcher m = pat.matcher(getRequestingURL().toString());
                 if (m.find()) {
-                    System.err.println("[" + m.group(1) + "][" + m.group(2) + "]");
                     return new PasswordAuthentication(m.group(1), m.group(2).toCharArray());
                 }
 
@@ -1174,7 +1171,7 @@ public class Base {
         compilers.clear();
 //        compilerLoaderThread = new Thread() {
 //            public void run() {
-                ArrayList<File> compilerFiles = systemFileCache.getFilesByName("compiler.txt");
+                ArrayList<File> compilerFiles = FileCache.getFilesByName("compiler.txt");
                 for (File cfile : compilerFiles) {
                     if(cfile.exists()) {
                         Debug.message("    Loading compiler " + cfile.getAbsolutePath());
@@ -1197,7 +1194,7 @@ public class Base {
 //        coreLoaderThread = new Thread() {
 //            public void run() {
 
-                ArrayList<File> coreFiles = systemFileCache.getFilesByName("core.txt");
+                ArrayList<File> coreFiles = FileCache.getFilesByName("core.txt");
                 for (File cfile : coreFiles) {
                     if(cfile.exists()) {
                         Debug.message("    Loading core " + cfile.getAbsolutePath());
@@ -1220,7 +1217,7 @@ public class Base {
 //        boardLoaderThread = new Thread() {
 //            public void run() {
 
-                ArrayList<File> boardFiles = systemFileCache.getFilesByName("board.txt");
+                ArrayList<File> boardFiles = FileCache.getFilesByName("board.txt");
                 for (File bfile : boardFiles) {
                     if(bfile.exists()) {
                         Debug.message("    Loading board " + bfile.getAbsolutePath());
@@ -1243,7 +1240,7 @@ public class Base {
 //        programmerLoaderThread = new Thread() {
 //            public void run() {
 
-                ArrayList<File> programmerFiles = systemFileCache.getFilesByName("programmer.txt");
+                ArrayList<File> programmerFiles = FileCache.getFilesByName("programmer.txt");
                 for (File pfile : programmerFiles) {
                     if(pfile.exists()) {
                         Debug.message("    Loading programmer " + pfile.getAbsolutePath());
@@ -1266,7 +1263,7 @@ public class Base {
 //        toolLoaderThread = new Thread() {
 //            public void run() {
 
-                ArrayList<File> toolFiles = systemFileCache.getFilesByName("tool.txt");
+                ArrayList<File> toolFiles = FileCache.getFilesByName("tool.txt");
                 for (File tfile : toolFiles) {
                     if(tfile.exists()) {
                         Debug.message("    Loading tool " + tfile.getAbsolutePath());
@@ -2019,6 +2016,7 @@ public class Base {
     static public File[] getPluginsFolders() { return getAnyFolders("plugins"); }
     static public File[] getCompilersFolders() { return getAnyFolders("compilers"); }
     static public File[] getLibrariesFolders() { return getAnyFolders("libraries"); }
+    static public File[] getIconsFolders() { return getAnyFolders("icons"); }
 
     static public void errorReport(Thread t, Throwable e) {
         showError("Uncaught Exception", "An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")\n" +
@@ -2115,7 +2113,7 @@ public class Base {
 
     // This handy little function will rebuild the whole of the internals of
     // UECIDE - that is, all the boards, cores, compilers and libraries etc.
-    public static void cleanAndScanAllSettings() {
+    public static void cleanAndScanAllSettings() throws IOException {
         try {
 
             SwingWorker<String, Object> worker = new SwingWorker<String, Object>() {
@@ -2127,6 +2125,8 @@ public class Base {
                     Serial.updatePortList();
                     Serial.fillExtraPorts();
                     Editor.bulletAll(i18n.string("msg.loading.assets"));
+
+                    IconManager.loadIconSets();
                     rescanCompilers();
                     rescanCores();
                     rescanBoards();
@@ -2138,6 +2138,8 @@ public class Base {
                     waitForAssetLoading();
 
                     buildPreferencesTree();
+
+                    IconManager.setIconFamily(Preferences.get("theme.icons"));
 
                     return "OK";
                 }
@@ -2211,20 +2213,6 @@ public class Base {
         Editor.updateLookAndFeel();
     }
 
-    public static ImageIcon loadIconFromFile(File f) {
-        return new ImageIcon(f.getAbsolutePath());
-    }
-
-    public static ImageIcon loadIconFromResource(String res, URLClassLoader loader) {
-        URL loc = loader.getResource(res);
-
-        if(loc == null) {
-            loc = Base.class.getResource("/org/uecide/icons/unknown.png");
-        }
-
-        return new ImageIcon(loc);
-    }
-
     public static BufferedImage loadImageFromResource(String res) {
         if(!res.startsWith("/")) {
             res = "/org/uecide/" + res;
@@ -2244,20 +2232,6 @@ public class Base {
         }
 
         return null;
-    }
-
-    public static ImageIcon loadIconFromResource(String res) {
-        if(!res.startsWith("/")) {
-            res = "/org/uecide/icons/" + res;
-        }
-
-        URL loc = Base.class.getResource(res);
-
-        if(loc == null) {
-            loc = Base.class.getResource("/org/uecide/icons/unknown.png");
-        }
-
-        return new ImageIcon(loc);
     }
 
     public static boolean copyResourceToFile(String res, File dest) {
@@ -2396,61 +2370,6 @@ public class Base {
         return "";
     }
 
-    public static String getIconsPath(String name) {
-        return "/org/uecide/icons/" + name;
-    }
-
-    public static ImageIcon getIcon(String category, String name, int size) {
-        try {
-            return new InternalIcon(category, name, size); 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    
-/*
-        String iconSet = getIconSet();
-
-        String path = getIconsPath(iconSet);
-        if (path == null) {
-            return null;
-        }
-
-        URL loc = Base.class.getResource(path + "/" + size + "x" + size + "/" + category + "/" + name + ".png");
-        if(loc == null) {
-            path = getIconsPath(defaultIconSet);
-            loc = Base.class.getResource(path + "/" + size + "x" + size + "/" + category + "/" + name + ".png");
-        }
-        if(loc == null) {
-            loc = Base.class.getResource(path + "/" + size + "x" + size + "/actions/unknown.png");
-        }
-
-        return new ImageIcon(loc);
-*/
-    }
-
-    public static String getIconSet() {
-        return Preferences.get("theme.icons");
-    }
-
-    public static void loadIconSets() {
-        iconSets = new HashMap<String, PropertyFile>();
-
-        Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forPackage("org.uecide"))
-                .setScanners(new ResourcesScanner()));
-
-        Pattern pat = Pattern.compile(".*\\.icon");
-        Set<String> icons = reflections.getResources(pat);
-
-        for (String icon : icons) {
-            PropertyFile pf = new PropertyFile("/" + icon);
-            if (pf.get("name") != null) {
-                iconSets.put(pf.get("name"), pf);
-            }
-        }
-    }
-
     public static boolean yesno(String title, String question) {
         if (!headless) {
             return JOptionPane.showOptionDialog(null, question, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.YES_OPTION;
@@ -2587,15 +2506,6 @@ public class Base {
             error(e);
         }
         return out;
-    }
-
-    public static HashMap<String, String> getIconSets() {
-        HashMap<String, String> hash = new HashMap<String, String>();
-
-        for (String i : iconSets.keySet()) {
-            hash.put(i, i);
-        }
-        return hash;
     }
 
     // This little routine works through each and every board, core and compiler and
@@ -2978,7 +2888,7 @@ public class Base {
         return tools.get(name);
     }
 
-    public static void loadAssets() {
+    public static void loadAssets() throws IOException {
         Debug.message("Loading assets");
         Debug.message("Caching system files");
         cacheSystemFiles();
@@ -3005,7 +2915,7 @@ public class Base {
         loadPlugins();
 
         Debug.message("Loading icon sets");
-        loadIconSets();
+        IconManager.loadIconSets();
 
 
         Debug.message("Loading libraries");
@@ -3014,6 +2924,7 @@ public class Base {
 //        waitForAssetLoading();
 
         Debug.message("Loading assets done");
+        IconManager.setIconFamily(Preferences.get("theme.icons"));
     }
 
     public static boolean isHeadless() {

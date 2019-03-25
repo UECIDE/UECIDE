@@ -161,48 +161,52 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
 
         toolbar.setFloatable(false);
 
-        toolbar.add(new ToolbarButton("actions", "save", Base.i18n.string("serial.save"), 24, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    saveSession();
-                } catch (Exception ex) {
-                    Base.error(ex);
+        try {
+            toolbar.add(new ToolbarButton("serial.save", Base.i18n.string("serial.save"), 24, new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        saveSession();
+                    } catch (Exception ex) {
+                        Base.error(ex);
+                    }
                 }
-            }
-        }));
-        
-        toolbar.add(new ToolbarToggleButton("actions", "install", Base.i18n.string("serial.capture"), 24, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
-                if (b.isSelected()) {
-                    startCapture();
-                } else {
-                    endCapture();
+            }));
+            
+            toolbar.add(new ToolbarToggleButton("serial.capture", Base.i18n.string("serial.capture"), 24, new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
+                    if (b.isSelected()) {
+                        startCapture();
+                    } else {
+                        endCapture();
+                    }
                 }
-            }
-        }));
+            }));
 
-        toolbar.add(new ToolbarSpacer());
+            toolbar.add(new ToolbarSpacer());
 
-        toolbar.add(new ToolbarButton("actions", "trash-empty", Base.i18n.string("serial.clear"), 24, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                term.getTermPanel().getBackBuffer().clear();
-                term.getTermPanel().getScrollBuffer().clear();
-                term.getTermPanel().updateRangeProperties();
-            }
-        }));
+            toolbar.add(new ToolbarButton("serial.clear", Base.i18n.string("serial.clear"), 24, new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    term.getTermPanel().getBackBuffer().clear();
+                    term.getTermPanel().getScrollBuffer().clear();
+                    term.getTermPanel().updateRangeProperties();
+                }
+            }));
 
-        ToolbarToggleButton as = new ToolbarToggleButton("actions", "media-playback-pause", Base.i18n.string("serial.pause"), 24, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
-                tty.discardInput(b.isSelected());
-                b.setAlternateIcon(b.isSelected());
-            }
-        }, "actions", "media-playback-start");
+            ToolbarToggleButton as = new ToolbarToggleButton("serial.pause", Base.i18n.string("serial.pause"), 24, new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
+                    tty.discardInput(b.isSelected());
+                    b.setAlternateIcon(b.isSelected());
+                }
+            }, "serial.play");
 
-        as.setSelected(false);
+            as.setSelected(false);
 
-        toolbar.add(as);
+            toolbar.add(as);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         win.add(toolbar, BorderLayout.NORTH);
 
@@ -573,11 +577,15 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
     
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == Plugin.TOOLBAR_EDITOR) {
-            toolbar.add(new ToolbarButton("apps", "serial", "Serial Terminal", new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    run();
-                }
-            }));
+            try {
+                toolbar.add(new ToolbarButton("apps.serial", "Serial Terminal", new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        run();
+                    }
+                }));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

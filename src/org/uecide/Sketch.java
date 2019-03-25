@@ -259,7 +259,7 @@ public class Sketch {
     }
 
     // Look up a board in the global boards map and set the board appropriately
-    public void setBoard(String board) {
+    public void setBoard(String board) throws IOException {
         if(board == null || board.equals("")) {
             Debug.message("NULL or blank board when calling setBoard");
             return;
@@ -271,7 +271,7 @@ public class Sketch {
 
     // Set the current board.  Also looks up the last settings used for that board
     // and propogates them onwards (core, compiler, etc).
-    public void setBoard(Board board) {
+    public void setBoard(Board board) throws IOException {
         Debug.message("Selecting board " + board);
 
         if(board == null) {
@@ -309,7 +309,7 @@ public class Sketch {
         return selectedCore;
     }
 
-    public void setCore(String core) {
+    public void setCore(String core) throws IOException {
         if(core == null || core.equals("")) {
             Debug.message("NULL or blank core when calling setCore");
             return;
@@ -324,7 +324,7 @@ public class Sketch {
         ctx.set("sketch.path", getFolder().getAbsolutePath());
     }
 
-    public void setCore(Core core) {
+    public void setCore(Core core) throws IOException {
         Debug.message("Selecting core " + core);
         if(core == null) {
             Debug.message("NULL core when calling setCore");
@@ -550,11 +550,11 @@ public class Sketch {
         }
     }
 
-    public void createNewFile(String filename) {
+    public void createNewFile(String filename) throws IOException {
         createNewFile(filename, null);
     }
 
-    public void createNewFile(String filename, String content) {
+    public void createNewFile(String filename, String content) throws IOException {
         if(filename.endsWith(".lib")) {
             createNewLibrary(filename.substring(0, filename.lastIndexOf(".")));
             return;
@@ -563,13 +563,9 @@ public class Sketch {
         File f = createBlankFile(filename);
 
         if (content != null) {
-            try {
-                PrintWriter pw = new PrintWriter(f);
-                pw.print(content);
-                pw.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            PrintWriter pw = new PrintWriter(f);
+            pw.print(content);
+            pw.close();
         }
 
         sketchFiles.add(f);
@@ -595,7 +591,7 @@ public class Sketch {
         return f;
     }
 
-    public void loadSketchFromFolder(File folder) {
+    public void loadSketchFromFolder(File folder) throws IOException {
         sketchFolder = folder;
 
         if(!isUntitled()) {
@@ -1760,7 +1756,7 @@ public class Sketch {
         return true;
     }
 
-    public boolean build() {
+    public boolean build() throws IOException {
 //        if(Preferences.getBoolean("editor.external.command")) {
 //            //reloadAllFiles();
 //        }
@@ -2043,7 +2039,7 @@ public class Sketch {
         return libFiles;
     }
 
-    public void checkForSettings() {
+    public void checkForSettings() throws IOException {
         File mainFile = getMainFile();
 
         Pattern param = Pattern.compile("^#pragma\\s+parameter\\s+([^\\s]+)\\s*=\\s*(.*)$");
@@ -3553,7 +3549,7 @@ public class Sketch {
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
                             eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.error"));
-                            eb.flagLine(errorLineNumber, Base.getIcon("flags", "fixme", 16), 0x1000);
+                            eb.flagLine(errorLineNumber, IconManager.getIcon(16, "tree.fixme"), 0x1000);
                         }
 
                         link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Error at line " + errorLineNumber + " in file " + errorFile.getName());
@@ -3582,7 +3578,7 @@ public class Sketch {
                         if(tabNumber > -1) {
                             EditorBase eb = editor.getTab(tabNumber);
                             eb.highlightLine(warningLineNumber, Preferences.getColor("theme.editor.colors.warning"));
-                            eb.flagLine(warningLineNumber, Base.getIcon("flags", "todo", 16), 0x1001);
+                            eb.flagLine(warningLineNumber, IconManager.getIcon(16, "tree.todo"), 0x1001);
                             link("uecide://error/" + warningLineNumber + "/" + warningFile.getAbsolutePath() + "|Warning at line " + warningLineNumber + " in file " + warningFile.getName());
                         }
 
@@ -4136,7 +4132,7 @@ public class Sketch {
         }
     }
 
-    public void rescanFileTree() {
+    public void rescanFileTree() throws IOException {
         sketchFiles = new ArrayList<File>();
         loadSketchFromFolder(sketchFolder);
     }
@@ -4309,7 +4305,7 @@ public class Sketch {
         }
     }
 
-    public void loadConfig() {
+    public void loadConfig() throws IOException {
         PropertyFile m = ctx.getMerged();
         if (m.get("sketch.board") != null) {
             String wantedBoard = m.get("sketch.board");
@@ -4499,13 +4495,6 @@ public class Sketch {
     }
 
     public ImageIcon getIcon() {
-        PropertyFile m = ctx.getMerged();
-        if ((m.get("sketch.icon") != null) && !(m.get("sketch.icon").equals(""))) {
-            File iconFile = new File(sketchFolder, m.get("sketch.icon"));
-            if (iconFile.exists()) {
-                return Base.loadIconFromFile(iconFile);
-            }
-        }
         return null;
     }
 
@@ -4558,7 +4547,7 @@ public class Sketch {
                     if(tabNumber > -1) {
                         EditorBase eb = editor.getTab(tabNumber);
                         eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.error"));
-                        eb.flagLine(errorLineNumber, Base.getIcon("flags", "fixme", 16), 0x1000);
+                        eb.flagLine(errorLineNumber, IconManager.getIcon(16, "tree.fixme"), 0x1000);
                     }
 
                     String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
@@ -4600,7 +4589,7 @@ public class Sketch {
                     if(tabNumber > -1) {
                         EditorBase eb = editor.getTab(tabNumber);
                         eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.warning"));
-                        eb.flagLine(errorLineNumber, Base.getIcon("flags", "todo", 16), 0x1001);
+                        eb.flagLine(errorLineNumber, IconManager.getIcon(16, "tree.todo"), 0x1001);
                     }
                     String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
 

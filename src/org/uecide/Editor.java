@@ -373,13 +373,13 @@ public class Editor extends JFrame {
         outputToolbar.setFloatable(false);
         outputToolbar.setOrientation(JToolBar.VERTICAL);
 
-        outputToolbar.add(new ToolbarButton("actions", "trash-empty", "Clear Console", 24, new ActionListener() {
+        outputToolbar.add(new ToolbarButton("console.clear", "Clear Console", 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 outputConsole.getTermPanel().getBackBuffer().clear();
                 outputConsole.getTermPanel().getScrollBuffer().clear();
             }
         }));
-        outputToolbar.add(new ToolbarButton("actions", "copy", "Copy Console Text", 24, new ActionListener() {
+        outputToolbar.add(new ToolbarButton("console.copy", "Copy Console Text", 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String scroll = outputConsole.getBufferText(GrittyTerminal.BufferType.Scroll);
                 String back = outputConsole.getBufferText(GrittyTerminal.BufferType.Back);
@@ -442,11 +442,15 @@ public class Editor extends JFrame {
 
         this.add(statusBar, BorderLayout.SOUTH);
 
-        JButton refreshButton = new ToolbarButton("actions", "refresh", "Refresh Project Tree", 24, new ActionListener() {
+        JButton refreshButton = new ToolbarButton("tree.refresh", "Refresh Project Tree", 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (!compilerRunning()) {
-                    loadedSketch.rescanFileTree();
-                    updateTree();
+                    try {
+                        loadedSketch.rescanFileTree();
+                        updateTree();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
@@ -494,12 +498,12 @@ public class Editor extends JFrame {
         consoleToolbar.setFloatable(false);
         consoleToolbar.setOrientation(JToolBar.VERTICAL);
 
-        consoleToolbar.add(new ToolbarButton("actions", "trash-empty", "Clear Console", 24, new ActionListener() {
+        consoleToolbar.add(new ToolbarButton("console.clear", "Clear Console", 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 console.clear();
             }
         }));
-        consoleToolbar.add(new ToolbarButton("actions", "copy", "Copy Console Text", 24, new ActionListener() {
+        consoleToolbar.add(new ToolbarButton("console.copy", "Copy Console Text", 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 StringSelection sel = new StringSelection(console.getText());
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -513,7 +517,7 @@ public class Editor extends JFrame {
         miniBar = new JToolBar();
         miniBar.setFloatable(false);
 
-        miniBar.add(new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 16, new ActionListener() {
+        miniBar.add(new ToolbarButton("main.compile", Base.i18n.string("toolbar.run"), 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -528,7 +532,7 @@ public class Editor extends JFrame {
             }
         }));
 
-       miniBar.add(new ToolbarButton("actions", "program", Base.i18n.string("toolbar.program"), 16, new ActionListener() {
+       miniBar.add(new ToolbarButton("main.program", Base.i18n.string("toolbar.program"), 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -542,7 +546,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        miniBar.add(new ToolbarButton("actions", "new", Base.i18n.string("toolbar.new"), 16, new ActionListener() {
+        miniBar.add(new ToolbarButton("main.new", Base.i18n.string("toolbar.new"), 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     Base.handleNew();
@@ -552,7 +556,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        miniBar.add(new ToolbarButton("actions", "open", Base.i18n.string("toolbar.open"), 16, new ActionListener() {
+        miniBar.add(new ToolbarButton("main.open", Base.i18n.string("toolbar.open"), 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     handleOpenPrompt();
@@ -562,7 +566,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        miniBar.add(new ToolbarButton("actions", "save", Base.i18n.string("toolbar.save"), 16, new ActionListener() {
+        miniBar.add(new ToolbarButton("main.save", Base.i18n.string("toolbar.save"), 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAllTabs();
@@ -688,10 +692,10 @@ public class Editor extends JFrame {
         toolbar.removeAll();
 
         abortIcon = new AnimatedIcon(100,
-            new InternalIcon("spinner", "circle1", 24),
-            new InternalIcon("spinner", "circle2", 24),
-            new InternalIcon("spinner", "circle3", 24),
-            new InternalIcon("spinner", "circle4", 24)
+            IconManager.getIcon(24, "spinner.pos-1"),
+            IconManager.getIcon(24, "spinner.pos-2"),
+            IconManager.getIcon(24, "spinner.pos-3"),
+            IconManager.getIcon(24, "spinner.pos-4")
         );
 
         //"actions", "cancel", Base.i18n.string("toolbar.abort"), 24, new ActionListener() {
@@ -703,7 +707,7 @@ public class Editor extends JFrame {
         abortButton.setVisible(false);
         toolbar.add(abortButton);
 
-        runButton = new ToolbarButton("actions", "run", Base.i18n.string("toolbar.run"), 24, new ActionListener() {
+        runButton = new ToolbarButton("main.compile", Base.i18n.string("toolbar.run"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -720,7 +724,7 @@ public class Editor extends JFrame {
         toolbar.add(runButton);
         runButton.setBorderPainted(false);
 
-        programButton = new ToolbarButton("actions", "program", Base.i18n.string("toolbar.program"), 24, new ActionListener() {
+        programButton = new ToolbarButton("main.program", Base.i18n.string("toolbar.program"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -736,7 +740,7 @@ public class Editor extends JFrame {
         toolbar.add(programButton);
         toolbar.add(new ToolbarSpacer()); //Separator();
 
-        toolbar.add(new ToolbarButton("actions", "new", Base.i18n.string("toolbar.new"), 24, new ActionListener() {
+        toolbar.add(new ToolbarButton("main.new", Base.i18n.string("toolbar.new"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     Base.handleNew();
@@ -746,7 +750,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        toolbar.add(new ToolbarButton("actions", "open", Base.i18n.string("toolbar.open"), 24, new ActionListener() {
+        toolbar.add(new ToolbarButton("main.open", Base.i18n.string("toolbar.open"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     handleOpenPrompt();
@@ -756,7 +760,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        toolbar.add(new ToolbarButton("actions", "save", Base.i18n.string("toolbar.save"), 24, new ActionListener() {
+        toolbar.add(new ToolbarButton("main.save", Base.i18n.string("toolbar.save"), 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAllTabs();
@@ -1262,17 +1266,29 @@ public class Editor extends JFrame {
                                     if (ent.getType() == TodoEntry.Note) {
                                         noteEntries.add(tent);
                                         if (eb != null) {
-                                            eb.flagLine(ent.getLine(), Base.getIcon("flags", "note", 16), 0x2000);
+                                            try {
+                                                eb.flagLine(ent.getLine(), IconManager.getIcon(16, "tree.note"), 0x2000);
+                                            } catch (Exception ex) {    
+                                                ex.printStackTrace();
+                                            }
                                         }
                                     } else if (ent.getType() == TodoEntry.Todo) {
                                         todoEntries.add(tent);
                                         if (eb != null) {
-                                            eb.flagLine(ent.getLine(), Base.getIcon("flags", "todo", 16), 0x2000);
+                                            try {
+                                                eb.flagLine(ent.getLine(), IconManager.getIcon(16, "tree.todo"), 0x2000);
+                                            } catch (Exception ex) {    
+                                                ex.printStackTrace();
+                                            }
                                         }
                                     } else if (ent.getType() == TodoEntry.Fixme) {
                                         fixmeEntries.add(tent);
                                         if (eb != null) {
-                                            eb.flagLine(ent.getLine(), Base.getIcon("flags", "fixme", 16), 0x2000);
+                                            try { 
+                                                eb.flagLine(ent.getLine(), IconManager.getIcon(16, "tree.fixme"), 0x2000);
+                                            } catch (Exception ex) {    
+                                                ex.printStackTrace();
+                                            }
                                         }
                                     }
                                 }
@@ -1513,7 +1529,7 @@ public class Editor extends JFrame {
         });
     }
 
-    public void updateTree() {
+    public void updateTree() throws IOException {
 
         treeRoot.setUserObject(loadedSketch);
 
@@ -1534,12 +1550,20 @@ public class Editor extends JFrame {
         public void mousePressed(MouseEvent e) {
             ActionListener createNewAction = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    createNewSketchFile(e.getActionCommand());
+                    try {
+                        createNewSketchFile(e.getActionCommand());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             };
             ActionListener importFileAction = new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    importFile(e.getActionCommand());
+                    try {
+                        importFile(e.getActionCommand());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             };
 
@@ -1744,7 +1768,11 @@ public class Editor extends JFrame {
                                     setTabFile(tab, newFile);
                                 }
 
-                                updateTree();
+                                try {
+                                    updateTree();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
                             }
                         }
                     });
@@ -1784,7 +1812,11 @@ public class Editor extends JFrame {
                                     editorTabs.remove(tab);
                                 }
 
-                                updateTree();
+                                try {
+                                    updateTree();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
                             }
                         }
                     });
@@ -1906,7 +1938,11 @@ public class Editor extends JFrame {
                                 File newLibDir = new File(libs, lib.getName());
                                 Base.copyDir(lib.getFolder(), newLibDir);
                                 loadedSketch.purgeLibrary(lib);
-                                updateTree();
+                                try {
+                                    updateTree();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
                             }
                         });
                         menu.add(item);
@@ -1986,7 +2022,11 @@ public class Editor extends JFrame {
                                 if(newName != null) {
                                     File newFile = new File(f, newName);
                                     newFile.mkdirs();
-                                    updateTree();
+                                    try {
+                                        updateTree();
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
                                 }
                             }
                         });
@@ -1995,7 +2035,11 @@ public class Editor extends JFrame {
                         unzipItem.setActionCommand(thisFile.getAbsolutePath());
                         unzipItem.addActionListener(new ActionListener() {
                             public void actionPerformed(ActionEvent e) {
-                                findAndUnzipZipFile(e.getActionCommand());
+                                try {
+                                    findAndUnzipZipFile(e.getActionCommand());
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
                             }
                         });
                         menu.add(unzipItem);
@@ -2045,7 +2089,11 @@ public class Editor extends JFrame {
                                     setTabFile(tab, newFile);
                                 }
 
-                                updateTree();
+                                try {
+                                    updateTree();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
                             }
                         }
                     });
@@ -2083,7 +2131,11 @@ public class Editor extends JFrame {
                                     editorTabs.remove(tab);
                                 }
 
-                                updateTree();
+                                try {
+                                    updateTree();
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
                             }
                         }
                     });
@@ -2546,7 +2598,7 @@ public class Editor extends JFrame {
         return -1;
     }
 
-    public void attachPanelAsTab(String name, JPanel panel) {
+    public void attachPanelAsTab(String name, JPanel panel) throws IOException {
         TabLabel lab = new TabLabel(this, name);
         editorTabs.addTab(name, panel);
         int tabno = editorTabs.getTabCount() - 1;
@@ -3091,7 +3143,11 @@ public class Editor extends JFrame {
 
         ActionListener createNewAction = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                createNewSketchFile(e.getActionCommand());
+                try {
+                    createNewSketchFile(e.getActionCommand());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         };
 
@@ -3289,7 +3345,11 @@ public class Editor extends JFrame {
 
         toolsMenu.add(new ActiveMenuItem(Base.i18n.string("menu.tools.sm"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                ServiceManager.open(Editor.this);
+                try {
+                    ServiceManager.open(Editor.this);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         }));
 
@@ -3373,13 +3433,21 @@ public class Editor extends JFrame {
 
         debugSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.help.debug.console"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Debug.show();
+                try {
+                    Debug.show();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         }));
 
         debugSubmenu.add(new ActiveMenuItem(Base.i18n.string("menu.help.debug.rebuild"), 0, 0, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                Base.cleanAndScanAllSettings();
+                try {
+                    Base.cleanAndScanAllSettings();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         }));
 
@@ -3495,7 +3563,11 @@ public class Editor extends JFrame {
                     JSerialMenuItem i = (JSerialMenuItem)(e.getSource());
                     loadedSketch.setDevice(i.getPort());
                     if (i.getPort().getBoard() != null) {
-                        loadedSketch.setBoard(i.getPort().getBoard());
+                        try {
+                            loadedSketch.setBoard(i.getPort().getBoard());
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                         updateAll();
                     }
                 }
@@ -3617,7 +3689,11 @@ public class Editor extends JFrame {
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Board b = (Board)((UObjectMenuItem)e.getSource()).getObject();
-                    loadedSketch.setBoard(b);
+                    try {
+                        loadedSketch.setBoard(b);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                     b.onSelected(Editor.this);
                 }
             });
@@ -3651,7 +3727,11 @@ public class Editor extends JFrame {
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     Core c = (Core)((UObjectMenuItem)e.getSource()).getObject();
-                    loadedSketch.setCore(c);
+                    try {
+                        loadedSketch.setCore(c);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                     c.onSelected(Editor.this);
                 }
             });
@@ -3850,7 +3930,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public void addPluginsToToolbar(JToolBar tb, int filterFlags) {
+    public void addPluginsToToolbar(JToolBar tb, int filterFlags) throws IOException {
         for(final Plugin plugin : plugins) {
             try {
                 plugin.addToolbarButtons(tb, filterFlags);
@@ -3866,7 +3946,7 @@ public class Editor extends JFrame {
                 ArrayList<JSAction> icons = p.getMainToolbarIcons();
                 for (JSAction action : icons) {
                     String[] icodat = action.icon.split("/");
-                    tb.add(new ToolbarButton(icodat[0], icodat[1], action.tooltip, 24, new JSActionListener(this, action)));
+                    tb.add(new ToolbarButton(icodat[0] + "." + icodat[1], action.tooltip, 24, new JSActionListener(this, action)));
                 }
             }
         } else {
@@ -3874,7 +3954,7 @@ public class Editor extends JFrame {
                 ArrayList<JSAction> icons = p.getEditorToolbarIcons();
                 for (JSAction action : icons) {
                     String[] icodat = action.icon.split("/");
-                    tb.add(new ToolbarButton(icodat[0], icodat[1], action.tooltip, 16, new JSActionListener(this, action)));
+                    tb.add(new ToolbarButton(icodat[0] + "." + icodat[1], action.tooltip, 16, new JSActionListener(this, action)));
                 }
             }
         }
@@ -4334,7 +4414,7 @@ public class Editor extends JFrame {
         return true;
     }
 
-    public void createNewGraphicFile(String extension) {
+    public void createNewGraphicFile(String extension) throws IOException {
         JPanel p = new JPanel();
         p.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -4393,7 +4473,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public void createNewSketchFile(String extension) {
+    public void createNewSketchFile(String extension) throws IOException {
 
         if (extension.equals("png")) { createNewGraphicFile(extension); return; }
         if (extension.equals("jpg")) { createNewGraphicFile(extension); return; }
@@ -4449,7 +4529,7 @@ public class Editor extends JFrame {
 
     File importFileDefaultDir = null;
 
-    public void importFile(String type) {
+    public void importFile(String type) throws IOException {
         JFileChooser fc = new JFileChooser();
         javax.swing.filechooser.FileFilter filter;
 
@@ -4674,7 +4754,7 @@ public class Editor extends JFrame {
         }
     }
 
-    public static void selectAllEditorBoards() {
+    public static void selectAllEditorBoards() throws IOException {
         for(Editor e : editorList) {
             e.reselectEditorBoard();
         }
@@ -4688,7 +4768,7 @@ public class Editor extends JFrame {
 //        }
     }
 
-    public void reselectEditorBoard() {
+    public void reselectEditorBoard() throws IOException {
         String eb = loadedSketch.getBoardName();
 
         if(eb != null) {
@@ -4792,6 +4872,7 @@ public class Editor extends JFrame {
     }
 
     public static void refreshAllEditors() throws IOException {
+        IconManager.setIconFamily(Preferences.get("theme.icons"));
         for(Editor e : editorList) {
             e.refreshEditors();
             e.updateToolbar();
@@ -5060,7 +5141,7 @@ public class Editor extends JFrame {
         return newName;
     }
 
-    public void findAndUnzipZipFile(String dest) {
+    public void findAndUnzipZipFile(String dest) throws IOException {  
         File destFolder = new File(dest);
 
         if(!destFolder.isDirectory()) {
@@ -5468,18 +5549,21 @@ public class Editor extends JFrame {
         updateBlockerTimer = new Timer();
         updateBlockerTimer.schedule(new TimerTask() {
             public void run() {
-                tickUpdateBlocker();
+                try {
+                    tickUpdateBlocker();
+                } catch (Exception exex) {
+                }
             }
         }, 0, 250);
 
     }
 
     int spinPos = 1;
-    public void tickUpdateBlocker() {
+    public void tickUpdateBlocker() throws IOException {
         spinPos++;
         if (spinPos == 5) spinPos = 1;
-        String iname = "circle" + spinPos;
-        ImageIcon i = Base.getIcon("spinner", iname, 48);
+        String iname = "pos-" + spinPos;
+        ImageIcon i = IconManager.getIcon(48, "spinner." + iname);
         updateLabel.setIcon(i);
     }
 

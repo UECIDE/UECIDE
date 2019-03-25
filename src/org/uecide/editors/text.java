@@ -54,7 +54,7 @@ import org.fife.ui.rtextarea.*;
 
 public class text extends code {
 
-    public text(Sketch s, File f, Editor e) {
+    public text(Sketch s, File f, Editor e) throws IOException {
         super(s, f, e);
         textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
         textArea.setLineWrap(true);

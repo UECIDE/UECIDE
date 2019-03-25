@@ -784,18 +784,22 @@ public class GitLink extends Plugin {
             toolbar.add(new ToolbarSpacer()); //Separator();
             hasFile(null);
 
-            pullButton = new ToolbarButton("actions", "pull", "Pull from remote repository", pullAction);
-            pushButton = new ToolbarButton("actions", "push", "Push to remote repository", pushAction);
-            commitButton = new ToolbarButton("actions", "commit", "Commit all changes", commitAction);
-            branchButton = new ToolbarButton("actions", "branch", "Branch", branchAction);
-            toolbar.add(pullButton);
-            toolbar.add(pushButton);
-            toolbar.add(commitButton);
-            toolbar.add(branchButton);
-            pullButton.setEnabled(hasRepo);
-            pushButton.setEnabled(hasRepo);
-            commitButton.setEnabled(hasRepo);
-            branchButton.setEnabled(hasRepo);
+            try {
+                pullButton = new ToolbarButton("vcs.pull", "Pull from remote repository", pullAction);
+                pushButton = new ToolbarButton("vcs.push", "Push to remote repository", pushAction);
+                commitButton = new ToolbarButton("vcs.commit", "Commit all changes", commitAction);
+                branchButton = new ToolbarButton("vcs.branch", "Branch", branchAction);
+                toolbar.add(pullButton);
+                toolbar.add(pushButton);
+                toolbar.add(commitButton);
+                toolbar.add(branchButton);
+                pullButton.setEnabled(hasRepo);
+                pushButton.setEnabled(hasRepo);
+                commitButton.setEnabled(hasRepo);
+                branchButton.setEnabled(hasRepo);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
             toolbar.add(new ToolbarSpacer()); // Separator();
         }
     }
@@ -859,31 +863,31 @@ public class GitLink extends Plugin {
 
                 for (String str : added) { 
                     File file = new File(repoRoot, str);
-                    ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-added.png");
+                    ImageIcon i = IconManager.getIcon(16, "vcs.added");
                     iconCache.put(file, i);
                 }
                     
                 for (String str : changed) { 
                     File file = new File(repoRoot, str);
-                    ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-locally-modified-not-staged.png");
+                    ImageIcon i = IconManager.getIcon(16, "vcs.changed");
                     iconCache.put(file, i);
                 }
                     
                 for (String str : missing) { 
                     File file = new File(repoRoot, str);
-                    ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-locally-modified-not-staged.png");
+                    ImageIcon i = IconManager.getIcon(16, "vcs.missing");
                     iconCache.put(file, i);
                 }
                     
                 for (String str : modified) { 
                     File file = new File(repoRoot, str);
-                    ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-locally-modified.png");
+                    ImageIcon i = IconManager.getIcon(16, "vcs.modified");
                     iconCache.put(file, i);
                 }
                     
                 for (String str : untracked) { 
                     File file = new File(repoRoot, str);
-                    ImageIcon i = Base.loadIconFromResource("/org/uecide/plugin/GitLink/vcs-conflicting.png");
+                    ImageIcon i = IconManager.getIcon(16, "vcs.conflicting");
                     iconCache.put(file, i);
                 }
             }

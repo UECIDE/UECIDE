@@ -270,7 +270,11 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         JButton applyButton = new JButton(Base.i18n.string("misc.apply"));
         applyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                applyFrame();
+                try {
+                    applyFrame();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
         JButton cancelButton = new JButton(Base.i18n.string("misc.cancel"));
@@ -282,7 +286,11 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         JButton okButton = new JButton(Base.i18n.string("misc.ok"));
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                applyFrame();
+                try {
+                    applyFrame();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
                 disposeFrame();
             }
         });
@@ -424,7 +432,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
      * Change internal settings based on what was chosen in the prefs,
      * then send a message to the editor saying that it's time to do the same.
      */
-    protected void applyFrame() {
+    protected void applyFrame() throws IOException {
 
         // Two special areas need to have any old subkeys removed - the port list and the library list.
 
@@ -726,6 +734,35 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
 
             b.add(sb);
+        } else if (type.equals("iconlist")) {
+            b.add(new JLabel(name + ": "));
+            HashMap<String, String> options = IconManager.getIconList();
+
+            ArrayList<KVPair> kvlist = new ArrayList<KVPair>();
+            for (String k : options.keySet()) {
+                KVPair kv = new KVPair(k, options.get(k));
+                kvlist.add(kv);
+            }
+            KVPair opList[] = kvlist.toArray(new KVPair[0]);
+            Arrays.sort(opList);
+            JComboBox cb = new JComboBox(opList);
+
+            for (KVPair op : opList) {
+                if (op.getKey().equals(get(key))) {
+                    cb.setSelectedItem(op);
+                }
+            }
+
+            cb.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    JComboBox widget = (JComboBox)e.getSource();
+                    KVPair data = (KVPair)widget.getSelectedItem();
+                    changedPrefs.set(fkey, data.getKey());
+                }
+            });
+            b.add(cb);
+
+    
         } else if (type.equals("dropdown")) {
             b.add(new JLabel(name + ": "));
 

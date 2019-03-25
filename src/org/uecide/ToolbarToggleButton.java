@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.image.*;
+import java.io.*;
 import java.awt.event.*;
 
 public class ToolbarToggleButton extends JToggleButton {
@@ -25,27 +26,27 @@ public class ToolbarToggleButton extends JToggleButton {
         }
     }
 
-    public ToolbarToggleButton(String cat, String name, String tooltip, int size) {
-        this(cat, name, tooltip, size, null, null, null);
+    public ToolbarToggleButton(String name, String tooltip, int size) throws IOException {
+        this(name, tooltip, size, null, null);
     }
 
-    public ToolbarToggleButton(String cat, String name, String tooltip) {
-        this(cat, name, tooltip, 24, null, null, null);
+    public ToolbarToggleButton(String name, String tooltip) throws IOException {
+        this(name, tooltip, 24, null, null);
     }
 
-    public ToolbarToggleButton(String cat, String name, String tooltip, ActionListener al) {
-        this(cat, name, tooltip, 24, al, null, null);
+    public ToolbarToggleButton(String name, String tooltip, ActionListener al) throws IOException {
+        this(name, tooltip, 24, al, null);
     }
 
-    public ToolbarToggleButton(String cat, String name, String tooltip, int size, ActionListener al) {
-        this(cat, name, tooltip, 24, al, null, null);
+    public ToolbarToggleButton(String name, String tooltip, int size, ActionListener al) throws IOException {
+        this(name, tooltip, 24, al, null);
     }
 
-    public ToolbarToggleButton(String cat, String name, String tooltip, int size, ActionListener al, String altcat, String altname) {
+    public ToolbarToggleButton(String name, String tooltip, int size, ActionListener al, String altname) throws IOException {
         super();
-        buttonIcon = Base.getIcon(cat, name, size);
-        if (altcat != null) {
-            alternateIcon = Base.getIcon(altcat, altname, size);
+        buttonIcon = IconManager.getIcon(size, name);
+        if (altname != null) {
+            alternateIcon = IconManager.getIcon(size, altname);
         }
         setIcon(buttonIcon);
         setToolTipText(tooltip);

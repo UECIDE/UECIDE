@@ -111,10 +111,10 @@ public class code extends JPanel implements EditorBase {
 
     boolean updateFlag = false;
 
-    public void openFindPanel() {
+    public void openFindPanel() throws IOException {
         if(findPanel == null) {
 
-            ImageIcon closeIcon = Base.getIcon("actions", "close", 16);
+            ImageIcon closeIcon = IconManager.getIcon(16, "find.close");
             JButton findCloseButton = new JButton(closeIcon);
             findCloseButton.setBorder(new EmptyBorder(0, 2, 0, 2));
             findCloseButton.setContentAreaFilled(false);
@@ -125,7 +125,7 @@ public class code extends JPanel implements EditorBase {
                 findPanel.add(findCloseButton);
             }
 
-            findPanelBurgerMenu = new ToolbarButton("actions", "format-list-unordered", "Search Options", 24, new ActionListener() {
+            findPanelBurgerMenu = new ToolbarButton("find.menu", "Search Options", 24, new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         JPopupMenu menu = new JPopupMenu();
                         menu.add(matchCase);
@@ -142,7 +142,7 @@ public class code extends JPanel implements EditorBase {
 
             findPanel.add(findPanelBurgerMenu);
 
-            findPanel.add(new ToolbarButton("actions", "arrow-left-double", "Find Previous", 24, new ActionListener() {
+            findPanel.add(new ToolbarButton("find.previous", "Find Previous", 24, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if(findNext(searchTerm.getText(), true)) {
                         searchTerm.setBackground(UIManager.getColor("TextField.background"));
@@ -152,7 +152,7 @@ public class code extends JPanel implements EditorBase {
                 }
             }));
 
-            findPanel.add(new ToolbarButton("actions", "arrow-right-double", "Find Next", 24, new ActionListener() {
+            findPanel.add(new ToolbarButton("find.next", "Find Next", 24, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     if(findNext(searchTerm.getText(), false)) {
                         searchTerm.setBackground(UIManager.getColor("TextField.background"));
@@ -264,7 +264,7 @@ public class code extends JPanel implements EditorBase {
         SearchEngine.replaceAll(textArea, search);
     }
 
-    public code(Sketch s, File f, Editor e) {
+    public code(Sketch s, File f, Editor e) throws IOException {
         editor = e;
         sketch = s;
         this.setLayout(new BorderLayout());
@@ -464,18 +464,18 @@ public class code extends JPanel implements EditorBase {
         toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden") && !Preferences.getBoolean("editor.layout.minimal"));
         this.add(toolbar, BorderLayout.NORTH);
 
-        toolbar.add(new ToolbarButton("actions", "copy", "Copy", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.copy", "Copy", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.copy();
             }
         }));
-        toolbar.add(new ToolbarButton("actions", "cut", "Cut", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.cut", "Cut", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.cut();
             }
         }));
 
-        toolbar.add(new ToolbarButton("actions", "paste", "Paste", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.paste", "Paste", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.paste();
             }
@@ -483,13 +483,13 @@ public class code extends JPanel implements EditorBase {
 
         toolbar.add(new ToolbarSpacer(12, 16)); //Separator();
 
-        toolbar.add(new ToolbarButton("actions", "undo", "Undo", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.undo", "Undo", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.undoLastAction();
             }
         }));
 
-        toolbar.add(new ToolbarButton("actions", "redo", "Redo", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.redo", "Redo", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.redoLastAction();
             }
@@ -497,13 +497,13 @@ public class code extends JPanel implements EditorBase {
 
         toolbar.add(new ToolbarSpacer(12, 16)); //Separator();
 
-        toolbar.add(new ToolbarButton("actions", "indent-more", "Increase Indent", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.indent-more", "Increase Indent", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 increaseIndent(e);
             }
         }));
         
-        toolbar.add(new ToolbarButton("actions", "indent-less", "Decrease Indent", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.indent-less", "Decrease Indent", 16, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 decreaseIndent(e);
             }
@@ -519,6 +519,7 @@ public class code extends JPanel implements EditorBase {
 
         if(Preferences.getBoolean("editor.find.keep")) {
             openFindPanel();
+
         }
 
         refreshSettings();
@@ -1014,7 +1015,11 @@ public class code extends JPanel implements EditorBase {
             item.setAccelerator(KeyStroke.getKeyStroke('F', modifiers));
             item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    openFindPanel();
+                    try {
+                        openFindPanel();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             });
             menu.add(item);

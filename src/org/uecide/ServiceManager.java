@@ -37,6 +37,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import javax.swing.event.*;
+import java.io.*;
 
 public class ServiceManager {
     static ArrayList<Service> services = new ArrayList<Service>();
@@ -48,7 +49,7 @@ public class ServiceManager {
         }
     }
 
-    public static void open(Window parent) {
+    public static void open(Window parent) throws IOException {
         final JDialog dialog = new JDialog(parent, JDialog.ModalityType.APPLICATION_MODAL);
         dialog.setResizable(false);
 
@@ -77,9 +78,9 @@ public class ServiceManager {
             }
         });
 
-        final JButton stopButton = new JButton(Base.loadIconFromResource("toolbar/media-playback-stop.png"));
-        final JButton startButton = new JButton(Base.loadIconFromResource("toolbar/media-playback-start.png"));
-        final JButton restartButton = new JButton(Base.loadIconFromResource("toolbar/media-seek-forward.png"));
+        final JButton stopButton = new JButton(IconManager.getIcon(24, "service.stop"));
+        final JButton startButton = new JButton(IconManager.getIcon(24, "service.start"));
+        final JButton restartButton = new JButton(IconManager.getIcon(24, "service.restart"));
 
         stopButton.setEnabled(false);
         startButton.setEnabled(false);

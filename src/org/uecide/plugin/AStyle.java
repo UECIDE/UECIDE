@@ -138,16 +138,20 @@ public class AStyle extends Plugin {
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == TOOLBAR_TAB) {
 
-            toolbar.add(new ToolbarButton("apps", "astyle", "Auto Format with Artistic Style", 16, new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    int tn = editor.getActiveTab();
-                    if (tn == -1) {
-                        return;
+            try {
+                toolbar.add(new ToolbarButton("apps.astyle", "Auto Format with Artistic Style", 16, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        int tn = editor.getActiveTab();
+                        if (tn == -1) {
+                            return;
+                        }
+                        editorTab = editor.getTab(tn);
+                        run();
                     }
-                    editorTab = editor.getTab(tn);
-                    run();
-                }
-            }));
+                }));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 

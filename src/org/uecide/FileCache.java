@@ -5,13 +5,10 @@ import java.util.*;
 
 public class FileCache {
 
-    ArrayList<String> files;
+    static ArrayList<String> files =
+        new ArrayList<String>();
 
-    public FileCache() {
-        files = new ArrayList<String>();
-    }
-
-    public void add(File root) {
+    public static void add(File root) {
         File[] list = root.listFiles();
         ArrayList<File>dirs = new ArrayList<File>();
 
@@ -42,6 +39,10 @@ public class FileCache {
                 files.add(f.getAbsolutePath());
                 return;
             }
+            if (f.getName().equals("icons.txt")) {
+                files.add(f.getAbsolutePath());
+                return;
+            }
 
         }
         for (File d : dirs) {
@@ -49,7 +50,7 @@ public class FileCache {
         }
     }
 
-    public ArrayList<File> getFilesByExtension(String ext) {
+    public static ArrayList<File> getFilesByExtension(String ext) {
         ArrayList<File> out = new ArrayList<File>();
         for (String fn : files) {
             if (fn.endsWith("." + ext)) {
@@ -59,7 +60,7 @@ public class FileCache {
         return out;
     }
 
-    public ArrayList<File> getFilesByName(String name) {
+    public static ArrayList<File> getFilesByName(String name) {
         ArrayList<File> out = new ArrayList<File>();
         for (String fn : files) {
             File f = new File(fn);

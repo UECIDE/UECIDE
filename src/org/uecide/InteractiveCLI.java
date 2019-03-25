@@ -472,7 +472,7 @@ public class InteractiveCLI {
         }
     }
 
-    public void rescanEverything() {
+    public void rescanEverything() throws IOException {
         Editor.bulletAll("Updating serial ports...");
         Serial.updatePortList();
         Serial.fillExtraPorts();

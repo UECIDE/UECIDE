@@ -240,10 +240,7 @@ theme.jtattoo.themes.smart.options.Gray=Gray
 theme.jtattoo.themes.smart.default=Default
 
 theme.icons.name=Icon set
-theme.icons.type=dropdown
-theme.icons.options.gnomic=Gnomic
-theme.icons.options.mono=Mono
-theme.icons.options.winston=Winston
+theme.icons.type=iconlist
 theme.icons.default=gnomic
 
 

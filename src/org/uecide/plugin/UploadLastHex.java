@@ -43,11 +43,15 @@ public class UploadLastHex extends Plugin
 
     public void addToolbarButtons(JToolBar toolbar, int flags) {
         if (flags == Plugin.TOOLBAR_EDITOR) {
-            toolbar.add(new ToolbarButton("apps", "reuploadhex", "Re-upload last HEX file", new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    run();
-                }
-            }));
+            try {
+                toolbar.add(new ToolbarButton("apps.reuploadhex", "Re-upload last HEX file", new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        run();
+                    }
+                }));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
 
     }

@@ -72,7 +72,7 @@ public class Debug {
         verbose = b;
     }
 
-    public static void show() {
+    public static void show() throws IOException {
         if(shown) {
             return;
         }
@@ -93,7 +93,7 @@ public class Debug {
 
         toolbar = new JToolBar();
 
-        ImageIcon trashIcon = Base.loadIconFromResource("toolbar/trash.png");
+        ImageIcon trashIcon = IconManager.getIcon(24, "debug.clear");
         JButton trashButton = new JButton(trashIcon);
         trashButton.setToolTipText(Base.i18n.string("toolbar.clear"));
         trashButton.addActionListener(new ActionListener() {
@@ -104,7 +104,7 @@ public class Debug {
         });
         toolbar.add(trashButton);
 
-        ImageIcon pauseIcon = Base.loadIconFromResource("toolbar/pause.png");
+        ImageIcon pauseIcon = IconManager.getIcon(24, "debug.pause");
         pauseButton = new JToggleButton(pauseIcon);
         pauseButton.setToolTipText(Base.i18n.string("toolbar.pause"));
         toolbar.add(pauseButton);

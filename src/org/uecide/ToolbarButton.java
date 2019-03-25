@@ -5,6 +5,7 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
+import java.io.*;
 
 public class ToolbarButton extends JButton {
 
@@ -24,21 +25,21 @@ public class ToolbarButton extends JButton {
         }
     }
 
-    public ToolbarButton(String cat, String name, String tooltip, int size) {
-        this(cat, name, tooltip, size, null);
+    public ToolbarButton(String name, String tooltip, int size) throws IOException {
+        this(name, tooltip, size, null);
     }
 
-    public ToolbarButton(String cat, String name, String tooltip) {
-        this(cat, name, tooltip, 24, null);
+    public ToolbarButton(String name, String tooltip) throws IOException {
+        this(name, tooltip, 24, null);
     }
 
-    public ToolbarButton(String cat, String name, String tooltip, ActionListener al) {
-        this(cat, name, tooltip, 24, al);
+    public ToolbarButton(String name, String tooltip, ActionListener al) throws IOException {
+        this(name, tooltip, 24, al);
     }
 
-    public ToolbarButton(String cat, String name, String tooltip, int size, ActionListener al) {
+    public ToolbarButton(String name, String tooltip, int size, ActionListener al) throws IOException {
         super();
-        buttonIcon = Base.getIcon(cat, name, size);
+        buttonIcon = IconManager.getIcon(size, name);
         setIcon(buttonIcon);
         setToolTipText(tooltip);
         if (al != null) {

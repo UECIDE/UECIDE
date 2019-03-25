@@ -72,18 +72,12 @@ public class SketchFileView extends javax.swing.filechooser.FileView {
     }
 
     public Icon getIcon(File f) {
-        if(Base.isSketchFolder(f)) {
-            File sketchConfigFile = new File(f, "sketch.cfg");
-            if (sketchConfigFile.exists()) {
-                PropertyFile sketchConfig = new PropertyFile(sketchConfigFile);
-                if (sketchConfig.get("icon") != null) {
-                    File iconFile = new File(f, sketchConfig.get("icon"));
-                    if (iconFile.exists()) {
-                        return Base.loadIconFromFile(iconFile);
-                    }
-                }
+        try {
+            if(Base.isSketchFolder(f)) {
+                return IconManager.getIcon(16, "apps.uecide");
             }
-            return Base.loadIconFromResource("icon16.png");
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         return null;

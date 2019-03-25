@@ -59,27 +59,32 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                 text.setText(file.getName());
 
                 if(file.isDirectory()) {
-                    if(expanded) {
-                        text.setIcon(Base.getIcon("bookmarks", "folder-open", 16));
-                    } else {
-                        text.setIcon(Base.getIcon("bookmarks", "folder", 16));
+                    try {
+                        if(expanded) {
+                            text.setIcon(IconManager.getIcon(16, "tree.folder-open"));
+                        } else {
+                            text.setIcon(IconManager.getIcon(16, "tree.folder-closed"));
+                        }
+                    } catch (Exception ex) {
+//                        ex.printStackTrace();
                     }
                 } else {
-                    OverlayIcon oicon = new OverlayIcon(Base.getIcon("mime", FileType.getIcon(file), 16));
+                    try {
+                        OverlayIcon oicon = new OverlayIcon(IconManager.getIcon(16, "mime." + FileType.getIcon(file)));
 
-                    for(Plugin plugin : editor.plugins) {
-                        try {
-                            ImageIcon fi = plugin.getFileIconOverlay(file);
+                        for(Plugin plugin : editor.plugins) {
+                                ImageIcon fi = plugin.getFileIconOverlay(file);
 
                             if(fi != null) {
                                 oicon.add(fi);
                             }
-                        } catch(AbstractMethodError e) {
-                        } catch(Exception e) {
                         }
+                        text.setIcon((ImageIcon)oicon);
+                    } catch(AbstractMethodError e) {
+                    } catch(Exception e) {
+                        e.printStackTrace();
                     }
 
-                    text.setIcon((ImageIcon)oicon);
                 }
                 return text;
             }
@@ -89,14 +94,18 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
 
                 text.setText(ent.toString());
 
-                if (ent.getColor() == FlaggedList.Red) {
-                    text.setIcon(Base.getIcon("flags", "fixme", 16));
-                } else if (ent.getColor() == FlaggedList.Green) {
-                    text.setIcon(Base.getIcon("flags", "note", 16));
-                } else if (ent.getColor() == FlaggedList.Yellow) {
-                    text.setIcon(Base.getIcon("flags", "todo", 16));
-                } else if (ent.getColor() == FlaggedList.Blue) {
-                    text.setIcon(Base.getIcon("flags", "info", 16));
+                try {
+                    if (ent.getColor() == FlaggedList.Red) {
+                        text.setIcon(IconManager.getIcon(16, "tree.fixme"));
+                    } else if (ent.getColor() == FlaggedList.Green) {
+                        text.setIcon(IconManager.getIcon(16, "tree.note"));
+                    } else if (ent.getColor() == FlaggedList.Yellow) {
+                        text.setIcon(IconManager.getIcon(16, "tree.todo"));
+                    } else if (ent.getColor() == FlaggedList.Blue) {
+                        text.setIcon(IconManager.getIcon(16, "tree.info"));
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
 
                 return text;
@@ -106,14 +115,22 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                 TodoEntry ent = (TodoEntry)userObject;
 
                 text.setText(ent.toString());
-                text.setIcon(Base.getIcon("bookmarks", "todo", 16));
+                try {
+                    text.setIcon(IconManager.getIcon(16, "tree.todo"));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
                 return text;
             }
 
             if (userObject instanceof FunctionBookmark) {
                 FunctionBookmark bm = (FunctionBookmark)userObject;
                 text.setText(bm.briefFormatted());
-                text.setIcon(Base.getIcon("bookmarks", "function", 16));
+                try {
+                    text.setIcon(IconManager.getIcon(16, "tree.function"));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
                 return text;
             }
 
@@ -125,14 +142,22 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
 
                 if(editor.loadedSketch.libraryIsCompiled(lib) && (pct >= 100 || pct <= 0)) {
                     text.setText(lib.getName());
-                    text.setIcon(Base.getIcon("bookmarks", "library-good", 16));
+                    try {
+                        text.setIcon(IconManager.getIcon(16, "tree.lib-good"));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                     return text;
                 } else {
                     if(pct > 0 && pct < 100) {
-                        if (pct >= 50) {
-                            text.setIcon(Base.getIcon("bookmarks", "library-semi", 16));
-                        } else {
-                            text.setIcon(Base.getIcon("bookmarks", "library-bad", 16));
+                        try {
+                            if (pct >= 50) {
+                                text.setIcon(IconManager.getIcon(16, "tree.lib-semi"));
+                            } else {
+                                text.setIcon(IconManager.getIcon(16, "tree.lib-bad"));
+                            }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
 
                         text.setText("");
@@ -150,7 +175,11 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                         p.add(bar, BorderLayout.EAST);
                         return p;
                     } else {
-                        text.setIcon(Base.getIcon("bookmarks", "library-bad", 16));
+                        try {
+                            text.setIcon(IconManager.getIcon(16, "tree.lib-bad"));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
                         text.setText(lib.getName());
                         return text;
                     }
@@ -163,17 +192,25 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                 ImageIcon icon = so.getIcon(16);
 
                 if(icon == null) {
-                    icon = Base.loadIconFromResource("icon16.png");
+                    try {
+                        icon = IconManager.getIcon(16, "apps.uecide");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
                 text.setIcon(icon);
                 return text;
             }
 
             text.setText(userObject.toString());
-            if(expanded) {
-                text.setIcon(Base.getIcon("bookmarks", "folder-open", 16));
-            } else {
-                text.setIcon(Base.getIcon("bookmarks", "folder", 16));
+            try {
+                if(expanded) {
+                    text.setIcon(IconManager.getIcon(16, "tree.folder-open"));
+                } else {
+                    text.setIcon(IconManager.getIcon(16, "tree.folder-closed"));
+                }
+            } catch (Exception ex) {
+//                ex.printStackTrace();
             }
         }
         return text;

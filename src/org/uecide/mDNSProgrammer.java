@@ -74,6 +74,10 @@ public class mDNSProgrammer extends Programmer {
     }
 
     public void onSelected(Editor e) {
-        e.getSketch().setBoard(_board);
+        try {
+            e.getSketch().setBoard(_board);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

@@ -4,6 +4,9 @@ Changelog
 0.10.6
 ------
 
+* Added changing icon for toggle button
+* Add sketch name to serial terminal title#
+* Overhaul of message and option dialogs
 * Provide right-click menu on tabs for easier navigation on themes that don't provide a tab menu button
 * Improved search panel
 * Fixed tree updating sequence
@@ -676,6 +679,9 @@ Changelog
 0.8.5
 -----
 
+* Added changing icon for toggle button
+* Add sketch name to serial terminal title#
+* Overhaul of message and option dialogs
 * Provide right-click menu on tabs for easier navigation on themes that don't provide a tab menu button
 * Improved search panel
 * Fixed tree updating sequence
