@@ -373,6 +373,8 @@ public class Editor extends JFrame {
         outputToolbar.setFloatable(false);
         outputToolbar.setOrientation(JToolBar.VERTICAL);
 
+        outputToolbar.setBorderPainted(false);
+
         outputToolbar.add(new ToolbarButton("console.clear", "Clear Console", 24, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 outputConsole.getTermPanel().getBackBuffer().clear();
@@ -403,7 +405,9 @@ public class Editor extends JFrame {
         consoleScroll.setViewportView(console);
 
         toolbar = new JToolBar();
+        toolbar.setBorderPainted(false);
         treeToolBar = new JToolBar();
+        treeToolBar.setBorderPainted(false);
 
         treeToolBar.setFloatable(false);
         toolbar.setFloatable(false);
@@ -495,6 +499,7 @@ public class Editor extends JFrame {
         toolbar.add(new ToolbarSpacer()); //Separator();
 
         consoleToolbar = new JToolBar();
+        consoleToolbar.setBorderPainted(false);
         consoleToolbar.setFloatable(false);
         consoleToolbar.setOrientation(JToolBar.VERTICAL);
 
@@ -515,6 +520,7 @@ public class Editor extends JFrame {
 
 
         miniBar = new JToolBar();
+        miniBar.setBorderPainted(false);
         miniBar.setFloatable(false);
 
         miniBar.add(new ToolbarButton("main.compile", Base.i18n.string("toolbar.run"), 16, new ActionListener() {
@@ -578,6 +584,7 @@ public class Editor extends JFrame {
 
 
         menuBar = new JMenuBar();
+        menuBar.setBorderPainted(false);
 
 
         fileMenu = new JMenu(Base.i18n.string("menu.file"));

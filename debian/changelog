@@ -1,3 +1,31 @@
+uecide (0.10.6) unstable; urgency=low 
+
+  * Fix default editor font
+  * Fix code border messing with cursor positioning
+  * Fixed missing no programmer error message
+  * Fixed execution on OS X JVM > 8
+  * Fix background service starting
+  * Cleanup of font replacement. Added copy and clear as toolbars to console
+  * Fix background issue with search box "not foun" status
+  * Fixed tree updating sequence
+  * Released 0.10.6
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Thu, 31 Jan 2019 12:53:39 +0000
+
+uecide (0.10.5) unstable; urgency=low 
+
+  * Improved search and replace interaction
+  * Removed obsolete and broken project search code
+  * Fixed JTattoo custom decorator setting
+  * Added theme load/save buttons in preferences
+  * Add hardware acceleration
+  * #126 Pause button for serial terminal
+  * #127 Clear button for Serial Terminal
+  * #128 Explicit save button for Serial Terminal
+  * Capture serial data to file
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Thu, 17 Jan 2019 15:37:42 +0000
+
 uecide (0.10.4) unstable; urgency=low 
 
   * Converted multiple spaces to single space in ctags protos

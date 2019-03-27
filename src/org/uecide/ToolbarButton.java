@@ -11,6 +11,8 @@ public class ToolbarButton extends JButton {
 
     ImageIcon buttonIcon;
 
+    int size;
+
     public ToolbarButton(ImageIcon ico) {
         this(ico, null);
     }
@@ -23,10 +25,15 @@ public class ToolbarButton extends JButton {
         if (al != null) {
             addActionListener(al);
         }
+
+        size = ico.getIconWidth() * 125 / 100;
+
+        setBorderPainted(false);
+        setContentAreaFilled(false);
     }
 
-    public ToolbarButton(String name, String tooltip, int size) throws IOException {
-        this(name, tooltip, size, null);
+    public ToolbarButton(String name, String tooltip, int s) throws IOException {
+        this(name, tooltip, s, null);
     }
 
     public ToolbarButton(String name, String tooltip) throws IOException {
@@ -37,9 +44,10 @@ public class ToolbarButton extends JButton {
         this(name, tooltip, 24, al);
     }
 
-    public ToolbarButton(String name, String tooltip, int size, ActionListener al) throws IOException {
+    public ToolbarButton(String name, String tooltip, int s, ActionListener al) throws IOException {
         super();
-        buttonIcon = IconManager.getIcon(size, name);
+        size = s;
+        buttonIcon = IconManager.getIcon(size * 75 / 100, name);
         setIcon(buttonIcon);
         setToolTipText(tooltip);
         if (al != null) {
@@ -47,7 +55,23 @@ public class ToolbarButton extends JButton {
         }
     }
 
+    @Override
     public boolean isBorderPainted() { return false; }
+    @Override
     public boolean isFocusPainted() { return false; }
+    @Override
     public Insets getInsets() { return new Insets(2, 2, 2, 2); }
+
+    @Override
+    public Dimension getSize() {
+        return new Dimension(size * 15 / 10, size);
+    }
+
+    @Override
+    public Dimension getPreferredSize() { return getSize(); }
+    @Override
+    public Dimension getMinimumSize() { return getSize(); }
+    @Override
+    public Dimension getMaximumSize() { return getSize(); }
+
 }

@@ -460,6 +460,7 @@ public class code extends JPanel implements EditorBase {
             }
         });
         toolbar = new JToolBar();
+        toolbar.setBorderPainted(false);
         toolbar.setFloatable(false);
         toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden") && !Preferences.getBoolean("editor.layout.minimal"));
         this.add(toolbar, BorderLayout.NORTH);

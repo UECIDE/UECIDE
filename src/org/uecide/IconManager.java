@@ -104,7 +104,6 @@ public class IconManager {
                 u = null;
             }
         } catch (Exception ex) {
-            System.err.println("Unable to open icon " + name);
             u = null;
         }
 

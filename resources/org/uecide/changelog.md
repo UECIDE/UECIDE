@@ -4,6 +4,7 @@ Changelog
 0.10.6
 ------
 
+* Complete overhaul of the icon system;
 * Added changing icon for toggle button
 * Add sketch name to serial terminal title#
 * Overhaul of message and option dialogs
@@ -679,6 +680,7 @@ Changelog
 0.8.5
 -----
 
+* Complete overhaul of the icon system;
 * Added changing icon for toggle button
 * Add sketch name to serial terminal title#
 * Overhaul of message and option dialogs

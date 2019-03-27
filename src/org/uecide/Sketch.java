@@ -213,7 +213,14 @@ public class Sketch {
                 if (!nsf.exists()) {
                     nsf = new File(path, path.getName() + ".pde");
                     if (!nsf.exists()) {
-                        if (Base.yesno("Import Sketch?", "This sketch file isn't in a properly named sketch folder.\nImport this sketch into your sketchbook area?")) {
+                        if (editor == null) return;
+                        if(editor.twoOptionBox(
+                            JOptionPane.QUESTION_MESSAGE,
+                            Base.i18n.string("sketch.import.title"),
+                            Base.i18n.string("sketch.import.body"),
+                            Base.i18n.string("misc.yes"),
+                            Base.i18n.string("misc.no")
+                        ) == 0) {
                             File sb = new File(Base.getSketchbookFolder(), inoName);
                             sb.mkdirs();
                             File inof = new File(sb, inoName + ".ino");

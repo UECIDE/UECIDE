@@ -162,6 +162,7 @@ theme.laf.options.mint=JTattoo: Mint
 theme.laf.options.noire=JTattoo: Noire
 theme.laf.options.smart=JTattoo: Smart
 theme.laf.options.liquid=Liquid
+theme.laf.options.material=Material
 theme.laf.options.metal=Metal
 theme.laf.options.motif=Motif
 theme.laf.options.nimbus=Nimbus
