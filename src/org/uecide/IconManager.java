@@ -9,9 +9,11 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 import javax.imageio.*;
+import java.util.Timer;
 
 public class IconManager {
     static String iconFamily = "gnomic";
+    static Timer tickTimer = null;
 
     static HashMap<String, CleverIcon> iconCache =
         new HashMap<String, CleverIcon>();
@@ -30,14 +32,16 @@ public class IconManager {
         }
     }
 
-    public static CleverIcon getIcon(int size, String name)
+    public static CleverIcon getIcon(int size, String... name)
             throws IOException, MalformedURLException {
 
-        if (iconCache.get(name + "." + size) != null) {
-            return iconCache.get(name + "." + size);
+        String cacheName = String.join(",", name);
+
+        if (iconCache.get(cacheName + "." + size) != null) {
+            return iconCache.get(cacheName + "." + size);
         }
         CleverIcon i = new CleverIcon(size, name);
-        iconCache.put(name + "." + size, i);
+        iconCache.put(cacheName + "." + size, i);
         return i;
     }
 
@@ -58,6 +62,8 @@ public class IconManager {
             pf.put("path", f.getParentFile().getAbsolutePath());
             iconSets.put(pf.get("name"), pf);
         }
+
+        initAnimation();
     }
 
     public static String getName(String set) {
@@ -135,4 +141,21 @@ public class IconManager {
         }
         return out;
     }
+
+    static void initAnimation() {
+        if (tickTimer != null) return;
+        tickTimer = new Timer();
+        tickTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                IconManager.tick();
+            }
+        }, 100, 100);
+    }
+
+    static public void tick() {
+        for (CleverIcon i : iconCache.values()) {
+            i.animate();
+        }
+    }
+
 }

@@ -1051,11 +1051,15 @@ public class Preferences extends JDialog implements TreeSelectionListener {
     }
 
     public static Integer getInteger(String key) {
+        return getInteger(key, 0);
+    }
+
+    public static Integer getInteger(String key, Integer def) {
         String data = get(key);
         if (data == null || data.equals("")) {
-            return 0;
+            return def;
         }
-        int val = 0;
+        int val = def;
         try {
             val = Integer.parseInt(data);
         } catch (Exception e) {

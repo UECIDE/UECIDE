@@ -6,12 +6,13 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.awt.event.*;
+import java.util.*;
 
-public class ToolbarToggleButton extends ToolbarButton {
+public class ToolbarToggleButton extends ToolbarButton implements ActionListener {
 
-    ImageIcon buttonIcon;
-    ImageIcon alternateIcon;
-    int size;
+    ImageIcon alternateIcon = null;
+    ArrayList<ActionListener> actionListeners = new ArrayList<ActionListener>();
+    boolean selected = false;
 
     public ToolbarToggleButton(ImageIcon ico) {
         this(ico, null);
@@ -40,15 +41,48 @@ public class ToolbarToggleButton extends ToolbarButton {
     public ToolbarToggleButton(String name, String tooltip, int s, ActionListener al, String altname) throws IOException {
         super(name, tooltip, s, al);
         if (altname != null) {
+            System.err.println("Getting alternate icon " + altname + " at size " + (size * 75 / 100) + " (" + size + ")");
             alternateIcon = IconManager.getIcon(size * 75 / 100, altname);
+        }
+
+        super.addActionListener(this);
+    }
+
+    public void actionPerformed(ActionEvent evt) {
+        selected = !selected;
+        if (alternateIcon != null) {
+            if (!selected) {
+                setIcon(buttonIcon);
+            } else {
+                setIcon(alternateIcon);
+            }
+        }
+        setBorderPainted(selected);
+        for (ActionListener al : actionListeners) {
+            al.actionPerformed(evt);
         }
     }
 
-    public void setAlternateIcon(boolean a) {
-        if (a) {
-            setIcon(alternateIcon);
-        } else {
-            setIcon(buttonIcon);
+    @Override
+    public void addActionListener(ActionListener l) {
+        actionListeners.add(l);
+    }
+
+    @Override
+    public boolean isSelected() {
+        return selected;
+    }
+
+    @Override
+    public void setSelected(boolean s) {
+        selected = s;
+        if (alternateIcon != null) {
+            if (!s) {
+                setIcon(buttonIcon);
+            } else {
+                setIcon(alternateIcon);
+            }
         }
+        repaint();
     }
 }

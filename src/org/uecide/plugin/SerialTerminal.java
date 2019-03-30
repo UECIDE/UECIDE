@@ -162,7 +162,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
         toolbar.setFloatable(false);
 
         try {
-            toolbar.add(new ToolbarButton("serial.save", Base.i18n.string("serial.save"), 24, new ActionListener() {
+            toolbar.add(new ToolbarButton("serial.save", Base.i18n.string("serial.save"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         saveSession();
@@ -172,7 +172,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                 }
             }));
             
-            toolbar.add(new ToolbarToggleButton("serial.capture", Base.i18n.string("serial.capture"), 24, new ActionListener() {
+            toolbar.add(new ToolbarToggleButton("serial.capture", Base.i18n.string("serial.capture"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
                     if (b.isSelected()) {
@@ -185,7 +185,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
 
             toolbar.add(new ToolbarSpacer());
 
-            toolbar.add(new ToolbarButton("serial.clear", Base.i18n.string("serial.clear"), 24, new ActionListener() {
+            toolbar.add(new ToolbarButton("serial.clear", Base.i18n.string("serial.clear"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     term.getTermPanel().getBackBuffer().clear();
                     term.getTermPanel().getScrollBuffer().clear();
@@ -193,11 +193,10 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                 }
             }));
 
-            ToolbarToggleButton as = new ToolbarToggleButton("serial.pause", Base.i18n.string("serial.pause"), 24, new ActionListener() {
+            ToolbarToggleButton as = new ToolbarToggleButton("serial.pause", Base.i18n.string("serial.pause"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     ToolbarToggleButton b = (ToolbarToggleButton)e.getSource();
                     tty.discardInput(b.isSelected());
-                    b.setAlternateIcon(b.isSelected());
                 }
             }, "serial.play");
 

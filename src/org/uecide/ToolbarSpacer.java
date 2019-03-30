@@ -13,11 +13,6 @@ public class ToolbarSpacer extends JPanel {
     
     public ToolbarSpacer() {
         this(16, 24);
-        setEnabled(false);
-//        setRolloverEnabled(false);
-//        setBorderPainted(false);
-//        setFocusable(false);
-        setOpaque(false);
     }
 
     public ToolbarSpacer(int s) {
@@ -28,10 +23,11 @@ public class ToolbarSpacer extends JPanel {
         super();
         gap = s;
         height = h;
+        setEnabled(false);
+        setOpaque(false);
+        setBackground(new Color(0f, 0f, 0f, 0f));
     }
 
-    public boolean isBorderPainted() { return false; }
-    public boolean isFocusPainted() { return false; }
     @Override
     public boolean isFocusable() { return false; }
     public boolean isRolloverEnabled() { return false; }

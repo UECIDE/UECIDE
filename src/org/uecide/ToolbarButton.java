@@ -18,15 +18,17 @@ public class ToolbarButton extends JButton {
     }
 
     public ToolbarButton(ImageIcon ico, ActionListener al) {
+        this(ico, ico.getIconWidth() * 133 / 100, al);
+    }
+    public ToolbarButton(ImageIcon ico, int s, ActionListener al) {
         super();
         buttonIcon = ico;
         setIcon(ico);
-    //    setToolTipText(null);
         if (al != null) {
-            addActionListener(al);
+            super.addActionListener(al);
         }
 
-        size = ico.getIconWidth() * 125 / 100;
+        size = s;
 
         setBorderPainted(false);
         setContentAreaFilled(false);
@@ -37,11 +39,11 @@ public class ToolbarButton extends JButton {
     }
 
     public ToolbarButton(String name, String tooltip) throws IOException {
-        this(name, tooltip, 24, null);
+        this(name, tooltip, Preferences.getInteger("theme.iconsize"), null);
     }
 
     public ToolbarButton(String name, String tooltip, ActionListener al) throws IOException {
-        this(name, tooltip, 24, al);
+        this(name, tooltip, Preferences.getInteger("theme.iconsize"), al);
     }
 
     public ToolbarButton(String name, String tooltip, int s, ActionListener al) throws IOException {
@@ -51,12 +53,10 @@ public class ToolbarButton extends JButton {
         setIcon(buttonIcon);
         setToolTipText(tooltip);
         if (al != null) {
-            addActionListener(al);
+            super.addActionListener(al);
         }
     }
 
-    @Override
-    public boolean isBorderPainted() { return false; }
     @Override
     public boolean isFocusPainted() { return false; }
     @Override

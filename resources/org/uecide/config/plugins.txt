@@ -4,12 +4,6 @@ serialterminal.description=A proper interactive screen-oriented serial terminal
 serialterminal.enabled=true
 serialterminal.released=true
 
-astyle.class=org.uecide.plugin.AStyle
-astyle.name=AStyle Code Formatter
-astyle.description=Auto-format your code using the AStyle code formatter
-astyle.enabled=true
-astyle.released=true
-
 elfinspector.class=org.uecide.plugin.ElfInspector
 elfinspector.name=ELF Inspector
 elfinspector.description=Examine the contents of ELF files

@@ -74,6 +74,7 @@ icon.debug.clear=user-trash.png
 icon.debug.pause=media-playback-pause.png
 
 icon.tabs.close=window-close.png
+icon.tabs.modified=dialog-warning.png
 
 icon.spinner.pos-1=circle1.png
 icon.spinner.pos-2=circle2.png

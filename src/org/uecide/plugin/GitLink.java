@@ -785,10 +785,10 @@ public class GitLink extends Plugin {
             hasFile(null);
 
             try {
-                pullButton = new ToolbarButton("vcs.pull", "Pull from remote repository", pullAction);
-                pushButton = new ToolbarButton("vcs.push", "Push to remote repository", pushAction);
-                commitButton = new ToolbarButton("vcs.commit", "Commit all changes", commitAction);
-                branchButton = new ToolbarButton("vcs.branch", "Branch", branchAction);
+                pullButton = new ToolbarButton("vcs.pull", "Pull from remote repository", Preferences.getInteger("theme.iconsize"), pullAction);
+                pushButton = new ToolbarButton("vcs.push", "Push to remote repository", Preferences.getInteger("theme.iconsize"), pushAction);
+                commitButton = new ToolbarButton("vcs.commit", "Commit all changes", Preferences.getInteger("theme.iconsize"), commitAction);
+                branchButton = new ToolbarButton("vcs.branch", "Branch", Preferences.getInteger("theme.iconsize"), branchAction);
                 toolbar.add(pullButton);
                 toolbar.add(pushButton);
                 toolbar.add(commitButton);

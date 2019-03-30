@@ -153,7 +153,7 @@ public class Editor extends JFrame {
 
     HashMap<String, Object> dataStore = new HashMap<String, Object>();
 
-    AnimatedIcon abortIcon;
+    CleverIcon abortIcon;
 
     public static ArrayList<Editor>editorList = new ArrayList<Editor>();
 
@@ -172,7 +172,6 @@ public class Editor extends JFrame {
     }
 
     public void indicateStartCompiling() {
-        abortIcon.start(abortButton);
         runButton.setEnabled(false);
         programButton.setEnabled(false);
         runButton.setVisible(false);
@@ -184,7 +183,6 @@ public class Editor extends JFrame {
         programButton.setEnabled(true);
         runButton.setVisible(true);
         abortButton.setVisible(false);
-        abortIcon.stop();
     }
 
     class DefaultRunHandler implements Runnable {
@@ -256,7 +254,7 @@ public class Editor extends JFrame {
 
         this.setLayout(new BorderLayout());
 
-        Base.setIcon(this);
+        this.setIconImage(IconManager.getIcon(128, "apps.uecide").getImage());
 
         treePanel = new JPanel();
         projectPanel = new JPanel();
@@ -375,13 +373,13 @@ public class Editor extends JFrame {
 
         outputToolbar.setBorderPainted(false);
 
-        outputToolbar.add(new ToolbarButton("console.clear", "Clear Console", 24, new ActionListener() {
+        outputToolbar.add(new ToolbarButton("console.clear", "Clear Console", Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 outputConsole.getTermPanel().getBackBuffer().clear();
                 outputConsole.getTermPanel().getScrollBuffer().clear();
             }
         }));
-        outputToolbar.add(new ToolbarButton("console.copy", "Copy Console Text", 24, new ActionListener() {
+        outputToolbar.add(new ToolbarButton("console.copy", "Copy Console Text", Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String scroll = outputConsole.getBufferText(GrittyTerminal.BufferType.Scroll);
                 String back = outputConsole.getBufferText(GrittyTerminal.BufferType.Back);
@@ -413,6 +411,7 @@ public class Editor extends JFrame {
         toolbar.setFloatable(false);
         
         statusText = new JLabel("");
+        statusText.setOpaque(false);
         statusProgress = new JProgressBar();
 
         JPanel sp = new JPanel();
@@ -446,7 +445,7 @@ public class Editor extends JFrame {
 
         this.add(statusBar, BorderLayout.SOUTH);
 
-        JButton refreshButton = new ToolbarButton("tree.refresh", "Refresh Project Tree", 24, new ActionListener() {
+        JButton refreshButton = new ToolbarButton("tree.refresh", "Refresh Project Tree", Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (!compilerRunning()) {
                     try {
@@ -503,12 +502,12 @@ public class Editor extends JFrame {
         consoleToolbar.setFloatable(false);
         consoleToolbar.setOrientation(JToolBar.VERTICAL);
 
-        consoleToolbar.add(new ToolbarButton("console.clear", "Clear Console", 24, new ActionListener() {
+        consoleToolbar.add(new ToolbarButton("console.clear", "Clear Console", Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 console.clear();
             }
         }));
-        consoleToolbar.add(new ToolbarButton("console.copy", "Copy Console Text", 24, new ActionListener() {
+        consoleToolbar.add(new ToolbarButton("console.copy", "Copy Console Text", Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 StringSelection sel = new StringSelection(console.getText());
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -523,7 +522,7 @@ public class Editor extends JFrame {
         miniBar.setBorderPainted(false);
         miniBar.setFloatable(false);
 
-        miniBar.add(new ToolbarButton("main.compile", Base.i18n.string("toolbar.run"), 16, new ActionListener() {
+        miniBar.add(new ToolbarButton("main.compile", Base.i18n.string("toolbar.run"), Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -538,7 +537,7 @@ public class Editor extends JFrame {
             }
         }));
 
-       miniBar.add(new ToolbarButton("main.program", Base.i18n.string("toolbar.program"), 16, new ActionListener() {
+       miniBar.add(new ToolbarButton("main.program", Base.i18n.string("toolbar.program"), Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -552,7 +551,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        miniBar.add(new ToolbarButton("main.new", Base.i18n.string("toolbar.new"), 16, new ActionListener() {
+        miniBar.add(new ToolbarButton("main.new", Base.i18n.string("toolbar.new"), Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     Base.handleNew();
@@ -562,7 +561,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        miniBar.add(new ToolbarButton("main.open", Base.i18n.string("toolbar.open"), 16, new ActionListener() {
+        miniBar.add(new ToolbarButton("main.open", Base.i18n.string("toolbar.open"), Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     handleOpenPrompt();
@@ -572,7 +571,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        miniBar.add(new ToolbarButton("main.save", Base.i18n.string("toolbar.save"), 16, new ActionListener() {
+        miniBar.add(new ToolbarButton("main.save", Base.i18n.string("toolbar.save"), Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAllTabs();
@@ -698,15 +697,14 @@ public class Editor extends JFrame {
     public void updateToolbar() throws IOException {
         toolbar.removeAll();
 
-        abortIcon = new AnimatedIcon(100,
-            IconManager.getIcon(24, "spinner.pos-1"),
-            IconManager.getIcon(24, "spinner.pos-2"),
-            IconManager.getIcon(24, "spinner.pos-3"),
-            IconManager.getIcon(24, "spinner.pos-4")
+        abortIcon = IconManager.getIcon(Preferences.getInteger("theme.iconsize") * 75 / 100, 
+                "spinner.pos-1",
+                "spinner.pos-2",
+                "spinner.pos-3",
+                "spinner.pos-4"
         );
 
-        //"actions", "cancel", Base.i18n.string("toolbar.abort"), 24, new ActionListener() {
-        abortButton = new ToolbarButton(abortIcon, new ActionListener() {
+        abortButton = new ToolbarButton(abortIcon, Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 abortCompilation();
             }
@@ -714,7 +712,7 @@ public class Editor extends JFrame {
         abortButton.setVisible(false);
         toolbar.add(abortButton);
 
-        runButton = new ToolbarButton("main.compile", Base.i18n.string("toolbar.run"), 24, new ActionListener() {
+        runButton = new ToolbarButton("main.compile", Base.i18n.string("toolbar.run"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -729,9 +727,8 @@ public class Editor extends JFrame {
             }
         });
         toolbar.add(runButton);
-        runButton.setBorderPainted(false);
 
-        programButton = new ToolbarButton("main.program", Base.i18n.string("toolbar.program"), 24, new ActionListener() {
+        programButton = new ToolbarButton("main.program", Base.i18n.string("toolbar.program"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
                     loadedSketch.purgeCache();
@@ -747,7 +744,7 @@ public class Editor extends JFrame {
         toolbar.add(programButton);
         toolbar.add(new ToolbarSpacer()); //Separator();
 
-        toolbar.add(new ToolbarButton("main.new", Base.i18n.string("toolbar.new"), 24, new ActionListener() {
+        toolbar.add(new ToolbarButton("main.new", Base.i18n.string("toolbar.new"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     Base.handleNew();
@@ -757,7 +754,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        toolbar.add(new ToolbarButton("main.open", Base.i18n.string("toolbar.open"), 24, new ActionListener() {
+        toolbar.add(new ToolbarButton("main.open", Base.i18n.string("toolbar.open"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     handleOpenPrompt();
@@ -767,7 +764,7 @@ public class Editor extends JFrame {
             }
         }));
 
-        toolbar.add(new ToolbarButton("main.save", Base.i18n.string("toolbar.save"), 24, new ActionListener() {
+        toolbar.add(new ToolbarButton("main.save", Base.i18n.string("toolbar.save"), Preferences.getInteger("theme.iconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
                     saveAllTabs();
@@ -1274,7 +1271,7 @@ public class Editor extends JFrame {
                                         noteEntries.add(tent);
                                         if (eb != null) {
                                             try {
-                                                eb.flagLine(ent.getLine(), IconManager.getIcon(16, "tree.note"), 0x2000);
+                                                eb.flagLine(ent.getLine(), IconManager.getIcon(Preferences.getInteger("theme.treeiconsize"), "tree.note"), 0x2000);
                                             } catch (Exception ex) {    
                                                 ex.printStackTrace();
                                             }
@@ -1283,7 +1280,7 @@ public class Editor extends JFrame {
                                         todoEntries.add(tent);
                                         if (eb != null) {
                                             try {
-                                                eb.flagLine(ent.getLine(), IconManager.getIcon(16, "tree.todo"), 0x2000);
+                                                eb.flagLine(ent.getLine(), IconManager.getIcon(Preferences.getInteger("theme.treeiconsize"), "tree.todo"), 0x2000);
                                             } catch (Exception ex) {    
                                                 ex.printStackTrace();
                                             }
@@ -1292,7 +1289,7 @@ public class Editor extends JFrame {
                                         fixmeEntries.add(tent);
                                         if (eb != null) {
                                             try { 
-                                                eb.flagLine(ent.getLine(), IconManager.getIcon(16, "tree.fixme"), 0x2000);
+                                                eb.flagLine(ent.getLine(), IconManager.getIcon(Preferences.getInteger("theme.treeiconsize"), "tree.fixme"), 0x2000);
                                             } catch (Exception ex) {    
                                                 ex.printStackTrace();
                                             }
@@ -3634,7 +3631,7 @@ public class Editor extends JFrame {
                 item.setSelected(loadedSketch.getContext().getProgrammer().equals(prog));
             }
 
-            ImageIcon i = prog.getIcon(16);
+            ImageIcon i = prog.getIcon(Preferences.getInteger("theme.treeiconsize"));
 
             if(i != null) {
                 item.setIcon(i);
@@ -3953,7 +3950,7 @@ public class Editor extends JFrame {
                 ArrayList<JSAction> icons = p.getMainToolbarIcons();
                 for (JSAction action : icons) {
                     String[] icodat = action.icon.split("/");
-                    tb.add(new ToolbarButton(icodat[0] + "." + icodat[1], action.tooltip, 24, new JSActionListener(this, action)));
+                    tb.add(new ToolbarButton(icodat[0] + "." + icodat[1], action.tooltip, Preferences.getInteger("theme.iconsize"), new JSActionListener(this, action)));
                 }
             }
         } else {
@@ -3961,7 +3958,7 @@ public class Editor extends JFrame {
                 ArrayList<JSAction> icons = p.getEditorToolbarIcons();
                 for (JSAction action : icons) {
                     String[] icodat = action.icon.split("/");
-                    tb.add(new ToolbarButton(icodat[0] + "." + icodat[1], action.tooltip, 16, new JSActionListener(this, action)));
+                    tb.add(new ToolbarButton(icodat[0] + "." + icodat[1], action.tooltip, Preferences.getInteger("theme.miniiconsize"), new JSActionListener(this, action)));
                 }
             }
         }

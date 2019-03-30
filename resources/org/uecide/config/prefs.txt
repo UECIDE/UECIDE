@@ -152,6 +152,7 @@ theme.laf.options.gnome=Gnome
 theme.laf.options.acryl=Acryl
 theme.laf.options.aero=Aero
 theme.laf.options.aluminium=JTattoo: Aluminium
+theme.laf.options.arduini=Arduino
 theme.laf.options.bernstein=JTattoo: Bernstein
 theme.laf.options.fast=JTattoo: Fast
 theme.laf.options.graphite=JTattoo: Graphite
@@ -243,6 +244,25 @@ theme.jtattoo.themes.smart.default=Default
 theme.icons.name=Icon set
 theme.icons.type=iconlist
 theme.icons.default=gnomic
+
+theme.iconsize.name=Toolbar Icon Size
+theme.iconsize.type=range
+theme.iconsize.min=16
+theme.iconsize.max=48
+theme.iconsize.default=32
+
+theme.miniiconsize.name=Small Toolbar Icon Size
+theme.miniiconsize.type=range
+theme.miniiconsize.min=16
+theme.miniiconsize.max=48
+theme.miniiconsize.default=24
+
+theme.treeiconsize.name=Tree Icon Size
+theme.treeiconsize.type=range
+theme.treeiconsize.min=16
+theme.treeiconsize.max=48
+theme.treeiconsize.default=16
+
 
 
 

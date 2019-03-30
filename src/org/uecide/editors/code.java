@@ -465,52 +465,52 @@ public class code extends JPanel implements EditorBase {
         toolbar.setVisible(!Preferences.getBoolean("editor.toolbars.sub_hidden") && !Preferences.getBoolean("editor.layout.minimal"));
         this.add(toolbar, BorderLayout.NORTH);
 
-        toolbar.add(new ToolbarButton("edit.copy", "Copy", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.copy", "Copy", Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.copy();
             }
         }));
-        toolbar.add(new ToolbarButton("edit.cut", "Cut", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.cut", "Cut", Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.cut();
             }
         }));
 
-        toolbar.add(new ToolbarButton("edit.paste", "Paste", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.paste", "Paste", Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.paste();
             }
         }));
 
-        toolbar.add(new ToolbarSpacer(12, 16)); //Separator();
+        toolbar.add(new ToolbarSpacer(12, Preferences.getInteger("theme.miniiconsize"))); //Separator();
 
-        toolbar.add(new ToolbarButton("edit.undo", "Undo", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.undo", "Undo", Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.undoLastAction();
             }
         }));
 
-        toolbar.add(new ToolbarButton("edit.redo", "Redo", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.redo", "Redo", Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 textArea.redoLastAction();
             }
         }));
 
-        toolbar.add(new ToolbarSpacer(12, 16)); //Separator();
+        toolbar.add(new ToolbarSpacer(12, Preferences.getInteger("theme.miniiconsize"))); //Separator();
 
-        toolbar.add(new ToolbarButton("edit.indent-more", "Increase Indent", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.indent-more", "Increase Indent", Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 increaseIndent(e);
             }
         }));
         
-        toolbar.add(new ToolbarButton("edit.indent-less", "Decrease Indent", 16, new ActionListener() {
+        toolbar.add(new ToolbarButton("edit.indent-less", "Decrease Indent", Preferences.getInteger("theme.miniiconsize"), new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 decreaseIndent(e);
             }
         }));
 
-        toolbar.add(new ToolbarSpacer(12, 16)); //Separator();
+        toolbar.add(new ToolbarSpacer(12, Preferences.getInteger("theme.miniiconsize"))); //Separator();
 
         editor.addPluginsToToolbar(toolbar, Plugin.TOOLBAR_TAB);
 

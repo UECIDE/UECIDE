@@ -2744,6 +2744,7 @@ public class Base {
             else if (lafname.equals("tinyunicode")) { new TinyUnicodeLAF().applyLAF(); }
             else if (lafname.equals("vs2005")) { new VisualStudio2005LAF().applyLAF(); }
             else if (lafname.equals("material")) { new MaterialLAF().applyLAF(); }
+            else if (lafname.equals("arduino")) { new ArduinoLAF().applyLAF(); }
         } catch (Exception ex) {
             ex.printStackTrace();
         }

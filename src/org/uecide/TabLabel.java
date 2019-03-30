@@ -56,9 +56,8 @@ import org.uecide.Compiler;
 import java.beans.*;
 
 public class TabLabel extends JPanel {
-    ImageIcon fileIcon = null;
     JLabel nameLabel;
-    File sketchFile;
+    File sketchFile = null;
     String name;
     long expectedFileTime;
     boolean modified = false;
@@ -68,84 +67,64 @@ public class TabLabel extends JPanel {
     boolean isSelected = false;
 
     public TabLabel(Editor e, File sf) throws IOException {
-        editor = e;
-        sketchFile = sf;
-        name = sketchFile.getName();
-        this.setLayout(new BorderLayout());
-        nameLabel = new JLabel(name);
-//        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
-        fileIcon = IconManager.getIcon(16, "mime." + FileType.getIcon(sketchFile));
-
-        if(fileIcon != null) {
-            nameLabel.setIcon(fileIcon);
-        }
-
-        JLabel blab = new JLabel();
-        nameLabel.setOpaque(false);
-        blab.setIcon(IconManager.getIcon(16, "tabs.close"));
-
-        blab.addMouseListener(new MouseListener() {
-            public void mouseClicked(MouseEvent e) {
-                int tab = editor.getTabByFile(sketchFile);
-                try {
-                    editor.closeTab(tab);
-                } catch (IOException ex) {
-                    editor.error(ex);
-                }
-            }
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
-        });
-
-        blab.setOpaque(false);
-        this.setOpaque(false);
-        this.add(nameLabel, BorderLayout.CENTER);
-        this.add(blab, BorderLayout.EAST);
-        expectedFileTime = sf.lastModified();
-        isSelected = true; // Just been made, so must be selected!
-        update();
+        this(e, sf.getName(), sf);
     }
 
     public TabLabel(Editor e, String tabname) throws IOException {
-        editor = e;
-        sketchFile = null;
-        name = tabname;
-        this.setLayout(new BorderLayout());
-        nameLabel = new JLabel(name);
-//        nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
-        JLabel blab = new JLabel();
-        nameLabel.setOpaque(false);
-        blab.setIcon(IconManager.getIcon(16, "tabs.close"));
+        this(e, tabname, null);
+    }
 
-        blab.addMouseListener(new MouseListener() {
-            public void mouseClicked(MouseEvent e) {
-                int tab = editor.getTabByLabel(TabLabel.this);
+    public TabLabel(Editor e, String tabname, File sf) throws IOException {
+        editor = e;
+        sketchFile = sf;
+        name = tabname;
+        setLayout(new BorderLayout(5, 0));
+        setOpaque(false);
+
+        nameLabel = new JLabel(name);
+        nameLabel.setOpaque(false);
+        add(nameLabel, BorderLayout.CENTER);
+
+        if (sketchFile != null) {
+            JLabel fileIconLabel = new JLabel(IconManager.getIcon(12, "mime." + FileType.getIcon(sketchFile)));
+            fileIconLabel.setOpaque(false);
+            add(fileIconLabel, BorderLayout.WEST);
+        }
+
+        ToolbarButton closeButton = new ToolbarButton("tabs.close", "Close Tab", 12, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int tab = editor.getTabByFile(sketchFile);
                 try {
                     editor.closeTab(tab);
                 } catch (Exception ex) {
-                    editor.error(ex);
                 }
             }
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
         });
 
-        blab.setOpaque(false);
-        this.setOpaque(false);
-        this.add(nameLabel, BorderLayout.CENTER);
-        this.add(blab, BorderLayout.EAST);
-        isSelected = true; // Just been made, so must be selected!
+        closeButton.setContentAreaFilled(false);
+
+        add(closeButton, BorderLayout.EAST);
+
+        isSelected = true;
         update();
     }
 
     public void update() {
+        if (sketchFile == null) return;
         Font labelFont = nameLabel.getFont();
-        name = sketchFile.getName();
+        if (sketchFile != null) {
+            name = sketchFile.getName();
+        }
         nameLabel.setText(name);
+
+        if (modified) {
+            try {
+                nameLabel.setIcon(IconManager.getIcon(12, "tabs.modified"));
+            } catch (IOException ex) {
+            }
+        } else {
+            nameLabel.setIcon(null);
+        }
 
         if (isSelected) {
 //            nameLabel.setForeground(Base.getTheme().getColor("tab.selected.fgcolor"));
@@ -193,7 +172,9 @@ public class TabLabel extends JPanel {
     public void setModified(boolean m) {
         if(modified != m) {
             if(!m) {
-                expectedFileTime = sketchFile.lastModified();
+                if (sketchFile != null) {
+                    expectedFileTime = sketchFile.lastModified();
+                }
             }
 
             modified = m;
