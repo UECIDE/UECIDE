@@ -16,6 +16,7 @@ public class CleverIcon extends ImageIcon {
     int frames = 0;
     String[] name;
     BufferedImage[] scaledImage;
+    ImageIcon disabledIcon = null;
 
     public CleverIcon(int s, String... n) throws IOException {
         super();
@@ -48,6 +49,28 @@ public class CleverIcon extends ImageIcon {
             g.drawImage(scaled, 0, 0, size, size, 0, 0, size, size, null);
         }
 
+        BufferedImage disabledImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+
+        Color disabledColor = UIManager.getColor("Button.disabledColor");
+        if (disabledColor == null) {
+            disabledColor = new Color(0x80, 0x80, 0x80);
+        }
+        int col = disabledColor.getRGB();
+        col &= 0x00FFFFFF;
+
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int rgb = scaledImage[0].getRGB(x, y);
+                rgb &= 0xFF000000;
+                rgb |= col;
+                disabledImage.setRGB(x, y, rgb);
+            }
+        }
+
+
+        disabledIcon = new ImageIcon(disabledImage);
+        
+
         setImage(scaledImage[0]);
     }
 
@@ -58,5 +81,9 @@ public class CleverIcon extends ImageIcon {
             frame = 0;
         }
         setImage(scaledImage[frame]);
+    }
+
+    public ImageIcon disabled() {
+        return disabledIcon;
     }
 }

@@ -4,6 +4,7 @@ Changelog
 0.10.6
 ------
 
+* Added Arduino-like LAF
 * Added Material LAF and cleaned up icons and buttons
 * Complete overhaul of the icon system;
 * Added changing icon for toggle button
@@ -681,6 +682,7 @@ Changelog
 0.8.5
 -----
 
+* Added Arduino-like LAF
 * Added Material LAF and cleaned up icons and buttons
 * Complete overhaul of the icon system;
 * Added changing icon for toggle button

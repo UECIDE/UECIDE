@@ -9,48 +9,62 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 class ArduinoLAF extends LookAndFeel {
-    public static String getName() { return "Material"; }
+    public static String getName() { return "Arduino"; }
+
+    final static Color DARK_BLUE = new Color(0x00, 0x64, 0x68);
+    final static Color MID_BLUE = new Color(0x17, 0xa1, 0xa5);
+    final static Color LIGHT_BLUE = new Color(0x4d, 0xb7, 0xbb);
+    final static Color LIGHT_GRAY = new Color(0xef, 0xf0, 0xf1);
+    final static Color DARK_GRAY = new Color(0x2d, 0x30, 0x31);
+    final static Color NOTHING = new Color(1f, 1f, 1f, 0f);
+    final static Color BLACK_TINT = new Color(0f, 0f, 0f, 0.2f);
+    final static Color VIBRANT_BLUE = new Color(0x3d, 0xae, 0xe9);
+    final static Color WHITE = new Color(0xff, 0xff, 0xff);
+    final static Color MID_GRAY = new Color(0xb6, 0xb8, 0xba);
 
     public static void applyLAF() {
         try {
+
             UIManager.setLookAndFeel(new MaterialLookAndFeel());
-            UIManager.put("Button.background", new Color(1f, 1f, 1f, 0f));
-            UIManager.put("Button.mouseHoverColor", new Color(0f, 0f, 0f, 0.2f));
+
+            UIManager.put("Button.background",                  NOTHING);
+            UIManager.put("Button.mouseHoverColor",             BLACK_TINT);
 
             // Arduino colour scheme
-            UIManager.put("MenuBar.background", new Color(0xef, 0xf0, 0xf1));
-            UIManager.put("MenuBar.foreground", new Color(0x2d, 0x30, 0x31));
-            UIManager.put("ToolBar.background", new Color(0x00, 0x64, 0x68));
-            UIManager.put("ToolBar.foreground", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("Button.background", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("Button.mouseHoverColor", new Color(0xff, 0xff, 0xff));
-
-            UIManager.put("Panel.background", new Color(0x17, 0xa1, 0xa5));
-            UIManager.put("TabbedPane.background", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("TabbedPane.borderHighlightColor", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("TabbedPane.darkShadow", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("TabbedPane.foreground", new Color(0x00, 0x5b, 0x5b));
-            UIManager.put("TabbedPane.highlight", new Color(0xff, 0xff, 0xff));
-            UIManager.put("TabbedPane.shadow", new Color(0x4d, 0xb7, 0xbb));
-
-//            UIManager.put("ScrollBar.arrowButtonBackground",
-//            UIManager.put("ScrollBar.thumbDarkShadow", 
-//            UIManager.put("ScrollBar.thumbHighlight", 
-//            UIManager.put("ScrollBar.thumbShadow", 
-            UIManager.put("ScrollBar.thumb", new Color(0x3d, 0xae, 0xe9));
-            UIManager.put("ScrollBar.track", new Color(0xb6, 0xb8, 0xba));
-
-            UIManager.put("TabbedPane.contentAreaColor", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("TextPane.background", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("ScrollPane.background", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("Separator.background", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("Label.background", new Color(0f, 0f, 0f, 0f));
-
-            UIManager.put("SplitPane.shadow", new Color(0x4d, 0xb7, 0xbb));
-            UIManager.put("SplitPane.darkshadow", new Color(0x4d, 0xb7, 0xbb));
+            UIManager.put("Button.background",                  LIGHT_BLUE);
+            UIManager.put("Button.backgroundCircle",            true);
+            UIManager.put("Button.backgroundPad",               new Integer(2));
+            UIManager.put("Button.disabledColor",               MID_BLUE);
+            UIManager.put("Button.mouseHoverColor",             WHITE);
+            UIManager.put("CheckBox.background",                MID_BLUE);
+            UIManager.put("Label.background",                   NOTHING);
+            UIManager.put("MenuBar.background",                 LIGHT_GRAY);
+            UIManager.put("MenuBar.foreground",                 DARK_GRAY);
+            UIManager.put("OptionPane.background",              MID_BLUE);
+            UIManager.put("Panel.background",                   MID_BLUE);
+            UIManager.put("ProgressBar.foreground",             VIBRANT_BLUE);
+            UIManager.put("ProgressBar.background",             MID_GRAY);
+            UIManager.put("ScrollBar.thumb",                    VIBRANT_BLUE);
+            UIManager.put("ScrollBar.thumbDarkShadow",          VIBRANT_BLUE);
+            UIManager.put("ScrollBar.thumbHighlight",           VIBRANT_BLUE);
+            UIManager.put("ScrollBar.thumbShadow",              VIBRANT_BLUE);
+            UIManager.put("ScrollBar.track",                    MID_GRAY);
+            UIManager.put("ScrollPane.background",              MID_BLUE);
+            UIManager.put("Separator.background",               MID_BLUE);
+            UIManager.put("SplitPane.darkshadow",               MID_BLUE);
+            UIManager.put("SplitPane.shadow",                   MID_BLUE);
+            UIManager.put("TabbedPane.background",              LIGHT_BLUE);
+            UIManager.put("TabbedPane.borderHighlightColor",    MID_BLUE);
+            UIManager.put("TabbedPane.contentAreaColor",        MID_BLUE);
+            UIManager.put("TabbedPane.darkShadow",              MID_BLUE);
+            UIManager.put("TabbedPane.foreground",              DARK_BLUE);
+            UIManager.put("TabbedPane.highlight",               WHITE);
+            UIManager.put("TabbedPane.shadow",                  MID_BLUE);
+            UIManager.put("TextPane.background",                MID_BLUE);
+            UIManager.put("ToolBar.background",                 DARK_BLUE);
+            UIManager.put("ToolBar.foreground",                 LIGHT_BLUE);
 
             UIManager.put("MenuBar.border", new EmptyBorder(0, 0, 0, 0));
-            UIManager.put("ProgressBar.background", new Color(0xb6, 0xb8, 0xba));
 
 
 

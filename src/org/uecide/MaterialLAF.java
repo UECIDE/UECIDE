@@ -15,7 +15,8 @@ class MaterialLAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel(new MaterialLookAndFeel());
             UIManager.put("Button.background", new Color(1f, 1f, 1f, 0f));
-            UIManager.put("Button.mouseHoverColor", new Color(0f, 0f, 0f, 0.2f));
+            UIManager.put("Button.mouseHoverColor", new Color(0f, 0f, 0f, 0.1f));
+            UIManager.put("Button.backgroundCircle", true);
 
         } catch (Exception e) {
             Base.error(e);

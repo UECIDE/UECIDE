@@ -152,7 +152,7 @@ theme.laf.options.gnome=Gnome
 theme.laf.options.acryl=Acryl
 theme.laf.options.aero=Aero
 theme.laf.options.aluminium=JTattoo: Aluminium
-theme.laf.options.arduini=Arduino
+theme.laf.options.arduino=Arduino
 theme.laf.options.bernstein=JTattoo: Bernstein
 theme.laf.options.fast=JTattoo: Fast
 theme.laf.options.graphite=JTattoo: Graphite
@@ -177,7 +177,7 @@ theme.laf.options.tinyplastic=Plastic
 theme.laf.options.tinysilver=Silver
 theme.laf.options.tinyunicode=Unicode
 theme.laf.options.vs2005=Visual Studio 2005*
-theme.laf.default=aluminium
+theme.laf.default=material
 
 theme.jtattoo.name=JTattoo Options
 theme.jtattoo.type=section
@@ -265,59 +265,55 @@ theme.treeiconsize.default=16
 
 
 
-
-
 theme.console.name=Console
 theme.console.type=section
 
 theme.console.background.name=Background color
 theme.console.background.type=colorselect
-theme.console.background.default=#000000
+theme.console.background.default=#ffffff
 
 theme.console.foreground.name=Foreground color
 theme.console.foreground.type=colorselect
-theme.console.foreground.default=#eeeeee
+theme.console.foreground.default=#000000
 
 theme.console.colors.name=Colors
 theme.console.colors.type=section
 
 theme.console.colors.background.name=Body color
 theme.console.colors.background.type=colorselect
-theme.console.colors.background.default=#eeeeee
+theme.console.colors.background.default=#222222
 
 theme.console.colors.warning.name=Warning color
 theme.console.colors.warning.type=colorselect
-theme.console.colors.warning.default=#CCCC00
+theme.console.colors.warning.default=#FF7043
 
 theme.console.colors.error.name=Error color
 theme.console.colors.error.type=colorselect
-theme.console.colors.error.default=#CC0066
+theme.console.colors.error.default=#F44336
 
 theme.console.colors.heading.name=Heading color
 theme.console.colors.heading.type=colorselect
-theme.console.colors.heading.default=#CC9900
+theme.console.colors.heading.default=#512DA8
 
 theme.console.colors.command.name=Command color
 theme.console.colors.command.type=colorselect
-theme.console.colors.command.default=#008800
+theme.console.colors.command.default=#388E3C
 
 theme.console.colors.bullet.name=Bullet 1 color
 theme.console.colors.bullet.type=colorselect
-theme.console.colors.bullet.default=#33ccff
+theme.console.colors.bullet.default=#607d8b
 
 theme.console.colors.bullet2.name=Bullet 2 color
 theme.console.colors.bullet2.type=colorselect
-theme.console.colors.bullet2.default=#33ccff
+theme.console.colors.bullet2.default=#607d8b
 
 theme.console.colors.bullet3.name=Bullet 3 color
 theme.console.colors.bullet3.type=colorselect
-theme.console.colors.bullet3.default=#33ccff
+theme.console.colors.bullet3.default=#607d8b
 
 theme.console.colors.link.name=Link color
 theme.console.colors.link.type=colorselect
-theme.console.colors.link.default=#8844ee
-
-
+theme.console.colors.link.default=#2196F3
 
 
 theme.console.fonts.name=Fonts
@@ -453,6 +449,11 @@ theme.console.characters.bullet3.name=Bullet point 3
 theme.console.characters.bullet3.type=string
 theme.console.characters.bullet3.default=◦
 
+
+
+
+
+
 theme.editor.name=Editor
 theme.editor.type=section
 
@@ -468,7 +469,7 @@ theme.editor.fonts.editor_aa.default=true
 
 theme.editor.fonts.default.font.name=Font
 theme.editor.fonts.default.font.type=fontselect
-theme.editor.fonts.default.font.default=Monotype,plain,14
+theme.editor.fonts.default.font.default=Monospaced,plain,14
 theme.editor.fonts.default.underline.name=Underlined
 theme.editor.fonts.default.underline.type=checkbox
 theme.editor.fonts.default.underline.default=false
@@ -510,7 +511,7 @@ theme.editor.fonts.comment.bold.type=checkbox
 theme.editor.fonts.comment.bold.default=false
 theme.editor.fonts.comment.foreground.name=Foreground
 theme.editor.fonts.comment.foreground.type=colorselect
-theme.editor.fonts.comment.foreground.default=#339900
+theme.editor.fonts.comment.foreground.default=#3949AB
 theme.editor.fonts.comment.background.name=Background
 theme.editor.fonts.comment.background.type=colorselect
 theme.editor.fonts.comment.background.default=default
@@ -546,7 +547,7 @@ theme.editor.fonts.datatype.bold.type=checkbox
 theme.editor.fonts.datatype.bold.default=true
 theme.editor.fonts.datatype.foreground.name=Foreground
 theme.editor.fonts.datatype.foreground.type=colorselect
-theme.editor.fonts.datatype.foreground.default=#0033FF
+theme.editor.fonts.datatype.foreground.default=#7986CB
 theme.editor.fonts.datatype.background.name=Background
 theme.editor.fonts.datatype.background.type=colorselect
 theme.editor.fonts.datatype.background.default=default
@@ -564,7 +565,7 @@ theme.editor.fonts.error.bold.type=checkbox
 theme.editor.fonts.error.bold.default=false
 theme.editor.fonts.error.foreground.name=Foreground
 theme.editor.fonts.error.foreground.type=colorselect
-theme.editor.fonts.error.foreground.default=#CC0033
+theme.editor.fonts.error.foreground.default=#E04336
 theme.editor.fonts.error.background.name=Background
 theme.editor.fonts.error.background.type=colorselect
 theme.editor.fonts.error.background.default=default
@@ -582,7 +583,7 @@ theme.editor.fonts.function.bold.type=checkbox
 theme.editor.fonts.function.bold.default=true
 theme.editor.fonts.function.foreground.name=Foreground
 theme.editor.fonts.function.foreground.type=colorselect
-theme.editor.fonts.function.foreground.default=#009900
+theme.editor.fonts.function.foreground.default=#311B92
 theme.editor.fonts.function.background.name=Background
 theme.editor.fonts.function.background.type=colorselect
 theme.editor.fonts.function.background.default=default
@@ -600,7 +601,7 @@ theme.editor.fonts.identifier.bold.type=checkbox
 theme.editor.fonts.identifier.bold.default=false
 theme.editor.fonts.identifier.foreground.name=Foreground
 theme.editor.fonts.identifier.foreground.type=colorselect
-theme.editor.fonts.identifier.foreground.default=#339900
+theme.editor.fonts.identifier.foreground.default=#795548
 theme.editor.fonts.identifier.background.name=Background
 theme.editor.fonts.identifier.background.type=colorselect
 theme.editor.fonts.identifier.background.default=default
@@ -618,7 +619,7 @@ theme.editor.fonts.literal.bold.type=checkbox
 theme.editor.fonts.literal.bold.default=false
 theme.editor.fonts.literal.foreground.name=Foreground
 theme.editor.fonts.literal.foreground.type=colorselect
-theme.editor.fonts.literal.foreground.default=#CC6600
+theme.editor.fonts.literal.foreground.default=#BF360C
 theme.editor.fonts.literal.background.name=Background
 theme.editor.fonts.literal.background.type=colorselect
 theme.editor.fonts.literal.background.default=default
@@ -690,7 +691,7 @@ theme.editor.fonts.reserved.bold.type=checkbox
 theme.editor.fonts.reserved.bold.default=true
 theme.editor.fonts.reserved.foreground.name=Foreground
 theme.editor.fonts.reserved.foreground.type=colorselect
-theme.editor.fonts.reserved.foreground.default=#0033ff
+theme.editor.fonts.reserved.foreground.default=#90A4AE
 theme.editor.fonts.reserved.background.name=Background
 theme.editor.fonts.reserved.background.type=colorselect
 theme.editor.fonts.reserved.background.default=default
@@ -708,7 +709,7 @@ theme.editor.fonts.variable.bold.type=checkbox
 theme.editor.fonts.variable.bold.default=false
 theme.editor.fonts.variable.foreground.name=Foreground
 theme.editor.fonts.variable.foreground.type=colorselect
-theme.editor.fonts.variable.foreground.default=#003333
+theme.editor.fonts.variable.foreground.default=#00967E
 theme.editor.fonts.variable.background.name=Background
 theme.editor.fonts.variable.background.type=colorselect
 theme.editor.fonts.variable.background.default=default
@@ -744,7 +745,7 @@ theme.editor.gutter.background.default=#FFFFFF
 
 theme.editor.gutter.foreground.name=Foreground
 theme.editor.gutter.foreground.type=colorselect
-theme.editor.gutter.foreground.default=#000000
+theme.editor.gutter.foreground.default=#616161
 
 theme.editor.colors.name=Colors
 theme.editor.colors.type=section
@@ -759,26 +760,28 @@ theme.editor.colors.background.default=#FFFFFF
 
 theme.editor.colors.error.name=Error
 theme.editor.colors.error.type=colorselect
-theme.editor.colors.error.default=#ff8888
+theme.editor.colors.error.default=#EF9A9A
 
 theme.editor.colors.warning.name=Warning
 theme.editor.colors.warning.type=colorselect
-theme.editor.colors.warning.default=#ffff00
+theme.editor.colors.warning.default=#F9A825
+
+
 
 theme.editor.highlight.name=Highlight
 theme.editor.highlight.type=section
 
 theme.editor.highlight.select.name=Selection color
 theme.editor.highlight.select.type=colorselect
-theme.editor.highlight.select.default=#CCCCFF
+theme.editor.highlight.select.default=#C8DDF2
 
 theme.editor.highlight.search.name=Search highlight
 theme.editor.highlight.search.type=colorselect
-theme.editor.highlight.search.default=#bb6666
+theme.editor.highlight.search.default=#03A9F4
 
 theme.editor.highlight.linecolor.name=Line highlight color
 theme.editor.highlight.linecolor.type=colorselect
-theme.editor.highlight.linecolor.default=#99aabb
+theme.editor.highlight.linecolor.default=#C8DDF2
 
 theme.editor.highlight.linefade.name=Fade line highlight
 theme.editor.highlight.linefade.type=checkbox
@@ -831,13 +834,13 @@ theme.editor.margins.left.name=Left
 theme.editor.margins.left.type=range
 theme.editor.margins.left.min=0
 theme.editor.margins.left.max=1000
-theme.editor.margins.left.default=0
+theme.editor.margins.left.default=5
 
 theme.editor.margins.right.name=Right
 theme.editor.margins.right.type=range
 theme.editor.margins.right.min=0
 theme.editor.margins.right.max=1000
-theme.editor.margins.right.default=0
+theme.editor.margins.right.default=5
 
 
 

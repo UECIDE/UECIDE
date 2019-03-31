@@ -2519,16 +2519,16 @@ public class Editor extends JFrame {
                 selectTab(tab);
                 int option = threeOptionBox(
                                  JOptionPane.WARNING_MESSAGE,
-                                 Base.i18n.string("msg.unsaved.title"),
+                                 Base.i18n.string("msg.unsaved.title", loadedSketch.getName(), getTabName(tab)),
                                  Base.i18n.string("msg.unsaved.body", getTabName(tab), loadedSketch.getName()),
-                                 Base.i18n.string("misc.save"),
                                  Base.i18n.string("misc.dontsave"),
-                                 Base.i18n.string("misc.dontclose")
+                                 Base.i18n.string("misc.dontclose"),
+                                 Base.i18n.string("misc.save")
                              );
 
-                if(option == 2) return false;
+                if(option == 1) return false;
 
-                if(option == 0) {
+                if(option == 2) {
                     if (loadedSketch.isUntitled()) {
                         saveAs();
                     }

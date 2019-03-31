@@ -24,6 +24,7 @@ public class ToolbarButton extends JButton {
         super();
         buttonIcon = ico;
         setIcon(ico);
+        setDisabledIcon(ico);
         if (al != null) {
             super.addActionListener(al);
         }
@@ -49,8 +50,10 @@ public class ToolbarButton extends JButton {
     public ToolbarButton(String name, String tooltip, int s, ActionListener al) throws IOException {
         super();
         size = s;
-        buttonIcon = IconManager.getIcon(size * 75 / 100, name);
-        setIcon(buttonIcon);
+        CleverIcon icon = IconManager.getIcon(size * 75 / 100, name);
+        buttonIcon = icon;
+        setIcon(icon);
+        setDisabledIcon(icon.disabled());
         setToolTipText(tooltip);
         if (al != null) {
             super.addActionListener(al);
@@ -64,7 +67,15 @@ public class ToolbarButton extends JButton {
 
     @Override
     public Dimension getSize() {
-        return new Dimension(size * 15 / 10, size);
+        Integer scale = UIManager.getInt("Button.scale");
+        if (scale == null) {
+            scale = new Integer(125);
+        }
+        if (scale < 1) {
+            scale = new Integer(125);
+        }
+        Integer scaled = size * scale / 100;
+        return new Dimension(scaled, scaled);
     }
 
     @Override
