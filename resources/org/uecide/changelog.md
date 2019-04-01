@@ -4,6 +4,7 @@ Changelog
 0.10.6
 ------
 
+* Incorporate Material into core code and tweak for better Arduino LAF effect
 * Added Arduino-like LAF
 * Added Material LAF and cleaned up icons and buttons
 * Complete overhaul of the icon system;
@@ -682,6 +683,7 @@ Changelog
 0.8.5
 -----
 
+* Incorporate Material into core code and tweak for better Arduino LAF effect
 * Added Arduino-like LAF
 * Added Material LAF and cleaned up icons and buttons
 * Complete overhaul of the icon system;

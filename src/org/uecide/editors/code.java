@@ -691,7 +691,15 @@ public class code extends JPanel implements EditorBase {
             textArea.setTabSize(4);
         }
 
-        textArea.setMargin(new Insets(
+// setMargin doesn't work for the MaterialLAF at the moment.
+//        textArea.setMargin(new Insets(
+//            Preferences.getInteger("theme.editor.margins.top"),
+//            Preferences.getInteger("theme.editor.margins.left"),
+//            Preferences.getInteger("theme.editor.margins.bottom"),
+//            Preferences.getInteger("theme.editor.margins.right")
+//        ));
+// so we need to add a border instead. Hope it doesn't mess with cursor control...
+        textArea.setBorder(new EmptyBorder(
             Preferences.getInteger("theme.editor.margins.top"),
             Preferences.getInteger("theme.editor.margins.left"),
             Preferences.getInteger("theme.editor.margins.bottom"),

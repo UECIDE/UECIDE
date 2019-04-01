@@ -272,6 +272,16 @@ public class PluginManager implements PropertyChangeListener
             }
         });
 
+        fileMenu.addSeparator();
+
+        JMenuItem purgePackages = new JMenuItem("Purge Package Cache");
+        fileMenu.add(purgePackages);
+        purgePackages.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                purgePackageCache();
+            }
+        });
+
         JMenuItem closeMenu = new JMenuItem("Close");
         fileMenu.add(closeMenu);
         closeMenu.addActionListener(new ActionListener() {
@@ -1249,5 +1259,28 @@ public class PluginManager implements PropertyChangeListener
     public void analyseAllPackages() {
         PackageAnalyser pa = new PackageAnalyser();
         pa.openWindow(frame);
+    }
+
+    public void purgePackageCache() {
+        System.out.print("Purging package cache ... ");
+        File cacheFolder = Base.getDataFile("apt/cache");
+        if (cacheFolder.exists()) {
+            if (!cacheFolder.isDirectory()) {
+                cacheFolder.delete();
+            }
+        }
+
+        if (!cacheFolder.exists()) {
+            cacheFolder.mkdirs();
+        }
+
+        File[] list = cacheFolder.listFiles();
+        for (File f : list) {
+            if (f.getName().endsWith(".deb")) {
+                f.delete();
+            }
+        }
+
+        System.out.println("done");
     }
 }

@@ -23,6 +23,7 @@ public class MaterialComboBoxUI extends BasicComboBoxUI {
 	}
 
 	@Override
+    @SuppressWarnings("unchecked")
 	public void installUI (JComponent c) {
 		super.installUI (c);
 
