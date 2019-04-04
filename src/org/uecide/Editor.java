@@ -777,6 +777,7 @@ public class Editor extends JFrame {
         toolbar.add(new ToolbarSpacer()); //Separator();
 
         addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
+        toolbar.repaint();
 
     }
 
@@ -4909,6 +4910,9 @@ public class Editor extends JFrame {
     }
 
     public void installLibraryArchive() {
+
+        new LibraryImporter();
+/*
         JFileChooser fc = new JFileChooser();
 
         fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -5046,6 +5050,7 @@ public class Editor extends JFrame {
                 warning(Base.i18n.string("err.analyzing.notfound.warning"));
             }
         }
+*/
     }
 
     public void extractZipMapped(File zipFile, TreeMap<String, File>mapping) {

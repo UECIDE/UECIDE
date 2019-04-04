@@ -4,6 +4,7 @@ Changelog
 0.10.6
 ------
 
+* Fix margin in Material LAF
 * Incorporate Material into core code and tweak for better Arduino LAF effect
 * Added Arduino-like LAF
 * Added Material LAF and cleaned up icons and buttons
@@ -683,6 +684,7 @@ Changelog
 0.8.5
 -----
 
+* Fix margin in Material LAF
 * Incorporate Material into core code and tweak for better Arduino LAF effect
 * Added Arduino-like LAF
 * Added Material LAF and cleaned up icons and buttons
