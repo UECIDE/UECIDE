@@ -1968,6 +1968,12 @@ public class Base {
         } else {
             if ((preferences != null) && (preferences.getFile("locations.data") != null)) {
                 out = preferences.getFile("locations.data");
+                if (out.getName().equals("")) {
+                    System.err.println("Warning: invalid data location detected in preferences file.");
+                    System.err.println("         Ignoring and using system default instead.");
+                    out = platform.getSettingsFolder();
+                    preferences.unset("locations.data");
+                }
             } else {
                 File portable = new File(getJarLocation().getParentFile(), "portable");
                 if (portable.exists() && portable.isDirectory()) {
