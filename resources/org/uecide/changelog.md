@@ -4,6 +4,7 @@ Changelog
 0.10.6
 ------
 
+* Trap invalid locations.data setting
 * Rewritten library importer
 * Fix margin in Material LAF
 * Incorporate Material into core code and tweak for better Arduino LAF effect
@@ -685,6 +686,7 @@ Changelog
 0.8.5
 -----
 
+* Trap invalid locations.data setting
 * Rewritten library importer
 * Fix margin in Material LAF
 * Incorporate Material into core code and tweak for better Arduino LAF effect

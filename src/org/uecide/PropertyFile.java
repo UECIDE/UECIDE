@@ -154,7 +154,7 @@ public class PropertyFile {
 
         properties = new TreeMap<String, String>(defaultProperties);
         embedded = new TreeMap<String, String>();
-            sources = new TreeMap<String, String>();
+        sources = new TreeMap<String, String>();
         embeddedTypes = new TreeMap<String, String>();
 
         if(user != null) {
@@ -178,7 +178,7 @@ public class PropertyFile {
         defaultProperties = new TreeMap<String, String>();
         properties = new TreeMap<String, String>();
         embedded = new TreeMap<String, String>();
-            sources = new TreeMap<String, String>();
+        sources = new TreeMap<String, String>();
         embeddedTypes = new TreeMap<String, String>();
     }
 
@@ -188,7 +188,7 @@ public class PropertyFile {
         defaultProperties = new TreeMap<String, String>();
         properties = new TreeMap<String, String>();
         embedded = new TreeMap<String, String>();
-            sources = new TreeMap<String, String>();
+        sources = new TreeMap<String, String>();
         embeddedTypes = new TreeMap<String, String>();
         mergeData(data);
     }
@@ -199,7 +199,7 @@ public class PropertyFile {
         defaultProperties = new TreeMap<String, String>();
         properties = new TreeMap<String, String>();
         embedded = new TreeMap<String, String>();
-            sources = new TreeMap<String, String>();
+        sources = new TreeMap<String, String>();
         embeddedTypes = new TreeMap<String, String>();
         mergeData(pf);
     }
@@ -222,8 +222,12 @@ public class PropertyFile {
         }
 
         for(String key : pf.getProperties().keySet()) {
-            set(key, pf.getProperties().get(key));
-            setSource(key, pf.getSource(key));
+            if (pf.getProperties().get(key).equals("")) {
+                unset(key);
+            } else {
+                set(key, pf.getProperties().get(key));
+                setSource(key, pf.getSource(key));
+            }
         }
 
         embeddedTypes.putAll(pf.getEmbeddedTypes());
