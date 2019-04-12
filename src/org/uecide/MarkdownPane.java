@@ -90,6 +90,8 @@ public class MarkdownPane extends JTextPane {
                 .addHtmlAttribute("style", fh3, "h3")
                 .process(content);
 
+            html = html.replaceAll("<br  />", "");
+
             super.setText("<html><body>" + html + "</body></html>");
         } catch (Exception e) {
         }
