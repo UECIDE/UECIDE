@@ -4,6 +4,8 @@ Changelog
 0.10.6
 ------
 
+* Undo setMargin replacement - as I feared it breaks cursor control
+* Delete empty changed properties
 * Trap invalid locations.data setting
 * Rewritten library importer
 * Fix margin in Material LAF
@@ -686,6 +688,8 @@ Changelog
 0.8.5
 -----
 
+* Undo setMargin replacement - as I feared it breaks cursor control
+* Delete empty changed properties
 * Trap invalid locations.data setting
 * Rewritten library importer
 * Fix margin in Material LAF

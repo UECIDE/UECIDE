@@ -177,7 +177,7 @@ theme.laf.options.tinyplastic=Plastic
 theme.laf.options.tinysilver=Silver
 theme.laf.options.tinyunicode=Unicode
 theme.laf.options.vs2005=Visual Studio 2005*
-theme.laf.default=material
+theme.laf.default=aluminium
 
 theme.jtattoo.name=JTattoo Options
 theme.jtattoo.type=section
