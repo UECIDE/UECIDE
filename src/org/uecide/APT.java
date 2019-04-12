@@ -275,7 +275,13 @@ public class APT {
                 }
             }
         }
-        save();
+        if (resOnly) {
+            if (!packagesDB.exists()) {
+                save();
+            }
+        } else {
+            save();
+        }
 
         Package[] ul = getUpgradeList();
         System.out.println(ul.length + " packages can be upgraded.");
