@@ -1157,14 +1157,16 @@ public class PluginManager implements PropertyChangeListener
     }
 
     public Package findLibraryByInclude(Core core, String include) {
-        Package[] packages = apt.getPackages("libraries");
+        Package[] packages = apt.getPackages("main");
         for (Package p : packages) {
             if (p.get("Provides") == null) {
                 continue;
             }
             if (p.get("Family") != null) {
-                if (!p.get("Family").equals(core.getFamily())) {
-                    continue;
+                if (!p.get("Family").equals("all")) {
+                    if (!p.get("Family").equals(core.getFamily())) {
+                        continue;
+                    }
                 }
             }
             if (p.get("Provides").replace("-UL-","_").equals(include)) {

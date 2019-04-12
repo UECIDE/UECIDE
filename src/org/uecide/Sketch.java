@@ -4711,7 +4711,6 @@ public class Sketch {
         PropertyFile props = ctx.getMerged();
         if (props.get("compile.preproc") == null) { // Manually parse it.
 
-
             ArrayList<String> incs = gatherIncludes(f);
             for (String inc : incs) {
                 Library l = findLibrary(inc);
