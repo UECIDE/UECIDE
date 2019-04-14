@@ -1236,7 +1236,20 @@ public class Base {
     }
 
     public static void loadProgrammers() {
+        ArrayList<Programmer> savedProgrammers = new ArrayList<Programmer>();
+
+        for (Programmer p : programmers.values()) {
+            if (p instanceof mDNSProgrammer) {
+                savedProgrammers.add(p);
+                continue;
+            }
+        }
+
         programmers.clear();
+
+        for (Programmer p : savedProgrammers) {
+            programmers.put(p.getName(), p);
+        }
 //        programmerLoaderThread = new Thread() {
 //            public void run() {
 
@@ -2191,7 +2204,7 @@ public class Base {
 
     public static void rescanProgrammers() {
         try {
-            programmers = new TreeMap<String, Programmer>();
+//            programmers = new TreeMap<String, Programmer>();
             loadProgrammers();
             Editor.updateAllEditors();
             Editor.selectAllEditorProgrammers();

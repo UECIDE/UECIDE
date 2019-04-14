@@ -4,6 +4,10 @@ Changelog
 0.10.6
 ------
 
+* Reverted to Aluminium LAF until problems with Material are ironed out
+* Improved missing library detection
+* Fixed repo data erasing at boot
+* Fixed markdown line formatting
 * Undo setMargin replacement - as I feared it breaks cursor control
 * Delete empty changed properties
 * Trap invalid locations.data setting
@@ -688,6 +692,10 @@ Changelog
 0.8.5
 -----
 
+* Reverted to Aluminium LAF until problems with Material are ironed out
+* Improved missing library detection
+* Fixed repo data erasing at boot
+* Fixed markdown line formatting
 * Undo setMargin replacement - as I feared it breaks cursor control
 * Delete empty changed properties
 * Trap invalid locations.data setting
