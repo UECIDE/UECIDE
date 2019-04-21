@@ -1236,6 +1236,10 @@ public class Sketch {
                 if (i > 0) out += " ";
                 out += parts[i];
             }
+
+            if (parts[parts.length-1].startsWith("*")) {
+                out += "*";
+            }
             return out;
         }
         return "";
