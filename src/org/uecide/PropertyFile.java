@@ -1039,10 +1039,10 @@ public class PropertyFile {
         return embedded.get(name);
     }
 
-    public byte[] getEmbeddedBinary(String name) {
-        byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(getEmbedded(name));
-        return binary;
-    }
+//    public byte[] getEmbeddedBinary(String name) {
+//        byte[] binary = javax.xml.bind.DatatypeConverter.parseBase64Binary(getEmbedded(name));
+//        return binary;
+//    }
 
     public void setSource(String k, String s) {
         sources.put(k, s);
