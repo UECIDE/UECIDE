@@ -37,6 +37,7 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 import java.util.zip.*;
+import java.nio.file.*;
 import java.util.jar.*;
 import java.text.*;
 import org.uecide.plugin.*;
@@ -81,6 +82,8 @@ import static java.nio.file.StandardCopyOption.*;
  *  helper functions.
  */
 public class Base {
+
+    public static URLClassLoader urlClassLoader;
 
     public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
 
@@ -178,6 +181,7 @@ public class Base {
      *  object and passes the command line arguments.
      */
     public static void main(String args[]) {
+        replaceSystemClassLoader();
         try {
             new Base(args);
         } catch (Exception e) {
@@ -930,17 +934,47 @@ public class Base {
     /*! Attempt to add a jar file as a URL to the system class loader */
     @SuppressWarnings("unchecked")
     public static void addURL(URL u) {
-        final Class[] parameters = new Class[]{URL.class}; 
-        URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        Class sysclass = URLClassLoader.class;
-
+        System.err.println("Loading URL " + u);
         try {
-            Method method = sysclass.getDeclaredMethod("addURL", parameters);
+            Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             method.setAccessible(true);
-            method.invoke(sysloader, new Object[]{u});
+            method.invoke(urlClassLoader, u);
+/*
+            JarInputStream jarFile = new JarInputStream(new FileInputStream(Paths.get(u.toURI()).toFile()));
+            JarEntry entry;
+            ArrayList<String> loadableClasses = new ArrayList<String>();
+            while (true) {
+                entry = jarFile.getNextJarEntry();
+                if (entry == null) {
+                    break;
+                }
+                if (entry.getName().endsWith(".class")) {
+                    String classPath = entry.getName();
+                    String className = classPath.substring(0, classPath.lastIndexOf('.'));
+                    className = className.replaceAll("\\/", ".");
+System.err.println("Found class: " + classPath + " = " + className);
+                    loadableClasses.add(className);
+                }
+            }
+
+            for (String className : loadableClasses) {
+                if (!className.contains("interfaces")) {
+System.err.println("Loading class " + className);
+                    urlClassLoader.loadClass(className);
+                }
+            }
+                
+
+            System.err.println("Classes now:");
+            Field f = ClassLoader.class.getDeclaredField("classes");
+            f.setAccessible(true);
+            Vector<Class> classes = (Vector<Class>)f.get(urlClassLoader);
+            for (Class c : classes) {
+                System.err.println("    " + c);
+            }
+*/
         } catch (Exception ex) {
             ex.printStackTrace();
-            Base.error(ex);
         }
     }
 
@@ -948,6 +982,7 @@ public class Base {
      *  specified on the command line.
      */
     static boolean doOpenThings(File sketch) throws IOException {
+
         Sketch s = null;
         Editor e = null;
 
@@ -2963,6 +2998,19 @@ public class Base {
             } else {
                 manualPages.mergeData(partFile, k);
             }
+        }
+    }
+
+    private static void replaceSystemClassLoader() {
+        try {
+            urlClassLoader = new URLClassLoader(new URL[0], ClassLoader.getSystemClassLoader());
+
+            Field scl = ClassLoader.class.getDeclaredField("scl");
+            scl.setAccessible(true);
+            scl.set(null, urlClassLoader);
+            Thread.currentThread().setContextClassLoader(urlClassLoader);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 }

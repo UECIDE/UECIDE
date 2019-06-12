@@ -644,6 +644,7 @@ public class Context {
         }
         Object ret = false;
         try {
+            Thread.currentThread().setContextClassLoader(Base.urlClassLoader);
             ScriptEngineManager manager = new ScriptEngineManager();
             ScriptEngine engine = manager.getEngineByName("JavaScript");
             if (filename != null) {

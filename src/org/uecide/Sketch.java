@@ -2053,8 +2053,8 @@ public class Sketch {
     public void checkForSettings() throws IOException {
         File mainFile = getMainFile();
 
-        Pattern param = Pattern.compile("^#pragma\\s+parameter\\s+([^\\s]+)\\s*=\\s*(.*)$");
-        Pattern option = Pattern.compile("^#pragma\\s+option\\s+([^\\s]+)\\s*=\\s*(.*)$");
+        Pattern param = Pattern.compile("^#pragma\\s+parameter\\s+([^\\s=]+)\\s*=\\s*(.*)$");
+        Pattern option = Pattern.compile("^#pragma\\s+option\\s+([^\\s=]+)\\s*=\\s*(.*)$");
         Pattern pcompiler = Pattern.compile("^#pragma\\s+compiler\\s+(.*)$");
         Pattern pcore = Pattern.compile("^#pragma\\s+core\\s+(.*)$");
         Pattern pboard = Pattern.compile("^#pragma\\s+board\\s+(.*)$");

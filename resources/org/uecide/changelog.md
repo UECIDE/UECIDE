@@ -1,9 +1,14 @@
 Changelog
 =========
 
-0.10.6
+0.11.0
 ------
 
+* Added new version of jarbundler
+* Removed redundant embedded binary support in PropertyFile
+* Check for
+* at start of function name when generating prototype
+* Improved programmer refresh
 * Reverted to Aluminium LAF until problems with Material are ironed out
 * Improved missing library detection
 * Fixed repo data erasing at boot
@@ -22,6 +27,11 @@ Changelog
 * Overhaul of message and option dialogs
 * Provide right-click menu on tabs for easier navigation on themes that don't provide a tab menu button
 * Improved search panel
+
+
+0.10.6
+------
+
 * Fixed tree updating sequence
 * Fix background issue with search box "not foun" status
 * Cleanup of font replacement. Added copy and clear as toolbars to console
@@ -692,6 +702,11 @@ Changelog
 0.8.5
 -----
 
+* Added new version of jarbundler
+* Removed redundant embedded binary support in PropertyFile
+* Check for
+* at start of function name when generating prototype
+* Improved programmer refresh
 * Reverted to Aluminium LAF until problems with Material are ironed out
 * Improved missing library detection
 * Fixed repo data erasing at boot
