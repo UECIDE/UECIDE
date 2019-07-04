@@ -628,6 +628,10 @@ public class Base {
             System.exit(0);
         }
 
+        if (!headless) {
+            setDisplayScaling();
+        }
+
         Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
         Debug.setSize(new Dimension(preferences.getInteger("debug.window.width"), preferences.getInteger("debug.window.height")));
 
@@ -3012,6 +3016,12 @@ System.err.println("Loading class " + className);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void setDisplayScaling() {
+        int scale = Preferences.getInteger("theme.scale");
+        Properties props = System.getProperties();
+        props.setProperty("sun.java2d.uiScale", String.format("%d", scale));
     }
 }
 

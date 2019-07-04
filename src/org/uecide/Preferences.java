@@ -1177,6 +1177,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
             newFile.save(f);
         }
     }
+
 }
 
 
