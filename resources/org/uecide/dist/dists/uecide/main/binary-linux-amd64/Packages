@@ -38,19 +38,40 @@ Subgroup: Tools
 
 Package: repos-master
 Source: repos-core
-Version: 1.0.7
+Version: 1.0.8
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
 Installed-Size: 11
 Priority: extra
 Section: main
-Filename: pool/main/r/repos-core/repos-master_1.0.7_all.deb
-Size: 1388
-SHA256: 259807ea6bd88723867f021b59f68aaeff448066c15e62a6fdacfa4aaf1bfe54
-SHA1: d1a8d97d618de4b36019cfac7cb5a12c57ec3337
-MD5sum: 764e3d4bacad463dadd27fc6af506855
+Filename: pool/main/r/repos-core/repos-master_1.0.8_all.deb
+Size: 1404
+SHA256: 0b062c87748da8a85d62734ae30344088030e6c4e1b1d235d70108afb4584bbc
+SHA1: b7ed3f38516a778bd8ef862aebab49e438d5ea1a
+MD5sum: 59bad288657fef52b2cc6d8b39e71746
 Description: Master UECIDE Repository
  This is the main repository for UECIDE plugins etc.
+Group: System
+Subgroup: Repositories
+
+Package: repos-nightly
+Source: repos-core
+Version: 1.0.8
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 11
+Priority: extra
+Section: main
+Filename: pool/main/r/repos-core/repos-nightly_1.0.8_all.deb
+Size: 1552
+SHA256: 9a3df010bb42dd56f41b71824aa8b4d48e638cda758dc0e6d0e67a8b8c7b698b
+SHA1: f92de65d13c8cd52a03729217b61d5a92f8c9bab
+MD5sum: 5811433cb349e804ac84962048a415d1
+Description: Nightly builds of cores
+ Cores that are automatically built from their parent github repositories
+ or other regularly updated sources every night. Great for tracking the
+ absolute latest changes to a core.  There are, of course, no guarantees
+ that these cores will remain working properly from one day to the next.
 Group: System
 Subgroup: Repositories
 

@@ -146,6 +146,12 @@ editor.hwaccel.default=false
 theme.name=Theme
 theme.type=section
 
+theme.scale.type=range
+theme.scale.name=UI Scale x 
+theme.scale.min=1
+theme.scale.max=4
+theme.scale.default=1
+
 theme.laf.name=Window Style
 theme.laf.type=dropdown
 theme.laf.options.gnome=Gnome
