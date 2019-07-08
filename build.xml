@@ -205,7 +205,6 @@
         <mkdir dir="tmp" />
         <mkdir dir="windows" /> 
         <depends dir="tmp">
-            <download url="http://uecide.org/supportfiles/jre-8-windows.zip" filename="jre-8-windows.zip"/>
             <download url="https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_windows-x64_bin.zip" filename="openjdk-11-windows.zip"/>
         </depends>
         <unzip dest="bundle/windows/uecide-${Version}" src="tmp/openjdk-11-windows.zip" overwrite="false"/>
@@ -249,10 +248,10 @@
     <target name="windows-exe-full" depends="build">
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
-        <!--get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
-        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-7-windows.zip" overwrite="false"/-->
-        <get src="https://uecide.org/supportfiles/jre-8-windows.zip" dest="tmp/jre-8-windows.zip" usetimestamp="true" />
-        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-8-windows.zip" overwrite="false"/>
+        <depends dir="tmp">
+            <download url="https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_windows-x64_bin.zip" filename="openjdk-11-windows.zip"/>
+        </depends>
+        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/openjdk-11-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
         <!--copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" /-->
         <!--copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" /-->
