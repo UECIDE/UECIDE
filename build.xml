@@ -204,13 +204,11 @@
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="tmp" />
         <mkdir dir="windows" /> 
-        <!--get src="http://uecide.org/supportfiles/jre-7-windows.zip" dest="tmp/jre-7-windows.zip" usetimestamp="true" />
-        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-7-windows.zip" overwrite="false"/-->
         <depends dir="tmp">
             <download url="http://uecide.org/supportfiles/jre-8-windows.zip" filename="jre-8-windows.zip"/>
+            <download url="https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_windows-x64_bin.zip" filename="openjdk-11-windows.zip"/>
         </depends>
-        <!--get src="http://uecide.org/supportfiles/jre-8-windows.zip" dest="tmp/jre-8-windows.zip" usetimestamp="true" /-->
-        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/jre-8-windows.zip" overwrite="false"/>
+        <unzip dest="bundle/windows/uecide-${Version}" src="tmp/openjdk-11-windows.zip" overwrite="false"/>
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
         <!--copy file="dist/windows/dist/debug.bat" todir="bundle/windows-${Version}" /-->
         <!--copy file="dist/windows/UECIDE-xp.exe" tofile="bundle/windows/uecide-${Version}/UECIDE.exe" /-->
@@ -322,13 +320,13 @@
     </target>
 
     <target name="uecide.exe">
-        <copy file="UECIDE-l4j-std.xml" tofile="UECIDE-l4j-gui.xml" />
+        <copy file="UECIDE-l4j-std.xml" tofile="UECIDE-l4j-gui.xml" overwrite="true" />
         <replace file="UECIDE-l4j-gui.xml" token="{version}" value="${Version}" />
         <replace file="UECIDE-l4j-gui.xml" token="{header}" value="gui" />
         <launch4j configFile="UECIDE-l4j-gui.xml" outfile="uecide.exe" />
     </target>
     <target name="uecide-cli.exe">
-        <copy file="UECIDE-l4j-std.xml" tofile="UECIDE-l4j-cli.xml" />
+        <copy file="UECIDE-l4j-std.xml" tofile="UECIDE-l4j-cli.xml" overwrite="true" />
         <replace file="UECIDE-l4j-cli.xml" token="{version}" value="${Version}" />
         <replace file="UECIDE-l4j-cli.xml" token="{header}" value="console" />
         <launch4j configFile="UECIDE-l4j-cli.xml" outfile="uecide-cli.exe" />
@@ -392,7 +390,7 @@
             </maven>
             <maven group="com.googlecode.json-simple"              artifact="json-simple"              version="1.1.1" />
             <maven group="org.jmdns"                               artifact="jmdns"                    version="3.5.3" />
-            <maven group="org.scream3r"                            artifact="jssc"                     version="2.8.0" />
+            <!--maven group="org.scream3r"                            artifact="jssc"                     version="2.8.0" /-->
             <maven group="com.sun.jna"                             artifact="jna"                      version="3.0.9" />
             <maven group="org.commonjava.googlecode.markdown4j"    artifact="markdown4j"               version="2.2-cj-1.1" />
             <maven group="com.jcraft"                              artifact="jsch"                     version="0.1.54" />
@@ -408,6 +406,7 @@
             <!--maven group="org.dnsjava"                             artifact="dnsjava"                  version="2.1.5" /-->
             <download url="http://www.dnsjava.org/download/dnsjava-2.1.8.jar" filename="dnsjava.jar" />
             <maven group="org.swinglabs"                        artifact="swingx"   version="1.6.1" />
+            <maven group="com.fazecast"                         artifact="jSerialComm"              version="2.5.1" />
         </depends>
     </target>
 

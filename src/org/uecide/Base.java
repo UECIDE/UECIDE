@@ -301,9 +301,11 @@ public class Base {
         cli.addParameter("cli",                 "",         Boolean.class,  "cli.help.cli");
 
         cli.addParameter("preferences",         "",         Boolean.class,  "cli.help.preferences");
+        cli.addParameter("set",                 "key=val",  String.class,   "cli.help.set");
+        cli.addParameter("reset",               "key",      String.class,   "cli.help.reset");
+        cli.addParameter("reset-preferences",   "",         Boolean.class,  "cli.help.reset.prefs");
         cli.addParameter("quiet",               "",         Boolean.class,  "cli.help.quiet");
 
-        cli.addParameter("reset-preferences",   "",         Boolean.class,  "cli.help.reset.prefs");
 
         cli.addParameter("locale",              "name",     String.class,   "cli.help.locale");
 
@@ -708,6 +710,38 @@ public class Base {
         loadAssets();
 
         buildPreferencesTree();
+        if (cli.isSet("set")) {
+            String[] bits = cli.getString("set").split("=");
+            if (bits.length != 2) {
+                System.err.println("Usage: --set=key=value");
+                System.exit(10);
+            }
+
+            if (preferencesTree.get(bits[0] + ".type") == null) {
+                System.err.println("Error: " + bits[0] + " is not a known preferences key");
+                System.exit(10);
+            }
+            preferences.set(bits[0], bits[1]);
+            preferences.save();
+            System.exit(0);
+        }
+
+        if (cli.isSet("reset")) {
+            String key = cli.getString("reset");
+            if (key == null) {
+                System.err.println("Usage: --reset=key");
+                System.exit(10);
+            }
+
+            if (preferencesTree.get(key + ".type") == null) {
+                System.err.println("Error: " + key + " is not a known preferences key");
+                System.exit(10);
+            }
+            preferences.set(key, preferencesTree.get(key + ".default"));
+            preferences.save();
+            System.exit(0);
+        }
+
 
         if (cli.isSet("mkmf")) {
             for(int i = 0; i < argv.length; i++) {

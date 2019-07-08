@@ -4,6 +4,9 @@ Changelog
 0.11.0
 ------
 
+* Update built in repos
+* Add display scaling option in preferences
+* Added git core varcmd
 * Added new version of jarbundler
 * Removed redundant embedded binary support in PropertyFile
 * Check for
@@ -702,6 +705,9 @@ Changelog
 0.8.5
 -----
 
+* Update built in repos
+* Add display scaling option in preferences
+* Added git core varcmd
 * Added new version of jarbundler
 * Removed redundant embedded binary support in PropertyFile
 * Check for

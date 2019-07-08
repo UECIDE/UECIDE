@@ -31,7 +31,7 @@
 package org.uecide;
 
 //import gnu.io.*;
-import jssc.*;
+import com.fazecast.jSerialComm.*;
 
 import java.io.*;
 import java.util.*;
@@ -110,9 +110,9 @@ public class Serial {
 
             Debug.message("Request for port " + name);
 
-            if(port.isOpened()) {
-                port.purgePort(1);
-                port.purgePort(2);
+            if(port.isOpen()) {
+//                port.purgePort(1);
+//                port.purgePort(2);
                 port.closePort();
                 unlockPort(name);
                 Debug.message("Purged and closed " + name);
@@ -138,7 +138,7 @@ public class Serial {
             port.openPort();
             Debug.message("Re-opened port");
 
-            if(!port.isOpened()) {
+            if(!port.isOpen()) {
                 JOptionPane.showMessageDialog(new Frame(), "The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.", "Port didn't open", JOptionPane.ERROR_MESSAGE);
                 return null;
             }
@@ -160,16 +160,16 @@ public class Serial {
         if(p == null)
             return;
 
-        if(!p.isOpened())
+        if(!p.isOpen())
             return;
 
         try {
-            p.purgePort(1);
-            p.purgePort(2);
-            p.setDTR(false);
-            p.setRTS(false);
+//            p.purgePort(1);
+//            p.purgePort(2);
+            p.clearDTR();
+            p.clearRTS();
             p.closePort();
-            unlockPort(p.getPortName());
+            unlockPort(p.getSystemPortName());
             Debug.message("Port closed OK");
         } catch(Exception e) {
             Base.error(e);
@@ -194,9 +194,11 @@ public class Serial {
         }
 
         try {
-            if(nsp.setParams(baudRate, 8, 1, 0)) {
-                return nsp;
-            }
+            nsp.setBaudRate(baudRate);
+            nsp.setParity(SerialPort.NO_PARITY);
+            nsp.setNumStopBits(SerialPort.ONE_STOP_BIT);
+            nsp.setNumDataBits(8);
+            return nsp;
         } catch(Exception e) {
             Base.error(e);
         }
@@ -266,11 +268,10 @@ public class Serial {
 
     public static ArrayList<String> getPortListDefault() {
         ArrayList<String> names = new ArrayList<String>();
-        SerialPortList spl = new SerialPortList();
-        String[] nlist = spl.getPortNames();
+        SerialPort[] spl = SerialPort.getCommPorts();
 
-        for(String n : nlist) {
-            names.add(n);
+        for(SerialPort p : spl) {
+            names.add(p.getSystemPortName());
         }
 
         return names;
@@ -355,7 +356,7 @@ public class Serial {
         for(String port : names) {
             if(serialPorts.get(port) == null) {
                 try {
-                    serialPorts.put(port, new SerialPort(port));
+                    serialPorts.put(port, SerialPort.getCommPort(port));
                 } catch(Exception e) {
                 }
             }
@@ -417,7 +418,7 @@ public class Serial {
 
     static String getNameLinux(SerialPort port) {
         try {
-            String pn = port.getPortName();
+            String pn = port.getSystemPortName();
             File f = new File(pn);
             pn = f.getCanonicalPath();
             pn = pn.substring(pn.lastIndexOf("/") + 1);
@@ -490,7 +491,8 @@ public class Serial {
             return getNameLinux(port);
         }
 
-        return "";
+        return port.getPortDescription();
+
     }
 
     static String getName(String port) {

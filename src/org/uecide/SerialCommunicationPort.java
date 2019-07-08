@@ -30,14 +30,13 @@
 
 package org.uecide;
 
-import jssc.*;
+import com.fazecast.jSerialComm.*;
 import java.io.*;
 import java.util.*;
-
 import java.util.regex.*;
 
 
-public class SerialCommunicationPort implements CommunicationPort,SerialPortEventListener,Comparable {
+public class SerialCommunicationPort implements CommunicationPort,SerialPortDataListener,Comparable {
 
     String portName = null;
     SerialPort serialPort = null;
@@ -47,7 +46,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
 
     public SerialCommunicationPort(String n) {
         portName = n;
-        serialPort = new SerialPort(portName);
+        serialPort = SerialPort.getCommPort(portName);
     }
 
     public String getConsoleAddress() {
@@ -115,7 +114,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     HashMap<String, String> getUSBAttributesMacOS() {
         HashMap<String, String> attributes = new HashMap<String, String>();
 
-        String deviceName = serialPort.getPortName();
+        String deviceName = serialPort.getSystemPortName();
         if (macPortNameCache.get(deviceName) != null) {
             return portAttributeCache.get(deviceName);
         }
@@ -160,7 +159,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     HashMap<String, String> getUSBAttributesLinux() {
         HashMap<String, String> attributes = new HashMap<String, String>();
 
-        String deviceName = serialPort.getPortName();
+        String deviceName = portName; //serialPort.getSystemPortName();
 
         Pattern pat = Pattern.compile("ATTRS\\{(.*)\\}==\"(.*)\"");
 
@@ -188,7 +187,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     }
 
     String getNameMacOS() {
-        String deviceName = serialPort.getPortName();
+        String deviceName = portName;
 
         if (macPortNameCache.get(deviceName) != null) {
             return macPortNameCache.get(deviceName);
@@ -244,10 +243,10 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     String getNameLinux() {
         BufferedReader reader;
         try {
-            String pn = serialPort.getPortName();
-            File f = new File(pn);
-            pn = f.getCanonicalPath();
-            pn = pn.substring(pn.lastIndexOf("/") + 1);
+            String pn = serialPort.getSystemPortName();
+//            File f = new File(pn);
+//            pn = f.getCanonicalPath();
+//            pn = pn.substring(pn.lastIndexOf("/") + 1);
 
             File classFolder = new File("/sys/class/tty", pn);
 
@@ -325,28 +324,16 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     }
 
     public boolean print(String s) {
-        try {
-            serialPort.writeString(s);
-            return true;
-        } catch (Exception e) {
-            lastError = e.getMessage();
-        }
-        return false;
+        return write(s.getBytes());
     }
 
     public boolean println(String s) {
-        try {
-            serialPort.writeString(s + "\r\n");
-            return true;
-        } catch (Exception e) {
-            lastError = e.getMessage();
-        }
-        return false;
+        return print(s + "\r\n");
     }
 
     public boolean write(byte[] b) {
         try {
-            serialPort.writeBytes(b);
+            serialPort.writeBytes(b, b.length);
             return true;
         } catch (Exception e) {
             lastError = e.getMessage();
@@ -355,23 +342,17 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     }
 
     public boolean write(byte b) {
-        try {
-            serialPort.writeByte(b);
-            return true;
-        } catch (Exception e) {
-            lastError = e.getMessage();
-        }
-        return false;
+        byte[] bytes = new byte[1];
+        bytes[0] = b;
+        return write(bytes);
     }
 
     public void closePort() {
         try {
-            if (serialPort.isOpened()) {
-                serialPort.removeEventListener();
-                serialPort.purgePort(1);
-                serialPort.purgePort(2);
-                serialPort.setDTR(false);
-                serialPort.setRTS(false);
+            if (serialPort.isOpen()) {
+                serialPort.removeDataListener();
+                serialPort.clearDTR();
+                serialPort.clearRTS();
                 serialPort.closePort();
             }
         } catch (Exception e) {
@@ -381,14 +362,17 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     public boolean openPort() {
         try {
             serialPort.openPort();
-            serialPort.setParams(9600, 8, 1, 0);
-            serialPort.addEventListener(this);
-            serialPort.setDTR(true);
-            serialPort.setRTS(true);
+            serialPort.setBaudRate(9600);
+            serialPort.setNumStopBits(SerialPort.ONE_STOP_BIT);
+            serialPort.setNumDataBits(8);
+            serialPort.setParity(SerialPort.NO_PARITY);
+            serialPort.addDataListener(this);
+            serialPort.setDTR();
+            serialPort.setRTS();
             return true;
         } catch (Exception e) {
             lastError = e.getMessage();
-//            e.printStackTrace();
+            e.printStackTrace();
         }
         return false;
     }
@@ -397,10 +381,14 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
         return lastError;
     }
 
+    public int getListeningEvents() {
+        return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
+    }
+
     public void serialEvent(SerialPortEvent e) {
-        if (e.isRXCHAR()) {
+        if (e.getEventType() == SerialPort.LISTENING_EVENT_DATA_RECEIVED) {
             try {
-                byte[] bytes = serialPort.readBytes();
+                byte[] bytes = e.getReceivedData();
                 if (bytes == null) {
                     return;
                 }
@@ -408,13 +396,17 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
                     listener.commsDataReceived(bytes);
                 }
             } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
     }
 
     public boolean setSpeed(int speed) {
         try {
-            serialPort.setParams(speed, 8, 1, 0);
+            serialPort.setBaudRate(speed);
+            serialPort.setNumStopBits(SerialPort.ONE_STOP_BIT);
+            serialPort.setNumDataBits(8);
+            serialPort.setParity(SerialPort.NO_PARITY);
         } catch (Exception e) {
             lastError = e.getMessage();
             return false;
@@ -424,7 +416,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
             
 
     public CommsSpeed[] getSpeeds() {
-        CommsSpeed[] s = new CommsSpeed[26];
+        CommsSpeed[] s = new CommsSpeed[27];
         s[0] = new CommsSpeed(300, "300 baud");
         s[1] = new CommsSpeed(1200, "1200 baud");
         s[2] = new CommsSpeed(2400, "2400 baud");
@@ -435,35 +427,36 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
         s[7] = new CommsSpeed(28800, "28800 baud");
         s[8] = new CommsSpeed(38400, "38400 baud");
         s[9] = new CommsSpeed(57600, "57600 baud");
-        s[10] = new CommsSpeed(115200, "115200 baud");
-        s[11] = new CommsSpeed(230400, "230400 baud");
-        s[12] = new CommsSpeed(250000, "250000 baud");
-        s[13] = new CommsSpeed(460800, "460800 baud");
-        s[14] = new CommsSpeed(500000, "500000 baud");
-        s[15] = new CommsSpeed(512000, "512000 baud");
-        s[16] = new CommsSpeed(576000, "576000 baud");
-        s[17] = new CommsSpeed(1000000, "1000000 baud");
-        s[18] = new CommsSpeed(1024000, "1024000 baud");
-        s[19] = new CommsSpeed(1152000, "1152000 baud");
-        s[20] = new CommsSpeed(2000000, "2000000 baud");
-        s[21] = new CommsSpeed(2304000, "2304000 baud");
-        s[22] = new CommsSpeed(2500000, "2500000 baud");
-        s[23] = new CommsSpeed(3000000, "3000000 baud");
-        s[24] = new CommsSpeed(3500000, "3500000 baud");
-        s[25] = new CommsSpeed(4000000, "4000000 baud");
+        s[10] = new CommsSpeed(74880, "74880 baud");
+        s[11] = new CommsSpeed(115200, "115200 baud");
+        s[12] = new CommsSpeed(230400, "230400 baud");
+        s[13] = new CommsSpeed(250000, "250000 baud");
+        s[14] = new CommsSpeed(460800, "460800 baud");
+        s[15] = new CommsSpeed(500000, "500000 baud");
+        s[16] = new CommsSpeed(512000, "512000 baud");
+        s[17] = new CommsSpeed(576000, "576000 baud");
+        s[18] = new CommsSpeed(1000000, "1000000 baud");
+        s[19] = new CommsSpeed(1024000, "1024000 baud");
+        s[20] = new CommsSpeed(1152000, "1152000 baud");
+        s[21] = new CommsSpeed(2000000, "2000000 baud");
+        s[22] = new CommsSpeed(2304000, "2304000 baud");
+        s[23] = new CommsSpeed(2500000, "2500000 baud");
+        s[24] = new CommsSpeed(3000000, "3000000 baud");
+        s[25] = new CommsSpeed(3500000, "3500000 baud");
+        s[26] = new CommsSpeed(4000000, "4000000 baud");
         return s;
     }
 
     public void pulseLine() {
         try {
-            serialPort.setDTR(true);
-            serialPort.setRTS(true);
+            serialPort.setDTR();
+            serialPort.setRTS();
             Thread.sleep(100);
-            serialPort.setDTR(false);
-            serialPort.setRTS(false);
+            serialPort.clearDTR();
+            serialPort.clearRTS();
             Thread.sleep(100);
-            serialPort.setDTR(true);
-            serialPort.setRTS(true);
+            serialPort.setDTR();
+            serialPort.setRTS();
         } catch (Exception e) {
             lastError = e.getMessage();
         }
@@ -471,7 +464,10 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
 
     public void setDTR(boolean s) {
         try {
-            serialPort.setDTR(s);
+            if (s) 
+                serialPort.setDTR();
+            else
+                serialPort.clearDTR();
         } catch (Exception e) {
             lastError = e.getMessage();
         }
@@ -479,14 +475,17 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
 
     public void setRTS(boolean s) {
         try {
-            serialPort.setRTS(s);
+            if (s)
+                serialPort.setRTS();
+            else
+                serialPort.clearRTS();
         } catch (Exception e) {
             lastError = e.getMessage();
         }
     }
 
     public String getBaseName() {
-        String n = serialPort.getPortName();
+        String n = serialPort.getSystemPortName();
         if (Base.isWindows()) { 
             return n;
         } else {
@@ -527,7 +526,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     int getVIDPIDLinux(String name) {
         BufferedReader reader;
         try {
-            String pn = serialPort.getPortName();
+            String pn = serialPort.getSystemPortName();
             File f = new File(pn);
             pn = f.getCanonicalPath();
             pn = pn.substring(pn.lastIndexOf("/") + 1);
@@ -570,7 +569,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
 
 
     int getVIDPIDMacOS(String name) {
-        String deviceName = serialPort.getPortName();
+        String deviceName = serialPort.getSystemPortName();
 
         String subName = deviceName;
 
@@ -610,13 +609,8 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortEven
     public boolean exists() {
         if (Base.isWindows()) {
             return true;
-//            ArrayList<String> ports = Serial.getPortListDefault();
-//            if (ports.indexOf(serialPort.getPortName()) >= 0) {
-//                return true;
-//            }
-//            return false;
         } 
-        File f = new File(serialPort.getPortName());
+        File f = new File(portName);
         return f.exists();
     }
 

@@ -15,12 +15,12 @@
   <manifest></manifest>
   <icon>dist/windows/UECIDE.ico</icon>
   <jre>
-    <path>java</path>
-    <bundledJre64Bit>false</bundledJre64Bit>
-    <bundledJreAsFallback>true</bundledJreAsFallback>
-    <minVersion>1.7.0</minVersion>
+    <path>jdk-11</path>
+    <bundledJre64Bit>true</bundledJre64Bit>
+    <bundledJreAsFallback>false</bundledJreAsFallback>
+    <minVersion>1.8.0</minVersion>
     <maxVersion></maxVersion>
-    <jdkPreference>preferJre</jdkPreference>
+    <jdkPreference>preferJdk</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
     <initialHeapSize>512</initialHeapSize>
     <maxHeapSize>512</maxHeapSize>
