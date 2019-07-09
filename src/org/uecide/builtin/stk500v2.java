@@ -31,7 +31,6 @@
 package org.uecide.builtin;
 
 import org.uecide.*;
-import jssc.*;
 import java.util.*;
 import java.io.*;
 

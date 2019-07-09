@@ -16,7 +16,6 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import java.awt.datatransfer.*;
-import jssc.*;
 
 
 public class LCD extends JComponent

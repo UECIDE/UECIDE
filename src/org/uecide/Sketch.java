@@ -34,11 +34,7 @@ import org.uecide.editors.*;
 import org.uecide.plugin.*;
 import org.uecide.builtin.BuiltinCommand;
 import org.uecide.varcmd.VariableCommand;
-
 import java.util.regex.*;
-
-import jssc.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;
@@ -50,15 +46,12 @@ import java.util.jar.*;
 import java.util.zip.*;
 import java.text.*;
 import java.lang.reflect.*;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import org.uecide.Compiler;
-
 import javax.script.*;
-
 import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.*;
 

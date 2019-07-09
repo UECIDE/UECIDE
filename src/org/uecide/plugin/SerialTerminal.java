@@ -17,8 +17,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import jssc.*;
-
 import say.swing.*;
 
 import com.wittams.gritty.swing.*;
@@ -150,7 +148,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
 
         term = new GrittyTerminal();
         tty = new SerialTty(port);
-        term.setFont(Preferences.getFont("plugins.serialterminal.font"));
+        term.getTermPanel().setFont(Preferences.getFont("plugins.serialterminal.font"));
         term.getTermPanel().setSize(new Dimension(100, 100));
         term.getTermPanel().setAntiAliasing(true);
         term.setTty(tty);

@@ -30,7 +30,6 @@
 
 package org.uecide;
 
-import jssc.*;
 import java.io.*;
 import java.net.*;
 import java.util.regex.*;

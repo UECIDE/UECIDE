@@ -30,7 +30,6 @@
 
 package org.uecide;
 
-import jssc.*;
 import java.io.*;
 import java.net.*;
 import java.util.regex.*;
@@ -38,9 +37,7 @@ import java.util.*;
 import com.jcraft.jsch.*;
 import java.awt.*;
 import javax.swing.*;
-
 import org.usb4java.*;
-
 import javax.usb.*;
 import javax.usb.event.*;
 

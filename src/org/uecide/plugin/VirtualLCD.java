@@ -15,9 +15,6 @@ import javax.swing.text.*;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
-
-import jssc.*;
-
 import say.swing.*;
 
 

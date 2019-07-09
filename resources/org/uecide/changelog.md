@@ -4,6 +4,8 @@ Changelog
 0.11.0
 ------
 
+* Switch to bundled OpenJDK 11
+* Switch to JSerialComm instead of jSSC
 * Update built in repos
 * Add display scaling option in preferences
 * Added git core varcmd
@@ -705,6 +707,8 @@ Changelog
 0.8.5
 -----
 
+* Switch to bundled OpenJDK 11
+* Switch to JSerialComm instead of jSSC
 * Update built in repos
 * Add display scaling option in preferences
 * Added git core varcmd
