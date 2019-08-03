@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Fix serial terminal font
 * Switch to bundled OpenJDK 11
 * Switch to JSerialComm instead of jSSC
 * Update built in repos
@@ -707,6 +708,7 @@ Changelog
 0.8.5
 -----
 
+* Fix serial terminal font
 * Switch to bundled OpenJDK 11
 * Switch to JSerialComm instead of jSSC
 * Update built in repos

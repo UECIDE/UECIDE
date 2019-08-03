@@ -1908,11 +1908,12 @@ public class Editor extends JFrame {
                         public void actionPerformed(ActionEvent e) {
                             loadedSketch.purgeLibrary(lib);
                             clearConsole();
-
+/*
                             if(compilerRunning()) {
                                 error(Base.i18n.string("err.compilerrunning"));
                                 return;
                             }
+*/
 
                             LibCompileRunHandler runHandler = new LibCompileRunHandler(lib);
                             compilationThread = new Thread(runHandler, "Compiler");
@@ -5361,8 +5362,8 @@ public class Editor extends JFrame {
         clearConsole();
 
         if(compilerRunning()) {
-            error(Base.i18n.string("err.compilerrunning"));
-            return;
+//            error(Base.i18n.string("err.compilerrunning"));
+//            return;
         }
 
         if(Preferences.getBoolean("editor.save.auto")) {
@@ -5380,8 +5381,8 @@ public class Editor extends JFrame {
         clearConsole();
 
         if(compilerRunning()) {
-            error(Base.i18n.string("err.compilerrunning"));
-            return;
+//            error(Base.i18n.string("err.compilerrunning"));
+//            return;
         }
 
         if(Preferences.getBoolean("editor.save.automatic")) {

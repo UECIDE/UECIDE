@@ -98,20 +98,20 @@ public class FileType {
         fileTypeList.put("cp",  new FileTypeInfo(FileType.CPPSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_SOURCE));
         fileTypeList.put("cxx", new FileTypeInfo(FileType.CPPSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_SOURCE));
         fileTypeList.put("CPP", new FileTypeInfo(FileType.CPPSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_SOURCE));
-        fileTypeList.put("C",   new FileTypeInfo(FileType.CPPSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_SOURCE));
+        fileTypeList.put("C",   new FileTypeInfo(FileType.CPPSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_c", GROUP_SOURCE));
 
         fileTypeList.put("S",   new FileTypeInfo(FileType.ASMSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_c", GROUP_SOURCE));
         fileTypeList.put("sx",  new FileTypeInfo(FileType.ASMSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_c", GROUP_SOURCE));
 
-        fileTypeList.put("h",   new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
-        fileTypeList.put("H",   new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
-        fileTypeList.put("hh",  new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
-        fileTypeList.put("hp",  new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
-        fileTypeList.put("hxx", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
-        fileTypeList.put("hpp", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
-        fileTypeList.put("HPP", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
-        fileTypeList.put("h++", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
-        fileTypeList.put("tcc", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_HEADER));
+        fileTypeList.put("h",   new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_h", GROUP_HEADER));
+        fileTypeList.put("H",   new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_h", GROUP_HEADER));
+        fileTypeList.put("hh",  new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_hpp", GROUP_HEADER));
+        fileTypeList.put("hp",  new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_hpp", GROUP_HEADER));
+        fileTypeList.put("hxx", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_hpp", GROUP_HEADER));
+        fileTypeList.put("hpp", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_hpp", GROUP_HEADER));
+        fileTypeList.put("HPP", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_hpp", GROUP_HEADER));
+        fileTypeList.put("h++", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_hpp", GROUP_HEADER));
+        fileTypeList.put("tcc", new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_hpp", GROUP_HEADER));
 
 
         fileTypeList.put("pde", new FileTypeInfo(FileType.SKETCH, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_EXTENDABLE_CPLUSPLUS, "source_cpp", GROUP_SOURCE));
@@ -188,12 +188,10 @@ public class FileType {
         return getIcon(f.getName());
     }
     public static String getIcon(String f) {
-        for(String extension : fileTypeList.keySet()) {
-            if(f.endsWith("." + extension)) {
-                return fileTypeList.get(extension).icon;
-            }
+        String[] parts = f.split("\\.");
+        if (parts.length > 1) {
+            return parts[parts.length-1];
         }
-
         return "unknown";
     }
 
