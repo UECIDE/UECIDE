@@ -1,3 +1,0 @@
-version=0.8.8a
-version.minimum=0.8.7a
-description=Examine ELF files. Find the size of each<br/>section, examine the amount of memory<br/>taken by each variable or function.

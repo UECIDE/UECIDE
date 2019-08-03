@@ -61,14 +61,67 @@ icon.tree.note=user-available.png
 icon.tree.info=user-invisible.png
 icon.tree.refresh=view-refresh.png
 
-icon.mime.source_cpp=text-x-generic.png
-icon.mime.source_c=text-x-generic.png
+
+# C++ Header Files
+icon.mime.hh=text-x-c++hdr.png
+icon.mime.hp=text-x-c++hdr.png
+icon.mime.hxx=text-x-c++hdr.png
+icon.mime.hpp=text-x-c++hdr.png
+icon.mime.HPP=text-x-c++hdr.png
+icon.mime.h++=text-x-c++hdr.png
+icon.mime.tcc=text-x-c++hdr.png
+
+# C++ Source Files
+icon.mime.cpp=text-x-c++src.png
+icon.mime.c++=text-x-c++src.png
+icon.mime.cc=text-x-c++src.png
+icon.mime.cp=text-x-c++src.png
+icon.mime.cxx=text-x-c++src.png
+icon.mime.CPP=text-x-c++src.png
+icon.mime.pde=text-x-c++src.png
+icon.mime.ino=text-x-c++src.png
+icon.mime.sx=text-x-c++src.png
+
+# C Header Files
+icon.mime.h=text-x-chdr.png
+
+# C Source Files
+icon.mime.c=text-x-csrc.png
+icon.mime.S=text-x-csrc.png
+
+# Other source files
+icon.mime.blk=text-x-blk.png
+
+# Text files
+icon.mime.txt=text-x-plain.png
+
+# Documentation
+icon.mime.md=text-x-readme.png
+
+# Output files
+icon.mime.hex=text-x-hex.png
+
+# Image files
+icon.mime.jpg=image-jpeg.png
+icon.mime.jpeg=image-jpeg.png
+icon.mime.png=image-png.png
+icon.mime.gif=image-gif.png
+icon.mime.bmp=image-bmp.png
+
+icon.mime.source_hpp=text-x-c++hdr.png
+icon.mime.source_h=text-x-chdr.png
+icon.mime.source_cpp=text-x-c++src.png
+icon.mime.source_c=text-x-csrc.png
 icon.mime.text-x-generic=text-x-generic.png
-icon.mime.bmp=text-x-generic.png
-icon.mime.png=text-x-generic.png
-icon.mime.jpg=text-x-generic.png
-icon.mime.blk=text-x-generic.png
 icon.mime.unknown=text-x-generic.png
+icon.mime.blk=text-x-blk.png
+icon.mime.text=text-x-plain.png
+icon.mime.text-x-markdown=text-x-readme.png
+
+icon.mime.bmp=image-bmp.png
+icon.mime.jpg=image-jpeg.png
+icon.mime.gif=image-gif.png
+icon.mime.png=image-png.png
 
 icon.debug.clear=user-trash.png
 icon.debug.pause=media-playback-pause.png
