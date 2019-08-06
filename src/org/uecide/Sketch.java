@@ -2481,7 +2481,8 @@ public class Sketch {
 
 
         if (props.keyExists("compile.script")) {
-            return (Boolean)ctx.executeKey("compile.script");
+            boolean ret = (Boolean)ctx.executeKey("compile.script");
+            if (!ret) return false;
         }
 
         // Copy any specified files from the compiler, core or board folders

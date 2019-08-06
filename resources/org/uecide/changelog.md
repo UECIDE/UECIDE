@@ -4,6 +4,8 @@ Changelog
 0.11.0
 ------
 
+* Updated internal gnomic icon set
+* Moved icon selection to icons.txt file based on extension
 * Fix serial terminal font
 * Switch to bundled OpenJDK 11
 * Switch to JSerialComm instead of jSSC
@@ -708,6 +710,8 @@ Changelog
 0.8.5
 -----
 
+* Updated internal gnomic icon set
+* Moved icon selection to icons.txt file based on extension
 * Fix serial terminal font
 * Switch to bundled OpenJDK 11
 * Switch to JSerialComm instead of jSSC
