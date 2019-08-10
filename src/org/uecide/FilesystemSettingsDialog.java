@@ -159,9 +159,9 @@ public class FilesystemSettingsDialog extends JDialog {
             current.setVisible(true);
             currentLabel.setVisible(true);
         } else if (selectedType.equals("SPIFFS")) {
-            size.setVisible(true);
-            sizeLabel.setVisible(true);
-            sizeSelect.setVisible(true);
+            size.setVisible(false);
+            sizeLabel.setVisible(false);
+            sizeSelect.setVisible(false);
             current.setVisible(true);
             currentLabel.setVisible(true);
         }

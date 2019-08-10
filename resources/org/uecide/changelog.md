@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* FAT filesystem building support
 * Turn "compile.script" into a system for running arbitrary commands before compilation
 * Updated internal gnomic icon set
 * Moved icon selection to icons.txt file based on extension
@@ -711,6 +712,7 @@ Changelog
 0.8.5
 -----
 
+* FAT filesystem building support
 * Turn "compile.script" into a system for running arbitrary commands before compilation
 * Updated internal gnomic icon set
 * Moved icon selection to icons.txt file based on extension

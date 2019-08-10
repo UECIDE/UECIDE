@@ -5932,6 +5932,21 @@ public class Editor extends JFrame {
             updateOutputTree();
             return;
         }
+        if (type.equals("SPIFFS")) {
+            Tool t = Base.getTool("mkspiffs");
+            if (t == null) {
+                alert("Unable to find the mkspiffs package");
+                return;
+            }
+            if (t != null) {
+                Context ctx = loadedSketch.getContext();
+                ctx.set("filename", loadedSketch.getName());
+                ctx.set("sketch.root", loadedSketch.getFolder().getAbsolutePath());
+                ctx.set("build.root", loadedSketch.getBuildFolder().getAbsolutePath());
+                ctx.set("build.path", loadedSketch.getBuildFolder().getAbsolutePath());
+                t.execute(ctx, "mkspiffs.create");
+            }
+        }
     }
 }
 
