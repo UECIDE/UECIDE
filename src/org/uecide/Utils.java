@@ -8,7 +8,12 @@ import java.awt.image.*;
 import javax.swing.border.*;
 import java.util.*;
 import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 import java.net.*;
+import de.waldheinz.fs.*;
+import de.waldheinz.fs.fat.*;
+import de.waldheinz.fs.util.*;
 
 public class Utils {
     public static Image getScaledImage(Image srcImg, int w, int h){
@@ -31,6 +36,14 @@ public class Utils {
         if (s.equals("yes")) return true;
         if (s.equals("y")) return true;
         return false;
+    }
+
+    public static long s2l(String s) {
+        try {
+            return Long.parseLong(s);
+        } catch (Exception e) {
+        }
+        return 0;
     }
 
     public static int s2i(String s) {
@@ -88,5 +101,74 @@ public class Utils {
         reader.close();
         return sb.toString();
 
+    }
+
+    public static long getFolderSize(File root) {
+        long total = 0;
+        File[] files = root.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                total += getFolderSize(file);
+            } else {
+                total += file.length();
+            }
+        }
+        return total;
+    }
+
+    public static void addFilesToImage(FsDirectory dir, File srcdir) throws IOException, FileNotFoundException {
+        if (srcdir == null) return;
+        File[] files = srcdir.listFiles();
+        if (files == null) return;
+        for (File file : files) {
+            if (file.isDirectory()) {
+                FsDirectoryEntry newDir = dir.addDirectory(file.getName());
+                FsDirectory nd = newDir.getDirectory();
+                addFilesToImage(nd, file);
+                nd.flush();
+            } else {
+                FsDirectoryEntry newFile = dir.addFile(file.getName());
+                FsFile f = newFile.getFile();
+                f.setLength(file.length());
+
+
+                RandomAccessFile input = new RandomAccessFile(file, "r");
+                FileChannel inChannel = input.getChannel();
+                long fileSize = inChannel.size();
+                ByteBuffer buffer = ByteBuffer.allocate((int) fileSize);
+                inChannel.read(buffer);
+                buffer.flip();
+                f.write(0, buffer);
+                f.flush();
+            }
+        }
+    }
+        
+
+    public static boolean buildFATImage(File root, File dest, long size, FatType type, String volname) {
+        try {
+            if (size == 0) {
+                long used = getFolderSize(root);
+                used *= 1.1; // 10% extra space
+                used += (512 * 32); // 32 blocks for system stuff
+                used /= 512;
+                used++;
+                used *= 512;
+                size = used;
+            }
+
+            BlockDevice dev = FileDisk.create(dest, size);
+            FatFileSystem fs = SuperFloppyFormatter.get(dev).setFatType(type).format();
+
+            addFilesToImage(fs.getRoot(), root);
+
+            fs.close();
+
+        } catch (Exception e) {
+            Base.error(e);
+            return false;
+        }
+
+        return true;
     }
 }

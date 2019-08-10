@@ -75,6 +75,11 @@ import javax.jmdns.ServiceInfo;
 
 import com.wittams.gritty.swing.*;
 
+import de.waldheinz.fs.*;
+import de.waldheinz.fs.fat.*;
+import de.waldheinz.fs.util.*;
+
+
 public class Editor extends JFrame {
 
     Box mainDecorationContainer;
@@ -131,6 +136,7 @@ public class Editor extends JFrame {
     DefaultMutableTreeNode treeOutput;
     DefaultMutableTreeNode treeDocs;
     DefaultMutableTreeNode treeBinaries;
+    DefaultMutableTreeNode treeFilesystem;
     DefaultTreeModel treeModel;
 
     DefaultMutableTreeNode filesTreeRoot;
@@ -814,6 +820,7 @@ public class Editor extends JFrame {
         treeHeaders = new DefaultMutableTreeNode(Base.i18n.string("tree.headers"));
         treeLibraries = new DefaultMutableTreeNode(Base.i18n.string("tree.libraries"));
         treeBinaries = new DefaultMutableTreeNode(Base.i18n.string("tree.binaries"));
+        treeFilesystem = new DefaultMutableTreeNode(Base.i18n.string("tree.filesystem"));
         treeOutput = new DefaultMutableTreeNode(Base.i18n.string("tree.output"));
         treeDocs = new DefaultMutableTreeNode(Base.i18n.string("tree.docs"));
         TreeCellRenderer renderer = new FileCellRenderer(this);
@@ -822,6 +829,7 @@ public class Editor extends JFrame {
         treeRoot.add(treeHeaders);
         treeRoot.add(treeLibraries);
         treeRoot.add(treeBinaries);
+        treeRoot.add(treeFilesystem);
         treeRoot.add(treeOutput);
         treeRoot.add(treeDocs);
 
@@ -1405,6 +1413,7 @@ public class Editor extends JFrame {
         treeModel.nodeStructureChanged(treeOutput);
         treeModel.nodeStructureChanged(treeDocs);
         treeModel.nodeStructureChanged(treeBinaries);
+        treeModel.nodeStructureChanged(treeFilesystem);
         restoreTreeState(sketchContentTree, saved);
     }
 
@@ -1495,7 +1504,23 @@ public class Editor extends JFrame {
                     }
                 }
 
-        treeModel.nodeStructureChanged(treeBinaries);
+                treeModel.nodeStructureChanged(treeBinaries);
+                restoreTreeState(sketchContentTree, saved);
+            }
+        });
+    }
+
+    public void updateFilesystemTree() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                TreePath[] saved = saveTreeState(sketchContentTree);
+                if (saved == null) {
+                    return;
+                }
+                treeFilesystem.removeAllChildren();
+                addFileTreeToNode(treeFilesystem, loadedSketch.getFilesystemFolder());
+                treeModel.nodeStructureChanged(treeFilesystem);
+
                 restoreTreeState(sketchContentTree, saved);
             }
         });
@@ -1542,6 +1567,7 @@ public class Editor extends JFrame {
         updateHeadersTree();
         updateLibrariesTree();
         updateBinariesTree();
+        updateFilesystemTree();
         updateOutputTree();
         updateDocsTree();
         updateFilesTree();
@@ -1703,6 +1729,42 @@ public class Editor extends JFrame {
                         populateContextMenu(menu, Plugin.MENU_TREE_BINARIES | Plugin.MENU_BOTTOM, o);
 
                         menu.show(sketchContentTree, e.getX(), e.getY());
+                    } else if (s.equals(Base.i18n.string("tree.filesystem"))) {
+                        JMenuItem item = new JMenuItem(Base.i18n.string("menu.fs.settings"));
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent ae) {
+                                openFSSettings();
+                            }
+                        });
+                        menu.add(item);
+                        item = new JMenuItem(Base.i18n.string("menu.fs.creatdir"));
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent ae) {
+                                createFSFolder(loadedSketch.getFilesystemFolder());
+                            }
+                        });
+                        menu.add(item);
+                        item = new JMenuItem(Base.i18n.string("menu.fs.import"));
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent ae) {
+                                importFSFile(loadedSketch.getFilesystemFolder());
+                            }
+                        });
+                        menu.add(item);
+                        item = new JMenuItem(Base.i18n.string("menu.fs.build"));
+                        item.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent ae) {
+                                buildFSImage(loadedSketch.getFilesystemFolder());
+                            }
+                        });
+                        if (loadedSketch.get("fs.type") == null) {
+                            item.setEnabled(false);
+                        } else if (loadedSketch.get("fs.type").equals("None")) {
+                            item.setEnabled(false);
+                        }
+                        menu.add(item);
+                        menu.show(sketchContentTree, e.getX(), e.getY());
+
                     } else if(s.equals(Base.i18n.string("tree.output"))) {
                         JMenuItem item = new JMenuItem(Base.i18n.string("menu.purge.output"));
                         item.addActionListener(new ActionListener() {
@@ -1827,6 +1889,24 @@ public class Editor extends JFrame {
                     });
                     deleteItem.setActionCommand(thisFile.getAbsolutePath());
                     menu.add(deleteItem);
+
+                    if (thisFile.isDirectory()) {
+                        JMenuItem createDirItem = new JMenuItem(Base.i18n.string("menu.fs.creatdir"));
+                        createDirItem.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent ae) {
+                                createFSFolder(thisFile);
+                            }
+                        });
+                        menu.add(createDirItem);
+                        JMenuItem importItem = new JMenuItem(Base.i18n.string("menu.fs.import"));
+                        importItem.addActionListener(new ActionListener() {
+                            public void actionPerformed(ActionEvent ae) {
+                                importFSFile(thisFile);
+                            }
+                        });
+                        menu.add(importItem);
+
+                    }
 
                     populateContextMenu(menu, Plugin.MENU_TREE_FILE | Plugin.MENU_TOP, o);
                     menu.addSeparator();
@@ -5713,6 +5793,144 @@ public class Editor extends JFrame {
                 plugin.call("attachToTab", this.loadedSketch.getContext(), this, new Object[]{p, t, location});
                 p.add(tabName, t);
             }
+        }
+    }
+
+
+    public void openFSSettings() {
+        try {
+            FilesystemSettingsDialog d = new FilesystemSettingsDialog(this);
+
+            d.setFilesystemType(loadedSketch.get("fs.type"));
+            d.setFilesystemSize(loadedSketch.getLong("fs.size"));
+
+            d.setVisible(true);
+
+            if (d.getResult() == FilesystemSettingsDialog.OK) {
+                loadedSketch.set("fs.type", d.getFilesystemType());
+                loadedSketch.set("fs.size", d.getFilesystemSize());
+            }
+        } catch (Exception e) {
+            Base.error(e);
+        }
+    }
+
+    public void createFSFolder(String root) {
+        createFSFolder(new File(root));
+    }   
+    
+    public void createFSFolder(File root) {
+        String newDirName = JOptionPane.showInputDialog(this,
+            Base.i18n.string("msg.createdir.body"),
+            Base.i18n.string("msg.createdir.title"),
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (newDirName == null) {
+            return;
+        }
+        newDirName = newDirName.trim();
+        if (newDirName.equals("")) {
+            return;
+        }
+        if (newDirName.contains("/")) {
+            alert("Invalid directory name.");
+            return;
+        }
+        try {
+            File newDir = new File(root, newDirName);
+            newDir.mkdirs();
+        } catch (Exception e) {
+            alert(e.getMessage());
+        }
+        updateFilesystemTree();
+    }
+
+    public void importFSFile(String root) {
+        importFSFile(new File(root));
+    }
+
+    public void importFSFile(File root) {
+        JFileChooser fc = new JFileChooser();
+
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.importfile");
+            if (loc == null) {
+                loc = new File(System.getProperty("user.dir"));
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        }
+
+        fc.setMultiSelectionEnabled(true);
+        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        fc.setApproveButtonText(Base.i18n.string("misc.import"));
+
+        int r = fc.showOpenDialog(this);
+
+        if(r == JFileChooser.APPROVE_OPTION) {
+            File[] src = fc.getSelectedFiles();
+            if (src == null) return;
+
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                Preferences.setFile("editor.locations.importfile", src[0].getParentFile());
+            }
+
+            for (File s : src) {
+                if(!s.exists()) {
+                    oneOptionBox(JOptionPane.ERROR_MESSAGE, Base.i18n.string("err.notfound.title"), Base.i18n.string("err.notfound", s.getName()));
+                    return;
+                }
+
+                addFileOrFolderToTree(s, root);
+            }
+            updateFilesystemTree();
+        }
+
+    }
+
+    public void addFileOrFolderToTree(File src, File root) {
+        try {
+            if (!root.exists()) {
+                root.mkdirs();
+            }
+            File dest = new File(root, src.getName());
+            if (src.isDirectory()) {
+                dest.mkdirs();
+                File[] files = src.listFiles();
+                for (File f : files) {
+                    addFileOrFolderToTree(f, dest);
+                }
+            } else {
+                Files.copy(src.toPath(), dest.toPath(), REPLACE_EXISTING);
+            }
+        } catch (Exception e) {
+            alert(e.getMessage());
+        }
+    }
+
+    public void buildFSImage(File src) {
+        String type = loadedSketch.get("fs.type");
+        if (type == null || type.equals("None")) {
+            alert("No filesystem type selected.");
+            return;
+        }
+
+        if (type.equals("FAT32")) {
+            Utils.buildFATImage(loadedSketch.getFilesystemFolder(), new File(loadedSketch.getBuildFolder(), loadedSketch.getName() + ".img"), loadedSketch.getLong("fs.size") * 1024, FatType.FAT32, loadedSketch.getName());
+            updateOutputTree();
+            return;
+        }
+        if (type.equals("FAT16")) {
+            Utils.buildFATImage(loadedSketch.getFilesystemFolder(), new File(loadedSketch.getBuildFolder(), loadedSketch.getName() + ".img"), loadedSketch.getLong("fs.size") * 1024, FatType.FAT16, loadedSketch.getName());
+            updateOutputTree();
+            return;
+        }
+        if (type.equals("FAT12")) {
+            Utils.buildFATImage(loadedSketch.getFilesystemFolder(), new File(loadedSketch.getBuildFolder(), loadedSketch.getName() + ".img"), loadedSketch.getLong("fs.size") * 1024, FatType.FAT12, loadedSketch.getName());
+            updateOutputTree();
+            return;
         }
     }
 }

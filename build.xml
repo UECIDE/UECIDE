@@ -406,6 +406,7 @@
             <download url="http://www.dnsjava.org/download/dnsjava-2.1.8.jar" filename="dnsjava.jar" />
             <maven group="org.swinglabs"                        artifact="swingx"   version="1.6.1" />
             <maven group="com.fazecast"                         artifact="jSerialComm"              version="2.5.1" />
+            <maven group="de.waldheinz"                         artifact="fat32-lib"                version="0.6.5" />
         </depends>
     </target>
 

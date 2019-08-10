@@ -686,6 +686,10 @@ public class Sketch {
         return new File(buildFolder, filename);
     }
 
+    public File getFilesystemFolder() {
+        return new File(getFolder(), "files");
+    }
+
     public String[] getFileNames() {
         String[] out = new String[sketchFiles.size()];
         int i = 0;
@@ -4847,15 +4851,23 @@ public class Sketch {
 
     public void set(String key, String value) { settings.set(key, value); saveSettings(); }
     public void set(String key, int value) { settings.setInteger(key, value); saveSettings(); }
+    public void set(String key, long value) { settings.setLong(key, value); saveSettings(); }
     public void set(String key, float value) { settings.setFloat(key, value); saveSettings(); }
     public void set(String key, boolean value) { settings.setBoolean(key, value); saveSettings(); }
     public void set(String key, Color value) { settings.setColor(key, value); saveSettings(); }
 
     public String get(String key) { return settings.get(key); }
     public int getInteger(String key) { return settings.getInteger(key); }
+    public long getLong(String key) { return settings.getLong(key); }
     public float getFloat(String key) { return settings.getFloat(key); }
     public boolean getBoolean(String key) { return settings.getBoolean(key); }
     public Color getColor(String key) { return settings.getColor(key); }
+
+    public String get(String key, String def) { return settings.get(key, def); }
+    public int getInteger(String key, int def) { return settings.getInteger(key, def); }
+    public long getLong(String key, long def) { return settings.getLong(key, def); }
+    public float getFloat(String key, float def) { return settings.getFloat(key, def); }
+    public boolean getBoolean(String key, boolean def) { return settings.getBoolean(key, def); }
 
     public void saveSettings() {
         File sketchPropertyFile = new File(sketchFolder, "sketch.properties");

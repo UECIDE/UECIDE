@@ -506,6 +506,15 @@ public class PropertyFile {
         }
     }
 
+    /*! Parse a key's value as a long. If the parsing fails the default value *def* is returned. */
+    public long getLong(String attribute, long def) {
+        try {
+            return Long.parseLong(get(attribute));
+        } catch(Exception e) {
+            return def;
+        }
+    }
+
     /*! Parse a key's value as an integer. If the parsing fails the default value *def* is returned. */
     public float getFloat(String attribute, float def) {
         try {
@@ -519,6 +528,15 @@ public class PropertyFile {
     public int getInteger(String attribute) {
         try {
             return Integer.parseInt(get(attribute));
+        } catch(Exception e) {
+            return 0;
+        }
+    }
+
+    /*! Parse a key's value as a long. If the parsing fails the value 0 is returned. */
+    public long getLong(String attribute) {
+        try {
+            return Long.parseLong(get(attribute));
         } catch(Exception e) {
             return 0;
         }
@@ -539,6 +557,10 @@ public class PropertyFile {
     }
 
     public void setInteger(String key, int value) {
+        set(key, String.valueOf(value));
+    }
+
+    public void setLong(String key, long value) {
         set(key, String.valueOf(value));
     }
 
