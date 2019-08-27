@@ -3706,6 +3706,9 @@ public class Editor extends JFrame {
         Arrays.sort(progs);
 
         for(Programmer prog : progs) {
+            if (prog instanceof mDNSProgrammer) {
+                continue;
+            }
             JMenuItem item = new JRadioButtonMenuItem(loadedSketch.getContext().parseString(prog.toString()));
             progGroup.add(item);
 
@@ -3729,6 +3732,39 @@ public class Editor extends JFrame {
             item.setActionCommand(prog.getName());
             menu.add(item);
         }
+
+        menu.addSeparator();
+
+        for(Programmer prog : progs) {
+            if (!(prog instanceof mDNSProgrammer)) {
+                continue;
+            }
+            JMenuItem item = new JRadioButtonMenuItem(loadedSketch.getContext().parseString(prog.toString()));
+            progGroup.add(item);
+
+            if(loadedSketch.getContext().getProgrammer() != null) {
+                item.setSelected(loadedSketch.getContext().getProgrammer().equals(prog));
+            }
+
+            ImageIcon i = prog.getIcon(Preferences.getInteger("theme.treeiconsize"));
+
+            if(i != null) {
+                item.setIcon(i);
+            }
+
+            item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Programmer p = Base.programmers.get(e.getActionCommand());
+                    p.onSelected(Editor.this);
+                    loadedSketch.setProgrammer(e.getActionCommand());
+                }
+            });
+            item.setActionCommand(prog.getName());
+            menu.add(item);
+        }
+
+
+
     }
 
     public void populateBoardsMenu(JMenu menu) {
