@@ -361,7 +361,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
 
     public boolean openPort() {
         try {
-            serialPort.openPort();
+            serialPort.openPort(0);
             serialPort.setBaudRate(9600);
             serialPort.setNumStopBits(SerialPort.ONE_STOP_BIT);
             serialPort.setNumDataBits(8);

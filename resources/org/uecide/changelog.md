@@ -4,6 +4,8 @@ Changelog
 0.11.0
 ------
 
+* Separate mDNS programmers in programmers menu
+* Added SPIFFS building support
 * FAT filesystem building support
 * Turn "compile.script" into a system for running arbitrary commands before compilation
 * Updated internal gnomic icon set
@@ -712,6 +714,8 @@ Changelog
 0.8.5
 -----
 
+* Separate mDNS programmers in programmers menu
+* Added SPIFFS building support
 * FAT filesystem building support
 * Turn "compile.script" into a system for running arbitrary commands before compilation
 * Updated internal gnomic icon set
