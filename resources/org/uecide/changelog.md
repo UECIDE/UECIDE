@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Removed delays in jSerialPort
 * Separate mDNS programmers in programmers menu
 * Added SPIFFS building support
 * FAT filesystem building support
@@ -714,6 +715,7 @@ Changelog
 0.8.5
 -----
 
+* Removed delays in jSerialPort
 * Separate mDNS programmers in programmers menu
 * Added SPIFFS building support
 * FAT filesystem building support
