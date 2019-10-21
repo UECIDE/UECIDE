@@ -1,16 +1,16 @@
 Package: core-varcmd
-Version: 1.0.8
+Version: 1.0.9
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
 Installed-Size: 84
 Homepage: http://uecide.org
 Priority: extra
 Section: main
-Filename: pool/main/c/core-varcmd/core-varcmd_1.0.8_all.deb
-Size: 6724
-SHA256: c41a15ff7c4accf488718fc86824a338acf79ad931b7f930b5aab1171f1a2aa5
-SHA1: 584c837e87e599c10dcb81ef5654257be37bea0e
-MD5sum: e7178c13c0b7cbf6873b3ac3e1e06c11
+Filename: pool/main/c/core-varcmd/core-varcmd_1.0.9_all.deb
+Size: 6784
+SHA256: 06a989a2851dc4c70e8d3aeb9619fdd7cbffa7364f226c2d17bc151a9114fce1
+SHA1: 5b356c929693da05cef35950e01b7c991f4e8157
+MD5sum: 6c4fa2bfc44f1d461a0343d865bb15f6
 Description: Core varcmd scriptlets
  Varcmd scriptlets are used to enhance the ability of the
  config and control files handling. They are called as the
@@ -20,17 +20,17 @@ Group: System
 Subgroup: Scriptlets
 
 Package: ctags
-Version: 1.0.4
+Version: 1.0.5
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 2745
+Installed-Size: 2813
 Priority: required
 Section: main
-Filename: pool/main/c/ctags/ctags_1.0.4_all.deb
-Size: 409908
-SHA256: de25fb8759c5f6b3a79a25db896e8fbe03d0b5e73358af9bf5ae85c4552f0347
-SHA1: 2cb36307422ca27bae3f423e7ae0ceffa3c8cd31
-MD5sum: 305d2e4d15f0ceac60cd3d28533ad8f7
+Filename: pool/main/c/ctags/ctags_1.0.5_all.deb
+Size: 496724
+SHA256: 3333b4f97a0bfc75f5af093315b8f86ce44839114c4f6aff54c7d6bdff398f54
+SHA1: 1356b7d547d09c3ec92bcd5b44e2593955e96749
+MD5sum: e6102f11d158987a5487e30783bea43a
 Description: Exuberant CTags Parser
  This is the main parser for INO files used for gathering function prototypes.
 Group: System
@@ -76,18 +76,18 @@ Group: System
 Subgroup: Repositories
 
 Package: uecide-families
-Version: 1.1.0
+Version: 1.1.1
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
 Installed-Size: 13
 Homepage: http://uecide.org
 Priority: extra
 Section: main
-Filename: pool/main/u/uecide-families/uecide-families_1.1.0_all.deb
-Size: 2912
-SHA256: ed145c72ebdee5465d2b9ecfcc1153b2b4e6fb1f6ed945bdddf17be32ab7549d
-SHA1: 640e95f9816b4b3b36159b6a70cfc7d67b4ff832
-MD5sum: b3e43ba53435c78d45637166b228674c
+Filename: pool/main/u/uecide-families/uecide-families_1.1.1_all.deb
+Size: 2944
+SHA256: 224b7f1561fc07c78b581ba2eef1ffbcf7f7bbbac8e5ea7e27b5e19976d1a2c2
+SHA1: 57425e305a5e01f05f2fcfb1ccf59e63e162f5c1
+MD5sum: 9db94c9c905d15a50b07299dce7adafd
 Description: Family grouping control
  Family grouping control
 Family: all
