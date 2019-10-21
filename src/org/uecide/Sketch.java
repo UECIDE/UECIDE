@@ -2102,9 +2102,11 @@ public class Sketch {
                 String value = m.group(2);
 
                 String oldOption = getOption(key);
-                if (!oldOption.equals(value)) {
-                    setOption(key, value);
-                    updateMenu = true;
+                if (oldOption != null) {
+                    if (!oldOption.equals(value)) {
+                        setOption(key, value);
+                        updateMenu = true;
+                    }
                 }
             }
 
