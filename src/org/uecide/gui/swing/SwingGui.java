@@ -412,6 +412,23 @@ public class SwingGui extends Gui implements ContextEventListener {
     }
 
     @Override
+    public File askOpenSketch(String question, File location) {
+        SketchFolderFilter filter = new SketchFolderFilter();
+        SketchFileView view = new SketchFileView();
+        JFileChooser fc = new JFileChooser();
+        fc.setFileFilter(filter);
+        fc.setFileView(view);
+        fc.setCurrentDirectory(location);
+        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        int rv = fc.showOpenDialog(window);
+
+        if (rv == JFileChooser.APPROVE_OPTION) {
+            return fc.getSelectedFile();
+        }
+        return null;
+    }
+
+    @Override
     public boolean askYesNo(String question) {
         Icon i = null;
         try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}

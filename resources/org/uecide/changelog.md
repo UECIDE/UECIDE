@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
 * Add null pointer protection to options;
 * Merge branch 'master' of github.com:UECIDE/UECIDE
@@ -720,6 +721,7 @@ Changelog
 0.8.5
 -----
 
+* Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
 * Add null pointer protection to options;
 * Merge branch 'master' of github.com:UECIDE/UECIDE

@@ -90,6 +90,31 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
 
             add(newSketchButton);
 
+            openSketchButton = new ToolbarButton(
+                "Open Sketch",
+                "main.open",
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent ev) {
+                        ctx.action("openSketch");
+                    }
+                }
+            );
+
+            add(openSketchButton);
+
+            saveSketchButton = new ToolbarButton(
+                "Save Sketch",
+                "main.save",
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent ev) {
+                        ctx.action("saveSketch");
+                    }
+                }
+            );
+
+            add(saveSketchButton);
+
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }
