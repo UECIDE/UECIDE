@@ -33,14 +33,14 @@ package org.uecide.varcmd;
 import org.uecide.*;
 import java.util.HashMap;
 
-public class vc_arduino implements VariableCommand {
+public class vc_arduino extends VariableCommand {
 
     public static HashMap<String, PropertyFile> propCache = new HashMap<String, PropertyFile>();
 
-    public String main(Context sketch, String args) {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
         if (bits.length != 2) {
-            return "ERR";
+            throw new VariableCommandException("Syntax Error");
         }
         PropertyFile props = propCache.get(bits[0]);
         if (props == null) {

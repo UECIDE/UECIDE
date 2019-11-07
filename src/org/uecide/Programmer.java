@@ -33,8 +33,6 @@ package org.uecide;
 import java.io.*;
 import java.util.*;
 
-import org.uecide.plugin.*;
-
 import java.util.regex.*;
 
 public class Programmer extends UObject {

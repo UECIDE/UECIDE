@@ -32,8 +32,8 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class cout implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class cout extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         StringBuilder sb = new StringBuilder();
 
         for(String s : arg) {

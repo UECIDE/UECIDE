@@ -56,17 +56,17 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.KeyPair;
 
 
-public class vc_git implements VariableCommand {
+public class vc_git extends VariableCommand {
 
     File dotGit;
     FileRepository localRepo;
     File repoRoot;
     Git git;
 
-    public String main(Context sketch, String args) {
+    public String main(Context sketch, String args) throws VariableCommandException {
 
         if (!openRepo(sketch.getSketch().getFolder())) {
-            return "ERR:NOTGIT";
+            throw new VariableCommandException("Not A Git Repository");
         }
         if (args.equals("hash")) {
             return getLatestCommit();
@@ -74,10 +74,10 @@ public class vc_git implements VariableCommand {
         if (args.equals("describe")) {
             return getDescription();
         }
-        return "ERR:NOKEY";
+        throw new VariableCommandException("Invalid Key");
     }
 
-    public String getLatestCommit() {
+    public String getLatestCommit() throws VariableCommandException {
         try {
             LogCommand cmd = git.log();
 
@@ -88,21 +88,21 @@ public class vc_git implements VariableCommand {
             for (RevCommit commit : it) {
                 return commit.getId().toString();
             }
-            return "ERR:NOCOMMIT";
+            throw new VariableCommandException("No Commit Found");
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "ERR:EXCEPT";
+        throw new VariableCommandException("General Exception Error");
     }
 
-    public String getDescription() {
+    public String getDescription() throws VariableCommandException {
         try {
             DescribeCommand cmd = git.describe();
             String desc = cmd.call();
             return desc;
         } catch (Exception e) {
             e.printStackTrace();
-            return "ERR:NOTAG";
+            throw new VariableCommandException("No Tag Found");
         }
     }
 

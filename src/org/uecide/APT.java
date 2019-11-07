@@ -49,6 +49,8 @@ public class APT {
 
     ArrayList<Source>sources = new ArrayList<Source>();
 
+    static APT apt = null;
+
     public APT(String rootPath) throws FileNotFoundException, IOException {
         root = new File(rootPath);
         initRepository();
@@ -754,4 +756,24 @@ System.err.println("Required package " + p.getName());
     public Collection<Package> getInstalledPackages() {
         return installedPackages.values();
     }
+
+    public static APT factory() throws IOException {
+        if (apt == null) {
+            File dd = Base.getDataFolder();
+
+            File aptFolder = new File(dd, "apt");
+            if (!aptFolder.exists()) {
+                aptFolder.mkdirs();
+            }
+
+            File dbFolder = new File(aptFolder, "db");
+            if (!dbFolder.exists()) {
+                dbFolder.mkdirs();
+            }
+
+            apt = new APT(dd);
+        }
+        return apt;
+    }
+
 }

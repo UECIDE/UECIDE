@@ -33,11 +33,11 @@ package org.uecide.varcmd;
 import org.uecide.*;
 import java.io.File;
 
-public class vc_join implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_join extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         int comma = args.indexOf(",");
         if (comma == -1) {
-            return "[syntax error]";
+            throw new VariableCommandException("Syntax Error");
         }
     
         String array = args.substring(0, comma);

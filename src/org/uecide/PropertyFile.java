@@ -30,21 +30,28 @@
 
 package org.uecide;
 
-import org.uecide.plugin.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.Method;
-import java.net.*;
-import java.util.regex.*;
+import java.awt.Color;
+import java.awt.Font;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
-import say.swing.*;
+import java.net.InetAddress;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /*! The PropertyFile class stores a set of key/value pairs.  The keys can be
  *  used verbatim, or traversed and searched in the form of a tree.  Nodes in

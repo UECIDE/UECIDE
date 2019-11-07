@@ -30,12 +30,7 @@
 
 package org.uecide;
 
-import java.io.*;
-import java.util.*;
-
-import org.uecide.plugin.*;
-
-import java.util.regex.*;
+import java.io.File;
 
 public class Tool extends UObject {
     public Tool(File folder) {

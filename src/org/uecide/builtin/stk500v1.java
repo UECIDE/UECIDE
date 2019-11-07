@@ -34,7 +34,7 @@ import org.uecide.*;
 import java.util.*;
 import java.io.*;
 
-public class stk500v1 implements BuiltinCommand, CommsListener {
+public class stk500v1 extends BuiltinCommand implements CommsListener {
 
     boolean replyIsAvailable = false;
 
@@ -127,7 +127,7 @@ public class stk500v1 implements BuiltinCommand, CommsListener {
 
     public static long pageSize = 128;
 
-    public boolean main(Context c, String[] args) {
+    public boolean main(Context c, String[] args) throws BuiltinCommandException {
         ctx = c;
 
         if (args.length != 3) {
@@ -163,9 +163,6 @@ public class stk500v1 implements BuiltinCommand, CommsListener {
         leaveProgMode();
 
         disconnect();
-        if (ctx.getSketch() != null) {
-            ctx.getSketch().setCompilingProgress(100);
-        }
         return true;
     }
 
@@ -318,9 +315,6 @@ e.printStackTrace();
 System.err.println("Programming chunk " + currentChunk + " at address " + start);
 
             int perc = currentChunk * 100 / numberOfChunks;
-            if (ctx.getSketch() != null) {
-                ctx.getSketch().setCompilingProgress(perc);
-            }
 
             currentChunk ++;
 

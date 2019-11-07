@@ -37,8 +37,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 
-public class getauth implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class getauth extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
 
         String prompt = arg[0];
         String dest = arg[1];

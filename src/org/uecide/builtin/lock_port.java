@@ -32,11 +32,10 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class lock_port implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class lock_port extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         if (!Serial.waitLock(arg[0])) {
-            ctx.error(Base.i18n.string("err.timeout.port"));
-            return false;
+            throw new BuiltinCommandException("Timeout On Port");
         }
         Serial.lockPort(arg[0]);
         return true;

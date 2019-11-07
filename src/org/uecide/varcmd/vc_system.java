@@ -32,8 +32,8 @@ package org.uecide.varcmd;
 
 import org.uecide.*;
 
-public class vc_system implements VariableCommand {
-    public String main(Context ctx, String args) {
+public class vc_system extends VariableCommand {
+    public String main(Context ctx, String args) throws VariableCommandException {
         ctx.startBuffer();
         ctx.runSystemCommand(args, null);
         String out = ctx.endBuffer();

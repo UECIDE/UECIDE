@@ -30,17 +30,9 @@
 
 package org.uecide;
 
-import java.io.*;
-import java.net.*;
-import java.util.regex.*;
-import java.util.*;
-import com.jcraft.jsch.*;
-import java.awt.*;
-import javax.swing.*;
-import org.usb4java.*;
-import javax.usb.*;
-import javax.usb.event.*;
-
+import java.util.HashMap;
+import javax.usb.UsbDevice;
+import javax.usb.UsbDeviceDescriptor;
 
 public class UsbHidDevice implements CommunicationPort {
 

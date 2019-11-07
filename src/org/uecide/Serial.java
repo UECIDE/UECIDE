@@ -30,17 +30,20 @@
 
 package org.uecide;
 
-//import gnu.io.*;
-import com.fazecast.jSerialComm.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-import java.lang.reflect.Method;
+import java.lang.management.ManagementFactory;
 
-import java.awt.*;
-import javax.swing.*;
-import java.lang.management.*;
+import com.fazecast.jSerialComm.SerialPort;
+
 
 public class Serial {
     static ArrayList<String> extraPorts = new ArrayList<String>();
@@ -102,7 +105,7 @@ public class Serial {
         }
 
         if(port == null) {
-            JOptionPane.showMessageDialog(new Frame(), "The port could not be found.\nCheck you have the right port\nselected in the Hardware menu.", "Port not found", JOptionPane.ERROR_MESSAGE);
+            Base.error("The port could not be found.\nCheck you have the right port selected in the Hardware menu.");
             return null;
         }
 
@@ -123,7 +126,7 @@ public class Serial {
                 }
             }
 
-            Editor.releasePorts(name);
+//            Editor.releasePorts(name);
             Debug.message("Released " + name + " in all plugins");
 
             try {
@@ -139,7 +142,7 @@ public class Serial {
             Debug.message("Re-opened port");
 
             if(!port.isOpen()) {
-                JOptionPane.showMessageDialog(new Frame(), "The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.", "Port didn't open", JOptionPane.ERROR_MESSAGE);
+                Base.error("The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.");
                 return null;
             }
 

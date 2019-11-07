@@ -30,13 +30,30 @@
 
 package org.uecide;
 
-import java.io.*;
-import java.net.*;
-import java.util.regex.*;
-import java.util.*;
-import com.jcraft.jsch.*;
-import java.awt.*;
-import javax.swing.*;
+//import java.io.*;
+//import java.net.*;
+//import java.util.regex.*;
+//import java.util.*;
+//import com.jcraft.jsch.*;
+//import java.awt.*;
+//import javax.swing.*;
+
+import java.util.HashMap;
+import java.util.Arrays;
+import java.net.InetAddress;
+import java.io.InputStream;
+import java.io.OutputStream;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+
+// These are for the password entry and must be moved to the Gui.
+import javax.swing.JOptionPane;
+import javax.swing.JCheckBox;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
 public class SSHCommunicationPort implements CommunicationPort {
 

@@ -32,8 +32,8 @@ package org.uecide.varcmd;
 
 import org.uecide.*;
 
-public class vc_foreach implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_foreach extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         int commaPos = args.indexOf(',');
 
         if(commaPos > 0) {
@@ -54,7 +54,7 @@ public class vc_foreach implements VariableCommand {
 
             return outString;
         } else {
-            return "Syntax error in foreach";
+            throw new VariableCommandException("Syntax Error");
         }
     }
 }

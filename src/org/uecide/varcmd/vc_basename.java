@@ -33,8 +33,8 @@ package org.uecide.varcmd;
 import org.uecide.*;
 import java.io.File;
 
-public class vc_basename implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_basename extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
         String filename = bits[0];
         String extension = "";

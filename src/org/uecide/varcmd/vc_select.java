@@ -32,8 +32,8 @@ package org.uecide.varcmd;
 
 import org.uecide.*;
 
-public class vc_select implements VariableCommand {
-    public String main(Context context, String args) {
+public class vc_select extends VariableCommand {
+    public String main(Context context, String args) throws VariableCommandException {
         PropertyFile props = context.getMerged();
         String[] keys = props.childKeysOf(args);
         String out = "";
@@ -43,8 +43,6 @@ public class vc_select implements VariableCommand {
             }
             out += args + "." + k;
         }
-
-        System.err.println("Select: " + out);
 
         return out;
     }

@@ -32,8 +32,8 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class dot implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class dot extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         ctx.messageStream(".");
         return true;
     }

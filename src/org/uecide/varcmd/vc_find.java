@@ -33,8 +33,8 @@ package org.uecide.varcmd;
 import org.uecide.*;
 import java.io.File;
 
-public class vc_find implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_find extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         int commaPos = args.indexOf(',');
 
         if(commaPos > 0) {
@@ -56,9 +56,9 @@ public class vc_find implements VariableCommand {
                 }
             }
 
-            return "Not found";
+            throw new VariableCommandException("File Not Found");
         } else {
-            return "Syntax Error in find";
+            throw new VariableCommandException("Syntax Error");
         }
     }
 }

@@ -142,5 +142,9 @@ icon.main.program=system-program.png
 icon.main.new=document-new.png
 icon.main.open=document-open.png
 icon.main.save=document-save.png
+icon.main.spin=circle1.png::circle2.png::circle3.png::circle4.png
 
 icon.actions.refresh=view-refresh.png
+
+icon.misc.question=q-mid.png::q-right.png::q-mid.png::q-left.png
+

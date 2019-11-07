@@ -33,7 +33,6 @@ package org.uecide.macosx;
 import java.awt.Insets;
 import java.io.*;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.regex.*;
 

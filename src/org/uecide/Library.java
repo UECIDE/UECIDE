@@ -30,20 +30,14 @@
 
 package org.uecide;
 
-import java.util.regex.*;
+import java.io.File;
+import java.io.FileReader;
 
-
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.*;
-import java.io.*;
-import java.util.*;
-import java.util.List;
-import java.util.zip.*;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class Library implements Comparable {
     public ArrayList<String> requiredLibraries = new ArrayList<String>();

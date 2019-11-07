@@ -71,7 +71,6 @@ public class NetworkDiscoveryService extends Service {
                         Programmer oldP = Base.programmers.get(p.getName());
                         if (oldP == null) {
                             Base.programmers.put(p.getName(), p);
-                            Editor.broadcast("Found " + p.getDescription());
                         }
                     }
                 }

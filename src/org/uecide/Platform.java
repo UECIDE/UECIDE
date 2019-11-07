@@ -58,19 +58,6 @@ import java.util.regex.*;
 public class Platform {
     Base base;
 
-
-    /**
-     * Set the default L & F. While I enjoy the bounty of the sixteen possible
-     * exception types that this UIManager method might throw, I feel that in
-     * just this one particular case, I'm being spoiled by those engineers
-     * at Sun, those Masters of the Abstractionverse. It leaves me feeling sad
-     * and overweight. So instead, I'll pretend that I'm not offered eleven dozen
-     * ways to report to the user exactly what went wrong, and I'll bundle them
-     * all into a single catch-all "Exception". Because in the end, all I really
-     * care about is whether things worked or not. And even then, I don't care.
-     *
-     * @throws Exception Just like I said.
-     */
     public void setLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -78,7 +65,6 @@ public class Platform {
             Base.error(e);
         }
     }
-
 
     public void init(Base base) {
         this.base = base;
@@ -175,68 +161,6 @@ public class Platform {
                 e.printStackTrace();
             }
         }
-    }
-
-    public boolean openFolderAvailable() {
-        return Base.session.get("launcher") != null;
-    }
-
-
-    public void openFolder(File file) {
-        try {
-            String launcher = Base.session.get("launcher");
-
-            if(launcher != null) {
-                String folder = file.getAbsolutePath();
-                Runtime.getRuntime().exec(new String[] { launcher, folder });
-            } else {
-                showLauncherWarning();
-            }
-        } catch(Exception e) {
-            Base.error(e);
-        }
-    }
-
-
-    // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-
-    public interface CLibrary extends Library {
-        CLibrary INSTANCE = (CLibrary)Native.loadLibrary("c", CLibrary.class);
-        int setenv(String name, String value, int overwrite);
-        String getenv(String name);
-        int unsetenv(String name);
-        int putenv(String string);
-    }
-
-
-    public void setenv(String variable, String value) {
-        CLibrary clib = CLibrary.INSTANCE;
-        clib.setenv(variable, value, 1);
-    }
-
-
-    public String getenv(String variable) {
-        CLibrary clib = CLibrary.INSTANCE;
-        return clib.getenv(variable);
-    }
-
-
-    public int unsetenv(String variable) {
-        CLibrary clib = CLibrary.INSTANCE;
-        return clib.unsetenv(variable);
-    }
-
-
-    // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-
-    protected void showLauncherWarning() {
-        Base.showWarning("No launcher available",
-                         "Unspecified platform, no launcher available.\n" +
-                         "To enable opening URLs or folders, add a \n" +
-                         "\"launcher=/path/to/app\" line to preferences.txt",
-                         null);
     }
 
     public PropertyFile platformInfo = new PropertyFile();

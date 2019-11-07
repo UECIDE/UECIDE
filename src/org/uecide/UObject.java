@@ -30,9 +30,8 @@
 
 package org.uecide;
 
-import java.io.*;
-import java.util.*;
-import javax.swing.*;
+import java.io.File;
+import javax.swing.ImageIcon;
 
 /*
  * The UObject is the heart of the UECIDE system.  It defines all the boards,
@@ -339,6 +338,6 @@ public class UObject implements Comparable {
         _related = o;
     }
 
-    public void onSelected(Editor e) {
-    }
+//    public void onSelected(Editor e) {
+//    }
 }

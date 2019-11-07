@@ -36,17 +36,16 @@ import java.awt.*;
 import javax.swing.*;
 import java.io.*;
 
-public class scp implements BuiltinCommand {
+public class scp extends BuiltinCommand {
     String host;
     String user;
 
     Context ctx;
 
-    public boolean main(Context c, String[] arg) {
+    public boolean main(Context c, String[] arg) throws BuiltinCommandException {
         ctx = c;
         if(arg.length != 2) {
-            System.err.println("usage: __builtin_scp file1 user@remotehost:file2");
-            return false;
+            throw new BuiltinCommandException("Syntax Error");
         }
 
         Session session = null;
@@ -74,8 +73,7 @@ public class scp implements BuiltinCommand {
                 password = askPassword();
 
                 if(password == null) {
-                    ctx.error(Base.i18n.string("err.ssh.nopass"));
-                    return false;
+                    throw new BuiltinCommandException("No Password Given");
                 }
             }
 
@@ -89,16 +87,13 @@ public class scp implements BuiltinCommand {
                     password = null;
                     Preferences.unset("ssh." + host + "." + user);
                     Base.session.unset("ssh." + host + "." + user);
-                    ctx.error(Base.i18n.string("err.ssh.auth"));
                     session.disconnect();
-                    return false;
+                    throw new BuiltinCommandException("Authentication Failed");
                 } else {
-                    ctx.error(e);
-                    return false;
+                    throw new BuiltinCommandException(e.getMessage());
                 }
             } catch(Exception e) {
-                ctx.error(e);
-                return false;
+                throw new BuiltinCommandException(e.getMessage());
             }
 
             Base.session.set("ssh." + host + "." + user, password);
@@ -118,9 +113,8 @@ public class scp implements BuiltinCommand {
             channel.connect();
 
             if(checkAck(in) != 0) {
-                ctx.error(Base.i18n.string("err.ssh.channel"));
                 session.disconnect();
-                return false;
+                throw new BuiltinCommandException("Error Connecting SSH Channel");
             }
 
             File _lfile = new File(lfile);
@@ -134,9 +128,8 @@ public class scp implements BuiltinCommand {
                 out.flush();
 
                 if(checkAck(in) != 0) {
-                    ctx.error(Base.i18n.string("err.ssh.stamp"));
                     session.disconnect();
-                    return false;
+                    throw new BuiltinCommandException("Timestamp Error");
                 }
             }
 
@@ -155,9 +148,8 @@ public class scp implements BuiltinCommand {
             out.flush();
 
             if(checkAck(in) != 0) {
-                ctx.error(Base.i18n.string("err.ssh.open"));
                 session.disconnect();
-                return false;
+                throw new BuiltinCommandException("Error Connecting SSH Channel");
             }
 
 // send a content of lfile

@@ -32,28 +32,32 @@ package org.uecide.varcmd;
 
 import org.uecide.*;
 
-public class vc_option implements VariableCommand {
-    public String main(Context ctx, String args) {
+public class vc_option extends VariableCommand {
+    public String main(Context ctx, String args) throws VariableCommandException {
 
         String[] bits = args.split("\\.");
 
-        if (bits.length != 2) {
-            return "ERR1";
+        if (bits.length < 2) {
+            throw new VariableCommandException("Syntax Error");
         }
 
         String opt = bits[0];
         String key = bits[1];
+
+        for (int i = 2; i < bits.length; i++) {
+            key = key + "." + bits[i];
+        }
         String optval = ctx.getSketch().getOption(opt);
 
         if (optval == null) {
-            return "ERR2";
+            throw new VariableCommandException("Invalid Option");
         }
 
         String val = "options." + opt + "." + optval + "." + key;
         PropertyFile props = ctx.getMerged();
         String retval = props.get(val);
         if (retval == null) {
-            return "ERR3";
+            throw new VariableCommandException("Invalid Option Value");
         }
         return retval;
     }

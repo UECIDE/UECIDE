@@ -194,7 +194,6 @@ public class UsbDiscoveryService extends Service {
                     continue;
                 }
                 if (vid == bvid && pid == bpid) {
-                    Editor.broadcast("Found device " + b.getDescription());
                     return b;
                 }
             }

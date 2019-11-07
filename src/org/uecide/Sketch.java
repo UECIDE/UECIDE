@@ -30,30 +30,39 @@
 
 package org.uecide;
 
-import org.uecide.editors.*;
-import org.uecide.plugin.*;
-import org.uecide.builtin.BuiltinCommand;
-import org.uecide.varcmd.VariableCommand;
-import java.util.regex.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.awt.Color;
+
+import javax.swing.ImageIcon;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+import java.text.SimpleDateFormat;
+
+import java.util.UUID;
+import java.util.Arrays;
 import java.util.List;
-import java.util.jar.*;
-import java.util.zip.*;
-import java.text.*;
-import java.lang.reflect.*;
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
-import org.uecide.Compiler;
-import javax.script.*;
+import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import java.nio.file.Files;
-import static java.nio.file.StandardCopyOption.*;
+import java.nio.file.StandardCopyOption;
 
 /**
  * The sketch class is the heart of the IDE.  It manages not only what files a
@@ -66,7 +75,6 @@ public class Sketch {
 
     public String sketchName;       // The name of the sketch
     public File sketchFolder;       // Where the sketch is
-    public Editor editor = null;    // The editor window the sketch is loaded in
     public File buildFolder;        // Where to build the sketch
     public String uuid;             // A globally unique ID for temporary folders etc
 
@@ -78,21 +86,12 @@ public class Sketch {
 
     boolean isUntitled;             // Whether or not the sketch has been named
 
-    // These are all the plugins selected for this sketch in order to compile
-    // the sketch and upload it.
-    Core selectedCore = null;
-    Board selectedBoard = null;
-    String selectedBoardName = null;
-    Compiler selectedCompiler = null;
-    Programmer selectedProgrammer = null;
-    CommunicationPort selectedDevice = null;
-
     boolean terminateExecution = false;
 
     Process runningProcess = null;
 
     // This lot is what the sketch consists of - the list of files, libraries, parameters etc.
-    public ArrayList<File> sketchFiles = new ArrayList<File>();
+    public TreeMap<String, SketchFile> sketchFiles = new TreeMap<String, SketchFile>();
 
     public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
     public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
@@ -116,37 +115,12 @@ public class Sketch {
      * or the folder the provided file resides in.                            *
      **************************************************************************/
 
-    HashMap<File, HashMap<Integer, String>>lineComments = new HashMap<File, HashMap<Integer, String>>();
-
     HashMap<String, Integer>keywords = new HashMap<String, Integer>();
 
-    public void setLineComment(File file, int line, String comment) {
-        HashMap<Integer, String> comments = lineComments.get(file);
-
-        if(comments == null) {
-            comments = new HashMap<Integer, String>();
-        }
-
-        comments.put(line, comment);
-        lineComments.put(file, comments);
-    }
-
-    public String getLineComment(File file, int line) {
-        HashMap<Integer, String> comments = lineComments.get(file);
-
-        if(comments == null) {
-            return null;
-        }
-
-        return comments.get(line);
-    }
-
-    public HashMap<Integer, String> getLineComments(File file) {
-        return lineComments.get(file);
-    }
-
     public void clearLineComments() {
-        lineComments = new HashMap<File, HashMap<Integer, String>>();
+        for (SketchFile f : sketchFiles.values()) {
+            f.clearLineComments();
+        }
     }
 
     public Sketch() {
@@ -155,27 +129,19 @@ public class Sketch {
         ctx.setSketch(this);
     }
 
-    public Sketch(String path) throws IOException {
-        this(new File(path));
+    public Sketch(String path, Context c) throws IOException {
+        this(new File(path), c);
     }
 
-    public Sketch(File path) throws IOException {
-        this(path, null);
-    }
-
-    public Sketch(File path, Editor e) throws IOException {
+    public Sketch(File path, Context c) throws IOException {
         uuid = UUID.randomUUID().toString();
-        ctx = new Context();
+        ctx = c;
         ctx.setSketch(this);
 
         isUntitled = false;
 
         if(path == null) {
             path = createUntitledSketch();
-        }
-
-        if (e != null) {
-            attachToEditor(e);
         }
 
         sketchFolder = path;
@@ -205,29 +171,6 @@ public class Sketch {
                 File nsf = new File(path, path.getName() + ".ino");
                 if (!nsf.exists()) {
                     nsf = new File(path, path.getName() + ".pde");
-                    if (!nsf.exists()) {
-                        if (editor == null) return;
-                        if(editor.twoOptionBox(
-                            JOptionPane.QUESTION_MESSAGE,
-                            Base.i18n.string("sketch.import.title"),
-                            Base.i18n.string("sketch.import.body"),
-                            Base.i18n.string("misc.yes"),
-                            Base.i18n.string("misc.no")
-                        ) == 0) {
-                            File sb = new File(Base.getSketchbookFolder(), inoName);
-                            sb.mkdirs();
-                            File inof = new File(sb, inoName + ".ino");
-                            Files.copy(oldPath.toPath(), inof.toPath(), REPLACE_EXISTING);
-                            path = sb;
-                        } else {
-                            path = createUntitledSketch();
-                            sketchFolder = path;
-                            sketchName = sketchFolder.getName();
-                            path.mkdirs();
-                            createBlankFile(path.getName() + ".ino");
-                            inoName = path.getName();
-                        }
-                    }
                 }
             }
         }
@@ -248,245 +191,10 @@ public class Sketch {
      * another.                                                               *
      **************************************************************************/
 
-    // Get the board as a string
-    public String getBoardName() {
-        return selectedBoardName;
-    }
-
-    // Get the board as a Board object
-    public Board getBoard() {
-        return selectedBoard;
-    }
-
-    // Look up a board in the global boards map and set the board appropriately
-    public void setBoard(String board) throws IOException {
-        if(board == null || board.equals("")) {
-            Debug.message("NULL or blank board when calling setBoard");
-            return;
-        }
-
-        Board b = Base.getBoard(board);
-        setBoard(b);
-    }
-
-    // Set the current board.  Also looks up the last settings used for that board
-    // and propogates them onwards (core, compiler, etc).
-    public void setBoard(Board board) throws IOException {
-        Debug.message("Selecting board " + board);
-
-        if(board == null) {
-            Debug.message("NULL board when calling setBoard");
-            return;
-        }
-
-        ctx.setBoard(board);
-
-        selectedBoard = board;
-        selectedBoardName = selectedBoard.getName();
-        Preferences.set("board", board.getName());
-        String boardsCore = Preferences.get("board." + selectedBoard.getName() + ".core");
-        Core core = null;
-
-        if(boardsCore != null) {
-            Debug.message("Board core is " + boardsCore);
-            core = Base.cores.get(boardsCore);
-        }
-
-        if(core == null) {
-            Debug.message("Board core is null!");
-            core = board.getCore();
-        }
-
-        Debug.message("Board's core is " + core);
-
-        if(core != null) {
-            setCore(core);
-        }
-
-    }
-
-    public Core getCore() {
-        return selectedCore;
-    }
-
-    public void setCore(String core) throws IOException {
-        if(core == null || core.equals("")) {
-            Debug.message("NULL or blank core when calling setCore");
-            return;
-        }
-
-        Core c = Base.getCore(core);
-        setCore(c);
-    }
-
     public void setSettings() {
         ctx.set("sketch.name", getName());
         ctx.set("sketch.path", getFolder().getAbsolutePath());
     }
-
-    public void setCore(Core core) throws IOException {
-        Debug.message("Selecting core " + core);
-        if(core == null) {
-            Debug.message("NULL core when calling setCore");
-            return;
-        }
-
-        ctx.setCore(core);
-
-        selectedCore = core;
-        Preferences.set("board." + selectedBoard.getName() + ".core", core.getName());
-        String boardsCompiler = Preferences.get("board." + selectedBoard.getName() + ".compiler");
-
-        Compiler compiler = null;
-
-        if(boardsCompiler != null) {
-            compiler = Base.compilers.get(boardsCompiler);
-        }
-
-        if(compiler == null) {
-            compiler = core.getCompiler();
-        }
-
-        if(compiler != null) {
-            Debug.message("Compiler set to " + compiler);
-            setCompiler(compiler);
-        } else {
-            Debug.message("No compiler available!");
-        }
-
-        if(editor != null) {
-            editor.updateTree();
-        }
-    }
-
-    public Compiler getCompiler() {
-        return selectedCompiler;
-    }
-
-    public void setCompiler(String compiler) {
-        if(compiler == null || compiler.equals("")) return;
-
-        Compiler c = Base.getCompiler(compiler);
-        setCompiler(c);
-    }
-
-    public void setCompiler(Compiler compiler) {
-        Debug.message("Selecting compiler " + compiler);
-        if(compiler == null) {
-            return;
-        }
-
-        ctx.setCompiler(compiler);
-
-        selectedCompiler = compiler;
-        if (selectedBoard == null) {
-            return;
-        }
-
-        Preferences.set("board." + selectedBoard.getName() + ".compiler", compiler.getName());
-        String programmer = Preferences.get("board." + selectedBoard.getName() + ".programmer");
-
-        Debug.message("Found programmer in prefs: " + programmer);
-        setProgrammer(programmer);
-    }
-
-    public Programmer getProgrammer() {
-        return selectedProgrammer;
-    }
-
-    public void setProgrammer(String programmer) {
-        if (programmer == null) {
-            Debug.message("NULL programmer specified");
-            setProgrammer((Programmer)null);
-            return;
-        }
-        Programmer p = Base.programmers.get(programmer);
-        setProgrammer(p);
-    }
-
-    public void setProgrammer(Programmer programmer) {
-        if(programmer == null) {
-            String cp = getCore().get("default.programmer");
-            if (cp != null) {
-                programmer = Base.programmers.get(programmer);
-            }
-        }
-
-        if (programmer == null) {
-            for (Programmer p : Base.programmers.values()) {
-                if (p.worksWith(getBoard())) {
-                    programmer = p;
-                    break;
-                }
-            }
-        }
-
-        if (programmer != null) {
-            Preferences.set("board." + getBoard().getName() + ".programmer", programmer.getName());
-        }
-
-        selectedProgrammer = programmer;
-        ctx.setProgrammer(programmer);
-
-        if(editor != null) editor.updateAll();
-    }
-
-    public CommunicationPort getDevice() {
-        return selectedDevice;
-    }
-
-    public void setDevice(String name) {
-        for (CommunicationPort dev : Base.communicationPorts) {
-            if (dev.toString().equals(name)) {
-                setDevice(dev);
-                return;
-            }
-        }
-        if (Base.isPosix()) {
-            File f = new File(name);
-            if (f.exists() && !f.isDirectory()) {
-                SerialCommunicationPort p = new SerialCommunicationPort(f.getAbsolutePath());
-                Base.communicationPorts.add(p);
-                setDevice(p);
-            }
-        }
-    }
-
-    public void setDevice(CommunicationPort dev) {
-        selectedDevice = dev;
-        ctx.setDevice(dev);
-        if (editor != null) {
-            editor.updateAll();
-        }
-        if (getBoard() != null) {
-            if (getDevice() != null) {
-                Preferences.set("board." + getBoard().getName() + ".port", getDevice().toString());
-            }
-        }
-    }
-
-    void attachToEditor(Editor e) {
-        editor = e;
-        ctx.setEditor(e);
-        if (editor != null) {
-            editor.setTitle("UECIDE | " + sketchName);
-            PropertyFile props = ctx.getMerged();
-            if (props.get("sketch.window.x") != null) {
-                editor.setXPosition(props.getInteger("sketch.window.x"));
-            }
-            if (props.get("sketch.window.y") != null) {
-                editor.setYPosition(props.getInteger("sketch.window.y"));
-            }
-            if (props.get("sketch.window.w") != null) {
-                editor.setWidth(props.getInteger("sketch.window.w"));
-            }
-            if (props.get("sketch.window.h") != null) {
-                editor.setHeight(props.getInteger("sketch.window.h"));
-            }
-        }
-    }
-
-
 
     /**************************************************************************
      * FILE HANDLING                                                          *
@@ -539,12 +247,6 @@ public class Sketch {
             out.println("}");
             out.close();
 
-            if(editor != null) {
-                editor.insertStringAtStart(getMainFile(), "#include <" + libname + ".h>\n");
-                editor.updateTree();
-                editor.openOrSelectFile(header);
-                editor.openOrSelectFile(code);
-            }
         } catch(Exception e) {
             Base.error(e);
         }
@@ -555,25 +257,10 @@ public class Sketch {
     }
 
     public void createNewFile(String filename, String content) throws IOException {
-        if(filename.endsWith(".lib")) {
-            createNewLibrary(filename.substring(0, filename.lastIndexOf(".")));
-            return;
-        }
-
-        File f = createBlankFile(filename);
-
-        if (content != null) {
-            PrintWriter pw = new PrintWriter(f);
-            pw.print(content);
-            pw.close();
-        }
-
-        sketchFiles.add(f);
-
-        if(editor != null) {
-            editor.updateTree();
-            editor.openOrSelectFile(f);
-        }
+        SketchFile f = new SketchFile(ctx, this, new File(sketchFolder, filename));
+        f.setFileData(content);
+        f.saveDataToDisk();
+        sketchFiles.put(filename, f);
     }
 
     public File createBlankFile(String fileName) {
@@ -615,71 +302,23 @@ public class Sketch {
             }
         }
 
-        setBoard(Preferences.get("board"));
-
-        if(selectedBoard != null) {
-            String portName = Preferences.get("board." + selectedBoard.getName() + ".port");
-
-            if (portName != null) {
-
-                CommunicationPort p = null;
-
-                for (CommunicationPort dev : Base.communicationPorts) {
-                    if (dev.toString().equals(portName)) {
-                        p = dev;
-                        break;
-                    }
-                }
-
-                if (p == null) {
-                    // Let's add a missing device - it can always be removed later.
-                    if (portName.startsWith("ssh://")) {
-//                        SSHCommunicationPort sp = new SSHCommunicationPort(portName, selectedBoard);
-//                        Base.communicationPorts.add(sp);
-//                        p = sp;
-                    } else {
-                        SerialCommunicationPort sp = new SerialCommunicationPort(portName);
-                        Base.communicationPorts.add(sp);
-                        p = sp;
-                    }
-                }
-
-                setDevice(p);
-            } else {
-                setDevice((CommunicationPort)null);
-            } 
-        } else {
-            setDevice((CommunicationPort)null);
-        }
+        ctx.action("SetBoard", Preferences.get("board.recent"));
 
         updateSketchConfig();
 
         updateLibraryList();
 
-        if(editor != null) {
-            editor.fireEvent(UEvent.SKETCH_OPEN);
-        }
 
         loadConfig();
     }
 
-    public boolean loadFile(File f) {
-        if(!f.exists()) {
-            return false;
-        }
-
-        sketchFiles.add(f);
+    public boolean loadFile(File f) throws IOException {
+        sketchFiles.put(f.getName(), new SketchFile(ctx, this, f));
         return true;
     }
 
-    public File getFileByName(String filename) {
-        for(File f : sketchFiles) {
-            if(f.getName().equals(filename)) {
-                return f;
-            }
-        }
-
-        return null;
+    public SketchFile getFileByName(String filename) {
+        return sketchFiles.get(filename);
     }
 
     public File getBuildFileByName(String filename) {
@@ -690,16 +329,12 @@ public class Sketch {
         return new File(getFolder(), "files");
     }
 
+    public TreeMap<String, SketchFile> getSketchFiles() {
+        return sketchFiles;
+    }
+
     public String[] getFileNames() {
-        String[] out = new String[sketchFiles.size()];
-        int i = 0;
-
-        for(File f : sketchFiles) {
-            out[i++] = f.getName();
-        }
-
-        Arrays.sort(out);
-        return out;
+        return sketchFiles.keySet().toArray(new String[0]);
     }
 
     public File createBuildFolder() {
@@ -742,45 +377,18 @@ public class Sketch {
         return f;
     }
 
-    public File getMainFile() {
-        File f = getFileByName(sketchName + ".ino");
-
-        if(f == null) {
-            f = getFileByName(sketchName + ".pde");
+    public SketchFile getMainFile() {
+        for (SketchFile f : sketchFiles.values()) {
+            if (f.isMainFile()) return f;
         }
-
-        return f;
-    }
-
-    public String getMainFilePath() {
-        File f = getMainFile();
-
-        if(f == null) {
-            return "";
-        }
-
-        return f.getAbsolutePath();
+        return null;
     }
 
     public boolean isModified() {
-        // If we have no editor then it's impossible for a file
-        // to be modified.
-        if(editor == null) {
-            return false;
+        for (SketchFile f : sketchFiles.values()) {
+            if (f.isModified()) return true;
         }
-
-        boolean modified = false;
-        int tabs = editor.getTabCount();
-
-        for(int tab = 0; tab < tabs; tab++) {
-            EditorBase ed = editor.getTab(tab);
-
-            if(ed.isModified()) {
-                modified = true;
-            }
-        }
-
-        return modified;
+        return false;
     }
 
     static public boolean isSanitaryName(String name) {
@@ -812,122 +420,14 @@ public class Sketch {
         return sketchFolder;
     }
 
-
-    // Get the content of a file.  If it's open in the editor then
-    // return the content of the editor, otherwise load the data from
-    // the file.
-    public String getFileContent(File f) {
-        return getFileContent(f, false);
-    }
-    public String getFileContent(File f, boolean forceOffDisk) {
-        if(!f.exists()) {
-            return "";
-        }
-
-        if(f.isDirectory()) {
-            return "";
-        }
-
-        if(!forceOffDisk) {
-            if(editor != null) {
-                int tabNumber = editor.getTabByFile(f);
-
-                if(tabNumber > -1) {
-                    EditorBase eb = editor.getTab(tabNumber);
-                    return eb.getText();
-                }
-            }
-        }
-
-        if (f.getName().endsWith(".blk")) { // Special case for ardublock files...
-            try {
-                com.ardublock.core.Context c = com.ardublock.core.Context.getContext();
-                c.loadArduBlockFile(f);
-                return org.uecide.editors.ardublock.generateCode(c, editor);
-            } catch (Exception e) {
-                error(e);
-                return "";
-            }
-        }
-
-        InputStream    fis;
-        BufferedReader br;
-        String         line;
-        StringBuilder sb = new StringBuilder();
-
-        try {
-
-            fis = new FileInputStream(f);
-            br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-
-            while((line = br.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-
-            br.close();
-        } catch(Exception e) {
-            error(e);
-        }
-        return sb.toString();
-    }
-
-    // Write the content of a file to a folder.
-    public void writeFileToFolder(File file, File folder) {
-        File dest = new File(folder, file.getName());
-
-        try {
-            PrintWriter out = new PrintWriter(dest);
-            out.print(getFileContent(file));
-            out.close();
-        } catch(Exception e) {
-            error(e);
-        }
-    }
-
-    // Write out any locally cached copies of files (in editors)
-    // to the disk.
-    public void saveAllFiles() {
-        // If we don't have an editor then we don't have any cached files.
-        if(editor == null) {
-            return;
-        }
-
-        for(File f : sketchFiles) {
-            int tab = editor.getTabByFile(f);
-
-            if(tab > -1) {
-                EditorBase eb = editor.getTab(tab);
-
-                if(eb.isModified()) {
-                    eb.setModified(false);
-                    writeFileToFolder(f, sketchFolder);
-                }
-            }
-        }
-
-        Base.updateMRU(sketchFolder);
-
-        if(editor != null) {
-            editor.updateMenus();
-        }
-    }
-
-    /**************************************************************************
-     * COMPILATION                                                            *
-     *                                                                        *
-     * This section deals with the compilation of the sketch.  It has all the *
-     * routines needed to convert a sketch into C++ or C source code, and to  *
-     * compile, link, and archive it all.                                     *
-     **************************************************************************/
-
-    TreeMap<File, String> cleanedFiles;
+    TreeMap<SketchFile, String> cleanedFiles;
 
     public boolean cleanFiles() {
-        cleanedFiles = new TreeMap<File, String>();
+        cleanedFiles = new TreeMap<SketchFile, String>();
 
-        for(File f : sketchFiles) {
-            if(FileType.getType(f) == FileType.SKETCH) {
-                String data = getFileContent(f);
+        for(SketchFile f : sketchFiles.values()) {
+            if(f.getType() == FileType.SKETCH) {
+                String data = f.getFileData();
                 String cleanData = stripComments(data);
                 String[] lines = cleanData.split("\n");
                 int lineno = 1;
@@ -940,7 +440,7 @@ public class Sketch {
 
                 cleanedFiles.put(f, out.toString());
             } else {
-                cleanedFiles.put(f, getFileContent(f));
+                cleanedFiles.put(f, f.getFileData());
             }
         }
 
@@ -992,13 +492,13 @@ public class Sketch {
             }
         }
 
-        if (getCore() == null) {
+        if (ctx.getCore() == null) {
             return null;
         }
-        Library lib = Library.getLibraryByInclude(filename, getCore().getName());
+        Library lib = Library.getLibraryByInclude(filename, ctx.getCore().getName());
         if (lib == null) {
-            if (getCore().get("core.alias") != null) {
-                String[] aliases = ctx.parseString(getCore().get("core.alias")).split("::");
+            if (ctx.getCore().get("core.alias") != null) {
+                String[] aliases = ctx.parseString(ctx.getCore().get("core.alias")).split("::");
                 for (String alias : aliases) {
                     lib = Library.getLibraryByInclude(filename, alias);
                     if (lib != null) {
@@ -1096,23 +596,20 @@ public class Sketch {
         return labels;
     }
 
-    public void findAllFunctions() {
-        if(editor == null) {
-            return;
-        }
-
+    public void findAllFunctions() throws IOException {
 
         functionListBm = new ArrayList<FunctionBookmark>();
         String data;
         HashMap<Integer, String>funcs = null;
 
-        for(File f : sketchFiles) {
-            switch(FileType.getType(f)) {
+        for(SketchFile f : sketchFiles.values()) {
+            switch(f.getType()) {
             case FileType.SKETCH:
             case FileType.HEADER:
             case FileType.CSOURCE:
             case FileType.CPPSOURCE:
-                File tf = dumpFileData(buildFolder, f.getName());
+                File tf = new File(buildFolder, f.toString());
+                f.saveDataToDisk(tf);
                 ArrayList<FunctionBookmark> bm = scanForFunctions(tf);
                 functionListBm.addAll(bm);
                 
@@ -1139,11 +636,11 @@ public class Sketch {
         includeOrder = new ArrayList<String>();
         Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
 
-        for(File f : cleanedFiles.keySet()) {
+        for(SketchFile f : cleanedFiles.keySet()) {
             try {
                 String data = cleanedFiles.get(f);
-                String fname = f.getName();
-                if(FileType.getType(f) == FileType.SKETCH) {
+                String fname = f.toString();
+                if(f.getType() == FileType.SKETCH) {
                     String ext = ctx.parseString(props.get("build.extension"));
                     if (ext == null) {
                         ext = "cpp";
@@ -1193,10 +690,6 @@ public class Sketch {
             if (importedLibraries.get(inclib) != null) {
                 orderedLibraries.add(importedLibraries.get(inclib));
             }
-        }
-
-        if(editor != null) {
-            editor.updateLibrariesTree();
         }
 
     }
@@ -1253,7 +746,7 @@ public class Sketch {
         return null;
     }
 
-    public ArrayList<FunctionBookmark> scanForFunctions(File f) {
+    public ArrayList<FunctionBookmark> scanForFunctions(File f) throws IOException {
 
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
         
@@ -1270,7 +763,7 @@ public class Sketch {
 
             File tags = new File(buildFolder, f.getName() + ".tags");
             if (tags.exists()) { // We got the tags
-                String tagData = Base.getFileAsString(tags);
+                String tagData = Utils.getFileAsString(tags);
                 String[] tagLines = tagData.split("\n");
 
                 for (String tagLine : tagLines) {
@@ -1392,38 +885,39 @@ public class Sketch {
 
     ArrayList<File> filesToCompile = null;
 
-    public synchronized boolean prepare() {
+    public boolean prepare() throws IOException {
         PropertyFile props = ctx.getMerged();
 
-        if(getBoard() == null) {
-            error(Base.i18n.string("err.noboard"));
+        if(ctx.getBoard() == null) {
+            ctx.error(Base.i18n.string("err.noboard"));
             return false;
         }
 
-        if(getCore() == null) {
-            error(Base.i18n.string("err.nocore"));
+        if(ctx.getCore() == null) {
+            ctx.error(Base.i18n.string("err.nocore"));
             return false;
         }
 
         if(Preferences.getBoolean("compiler.purge")) {
-            cleanBuild();
+            ctx.action("purge");
         }
 
         filesToCompile = new ArrayList<File>();
 
-        
-
-        for (String fn : getFileNames()) {
-            File f = getFileByName(fn);
-            int ft = FileType.getType(f);
-            switch (ft) {
+        for (SketchFile f : sketchFiles.values()) {
+            switch (f.getType()) {
                 case FileType.ASMSOURCE:
                 case FileType.CSOURCE:
-                case FileType.CPPSOURCE:
-                    filesToCompile.add(dumpFileData(buildFolder, fn));
-                    break;
-                case FileType.SKETCH:
-                    dumpFileData(buildFolder, fn);
+                case FileType.CPPSOURCE: { // Save to build area and compile
+                        File bff = new File(buildFolder, f.toString());
+                        f.saveDataToDisk(bff);
+                        filesToCompile.add(bff);
+                    } break;
+                case FileType.HEADER: { // Save to build area but don't compile
+                        File bff = new File(buildFolder, f.toString());
+                        f.saveDataToDisk(bff);
+                    } break;
+                case FileType.SKETCH: // Don't do anything
                     break;
             }
         }
@@ -1437,159 +931,107 @@ public class Sketch {
             }
         }
 
-        bullet("Converting binary files");
+        ctx.bullet("Converting binary files");
         HashMap<File, String[]> binFiles = convertBinaryFiles();
 
         if (binFiles.size() > 0) {
             filesToCompile.addAll(binFiles.keySet());
-            try {
-                PrintWriter bh = new PrintWriter(new File(buildFolder, "binary/binaries.h"));
-                bh.println("#ifndef _UECIDE_BINARY_BINARIES_H");
-                bh.println("#define _UECIDE_BINARY_BINARIES_H");
-                bh.println();
-                for (String[] lines : binFiles.values()) {
-                    for (String line : lines) {
-                        bh.println(line);
-                    }
-                    bh.println();
+            PrintWriter bh = new PrintWriter(new File(buildFolder, "binary/binaries.h"));
+            bh.println("#ifndef _UECIDE_BINARY_BINARIES_H");
+            bh.println("#define _UECIDE_BINARY_BINARIES_H");
+            bh.println();
+            for (String[] lines : binFiles.values()) {
+                for (String line : lines) {
+                    bh.println(line);
                 }
-                bh.println("#endif");
-                bh.close();
-            } catch (Exception ex) {
-                error(ex);
-                return false;
+                bh.println();
             }
+            bh.println("#endif");
+            bh.close();
         }
 
         // Find all the function prototypes in sketch files
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
 
-        for (String fn : getFileNames()) {
-            File f = getBuildFileByName(fn);
-            switch (FileType.getType(f)) {
+        int lineno = Integer.MAX_VALUE;
+        for (SketchFile f : sketchFiles.values()) {
+            switch (f.getType()) {
                 case FileType.CSOURCE:
                 case FileType.CPPSOURCE:
                 case FileType.ASMSOURCE:
                 case FileType.HEADER:
+                    break;
                 case FileType.SKETCH: {
-                    ArrayList<FunctionBookmark> bms = scanForFunctions(f);
+                    ArrayList<FunctionBookmark> bms = f.scanForFunctions();
                     for (FunctionBookmark bm : bms) {
                         if (bm.isFunction()) {
                             protos.add(bm);
+                            if (f.isMainFile()) {
+                                if (bm.getLine() < lineno) {
+                                    lineno = bm.getLine();
+                                }
+                            }
                         }
                     }
                 } break;
             }
         }
 
-        // Work out which the first prototype in the main file is.
-        int lineno = Integer.MAX_VALUE;
-        for (FunctionBookmark p : protos) {
-            if (p.getFile().getAbsolutePath().equals(getMainFile().getAbsolutePath())) {
-                if (p.getType() == FunctionBookmark.FUNCTION) {
-                    if (p.getLine() < lineno) {
-                        lineno = p.getLine();
-                    }
-                }
-            }
-        }
-
         // Save these prototypes into a header file.
-        try {
-            File out = new File(buildFolder, getName() + "_proto.h");
-            PrintWriter pw = new PrintWriter(out);
-            pw.println("#ifndef _UECIDE_FUNCTION_PROTOTYPES");
-            pw.println("#define _UECIDE_FUNCTION_PROTOTYPES");
-            pw.println();
-            pw.println("// This should be inserted at line " + lineno);
-            pw.println();
-            for (FunctionBookmark p : protos) {
-                pw.println(p + ";");
-            }
-            pw.println();
+        File out = new File(buildFolder, getName() + "_proto.h");
+        PrintWriter pw = new PrintWriter(out);
+        pw.println("#ifndef _UECIDE_FUNCTION_PROTOTYPES");
+        pw.println("#define _UECIDE_FUNCTION_PROTOTYPES");
+        pw.println();
+        pw.println("// This should be inserted at line " + lineno);
+        pw.println();
+        for (FunctionBookmark p : protos) {
+            pw.println(p + ";");
+        }
+        pw.println();
 
-            pw.println("#endif");
-            pw.close();
-        } catch (Exception e) {
-            error(e);
-            return false;
+        pw.println("#endif");
+        pw.close();
+
+        String ext = ctx.parseString(props.get("build.extension"));
+        if (ext == null) {
+            ext = "cpp";
+        }
+        File masterSketchFile = new File(buildFolder, getName() + "_combined." + ext);
+        filesToCompile.add(masterSketchFile);
+        pw = new PrintWriter(masterSketchFile);
+
+        String hdr = props.get("core.header");
+        if (hdr != null) {
+            pw.println("#include <" + hdr + ">");
+            if (binFiles.size() > 0) {
+                pw.println("#include <binary/binaries.h>");
+            }
+        }
+        pw.println("#line 1 \"" + getMainFile().getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+
+        int thisLine = 1;
+        String data = getMainFile().getFileData();
+        String lines[] = data.split("\n");
+        for (String line : lines) {
+            if (thisLine == lineno) {
+                pw.println("#include <" + getName() + "_proto.h>");
+                pw.println("#line " + thisLine + " \"" + getMainFile().getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+            }
+            pw.println(line);
+            thisLine++;
         }
 
-        // Copy each INO/PDE file across scanning it as we go, starting with the
-        // main INO file.
-
-        try {
-            String ext = ctx.parseString(props.get("build.extension"));
-            if (ext == null) {
-                ext = "cpp";
-            }
-            File masterSketchFile = new File(buildFolder, getName() + "_combined." + ext);
-            PrintWriter pw = new PrintWriter(masterSketchFile);
-    
-
-            String hdr = props.get("core.header");
-            if (hdr != null) {
-                pw.println("#include <" + hdr + ">");
-                if (binFiles.size() > 0) {
-                    pw.println("#include <binary/binaries.h>");
-                }
-            }
-            pw.println("#line 1 \"" + getMainFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
-
-            int thisLine = 1;
-
-            String data = getFileContent(getMainFile());
-            String lines[] = data.split("\n");
-            for (String line : lines) {
-                if (thisLine == lineno) {
-                    pw.println("#include <" + getName() + "_proto.h>");
-                    pw.println("#line " + thisLine + " \"" + getMainFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
-                }
-                pw.println(line);
-                thisLine++;
-            }
-
-            pw.close();
-        } catch (Exception e) {
-            error(e);
-            return false;
-        }
-                    
-
-        // Now do the same for all other sketch files.
-
-        for (String fn : getFileNames()) {
-            File f = getFileByName(fn);
-            if (!f.equals(getMainFile())) {
-                if (FileType.getType(f) == FileType.SKETCH) {
-                    try {
-                        String ext = ctx.parseString(props.get("build.extension"));
-                        if (ext == null) {
-                            ext = "cpp";
-                        }
-                        File masterSketchFile = new File(buildFolder, getName() + "_combined." + ext);
-                        PrintWriter pw = new PrintWriter(new FileOutputStream(masterSketchFile, true));
-
-                        pw.println("#line 1 \"" + f.getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
-
-                        int thisLine = 1;
-
-                        String data = getFileContent(f);
-                        pw.print(data);
-
-                        pw.close();
-                    } catch (Exception e) {
-                        error(e);
-                        return false;
-                    }
+        for (SketchFile f : sketchFiles.values()) {
+            if (f.getType() == FileType.SKETCH) {
+                if (!f.isMainFile()) {
+                    pw.println("#line 1 \"" + f.getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+                    pw.print(f.getFileData());
                 }
             }
         }
-
-
-
+        pw.close();
         return true;
-
     }
 
     public String stripComments(String data) {
@@ -1700,7 +1142,7 @@ public class Sketch {
 
     public boolean upload() {
         ctx.executeKey("upload.precmd");
-        boolean ret = programFile(getProgrammer(), sketchName);
+        boolean ret = programFile(ctx.getProgrammer(), sketchName);
         ctx.executeKey("upload.postcmd");
         return ret;
     }
@@ -1765,64 +1207,71 @@ public class Sketch {
     }
 
     public boolean build() throws IOException {
-//        if(Preferences.getBoolean("editor.external.command")) {
-//            //reloadAllFiles();
-//        }
+
+        ctx.triggerEvent("buildStart");
 
         checkForSettings();
 
         terminateExecution = false;
 
-        if(getBoard() == null) {
-            error(Base.i18n.string("err.noboard"));
+        if(ctx.getBoard() == null) {
+            ctx.error(Base.i18n.string("err.noboard"));
+            ctx.triggerEvent("buildFail");
             return false;
         }
 
-        if(getCore() == null) {
-            error(Base.i18n.string("err.nocore"));
+        if(ctx.getCore() == null) {
+            ctx.error(Base.i18n.string("err.nocore"));
+            ctx.triggerEvent("buildFail");
             return false;
         }
 
-        if(getCompiler() == null) {
-            error(Base.i18n.string("err.nocompiler"));
+        if(ctx.getCompiler() == null) {
+            ctx.error(Base.i18n.string("err.nocompiler"));
+            ctx.triggerEvent("buildFail");
             return false;
         }
 
-        if (!Base.isQuiet()) heading(Base.i18n.string("msg.compiling"));
+        if (!Base.isQuiet()) ctx.heading(Base.i18n.string("msg.compiling"));
 
-        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.preprocessing"));
+        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.preprocessing"));
         try {
             if(!prepare()) {
-                error(Base.i18n.string("err.compiling.failed"));
-                setCompilingProgress(0);
+                ctx.error(Base.i18n.string("err.compiling.failed"));
+                ctx.triggerEvent("buildFail");
                 return false;
             }
         } catch(Exception e) {
-            error(e);
-            setCompilingProgress(0);
+            ctx.error(e);
+            ctx.triggerEvent("buildFail");
             return false;
         }
     
         try {
             boolean done = compile();
-            setCompilingProgress(0);
+            if (done) {
+                ctx.triggerEvent("buildFinished");
+            } else {
+                ctx.triggerEvent("buildFail");
+            }
             return done;
         } catch (IOException ex) {
-            error(ex);
-            setCompilingProgress(0);
+            ctx.error(ex);
+            ctx.triggerEvent("buildFail");
             return false;
         }
     }
 
     public boolean saveAs(File newPath) throws IOException {
         if(newPath.exists()) {
-            return false;
+            boolean overwrite = ctx.getGui().askYesNo("Overwrite " + newPath.getName() + "?");
+            if (!overwrite) return false;
         }
 
         Debug.message("Save as " + newPath.getAbsolutePath());
         newPath.mkdirs();
         File newMainFile = new File(newPath, newPath.getName() + ".ino");
-        File oldMainFile = getMainFile();
+        File oldMainFile = getMainFile().getFile();
 
         // First let's copy the contents of the existing sketch folder, renaming the main file.
 
@@ -1833,20 +1282,20 @@ public class Sketch {
         for(File f : files) {
             if(f.equals(oldMainFile)) {
                 Debug.message("Copy main file " + f.getAbsolutePath() + " to " + newMainFile.getAbsolutePath());
-                Files.copy(f.toPath(), newMainFile.toPath(), REPLACE_EXISTING);
+                Files.copy(f.toPath(), newMainFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 continue;
             }
 
             File dest = new File(newPath, f.getName());
 
             if(f.isDirectory()) {
-                Base.copyDir(f, dest);
+                Utils.copyDir(f, dest);
                 Debug.message("Copy dir " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
                 continue;
             }
 
             Debug.message("Copy file " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
-            Files.copy(f.toPath(), dest.toPath(), REPLACE_EXISTING);
+            Files.copy(f.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
         String oldPrefix = sketchFolder.getAbsolutePath();
@@ -1859,62 +1308,14 @@ public class Sketch {
         // We want to try and keep the indexes in the same order if that
         // is possible, so we'll use a numeric iterator.
 
-        ArrayList<File> newSketchFiles = new ArrayList<File>();
-
-        for(int i = 0; i < sketchFiles.size(); i++) {
-            File sf = sketchFiles.get(i);
-
-            if(sf.equals(oldMainFile)) {
-                newSketchFiles.add(i, newMainFile);
-
-                if(editor != null) {
-                    int tab = editor.getTabByFile(oldMainFile);
-
-                    if(tab > -1) {
-                        TabLabel tl = editor.getTabLabel(tab);
-                        tl.setFile(newMainFile);
-                    }
-                }
-            } else {
-                File newFile = new File(newPath, sf.getName());
-                Debug.message("New file name " + newFile.getAbsolutePath());
-                newSketchFiles.add(i, newFile);
-
-                if(editor != null) {
-                    int tab = editor.getTabByFile(sf);
-
-                    if(tab > -1) {
-                        TabLabel tl = editor.getTabLabel(tab);
-                        tl.setFile(newFile);
-                    }
-                }
-            }
-        }
-
-        sketchFiles = newSketchFiles;
-
-        buildFolder = createBuildFolder();
-
-        // Now we have reconstructed the sketch in a new location we can save any
-        // changed files from the editor.
-
-        if(editor != null) {
-            // Now step through the files looking for any that are open, change the tab's file pointer
-            // and save the data.
-            for(int tab = 0; tab < editor.getTabCount(); tab++) {
-                TabLabel tl = editor.getTabLabel(tab);
-                tl.save();
-            }
-
-            editor.updateTree();
-            editor.setTitle("UECIDE | " + sketchName);
-        }
-
-        save();
+        Sketch newlyCreatedSketch = new Sketch(newPath, ctx);
+        ctx.setSketch(newlyCreatedSketch);
+        ctx.triggerEvent("sketchLoaded");
         return true;
     }
 
     public boolean save() throws IOException {
+/* TODO: REWRITE THIS LOT!
         // We can't really save it if it's untitled - there's no point.
         if(isUntitled()) {
             return false;
@@ -1958,12 +1359,13 @@ public class Sketch {
             for(File f : sketchFiles) {
                 File to = new File(bottom, f.getName());
                 Debug.message("    Backing up " + f.getAbsolutePath() + " to " + to.getAbsolutePath());
-                Files.copy(f.toPath(), to.toPath(), REPLACE_EXISTING);
+                Files.copy(f.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
         }
 
         saveAllFiles();
         Debug.message("All saved");
+*/
         return true;
     }
 
@@ -1986,8 +1388,8 @@ public class Sketch {
         PropertyFile props = ctx.getMerged();
 
         libFiles.add(buildFolder.getAbsolutePath());
-        libFiles.add(getBoard().getFolder().getAbsolutePath());
-        libFiles.add(getCore().getLibrariesFolder().getAbsolutePath());
+        libFiles.add(ctx.getBoard().getFolder().getAbsolutePath());
+        libFiles.add(ctx.getCore().getLibrariesFolder().getAbsolutePath());
 
         for(String key : props.childKeysOf("compiler.library")) {
             String coreLibName = key.substring(17);
@@ -1997,7 +1399,7 @@ public class Sketch {
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
-                    File f = new File(getCompiler().getFolder(), p);
+                    File f = new File(ctx.getCompiler().getFolder(), p);
 
                     if(f.exists()) {
                         libFiles.add(f.getAbsolutePath());
@@ -2014,7 +1416,7 @@ public class Sketch {
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
-                    File f = new File(getCore().getFolder(), p);
+                    File f = new File(ctx.getCore().getFolder(), p);
 
                     if(f.exists()) {
                         libFiles.add(f.getAbsolutePath());
@@ -2031,7 +1433,7 @@ public class Sketch {
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
-                    File f = new File(getBoard().getFolder(), p);
+                    File f = new File(ctx.getBoard().getFolder(), p);
 
                     if(f.exists()) {
                         libFiles.add(f.getAbsolutePath());
@@ -2048,7 +1450,7 @@ public class Sketch {
     }
 
     public void checkForSettings() throws IOException {
-        File mainFile = getMainFile();
+        SketchFile mainFile = getMainFile();
 
         Pattern param = Pattern.compile("^#pragma\\s+parameter\\s+([^\\s=]+)\\s*=\\s*(.*)$");
         Pattern option = Pattern.compile("^#pragma\\s+option\\s+([^\\s=]+)\\s*=\\s*(.*)$");
@@ -2057,25 +1459,25 @@ public class Sketch {
         Pattern pboard = Pattern.compile("^#pragma\\s+board\\s+(.*)$");
         Pattern pport = Pattern.compile("^#pragma\\s+port\\s+(.*)$");
 
-        String[] data = getFileContent(mainFile).split("\n");
+        String[] data = mainFile.getFileData().split("\n");
 
 
         for(String line : data) {
             Matcher m = pcompiler.matcher(line);
             if (m.find()) {
-                setCompiler(m.group(1));
+                ctx.action("SetCompiler", m.group(1));
             }
             m = pcore.matcher(line);
             if (m.find()) {
-                setCore(m.group(1));
+                ctx.action("SetCore", m.group(1));
             }
             m = pboard.matcher(line);
             if (m.find()) {
-                setBoard(m.group(1));
+                ctx.action("SetBoard", m.group(1));
             }
             m = pport.matcher(line);
             if (m.find()) {
-                setDevice(m.group(1));
+                ctx.action("SetDevice", m.group(1));
             }
         }
 
@@ -2112,16 +1514,6 @@ public class Sketch {
 
         }
 
-        if (updateMenu) {
-            if (editor != null) {
-                editor.updateOptionsMenu();
-            }
-        }
-
-    }
-
-    public File getCode(int i) {
-        return sketchFiles.get(i);
     }
 
     public File getBuildFolder() {
@@ -2136,45 +1528,9 @@ public class Sketch {
         Base.removeDescendants(buildFolder);
     }
 
-    public void setCompilingProgress(int percent) {
-        if(editor != null) {
-            editor.setProgress(percent);
-        }
-    }
-
+/* TODO: REWRITE THIS FUNCTION */
     public boolean isReadOnly() {
-
-        if(isInternal()) {
-            return true;
-        }
-
-        File testFile = new File(sketchFolder, ".testWrite");
-        boolean canWrite = false;
-
-        try {
-            testFile.createNewFile();
-
-            if(testFile.exists()) {
-                Base.tryDelete(testFile);
-                canWrite = true;
-            }
-        } catch(Exception e) {
-            return true;
-        }
-
-        if(!canWrite) {
-            return true;
-        }
-
-        canWrite = true;
-
-        for(File c : sketchFiles) {
-            if(!c.canWrite()) {
-                canWrite = false;
-            }
-        }
-
-        return !canWrite;
+        return false;
     }
 
     public void needPurge() {
@@ -2232,7 +1588,7 @@ public class Sketch {
             }
         }
 
-        includes.add(getBoard().getFolder());
+        includes.add(ctx.getBoard().getFolder());
         includes.add(buildFolder);
         includes.add(sketchFolder);
 
@@ -2267,7 +1623,7 @@ public class Sketch {
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
-                    File f = new File(getCompiler().getFolder(), p);
+                    File f = new File(ctx.getCompiler().getFolder(), p);
 
                     if(f.exists() && f.isDirectory()) {
                         files.add(f);
@@ -2287,7 +1643,7 @@ public class Sketch {
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
-                    File f = new File(getCore().getFolder(), p);
+                    File f = new File(ctx.getCore().getFolder(), p);
 
                     if(f.exists() && f.isDirectory()) {
                         files.add(f);
@@ -2307,7 +1663,7 @@ public class Sketch {
                 String[] libPathsArray = libPaths.split("::");
 
                 for(String p : libPathsArray) {
-                    File f = new File(getBoard().getFolder(), p);
+                    File f = new File(ctx.getBoard().getFolder(), p);
 
                     if(f.exists() && f.isDirectory()) {
                         files.add(f);
@@ -2336,10 +1692,10 @@ public class Sketch {
         }
 
         if (!apt.isInstalled(pkg)) {
-            bullet2("Downloading " + pkg.getName());
+            ctx.bullet2("Downloading " + pkg.getName());
             pkg.fetchPackage(Base.getDataFile("apt/cache"));
         
-            bullet2("Installing " + pkg.getName());
+            ctx.bullet2("Installing " + pkg.getName());
             pkg.extractPackage(Base.getDataFile("apt/cache"), Base.getDataFile("apt/db/packages"), Base.getDataFolder());
         }
     }
@@ -2362,18 +1718,6 @@ public class Sketch {
 
         ctx.executeKey("compile.precmd");
 
-        if(editor != null) {
-            for(int i = 0; i < editor.getTabCount(); i++) {
-                EditorBase eb = editor.getTab(i);
-
-                if(eb != null) {
-                    eb.clearHighlights();
-                    eb.removeFlagGroup(0x1000); // Error flags
-                    eb.removeFlagGroup(0x1001); // Warning flags
-                }
-            }
-        }
-
         // Rewritten compilation system from the ground up.
 
         // Step one, we need to build a generic set of includes:
@@ -2383,77 +1727,8 @@ public class Sketch {
 
         try {
             if ((Preferences.getBoolean("editor.dialog.missinglibs")) && (Base.isOnline())) {
-                if (editor != null) {
-                    if (unknownLibraries.size() > 0) {
-                        PluginManager pm = new PluginManager();
-                        HashMap<String, Package> foundPackages = new HashMap<String, Package>();
-                        for (String l : unknownLibraries) {
-                            File sketchHeader = new File(sketchFolder, l);
-                            if (!sketchHeader.exists()) {
-                                Package p = pm.findLibraryByInclude(getCore(), l);
-                                if (p != null) {
-                                    foundPackages.put(l, p);
-                                }
-                            }
-                        }
-
-                        if (foundPackages.size() > 0) {
-                            JPanel panel = new JPanel();
-                            panel.setLayout(new GridBagLayout());
-                            GridBagConstraints c = new GridBagConstraints();
-
-                            c.gridwidth = 2;
-                            c.gridx = 0;
-                            c.gridy = 0;
-                            c.fill = GridBagConstraints.HORIZONTAL;
-                            c.anchor = GridBagConstraints.LINE_START;
-
-                            panel.add(new JLabel("I have identified some libraries you may be missing:"), c);
-                            
-                            c.gridy++;
-                            panel.add(new JLabel(" "), c);
-
-                            c.gridwidth = 1;
-
-                            for(String l : foundPackages.keySet()) {
-                                c.gridx = 0;
-                                c.gridy++;
-                                panel.add(new JLabel(l + ": "), c);
-                                c.gridx = 1;
-                                panel.add(new JLabel(foundPackages.get(l).getName()), c);
-                            }
-                            c.gridx = 0;
-                            c.gridy++;
-                            c.gridwidth = 2;
-                            panel.add(new JLabel(" "), c);
-
-                            c.gridy++;
-                            panel.add(new JLabel("Do you want me to install these libraries for you?"), c);
-
-                            JCheckBox cb = new JCheckBox("Never ask me again");
-                            Object[] options = {cb, "Yes", "No"};
-                            int n = JOptionPane.showOptionDialog(editor, panel, "Missing Libraries", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-
-                            if (cb.isSelected()) {
-                                Preferences.setBoolean("editor.dialog.missinglibs", false);
-                            }
-
-                            if (n == 1) {
-                                bullet("Updating repository information...");
-                                APT apt = pm.getApt();
-                                apt.update();
-                                bullet("Installing missing libraries...");
-                                for (Package p : foundPackages.values()) {
-                                    installLibrary(pm.getApt(), p, true);
-                                }
-                                Base.rescanLibraries();
-                                ctx.set("includes", generateIncludes());
-                            }
-                        }
-                    }
-                }
             }
-        } catch (Exception ex) { error(ex); }
+        } catch (Exception ex) { ctx.error(ex); }
 
         if(doPrePurge) {
             doPrePurge = false;
@@ -2504,19 +1779,19 @@ public class Sketch {
 
             for(String cf : copyfiles) {
                 Debug.message("  " + cf + "...");
-                File src = new File(getCompiler().getFolder(), cf);
+                File src = new File(ctx.getCompiler().getFolder(), cf);
 
                 if(!src.exists()) {
-                    src = new File(getCore().getFolder(), cf);
+                    src = new File(ctx.getCore().getFolder(), cf);
                 }
 
                 if(!src.exists()) {
-                    src = new File(getBoard().getFolder(), cf);
+                    src = new File(ctx.getBoard().getFolder(), cf);
                 }
 
                 if(src.exists()) {
                     File dest = new File(buildFolder, src.getName());
-                    Files.copy(src.toPath(), dest.toPath(), REPLACE_EXISTING);
+                    Files.copy(src.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     Debug.message("    ... ok");
                 } else {
                     Debug.message("    ... not found");
@@ -2524,42 +1799,37 @@ public class Sketch {
             }
         }
 
-        if (!Base.isQuiet()) bullet("Compiling sketch...");
-        setCompilingProgress(10);
+        if (!Base.isQuiet()) ctx.bullet("Compiling sketch...");
         ArrayList<File>sketchObjects = compileSketch();
 
         if(sketchObjects == null) {
-            error(Base.i18n.string("err.compiling.failed"));
+            ctx.error(Base.i18n.string("err.compiling.failed"));
             return false;
         }
 
-        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.core"));
-        setCompilingProgress(20);
+        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.compiling.core"));
 
         if(!compileCore()) {
-            error(Base.i18n.string("err.compiling.failed"));
+            ctx.error(Base.i18n.string("err.compiling.failed"));
             return false;
         }
 
-        setCompilingProgress(30);
 
-        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.libraries"));
+        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.compiling.libraries"));
 
         if(!compileLibraries()) {
-            error(Base.i18n.string("err.compiling.failed"));
+            ctx.error(Base.i18n.string("err.compiling.failed"));
             return false;
         }
 
-        setCompilingProgress(40);
 
-        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.linking"));
+        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.linking"));
 
         if(!compileLink(sketchObjects)) {
-            error(Base.i18n.string("err.compiling.failed"));
+            ctx.error(Base.i18n.string("err.compiling.failed"));
             return false;
         }
 
-        setCompilingProgress(50);
 
 
         PropertyFile autogen = props.getChildren("compile.autogen");
@@ -2573,7 +1843,6 @@ public class Sketch {
                 ctx.bullet2(Base.i18n.string("msg.compiling.genfile", type));
                 ctx.executeKey("compile.autogen." + type);
                 pct += steps;
-                setCompilingProgress(pct);
             }
         }
 
@@ -2581,18 +1850,14 @@ public class Sketch {
             try {
                 File lss = new File(buildFolder, sketchName + ".lss");
                 if (lss.exists()) {
-                    Files.copy(new File(buildFolder, sketchName + ".lss").toPath(), new File(sketchFolder, sketchName + ".lss").toPath(), REPLACE_EXISTING);
+                    Files.copy(new File(buildFolder, sketchName + ".lss").toPath(), new File(sketchFolder, sketchName + ".lss").toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-                    if(editor != null) {
-                        editor.updateFilesTree();
-                    }
                 }
             } catch(Exception e) {
-                error(e);
+                ctx.error(e);
             }
         }
 
-        setCompilingProgress(70);
 
         if((
             Preferences.getBoolean("compiler.save_hex") || Base.cli.isSet("force-save-hex") || Base.cli.isSet("cli")) 
@@ -2603,34 +1868,26 @@ public class Sketch {
                     exeSuffix = ".hex";
                 }
                 File dest = new File(sketchFolder, sketchName + exeSuffix);
-                Files.copy(new File(buildFolder, sketchName + exeSuffix).toPath(), dest.toPath(), REPLACE_EXISTING);
+                Files.copy(new File(buildFolder, sketchName + exeSuffix).toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 if (dest.exists()) {
                     dest.setExecutable(true);
                 }
                 
 
-                if(editor != null) {
-                    editor.updateFilesTree();
-                }
             } catch(Exception e) {
-                error(e);
+                ctx.error(e);
             }
         }
 
 
-        if (!Base.isQuiet()) heading(Base.i18n.string("msg.compiling.done"));
-        setCompilingProgress(100);
-
-        if(editor != null) {
-            editor.updateOutputTree();
-        }
+        if (!Base.isQuiet()) ctx.heading(Base.i18n.string("msg.compiling.done"));
 
 
         compileSize();
 
         long endTime = System.currentTimeMillis();
         double compileTime = (double)(endTime - startTime) / 1000d;
-        if (!Base.isQuiet()) bullet(Base.i18n.string("msg.compiling.time", compileTime));
+        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.compiling.time", compileTime));
         ctx.executeKey("compile.postcmd");
         return true;
     }
@@ -2639,7 +1896,7 @@ public class Sketch {
         PropertyFile props = ctx.getMerged();
 
         if (props.get("compile.size") != null) {
-            if (!Base.isQuiet()) heading(Base.i18n.string("msg.compiling.memory"));
+            if (!Base.isQuiet()) ctx.heading(Base.i18n.string("msg.compiling.memory"));
 
             ctx.startBuffer();
             ctx.executeKey("compile.size");
@@ -2692,16 +1949,16 @@ public class Sketch {
 
                 if (max_rom > 0) {
                     int romperc = (textSize + dataSize + rodataSize) * 100 / max_rom;
-                    bullet(Base.i18n.string("msg.compiling.progsize.perc", (textSize + dataSize + rodataSize), romperc)); 
+                    ctx.bullet(Base.i18n.string("msg.compiling.progsize.perc", (textSize + dataSize + rodataSize), romperc)); 
                 } else {
-                    bullet(Base.i18n.string("msg.compiling.progsize", (textSize + dataSize + rodataSize))); 
+                    ctx.bullet(Base.i18n.string("msg.compiling.progsize", (textSize + dataSize + rodataSize))); 
                 }
 
                 if (max_ram > 0) {
                     int ramperc = (bssSize + dataSize) * 100 / max_ram;
-                    bullet(Base.i18n.string("msg.compiling.ramsize.perc", (bssSize + dataSize), ramperc)); 
+                    ctx.bullet(Base.i18n.string("msg.compiling.ramsize.perc", (bssSize + dataSize), ramperc)); 
                 } else {
-                    bullet(Base.i18n.string("msg.compiling.ramsize", (bssSize + dataSize))); 
+                    ctx.bullet(Base.i18n.string("msg.compiling.ramsize", (bssSize + dataSize))); 
                 }
             }
         }
@@ -2739,7 +1996,7 @@ public class Sketch {
                             break;
                         }
                     } catch (Exception e) {
-                        error(e);
+                        ctx.error(e);
                     }
                 }
             }
@@ -2760,7 +2017,7 @@ public class Sketch {
                 t.join();
                 if (t.compiled == false) ok = false;
             } catch (Exception e) {
-                error(e);
+                ctx.error(e);
             }
         }
 
@@ -2779,7 +2036,7 @@ public class Sketch {
 
         if(terminateExecution) {
             terminateExecution = false;
-            error("Compilation terminated");
+            ctx.error("Compilation terminated");
             return null;
         }
 
@@ -2798,12 +2055,12 @@ public class Sketch {
         }
 
         if(recipe == null) {
-            error(Base.i18n.string("err.badfile", fileName));
+            ctx.error(Base.i18n.string("err.badfile", fileName));
             return null;
         }
 
         if (Preferences.getBoolean("compiler.verbose_files")) {
-            bullet3(fileName);
+            ctx.bullet3(fileName);
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
@@ -2857,19 +2114,15 @@ public class Sketch {
             return null;
         }
 
-        if(editor != null) {
-            editor.updateOutputTree();
-        }
-
         return dest;
     }
 
     public File getCacheFolder() {
         File cacheRoot = Base.getCacheFolder();
-        Core c = getCore();
+        Core c = ctx.getCore();
         File boardCache = new File(cacheRoot, "unknownCache");
         if (c != null) {
-            Board b = getBoard();
+            Board b = ctx.getBoard();
             if (b != null) {
                 File coreCache = new File(cacheRoot, c.getName());
                 boardCache = new File(coreCache, b.getName());
@@ -2902,7 +2155,7 @@ public class Sketch {
                     File mainStubObject = compileFile(ctx, mainStubFile);
                     File cachedStubObject = getCacheFile(mainStubObject.getName());
                     if (mainStubObject.exists()) {
-                        Files.copy(mainStubObject.toPath(), cachedStubObject.toPath(), REPLACE_EXISTING);
+                        Files.copy(mainStubObject.toPath(), cachedStubObject.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         Base.tryDelete(mainStubObject);
                     }
                 }
@@ -2910,7 +2163,7 @@ public class Sketch {
         }
 
         for(String lib : coreLibs.keySet()) {
-            if (!Base.isQuiet()) bullet2(lib);
+            if (!Base.isQuiet()) ctx.bullet2(lib);
 
             if(!compileCore(coreLibs.get(lib), "Core_" + lib)) {
                 return false;
@@ -2998,7 +2251,7 @@ public class Sketch {
         File archive = getCacheFile(getArchiveName(lib));  //getCacheFile("lib" + lib.getName() + ".a");
         File utility = lib.getUtilityFolder();
         PropertyFile props = localCtx.getMerged();
-        if (!Base.isQuiet()) bullet2(lib.toString() + " [" + lib.getFolder().getAbsolutePath() + "]");
+        if (!Base.isQuiet()) ctx.bullet2(lib.toString() + " [" + lib.getFolder().getAbsolutePath() + "]");
 
         localCtx.set("library", archive.getAbsolutePath());
 
@@ -3011,7 +2264,7 @@ public class Sketch {
         File libBuildFolder = new File(buildFolder, "lib" + lib.getLinkName());
         libBuildFolder.mkdirs();
         if (!libBuildFolder.exists()) {
-            error("Failed to make build folder " + libBuildFolder);
+            ctx.error("Failed to make build folder " + libBuildFolder);
         }
 
         TreeSet<File> fileList = lib.getSourceFiles(this);
@@ -3031,10 +2284,6 @@ public class Sketch {
                     purgeLibrary(lib);
                     lib.setCompiledPercent(0);
 
-                    if(editor != null) {
-                        editor.updateLibrariesTree();
-                    }
-
                     Base.tryDelete(libBuildFolder);
                     return false;
                 }
@@ -3046,10 +2295,6 @@ public class Sketch {
                     purgeLibrary(lib);
                     lib.setCompiledPercent(0);
 
-                    if(editor != null) {
-                        editor.updateLibrariesTree();
-                    }
-
                     Base.tryDelete(out);
                     Base.tryDelete(libBuildFolder);
                     return false;
@@ -3058,24 +2303,13 @@ public class Sketch {
                 count++;
                 lib.setCompiledPercent(count * 100 / fileCount);
 
-                if(editor != null) {
-                    editor.updateLibrariesTree();
-                }
-
                 Base.tryDelete(out);
             }
-        }
-
-        if(editor != null) {
-            editor.updateOutputTree();
         }
 
         localCtx.set("includes", origIncs);
         lib.setCompiledPercent(100);
 
-        if(editor != null) {
-            editor.updateLibrariesTree();
-        }
 
         Base.tryDelete(libBuildFolder);
 
@@ -3108,7 +2342,7 @@ public class Sketch {
             destObjects.mkdirs();
 
             File destFile = new File(destObjects, file.getName());
-            Files.copy(file.toPath(), destFile.toPath(), REPLACE_EXISTING);
+            Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
             ctx.set("source.name", sp);
             ctx.set("object.name", objectFile.getAbsolutePath());
@@ -3175,20 +2409,6 @@ public class Sketch {
         return objectPaths;
     }
 
-    public File dumpFileData(File dest, String name) {
-        try {
-            File out = new File(dest, name);
-            File in = getFileByName(name);
-            PrintWriter pw = new PrintWriter(out);
-            pw.print(getFileContent(in));
-            pw.close();
-            return out;
-        } catch (Exception e) {
-            error(e);
-        }
-        return null;
-    }
-
     private ArrayList<File> compileFiles(Context localCtx, File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources) {
 
         ArrayList<File> objectPaths = new ArrayList<File>();
@@ -3223,17 +2443,6 @@ public class Sketch {
             ext = "cpp";
         }
 
-        File mainParsedFile = new File(buildFolder, getName() + "_combined." + ext);
-
-
-        switch (FileType.getType(mainParsedFile)) {
-            case FileType.ASMSOURCE:
-            case FileType.CSOURCE:
-            case FileType.CPPSOURCE:
-                filesToCompile.add(mainParsedFile);
-                break;
-        }
-
         for (File f : filesToCompile) {
             File obj = compileFile(ctx, f, buildFolder);
             if (obj == null) {
@@ -3254,19 +2463,19 @@ public class Sketch {
 
                 for(String bf : bfs) {
                     if(bf.endsWith(".c")) {
-                        File f = new File(getBoard().getFolder(), bf);
+                        File f = new File(ctx.getBoard().getFolder(), bf);
 
                         if(f.exists()) {
                             cFiles.add(f);
                         }
                     } else if(bf.endsWith(".cpp")) {
-                        File f = new File(getBoard().getFolder(), bf);
+                        File f = new File(ctx.getBoard().getFolder(), bf);
 
                         if(f.exists()) {
                             cppFiles.add(f);
                         }
                     } else if(bf.endsWith(".S")) {
-                        File f = new File(getBoard().getFolder(), bf);
+                        File f = new File(ctx.getBoard().getFolder(), bf);
 
                         if(f.exists()) {
                             sFiles.add(f);
@@ -3405,8 +2614,8 @@ public class Sketch {
         String path = sketchFolder.getAbsolutePath();
         String basePath = Base.getContentFile(".").getAbsolutePath() + File.separator;
         String cachePath = getCacheFolder().getAbsolutePath() + File.separator;
-        String corePath = getCore().getFolder().getAbsolutePath() + File.separator;
-        String boardPath = getBoard().getFolder().getAbsolutePath() + File.separator;
+        String corePath = ctx.getCore().getFolder().getAbsolutePath() + File.separator;
+        String boardPath = ctx.getBoard().getFolder().getAbsolutePath() + File.separator;
 
         if(path.startsWith(basePath)) return true;
 
@@ -3424,9 +2633,9 @@ public class Sketch {
     }
 
     public void about() {
-        bullet("Sketch folder: " + sketchFolder.getAbsolutePath());
-        bullet("Selected board: " + getBoard().getName());
-        bullet("Board folder: " + getBoard().getFolder().getAbsolutePath());
+        ctx.bullet("Sketch folder: " + sketchFolder.getAbsolutePath());
+        ctx.bullet("Selected board: " + ctx.getBoard().getName());
+        ctx.bullet("Board folder: " + ctx.getBoard().getFolder().getAbsolutePath());
     }
 
     public File getLibrariesFolder() {
@@ -3437,63 +2646,8 @@ public class Sketch {
         return importedLibraries;
     }
 
-    class programContextListener implements ContextListener {
-
-        String pctFormat = null;
-        String pctChar = null;
-        float pctMultiply = 1.0f;
-        int pctCount = 0;
-
-        public programContextListener(String format, String chr, float mul) {
-            pctFormat = format;
-            pctChar = chr;
-            pctMultiply = mul;
-            pctCount = 0;
-        }
-
-        public void contextMessage(String m) {
-            process(m);
-        }
-
-        public void contextWarning(String m) {
-            process(m);
-        }
-
-        public void contextError(String m) {
-            process(m);
-        }
-
-        void process(String s) {
-            if (pctChar != null) {
-                String[] chars = s.split("(?!^)");
-                for (String c : chars) {
-                    if (c.equals(pctChar)) {
-                        pctCount++;
-                    } else {
-                        pctCount = 0;
-                    }
-                    setCompilingProgress((int)((float)pctCount * pctMultiply));
-                }
-            }
-
-            if (pctFormat != null) {
-                Pattern p = Pattern.compile(pctFormat);
-                Matcher m = p.matcher(s);
-                if (m.find()) {
-                    try {
-                        String ps = m.group(1);
-                        float perc = Float.parseFloat(ps);
-                        setCompilingProgress((int)(perc * pctMultiply));
-                    } catch (Exception e) {
-                        Base.error(e);
-                    }
-                }
-            }
-        }
-    }
-
     public boolean programFile(Programmer programmer, String file) {
-        Programmer p = getProgrammer();
+        Programmer p = ctx.getProgrammer();
         if (p == null) {
             ctx.error(Base.i18n.string("err.noprogrammer"));
             return false;
@@ -3527,10 +2681,14 @@ public class Sketch {
         return false;
     }
 
+    public SketchFile getSketchFileByFile(File f) {
+        SketchFile sf = sketchFiles.get(f.getName());
+        if (sf == null) return null;
+        if (sf.getFile() == f) return sf;
+        return null;
+    }
+
     public void flagError(String s) {
-        if(editor == null) {
-            return;
-        }
 
         PropertyFile props = ctx.getMerged();
 
@@ -3555,20 +2713,15 @@ public class Sketch {
                     File errorFile = new File(eMat.group(eFilename));
 
                     if(errorFile != null) {
-                        int tabNumber = editor.getTabByFile(errorFile);
-
-                        if(tabNumber > -1) {
-                            EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.error"));
-                            eb.flagLine(errorLineNumber, IconManager.getIcon(16, "tree.fixme"), 0x1000);
-                        }
 
                         link("uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath() + "|Error at line " + errorLineNumber + " in file " + errorFile.getName());
-
-                        setLineComment(errorFile, errorLineNumber, eMat.group(eMessage));
+                        SketchFile sf = getSketchFileByFile(errorFile);
+                        if (sf != null) {
+                            sf.setLineComment(errorLineNumber, eMat.group(eMessage));
+                        }
                     }
                 } catch(Exception e) {
-                    Base.error(e);
+                    ctx.error(e);
                 }
             }
         }
@@ -3583,20 +2736,8 @@ public class Sketch {
 
                     File warningFile = new File(wMat.group(wFilename));
 
-                    if(warningFile != null) {
-                        int tabNumber = editor.getTabByFile(warningFile);
-
-                        if(tabNumber > -1) {
-                            EditorBase eb = editor.getTab(tabNumber);
-                            eb.highlightLine(warningLineNumber, Preferences.getColor("theme.editor.colors.warning"));
-                            eb.flagLine(warningLineNumber, IconManager.getIcon(16, "tree.todo"), 0x1001);
-                            link("uecide://error/" + warningLineNumber + "/" + warningFile.getAbsolutePath() + "|Warning at line " + warningLineNumber + " in file " + warningFile.getName());
-                        }
-
-                        setLineComment(warningFile, warningLineNumber, wMat.group(wMessage));
-                    }
                 } catch(Exception e) {
-                    Base.error(e);
+                    ctx.error(e);
                 }
             }
         }
@@ -3604,10 +2745,6 @@ public class Sketch {
 
     String mBuffer = "";
     public void messageStream(String msg) {
-        if(editor != null) {
-            editor.messageStream(msg);
-            return;
-        }
 
         mBuffer += msg;
         int nlpos = mBuffer.lastIndexOf("\n");
@@ -3632,12 +2769,12 @@ public class Sketch {
         String[] bits = mBuffer.split("\n");
 
         for(int i = 0; i < bits.length - 1; i++) {
-            message(bits[i]);
+           ctx.message(bits[i]);
         }
 
         if(eol) {
             mBuffer = "";
-            message(bits[bits.length - 1]);
+            ctx.message(bits[bits.length - 1]);
         } else {
             mBuffer = bits[bits.length - 1];
         }
@@ -3662,12 +2799,12 @@ public class Sketch {
         String[] bits = wBuffer.split("\n");
 
         for(int i = 0; i < bits.length - 1; i++) {
-            warning(bits[i]);
+            ctx.warning(bits[i]);
         }
 
         if(eol) {
             wBuffer = "";
-            warning(bits[bits.length - 1]);
+            ctx.warning(bits[bits.length - 1]);
         } else {
             wBuffer = bits[bits.length - 1];
         }
@@ -3692,12 +2829,12 @@ public class Sketch {
         String[] bits = eBuffer.split("\n");
 
         for(int i = 0; i < bits.length - 1; i++) {
-            error(bits[i]);
+            ctx.error(bits[i]);
         }
 
         if(eol) {
             eBuffer = "";
-            error(bits[bits.length - 1]);
+            ctx.error(bits[bits.length - 1]);
         } else {
             eBuffer = bits[bits.length - 1];
         }
@@ -3707,177 +2844,16 @@ public class Sketch {
         if(!s.endsWith("\n")) {
             s += "\n";
         }
-        if(editor != null) {
-            editor.link(s);
-        }
     }        
 
     public void command(String s) {
         if(!s.endsWith("\n")) {
             s += "\n";
         }
-        if(editor != null) {
-            editor.command(s);
-        } else {
             if (Base.cli.isSet("verbose")) {
                 System.out.print(s);
             }
-        }
     }        
-
-    public void bullet(String s) {
-        if(!s.endsWith("\n")) {
-            s += "\n";
-        }
-        if(editor != null) {
-            editor.bullet(s);
-        } else {
-            System.out.print("    * " + s);
-        }
-    }        
-
-    public void bullet2(String s) {
-        if(!s.endsWith("\n")) {
-            s += "\n";
-        }
-        if(editor != null) {
-            editor.bullet2(s);
-        } else {
-            System.out.print("      > " + s);
-        }
-    }        
-
-    public void bullet3(String s) {
-        if(!s.endsWith("\n")) {
-            s += "\n";
-        }
-        if(editor != null) {
-            editor.bullet3(s);
-        } else {
-            System.out.print("        o " + s);
-        }
-    }        
-
-    public void heading(String s) {
-        if(!s.endsWith("\n")) {
-            s += "\n";
-        }
-        if(editor != null) {
-            editor.heading(s);
-        } else {
-            System.out.print(s);
-            for (int i = 0; i < s.trim().length(); i++) {
-                System.out.print("=");
-            }
-            System.out.println();
-        }
-    }        
-
-    public void message(String s) {
-        flagError(s);
-
-        if (percentageCharacter != null) {
-            String[] chars = s.split("(?!^)");
-            for (String c : chars) {
-                if (c.equals(percentageCharacter)) {
-                    percentageCharacterCount++;
-                } else {
-                    percentageCharacterCount = 0;
-                }
-                setCompilingProgress((int)((float)percentageCharacterCount * percentageMultiplier));
-            }
-        }
-
-        if (percentageFilter != null) {
-            Pattern p = Pattern.compile(percentageFilter);
-            Matcher m = p.matcher(s);
-            if (m.find()) {
-                try {
-                    String ps = m.group(1);
-                    float perc = Float.parseFloat(ps);
-                    setCompilingProgress((int)(perc * percentageMultiplier));
-                    return;
-                } catch (Exception e) {
-                    Base.error(e);
-                }
-            }
-        }
-
-        if(!s.endsWith("\n")) {
-            s += "\n";
-        }
-
-        if(editor != null) {
-            editor.message(s);
-        } else {
-            System.out.print(s);
-        }
-    }
-
-    public void warning(String s) {
-        flagError(s);
-
-        if(!s.endsWith("\n")) {
-            s += "\n";
-        }
-
-        if(editor != null) {
-            editor.warning(s);
-        } else {
-            System.out.print(s);
-        }
-    }
-
-    public void error(String s) {
-        if (isWarningMessage(s)) {
-            warning(s);
-            return;
-        }
-        flagError(s);
-
-        if (percentageCharacter != null) {
-            String[] chars = s.split("(?!^)");
-            for (String c : chars) {
-                if (c.equals(percentageCharacter)) {
-                    percentageCharacterCount++;
-                } else {
-                    percentageCharacterCount = 0;
-                }
-                setCompilingProgress((int)((float)percentageCharacterCount * percentageMultiplier));
-            }
-        }
-
-        if (percentageFilter != null) {
-            Pattern p = Pattern.compile(percentageFilter);
-            Matcher m = p.matcher(s);
-            if (m.find()) {
-                try {
-                    String ps = m.group(1);
-                    float perc = Float.parseFloat(ps);
-                    setCompilingProgress((int)(perc * percentageMultiplier));
-                    return;
-                } catch (Exception e) {
-                    Base.error(e);
-                }
-            }
-        }
-        if(!s.endsWith("\n")) {
-            s += "\n";
-        }
-
-        if(editor != null) {
-            editor.error(s);
-        } else {
-            System.err.print(s);
-        }
-    }
-
-    public void error(Throwable e) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
-        error(sw.toString());
-    }
 
     /**************************************************************************
      * OPTIONS HANDLING                                                       *
@@ -3888,7 +2864,7 @@ public class Sketch {
 
     public String getOption(String opt) {
         PropertyFile props = ctx.getMerged();
-        PropertyFile opts = Base.preferences.getChildren("board." + selectedBoard.getName() + ".options");
+        PropertyFile opts = Base.preferences.getChildren("board." + ctx.getBoard().getName() + ".options");
         String optval = opts.get(opt);
 
 
@@ -3913,7 +2889,7 @@ public class Sketch {
 
     public void setOption(String opt, String val) {
         PropertyFile props = ctx.getMerged();
-        Preferences.set("board." + selectedBoard.getName() + ".options." + opt, val);
+        Preferences.set("board." + ctx.getBoard().getName() + ".options." + opt, val);
 
         if (opt.contains("@")) {
             String bits[] = opt.split("@");
@@ -4007,7 +2983,7 @@ public class Sketch {
 
     public String getFlags(String type) {
         PropertyFile props = ctx.getMerged();
-        PropertyFile opts = Base.preferences.getChildren("board." + selectedBoard.getName() + ".options");
+        PropertyFile opts = Base.preferences.getChildren("board." + ctx.getBoard().getName() + ".options");
         TreeMap<String, String> options = getOptionGroups();
 
         String flags = "";
@@ -4130,21 +3106,16 @@ public class Sketch {
 
         compileLibrary(lib);
     }
+/* TODO: Move to SketchFile */
     public void renameFile(File old, File newFile) {
-        if(sketchFiles.indexOf(old) >= 0) {
-            sketchFiles.remove(old);
-            sketchFiles.add(newFile);
-        }
     }
 
+/* TODO: Move to SketchFile */
     public void deleteFile(File f) {
-        if(sketchFiles.indexOf(f) >= 0) {
-            sketchFiles.remove(f);
-        }
     }
 
     public void rescanFileTree() throws IOException {
-        sketchFiles = new ArrayList<File>();
+        sketchFiles.clear();
         loadSketchFromFolder(sketchFolder);
     }
 
@@ -4263,8 +3234,8 @@ public class Sketch {
             mf.append("Author: " + System.getProperty("user.name") + "\n");
             mf.append("Sketch-Name: " + sketchFolder.getName() + "\n");
             mf.append("Libraries: " + libList + "\n");
-            mf.append("Board: " + getBoard().getName() + "\n");
-            mf.append("Core: " + getCore().getName() + "\n");
+            mf.append("Board: " + ctx.getBoard().getName() + "\n");
+            mf.append("Core: " + ctx.getCore().getName() + "\n");
             mf.append("Archived: " + timeStamp + "\n");
 
             String mfData = mf.toString();
@@ -4274,7 +3245,7 @@ public class Sketch {
             sar.flush();
             sar.close();
         } catch(Exception e) {
-            Base.error(e);
+            ctx.error(e);
             return false;
         }
 
@@ -4310,7 +3281,7 @@ public class Sketch {
                 ZipEntry entry = new ZipEntry(nowfar);
                 entry.setTime(sub.lastModified());
                 zos.putNextEntry(entry);
-                zos.write(Base.loadBytesRaw(sub));
+                zos.write(Utils.loadBytesRaw(sub));
                 zos.closeEntry();
             }
         }
@@ -4325,7 +3296,7 @@ public class Sketch {
                 ctx.error(Base.i18n.string("err.badboard", wantedBoard));
             } else {
                 ctx.bullet(Base.i18n.string("msg.selecting.board", b));
-                setBoard(b);
+                ctx.action("SetBoard", b);
             }
         }
 
@@ -4336,7 +3307,7 @@ public class Sketch {
                 ctx.error(Base.i18n.string("err.badcore", wantedCore));
             } else {
                 ctx.bullet(Base.i18n.string("msg.selecting.core", c));
-                setCore(c);
+                ctx.setCore(c);
             }
         }
 
@@ -4347,16 +3318,16 @@ public class Sketch {
                 ctx.error(Base.i18n.string("err.badcompiler", wantedCompiler));
             } else {
                 ctx.bullet(Base.i18n.string("msg.selecting.compiler", c));
-                setCompiler(c);
+                ctx.action("SetCompiler", c);
             }
         }
 
         if (m.get("sketch.programmer") != null) {
-            setProgrammer(m.get("sketch.programmer"));
+            ctx.action("SetProgrammer", m.get("sketch.programmer"));
         }
 
         if (m.get("sketch.port") != null) {
-            setDevice(m.get("sketch.port"));
+            ctx.action("SetDevice", m.get("sketch.port"));
         }
 
     }
@@ -4373,14 +3344,14 @@ public class Sketch {
             if(i != null) return i;
         }
 
-        if(selectedBoard != null) {
-            i = selectedBoard.getIcon(size);
+        if(ctx.getBoard() != null) {
+            i = ctx.getBoard().getIcon(size);
 
             if(i != null) return i;
         }
 
-        if(selectedCore != null) {
-            i = selectedCore.getIcon(size);
+        if(ctx.getCore() != null) {
+            i = ctx.getCore().getIcon(size);
 
             if(i != null) return i;
         }
@@ -4389,20 +3360,20 @@ public class Sketch {
     }
 
     public String getArch() {
-        if (getBoard().get("arch") != null) {
-            return getBoard().get("arch");
+        if (ctx.getBoard().get("arch") != null) {
+            return ctx.getBoard().get("arch");
         }
-        if (getCore().get("arch") != null) {
-            return getCore().get("arch");
+        if (ctx.getCore().get("arch") != null) {
+            return ctx.getCore().get("arch");
         }
-        if (getCompiler().get("arch") != null) {
-            return getCompiler().get("arch");
+        if (ctx.getCompiler().get("arch") != null) {
+            return ctx.getCompiler().get("arch");
         }
-        return getBoard().get("family");
+        return ctx.getBoard().get("family");
     }
-
-    public ArrayList<TodoEntry> todo(File f) {
-        if (sketchFiles.indexOf(f) == -1) {
+/* TODO: Move this to SketchFile 
+    public ArrayList<TodoEntry> todo(SketchFile f) {
+        if (!sketchFiles.contains(f)) {
             return null;
         }
 
@@ -4436,10 +3407,11 @@ public class Sketch {
 
         return found;
     }
+*/
 
-    public void addKeywordsFromFile(File f) {
+    public void addKeywordsFromFile(File f) throws IOException {
 
-        String kwd = Base.getFileAsString(f);
+        String kwd = Utils.getFileAsString(f);
 
         String[] lines = kwd.split("\n");
         Pattern p = Pattern.compile("^\\s*([^\\s]+)\\s+([^\\s]+)");
@@ -4476,16 +3448,16 @@ public class Sketch {
     }
 
 
-    public void updateKeywords() {
+    public void updateKeywords() throws IOException {
         keywords.clear();
-        if (selectedCompiler != null) {
-            addKeywordsFromFile(selectedCompiler.getKeywords());
+        if (ctx.getCompiler() != null) {
+            addKeywordsFromFile(ctx.getCompiler().getKeywords());
         }
-        if (selectedCore != null) {
-            addKeywordsFromFile(selectedCore.getKeywords());
+        if (ctx.getCore() != null) {
+            addKeywordsFromFile(ctx.getCore().getKeywords());
         }
-        if (selectedBoard != null) {
-            addKeywordsFromFile(selectedBoard.getKeywords());
+        if (ctx.getBoard() != null) {
+            addKeywordsFromFile(ctx.getBoard().getKeywords());
         }
         for (Library l : importedLibraries.values()) {
             addKeywordsFromFile(l.getKeywords());
@@ -4523,10 +3495,10 @@ public class Sketch {
         }
     }
 
-    public void generateMakefile() {
+    public void generateMakefile() throws IOException {
         PropertyFile props = ctx.getMerged();
         if (props.get("makefile.template") != null) {
-            String template = Base.getFileAsString(new File(ctx.parseString(props.get("makefile.template"))));
+            String template = Utils.getFileAsString(new File(ctx.parseString(props.get("makefile.template"))));
             File out = new File(sketchFolder, "Makefile");
             generateFileFromTemplate(template, out);
         }
@@ -4551,36 +3523,12 @@ public class Sketch {
         if (m.find()) {
             File errorFile = new File(m.group(1));
             int errorLineNumber = Integer.parseInt(m.group(2));
-            if (editor != null) {
-                try {
-                    int tabNumber = editor.getTabByFile(errorFile);
-
-                    if(tabNumber > -1) {
-                        EditorBase eb = editor.getTab(tabNumber);
-                        eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.error"));
-                        eb.flagLine(errorLineNumber, IconManager.getIcon(16, "tree.fixme"), 0x1000);
-                    }
-
-                    String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
-
-                    if (containsFile(errorFile)) {
-                        String errmess = String.format(
-                            "{\\bullet}{\\error Error at }{\\link %s|line %d in file %s}{\\error :}\n",
-                                linkUrl, errorLineNumber, errorFile.getName());
-
-                        ctx.parsedMessage(errmess);
-
-                    } else {
-                        ctx.parsedMessage("{\\bullet}{\\error Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
-                    }
-
-                } catch (Exception execpt) {
-                }
-            } else {
-                ctx.parsedMessage("{\\bullet}{\\error Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
-            }
+            ctx.parsedMessage("{\\bullet}{\\error Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
             ctx.parsedMessage("{\\bullet2}{\\error " + m.group(3) + "}\n");
-            setLineComment(errorFile, errorLineNumber, m.group(3));
+            SketchFile sf = getSketchFileByFile(errorFile);
+            if (sf != null) {
+                sf.setLineComment(errorLineNumber, m.group(3));
+            }
             return true;
         }
         return false;
@@ -4593,45 +3541,13 @@ public class Sketch {
         if (m.find()) {
             File errorFile = new File(m.group(1));
             int errorLineNumber = Integer.parseInt(m.group(2));
-            if (editor != null) {
-                try {
-                    int tabNumber = editor.getTabByFile(errorFile);
-
-                    if(tabNumber > -1) {
-                        EditorBase eb = editor.getTab(tabNumber);
-                        eb.highlightLine(errorLineNumber, Preferences.getColor("theme.editor.colors.warning"));
-                        eb.flagLine(errorLineNumber, IconManager.getIcon(16, "tree.todo"), 0x1001);
-                    }
-                    String linkUrl = "uecide://error/" + errorLineNumber + "/" + errorFile.getAbsolutePath();
-
-                    if (containsFile(errorFile)) {
-                        String errmess = String.format(
-                            "{\\bullet}{\\warning Warning at }{\\link %s|line %d in file %s}{\\warning :}\n",
-                                linkUrl, errorLineNumber, errorFile.getName());
-
-                        ctx.parsedMessage(errmess);
-
-                    } else {
-                        ctx.parsedMessage("{\\bullet}{\\warning Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
-                    }
-
-                } catch (Exception execpt) {
-                }
-            } else {
-                ctx.parsedMessage("{\\bullet}{\\warning Warning at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
-            }
+            ctx.parsedMessage("{\\bullet}{\\warning Warning at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
             ctx.parsedMessage("{\\bullet2}{\\warning " + m.group(3) + "}\n");
-            setLineComment(errorFile, errorLineNumber, m.group(3));
-            return true;
-        }
-        return false;
-    }
-
-    public boolean containsFile(File f) {
-        for (File q : sketchFiles) {
-            if (q.getAbsolutePath().equals(f.getAbsolutePath())) {
-                return true;
+            SketchFile sf = getSketchFileByFile(errorFile);
+            if (sf != null) {
+                sf.setLineComment(errorLineNumber, m.group(3));
             }
+            return true;
         }
         return false;
     }
@@ -4707,7 +3623,7 @@ public class Sketch {
         }
     }
 
-    public boolean huntForLibraries(File f, HashMap<String, Library>foundLibs, ArrayList<String> missingLibs) {
+    public boolean huntForLibraries(File f, HashMap<String, Library>foundLibs, ArrayList<String> missingLibs) throws IOException {
 
         if (getBuildFolder() == null) {
             return false;
@@ -4763,7 +3679,7 @@ public class Sketch {
             ctx.endBuffer();
 
             if (dst.exists()) {
-                String data = Base.getFileAsString(dst);
+                String data = Utils.getFileAsString(dst);
                 data = data.replaceAll("\\\\\n", " ");
                 data = data.replaceAll("\\s+", "::");
                 String[] entries = data.split("::");
@@ -4803,10 +3719,6 @@ public class Sketch {
             return true;
         }
         return false;
-    }
-
-    public Editor getEditor() { 
-        return editor;
     }
 
     public void outputErrorStream(String msg) {
@@ -4874,5 +3786,9 @@ public class Sketch {
     public void saveSettings() {
         File sketchPropertyFile = new File(sketchFolder, "sketch.properties");
         settings.save(sketchPropertyFile);
+    }
+
+    public void setContext(Context c) {
+        ctx = c;
     }
 }

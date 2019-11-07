@@ -33,14 +33,15 @@ package org.uecide;
 import java.io.*;
 import java.lang.*;
 import java.util.*;
-import java.lang.reflect.*;
 
 import javax.script.*;
 
 import java.util.regex.*;
 
-import org.uecide.builtin.BuiltinCommand;
-import org.uecide.varcmd.VariableCommand;
+import org.uecide.builtin.*;
+import org.uecide.varcmd.*;
+import org.uecide.actions.*;
+import org.uecide.gui.*;
 
 
 
@@ -53,14 +54,12 @@ public class Context {
     public Compiler compiler = null;
     public Programmer programmer = null;
     public Sketch sketch = null;
-    public Editor editor = null;
     public CommunicationPort port = null;
+    public Gui gui = null;
 
     public ContextListener listener = null;
 
     public StringBuilder buffer = null;
-
-    public HashMap<String, String> varcmds = new HashMap<String, String>();
 
     boolean bufferError = false;
 
@@ -75,6 +74,10 @@ public class Context {
 
     public boolean silence = false;
 
+    public HashMap<String, ArrayList<ContextEventListener>> contextEventListeners = new HashMap<String, ArrayList<ContextEventListener>>();
+
+    public HashMap<String, Thread> threads = new HashMap<String, Thread>();
+
     // Make a new empty context.
 
     public Context(Context src) {
@@ -83,8 +86,8 @@ public class Context {
         compiler = src.compiler;
         programmer = src.programmer;
         sketch = src.sketch;
-        editor = src.editor;
         port = src.port;
+        gui = src.gui;
         listener = src.listener;
         buffer = src.buffer;
         bufferError = src.bufferError;
@@ -92,9 +95,6 @@ public class Context {
         parser = src.parser;
         silence = src.silence;
 
-        for (String vc : src.varcmds.keySet()) {
-            varcmds.put(vc, src.varcmds.get(vc));
-        }
         settings = new PropertyFile(src.settings);
         sketchSettings = new PropertyFile(src.sketchSettings);
         savedSettings = new PropertyFile(src.savedSettings);
@@ -112,12 +112,12 @@ public class Context {
 
     // At least one of these should be called to configure the context:
 
-    public void setProgrammer(Programmer p) { programmer = p; updateSystem(); }
-    public void setBoard(Board b) { board = b; updateSystem(); }
-    public void setCore(Core c) { core = c; updateSystem(); }
-    public void setCompiler(Compiler c) { compiler = c; updateSystem(); }
-    public void setSketch(Sketch s) { sketch = s; updateSystem(); }
-    public void setEditor(Editor e) { editor = e; updateSystem(); }
+    public void setProgrammer(Programmer p) { programmer = p; triggerEvent("setProgrammer"); updateSystem(); }
+    public void setBoard(Board b) { board = b; triggerEvent("setBoard"); updateSystem(); }
+    public void setCore(Core c) { core = c; triggerEvent("setCore"); updateSystem(); }
+    public void setCompiler(Compiler c) { compiler = c; triggerEvent("setCompiler"); updateSystem(); }
+    public void setSketch(Sketch s) { sketch = s; triggerEvent("setSketch"); updateSystem(); }
+    public void setGui(Gui g) { gui = g; triggerEvent("setGui"); updateSystem(); }
     public void setDevice(CommunicationPort p) { 
         port = p; 
         if (port != null) {
@@ -125,40 +125,27 @@ public class Context {
             set("port.base", port.getBaseName());
             set("ip", port.getProgrammingAddress());
         }
-
-    }
-
-    public void loadVarCmdsFromDirectory(File vcdir) {
-        if (vcdir.exists() && vcdir.isDirectory()) {
-            File[] flist = vcdir.listFiles();
-            for (File f : flist) {
-                if (f.getName().endsWith(".jvc")) {
-                    String src = Base.getFileAsString(f);
-                    String fn = f.getName();
-                    fn = fn.substring(0, fn.length() - 4);
-                    varcmds.put(fn, src);
-                }
-            }
-        }
+        triggerEvent("setDevice");
     }
 
     public synchronized void updateSystem() {
-        // Load varcmds:
-        varcmds = new HashMap<String, String>();
-        loadVarCmdsFromDirectory(new File(Base.getDataFolder(), "usr/share/uecide/system/vc"));
+    }
 
-        if (compiler != null && compiler.get("system.varcmd") != null) {
-            loadVarCmdsFromDirectory(new File(compiler.getFolder(), compiler.get("system.varcmd")));
+    public void triggerEvent(String event) {
+        Debug.message("Event triggered: " + event);
+        if (contextEventListeners.get(event) == null) return;
+        for (ContextEventListener target : contextEventListeners.get(event)) {
+            target.contextEventTriggered(event, this);
         }
-        if (core != null && core.get("system.varcmd") != null) {
-            loadVarCmdsFromDirectory(new File(core.getFolder(), core.get("system.varcmd")));
+    }
+
+    public void listenForEvent(String event, ContextEventListener target) {
+        if (contextEventListeners.get(event) == null) {
+            contextEventListeners.put(event, new ArrayList<ContextEventListener>());
         }
-        if (board != null && board.get("system.varcmd") != null) {
-            loadVarCmdsFromDirectory(new File(board.getFolder(), board.get("system.varcmd")));
-        }
-        if (programmer != null && programmer.get("system.varcmd") != null) {
-            loadVarCmdsFromDirectory(new File(programmer.getFolder(), programmer.get("system.varcmd")));
-        }
+
+        ArrayList<ContextEventListener> listeners = contextEventListeners.get(event);
+        listeners.add(target);
     }
 
     // Getters for all the above.
@@ -168,7 +155,7 @@ public class Context {
     public Core getCore() { return core; }
     public Compiler getCompiler() { return compiler; }
     public Sketch getSketch() { return sketch; }
-    public Editor getEditor() { return editor; }
+    public Gui getGui() { return gui; }
     public CommunicationPort getDevice() { return port; }
 
 
@@ -224,12 +211,12 @@ public class Context {
     // board:name.of.file - Get an embedded file from the board
     // merged:name.of.file - Get am embedded file from the merged properties
 
-    public String getResource(String uri) {
+    public String getResource(String uri) throws IOException {
         if (uri.startsWith("res:")) {
-            return getResourceAsString(uri.substring(4));
+            return Utils.getResourceAsString(uri.substring(4));
         }
         if (uri.startsWith("file:")) {
-            return getFileAsString(uri.substring(5));
+            return Utils.getFileAsString(new File(uri.substring(5)));
         }
         if (uri.startsWith("compiler:")) {
             return compiler.getEmbedded(uri.substring(9));
@@ -253,62 +240,17 @@ public class Context {
         return null;
     }
 
-    public String getResourceAsString(String res) {
-        String out = "";
-        try {
-            InputStream from = Context.class.getResourceAsStream(res);
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(from));
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-
-            out = sb.toString();
-
-            reader.close();
-            from.close();
-        } catch(Exception e) {
-            error(e);
-        }
-        return out;
-    }
-
-    public String getFileAsString(String res) {
-        return null;
-    }
-
-
     // Reporting and messaging functions.
 
-    public void error(Exception e) {
-        if (editor != null) {
-            editor.error(e);
-            return;
-        }
-        if (sketch != null) {
-            sketch.error(e);
-            return;
-        }
-        e.printStackTrace();
+    public void error(Throwable e) {
+        gui.error(e);
     }
 
     public void error(String e) {
         if (listener != null) {
             listener.contextError(e);
         } else {
-            if (!e.endsWith("\n")) { e += "\n"; }
-            if (editor != null) {
-                editor.error(e);
-                return;
-            }
-            if (sketch != null) {
-                sketch.error(e);
-                return;
-            }
-            System.err.print(e);
+            gui.error(e);
         }
     }
 
@@ -316,16 +258,7 @@ public class Context {
         if (listener != null) {
             listener.contextWarning(e);
         } else {
-            if (!e.endsWith("\n")) { e += "\n"; }
-            if (editor != null) {
-                editor.warning(e);
-                return;
-            }
-            if (sketch != null) {
-                sketch.warning(e);
-                return;
-            }
-            System.out.print(e);
+            gui.warning(e);
         }
     }
         
@@ -333,24 +266,11 @@ public class Context {
         if (listener != null) {
             listener.contextMessage(e);
         } else {
-            if (!e.endsWith("\n")) { e += "\n"; }
-            if (editor != null) {
-                editor.message(e);
-                return;
-            }
-            if (sketch != null) {
-                sketch.message(e);
-                return;
-            }
-            System.out.print(e);
+            gui.message(e);
         }
     }
 
     public void parsedMessage(String e) {
-        if (editor != null) {
-            editor.parsedMessage(e);
-            return;
-        }
         if (sketch != null) {
             sketch.parsedMessage(e);
             return;
@@ -361,10 +281,6 @@ public class Context {
 
     public void link(String e) {
         if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.link(e);
-            return;
-        }
         if (sketch != null) {
             sketch.link(e);
             return;
@@ -373,81 +289,28 @@ public class Context {
     }
 
     public void command(String e) {
-        if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.command("\n" + e);
-            return;
-        }
-        if (sketch != null) {
-            sketch.command("\n" + e);
-            return;
-        }
-        if (Base.cli.isSet("verbose")) {
-            System.out.print(e);
+        if ((Preferences.getBoolean("compiler.verbose_compile")) || (Base.cli.isSet("verbose"))) {
+            gui.command(e);
         }
     }
         
     public void bullet(String e) {
-        if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.bullet(e);
-            return;
-        }
-        if (sketch != null) {
-            sketch.bullet(e);
-            return;
-        }
-        System.out.print(" * " + e);
+        gui.bullet(e);
     }
         
     public void bullet2(String e) {
-        if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.bullet2(e);
-            return;
-        }
-        if (sketch != null) {
-            sketch.bullet2(e);
-            return;
-        }
-        System.out.print("   + " + e);
+        gui.bullet2(e);
     }
 
     public void bullet3(String e) {
-        if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.bullet3(e);
-            return;
-        }
-        if (sketch != null) {
-            sketch.bullet3(e);
-            return;
-        }
-        System.out.print("   + " + e);
+        gui.bullet3(e);
     }
 
     public void heading(String e) {
-        if (!e.endsWith("\n")) { e += "\n"; }
-        if (editor != null) {
-            editor.heading(e);
-            return;
-        }
-        if (sketch != null) {
-            sketch.heading(e);
-            return;
-        }
-        System.out.print(e);
-        for (int i = 0; i < e.trim().length(); i++) {
-            System.out.print("=");
-        }
-        System.out.println();
+        gui.heading(e);
     }
         
     public void rawMessageStream(String e) {
-        if (editor != null) {
-            editor.outputMessageStream(e);
-            return;
-        }
         if (sketch != null) {
             sketch.outputMessageStream(e);
             return;
@@ -456,10 +319,6 @@ public class Context {
     }
 
     public void rawErrorStream(String e) {
-        if (editor != null) {
-            editor.outputErrorStream(e);
-            return;
-        }
         if (sketch != null) {
             sketch.outputErrorStream(e);
             return;
@@ -471,10 +330,6 @@ public class Context {
         if  (listener != null) {
             listener.contextError(e);
         } else {
-            if (editor != null) {
-                editor.errorStream(e);
-                return;
-            }
             if (sketch != null) {
                 sketch.errorStream(e);
                 return;
@@ -487,10 +342,6 @@ public class Context {
         if  (listener != null) {
             listener.contextWarning(e);
         } else {
-            if (editor != null) {
-                editor.warningStream(e);
-                return;
-            }
             if (sketch != null) {
                 sketch.warningStream(e);
                 return;
@@ -503,10 +354,6 @@ public class Context {
         if  (listener != null) {
             listener.contextMessage(e);
         } else {
-            if (editor != null) {
-                editor.messageStream(e);
-                return;
-            }
             if (sketch != null) {
                 sketch.messageStream(e);
                 return;
@@ -591,28 +438,6 @@ public class Context {
         // If there is a platform specific version of the key then we should switch to that instead.
         key = props.getPlatformSpecificKey(key);
 
-        // If the key is just a plain key and starts with a URI indicator then run it as a javascript file
-        if (props.get(key) != null) {
-            String data = parseString(props.get(key));
-            String[] val = data.split("::");
-            if (
-                val[0].startsWith("res:") || 
-                val[0].startsWith("file:") || 
-                val[0].startsWith("compiler:") || 
-                val[0].startsWith("core:") || 
-                val[0].startsWith("board:") || 
-                val[0].startsWith("programmer:") || 
-                val[0].startsWith("sketch:") ||
-                val[0].startsWith("merged:")
-            ) {
-                String script = getResource(val[0]);
-                String function = val[1];
-                String[] args = Arrays.copyOfRange(val, 2, val.length);
-
-                return executeJavaScript(script, function, args, silent);
-            }
-        }
-
         // If the key has a sub-key of .0 then run it as a UECIDE Script
         if (props.get(key + ".0") != null) {
             return executeUScript(key, silent);
@@ -625,67 +450,6 @@ public class Context {
 
         return false;
     }
-
-    public Object executeJavaScript(String script, String function, Object[] args, boolean silent) {
-        return executeJavaScript(null, script, function, args, silent);
-    }
-
-    public Object executeJavaScript(String script, String function, Object[] args) {
-        return executeJavaScript(null, script, function, args, false);
-    }
-
-    public Object executeJavaScript(String filename, String script, String function, Object[] args) {
-        return executeJavaScript(filename, script, function, args, false);
-    }
-
-    public Object executeJavaScript(String filename, String script, String function, Object[] args, boolean silent) {
-        if (function == null) {
-            return false;
-        }
-        Object ret = false;
-        try {
-            Thread.currentThread().setContextClassLoader(Base.urlClassLoader);
-            ScriptEngineManager manager = new ScriptEngineManager();
-            ScriptEngine engine = manager.getEngineByName("JavaScript");
-            if (filename != null) {
-                engine.put(ScriptEngine.FILENAME, filename);
-            }
-
-            if (script == null) { return false; }
-            if (script.equals("")) { return false; }
-
-            engine.put("ctx", this);
-            engine.put("context", this);
-            engine.put("editor", editor);
-            engine.eval(script);
-
-            Invocable inv = (Invocable)engine;
-
-            if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
-                String argstr = "";
-                for (Object o : args) {
-                    String s = o.toString();
-                    if (!argstr.equals("")) {
-                        argstr += ", ";
-                    }
-                    argstr += s;
-                }
-                //if (!silent) command(function + "(" + argstr + ")");
-            }
-
-            if (args == null) {
-                ret = inv.invokeFunction(function);
-            } else {
-                ret = inv.invokeFunction(function, args);
-            }
-
-        } catch (Exception e) {
-            error(e);
-        }
-
-        return ret;
-    }
-
 
     public Object executeCommand(String command, String env) {
         return executeCommand(command, env, false);
@@ -843,7 +607,7 @@ public class Context {
                 String command = mid.substring(0, mid.indexOf(":"));
                 String param = mid.substring(mid.indexOf(":") + 1);
 
-                mid = runFunctionVariable(command, param);
+                mid = VariableCommand.run(this, command, param);
             } else {
                 String tmid = tokens.get(mid);
 
@@ -878,60 +642,6 @@ public class Context {
         }
 
         return out;
-    }
-
-    public String runFunctionVariable(String command, String param) {
-        if (varcmds.get(command) != null) {
-            Object[] pars = {this, param};
-            Object ret = executeJavaScript(command, varcmds.get(command), "main", pars);
-            if (ret instanceof Boolean) {
-                if ((Boolean)ret == false) {
-                    return "ERR";
-                } else {
-                    return "OK";
-                }
-            } else {
-                return (String)ret;
-            }
-        }
-
-
-        try {
-            Class<?> c = Class.forName("org.uecide.varcmd.vc_" + command);
-
-            if(c == null) {
-                return "";
-            }
-
-            Constructor<?> ctor = c.getConstructor();
-            VariableCommand  p = (VariableCommand)(ctor.newInstance());
-
-            if (p == null) {
-                return "";
-            }
-
-            Class[] param_types = new Class<?>[2];
-            param_types[0] = org.uecide.Context.class;
-            param_types[1] = String.class;
-            Method m = c.getMethod("main", param_types);
-
-            if(m == null) {
-                return "";
-            }
-
-            Object[] args = new Object[2];
-            args[0] = this;
-            args[1] = param;
-            try {
-                return (String)m.invoke(p, args);
-            } catch (Exception e2) {
-            }
-            return "";
-        } catch(Exception e) {
-            error(e);
-        }
-
-        return "";
     }
 
     public Object runBuiltinCommand(String commandline) {
@@ -969,36 +679,7 @@ public class Context {
                 if (!silent) command(args.toString());
             }
 
-            Class<?> c = Class.forName("org.uecide.builtin." + cmdName);
-
-            Constructor<?> ctor = c.getConstructor();
-            final BuiltinCommand  p = (BuiltinCommand)(ctor.newInstance());
-
-            if(c == null) {
-                return false;
-            }
-
-            Class<?>[] param_types = new Class<?>[2];
-            param_types[0] = org.uecide.Context.class;
-            param_types[1] = String[].class;
-            
-            final Method m = c.getMethod("main", param_types);
-//            final Method k = c.getMethod("kill");
-
-            Object[] args = new Object[2];
-            args[0] = this;
-            args[1] = arg;
-
-            final Object[] aa = args;
-
-            Boolean retval = false;
-            try {
-                retval = (Boolean)m.invoke(p, aa);
-            } catch (Exception e2) {
-                error(e2);
-                return false;
-            }
-            return retval;
+            return BuiltinCommand.run(this, cmdName, arg);
 
         } catch(Exception e) {
             Base.error(e);
@@ -1060,9 +741,8 @@ public class Context {
             sb.append(" ");
         }
 
-        if (!silence) {
-            Debug.message("Execute: " + sb.toString());
-        }
+        Debug.message("Execute: " + sb.toString());
+
         if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
             if (!silent) command(sb.toString());
         }
@@ -1154,8 +834,14 @@ public class Context {
 
                 Thread.sleep(1);
 
+            } catch (InterruptedException ex) {
+                runningProcess.destroyForcibly();
+                Base.processes.remove(runningProcess);
+                error("Aborted");
+                return false;
+
             } catch(Exception ignored) {
-                Base.error(ignored);
+                error(ignored);
             }
         }
 
@@ -1378,4 +1064,62 @@ public class Context {
         }
         return d;
     }
+
+
+
+    public boolean action(String name, Object... args) {
+        return Action.run(this, name, args);
+    }
+
+    public Thread actionThread(String name, Object... args) {
+        Thread t = new ActionThread(this, name, args);
+        t.start();
+        return t;
+    }
+
+    public boolean killThread(String name) {
+        Thread t = threads.get(name.toLowerCase());
+        if (t == null) return false;
+        t.interrupt();
+        try {
+            t.join();
+        } catch (Exception ex) {
+            error(ex);
+        }
+        return true;
+    }
+
+    public void runInitScripts() {
+        for (Board b : Base.boards.values()) {
+            if (b.get("init.script.0") != null) {
+                Context ctx = new Context(this);
+                ctx.setBoard(b);
+                ctx.executeKey("init.script");
+            }
+        }
+        for (Core c : Base.cores.values()) {
+            if (c.get("init.script.0") != null) {
+                Context ctx = new Context(this);
+                ctx.setCore(c);
+                ctx.executeKey("init.script");
+            }
+        }
+        for (Compiler c : Base.compilers.values()) {
+            if (c.get("init.script.0") != null) {
+                Context ctx = new Context(this);
+                ctx.setCompiler(c);
+                ctx.executeKey("init.script");
+            }
+        }
+        for (Programmer c : Base.programmers.values()) {
+            if (c.get("init.script.0") != null) {
+                Context ctx = new Context(this);
+                ctx.setProgrammer(c);
+                ctx.executeKey("init.script");
+            }
+        }
+    }
+
+
+
 }

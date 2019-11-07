@@ -33,8 +33,8 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-public class append implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class append extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         try {
             File f = new File(arg[0]);
 
@@ -51,9 +51,8 @@ public class append implements BuiltinCommand {
 
             return true;
         } catch (Exception e) {
-            Base.error(e);
+            throw new BuiltinCommandException(e.getMessage());
         }
-        return false;
     }
 
     public void kill() {

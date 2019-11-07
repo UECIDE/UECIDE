@@ -32,8 +32,8 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class echo implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class echo extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         StringBuilder sb = new StringBuilder();
 
         for(String s : arg) {

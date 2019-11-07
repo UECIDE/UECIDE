@@ -32,9 +32,9 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class spin implements BuiltinCommand {
+public class spin extends BuiltinCommand {
     static int spinpos = 0;
-    public boolean main(Context ctx, String[] arg) {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         String symbol = "";
 
         switch(spinpos) {

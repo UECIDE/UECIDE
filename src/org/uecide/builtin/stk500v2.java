@@ -34,7 +34,7 @@ import org.uecide.*;
 import java.util.*;
 import java.io.*;
 
-public class stk500v2 implements BuiltinCommand, CommsListener {
+public class stk500v2 extends BuiltinCommand implements CommsListener {
 
     boolean replyIsAvailable = false;
 
@@ -77,7 +77,7 @@ public class stk500v2 implements BuiltinCommand, CommsListener {
 
     public static long pageSize = 256;
 
-    public boolean main(Context c, String[] args) {
+    public boolean main(Context c, String[] args) throws BuiltinCommandException {
         ctx = c;
         if (args.length != 3) {
             ctx.error("Usage: __builtin_stk500::port::baud::filename");
@@ -338,9 +338,6 @@ e.printStackTrace();
         for(Long start : memChunks.keySet()) {
 
             int perc = currentChunk * 100 / numberOfChunks;
-            if (ctx.getSketch() != null) {
-                ctx.getSketch().setCompilingProgress(perc);
-            }
 
             currentChunk ++;
 

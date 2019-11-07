@@ -33,8 +33,8 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-public class write implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class write extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         try {
             File f = new File(arg[0]);
             

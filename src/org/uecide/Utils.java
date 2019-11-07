@@ -1,32 +1,37 @@
 package org.uecide;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
-import javax.swing.border.*;
-import java.util.*;
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.net.*;
-import de.waldheinz.fs.*;
-import de.waldheinz.fs.fat.*;
-import de.waldheinz.fs.util.*;
+import de.waldheinz.fs.BlockDevice;
+import de.waldheinz.fs.FsDirectory;
+import de.waldheinz.fs.FsDirectoryEntry;
+import de.waldheinz.fs.FsFile;
+import de.waldheinz.fs.util.FileDisk;
+import de.waldheinz.fs.fat.FatFileSystem;
+import de.waldheinz.fs.fat.FatType;
+import de.waldheinz.fs.fat.SuperFloppyFormatter;
+import java.awt.Desktop;
+import java.awt.Image;
+import java.io.BufferedReader;
+import java.io.BufferedOutputStream;
+import java.io.RandomAccessFile;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.channels.FileChannel;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class Utils {
     public static Image getScaledImage(Image srcImg, int w, int h){
         Image rescaled = srcImg.getScaledInstance(w, h, Image.SCALE_AREA_AVERAGING);
         return rescaled;
-//        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-//        Graphics2D g2 = resizedImg.createGraphics();
-//
-//        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-//        g2.drawImage(srcImg, 0, 0, w, h, null);
-//        g2.dispose();
-//
- //       return resizedImg;
     }
 
     public static boolean s2b(String s) {
@@ -40,7 +45,7 @@ public class Utils {
 
     public static long s2l(String s) {
         try {
-            return Long.parseLong(s);
+            return Long.decode(s);
         } catch (Exception e) {
         }
         return 0;
@@ -48,7 +53,7 @@ public class Utils {
 
     public static int s2i(String s) {
         try {
-            return Integer.parseInt(s);
+            return Integer.decode(s);
         } catch (Exception e) {
         }
         return 0;
@@ -81,6 +86,52 @@ public class Utils {
         }
     }
 
+    public static void copyDir(File sourceDir, File targetDir) throws IOException {
+        if (!targetDir.exists()) {
+            if (!targetDir.mkdirs()) {
+                Base.error("Unable to make target folder " + targetDir.getAbsolutePath());
+                return;
+            }
+        }
+        String files[] = sourceDir.list();
+
+        for(int i = 0; i < files.length; i++) {
+            // Ignore dot files (.DS_Store), dot folders (.svn) while copying
+            if(files[i].charAt(0) == '.') continue;
+
+            //if (files[i].equals(".") || files[i].equals("..")) continue;
+            File source = new File(sourceDir, files[i]);
+            File target = new File(targetDir, files[i]);
+
+            if(source.isDirectory()) {
+                //target.mkdirs();
+                copyDir(source, target);
+                target.setLastModified(source.lastModified());
+            } else {
+                Files.copy(source.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
+    }
+
+
+    public static byte[] loadBytesRaw(File file) throws FileNotFoundException, IOException {
+        FileInputStream input = new FileInputStream(file);
+
+        int size = (int) file.length();
+        byte buffer[] = new byte[size];
+        int offset = 0;
+        int bytesRead;
+
+        while((bytesRead = input.read(buffer, offset, size - offset)) != -1) {
+            offset += bytesRead;
+            if(bytesRead == 0) break;
+        }
+
+        input.close();
+
+        return buffer;
+    }
+
     public static String getFileAsString(File f) throws IOException, FileNotFoundException {
         if (f == null) {
             return "";
@@ -101,6 +152,42 @@ public class Utils {
         reader.close();
         return sb.toString();
 
+    }
+
+    public static String getResourceAsString(String resource) throws IOException {
+        String out = "";
+        InputStream from = Utils.class.getResourceAsStream(resource);
+        int bytesRead;
+
+        StringBuilder sb = new StringBuilder();
+
+        String line = null;
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(from));
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+            sb.append("\n");
+        }
+
+        out = sb.toString();
+
+        reader.close();
+        from.close();
+        return out;
+    }
+
+    public static void copyResourceToFile(String res, File dest) throws IOException {
+        InputStream from = Utils.class.getResourceAsStream(res);
+        OutputStream to = new BufferedOutputStream(new FileOutputStream(dest));
+        byte[] buffer = new byte[16 * 1024];
+        int bytesRead;
+
+        while((bytesRead = from.read(buffer)) != -1) {
+            to.write(buffer, 0, bytesRead);
+        }
+
+        from.close();
+        to.close();
     }
 
     public static long getFolderSize(File root) {

@@ -32,8 +32,8 @@ package org.uecide.varcmd;
 
 import org.uecide.*;
 
-public class vc_programmer implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_programmer extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
 
         String[] alist = args.split(",");
         Programmer prog = sketch.getProgrammer();
@@ -48,12 +48,12 @@ public class vc_programmer implements VariableCommand {
         }
 
         if (prog == null) {
-            return "ERROR";
+            throw new VariableCommandException("Programmer Not Found");
         }
 
         if (prop.equals("root")) {
             return prog.getFolder().getAbsolutePath();
         }
-        return sketch.getProgrammer().get(prop);
+        return prog.get(prop);
     }
 }

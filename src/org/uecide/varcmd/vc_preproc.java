@@ -33,9 +33,9 @@ package org.uecide.varcmd;
 import org.uecide.*;
 import java.io.*;
 
-public class vc_preproc implements VariableCommand {
+public class vc_preproc extends VariableCommand {
 
-    public String main(Context ctx, String args) {
+    public String main(Context ctx, String args) throws VariableCommandException {
         ctx.snapshot();
         String file = args;
         String[] bits = args.split(",");
@@ -51,21 +51,22 @@ public class vc_preproc implements VariableCommand {
         File infile = new File(file);
         if (!infile.exists()) {
             ctx.rollback();
-            return "FILE NOT FOUND";
-        }
-
-        String data = Base.getFileAsString(infile);
-        data = ctx.parseString(data);
-
-        String extension = null;
-        String[] fbits = infile.getName().split("\\.");
-        if (fbits.length > 1) {
-            extension = "." + fbits[fbits.length-1];
+            throw new VariableCommandException("File Not Found");
         }
 
         File tempfile = null;
 
         try {
+            String data = Utils.getFileAsString(infile);
+            data = ctx.parseString(data);
+
+            String extension = null;
+            String[] fbits = infile.getName().split("\\.");
+            if (fbits.length > 1) {
+                extension = "." + fbits[fbits.length-1];
+            }
+
+
             tempfile = File.createTempFile("uecide-preproc-", extension);
             tempfile.deleteOnExit();
 
@@ -73,13 +74,10 @@ public class vc_preproc implements VariableCommand {
             pw.print(data);
             pw.close();
         } catch (Exception e) {
+            ctx.rollback();
+            throw new VariableCommandException(e.getMessage());
         }
 
-        ctx.rollback();
-        if (tempfile != null) {
-            return tempfile.getAbsolutePath();
-        } else {
-            return "UNABLE TO CREATE TEMPFILE";
-        }
+        return tempfile.getAbsolutePath();
     }
 }

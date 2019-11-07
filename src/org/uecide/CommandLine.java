@@ -213,4 +213,8 @@ public class CommandLine {
         }
         return (double)value;
     }
+
+    public void set(String key, String value) {
+        parameterValues.put(key, value);
+    }
 }

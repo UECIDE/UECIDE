@@ -73,11 +73,11 @@ public class mDNSProgrammer extends Programmer {
         return get("description");
     }
 
-    public void onSelected(Editor e) {
-        try {
-            e.getSketch().setBoard(_board);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
+//    public void onSelected(Editor e) {
+//        try {
+//            e.getContext().setBoard(_board);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//    }
 }

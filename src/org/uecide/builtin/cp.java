@@ -36,15 +36,14 @@ import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.*;
 
 
-public class cp implements BuiltinCommand {
+public class cp extends BuiltinCommand {
     Context ctx;
 
-    public boolean main(Context c, String[] arg) {
+    public boolean main(Context c, String[] arg) throws BuiltinCommandException {
         ctx = c;
 
         if (arg.length < 2) {
-            ctx.error("Usage: __builtin_cp::[file::[file::[file...]]]::[dest]");
-            return false;
+            throw new BuiltinCommandException("Syntax Error");
         }
 
         if (arg.length > 2) {
@@ -54,7 +53,7 @@ public class cp implements BuiltinCommand {
         }
     }
 
-    public boolean copy_one_to_one(String[] arg) {
+    public boolean copy_one_to_one(String[] arg) throws BuiltinCommandException {
         File from = new File(arg[0]);
         File to = new File(arg[1]);
         if (to.exists() && to.isDirectory()) {
@@ -64,13 +63,12 @@ public class cp implements BuiltinCommand {
         try {
             Files.copy(from.toPath(), to.toPath(), REPLACE_EXISTING);
         } catch (IOException e) {
-            ctx.error(e);
-            return false;
+            throw new BuiltinCommandException(e.getMessage());
         }
         return true;
     }
 
-    public boolean copy_many_to_one(String[] arg) {
+    public boolean copy_many_to_one(String[] arg) throws BuiltinCommandException {
         File to = new File(arg[arg.length - 1]);
         if (!to.exists() || !to.isDirectory()) {
             return false;

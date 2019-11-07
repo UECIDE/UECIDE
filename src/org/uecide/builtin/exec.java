@@ -32,11 +32,10 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class exec implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class exec extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         if(arg.length != 1) {
-            ctx.error("Usage: __builtin_exec::<script key>");
-            return false;
+            throw new BuiltinCommandException("Syntax Error");
         }
 
         String key = arg[0];

@@ -33,10 +33,10 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-public class gpio implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class gpio extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         try {
-            int pin = Integer.parseInt(arg[0]);
+            int pin = Utils.s2i(arg[0]);
             String command = arg[1];
 
             if (command.equals("high")) {
@@ -52,8 +52,7 @@ public class gpio implements BuiltinCommand {
                 setMode(pin, "in");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            throw new BuiltinCommandException(e.getMessage());
         }
         return true;
     }

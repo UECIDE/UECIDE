@@ -33,23 +33,18 @@ package org.uecide.varcmd;
 import org.uecide.*;
 import java.util.Random;
 
-public class vc_random implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_random extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
         if (bits.length != 2) {
-            return "ERR";
+            throw new VariableCommandException("Syntax Error");
         }
-        try {
-            int low = Integer.parseInt(bits[0]);
-            int high = Integer.parseInt(bits[1]);
-            Random r = new Random();
-            int val = Math.abs(r.nextInt() / 2);
-            val = val % (high - low);
-            val += low;
-            return Integer.toString(val);
-        } catch (Exception ex) {
-        }
-        return "ERR";
-
+        int low = Utils.s2i(bits[0]);
+        int high = Utils.s2i(bits[1]);
+        Random r = new Random();
+        int val = Math.abs(r.nextInt() / 2);
+        val = val % (high - low);
+        val += low;
+        return Integer.toString(val);
     }
 }

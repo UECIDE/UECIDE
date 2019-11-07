@@ -30,12 +30,10 @@
 
 package org.uecide;
 
-import org.uecide.plugin.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-import java.lang.reflect.Method;
 import java.net.URI;
 
 import javax.swing.*;
@@ -57,7 +55,6 @@ import de.muntjak.tinylookandfeel.*;
 
 public class Preferences extends JDialog implements TreeSelectionListener {
 
-    Editor editor;
     ScrollablePanel advancedTreeBody;
 
     PropertyFile changedPrefs = new PropertyFile();
@@ -177,9 +174,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return new Dimension(700, 500);
     }
 
-    public Preferences(Editor ed) {
-        editor = ed;
-
+    public Preferences() {
         // setup dialog for the prefs
 
         JMenuBar menuBar = new JMenuBar();
@@ -302,14 +297,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         outer.add(buttonLine, BorderLayout.SOUTH);
 
         Context ctx = new Context();
-
-        for (JSPlugin plugin : Base.jsplugins.values()) {
-            PropertyFile pf = (PropertyFile)plugin.call("getPreferencesTree", ctx, null);
-            if (pf != null) {
-                Base.preferencesTree.mergeData(pf);
-            }
-        }
-
+/*
         for(Class<?> pluginClass : Base.plugins.values()) {
             try {
                 Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
@@ -331,7 +319,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
             } catch (Exception e) {
             }
         }
-
+*/
         JPanel treeSettings = new JPanel();
         populateAdvancedSettings(treeSettings);
         outer.add(treeSettings, BorderLayout.CENTER);
@@ -349,13 +337,8 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                 disposeFrame();
             }
         };
-        Base.registerWindowCloseKeys(getRootPane(), disposer);
-//        Base.setIcon(this);
-
-        // handle window closing commands for ctrl/cmd-W or hitting ESC.
 
         pack();
-        if (editor != null) setLocationRelativeTo(editor);
         setVisible(true);
     }
 
@@ -735,34 +718,34 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
             b.add(sb);
         } else if (type.equals("iconlist")) {
-            b.add(new JLabel(name + ": "));
-            HashMap<String, String> options = IconManager.getIconList();
-
-            ArrayList<KVPair> kvlist = new ArrayList<KVPair>();
-            for (String k : options.keySet()) {
-                KVPair kv = new KVPair(k, options.get(k));
-                kvlist.add(kv);
-            }
-            KVPair opList[] = kvlist.toArray(new KVPair[0]);
-            Arrays.sort(opList);
-            JComboBox cb = new JComboBox(opList);
-
-            for (KVPair op : opList) {
-                if (op.getKey().equals(get(key))) {
-                    cb.setSelectedItem(op);
-                }
-            }
-
-            cb.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JComboBox widget = (JComboBox)e.getSource();
-                    KVPair data = (KVPair)widget.getSelectedItem();
-                    changedPrefs.set(fkey, data.getKey());
-                }
-            });
-            b.add(cb);
-
-    
+//            b.add(new JLabel(name + ": "));
+//            HashMap<String, String> options = IconManager.getIconList();
+//
+//            ArrayList<KVPair> kvlist = new ArrayList<KVPair>();
+//            for (String k : options.keySet()) {
+//                KVPair kv = new KVPair(k, options.get(k));
+//                kvlist.add(kv);
+//            }
+//            KVPair opList[] = kvlist.toArray(new KVPair[0]);
+//            Arrays.sort(opList);
+//            JComboBox cb = new JComboBox(opList);
+//
+//            for (KVPair op : opList) {
+//                if (op.getKey().equals(get(key))) {
+//                    cb.setSelectedItem(op);
+//                }
+//            }
+//
+//            cb.addActionListener(new ActionListener() {
+//                public void actionPerformed(ActionEvent e) {
+//                    JComboBox widget = (JComboBox)e.getSource();
+//                    KVPair data = (KVPair)widget.getSelectedItem();
+//                    changedPrefs.set(fkey, data.getKey());
+//                }
+//            });
+//            b.add(cb);
+//
+//    
         } else if (type.equals("dropdown")) {
             b.add(new JLabel(name + ": "));
 
@@ -1085,7 +1068,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
     public static void setColor(String key, Color value) { Base.preferences.setColor(key, value); Base.preferences.saveDelay(); }
     public static void setFile(String key, File value) { Base.preferences.setFile(key, value); Base.preferences.saveDelay(); }
 
-    public static void setFile(String key, Font value) { 
+    public static void setFont(String key, Font value) { 
         if (Base.preferences != null) {
             Base.preferences.setFont(key, value); 
             Base.preferences.saveDelay(); 

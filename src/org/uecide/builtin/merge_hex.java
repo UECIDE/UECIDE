@@ -35,11 +35,11 @@ import java.io.*;
 
 import uk.co.majenko.hexfile.*;
 
-public class merge_hex implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class merge_hex extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         try {
             if (arg.length < 2) {
-                return false;
+                throw new BuiltinCommandException("Syntax Error");
             }
 
             HexFile hex = new HexFile();
@@ -49,8 +49,9 @@ public class merge_hex implements BuiltinCommand {
             hex.saveFile(new File(arg[0]));
 
             return true;
-        } catch (Exception ex) { ctx.error(ex); }
-        return false;
+        } catch (Exception ex) { 
+            throw new BuiltinCommandException(ex.getMessage());
+        }
     }
 
     public void kill() {

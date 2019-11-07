@@ -32,8 +32,8 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class delay implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class delay extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         try {
             Thread.sleep(Integer.parseInt(arg[0]));
         } catch (Exception e) {

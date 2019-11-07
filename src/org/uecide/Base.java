@@ -30,60 +30,35 @@
 
 package org.uecide;
 
-import java.awt.*;
-import java.awt.image.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
-import java.net.*;
-import java.util.zip.*;
-import java.nio.file.*;
-import java.util.jar.*;
-import java.text.*;
-import org.uecide.plugin.*;
+import org.uecide.gui.Gui;
+import org.uecide.gui.swing.SwingGui;
+import org.uecide.gui.cli.CliGui;
+import org.uecide.gui.none.NoneGui;
 
-import javax.script.*;
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.IOException;
 
-import org.uecide.builtin.BuiltinCommand;
-import org.uecide.varcmd.VariableCommand;
+import java.util.ArrayList;
+import java.util.TreeSet;
+import java.util.TreeMap;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.lang.reflect.*;
+import java.net.PasswordAuthentication;
+import java.net.Authenticator;
+import java.net.URI;
+import java.net.URL;
 
-import java.util.regex.*;
+import java.security.ProtectionDomain;
+import java.security.CodeSource;
 
-
-import java.security.*;
-
-import javax.swing.*;
-import javax.imageio.*;
-
-import org.uecide.Compiler;
-
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceEvent;
-import javax.jmdns.ServiceListener;
-import javax.jmdns.ServiceInfo;
-
-import org.reflections.*;
-import org.reflections.util.*;
-import org.reflections.scanners.*;
-
-import java.nio.file.Files;
-import static java.nio.file.StandardCopyOption.*;
-
-/*! The Base class provides the initial application
- *  startup code, parsing command line options, loading
- *  preferences, themes, etc, then scanning all the boards,
- *  cores, compilers etc.  It also provides a central storage
- *  location for application data, and a selection of useful
- *  helper functions.
- */
 public class Base {
-
-    public static URLClassLoader urlClassLoader;
 
     public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
 
@@ -92,8 +67,6 @@ public class Base {
     public static String overrideSettingsFolder = null;
 
     public static ArrayList<Process> processes = new ArrayList<Process>();
-
-    public static HashMap<String, JSPlugin> jsplugins;
 
     static Platform platform;
 
@@ -108,8 +81,7 @@ public class Base {
     static private File hardwareFolder;
     public static ArrayList<File> MRUList;
     public static HashMap<File,Integer> MCUList;
-
-    static HashSet<File> libraries;
+    public static String gui;
 
     // maps imported packages to their library folder
     public static TreeMap<String, File> importToLibraryTable;
@@ -126,16 +98,14 @@ public class Base {
     public static TreeMap<String, Core> cores;
     public static TreeMap<String, Programmer> programmers;
     public static TreeMap<String, Tool> tools;
-//    public static TreeMap<String, Plugin> plugins;
-    public static TreeMap<String, Class<?>> plugins = new TreeMap<String, Class<?>>();
-    public static ArrayList<Plugin> pluginInstances;
-    static Splash splashScreen;
+
+    public static Context systemContext;
+
+    public ArrayList<Context> sessions = new ArrayList<Context>();
 
     public static CommandLine cli = new CommandLine();
 
     // Location for untitled items
-    static File untitledFolder;
-
     public static PropertyFile preferences;
     public static PropertyFile session = new PropertyFile();
 
@@ -148,8 +118,6 @@ public class Base {
     public static boolean onlineMode = true;
 
     public static TreeSet<CommunicationPort> communicationPorts = new TreeSet<CommunicationPort>();
-
-    public static TreeMap<String, Class<?>> lookAndFeels = new TreeMap<String, Class<?>>();
 
     public static I18N i18n = new I18N("Core");
 
@@ -181,7 +149,7 @@ public class Base {
      *  object and passes the command line arguments.
      */
     public static void main(String args[]) {
-        replaceSystemClassLoader();
+//        replaceSystemClassLoader();
         try {
             new Base(args);
         } catch (Exception e) {
@@ -309,6 +277,8 @@ public class Base {
 
         cli.addParameter("locale",              "name",     String.class,   "cli.help.locale");
 
+        cli.addParameter("gui",                 "name",     String.class,   "Select a GUI to run (cli / swing / none)");
+
         String[] argv = cli.process(args);
 
         Authenticator.setDefault(new Authenticator() {
@@ -340,9 +310,6 @@ public class Base {
         }
 
         Debug.setVerbose(cli.isSet("verbose"));
-        if (cli.isSet("debug")) {
-            Debug.show();
-        }
 
         overrideSettingsFolder = cli.getString("datadir");
         autoCompile = cli.isSet("compile");
@@ -424,8 +391,7 @@ public class Base {
         
         if (cli.isSet("update")) {
             try {
-                PluginManager pm = new PluginManager();
-                APT apt = pm.getApt();
+                APT apt = APT.factory();
                 apt.update();
             } catch (Exception ex) { error(ex); }
             doExit = true;
@@ -433,8 +399,7 @@ public class Base {
 
         if (cli.isSet("upgrade")) {
             try {
-                PluginManager pm = new PluginManager();
-                APT apt = pm.getApt();
+                APT apt = APT.factory();
                 Package[] pl = apt.getUpgradeList();
                 for (Package p : pl) {
                     apt.upgradePackage(p);
@@ -447,8 +412,7 @@ public class Base {
 
         if (cli.isSet("install")) {
             try {
-                PluginManager pm = new PluginManager();
-                APT apt = pm.getApt();
+                APT apt = APT.factory();
                 String packageName = cli.getString("install");
                 if (packageName == null) {
                     System.err.println(i18n.string("err.selpkginst"));
@@ -472,8 +436,7 @@ public class Base {
                 if (!cli.isSet("force")) {
                     System.err.println(i18n.string("err.notremove"));
                 } else {
-                    PluginManager pm = new PluginManager();
-                    APT apt = pm.getApt();
+                    APT apt = APT.factory();
                     for (Package p : apt.getInstalledPackages()) {
                         apt.uninstallPackage(p, true);
                     }
@@ -484,8 +447,7 @@ public class Base {
             
         if (cli.isSet("remove")) {
             try {
-                PluginManager pm = new PluginManager();
-                APT apt = pm.getApt();
+                APT apt = APT.factory();
                 String packageName = cli.getString("remove");
                 if (packageName == null) {
                     System.err.println(i18n.string("err.selpkguninst"));
@@ -506,8 +468,7 @@ public class Base {
 
         if (cli.isSet("list")) {
             try {
-                PluginManager pm = new PluginManager();
-                APT apt = pm.getApt();
+                APT apt = APT.factory();
                 Package[] pkgs = apt.getPackages();
                 String format = "%-50s %10s %10s %s";
                 System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
@@ -551,8 +512,7 @@ public class Base {
                 
         if (cli.isSet("search")) {
             try {
-                PluginManager pm = new PluginManager();
-                APT apt = pm.getApt();
+                APT apt = APT.factory();
                 Package[] pkgs = apt.getPackages();
                 String format = "%-50s %10s %10s %s";
                 System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
@@ -603,97 +563,50 @@ public class Base {
         }
 
 
+        // From here on in we create a new context, load a sketch into it if needed, then start our GUI, whatever that may be.
+
+        // Our first task is to load all the settings.
+
         if (cli.isSet("cli")) {
-            headless = true;
-            platform.init(this);
-            compilers = new TreeMap<String, Compiler>();
-            cores = new TreeMap<String, Core>();
-            tools = new TreeMap<String, Tool>();
-            boards = new TreeMap<String, Board>();
-            programmers = new TreeMap<String, Programmer>();
-            plugins = new TreeMap<String, Class<?>>();
-            lookAndFeels = new TreeMap<String, Class<?>>();
-            pluginInstances = new ArrayList<Plugin>();
-            
-            Serial.updatePortList();
-
-            System.out.print(i18n.string("msg.loading.assets"));
-            loadAssets();
-            System.out.println(i18n.string("msg.loading.done"));
-
-            buildPreferencesTree();
-
-            runInitScripts();
-
-            InteractiveCLI icli = new InteractiveCLI(argv);
-            icli.run();
-            System.exit(0);
+            System.err.println("Warning: --cli is deprecated. Use --gui=cli instead");
+            cli.set("gui", "cli");
         }
 
-        if (!headless) {
-            setDisplayScaling();
+        if (cli.isSet("headless")) {
+            System.err.println("Warning: --headless is deprecated. Use --gui=none instead");
+            cli.set("gui", "none");
         }
 
-        Debug.setLocation(new Point(preferences.getInteger("debug.window.x"), preferences.getInteger("debug.window.y")));
-        Debug.setSize(new Dimension(preferences.getInteger("debug.window.width"), preferences.getInteger("debug.window.height")));
-
-        if(!headless) {
-            splashScreen = new Splash();
-            splashScreen.setMessage("Loading UECIDE...", 10);
+        if (!cli.isSet("gui")) {
+            cli.set("gui", "swing");
         }
 
-        if (!headless) splashScreen.setMessage(i18n.string("splash.msg.packagemanager"), 15);
+        gui = cli.getString("gui");
+
+        switch (gui) {
+            case "cli": CliGui.init(); break;
+            case "swing": SwingGui.init(); break;
+            case "none": NoneGui.init(); break;
+            default:
+                System.err.println("Unknown GUI specified. Cannot continue.");
+                System.exit(10);
+        }
+
+        systemContext = createContext(null, gui, false);
+
+        systemContext.getGui().openSplash();
+        systemContext.getGui().splashMessage("Loading UECIDE...", 10);
+        systemContext.getGui().splashMessage(i18n.string("splash.msg.packagemanager"), 15);
         initPackageManager();
-
-        JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-
-        // Create a location for untitled sketches
-        untitledFolder = createTempFolder("untitled");
-        untitledFolder.deleteOnExit();
-
-        Debug.message("Application section start");
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.application"), 20);
-
-        Debug.message("Platform init");
+        systemContext.getGui().splashMessage(i18n.string("splash.msg.application"), 20);
         platform.init(this);
-
-        // Get paths for the libraries and examples in the Processing folder
-        //String workingDirectory = System.getProperty("user.dir");
-
-        Debug.message("Get system folders");
-        examplesFolder = getContentFile("examples");
-        toolsFolder = getContentFile("tools");
-
-        // Get the sketchbook path, and make sure it's set properly
-        String sketchbookPath = preferences.get("locations.sketchbook");
-
-        // If no path is set, get the default sketchbook folder for this platform
-        if(sketchbookPath == null) {
-            File defaultFolder = getDefaultSketchbookFolder();
-            preferences.set("locations.sketchbook", defaultFolder.getAbsolutePath());
-            sketchbookPath = defaultFolder.getAbsolutePath();
-        }
-
-        File sketchbookFolder = new File(sketchbookPath);
-
-        if(!sketchbookFolder.exists()) {
-            if (!sketchbookFolder.mkdirs()) { error("Unable to make sketchbook folder " + sketchbookFolder.getAbsolutePath()); }
-        }
-
-        Debug.message("Create trees");
-
-        webLinks = new PropertyFile("/org/uecide/config/links.txt");
 
         compilers = new TreeMap<String, Compiler>();
         cores = new TreeMap<String, Core>();
         tools = new TreeMap<String, Tool>();
         boards = new TreeMap<String, Board>();
         programmers = new TreeMap<String, Programmer>();
-        plugins = new TreeMap<String, Class<?>>();
-        lookAndFeels = new TreeMap<String, Class<?>>();
-        pluginInstances = new ArrayList<Plugin>();
 
-        Debug.message("Scan ports");
         Thread t = new Thread() {
             public void run() {
                 Serial.updatePortList();
@@ -702,234 +615,31 @@ public class Base {
         };
         t.start();
 
-        Debug.message("Application section done");
-
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.assets"), 40);
-
-
+        systemContext.getGui().splashMessage(i18n.string("splash.msg.assets"), 40);
         loadAssets();
-
         buildPreferencesTree();
-        if (cli.isSet("set")) {
-            String[] bits = cli.getString("set").split("=");
-            if (bits.length != 2) {
-                System.err.println("Usage: --set=key=value");
-                System.exit(10);
-            }
 
-            if (preferencesTree.get(bits[0] + ".type") == null) {
-                System.err.println("Error: " + bits[0] + " is not a known preferences key");
-                System.exit(10);
-            }
-            preferences.set(bits[0], bits[1]);
-            preferences.save();
-            System.exit(0);
-        }
-
-        if (cli.isSet("reset")) {
-            String key = cli.getString("reset");
-            if (key == null) {
-                System.err.println("Usage: --reset=key");
-                System.exit(10);
-            }
-
-            if (preferencesTree.get(key + ".type") == null) {
-                System.err.println("Error: " + key + " is not a known preferences key");
-                System.exit(10);
-            }
-            preferences.set(key, preferencesTree.get(key + ".default"));
-            preferences.save();
-            System.exit(0);
-        }
-
-
-        if (cli.isSet("mkmf")) {
-            for(int i = 0; i < argv.length; i++) {
-                String path = argv[i];
-                if (path.equals(".")) {
-                    path = System.getProperty("user.dir");
-                }
-                Sketch s = null;
-                try {
-                    s = new Sketch(path);
-                } catch (IOException ex) {
-                    error(ex);
-                    return;
-                }
-                s.loadConfig();
-                if(presetPort != null) {
-                    s.setDevice(presetPort);
-                }
-
-                if(presetBoard != null) {
-                    s.setBoard(presetBoard);
-                }
-
-                if(presetCore != null) {
-                    s.setCore(presetCore);
-                }
-
-                if(presetCompiler != null) {
-                    s.setCompiler(presetCompiler);
-                }
-
-                if(presetProgrammer != null) {
-                    s.setProgrammer(presetProgrammer);
-                }
-
-                if (purgeCache) {
-                    s.purgeCache();
-                }
-
-                s.generateMakefile();
-            }
-            System.exit(0);
-        }
-
-
-        runInitScripts();
-
+  //      ctx.runInitScripts();
         initMRU();
+        systemContext.getGui().splashMessage(i18n.string("splash.msg.complete"), 100);
 
+        ServiceManager.addService(new UsbDiscoveryService());
+        ServiceManager.addService(new BackgroundLibraryCompileService());
+//        ServiceManager.addService(new ChangedFileService());
+        ServiceManager.addService(new NetworkDiscoveryService());
+//        ServiceManager.addService(new TreeUpdaterService());        
+        ServiceManager.addService(new PortListUpdaterService());
 
-        if(!headless) splashScreen.setMessage(i18n.string("splash.msg.editor"), 80);
+        systemContext.getGui().closeSplash();
 
-        if (!headless) setLookAndFeel();
+        createContext(null, gui);
 
-        if (cli.isSet("preferences")) {
-            if(!headless) splashScreen.setMessage(i18n.string("splash.msg.complete"), 100);
-            splashScreen.dispose();
-            new Preferences(null);
-            preferences.save();
-            System.exit(0);
-        }
-
-        boolean opened = false;
-
-        // Check if any files were passed in on the command line
-        for(int i = 0; i < argv.length; i++) {
-            String path = argv[i];
-
-            // Fix a problem with systems that use a non-ASCII languages. Paths are
-            // being passed in with 8.3 syntax, which makes the sketch loader code
-            // unhappy, since the sketch folder naming doesn't match up correctly.
-            // http://dev.processing.org/bugs/show_bug.cgi?id=1089
-            if(isWindows()) {
-                try {
-                    File file = new File(argv[i]);
-                    path = file.getCanonicalPath();
-                } catch(IOException e) {
-                    error(e);
-                }
-            }
-
-            if (path.equals(".")) {
-                path = System.getProperty("user.dir");
-            }
-
-            File p = new File(path);
-            Debug.message("Loading sketch " + p);
-            if (p.exists()) {
-                try {
-                    opened = doOpenThings(p);
-                } catch (IOException ex) {
-                    error(ex);
-                    return;
-                }
-            }
-        }
-
-        if(loadLastSketch || Preferences.getBoolean("editor.save.loadlast")) {
-            File lastFile = MRUList.get(0);
-
-            if(lastFile != null) {
-                if (!headless && !opened)
-                try {
-                    opened = doOpenThings(lastFile);
-                } catch (IOException ex) {
-                    error(ex);
-                    return;
-                }
-            }
-        }
-
-        // Create a new empty window (will be replaced with any files to be opened)
-        if(!opened && !headless) {
-            try {
-                handleNew();
-            } catch (IOException ex) {
-                error(ex);
-                return;
-            }
-        }
-
-        if(!headless) {
-            if(!headless) splashScreen.setMessage(i18n.string("splash.msg.complete"), 100);
-            splashScreen.dispose();
-
-            if (preferences.get("changelog.hide") != null) {
-                Version vhidden = new Version(preferences.get("changelog.hide"));
-                if (systemVersion.compareTo(vhidden) > 0) {
-                    Changelog c = new Changelog(Editor.editorList.get(0));
-                }
-            } else {
-                Changelog c = new Changelog(Editor.editorList.get(0));
-            }
-
-            try {
-
-                synchronized (Editor.editorList) {
-                    if(boards.size() == 0) {
-
-                        showWarning(
-                            i18n.string("err.noboards.title"),
-                            i18n.string("err.noboards.body"),
-                            null
-                        );
-                        PluginManager pm = new PluginManager();
-                        pm.openWindow(Editor.editorList.get(0), true);
-                    } else if(cores.size() == 0) {
-                        showWarning(
-                            i18n.string("err.nocores.title"),
-                            i18n.string("err.nocores.body"),
-                            null
-                        );
-                        PluginManager pm = new PluginManager();
-                        pm.openWindow(Editor.editorList.get(0), true);
-                    } else if(compilers.size() == 0) {
-                        showWarning(
-                            i18n.string("err.nocompilers.title"),
-                            i18n.string("err.nocompilers.body"),
-                            null
-                        );
-                        PluginManager pm = new PluginManager();
-                        pm.openWindow(Editor.editorList.get(0), true);
-                    }
-                }
-            } catch (Exception ex) { error(ex); }
-        }
-
+/*
         if(isTimeToCheckVersion()) {
             if(isNewVersionAvailable()) {
                 if(headless) {
                     System.err.println(i18n.string("msg.version.available"));
                     System.err.println(i18n.string("msg.version.download", "https://uecide.org/download"));
-                } else {
-                    String[] options = {"Yes", "No"};
-                    int n = JOptionPane.showOptionDialog(
-                        null, 
-                        i18n.string("msg.version.available.body"),
-                        i18n.string("msg.version.available"),
-                        JOptionPane.YES_NO_OPTION, 
-                        JOptionPane.QUESTION_MESSAGE, 
-                        null, 
-                        options, 
-                        options[0]
-                    );
-
-                    if(n == 0) {
-                        Utils.browse("https://uecide.org/download");
-                    }
                 }
             }
         }
@@ -939,178 +649,23 @@ public class Base {
         if(headless) {
             System.exit(0);
         }
-
-        ServiceManager.addService(new UsbDiscoveryService());
-        ServiceManager.addService(new BackgroundLibraryCompileService());
-        ServiceManager.addService(new ChangedFileService());
-        ServiceManager.addService(new NetworkDiscoveryService());
-        ServiceManager.addService(new TreeUpdaterService());        
-    }
-
-    public static void addJarFile(File f) {
-        try {
-            File find = f;
-            if (!find.exists()) {
-                File[] pfs = getPluginsFolders();
-                for (File pf : pfs) {
-                    find = new File(pf, f.getPath());
-                    if (find.exists()) {
-                        break;
-                    }
-                }
-            }
-            if (!find.exists()) {
-                error("File not found: " + f);
-                return;
-            }
-            Base.addURL(f.toURI().toURL());
-        } catch (Exception e) {
-            error(e);
-        }
-    }
-    
-    /*! Attempt to add a jar file as a URL to the system class loader */
-    @SuppressWarnings("unchecked")
-    public static void addURL(URL u) {
-        System.err.println("Loading URL " + u);
-        try {
-            Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-            method.setAccessible(true);
-            method.invoke(urlClassLoader, u);
-/*
-            JarInputStream jarFile = new JarInputStream(new FileInputStream(Paths.get(u.toURI()).toFile()));
-            JarEntry entry;
-            ArrayList<String> loadableClasses = new ArrayList<String>();
-            while (true) {
-                entry = jarFile.getNextJarEntry();
-                if (entry == null) {
-                    break;
-                }
-                if (entry.getName().endsWith(".class")) {
-                    String classPath = entry.getName();
-                    String className = classPath.substring(0, classPath.lastIndexOf('.'));
-                    className = className.replaceAll("\\/", ".");
-System.err.println("Found class: " + classPath + " = " + className);
-                    loadableClasses.add(className);
-                }
-            }
-
-            for (String className : loadableClasses) {
-                if (!className.contains("interfaces")) {
-System.err.println("Loading class " + className);
-                    urlClassLoader.loadClass(className);
-                }
-            }
-                
-
-            System.err.println("Classes now:");
-            Field f = ClassLoader.class.getDeclaredField("classes");
-            f.setAccessible(true);
-            Vector<Class> classes = (Vector<Class>)f.get(urlClassLoader);
-            for (Class c : classes) {
-                System.err.println("    " + c);
-            }
 */
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+
     }
 
-    /*! Open a sketch in a new Editor (if not running headless) and set up any preset values
-     *  specified on the command line.
-     */
-    static boolean doOpenThings(File sketch) throws IOException {
-
-        Sketch s = null;
-        Editor e = null;
-
-        if(!headless) {
-            e = createNewEditor(sketch.getAbsolutePath());
-
-            if(e == null) {
-                return false;
-            }
-
-
-            s = e.getSketch();
-        } else {
-            s = new Sketch(sketch);
-            s.loadConfig();
-        }
-
-        if(presetPort != null) {
-            s.setDevice(presetPort);
-        }
-
-        if(presetBoard != null) {
-            s.setBoard(presetBoard);
-        }
-
-        if(presetCore != null) {
-            s.setCore(presetCore);
-        }
-
-        if(presetCompiler != null) {
-            s.setCompiler(presetCompiler);
-        }
-
-        if(presetProgrammer != null) {
-            s.setProgrammer(presetProgrammer);
-        }
-
-        if (purgeCache) {
-            s.purgeCache();
-        }
-
-        if (cleanBuild) {
-            s.purgeBuildFiles();
-        }
-
-        if(e == null) {
-            if(autoProgram) {
-                if(!s.build()) {
-                    System.exit(10);
-                }
-                if (!s.upload()) {
-                    System.exit(10);
-                }
-            } else if(autoCompile) {
-                if (!s.build()) {
-                    System.exit(10);
-                }
-            }
-        } else {
-            if(autoProgram) {
-                e.program();
-            } else if(autoCompile) {
-                e.compile();
-            }
-        }
-
-        return true;
-    }
-
-    /*! Initialize any platform specific settings */
     static protected void initPlatform() {
         try {
-//            Class<?> platformClass = Class.forName("org.uecide.Platform");
 
             if(Base.isMacOS()) {
                 platform = new org.uecide.macosx.Platform();
-//                platformClass = Class.forName("org.uecide.macosx.Platform");
             } else if(Base.isWindows()) {
                 platform = new org.uecide.windows.Platform();
-//                platformClass = Class.forName("org.uecide.windows.Platform");
             } else if(Base.isUnix()) {
                 platform = new org.uecide.unix.Platform();
-//                platformClass = Class.forName("org.uecide.unix.Platform");
             }
 
-//            platform = (Platform) platformClass.newInstance();
         } catch(Exception e) {
-            Base.showError("Problem Setting the Platform",
-                           "An unknown error occurred while trying to load\n" +
-                           "platform-specific code for your machine.", e);
+            error("An unknown error occurred while trying to load platform-specific code for your machine.");
         }
     }
 
@@ -1376,7 +931,7 @@ System.err.println("Loading class " + className);
 
     /*! Create a new untitled document in a new sketch window.  */
     public static void handleNew() throws IOException {
-        createNewEditor(null);
+//        createNewEditor(null);
     }
 
 
@@ -1423,16 +978,17 @@ System.err.println("Loading class " + className);
     }
 
     /*! Opens a sketch given by *path* in a new Editor window */
+/*
     public static Editor createNewEditor(String path) throws IOException {
         Sketch s;
 
         if(path == null) {
-            s = new Sketch((File)null);
+            s = new Sketch((File)null, null);
         } else {
-            s = new Sketch(path);
+            s = new Sketch(path, null);
         }
 
-        Editor editor = new Editor(s);
+        Editor editor = new Editor(s.getContext(), s);
         editor.setVisible(true);
 
         if(path != null) {
@@ -1443,6 +999,7 @@ System.err.println("Loading class " + className);
 
         return editor;
     }
+*/
 
 // .................................................................
 
@@ -1547,12 +1104,6 @@ System.err.println("Loading class " + className);
         return null;
     }
 
-
-    public static Set<File> getLibraries() {
-        return libraries;
-    }
-
-
     public static File getExamplesFolder() {
         return examplesFolder;
     }
@@ -1603,181 +1154,6 @@ System.err.println("Loading class " + className);
         return sketchbookFolder;
     }
 
-    /**
-    * Used to determine whether to disable the "Show Sketch Folder" option.
-    * @return true If a means of opening a folder is known to be available.
-    */
-    static protected boolean openFolderAvailable() {
-        return platform.openFolderAvailable();
-    }
-
-
-    /**
-    * Implements the other cross-platform headache of opening
-    * a folder in the machine's native file browser.
-    */
-    public static void openFolder(File file) {
-        try {
-            platform.openFolder(file);
-
-        } catch(Exception e) {
-            showWarning(
-                i18n.string("err.badfolder.title"),
-                i18n.string("err.badfolder.body", file),
-                e
-            );
-        }
-    }
-
-
-    // .................................................................
-
-
-    /**
-    * Prompt for a fodler and return it as a File object (or null).
-    * Implementation for choosing directories that handles both the
-    * Mac OS X hack to allow the native AWT file dialog, or uses
-    * the JFileChooser on other platforms. Mac AWT trick obtained from
-    * <A HREF="http://lists.apple.com/archives/java-dev/2003/Jul/msg00243.html">this post</A>
-    * on the OS X Java dev archive which explains the cryptic note in
-    * Apple's Java 1.4 release docs about the special System property.
-    */
-    public static File selectFolder(String prompt, File folder, Frame frame) {
-        if(Base.isMacOS()) {
-            if(frame == null) frame = new Frame();  //.pack();
-
-            FileDialog fd = new FileDialog(frame, prompt, FileDialog.LOAD);
-
-            if(folder != null) {
-                fd.setDirectory(folder.getParent());
-                //fd.setFile(folder.getName());
-            }
-
-            System.setProperty("apple.awt.fileDialogForDirectories", "true");
-            fd.setVisible(true);
-            System.setProperty("apple.awt.fileDialogForDirectories", "false");
-
-            if(fd.getFile() == null) {
-                return null;
-            }
-
-            return new File(fd.getDirectory(), fd.getFile());
-
-        } else {
-            JFileChooser fc = new JFileChooser();
-            fc.setDialogTitle(prompt);
-
-            if(folder != null) {
-                fc.setSelectedFile(folder);
-            }
-
-            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-            int returned = fc.showOpenDialog(new JDialog());
-
-            if(returned == JFileChooser.APPROVE_OPTION) {
-                return fc.getSelectedFile();
-            }
-        }
-
-        return null;
-    }
-
-
-    // .................................................................
-
-
-    /**
-    * Give this Frame a Processing icon.
-    */
-    public static void setIcon(Frame frame) {
-        try {
-            frame.setIconImage(loadImageFromResource("icons/icon.png"));
-        } catch(Exception e) {
-            error(e);
-        }
-    }
-
-
-    /**
-    * Registers key events for a Ctrl-W and ESC with an ActionListener
-    * that will take care of disposing the window.
-    */
-    public static void registerWindowCloseKeys(JRootPane root, ActionListener disposer) {
-        KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-        root.registerKeyboardAction(disposer, stroke,
-                                    JComponent.WHEN_IN_FOCUSED_WINDOW);
-
-        int modifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-        stroke = KeyStroke.getKeyStroke('W', modifiers);
-        root.registerKeyboardAction(disposer, stroke,
-                                    JComponent.WHEN_IN_FOCUSED_WINDOW);
-    }
-
-
-    // .................................................................
-
-
-    /**
-    * "No cookie for you" type messages. Nothing fatal or all that
-    * much of a bummer, but something to notify the user about.
-    */
-    public static void showMessage(String title, String message) {
-        if(title == null) title = i18n.string("alert.message");
-
-        if(headless) {
-            System.out.println(title + ": " + message);
-
-        } else {
-            JOptionPane.showMessageDialog(new Frame(), message, title,
-                                          JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-
-    /**
-    * Non-fatal error message with optional stack trace side dish.
-    */
-    public static void showWarning(String title, String message, Exception e) {
-        if(title == null) title = i18n.string("alert.warning");
-
-        if(headless) {
-            System.out.println(title + ": " + message);
-
-        } else {
-            System.out.println(title + ": " + message);
-            JOptionPane.showMessageDialog(new Frame(), message, title,
-                                          JOptionPane.WARNING_MESSAGE);
-        }
-
-        if(e != null) error(e);
-    }
-
-
-    /**
-    * Show an error message that's actually fatal to the program.
-    * This is an error that can't be recovered. Use showWarning()
-    * for errors that allow P5 to continue running.
-    */
-    public static void showError(String title, String message, Throwable e) {
-        if(title == null) title = i18n.string("alert.error");
-
-        if(headless) {
-            System.err.println(title + ": " + message);
-
-        } else {
-            JOptionPane.showMessageDialog(new Frame(), message, title,
-                                          JOptionPane.ERROR_MESSAGE);
-        }
-
-        if(e != null) error(e);
-
-        System.exit(1);
-    }
-
-
-    // ...................................................................
-
     public static File getContentFile(String name) {
         String path = System.getProperty("user.dir");
 
@@ -1800,51 +1176,6 @@ System.err.println("Loading class " + className);
 
         return new File(working, name);
     }
-
-    public static void copyFile(File sourceFile, File targetFile) {
-        try {
-            Files.copy(sourceFile.toPath(), targetFile.toPath(), REPLACE_EXISTING);
-        } catch (IOException e) {
-            error(e);
-        }
-    }
-
-    /**
-    * Copy a folder from one place to another. This ignores all dot files and
-    * folders found in the source directory, to avoid copying silly .DS_Store
-    * files and potentially troublesome .svn folders.
-    */
-    public static void copyDir(File sourceDir, File targetDir) {
-        try {
-            if (!targetDir.exists()) {
-                if (!targetDir.mkdirs()) {
-                    error("Unable to make target folder " + targetDir.getAbsolutePath());
-                    return;
-                }
-            }
-            String files[] = sourceDir.list();
-
-            for(int i = 0; i < files.length; i++) {
-                // Ignore dot files (.DS_Store), dot folders (.svn) while copying
-                if(files[i].charAt(0) == '.') continue;
-
-                //if (files[i].equals(".") || files[i].equals("..")) continue;
-                File source = new File(sourceDir, files[i]);
-                File target = new File(targetDir, files[i]);
-
-                if(source.isDirectory()) {
-                    //target.mkdirs();
-                    copyDir(source, target);
-                    target.setLastModified(source.lastModified());
-                } else {
-                    copyFile(source, target);
-                }
-            }
-        } catch(Exception e) {
-            error(e);
-        }
-    }
-
 
     /**
     * Remove all files in a directory and the directory itself.
@@ -1882,99 +1213,11 @@ System.err.println("Loading class " + className);
         }
     }
 
-    public static void loadPlugins() {
-
-        PropertyFile availablePlugins = new PropertyFile("/org/uecide/config/plugins.txt");
-
-        for (String k : availablePlugins.childKeys()) {
-            String pluginClass = availablePlugins.get(k + ".class");
-            String pluginName = availablePlugins.get(k + ".name");
-            boolean pluginDefaultEnabled = availablePlugins.getBoolean(k + ".enabled");
-            boolean pluginIsEnabled = Preferences.getBoolean("plugins.enable." + k, pluginDefaultEnabled);
-
-            if (pluginIsEnabled) {
-                try {
-                    Debug.message("Enabling plugin " + pluginName);
-                    Class cl = Class.forName(pluginClass);
-                    plugins.put(cl.getName(), cl);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        loadJSPlugins();
-    }
-
-    public static Version getPluginVersion(String plugin) {
-
-        Class<?> pluginClass = plugins.get(plugin);
-        if (pluginClass == null) {
-            return new Version(null);
-        }
-        File f = Base.getJarLocation(pluginClass);
-
-        try {
-            JarFile myself = new JarFile(f);
-            Manifest manifest = myself.getManifest();
-            myself.close();
-            Attributes manifestContents = manifest.getMainAttributes();
-
-            return new Version(manifestContents.getValue("Version"));
-        } catch (IOException ex) {
-        }
-        return new Version(null);
-    }
-
-    public static String findClassInZipFile(File file) {
-        String base = file.getName();
-
-        if(!base.endsWith(".jar")) {
-            return null;
-        }
-
-        base = base.substring(0, base.length() - 4);
-
-        String classFileName = "/" + base + ".class";
-
-
-        try {
-            ZipFile zipFile = new ZipFile(file);
-            Enumeration<?> entries = zipFile.entries();
-
-            while(entries.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry) entries.nextElement();
-
-                if(!entry.isDirectory()) {
-                    String name = entry.getName();
-
-                    if(name.endsWith(classFileName)) {
-                        // Remove .class and convert slashes to periods.
-                        zipFile.close();
-                        return name.substring(0, name.length() - 6).replace('/', '.');
-                    }
-                }
-            }
-            zipFile.close();
-        } catch(IOException e) {
-            error(e);
-        }
-
-        return null;
-    }
-
     public static File getTmpDir() {
         return new File(System.getProperty("java.io.tmpdir"));
     }
 
     public static void applyPreferences() {
-        setLookAndFeel();
-        Editor.updateLookAndFeel();
-    }
-
-    public static void reloadPlugins() {
-        loadPlugins();
-        Editor.updateAllEditors();
     }
 
     static String openLauncher;
@@ -2105,16 +1348,9 @@ System.err.println("Loading class " + className);
     static public File[] getToolsFolders() { return getAnyFolders("tools"); }
     static public File[] getProgrammersFolders() { return getAnyFolders("programmers"); }
     static public File[] getBoardsFolders() { return getAnyFolders("boards"); }
-    static public File[] getPluginsFolders() { return getAnyFolders("plugins"); }
     static public File[] getCompilersFolders() { return getAnyFolders("compilers"); }
     static public File[] getLibrariesFolders() { return getAnyFolders("libraries"); }
     static public File[] getIconsFolders() { return getAnyFolders("icons"); }
-
-    static public void errorReport(Thread t, Throwable e) {
-        showError("Uncaught Exception", "An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")\n" +
-                  "The cause is: " + e.getCause() + "\n" +
-                  "The message is: " + e.getMessage() + "\n", e);
-    }
 
     static public void broken(Thread t, Throwable e) {
         if (headless) {
@@ -2148,34 +1384,15 @@ System.err.println("Loading class " + className);
         }
     }
 
-    public static byte[] loadBytesRaw(File file) throws FileNotFoundException, IOException {
-        FileInputStream input = new FileInputStream(file);
-
-        int size = (int) file.length();
-        byte buffer[] = new byte[size];
-        int offset = 0;
-        int bytesRead;
-
-        while((bytesRead = input.read(buffer, offset, size - offset)) != -1) {
-            offset += bytesRead;
-            if(bytesRead == 0) break;
-        }
-
-        input.close();
-
-        return buffer;
-    }
-
-
     public static void error(String e) {
-        Editor.broadcastError(e);
+//        Editor.broadcastError(e);
         System.err.println(e);
         Debug.message(e);
     }
 
     public static void error(Throwable e) {
 
-        Editor.broadcastError(e.getMessage());
+//        Editor.broadcastError(e.getMessage());
 
         try {
             Debug.message("");
@@ -2197,67 +1414,23 @@ System.err.println("Loading class " + className);
             ee.printStackTrace();
         }
 
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
-        System.err.println(sw.toString());
+        e.printStackTrace();
     }
 
     // This handy little function will rebuild the whole of the internals of
     // UECIDE - that is, all the boards, cores, compilers and libraries etc.
     public static void cleanAndScanAllSettings() throws IOException {
-        try {
-
-            SwingWorker<String, Object> worker = new SwingWorker<String, Object>() {
-                @Override
-                protected String doInBackground() throws Exception {
-                    cacheSystemFiles();
-                    Editor.lockAll();
-                    Editor.bulletAll(i18n.string("msg.loading.serial"));
-                    Serial.updatePortList();
-                    Serial.fillExtraPorts();
-                    Editor.bulletAll(i18n.string("msg.loading.assets"));
-
-                    IconManager.loadIconSets();
-                    rescanCompilers();
-                    rescanCores();
-                    rescanBoards();
-                    rescanProgrammers();
-                    rescanTools();
-                    rescanPlugins();
-                    rescanLibraries();
-
-                    waitForAssetLoading();
-
-                    buildPreferencesTree();
-
-                    IconManager.setIconFamily(Preferences.get("theme.icons"));
-
-                    return "OK";
-                }
-
-                @Override
-                protected void done() {
-                    Editor.unlockAll();
-                    Editor.bulletAll(i18n.string("msg.loading.updating"));
-                    try { Editor.updateAllEditors(); } catch (Exception e) {}
-                    try { Editor.selectAllEditorBoards(); } catch (Exception e) {}
-                    try { Editor.refreshAllEditors(); } catch (Exception e) {}
-                    Editor.bulletAll(i18n.string("msg.done"));
-                }
-            };
-            worker.execute();
-
-            //Editor.unlockAll();
-        } catch (Exception e) {
-        }
-    }
-
-    public static void rescanPlugins() {
-//        plugins = new TreeMap<String, Class<?>>();
-//        lookAndFeels = new TreeMap<String, Class<?>>();
-//        pluginInstances = new ArrayList<Plugin>();
-        loadPlugins();
+        cacheSystemFiles();
+        Serial.updatePortList();
+        Serial.fillExtraPorts();
+        rescanCompilers();
+        rescanCores();
+        rescanBoards();
+        rescanProgrammers();
+        rescanTools();
+        rescanLibraries();
+        waitForAssetLoading();
+        buildPreferencesTree();
     }
 
     public static void rescanCompilers() {
@@ -2279,8 +1452,8 @@ System.err.println("Loading class " + className);
         try {
 //            programmers = new TreeMap<String, Programmer>();
             loadProgrammers();
-            Editor.updateAllEditors();
-            Editor.selectAllEditorProgrammers();
+//            Editor.updateAllEditors();
+//            Editor.selectAllEditorProgrammers();
         } catch(Exception e) {
             error(e);
         }
@@ -2290,8 +1463,8 @@ System.err.println("Loading class " + className);
         try {
             boards = new TreeMap<String, Board>();
             loadBoards();
-            Editor.updateAllEditors();
-            Editor.selectAllEditorBoards();
+//            Editor.updateAllEditors();
+//            Editor.selectAllEditorBoards();
         } catch(Exception e) {
             error(e);
         }
@@ -2299,54 +1472,6 @@ System.err.println("Loading class " + className);
 
     public static void rescanLibraries() {
         gatherLibraries();
-    }
-
-    public static void updateLookAndFeel() {
-        Editor.updateLookAndFeel();
-    }
-
-    public static BufferedImage loadImageFromResource(String res) {
-        if(!res.startsWith("/")) {
-            res = "/org/uecide/" + res;
-        }
-
-        URL loc = Base.class.getResource(res);
-
-        if(loc == null) {
-            loc = Base.class.getResource("/org/uecide/icons/unknown.png");
-        }
-
-        try {
-            BufferedImage im = ImageIO.read(loc);
-            return im;
-        } catch(Exception e) {
-            error(e);
-        }
-
-        return null;
-    }
-
-    public static boolean copyResourceToFile(String res, File dest) {
-        try {
-            InputStream from = Base.class.getResourceAsStream(res);
-            OutputStream to =
-                new BufferedOutputStream(new FileOutputStream(dest));
-            byte[] buffer = new byte[16 * 1024];
-            int bytesRead;
-
-            while((bytesRead = from.read(buffer)) != -1) {
-                to.write(buffer, 0, bytesRead);
-            }
-
-            to.flush();
-            from.close();
-            to.close();
-        } catch(Exception e) {
-            error(e);
-            return false;
-        }
-
-        return true;
     }
 
     public Version getLatestVersion() {
@@ -2436,39 +1561,6 @@ System.err.println("Loading class " + className);
         System.err.print(caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): " + msg);
     }
 
-    public static String getFileAsString(File f) {
-        if (f == null) {
-            return "";
-        }
-        if (!f.exists()) {
-            return "";
-        }
-        if (f.isDirectory()) {
-            return "";
-        }
-        try {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            BufferedReader reader = new BufferedReader(new FileReader(f));
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-            reader.close();
-            return sb.toString();
-        } catch (FileNotFoundException ex) {
-        } catch (IOException ex) {
-        }
-        return "";
-    }
-
-    public static boolean yesno(String title, String question) {
-        if (!headless) {
-            return JOptionPane.showOptionDialog(null, question, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.YES_OPTION;
-        }
-        return false;
-    }
-
     public static void buildPreferencesTree() {
         preferencesTree = new PropertyFile();
 
@@ -2505,30 +1597,8 @@ System.err.println("Loading class " + className);
             preferencesTree.mergeData(prefs);
         }
 
-        for (Map.Entry<String, Class<?>> p : plugins.entrySet()) {
-            try {
-                Class<?> plg = p.getValue();
-                Method m = plg.getMethod("getPreferencesTree");
-                Object[] foo = null;
-                PropertyFile prefs = (PropertyFile)m.invoke(null, foo);
-                for (String k : prefs.keySet()) {
-                    prefs.setSource(k, "plugin:" + p.getKey());
-                }
-                preferencesTree.mergeData(prefs);
-            } catch (Exception e) {
-            }
-        }
-
         loadPreferencesTree("/org/uecide/config/prefs.txt");
         Context ctx = new Context();
-
-        for (JSPlugin p : jsplugins.values()) {
-            PropertyFile pf = (PropertyFile)p.call("getPreferencesTree", ctx, null);
-            if (pf != null) {
-                Base.preferencesTree.mergeData(pf);
-            }
-            p.onBoot();
-        }
 
     }
 
@@ -2549,55 +1619,6 @@ System.err.println("Loading class " + className);
     public static void loadPreferencesTree(String res) {
         PropertyFile pf = new PropertyFile(res);
         preferencesTree.mergeData(pf);
-    }
-
-    public static Object executeJavaScript(String resource, String function, Object[] args) {
-        Object ret = null;
-        try {
-            ScriptEngineManager manager = new ScriptEngineManager();
-            ScriptEngine engine = manager.getEngineByName("JavaScript");
-
-            String script = getResourceAsString(resource);
-
-            if (script == null) { return null; }
-            if (script.equals("")) { return null; }
-
-            engine.eval(script);
-
-            Invocable inv = (Invocable)engine;
-            ret = inv.invokeFunction(function, args);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return ret;
-    }
-
-    public static String getResourceAsString(String resource) {
-        String out = "";
-        try {
-            InputStream from = Base.class.getResourceAsStream(resource);
-            int bytesRead;
-
-            StringBuilder sb = new StringBuilder();
-
-            String line = null;
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(from));
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-
-            out = sb.toString();
-
-            reader.close();
-            from.close();
-        } catch(Exception e) {
-            error(e);
-        }
-        return out;
     }
 
     // This little routine works through each and every board, core and compiler and
@@ -2667,8 +1688,7 @@ System.err.println("Loading class " + className);
                 pw.close();
             }
 
-            PluginManager reqpm = new PluginManager();
-            APT reqapt = reqpm.getApt();
+            APT reqapt = APT.factory();
             reqapt.update(true, true);
             Package[] reqpkgs = reqapt.getPackages();
             for (Package p : reqpkgs) {
@@ -2688,160 +1708,6 @@ System.err.println("Loading class " + className);
 
     }
 
-    static String jTattooTheme(String name) {
-        String fontData = Preferences.get("theme.jtattoo.aafont");
-        String colourData = Preferences.get("theme.jtattoo.themes." + name);
-
-        if (fontData == null) fontData = "Default";
-        if (colourData == null) colourData = "Default";
-
-        String full = colourData + "-" + fontData;
-
-        full = full.replace("Default-", "");
-        full = full.replace("-Default", "");
-
-        return full;
-    }
-
-    public static void setLookAndFeel() {
-        String lafname = Preferences.get("theme.laf");
-
-        LookAndFeel laf = null;
-
-        try {
-
-            if (lafname.equals("gnome")) { 
-                new GnomeLAF().applyLAF(); 
-            } else if (lafname.equals("acryl")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme(jTattooTheme("acryl"));
-                com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme(p);
-                new JTattooAcrylLAF().applyLAF(); 
-            } else if (lafname.equals("aero")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.aero.AeroLookAndFeel.setTheme(jTattooTheme("aero"));
-                com.jtattoo.plaf.aero.AeroLookAndFeel.setTheme(p);
-                new JTattooAeroLAF().applyLAF();
-            } else if (lafname.equals("aluminium")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme(jTattooTheme("aluminium"));
-                com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme(p);
-                new JTattooAluminiumLAF().applyLAF(); 
-            } else if (lafname.equals("bernstein")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.bernstein.BernsteinLookAndFeel.setTheme(jTattooTheme("bernstein"));
-                com.jtattoo.plaf.bernstein.BernsteinLookAndFeel.setTheme(p);
-                new JTattooBernsteinLAF().applyLAF(); 
-            } else if (lafname.equals("fast")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.fast.FastLookAndFeel.setTheme(jTattooTheme("fast"));
-                com.jtattoo.plaf.fast.FastLookAndFeel.setTheme(p);
-                new JTattooFastLAF().applyLAF(); 
-            } else if (lafname.equals("graphite")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.graphite.GraphiteLookAndFeel.setTheme(jTattooTheme("graphite"));
-                com.jtattoo.plaf.graphite.GraphiteLookAndFeel.setTheme(p);
-                new JTattooGraphiteLAF().applyLAF(); 
-            } else if (lafname.equals("hifi")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.hifi.HiFiLookAndFeel.setTheme(jTattooTheme("hifi"));
-                com.jtattoo.plaf.hifi.HiFiLookAndFeel.setTheme(p);
-                new JTattooHiFiLAF().applyLAF(); 
-            } else if (lafname.equals("luna")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.luna.LunaLookAndFeel.setTheme(jTattooTheme("luna"));
-                com.jtattoo.plaf.luna.LunaLookAndFeel.setTheme(p);
-                new JTattooLunaLAF().applyLAF(); 
-            } else if (lafname.equals("mcwin")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.mcwin.McWinLookAndFeel.setTheme(jTattooTheme("mcwin"));
-                com.jtattoo.plaf.mcwin.McWinLookAndFeel.setTheme(p);
-                new JTattooMcWinLAF().applyLAF(); 
-            } else if (lafname.equals("mint")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.mint.MintLookAndFeel.setTheme(jTattooTheme("mint"));
-                com.jtattoo.plaf.mint.MintLookAndFeel.setTheme(p);
-                new JTattooMintLAF().applyLAF(); 
-            } else if (lafname.equals("noire")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.noire.NoireLookAndFeel.setTheme(jTattooTheme("noire"));
-                com.jtattoo.plaf.noire.NoireLookAndFeel.setTheme(p);
-                new JTattooNoireLAF().applyLAF(); 
-            } else if (lafname.equals("smart")) { 
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.smart.SmartLookAndFeel.setTheme(jTattooTheme("smart"));
-                com.jtattoo.plaf.smart.SmartLookAndFeel.setTheme(p);
-                new JTattooSmartLAF().applyLAF(); 
-            }
-            else if (lafname.equals("liquid")) { new LiquidLAF().applyLAF(); }
-            else if (lafname.equals("metal")) { new MetalLAF().applyLAF(); }
-            else if (lafname.equals("motif")) { new MotifLAF().applyLAF(); }
-            else if (lafname.equals("nimbus")) { new NimbusLAF().applyLAF(); }
-            else if (lafname.equals("office2003")) { new Office2003LAF().applyLAF(); }
-            else if (lafname.equals("officexp")) { new OfficeXPLAF().applyLAF(); }
-            else if (lafname.equals("systemdefault")) { new SystemDefaultLAF().applyLAF(); }
-            else if (lafname.equals("tinyforest")) { new TinyForestLAF().applyLAF(); }
-            else if (lafname.equals("tinygolden")) { new TinyGoldenLAF().applyLAF(); }
-            else if (lafname.equals("tinynightly")) { new TinyNightlyLAF().applyLAF(); }
-            else if (lafname.equals("tinyplastic")) { new TinyPlasticLAF().applyLAF(); }
-            else if (lafname.equals("tinysilver")) { new TinySilverLAF().applyLAF(); }
-            else if (lafname.equals("tinyunicode")) { new TinyUnicodeLAF().applyLAF(); }
-            else if (lafname.equals("vs2005")) { new VisualStudio2005LAF().applyLAF(); }
-            else if (lafname.equals("material")) { new MaterialLAF().applyLAF(); }
-            else if (lafname.equals("arduino")) { new ArduinoLAF().applyLAF(); }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
     public static boolean isQuiet() {
         return cli.isSet("quiet");
     }
@@ -2856,41 +1722,6 @@ System.err.println("Loading class " + className);
             }
         }
         return Locale.getDefault();
-    }
-
-    public static void loadJSPlugins() {
-        jsplugins = new HashMap<String, JSPlugin>();
-
-        File[] pfs = getPluginsFolders();
-        for (File pf : pfs) {
-            loadJSPluginsFromFolder(pf);
-        }
-
-        for (JSPlugin p : jsplugins.values()) {
-            p.onBoot();
-        }
-    }
-
-    public static void loadJSPluginsFromFolder(File f) {
-        if (!f.exists()) return;
-        if (!f.isDirectory()) return;
-        File[] files = f.listFiles();
-        for (File file : files) {
-            if (file.getName().endsWith(".jpl")) {
-                Debug.message("Loading javascript plugin " + file.getAbsolutePath());
-                JSPlugin p = new JSPlugin(file);
-                JSPlugin op = jsplugins.get(file.getName());
-                if (op != null) {
-                    Version vold = new Version(op.getVersion());
-                    Version vnew = new Version(p.getVersion());
-                    if (vold.compareTo(vnew) < 0) {
-                        jsplugins.put(file.getName(), p);
-                    }
-                } else {
-                    jsplugins.put(file.getName(), p);
-                }
-            }
-        }
     }
 
     public static void tryDelete(File file) {
@@ -2991,7 +1822,6 @@ System.err.println("Loading class " + className);
 
         Debug.message("Loading cores");
         loadCores();
-//        waitForAssetLoading();
 
         Debug.message("Loading compilers");
         loadCompilers();
@@ -3005,20 +1835,13 @@ System.err.println("Loading class " + className);
         Debug.message("Loading tools");
         loadTools();
 
-        Debug.message("Loading plugins");
-        loadPlugins();
-
         Debug.message("Loading icon sets");
-        IconManager.loadIconSets();
 
 
         Debug.message("Loading libraries");
         gatherLibraries();
 
-//        waitForAssetLoading();
-
         Debug.message("Loading assets done");
-        IconManager.setIconFamily(Preferences.get("theme.icons"));
     }
 
     public static boolean isHeadless() {
@@ -3039,23 +1862,53 @@ System.err.println("Loading class " + className);
         }
     }
 
-    private static void replaceSystemClassLoader() {
-        try {
-            urlClassLoader = new URLClassLoader(new URL[0], ClassLoader.getSystemClassLoader());
-
-            Field scl = ClassLoader.class.getDeclaredField("scl");
-            scl.setAccessible(true);
-            scl.set(null, urlClassLoader);
-            Thread.currentThread().setContextClassLoader(urlClassLoader);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
     public void setDisplayScaling() {
         int scale = Preferences.getInteger("theme.scale");
         Properties props = System.getProperties();
         props.setProperty("sun.java2d.uiScale", String.format("%d", scale));
+    }
+
+    public Context createContext(File sf, String gui) {
+        return createContext(sf, gui, true);
+    }
+
+    public Context createContext(File sf, String gui, boolean startSession) {
+        try {
+
+            Gui guiObject = null;
+            Context ctx = new Context();
+            switch (gui) {
+                case "cli": guiObject = new CliGui(ctx); break;
+                case "swing": guiObject = new SwingGui(ctx); break;
+                case "none": guiObject = new NoneGui(ctx); break;
+                default:
+                    System.err.println("Unknown GUI specified. Cannot continue.");
+                    System.exit(10);
+            }
+
+            ctx.setGui(guiObject);
+
+            sessions.add(ctx);
+
+            if (startSession) {
+                ctx.action("openSketch", sf);
+                if (presetPort != null) { ctx.action("SetDevice", presetPort); }
+                if (presetBoard != null) { ctx.action("SetBoard", presetBoard); }
+                if (presetCore != null) { ctx.action("SetCore", presetCore); }
+                if (presetCompiler != null) { ctx.action("SetCompiler", presetCompiler); }
+                if (presetProgrammer != null) { ctx.action("SetProgrammer", presetProgrammer); }
+                if (purgeCache) { ctx.action("Purge"); }
+                if (cleanBuild) { ctx.action("Purge"); }
+                if (autoProgram) { ctx.action("Upload", ctx.getSketch().getName()); }
+
+                guiObject.open();
+                ctx.action("openSketchFile", ctx.getSketch().getMainFile());
+            }
+            return ctx;
+        } catch (Exception e) {
+            error(e);
+        }
+        return null;
     }
 }
 

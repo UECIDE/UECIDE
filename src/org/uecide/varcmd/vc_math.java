@@ -33,8 +33,8 @@ package org.uecide.varcmd;
 import org.uecide.*;
 import java.util.*;
 
-public class vc_math implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_math extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
 
         Stack<Float> stack = new Stack<Float>();
@@ -44,8 +44,14 @@ public class vc_math implements VariableCommand {
             boolean isNumber = false;
 
             try {
-                val = Float.parseFloat(bit);
-                isNumber = true;
+
+                if (bit.startsWith("0x")) {
+                    val = (float)Integer.decode(bit);
+                    isNumber = true;
+                } else {
+                    val = Float.parseFloat(bit);
+                    isNumber = true;
+                }
             } catch (Exception e) {
                 isNumber = false;
             }

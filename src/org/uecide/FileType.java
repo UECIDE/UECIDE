@@ -38,8 +38,6 @@ import java.util.*;
 import java.net.*;
 import java.util.zip.*;
 import java.util.jar.*;
-import org.uecide.plugin.*;
-
 
 import javax.swing.*;
 import javax.imageio.*;

@@ -32,14 +32,10 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class foreach implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class foreach extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         if (arg.length != 3) {
-            for (String a : arg) {
-                System.err.print("foreach: " + a);
-            }
-            ctx.error("Usage: __builtin_foreach::item,item,item...::variable::script");
-            return false;
+            throw new BuiltinCommandException("Syntax Error");
         }
 
         String[] items = arg[0].split(",");

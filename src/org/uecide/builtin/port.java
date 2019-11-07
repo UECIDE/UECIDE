@@ -40,12 +40,12 @@ import javax.usb.*;
 import javax.usb.event.*;
 
 
-public class port implements BuiltinCommand {
+public class port extends BuiltinCommand {
     static CommunicationPort comPort = null;
 
-    public boolean main(org.uecide.Context ctx, String[] arg) {
+    public boolean main(org.uecide.Context ctx, String[] arg) throws BuiltinCommandException {
         if (arg.length == 0) {
-            return false;
+            throw new BuiltinCommandException("Syntax Error");
         }
         try {
             String action = arg[0];
@@ -160,16 +160,15 @@ public class port implements BuiltinCommand {
                     }
 
                     if (System.currentTimeMillis() - start > 10000) {
-                        ctx.error("Timeout looking for port");
-                        return false;
+                        throw new BuiltinCommandException("Timeout On Port");
                     }
                     currentList = newList;
                 }
             }
         } catch (Exception e) {
-            Base.error(e);
+            throw new BuiltinCommandException(e.getMessage());
         }
-        return false;
+        return true;
     }
 
     public void kill() {

@@ -46,11 +46,11 @@ import java.awt.*;
 import javax.swing.*;
 import java.io.*;
 
-public class ssh  implements BuiltinCommand {
+public class ssh  extends BuiltinCommand {
     String host;
     String user;
 
-    public boolean main(Context ctx, String[] arg) {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         try {
             JSch jsch = new JSch();
 

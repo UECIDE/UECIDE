@@ -32,11 +32,10 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class push implements BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) {
+public class push extends BuiltinCommand {
+    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
         if (arg.length != 2) {
-            ctx.error("Usage: __builtin_push::variable::value");
-            return false;
+            throw new BuiltinCommandException("Syntax Error");
         }
 
         String val = null;

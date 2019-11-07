@@ -32,12 +32,12 @@ package org.uecide.varcmd;
 
 import org.uecide.*;
 
-public class vc_if implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_if extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
 
         if(bits.length != 3) {
-            return "Syntax error in if - bad arg count";
+            throw new VariableCommandException("Syntax Error");
         } else {
             String condition = bits[0];
             String trueVal = bits[1];
@@ -46,7 +46,7 @@ public class vc_if implements VariableCommand {
             String[] conditionBits = condition.split("=");
 
             if(conditionBits.length != 2) {
-                return "Syntax Error in if - bad comparison";
+                throw new VariableCommandException("Bad Comparison");
             } else {
                 String leftVal = conditionBits[0].trim();
                 String rightVal = conditionBits[1].trim();
