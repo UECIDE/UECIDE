@@ -101,7 +101,7 @@ public class Base {
 
     public static Context systemContext;
 
-    public ArrayList<Context> sessions = new ArrayList<Context>();
+    public static ArrayList<Context> sessions = new ArrayList<Context>();
 
     public static CommandLine cli = new CommandLine();
 
@@ -1868,11 +1868,16 @@ public class Base {
         props.setProperty("sun.java2d.uiScale", String.format("%d", scale));
     }
 
-    public Context createContext(File sf, String gui) {
+    public static Context createContext(File sf) {
+        String gui = cli.getString("gui");
         return createContext(sf, gui, true);
     }
 
-    public Context createContext(File sf, String gui, boolean startSession) {
+    public static Context createContext(File sf, String gui) {
+        return createContext(sf, gui, true);
+    }
+
+    public static Context createContext(File sf, String gui, boolean startSession) {
         try {
 
             Gui guiObject = null;
@@ -1888,9 +1893,9 @@ public class Base {
 
             ctx.setGui(guiObject);
 
-            sessions.add(ctx);
 
             if (startSession) {
+                sessions.add(ctx);
                 ctx.action("openSketch", sf);
                 if (presetPort != null) { ctx.action("SetDevice", presetPort); }
                 if (presetBoard != null) { ctx.action("SetBoard", presetBoard); }
@@ -1909,6 +1914,14 @@ public class Base {
             error(e);
         }
         return null;
+    }
+
+    public static void cleanupSession(Context ctx) {
+        sessions.remove(ctx);
+        if (sessions.size() == 0) {
+            System.err.println("Last session exited - quitting");
+            System.exit(0);
+        }
     }
 }
 

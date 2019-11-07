@@ -40,8 +40,10 @@ public class SketchFile implements Comparable {
     }
 
     public void setFileData(String d) {
-        data = d;
-        bufferModified = System.currentTimeMillis();
+        if (!(data.equals(d))) {
+            data = d;
+            bufferModified = System.currentTimeMillis();
+        }
     }
 
     public String getFileData() {

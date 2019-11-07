@@ -15,6 +15,10 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
     ToolbarToggleButton compileButton;
     ToolbarToggleButton uploadButton;
 
+    ToolbarButton newSketchButton;
+    ToolbarButton openSketchButton;
+    ToolbarButton saveSketchButton;
+
     public MainToolbar(SwingGui g) {
         super();
         gui = g;
@@ -73,6 +77,18 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
 
 
             add(new ToolbarSpacer());
+
+            newSketchButton = new ToolbarButton(
+                "New Sketch", 
+                "main.new",
+                new ActionListener() {
+                    public void actionPerformed(ActionEvent ev) {
+                        ctx.action("newSketch");
+                    }
+                }
+            );
+
+            add(newSketchButton);
 
         } catch (IOException ex) {
             ex.printStackTrace();

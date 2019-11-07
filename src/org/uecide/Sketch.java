@@ -384,7 +384,20 @@ public class Sketch {
         return null;
     }
 
+    public TreeSet<SketchFile> getModifiedFiles() {
+        ctx.triggerEvent("fileDataRead");
+        TreeSet<SketchFile> list = new TreeSet<SketchFile>();
+        for (SketchFile f : sketchFiles.values()) {
+            if (f.isModified()) {
+                list.add(f);
+            }
+        }
+
+        return list;
+    }
+
     public boolean isModified() {
+        ctx.triggerEvent("fileDataRead");
         for (SketchFile f : sketchFiles.values()) {
             if (f.isModified()) return true;
         }
@@ -904,6 +917,8 @@ public class Sketch {
 
         filesToCompile = new ArrayList<File>();
 
+        ctx.triggerEvent("fileDataRead");
+
         for (SketchFile f : sketchFiles.values()) {
             switch (f.getType()) {
                 case FileType.ASMSOURCE:
@@ -1262,110 +1277,81 @@ public class Sketch {
         }
     }
 
+    public boolean isSketchFile(File f) throws IOException {
+        for (SketchFile sf : sketchFiles.values()) {
+            if (f.getCanonicalFile().equals(sf.getFile().getCanonicalFile())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean saveAs(File newPath) throws IOException {
         if(newPath.exists()) {
             boolean overwrite = ctx.getGui().askYesNo("Overwrite " + newPath.getName() + "?");
             if (!overwrite) return false;
+            Base.removeDescendants(newPath);
         }
 
         Debug.message("Save as " + newPath.getAbsolutePath());
+        // 1. Make the folder to store the files in
         newPath.mkdirs();
-        File newMainFile = new File(newPath, newPath.getName() + ".ino");
-        File oldMainFile = getMainFile().getFile();
 
-        // First let's copy the contents of the existing sketch folder, renaming the main file.
 
+        // 2. Copy any data that isn't a sketch file
         File[] files = sketchFolder.listFiles();
 
-        Base.removeDescendants(buildFolder);
+        for (File f : files) {
+            // Skip any sketch files
+            if (isSketchFile(f)) continue;
 
-        for(File f : files) {
-            if(f.equals(oldMainFile)) {
-                Debug.message("Copy main file " + f.getAbsolutePath() + " to " + newMainFile.getAbsolutePath());
-                Files.copy(f.toPath(), newMainFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                continue;
-            }
-
+            // Make a file to point to the destination
             File dest = new File(newPath, f.getName());
 
-            if(f.isDirectory()) {
-                Utils.copyDir(f, dest);
-                Debug.message("Copy dir " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
+            // Copy any folders ...
+            if (f.isDirectory()) {
+                // ... except the build folder
+                if (f != buildFolder) {
+                    Utils.copyDir(f, dest);
+                }
                 continue;
             }
 
-            Debug.message("Copy file " + f.getAbsolutePath() + " to " + dest.getAbsolutePath());
+            // And copy any plain files.
             Files.copy(f.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        String oldPrefix = sketchFolder.getAbsolutePath();
-        Debug.message("Old prefix: " + oldPrefix);
-        sketchFolder = newPath;
-        sketchName = newPath.getName();
-        Debug.message("Sketch name: " + sketchName);
-        isUntitled = false;
-        // Now we can shuffle the files around in the sketchFiles array.
-        // We want to try and keep the indexes in the same order if that
-        // is possible, so we'll use a numeric iterator.
+        // 3. Dump any file data from the sketch files into new files.
 
+        for (SketchFile sf : sketchFiles.values()) {
+            // New file destination, renaming the main file according to the folder name
+            File dest = new File(newPath, sf.isMainFile() ? newPath.getName() + ".ino" : sf.getFile().getName());
+            sf.saveDataToDisk(dest);
+        }
+
+        // 4. Load the newly created sketch into a new Sketch object and apply it to the context.
         Sketch newlyCreatedSketch = new Sketch(newPath, ctx);
         ctx.setSketch(newlyCreatedSketch);
+
+        // 5. Tell anyone who cares that the sketch object has changed.
         ctx.triggerEvent("sketchLoaded");
         return true;
     }
 
     public boolean save() throws IOException {
-/* TODO: REWRITE THIS LOT!
-        // We can't really save it if it's untitled - there's no point.
-        if(isUntitled()) {
+        if (isUntitled()) {
             return false;
         }
 
-        // Same if it's an example in a protected area:
-        if(parentIsProtected()) {
+        if (parentIsProtected()) {
             return false;
         }
 
-        if(Preferences.getBoolean("editor.save.version")) {
-            int numToSave = Preferences.getInteger("editor.save.version_num");
-            File versionsFolder = new File(sketchFolder, "backup");
+        // TODO: Implement backup versions
 
-            if(!versionsFolder.exists()) {
-                versionsFolder.mkdirs();
-            }
-
-            // Prune the oldest version if it exists
-            File last = new File(versionsFolder, sketchName + "-" + numToSave);
-
-            if(last.exists()) {
-                Debug.message("Deleting " + last.getAbsolutePath());
-                Base.tryDelete(last);
-            }
-
-            for(int i = numToSave - 1; i >= 1; i--) {
-                File low = new File(versionsFolder, sketchName + "-" + i);
-                File high = new File(versionsFolder, sketchName + "-" + (i + 1));
-
-                if(low.exists()) {
-                    Debug.message("Shuffling " + low.getAbsolutePath() + " to " + high.getAbsolutePath());
-                    low.renameTo(high);
-                }
-            }
-
-            File bottom = new File(versionsFolder, sketchName + "-1");
-            Debug.message("Backing up as " + bottom.getAbsolutePath());
-            bottom.mkdirs();
-
-            for(File f : sketchFiles) {
-                File to = new File(bottom, f.getName());
-                Debug.message("    Backing up " + f.getAbsolutePath() + " to " + to.getAbsolutePath());
-                Files.copy(f.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
+        for (SketchFile sf : sketchFiles.values()) {
+            sf.saveDataToDisk();
         }
-
-        saveAllFiles();
-        Debug.message("All saved");
-*/
         return true;
     }
 

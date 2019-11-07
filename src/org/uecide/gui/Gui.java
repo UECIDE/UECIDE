@@ -17,6 +17,7 @@ public abstract class Gui {
 
 
     public abstract void open();
+    public abstract void close();
     public abstract void message(String m);
     public abstract void warning(String m);
     public abstract void error(String m);
@@ -33,6 +34,7 @@ public abstract class Gui {
     public abstract String askString(String question, String defaultValue);
     public abstract File askSketchFilename(String question, File location);
     public abstract boolean askYesNo(String question);
+    public abstract int askYesNoCancel(String question);
 
 
 }

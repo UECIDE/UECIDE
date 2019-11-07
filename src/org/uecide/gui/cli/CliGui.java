@@ -1,34 +1,46 @@
 package org.uecide.gui.cli;
 
-import org.uecide.gui.*;
-import org.uecide.*;
-import org.uecide.actions.*;
+import org.uecide.APT;
+import org.uecide.Base;
+import org.uecide.Board;
+import org.uecide.Compiler;
+import org.uecide.Context;
+import org.uecide.Core;
+import org.uecide.Package;
+import org.uecide.Preferences;
+import org.uecide.Programmer;
+import org.uecide.Serial;
+import org.uecide.SketchFile;
 
-import org.jline.reader.*;
+import org.uecide.gui.Gui;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.File;
+import java.io.IOException;
+
+import org.jline.reader.Completer;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.EndOfFileException;
+import org.jline.reader.UserInterruptException;
 import org.jline.builtins.Completers.FileNameCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.builtins.Completers.TreeCompleter;
 
 import java.util.*;
-import java.io.*;
 
 import org.uecide.Compiler;
 import org.uecide.Package;
 
 public class CliGui extends Gui {
-
-    Context ctx;
-
     LineReader _reader;
     Completer _completer = null;
     APT _apt;
 
     public CliGui(Context c) {
-        ctx = c;
+        super(c);
     }
-
-    public void setContext(Context c) { ctx = c; }
-    public Context getContext() { return ctx; }
 
     void updateComplete() {
         ArrayList<String> flist = new ArrayList<String>();
@@ -152,12 +164,20 @@ public class CliGui extends Gui {
         return ctx.getSketch().getName();
     }
 
+    @Override
+    public void close() {
+        // We can only have one instance running. Since there's no way to interrupt the 
+        // line reader we'll just quit here.
+        System.exit(0);
+    }
+
+    @Override
     public void open() {
         String line;
 
         try {
             _apt = APT.factory();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             ctx.error(ex);
         }
 
@@ -264,18 +284,20 @@ public class CliGui extends Gui {
             Preferences.save();
             message("Bye");
             System.exit(0);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Preferences.save();
-            System.exit(10);
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//            Preferences.save();
+//            System.exit(10);
         }
     }
 
 
+    @Override
     public void message(String m) {
         System.out.println(m);
     }
 
+    @Override
     public void warning(String m) {
         if (!Base.isWindows()) {
             System.out.println("[33m" + m + "[0m");
@@ -284,6 +306,7 @@ public class CliGui extends Gui {
         }
     }
 
+    @Override
     public void error(String m) {
         if (!Base.isWindows()) {
             System.err.println("[31m" + m + "[0m");
@@ -292,6 +315,7 @@ public class CliGui extends Gui {
         }
     }
 
+    @Override
     public void error(Throwable m) {
         if (!Base.isWindows()) {
             System.err.print("[31m");
@@ -302,6 +326,7 @@ public class CliGui extends Gui {
         } 
     }
 
+    @Override
     public void heading(String m) {
         System.out.println(m);
         for (int i = 0; i < m.length(); i++) {
@@ -310,6 +335,7 @@ public class CliGui extends Gui {
         System.out.println();
     }
 
+    @Override
     public void command(String m) {
         if (!Base.isWindows()) {
             System.out.println("[32m" + m + "[0m");
@@ -318,27 +344,33 @@ public class CliGui extends Gui {
         }
     }
 
+    @Override
     public void bullet(String m) {
         System.out.println(" * " + m);
     }
 
+    @Override
     public void bullet2(String m) {
         System.out.println("   * " + m);
     }
 
+    @Override
     public void bullet3(String m) {
         System.out.println("     * " + m);
     }
 
+    @Override
     public void openSplash() {
         System.out.println("UECIDE version 0.11.0");
         System.out.println("(c) 2019 Majenko Technologies");
     }
 
+    @Override
     public void closeSplash() {
         System.out.println();
     }
 
+    @Override
     public void splashMessage(String message, int percent) {
         System.out.println(" * " + message);
     }
@@ -359,7 +391,9 @@ public class CliGui extends Gui {
 
                     p.waitFor();
                     ctx.getSketch().rescanFileTree();
-                } catch (Exception e) {
+                } catch (InterruptedException e) {
+                    ctx.error(e);
+                } catch (IOException e) {
                     ctx.error(e);
                 }
                 return;
@@ -398,6 +432,82 @@ public class CliGui extends Gui {
     }
 
     public static void init() {
+    }
+
+    @Override
+    public boolean askYesNo(String question) {
+        System.out.print(question + " (Y/N) ");
+        try {
+            int ch = System.in.read();
+            if ((ch == 'n') || (ch == 'N')) {
+                System.out.println("No");
+                return false;
+            }
+            if ((ch == 'y') || (ch == 'Y')) {
+                System.out.println("Yes");
+                return true;
+            }
+        } catch (IOException ex) {
+            ctx.error(ex);
+        }
+        return false;
+    }
+
+    @Override
+    public int askYesNoCancel(String question) {
+        System.out.print(question + " (Y/N/C) ");
+        try {
+            int ch = System.in.read();
+            if ((ch == 'y') || (ch == 'Y')) {
+                System.out.println("Yes");
+                return 0;
+            }
+            if ((ch == 'n') || (ch == 'N')) {
+                System.out.println("No");
+                return 1;
+            }
+            if ((ch == 'c') || (ch == 'C')) {
+                System.out.println("Cancel");
+                return 2;
+            }
+        } catch (IOException ex) {
+            ctx.error(ex);
+        }
+        return -1;
+    }
+
+    @Override
+    public File askSketchFilename(String question, File location) {
+        System.out.print(question + " ");
+        try {
+            BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+            String fn = r.readLine();
+            if (fn == null) return null;
+            if (fn.equals("")) return null;
+            File outFile = new File(location, fn);
+            return outFile;
+        } catch (IOException ex) {
+            ctx.error(ex);
+        }
+        return null;
+    }
+
+    @Override
+    public String askString(String question, String def) {
+        System.out.print(question + " ");
+        try {
+            BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+            String fn = r.readLine();
+            return fn;
+        } catch (IOException ex) {
+            ctx.error(ex);
+        }
+        return "";
+    }
+
+    @Override
+    public void openSketchFileEditor(SketchFile f) {
+        editFile(f.getFile().getName());
     }
 
 }

@@ -31,6 +31,7 @@ public abstract class Action {
             case "setpref": action = new SetPrefAction(c); break;
             case "opensketchfile": action = new OpenSketchFileAction(c); break;
             case "savesketch": action = new SaveSketchAction(c); break;
+            case "closesession": action = new CloseSessionAction(c); break;
             default:
                 c.error("Unknown action " + name);
                 return false;

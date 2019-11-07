@@ -14,6 +14,10 @@ public class SetDeviceAction extends Action {
                 throw new SyntaxErrorActionException();
             }
 
+            if (ctx == null) return false;
+
+            if (args[0] == null) return false;
+
             if (args[0] instanceof CommunicationPort) {
                 ctx.setDevice((CommunicationPort)args[0]);
                 ctx.action("setPref", "board." + ctx.getBoard().getName() + ".port", ctx.getDevice().toString());
@@ -39,7 +43,7 @@ public class SetDeviceAction extends Action {
                     }
                 }
 
-                ctx.error("Unknown device: " + (String)args[0]);
+//                ctx.error("Unknown device: " + (String)args[0]);
                 return false;
             }
             throw new BadArgumentActionException();

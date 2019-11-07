@@ -9,6 +9,8 @@ import java.util.*;
 import java.io.*;
 import java.awt.*;
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import org.uecide.Compiler;
 import org.uecide.Package;
@@ -47,7 +49,8 @@ public class SwingGui extends Gui implements ContextEventListener {
 
     public SwingGui(Context c) {
         super(c);
-        ctx.listenForEvent("buildStart", this);
+        ctx.listenForEvent("sketchLoaded", this);
+        ctx.listenForEvent("fileDataRead", this);
     }
 
     @Override
@@ -102,6 +105,15 @@ public class SwingGui extends Gui implements ContextEventListener {
 
         console = new Console(ctx);
         bottomPane.add(console);
+
+        window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                ctx.action("closeSession");
+            }
+        });
 
         System.err.println("Sorry, Swing GUI not implemented yet.");
     }
@@ -337,7 +349,15 @@ public class SwingGui extends Gui implements ContextEventListener {
     }
 
     public void contextEventTriggered(String event, Context ctx) {
-        flushDocumentData();
+        if (event.equals("fileDataRead")) {
+            flushDocumentData();
+            return;
+        }
+
+        if (event.equals("sketchLoaded")) {
+            window.setTitle("UECIDE :: " + ctx.getSketch().getName());
+            return;
+        }
     }
 
     @Override
@@ -396,5 +416,21 @@ public class SwingGui extends Gui implements ContextEventListener {
         Icon i = null;
         try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
         return (JOptionPane.showConfirmDialog(window, question, "Excuse me, but...", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, i) == JOptionPane.YES_OPTION);
+    }
+
+    @Override
+    public int askYesNoCancel(String question) {
+        Icon i = null;
+        try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
+        int rv = JOptionPane.showConfirmDialog(window, question, "Excuse me, but...", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, i);
+        if (rv == JOptionPane.YES_OPTION) return 0;
+        if (rv == JOptionPane.NO_OPTION) return 1;
+        if (rv == JOptionPane.CANCEL_OPTION) return 2;
+        return -1;
+    }
+
+    public void close() {
+        window.dispose();
+        Base.cleanupSession(ctx);
     }
 }
