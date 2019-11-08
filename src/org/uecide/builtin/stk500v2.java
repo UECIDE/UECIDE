@@ -140,12 +140,10 @@ public class stk500v2 extends BuiltinCommand implements CommsListener {
 
         port = null;
         for (CommunicationPort p : Base.communicationPorts) {
-System.err.println(p.toString());
             if (p.toString().equals(portName)) {
                 port = p;
             }
         }
-System.err.println("Port: " + port);
         if (port == null) {
             ctx.error("Unable to find port " + portName);
             return false;
@@ -240,7 +238,6 @@ System.err.println("Port: " + port);
 
             for(int i = 0; i < command.length; i++) {
                 port.write((byte)(command[i] & 0xFF));
-System.err.println(String.format("> [%02X]", command[i]));
                 checksum ^= command[i];
             }
 
@@ -253,11 +250,9 @@ System.err.println(String.format("> [%02X]", command[i]));
                 Thread.sleep(10);
                 to++;
                 if (to > 100) {
-System.err.println("Timeout");
                     return null;
                 }
             }
-System.err.println("Reply: " + replyData.get(1));
 
             return replyData;
 
@@ -774,7 +769,6 @@ e.printStackTrace();
         for (int i = 0; i < data.length; i++) {
             int recByte = (int)data[i];
 
-System.err.println(String.format("< [%02X]", recByte));
 
             switch(recPhase) {
                 case 0: // Message start

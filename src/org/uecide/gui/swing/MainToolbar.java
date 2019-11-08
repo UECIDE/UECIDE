@@ -31,6 +31,9 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
         ctx.listenForEvent("uploadFail", this);
         ctx.listenForEvent("uploadFinished", this);
 
+        setFloatable(false);
+        setBorderPainted(false);
+
         try {
 
             compileButton = new ToolbarToggleButton(

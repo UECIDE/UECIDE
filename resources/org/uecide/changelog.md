@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Open sketch
 * Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
 * Add null pointer protection to options;
@@ -721,6 +722,7 @@ Changelog
 0.8.5
 -----
 
+* Open sketch
 * Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
 * Add null pointer protection to options;

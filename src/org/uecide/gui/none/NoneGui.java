@@ -22,4 +22,7 @@ public class NoneGui extends CliGui {
 
     public static void init() {
     }
+
+    public static void endinit() {
+    }
 }

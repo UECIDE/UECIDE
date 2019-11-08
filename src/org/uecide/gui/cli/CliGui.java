@@ -434,6 +434,9 @@ public class CliGui extends Gui {
     public static void init() {
     }
 
+    public static void endinit() {
+    }
+
     @Override
     public boolean askYesNo(String question) {
         System.out.print(question + " (Y/N) ");
@@ -478,6 +481,22 @@ public class CliGui extends Gui {
 
     @Override
     public File askSketchFilename(String question, File location) {
+        System.out.print(question + " ");
+        try {
+            BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+            String fn = r.readLine();
+            if (fn == null) return null;
+            if (fn.equals("")) return null;
+            File outFile = new File(location, fn);
+            return outFile;
+        } catch (IOException ex) {
+            ctx.error(ex);
+        }
+        return null;
+    }
+
+    @Override
+    public File askOpenSketch(String question, File location) {
         System.out.print(question + " ");
         try {
             BufferedReader r = new BufferedReader(new InputStreamReader(System.in));

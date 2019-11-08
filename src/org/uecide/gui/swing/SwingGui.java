@@ -11,13 +11,17 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 import org.uecide.Compiler;
 import org.uecide.Package;
 import org.uecide.gui.swing.laf.LookAndFeel;
 
 
-public class SwingGui extends Gui implements ContextEventListener {
+public class SwingGui extends Gui implements ContextEventListener, TabChangeListener, TabMouseListener {
 
     Splash splash;
 
@@ -82,9 +86,33 @@ public class SwingGui extends Gui implements ContextEventListener {
         rightPane = new AutoTab();
         bottomPane = new AutoTab();
 
-        midright = new AbsoluteSplitPane(AbsoluteSplitPane.HORIZONTAL_SPLIT, centerPane, rightPane);
-        leftmid = new AbsoluteSplitPane(AbsoluteSplitPane.HORIZONTAL_SPLIT, leftPane, midright);
-        topbottom = new AbsoluteSplitPane(AbsoluteSplitPane.VERTICAL_SPLIT, leftmid, bottomPane);
+        leftPane.addTabMouseListener(this);
+        centerPane.addTabMouseListener(this);
+        rightPane.addTabMouseListener(this);
+        bottomPane.addTabMouseListener(this);
+
+        centerPane.addTabChangeListener(this);
+        
+        // This set of wrapper JPanels are needed for the themes to work properly.
+        JPanel leftPaneContainer = new JPanel();
+        leftPaneContainer.setLayout(new BorderLayout());
+        leftPaneContainer.add(leftPane, BorderLayout.CENTER);
+
+        JPanel centerPaneContainer = new JPanel();
+        centerPaneContainer.setLayout(new BorderLayout());
+        centerPaneContainer.add(centerPane, BorderLayout.CENTER);
+
+        JPanel rightPaneContainer = new JPanel();
+        rightPaneContainer.setLayout(new BorderLayout());
+        rightPaneContainer.add(rightPane, BorderLayout.CENTER);
+
+        JPanel bottomPaneContainer = new JPanel();
+        bottomPaneContainer.setLayout(new BorderLayout());
+        bottomPaneContainer.add(bottomPane, BorderLayout.CENTER);
+
+        midright = new AbsoluteSplitPane(AbsoluteSplitPane.HORIZONTAL_SPLIT, centerPaneContainer, rightPaneContainer);
+        leftmid = new AbsoluteSplitPane(AbsoluteSplitPane.HORIZONTAL_SPLIT, leftPaneContainer, midright);
+        topbottom = new AbsoluteSplitPane(AbsoluteSplitPane.VERTICAL_SPLIT, leftmid, bottomPaneContainer);
 
 
         window.add(topbottom, BorderLayout.CENTER);
@@ -183,6 +211,9 @@ public class SwingGui extends Gui implements ContextEventListener {
     }
 
     public static void init() {
+    }
+
+    public static void endinit() {
         try {
             IconManager.loadIconSets();
             IconManager.setIconFamily(Preferences.get("theme.icons"));
@@ -369,12 +400,49 @@ public class SwingGui extends Gui implements ContextEventListener {
 
     @Override
     public void openSketchFileEditor(SketchFile f) {
+        for (int i = 0; i < leftPane.getTabCount(); i++) {
+            Component c = leftPane.getComponentAt(i);
+            if (c instanceof CodeEditor) {
+                CodeEditor ce = (CodeEditor)c;
+                if (ce.getSketchFile() == f) {
+                    leftPane.setSelectedIndex(i);
+                    ce.requestFocus();
+                    return;
+                }
+            }
+        }
+
         for (int i = 0; i < centerPane.getTabCount(); i++) {
             Component c = centerPane.getComponentAt(i);
             if (c instanceof CodeEditor) {
                 CodeEditor ce = (CodeEditor)c;
                 if (ce.getSketchFile() == f) {
                     centerPane.setSelectedIndex(i);
+                    ce.requestFocus();
+                    return;
+                }
+            }
+        }
+
+        for (int i = 0; i < rightPane.getTabCount(); i++) {
+            Component c = rightPane.getComponentAt(i);
+            if (c instanceof CodeEditor) {
+                CodeEditor ce = (CodeEditor)c;
+                if (ce.getSketchFile() == f) {
+                    rightPane.setSelectedIndex(i);
+                    ce.requestFocus();
+                    return;
+                }
+            }
+        }
+
+        for (int i = 0; i < bottomPane.getTabCount(); i++) {
+            Component c = bottomPane.getComponentAt(i);
+            if (c instanceof CodeEditor) {
+                CodeEditor ce = (CodeEditor)c;
+                if (ce.getSketchFile() == f) {
+                    bottomPane.setSelectedIndex(i);
+                    ce.requestFocus();
                     return;
                 }
             }
@@ -382,6 +450,7 @@ public class SwingGui extends Gui implements ContextEventListener {
 
         CodeEditor ce = new CodeEditor(ctx, f);
         centerPane.add(ce);
+        ce.requestFocus();
     }
 
     public void flushDocumentData() {
@@ -450,4 +519,78 @@ public class SwingGui extends Gui implements ContextEventListener {
         window.dispose();
         Base.cleanupSession(ctx);
     }
+
+    public void tabAdded(TabChangeEvent e) {
+    }
+
+    public void tabRemoved(TabChangeEvent e) {
+    }
+
+    public void mouseTabEntered(TabPanel p, MouseEvent evt) {
+    }
+
+    public void mouseTabExited(TabPanel p, MouseEvent evt) {
+    }
+
+    public void mouseTabPressed(TabPanel p, MouseEvent evt) {
+        System.err.println(p);
+        System.err.println(evt);
+
+        if (evt.getButton() == 3) {
+            JPopupMenu menu = new JPopupMenu();
+            JMenu moveMenu = new JMenu("Move to");
+            menu.add(moveMenu);
+            JMenuItem moveLeft = new JMenuItem("Left panel");
+            moveLeft.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent inner) {
+                    leftPane.add(p);
+                }
+            });
+            moveMenu.add(moveLeft);
+            JMenuItem moveCenter = new JMenuItem("Center panel");
+            moveCenter.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent inner) {
+                    centerPane.add(p);
+                }
+            });
+            moveMenu.add(moveCenter);
+            JMenuItem moveRight = new JMenuItem("Right panel");
+            moveRight.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent inner) {
+                    rightPane.add(p);
+                }
+            });
+            moveMenu.add(moveRight);
+            JMenuItem moveBottom = new JMenuItem("Bottom panel");
+            moveBottom.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent inner) {
+                    bottomPane.add(p);
+                }
+            });
+            moveMenu.add(moveBottom);
+            menu.show(p.getTab(), evt.getX(), evt.getY());
+        }
+    }
+
+    public void mouseTabReleased(TabPanel p, MouseEvent evt) {
+    }
+
+    public void mouseTabClicked(TabPanel p, MouseEvent evt) {
+        AutoTab t = getPanelByTab(p);
+        if (t == null) return;
+        t.setSelectedComponent(p);
+    }
+
+    AutoTab getPanelByTab(TabPanel p) {
+        int i = leftPane.indexOfComponent(p);
+        if (i > -1) return leftPane;
+        i = centerPane.indexOfComponent(p);
+        if (i > -1) return centerPane;
+        i = rightPane.indexOfComponent(p);
+        if (i > -1) return rightPane;
+        i = bottomPane.indexOfComponent(p);
+        if (i > -1) return bottomPane;
+        return null;
+    }
+
 }

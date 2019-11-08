@@ -73,7 +73,6 @@ public class IconManager {
     }
 
     static HashMap<String, String> loadIconList(String path) throws IOException {
-System.err.println("Loading icon set from " + path);
         HashMap<String, String> out = new HashMap<String, String>();
         String data = FileManager.loadTextFile(path);
         String[] lines = data.split("\n");

@@ -33,15 +33,14 @@ public class SketchSourceFileNode extends SketchTreeNodeBase {
 
     public JPopupMenu getPopupMenu() {
         JPopupMenu menu = new JPopupMenu();
-//        if (!sketchFile.isMainFile()) {
+        if (!sketchFile.isMainFile()) {
             menu.add(new DeleteFileMenuItem(ctx, sketchFile.getFile()));
             menu.add(new RenameFileMenuItem(ctx, sketchFile.getFile()));
-//        }
+        }
         return menu;
     }
 
     public void performDoubleClick() {
-        ctx.warning("I want to open " + sketchFile.getFile().getAbsolutePath());
         ctx.action("openSketchFile", sketchFile);
     }
 

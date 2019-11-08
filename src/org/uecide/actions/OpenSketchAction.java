@@ -14,7 +14,6 @@ public class OpenSketchAction extends Action {
         if (args.length == 0) { 
             file = ctx.getGui().askOpenSketch("Open Sketch", Base.getSketchbookFolder());
             if (file == null) {
-                System.err.println("It cancelled?");
                 return false;
             }
         }

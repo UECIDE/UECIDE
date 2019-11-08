@@ -30,6 +30,7 @@ public class CodeEditor extends TabPanel  {
         scrollPane = new RTextScrollPane(textArea);
         add(scrollPane, BorderLayout.CENTER);
         textArea.setText(f.getFileData());
+        textArea.requestFocus();
     }
 
     public SketchFile getSketchFile() {
@@ -38,5 +39,9 @@ public class CodeEditor extends TabPanel  {
 
     public void flushData() {
         file.setFileData(textArea.getText());
+    }
+
+    public void requestFocus() {
+        textArea.requestFocus();
     }
 }

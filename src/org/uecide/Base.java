@@ -630,6 +630,16 @@ public class Base {
 //        ServiceManager.addService(new TreeUpdaterService());        
         ServiceManager.addService(new PortListUpdaterService());
 
+        switch (gui) {
+            case "cli": CliGui.endinit(); break;
+            case "swing": SwingGui.endinit(); break;
+            case "none": NoneGui.endinit(); break;
+            default:
+                System.err.println("Unknown GUI specified. Cannot continue.");
+                System.exit(10);
+        }
+        
+
         systemContext.getGui().closeSplash();
 
         createContext(null, gui);
