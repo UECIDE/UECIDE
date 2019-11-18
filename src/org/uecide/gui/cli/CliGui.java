@@ -529,4 +529,8 @@ public class CliGui extends Gui {
         editFile(f.getFile().getName());
     }
 
+    @Override
+    public void closeSketchFileEditor(SketchFile f) {
+    }
+
 }

@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Movable tabs
 * Open sketch
 * Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
@@ -722,6 +723,7 @@ Changelog
 0.8.5
 -----
 
+* Movable tabs
 * Open sketch
 * Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality

@@ -230,6 +230,11 @@ public class Serial {
                 continue;
             }
 
+            if(devfile.getName().startsWith("ttyS")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
+
             if(devfile.getName().startsWith("rfcomm")) {
                 names.add(devfile.getAbsolutePath());
                 continue;

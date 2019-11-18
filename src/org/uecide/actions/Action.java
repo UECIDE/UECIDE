@@ -33,6 +33,7 @@ public abstract class Action {
             case "savesketch": action = new SaveSketchAction(c); break;
             case "savesketchas": action = new SaveSketchAsAction(c); break;
             case "closesession": action = new CloseSessionAction(c); break;
+            case "closesketchfile": action = new CloseSketchFileAction(c); break;
             default:
                 c.error("Unknown action " + name);
                 return false;

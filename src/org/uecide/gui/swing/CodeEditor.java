@@ -6,6 +6,14 @@ import org.uecide.SketchFile;
 import org.uecide.Preferences;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
@@ -19,6 +27,8 @@ public class CodeEditor extends TabPanel  {
     RTextScrollPane scrollPane;
     RSyntaxTextArea textArea;
     RSyntaxDocument document;
+
+    JPanel tabPanel = null;
 
     public CodeEditor(Context c, SketchFile f) {
         super(f.getFile().getName());
@@ -43,5 +53,34 @@ public class CodeEditor extends TabPanel  {
 
     public void requestFocus() {
         textArea.requestFocus();
+    }
+
+    @Override
+    public Component getTab() {
+        if (tabPanel == null) {
+            tabPanel = new JPanel();
+            tabPanel.setLayout(new BorderLayout());
+            JLabel l = new JLabel(file.getFile().getName());
+            tabPanel.add(l, BorderLayout.CENTER);
+            try {
+                JLabel ico = new JLabel("");
+                ico.setIcon(IconManager.getIcon(16, "mime." + FileType.getIcon(file.getFile().getName())));
+                tabPanel.add(ico, BorderLayout.WEST);
+            } catch (Exception ex) { }
+            
+            try {
+                JButton ico = new JButton(IconManager.getIcon(16, "tabs.close"));
+                ico.setBorderPainted(false);
+                ico.setFocusPainted(false);
+                ico.setContentAreaFilled(false);
+                ico.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        ctx.action("closeSketchFile", file);
+                    }
+                });
+                tabPanel.add(ico, BorderLayout.EAST);
+            } catch (Exception ex) { }
+        }
+        return tabPanel;
     }
 }

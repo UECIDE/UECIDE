@@ -31,6 +31,7 @@ public abstract class Gui {
     public abstract void closeSplash();
     public abstract void splashMessage(String message, int percent);
     public abstract void openSketchFileEditor(SketchFile f);
+    public abstract void closeSketchFileEditor(SketchFile f);
     public abstract String askString(String question, String defaultValue);
     public abstract File askSketchFilename(String question, File location);
     public abstract boolean askYesNo(String question);

@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import javax.swing.JTabbedPane;
+import javax.swing.JFrame;
 import java.awt.Component;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 public class AutoTab extends JTabbedPane implements MouseListener {
     ArrayList<TabChangeListener> listeners = new ArrayList<TabChangeListener>();
     ArrayList<TabMouseListener> mouseListeners = new ArrayList<TabMouseListener>();
+    boolean separateWindow = false;
+    JFrame parentWindow = null;
     public AutoTab() {
         super(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
     }
@@ -22,6 +25,22 @@ public class AutoTab extends JTabbedPane implements MouseListener {
             }
         }
         return null;
+    }
+
+    public void setSeparateWindow(boolean w) {
+        separateWindow = w;
+    }
+
+    public void setParentWindow(JFrame w) {
+        parentWindow = w;
+    }
+
+    public boolean isSeparateWindow() {
+        return separateWindow;
+    }
+
+    public JFrame getParentWindow() {
+        return parentWindow;
     }
 
     @Override

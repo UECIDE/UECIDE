@@ -36,6 +36,8 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     AutoTab rightPane;
     AutoTab bottomPane;
 
+    ArrayList<AutoTab> panes = new ArrayList<AutoTab>();
+
     MainToolbar toolbar;
 
     JMenuBar menu;
@@ -91,6 +93,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         rightPane.addTabMouseListener(this);
         bottomPane.addTabMouseListener(this);
 
+        panes.add(leftPane);
+        panes.add(centerPane);
+        panes.add(rightPane);
+        panes.add(bottomPane);
+
         centerPane.addTabChangeListener(this);
         
         // This set of wrapper JPanels are needed for the themes to work properly.
@@ -143,7 +150,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
             }
         });
 
-        System.err.println("Sorry, Swing GUI not implemented yet.");
+        System.err.println("Sorry, Swing GUI not fully implemented yet.");
     }
 
     @Override
@@ -400,50 +407,16 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     @Override
     public void openSketchFileEditor(SketchFile f) {
-        for (int i = 0; i < leftPane.getTabCount(); i++) {
-            Component c = leftPane.getComponentAt(i);
-            if (c instanceof CodeEditor) {
-                CodeEditor ce = (CodeEditor)c;
-                if (ce.getSketchFile() == f) {
-                    leftPane.setSelectedIndex(i);
-                    ce.requestFocus();
-                    return;
-                }
-            }
-        }
-
-        for (int i = 0; i < centerPane.getTabCount(); i++) {
-            Component c = centerPane.getComponentAt(i);
-            if (c instanceof CodeEditor) {
-                CodeEditor ce = (CodeEditor)c;
-                if (ce.getSketchFile() == f) {
-                    centerPane.setSelectedIndex(i);
-                    ce.requestFocus();
-                    return;
-                }
-            }
-        }
-
-        for (int i = 0; i < rightPane.getTabCount(); i++) {
-            Component c = rightPane.getComponentAt(i);
-            if (c instanceof CodeEditor) {
-                CodeEditor ce = (CodeEditor)c;
-                if (ce.getSketchFile() == f) {
-                    rightPane.setSelectedIndex(i);
-                    ce.requestFocus();
-                    return;
-                }
-            }
-        }
-
-        for (int i = 0; i < bottomPane.getTabCount(); i++) {
-            Component c = bottomPane.getComponentAt(i);
-            if (c instanceof CodeEditor) {
-                CodeEditor ce = (CodeEditor)c;
-                if (ce.getSketchFile() == f) {
-                    bottomPane.setSelectedIndex(i);
-                    ce.requestFocus();
-                    return;
+        for (AutoTab pane : panes) {
+            for (int i = 0; i < pane.getTabCount(); i++) {
+                Component c = pane.getComponentAt(i);
+                if (c instanceof CodeEditor) {
+                    CodeEditor ce = (CodeEditor)c;
+                    if (ce.getSketchFile() == f) {
+                        pane.setSelectedIndex(i);
+                        ce.requestFocus();
+                        return;
+                    }
                 }
             }
         }
@@ -453,12 +426,30 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         ce.requestFocus();
     }
 
+    @Override
+    public void closeSketchFileEditor(SketchFile f) {
+        flushDocumentData();
+        for (AutoTab pane : panes) {
+            for (int i = 0; i < pane.getTabCount(); i++) {
+                Component c = pane.getComponentAt(i);
+                if (c instanceof CodeEditor) {
+                    CodeEditor ce = (CodeEditor)c;
+                    if (ce.getSketchFile() == f) {
+                        pane.remove(ce);
+                    }
+                }
+            }
+        }
+    }
+
     public void flushDocumentData() {
-        for (int i = 0; i < centerPane.getTabCount(); i++) {
-            Component c = centerPane.getComponentAt(i);
-            if (c instanceof CodeEditor) {
-                CodeEditor ce = (CodeEditor)c;
-                ce.flushData();
+        for (AutoTab pane : panes) {
+            for (int i = 0; i < pane.getTabCount(); i++) {
+                Component c = pane.getComponentAt(i);
+                if (c instanceof CodeEditor) {
+                    CodeEditor ce = (CodeEditor)c;
+                    ce.flushData();
+                }
             }
         }
     }
@@ -533,41 +524,118 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     }
 
     public void mouseTabPressed(TabPanel p, MouseEvent evt) {
-        System.err.println(p);
-        System.err.println(evt);
-
         if (evt.getButton() == 3) {
+
+    
             JPopupMenu menu = new JPopupMenu();
             JMenu moveMenu = new JMenu("Move to");
             menu.add(moveMenu);
             JMenuItem moveLeft = new JMenuItem("Left panel");
             moveLeft.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent inner) {
+                    AutoTab parentTabs = null;
+                    if (p.getParent() instanceof AutoTab) {
+                        parentTabs = (AutoTab)p.getParent();
+                    }
                     leftPane.add(p);
+                    if ((parentTabs != null) && parentTabs.isSeparateWindow()) {
+                        if (parentTabs.getTabCount() == 0) {
+                            parentTabs.getParentWindow().dispose();
+                        }
+                    }
                 }
             });
             moveMenu.add(moveLeft);
             JMenuItem moveCenter = new JMenuItem("Center panel");
             moveCenter.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent inner) {
+                    AutoTab parentTabs = null;
+                    if (p.getParent() instanceof AutoTab) {
+                        parentTabs = (AutoTab)p.getParent();
+                    }
                     centerPane.add(p);
+                    if ((parentTabs != null) && parentTabs.isSeparateWindow()) {
+                        if (parentTabs.getTabCount() == 0) {
+                            parentTabs.getParentWindow().dispose();
+                        }
+                    }
                 }
             });
             moveMenu.add(moveCenter);
             JMenuItem moveRight = new JMenuItem("Right panel");
             moveRight.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent inner) {
+                    AutoTab parentTabs = null;
+                    if (p.getParent() instanceof AutoTab) {
+                        parentTabs = (AutoTab)p.getParent();
+                    }
                     rightPane.add(p);
+                    if ((parentTabs != null) && parentTabs.isSeparateWindow()) {
+                        if (parentTabs.getTabCount() == 0) {
+                            parentTabs.getParentWindow().dispose();
+                        }
+                    }
                 }
             });
             moveMenu.add(moveRight);
             JMenuItem moveBottom = new JMenuItem("Bottom panel");
             moveBottom.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent inner) {
+                    AutoTab parentTabs = null;
+                    if (p.getParent() instanceof AutoTab) {
+                        parentTabs = (AutoTab)p.getParent();
+                    }
                     bottomPane.add(p);
+                    if ((parentTabs != null) && parentTabs.isSeparateWindow()) {
+                        if (parentTabs.getTabCount() == 0) {
+                            parentTabs.getParentWindow().dispose();
+                        }
+                    }
                 }
             });
             moveMenu.add(moveBottom);
+            moveMenu.addSeparator();
+            JMenuItem newWindow = new JMenuItem("Separate window");
+            newWindow.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent inner) {
+
+                    AutoTab parentTabs = null;
+                    if (p.getParent() instanceof AutoTab) {
+                        parentTabs = (AutoTab)p.getParent();
+                    }
+
+                    JFrame f = new JFrame();
+                    JPanel pan = new JPanel();
+                    AutoTab t = new AutoTab();
+                    t.setSeparateWindow(true);
+                    t.setParentWindow(f);
+                    pan.setLayout(new BorderLayout());
+                    pan.add(t, BorderLayout.CENTER);
+                    f.setLayout(new BorderLayout());
+                    f.add(pan, BorderLayout.CENTER);
+
+                    panes.add(t);
+                    t.add(p);
+                    f.setVisible(true);
+
+                    t.addTabMouseListener(SwingGui.this);
+                    f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+                    f.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowClosing(WindowEvent e) {
+//                            ctx.action("closeSession");
+                        }
+                    });
+
+                    if ((parentTabs != null) && parentTabs.isSeparateWindow()) {
+                        if (parentTabs.getTabCount() == 0) {
+                            parentTabs.getParentWindow().dispose();
+                        }
+                    }
+                }
+            });
+            moveMenu.add(newWindow);
             menu.show(p.getTab(), evt.getX(), evt.getY());
         }
     }

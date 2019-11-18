@@ -20,17 +20,17 @@ Group: System
 Subgroup: Scriptlets
 
 Package: ctags
-Version: 1.0.5
+Version: 1.0.6
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 2813
+Installed-Size: 3124
 Priority: required
 Section: main
-Filename: pool/main/c/ctags/ctags_1.0.5_all.deb
-Size: 496724
-SHA256: 3333b4f97a0bfc75f5af093315b8f86ce44839114c4f6aff54c7d6bdff398f54
-SHA1: 1356b7d547d09c3ec92bcd5b44e2593955e96749
-MD5sum: e6102f11d158987a5487e30783bea43a
+Filename: pool/main/c/ctags/ctags_1.0.6_all.deb
+Size: 585356
+SHA256: a2457e0665b003a8d87df46c9dd7a1639bf5a2dc77fd47f67d7a71737d4b8f8c
+SHA1: f9f91bf7065de9bc6560968008352cc90a6c7db6
+MD5sum: 3e7f8a1e8515141bf68644295c579b95
 Description: Exuberant CTags Parser
  This is the main parser for INO files used for gathering function prototypes.
 Group: System
