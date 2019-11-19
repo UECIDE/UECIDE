@@ -16,12 +16,12 @@ public class SketchTreeNode extends SketchTreeNodeBase {
     SketchTreeLibrariesNode sketchTreeLibrariesNode;
     SketchTreeOutputNode sketchTreeOutputNode;
 
-    public SketchTreeNode(Context c) {
-        super(c, c.getSketch().getName());
-        sketchSourceFilesNode = new SketchSourceFilesNode(c);
-        sketchHeaderFilesNode = new SketchHeaderFilesNode(c);
-        sketchTreeLibrariesNode = new SketchTreeLibrariesNode(c);
-        sketchTreeOutputNode = new SketchTreeOutputNode(c);
+    public SketchTreeNode(Context c, SketchTreeModel m) {
+        super(c, m, c.getSketch().getName());
+        sketchSourceFilesNode = new SketchSourceFilesNode(ctx, model);
+        sketchHeaderFilesNode = new SketchHeaderFilesNode(ctx, model);
+        sketchTreeLibrariesNode = new SketchTreeLibrariesNode(ctx, model);
+        sketchTreeOutputNode = new SketchTreeOutputNode(ctx, model);
 
         add(sketchSourceFilesNode);
         add(sketchHeaderFilesNode);
@@ -39,6 +39,7 @@ public class SketchTreeNode extends SketchTreeNodeBase {
         if(sketchHeaderFilesNode.updateChildren()) modified = true;
         if(sketchTreeLibrariesNode.updateChildren()) modified = true;
         if(sketchTreeOutputNode.updateChildren()) modified = true;
+        if (modified) model.reload(this);
         return modified;
     }
 

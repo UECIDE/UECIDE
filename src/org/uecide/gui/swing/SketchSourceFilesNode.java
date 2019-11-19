@@ -17,8 +17,8 @@ import java.util.Comparator;
 import java.util.Enumeration;
 
 public class SketchSourceFilesNode extends SketchTreeNodeBase {
-    public SketchSourceFilesNode(Context c) {
-        super(c, "Source");
+    public SketchSourceFilesNode(Context c, SketchTreeModel m) {
+        super(c, m, "Source");
         updateChildren();
     }
 
@@ -44,10 +44,20 @@ public class SketchSourceFilesNode extends SketchTreeNodeBase {
         for (SketchFile f : ctx.getSketch().getSketchFiles().values()) {
             if (f.getGroup() == FileType.GROUP_SOURCE) {
                 if (!hasChildFile(f)) {
-                    SketchSourceFileNode sfn = new SketchSourceFileNode(ctx, f);
+                    SketchSourceFileNode sfn = new SketchSourceFileNode(ctx, model, f);
                     add(sfn);
                     hasBeenModified = true;
                 }
+            }
+        }
+
+        if (hasBeenModified) model.reload(this);
+
+        for (Enumeration e = children(); e.hasMoreElements();) {
+            SketchSourceFileNode child = (SketchSourceFileNode)e.nextElement();
+            if (child.updateChildren()) {
+                hasBeenModified = true;
+                break;
             }
         }
 

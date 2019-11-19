@@ -129,7 +129,21 @@ public class FunctionBookmark {
     }
 
     public String toString() {
-        return formatted().trim();
+        switch (type) {
+            case FUNCTION:
+                return returnType + " " + name + paramList;
+            case VARIABLE:
+                return returnType + " " + name;
+            case MEMBER_FUNCTION:
+                return returnType + " " + name + paramList;
+            case MEMBER_VARIABLE:
+                return returnType + " " + name;
+            case DEFINE:
+                return "#define " + name;
+            case CLASS:
+                return "class " + name;
+        }
+        return name;
     }
 
     public File getFile() {
@@ -166,6 +180,28 @@ public class FunctionBookmark {
 
     public String getReturnType() {
         return returnType;
+    }
+
+    public String getParamList() {
+        return paramList;
+    }
+
+    public boolean equals(FunctionBookmark other) {
+        if (type != other.getType()) { return false; }
+        if (!(name.equals(other.getName()))) { return false; }
+        if ((returnType != null) && !(returnType.equals(other.getReturnType()))) { return false; }
+        if ((parentClass == null) && (other.getParentClass() != null)) { return false; }
+        if ((parentClass != null) && (other.getParentClass() == null)) { return false; }
+        if ((parentClass != null) && (!(parentClass.equals(other.getParentClass())))) { return false; }
+        if (line != other.getLine()) { return false; }
+        if ((paramList != null) && (!(paramList.equals(other.getParamList())))) { return false; }
+        try {
+            if (!(file.getCanonicalPath().equals(other.getFile().getCanonicalPath()))) { return false; }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }
 

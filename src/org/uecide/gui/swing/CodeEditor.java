@@ -19,6 +19,9 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class CodeEditor extends TabPanel  {
     Context ctx;
@@ -41,6 +44,14 @@ public class CodeEditor extends TabPanel  {
         add(scrollPane, BorderLayout.CENTER);
         textArea.setText(f.getFileData());
         textArea.requestFocus();
+
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                flushData();
+            }
+        }, 5000, 5000);
     }
 
     public SketchFile getSketchFile() {

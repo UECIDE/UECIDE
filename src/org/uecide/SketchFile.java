@@ -43,6 +43,7 @@ public class SketchFile implements Comparable {
         if (!(data.equals(d))) {
             data = d;
             bufferModified = System.currentTimeMillis();
+            ctx.triggerEvent("SketchDataModified");
         }
     }
 
@@ -229,33 +230,47 @@ public class SketchFile implements Comparable {
 
     public ArrayList<FunctionBookmark> scanForFunctions() throws IOException {
 
+        ctx.triggerEvent("fileDataRead");
+
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
 
         Tool t = Base.getTool("ctags");
         if (t != null) {
             Pattern pat = Pattern.compile("\\^([^\\(]+)\\(");
+            File tmp = new File(sketch.buildFolder, "tmp");
+            if (!tmp.exists()) {
+                tmp.mkdirs();
+            }
+
+            File tempSource = new File(tmp, file.getName());
+            saveDataToDisk(tempSource);
             ctx.set("filename", file.getName());
             ctx.set("sketch.root", file.getParentFile().getAbsolutePath());
             ctx.set("build.root", sketch.buildFolder.getAbsolutePath());
             ctx.set("build.path", sketch.buildFolder.getAbsolutePath());
+            ctx.set("tmp.root", tmp.getAbsolutePath());
             ctx.startBuffer(true);
-            t.execute(ctx, "ctags.parse.ino");
+            t.execute(ctx, "ctags.bookmark");
             ctx.endBuffer();
 
-            File tags = new File(sketch.buildFolder, file.getName() + ".tags");
+            File tags = new File(tmp, file.getName() + ".tags");
             if (tags.exists()) { // We got the tags
                 String tagData = Utils.getFileAsString(tags);
                 String[] tagLines = tagData.split("\n");
 
                 for (String tagLine : tagLines) {
-
                     String[] chunks = tagLine.split("\t");
 
                     if (chunks[0].startsWith("!")) continue;
 
                     String itemName = chunks[0].trim();
                     String fileName = chunks[1].trim();
+                    String returnText = chunks[2].trim();
                     String objectType = chunks[3].trim();
+                    if (chunks[2].trim().equals("/^")) {
+                        returnText = chunks[3].trim();
+                        objectType = chunks[4].trim();
+                    }
 
                     HashMap<String, String> params = new HashMap<String, String>();
 
@@ -269,7 +284,7 @@ public class SketchFile implements Comparable {
 
                     if (objectType.equals("f")) { // Function
                         if (params.get("class") != null) { // Class member function
-                            String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
+                            String returnType = getReturnTypeFromProtoAndSignature(returnText, params.get("signature"));
                             if ((returnType != null) && (!returnType.equals(""))) {
                                 if (itemName.indexOf("::") > 0) {
                                     itemName = itemName.substring(itemName.indexOf("::") + 2);
@@ -286,7 +301,7 @@ public class SketchFile implements Comparable {
                                 protos.add(bm);
                             }
                         } else { // Global function
-                            String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
+                            String returnType = getReturnTypeFromProtoAndSignature(returnText, params.get("signature"));
                             FunctionBookmark bm = new FunctionBookmark(
                                 FunctionBookmark.FUNCTION,
                                 sketch.translateBuildFileToSketchFile(fileName),
@@ -299,7 +314,7 @@ public class SketchFile implements Comparable {
                             protos.add(bm);
                         }
                     } else if (objectType.equals("v")) { // Variable
-                        String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                        String returnType = getReturnTypeFromProtoAndName(returnText, itemName);
                         FunctionBookmark bm = new FunctionBookmark(
                             FunctionBookmark.VARIABLE,
                             sketch.translateBuildFileToSketchFile(fileName),
@@ -311,7 +326,7 @@ public class SketchFile implements Comparable {
                         );
                         protos.add(bm);
                     } else if (objectType.equals("m")) { // Class member variable
-                        String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
+                        String returnType = getReturnTypeFromProtoAndName(returnText, itemName);
                         FunctionBookmark bm = new FunctionBookmark(
                             FunctionBookmark.MEMBER_VARIABLE,
                             sketch.translateBuildFileToSketchFile(fileName),
@@ -345,7 +360,7 @@ public class SketchFile implements Comparable {
                         );
                         protos.add(bm);
                     } else if (objectType.equals("p")) { // Function prototype - may be a class instantiation
-                        String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
+                        String returnType = getReturnTypeFromProtoAndSignature(returnText, params.get("signature"));
                         FunctionBookmark bm = new FunctionBookmark(
                             FunctionBookmark.VARIABLE,
                             sketch.translateBuildFileToSketchFile(fileName),

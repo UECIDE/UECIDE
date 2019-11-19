@@ -3,6 +3,7 @@ package org.uecide.gui.swing;
 import org.uecide.Context;
 
 import java.awt.Component;
+import java.awt.Font;
 
 import java.io.IOException;
 
@@ -33,6 +34,20 @@ public class SketchTreeCellRenderer extends DefaultTreeCellRenderer {
                 }
             } catch (IOException ignored) {
             }
+        }
+
+        if (value instanceof FunctionBookmarkNode) {
+            Font originalFont = new JLabel().getFont();
+            ret.setFont(originalFont.deriveFont(Font.PLAIN, originalFont.getSize() * 0.75f));
+        } else if (value instanceof ClassBookmarkNode) {
+            Font originalFont = new JLabel().getFont();
+            ret.setFont(originalFont.deriveFont(Font.PLAIN, originalFont.getSize() * 0.75f));
+        } else if (value instanceof MemberBookmarkNode) {
+            Font originalFont = new JLabel().getFont();
+            ret.setFont(originalFont.deriveFont(Font.PLAIN, originalFont.getSize() * 0.75f));
+        } else {
+            Font originalFont = new JLabel().getFont();
+            ret.setFont(originalFont);
         }
 
         return ret;

@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Break out tab to separate window
 * Movable tabs
 * Open sketch
 * Close confirmation and save/saveas
@@ -723,6 +724,7 @@ Changelog
 0.8.5
 -----
 
+* Break out tab to separate window
 * Movable tabs
 * Open sketch
 * Close confirmation and save/saveas

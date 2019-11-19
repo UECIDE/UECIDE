@@ -3,20 +3,29 @@ package org.uecide.gui.swing;
 import org.uecide.Context;
 import org.uecide.SketchFile;
 import org.uecide.FileType;
+import org.uecide.FunctionBookmark;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
-public class SketchSourceFileNode extends SketchTreeNodeBase {
+
+import org.uecide.ContextEventListener;
+
+public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextEventListener {
     SketchFile sketchFile;
 
-    public SketchSourceFileNode(Context c, SketchFile sf) {
-        super(c, sf.getFile().getName());
+    public SketchSourceFileNode(Context c, SketchTreeModel m, SketchFile sf) {
+        super(c, m, sf.getFile().getName());
         sketchFile = sf;
+        updateChildren();
+        ctx.listenForEvent("SketchDataModified", this);
     }
 
     public SketchFile getSketchFile() {
@@ -28,7 +37,79 @@ public class SketchSourceFileNode extends SketchTreeNodeBase {
     }
 
     public boolean updateChildren() {
-        return false;
+
+        ArrayList<FunctionBookmark> bookmarks = null;
+        try {
+            bookmarks = sketchFile.scanForFunctions();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+
+        boolean somethingRemoved = false;
+        boolean hasBeenModified = false;
+
+        // First remove any obsolete nodes
+        do {
+            somethingRemoved = false;
+            for (Enumeration e = children(); e.hasMoreElements();) {
+                FunctionBookmarkNode child = (FunctionBookmarkNode)e.nextElement();
+
+                FunctionBookmark bm = child.getBookmark();
+                boolean found = false;
+                for (FunctionBookmark newbm : bookmarks) {
+                    if (newbm.equals(bm)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    remove(child);
+                    somethingRemoved = true;
+                    hasBeenModified = true;
+                    break;
+                }
+            }
+        } while (somethingRemoved);
+
+        // Now add any new nodes
+        for (FunctionBookmark bookmark : bookmarks) {
+            boolean found = false;
+            for (Enumeration e = children(); e.hasMoreElements();) {
+                FunctionBookmarkNode child = (FunctionBookmarkNode)e.nextElement();
+                FunctionBookmark bm = child.getBookmark();
+                if (bookmark.equals(bm)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                if (bookmark.isClass()) {
+                    add(new ClassBookmarkNode(ctx, model, bookmark));
+                    hasBeenModified = true;
+                } else if (bookmark.isFunction()) {
+                    add(new FunctionBookmarkNode(ctx, model, bookmark));
+                    hasBeenModified = true;
+                }
+            }
+        }
+    
+        if (hasBeenModified) model.reload(this);
+
+        // Finally, hand off the member functions to the class nodes
+        for (Enumeration e = children(); e.hasMoreElements();) {
+            FunctionBookmarkNode child = (FunctionBookmarkNode)e.nextElement();
+            if (child instanceof ClassBookmarkNode) {
+                ClassBookmarkNode cbn = (ClassBookmarkNode)child;
+                if (cbn.updateChildren(bookmarks)) {
+                    hasBeenModified = true;
+                }
+            }
+        }
+
+        return hasBeenModified;
     }
 
     public JPopupMenu getPopupMenu() {
@@ -42,6 +123,10 @@ public class SketchSourceFileNode extends SketchTreeNodeBase {
 
     public void performDoubleClick() {
         ctx.action("openSketchFile", sketchFile);
+    }
+
+    public void contextEventTriggered(String event, Context c) {
+        updateChildren();
     }
 
 }

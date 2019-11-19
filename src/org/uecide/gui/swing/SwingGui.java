@@ -624,12 +624,38 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                     f.addWindowListener(new WindowAdapter() {
                         @Override
                         public void windowClosing(WindowEvent e) {
-//                            ctx.action("closeSession");
+
+                            if (e.getSource() instanceof JFrame) {
+                                JFrame win = (JFrame)e.getSource();
+                                Component[] comps = win.getContentPane().getComponents();
+                                for (Component comp : comps) {
+                                    if (comp instanceof JPanel) {
+                                        Component[] comps2 = ((JPanel)comp).getComponents();
+                                        for (Component comp2 : comps2) {
+                                            if (comp2 instanceof AutoTab) {
+                                                AutoTab at = (AutoTab)comp2;
+                                                ctx.triggerEvent("fileDataRead");
+                                                for (int i = 0; i < at.getTabCount(); i++) {
+                                                    if (at.getComponentAt(i) instanceof CodeEditor) {
+                                                        SketchFile f = ((CodeEditor)at.getComponentAt(i)).getSketchFile();
+                                                        if (!(ctx.action("closeSketchFile", f))) {
+                                                            return;
+                                                        }
+                                                    }
+                                                }
+                                                panes.remove(at);
+                                            }
+                                        }
+                                    }
+                                }
+                                win.dispose();
+                            }
                         }
                     });
 
                     if ((parentTabs != null) && parentTabs.isSeparateWindow()) {
                         if (parentTabs.getTabCount() == 0) {
+                            panes.remove(parentTabs);
                             parentTabs.getParentWindow().dispose();
                         }
                     }

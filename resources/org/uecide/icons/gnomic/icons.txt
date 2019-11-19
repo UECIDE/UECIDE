@@ -55,6 +55,7 @@ icon.tree.lib-good=starred.png
 icon.tree.lib-semi=semi-starred.png
 icon.tree.lib-bad=non-starred.png
 icon.tree.function=system-run.png
+icon.tree.class=application-x-addon.png
 icon.tree.todo=user-away.png
 icon.tree.fixme=user-busy.png
 icon.tree.note=user-available.png

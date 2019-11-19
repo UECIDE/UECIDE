@@ -16,10 +16,12 @@ import java.io.IOException;
 
 public abstract class SketchTreeNodeBase extends DefaultMutableTreeNode {
     protected Context ctx;
+    protected SketchTreeModel model;
 
-    public SketchTreeNodeBase(Context c, String name) {
+    public SketchTreeNodeBase(Context c, SketchTreeModel m, String name) {
         super(name);
         ctx = c;
+        model = m;
     }
 
   public TreePath getTreePath() {

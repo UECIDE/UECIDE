@@ -12,8 +12,8 @@ import javax.swing.JTree;
 import java.io.IOException;
 
 public class SketchHeaderFilesNode extends SketchTreeNodeBase {
-    public SketchHeaderFilesNode(Context c) {
-        super(c, "Headers");
+    public SketchHeaderFilesNode(Context c, SketchTreeModel m) {
+        super(c, m, "Headers");
         updateChildren();
     }
 
@@ -21,10 +21,11 @@ public class SketchHeaderFilesNode extends SketchTreeNodeBase {
         removeAllChildren();
         for (SketchFile f : ctx.getSketch().getSketchFiles().values()) {
             if (f.getGroup() == FileType.GROUP_HEADER) {
-                SketchSourceFileNode sfn = new SketchSourceFileNode(ctx, f);
+                SketchSourceFileNode sfn = new SketchSourceFileNode(ctx, model, f);
                 add(sfn);
             }
         }
+        model.reload(this);
         return true;
     }
 

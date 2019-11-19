@@ -10,8 +10,8 @@ import javax.swing.JTree;
 import java.io.IOException;
 
 public class SketchTreeLibrariesNode extends SketchTreeNodeBase {
-    public SketchTreeLibrariesNode(Context c) {
-        super(c, "Libraries");
+    public SketchTreeLibrariesNode(Context c, SketchTreeModel m) {
+        super(c, m, "Libraries");
         updateChildren();
     }
 

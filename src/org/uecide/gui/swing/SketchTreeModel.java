@@ -12,7 +12,7 @@ public class SketchTreeModel extends DefaultTreeModel {
 
     public SketchTreeModel(Context c) {
         super(new DefaultMutableTreeNode("dummy"));
-        rootNode = new SketchTreeNode(c);
+        rootNode = new SketchTreeNode(c, this);
         ctx = c;
         setRoot(rootNode);
     }
