@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Function bookmark entries in tree
 * Break out tab to separate window
 * Movable tabs
 * Open sketch
@@ -724,6 +725,7 @@ Changelog
 0.8.5
 -----
 
+* Function bookmark entries in tree
 * Break out tab to separate window
 * Movable tabs
 * Open sketch

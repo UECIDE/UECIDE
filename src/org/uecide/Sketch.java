@@ -523,50 +523,6 @@ public class Sketch {
         return lib;
     }
 
-    public TreeSet<String> getAllFunctionNames() {
-        TreeSet<String>funcs = new TreeSet<String>();
-        for (FunctionBookmark bm : functionListBm) {
-            if (bm.isFunction()) {
-                funcs.add(bm.getName());
-            }
-        }
-        return funcs;
-    }
-
-    public TreeSet<String> getAllVariableNames() {
-        TreeSet<String>funcs = new TreeSet<String>();
-        for (FunctionBookmark bm : functionListBm) {
-            if (bm.isVariable()) {
-                funcs.add(bm.getName());
-            }
-        }
-        return funcs;
-    }
-
-    public ArrayList<FunctionBookmark> getFunctionsForFile(File f) {
-        ArrayList<FunctionBookmark>funcs = new ArrayList<FunctionBookmark>();
-        for (FunctionBookmark bm : functionListBm) {
-            if (bm.getFile().getName().equals(f.getName())) {
-                if (bm.isFunction()) {
-                    funcs.add(bm);
-                }
-            }
-        }
-        return funcs;
-    }
-
-    public ArrayList<FunctionBookmark> getVariablesForFile(File f) {
-        ArrayList<FunctionBookmark>funcs = new ArrayList<FunctionBookmark>();
-        for (FunctionBookmark bm : functionListBm) {
-            if (bm.getFile().getName().equals(f.getName())) {
-                if (bm.isVariable()) {
-                    funcs.add(bm);
-                }
-            }
-        }
-        return funcs;
-    }
-
     public HashMap<Integer, String> findLabels(String data) {
         HashMap<Integer, String>labels = new HashMap<Integer, String>();
 
@@ -607,31 +563,6 @@ public class Sketch {
         }
 
         return labels;
-    }
-
-    public void findAllFunctions() throws IOException {
-
-        functionListBm = new ArrayList<FunctionBookmark>();
-        String data;
-        HashMap<Integer, String>funcs = null;
-
-        for(SketchFile f : sketchFiles.values()) {
-            switch(f.getType()) {
-            case FileType.SKETCH:
-            case FileType.HEADER:
-            case FileType.CSOURCE:
-            case FileType.CPPSOURCE:
-                File tf = new File(buildFolder, f.toString());
-                f.saveDataToDisk(tf);
-                ArrayList<FunctionBookmark> bm = scanForFunctions(tf);
-                functionListBm.addAll(bm);
-                
-                break;
-
-            case FileType.ASMSOURCE:
-                break;
-            }
-        }
     }
 
     public static final int LIB_PENDING = 0;
@@ -759,143 +690,6 @@ public class Sketch {
         return null;
     }
 
-    public ArrayList<FunctionBookmark> scanForFunctions(File f) throws IOException {
-
-        ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
-        
-        Tool t = Base.getTool("ctags");
-        if (t != null) {
-            Pattern pat = Pattern.compile("\\^([^\\(]+)\\(");
-            ctx.set("filename", f.getName());
-            ctx.set("sketch.root", f.getParentFile().getAbsolutePath());
-            ctx.set("build.root", buildFolder.getAbsolutePath());
-            ctx.set("build.path", buildFolder.getAbsolutePath());
-            ctx.startBuffer(true);
-            t.execute(ctx, "ctags.parse.ino");
-            ctx.endBuffer();
-
-            File tags = new File(buildFolder, f.getName() + ".tags");
-            if (tags.exists()) { // We got the tags
-                String tagData = Utils.getFileAsString(tags);
-                String[] tagLines = tagData.split("\n");
-
-                for (String tagLine : tagLines) {
-
-                    String[] chunks = tagLine.split("\t");
-
-                    if (chunks[0].startsWith("!")) continue;
-
-                    String itemName = chunks[0].trim();
-                    String fileName = chunks[1].trim();
-                    String objectType = chunks[3].trim();
-
-                    HashMap<String, String> params = new HashMap<String, String>();
-
-                    for (int i = 4; i < chunks.length; i++) {
-                        String[] parts = chunks[i].split(":", 2);
-                        if (parts.length == 2) {
-                            params.put(parts[0], parts[1]);
-                        }
-                    }
-
-
-                    if (objectType.equals("f")) { // Function
-                        if (params.get("class") != null) { // Class member function
-                            String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
-                            if ((returnType != null) && (!returnType.equals(""))) {
-                                if (itemName.indexOf("::") > 0) {
-                                    itemName = itemName.substring(itemName.indexOf("::") + 2);
-                                }
-                                FunctionBookmark bm = new FunctionBookmark(
-                                    FunctionBookmark.MEMBER_FUNCTION,
-                                    translateBuildFileToSketchFile(fileName),
-                                    Utils.s2i(params.get("line")),
-                                    itemName,
-                                    returnType,
-                                    params.get("signature"),
-                                    params.get("class")
-                                );
-                                protos.add(bm);
-                            }
-                        } else { // Global function
-                            String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
-                            FunctionBookmark bm = new FunctionBookmark(
-                                FunctionBookmark.FUNCTION,
-                                translateBuildFileToSketchFile(fileName),
-                                Utils.s2i(params.get("line")),
-                                itemName,
-                                returnType,
-                                params.get("signature"),
-                                null
-                            );
-                            protos.add(bm);
-                        }
-                    } else if (objectType.equals("v")) { // Variable
-                        String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.VARIABLE,
-                            translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            returnType,
-                            null,
-                            null
-                        );
-                        protos.add(bm);
-                    } else if (objectType.equals("m")) { // Class member variable
-                        String returnType = getReturnTypeFromProtoAndName(chunks[2], itemName);
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.MEMBER_VARIABLE,
-                            translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            returnType,
-                            params.get("class"),
-                            null
-                        );
-                        protos.add(bm);
-                    } else if (objectType.equals("d")) { // Preprocessor macro
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.DEFINE,
-                            translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            null,
-                            null,
-                            null
-                        );
-                        protos.add(bm);
-                    } else if (objectType.equals("c")) { // Class definition
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.CLASS,
-                            translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            null,
-                            null,
-                            null
-                        );
-                        protos.add(bm);
-                    } else if (objectType.equals("p")) { // Function prototype - may be a class instantiation
-                        String returnType = getReturnTypeFromProtoAndSignature(chunks[2], params.get("signature"));
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.VARIABLE,
-                            translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            returnType,
-                            null,
-                            null
-                        );
-                        protos.add(bm);
-                    } else { // Something we don't know about
-                    }
-                }
-            }
-        }
-        return protos;
-    }
-
     ArrayList<File> filesToCompile = null;
 
     public boolean prepare() throws IOException {
@@ -969,6 +763,9 @@ public class Sketch {
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
 
         int lineno = Integer.MAX_VALUE;
+        int thisEnd = 0;
+        int lastEnd = 0;
+
         for (SketchFile f : sketchFiles.values()) {
             switch (f.getType()) {
                 case FileType.CSOURCE:
@@ -988,9 +785,19 @@ public class Sketch {
                             }
                         }
                     }
+                    if (f.isMainFile()) {
+                        for (FunctionBookmark bm : bms) {
+                            if (thisEnd > lastEnd && thisEnd < lineno) {
+                                lastEnd = thisEnd;
+                            }
+                            thisEnd = bm.getEnd();
+                        }
+                    }
                 } break;
             }
         }
+
+        int protoLocation = lastEnd + 1;
 
         // Save these prototypes into a header file.
         File out = new File(buildFolder, getName() + "_proto.h");
@@ -998,7 +805,7 @@ public class Sketch {
         pw.println("#ifndef _UECIDE_FUNCTION_PROTOTYPES");
         pw.println("#define _UECIDE_FUNCTION_PROTOTYPES");
         pw.println();
-        pw.println("// This should be inserted at line " + lineno);
+        pw.println("// This should be inserted at line " + protoLocation);
         pw.println();
         for (FunctionBookmark p : protos) {
             pw.println(p + ";");
@@ -1029,7 +836,7 @@ public class Sketch {
         String data = getMainFile().getFileData();
         String lines[] = data.split("\n");
         for (String line : lines) {
-            if (thisLine == lineno) {
+            if (thisLine == protoLocation) {
                 pw.println("#include <" + getName() + "_proto.h>");
                 pw.println("#line " + thisLine + " \"" + getMainFile().getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
             }

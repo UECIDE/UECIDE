@@ -59,6 +59,15 @@ public class Utils {
         return 0;
     }
 
+    public static int s2i(String s, int d) {
+        if (s == null) return d;
+        try {
+            return Integer.decode(s);
+        } catch (Exception e) {
+        }
+        return d;
+    }
+
     public static float s2f(String s) {
         try {
             return Float.parseFloat(s);

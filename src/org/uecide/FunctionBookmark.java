@@ -33,13 +33,15 @@ package org.uecide;
 import java.io.File;
 
 public class FunctionBookmark {
-    File file;
+    SketchFile file;
     int line;
+    int end;
 
     String returnType;
     String name;
     String paramList;
     String parentClass;
+    String extra;
 
     int type;
 
@@ -50,7 +52,7 @@ public class FunctionBookmark {
     public static final int DEFINE = 4;
     public static final int CLASS = 5;
 
-    public FunctionBookmark(int t, File f, int l, String n, String rt, String pl, String pc) {
+    public FunctionBookmark(int t, SketchFile f, int l, String n, String rt, String pl, String pc, String ex, int en) {
         type = t;
         file = f;
         line = l;
@@ -58,6 +60,8 @@ public class FunctionBookmark {
         returnType = rt != null ? rt.trim() : null;
         paramList = pl != null ? pl.trim() : null;
         parentClass = pc != null ? pc.trim() : null;
+        extra = ex != null ? ex.trim() : null;
+        end = en;
     }
 
     public boolean isFunction() {
@@ -131,22 +135,22 @@ public class FunctionBookmark {
     public String toString() {
         switch (type) {
             case FUNCTION:
-                return returnType + " " + name + paramList;
+                return (extra != null ? extra + " " : "") + returnType + " " + name + paramList;
             case VARIABLE:
-                return returnType + " " + name;
+                return (extra != null ? extra + " " : "") + returnType + " " + name;
             case MEMBER_FUNCTION:
-                return returnType + " " + name + paramList;
+                return (extra != null ? extra + " " : "") + returnType + " " + name + paramList;
             case MEMBER_VARIABLE:
-                return returnType + " " + name;
+                return (extra != null ? extra + " " : "") + returnType + " " + name;
             case DEFINE:
                 return "#define " + name;
             case CLASS:
-                return "class " + name;
+                return (extra != null ? extra + " " : "") + "class " + name;
         }
         return name;
     }
 
-    public File getFile() {
+    public SketchFile getFile() {
         return file;
     }
 
@@ -171,7 +175,12 @@ public class FunctionBookmark {
     }
 
     public String dump() {
-        return formatted().trim() + " @ " + file.getAbsolutePath() + " line " + line + " type " + type;
+        try {
+            return formatted().trim() + " @ " + file.getFile().getCanonicalPath() + " line " + line + " type " + type;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Error";
     }
 
     public String getParentClass() {
@@ -186,17 +195,33 @@ public class FunctionBookmark {
         return paramList;
     }
 
+    public String getExtra() {
+        return extra;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
     public boolean equals(FunctionBookmark other) {
         if (type != other.getType()) { return false; }
         if (!(name.equals(other.getName()))) { return false; }
         if ((returnType != null) && !(returnType.equals(other.getReturnType()))) { return false; }
+
         if ((parentClass == null) && (other.getParentClass() != null)) { return false; }
         if ((parentClass != null) && (other.getParentClass() == null)) { return false; }
         if ((parentClass != null) && (!(parentClass.equals(other.getParentClass())))) { return false; }
+
+        if ((extra == null) && (other.getExtra() != null)) { return false; }
+        if ((extra != null) && (other.getExtra() == null)) { return false; }
+        if ((extra != null) && (!(extra.equals(other.getExtra())))) { return false; }
+
         if (line != other.getLine()) { return false; }
         if ((paramList != null) && (!(paramList.equals(other.getParamList())))) { return false; }
+
+
         try {
-            if (!(file.getCanonicalPath().equals(other.getFile().getCanonicalPath()))) { return false; }
+            if (!(file.getFile().getCanonicalPath().equals(other.getFile().getFile().getCanonicalPath()))) { return false; }
         } catch (Exception ex) {
             ex.printStackTrace();
             return false;

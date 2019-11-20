@@ -236,7 +236,6 @@ public class SketchFile implements Comparable {
 
         Tool t = Base.getTool("ctags");
         if (t != null) {
-            Pattern pat = Pattern.compile("\\^([^\\(]+)\\(");
             File tmp = new File(sketch.buildFolder, "tmp");
             if (!tmp.exists()) {
                 tmp.mkdirs();
@@ -258,120 +257,133 @@ public class SketchFile implements Comparable {
                 String tagData = Utils.getFileAsString(tags);
                 String[] tagLines = tagData.split("\n");
 
+                Pattern p = Pattern.compile("^(.*)/\\^.*\\$/;\"(.*)$");
+
                 for (String tagLine : tagLines) {
-                    String[] chunks = tagLine.split("\t");
-
-                    if (chunks[0].startsWith("!")) continue;
-
-                    String itemName = chunks[0].trim();
-                    String fileName = chunks[1].trim();
-                    String returnText = chunks[2].trim();
-                    String objectType = chunks[3].trim();
-                    if (chunks[2].trim().equals("/^")) {
-                        returnText = chunks[3].trim();
-                        objectType = chunks[4].trim();
+                    // Skip comments
+                    if (tagLine.startsWith("!")) {
+                        continue;
                     }
 
-                    HashMap<String, String> params = new HashMap<String, String>();
+                    // Split the tag line into three parts with a regexp.  <anything>/^<ignored>$/;"<anything>
+                    Matcher m = p.matcher(tagLine);
+                    if (m.find()) {
 
-                    for (int i = 4; i < chunks.length; i++) {
-                        String[] parts = chunks[i].split(":", 2);
-                        if (parts.length == 2) {
-                            params.put(parts[0], parts[1]);
-                        }
-                    }
+                        System.err.println(m.group(1));
+                        System.err.println(m.group(2));
+                        System.err.println("----");
 
+                        String[] first = m.group(1).split("\t");
+                        String itemName = first[0].trim();
 
-                    if (objectType.equals("f")) { // Function
-                        if (params.get("class") != null) { // Class member function
-                            String returnType = getReturnTypeFromProtoAndSignature(returnText, params.get("signature"));
-                            if ((returnType != null) && (!returnType.equals(""))) {
-                                if (itemName.indexOf("::") > 0) {
-                                    itemName = itemName.substring(itemName.indexOf("::") + 2);
+                        String[] chunks = m.group(2).split("\t");
+                        HashMap<String, String> params = new HashMap<String, String>();
+
+                        for (String chunk : chunks) {
+                            chunk = chunk.trim();
+                            if (chunk.contains(":")) {
+                                String[] bits = chunk.split(":", 2);
+                                if (bits[0].equals("typeref")) {
+                                    String[] b2 = bits[1].split(":");
+                                    bits[1] = b2[1];
                                 }
+
+                                if (bits[0].equals("scope") && bits[1].startsWith("class:")) {
+                                    String[] b2 = bits[1].split(":");
+                                    bits[0] = "class";
+                                    bits[1] = b2[1];
+                                }
+
+                                params.put(bits[0], bits[1]);
+                            }
+                        }
+
+                        for (String k : params.keySet()) {
+                            System.err.println("[" + k + "]=[" + params.get(k) + "]");
+                        }
+
+                        if (params.get("kind").equals("function")) { // Function
+                            if (params.get("class") != null) { // Class member function
                                 FunctionBookmark bm = new FunctionBookmark(
                                     FunctionBookmark.MEMBER_FUNCTION,
-                                    sketch.translateBuildFileToSketchFile(fileName),
+                                    this,
                                     Utils.s2i(params.get("line")),
                                     itemName,
-                                    returnType,
+                                    params.get("typeref"),
                                     params.get("signature"),
-                                    params.get("class")
+                                    params.get("class"),
+                                    params.get("properties"),
+                                    Utils.s2i(params.get("end"), Utils.s2i(params.get("line")))
+                                );
+                                protos.add(bm);
+                            } else { // Global function
+                                FunctionBookmark bm = new FunctionBookmark(
+                                    FunctionBookmark.FUNCTION,
+                                    this,
+                                    Utils.s2i(params.get("line")),
+                                    itemName,
+                                    params.get("typeref"),
+                                    params.get("signature"),
+                                    null,
+                                    params.get("properties"),
+                                    Utils.s2i(params.get("end"), Utils.s2i(params.get("line")))
                                 );
                                 protos.add(bm);
                             }
-                        } else { // Global function
-                            String returnType = getReturnTypeFromProtoAndSignature(returnText, params.get("signature"));
+                        } else if (params.get("kind").equals("variable")) { // Variable
                             FunctionBookmark bm = new FunctionBookmark(
-                                FunctionBookmark.FUNCTION,
-                                sketch.translateBuildFileToSketchFile(fileName),
+                                FunctionBookmark.VARIABLE,
+                                this,
                                 Utils.s2i(params.get("line")),
                                 itemName,
-                                returnType,
-                                params.get("signature"),
-                                null
+                                params.get("typeref"),
+                                null,
+                                null,
+                                params.get("properties"),
+                                Utils.s2i(params.get("end"), Utils.s2i(params.get("line")))
                             );
                             protos.add(bm);
+                        } else if (params.get("kind").equals("define")) { // Preprocessor macro
+                            FunctionBookmark bm = new FunctionBookmark(
+                                FunctionBookmark.DEFINE,
+                                this,
+                                Utils.s2i(params.get("line")),
+                                itemName,
+                                null,
+                                null,
+                                null,
+                                params.get("properties"),
+                                Utils.s2i(params.get("end"), Utils.s2i(params.get("line")))
+                            );
+                            protos.add(bm);
+                        } else if (params.get("kind").equals("class")) { // Class definition
+                            FunctionBookmark bm = new FunctionBookmark(
+                                FunctionBookmark.CLASS,
+                                this,
+                                Utils.s2i(params.get("line")),
+                                itemName,
+                                null,
+                                null,
+                                null,
+                                params.get("properties"),
+                                Utils.s2i(params.get("end"), Utils.s2i(params.get("line")))
+                            );
+                            protos.add(bm);
+                        } else if (params.get("kind").equals("prototype")) { // Function prototype - may be a class instantiation
+                            FunctionBookmark bm = new FunctionBookmark(
+                                FunctionBookmark.VARIABLE,
+                                this,
+                                Utils.s2i(params.get("line")),
+                                itemName,
+                                params.get("typeref"),
+                                null,
+                                null,
+                                params.get("properties"),
+                                Utils.s2i(params.get("end"), Utils.s2i(params.get("line")))
+                            );
+                            protos.add(bm);
+                        } else { // Something we don't know about
                         }
-                    } else if (objectType.equals("v")) { // Variable
-                        String returnType = getReturnTypeFromProtoAndName(returnText, itemName);
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.VARIABLE,
-                            sketch.translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            returnType,
-                            null,
-                            null
-                        );
-                        protos.add(bm);
-                    } else if (objectType.equals("m")) { // Class member variable
-                        String returnType = getReturnTypeFromProtoAndName(returnText, itemName);
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.MEMBER_VARIABLE,
-                            sketch.translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            returnType,
-                            params.get("class"),
-                            null
-                        );
-                        protos.add(bm);
-                    } else if (objectType.equals("d")) { // Preprocessor macro
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.DEFINE,
-                            sketch.translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            null,
-                            null,
-                            null
-                        );
-                        protos.add(bm);
-                    } else if (objectType.equals("c")) { // Class definition
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.CLASS,
-                            sketch.translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            null,
-                            null,
-                            null
-                        );
-                        protos.add(bm);
-                    } else if (objectType.equals("p")) { // Function prototype - may be a class instantiation
-                        String returnType = getReturnTypeFromProtoAndSignature(returnText, params.get("signature"));
-                        FunctionBookmark bm = new FunctionBookmark(
-                            FunctionBookmark.VARIABLE,
-                            sketch.translateBuildFileToSketchFile(fileName),
-                            Utils.s2i(params.get("line")),
-                            itemName,
-                            returnType,
-                            null,
-                            null
-                        );
-                        protos.add(bm);
-                    } else { // Something we don't know about
                     }
                 }
             }
