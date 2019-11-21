@@ -645,7 +645,19 @@ public class Base {
 
         systemContext.getGui().closeSplash();
 
-        createContext(null, gui);
+        Context newContext = null;
+
+        for (String arg : argv) {
+            if (newContext == null) {
+                newContext = createContext(new File(arg), gui);
+            } else {
+                newContext.action("OpenSketch", arg);
+            }
+        }
+        
+        if (newContext == null) {
+            newContext = createContext(null, gui);
+        }
 
 /*
         if(isTimeToCheckVersion()) {

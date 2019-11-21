@@ -430,4 +430,12 @@ public class SketchFile implements Comparable {
         return file.compareTo(((SketchFile)o).getFile());
     }
 
+    public boolean renameFile(File newFile) {
+        if (file.renameTo(newFile)) {
+            file = newFile;
+            return true;
+        }
+        return false;
+    }
+
 }

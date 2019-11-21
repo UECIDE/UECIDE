@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* action script gui
 * Improved function bookmarks and prototype handling
 * Function bookmark entries in tree
 * Break out tab to separate window
@@ -726,6 +727,7 @@ Changelog
 0.8.5
 -----
 
+* action script gui
 * Improved function bookmarks and prototype handling
 * Function bookmark entries in tree
 * Break out tab to separate window
