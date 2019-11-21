@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Open sketches on command line
 * action script gui
 * Improved function bookmarks and prototype handling
 * Function bookmark entries in tree
@@ -727,6 +728,7 @@ Changelog
 0.8.5
 -----
 
+* Open sketches on command line
 * action script gui
 * Improved function bookmarks and prototype handling
 * Function bookmark entries in tree
