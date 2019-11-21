@@ -7,6 +7,12 @@ public class BuildAction extends Action {
 
     public BuildAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "Build"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
             return ctx.getSketch().build();

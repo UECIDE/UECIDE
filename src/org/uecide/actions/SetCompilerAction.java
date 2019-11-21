@@ -8,6 +8,12 @@ public class SetCompilerAction extends Action {
 
     public SetCompilerAction(Context c) { super(c); }
 
+    public String[] getUsage() {    
+        return new String[] {
+            "SetCompiler <codename>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

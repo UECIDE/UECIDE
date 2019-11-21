@@ -687,4 +687,20 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         return null;
     }
 
+    public void navigateToLine(SketchFile f, Integer lineno) {
+        for (AutoTab pane : panes) {
+            for (int i = 0; i < pane.getTabCount(); i++) {
+                Component c = pane.getComponentAt(i);
+                if (c instanceof CodeEditor) {
+                    CodeEditor ce = (CodeEditor)c;
+                    if (ce.getSketchFile() == f) {
+                        pane.setSelectedIndex(i);
+                        ce.requestFocus();
+                        ce.gotoLine(lineno);
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }

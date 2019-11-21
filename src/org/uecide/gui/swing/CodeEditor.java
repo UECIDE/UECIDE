@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.text.BadLocationException;
 
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
@@ -93,5 +94,12 @@ public class CodeEditor extends TabPanel  {
             } catch (Exception ex) { }
         }
         return tabPanel;
+    }
+
+    public void gotoLine(int lineno) {
+        try {
+            textArea.setCaretPosition(textArea.getLineStartOffset(lineno - 1));
+        } catch(BadLocationException e) {
+        }
     }
 }

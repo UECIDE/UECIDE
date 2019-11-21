@@ -34,6 +34,7 @@ public abstract class Action {
             case "savesketchas": action = new SaveSketchAsAction(c); break;
             case "closesession": action = new CloseSessionAction(c); break;
             case "closesketchfile": action = new CloseSketchFileAction(c); break;
+            case "actions": action = new ActionsAction(c); break;
             default:
                 c.error("Unknown action " + name);
                 return false;
@@ -46,5 +47,7 @@ public abstract class Action {
         }
         return false;
     }
+
+    public abstract String[] getUsage();
 
 }

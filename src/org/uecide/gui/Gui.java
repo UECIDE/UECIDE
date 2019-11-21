@@ -37,6 +37,6 @@ public abstract class Gui {
     public abstract boolean askYesNo(String question);
     public abstract int askYesNoCancel(String question);
     public abstract File askOpenSketch(String question, File location);
-
+    public abstract void navigateToLine(SketchFile f, Integer lineno);
 
 }

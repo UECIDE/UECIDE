@@ -533,4 +533,8 @@ public class CliGui extends Gui {
     public void closeSketchFileEditor(SketchFile f) {
     }
 
+    @Override
+    public void navigateToLine(SketchFile f, Integer l) {
+    }
+
 }

@@ -17,8 +17,8 @@ import java.util.Enumeration;
 public class GenericFileNode extends SketchTreeNodeBase {
     File file;
 
-    public GenericFileNode(Context c, File f) {
-        super(c, f.getName());
+    public GenericFileNode(Context c, SketchTreeModel m, File f) {
+        super(c, m, f.getName());
         file = f;
     }
 
@@ -66,7 +66,7 @@ public class GenericFileNode extends SketchTreeNodeBase {
 
             for (File f : files) {
                 if (!hasChildFile(f)) {
-                    GenericFileNode sfn = new GenericFileNode(ctx, f);
+                    GenericFileNode sfn = new GenericFileNode(ctx, model, f);
                     add(sfn);
                     hasBeenModified = true;
                 }

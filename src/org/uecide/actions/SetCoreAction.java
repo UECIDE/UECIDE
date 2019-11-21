@@ -7,6 +7,12 @@ public class SetCoreAction extends Action {
 
     public SetCoreAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "SetCore <codename>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

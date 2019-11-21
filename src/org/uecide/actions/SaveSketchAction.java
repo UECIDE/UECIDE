@@ -10,6 +10,12 @@ public class SaveSketchAction extends Action {
 
     public SaveSketchAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "SaveSketch [<filename>]"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         try {

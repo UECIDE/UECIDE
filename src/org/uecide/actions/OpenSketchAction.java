@@ -7,6 +7,12 @@ public class OpenSketchAction extends Action {
 
     public OpenSketchAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "OpenSketch <file>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         File file = null;

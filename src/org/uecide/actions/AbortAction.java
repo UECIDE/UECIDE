@@ -11,6 +11,12 @@ public class AbortAction extends Action {
 
     public AbortAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "Abort <action>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         if (args.length != 1) {
             throw new SyntaxErrorActionException();

@@ -269,10 +269,6 @@ public class SketchFile implements Comparable {
                     Matcher m = p.matcher(tagLine);
                     if (m.find()) {
 
-                        System.err.println(m.group(1));
-                        System.err.println(m.group(2));
-                        System.err.println("----");
-
                         String[] first = m.group(1).split("\t");
                         String itemName = first[0].trim();
 
@@ -296,10 +292,6 @@ public class SketchFile implements Comparable {
 
                                 params.put(bits[0], bits[1]);
                             }
-                        }
-
-                        for (String k : params.keySet()) {
-                            System.err.println("[" + k + "]=[" + params.get(k) + "]");
                         }
 
                         if (params.get("kind").equals("function")) { // Function

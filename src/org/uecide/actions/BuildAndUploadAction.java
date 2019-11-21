@@ -7,6 +7,12 @@ public class BuildAndUploadAction extends Action {
 
     public BuildAndUploadAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "BuildAndUpload"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
             boolean r = ctx.getSketch().build();

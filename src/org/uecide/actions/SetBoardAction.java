@@ -7,6 +7,12 @@ public class SetBoardAction extends Action {
 
     public SetBoardAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "SetBoard <codename>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

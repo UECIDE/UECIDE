@@ -7,6 +7,12 @@ public class SetProgrammerAction extends Action {
 
     public SetProgrammerAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "SetProgrammer <codename>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

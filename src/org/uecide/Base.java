@@ -33,6 +33,7 @@ package org.uecide;
 import org.uecide.gui.Gui;
 import org.uecide.gui.swing.SwingGui;
 import org.uecide.gui.cli.CliGui;
+import org.uecide.gui.action.ActionGui;
 import org.uecide.gui.none.NoneGui;
 
 import java.io.File;
@@ -586,6 +587,7 @@ public class Base {
         switch (gui) {
             case "cli": CliGui.init(); break;
             case "swing": SwingGui.init(); break;
+            case "action": ActionGui.init(); break;
             case "none": NoneGui.init(); break;
             default:
                 System.err.println("Unknown GUI specified. Cannot continue.");
@@ -633,6 +635,7 @@ public class Base {
         switch (gui) {
             case "cli": CliGui.endinit(); break;
             case "swing": SwingGui.endinit(); break;
+            case "action": ActionGui.endinit(); break;
             case "none": NoneGui.endinit(); break;
             default:
                 System.err.println("Unknown GUI specified. Cannot continue.");
@@ -1895,6 +1898,7 @@ public class Base {
             switch (gui) {
                 case "cli": guiObject = new CliGui(ctx); break;
                 case "swing": guiObject = new SwingGui(ctx); break;
+                case "action": guiObject = new ActionGui(ctx); break;
                 case "none": guiObject = new NoneGui(ctx); break;
                 default:
                     System.err.println("Unknown GUI specified. Cannot continue.");

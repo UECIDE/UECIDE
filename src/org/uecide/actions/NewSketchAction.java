@@ -8,6 +8,12 @@ public class NewSketchAction extends Action {
 
     public NewSketchAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "NewSketch"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         if (args.length != 0) {

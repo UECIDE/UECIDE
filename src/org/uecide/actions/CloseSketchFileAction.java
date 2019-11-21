@@ -8,6 +8,12 @@ public class CloseSketchFileAction extends Action {
 
     public CloseSketchFileAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "CloseSketchFile <filename>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         if (args.length != 1) {

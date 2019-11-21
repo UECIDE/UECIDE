@@ -6,6 +6,12 @@ public class UploadAction extends Action {
 
     public UploadAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "Upload <filename>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
             ctx.triggerEvent("uploadStart");

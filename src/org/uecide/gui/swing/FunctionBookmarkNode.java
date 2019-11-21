@@ -39,6 +39,8 @@ public class FunctionBookmarkNode extends SketchTreeNodeBase implements ContextE
     }
 
     public void performDoubleClick() {
+        SketchFile sf = bookmark.getFile();
+        ctx.action("OpenSketchFile", sf, (Integer)bookmark.getLine());
     }
 
     public void contextEventTriggered(String event, Context c) {

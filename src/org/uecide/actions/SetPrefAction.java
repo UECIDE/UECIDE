@@ -15,6 +15,12 @@ public class SetPrefAction extends Action {
 
     public SetPrefAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "SetPref <key> <value>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         if (args.length != 2) throw new SyntaxErrorActionException();

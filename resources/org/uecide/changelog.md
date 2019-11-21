@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Improved function bookmarks and prototype handling
 * Function bookmark entries in tree
 * Break out tab to separate window
 * Movable tabs
@@ -725,6 +726,7 @@ Changelog
 0.8.5
 -----
 
+* Improved function bookmarks and prototype handling
 * Function bookmark entries in tree
 * Break out tab to separate window
 * Movable tabs

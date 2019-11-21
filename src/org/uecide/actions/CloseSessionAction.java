@@ -8,6 +8,12 @@ public class CloseSessionAction extends Action {
 
     public CloseSessionAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "CloseSession"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         if (ctx.getSketch().isModified()) {
@@ -33,6 +39,6 @@ public class CloseSessionAction extends Action {
         } else {
             ctx.getGui().close();
         }
-        return false;
+        return true;
     }
 }

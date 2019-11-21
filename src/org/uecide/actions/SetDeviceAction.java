@@ -7,6 +7,12 @@ public class SetDeviceAction extends Action {
 
     public SetDeviceAction(Context c) { super(c); }
 
+    public String[] getUsage() {
+        return new String[] {
+            "SetDevice <device>"
+        };
+    }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 
