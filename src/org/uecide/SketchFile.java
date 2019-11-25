@@ -438,4 +438,35 @@ public class SketchFile implements Comparable {
         return false;
     }
 
+    public ArrayList<TodoEntry> getTodoList() {
+        Pattern p = Pattern.compile("(?i)\\/\\/\\s*(TODO|NOTE|FIXME):\\s*(.*)$");
+
+        ArrayList<TodoEntry> found = new ArrayList<TodoEntry>();
+
+        String[] lines = data.split("\n");
+        int lineno = 1;
+        for (String line : lines) {
+            Matcher m = p.matcher(line);
+            if (m.find()) {
+                String type = m.group(1).trim().toLowerCase();
+                String comment = m.group(2).trim();
+                int itype = 0;
+
+                if (type.equals("todo")) {
+                    itype = TodoEntry.Todo;
+                } else if (type.equals("note")) {
+                    itype = TodoEntry.Note;
+                } else if (type.equals("fixme")) {
+                    itype = TodoEntry.Fixme;
+                }
+                if (itype != 0) {
+                    found.add(new TodoEntry(this, lineno, comment, itype));
+                }
+            }
+            lineno++;
+        }
+
+        return found;
+    }
+
 }

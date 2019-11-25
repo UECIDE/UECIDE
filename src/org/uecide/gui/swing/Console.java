@@ -20,8 +20,8 @@ public class Console extends TabPanel implements MouseWheelListener {
     ConsoleTty tty;
     TermPanel panel;
 
-    public Console(Context c) {
-        super("Output");
+    public Console(Context c, AutoTab def) {
+        super("Output", def);
         ctx = c;
         terminal = new GrittyTerminal();
         tty = new ConsoleTty(c);
@@ -38,12 +38,24 @@ public class Console extends TabPanel implements MouseWheelListener {
         add(terminal, BorderLayout.CENTER);
     }
 
+    public void streamError(String e) {
+        tty.feed("[31m" + e + "[0m");
+    }
+
     public void error(String e) {
         tty.feed("[31m" + e + "[0m\r\n");
     }
 
+    public void streamWarning(String e) {
+        tty.feed("[33m" + e + "[0m");
+    }
+        
     public void warning(String e) {
         tty.feed("[33m" + e + "[0m\r\n");
+    }
+        
+    public void streamMessage(String e) {
+        tty.feed("[37m" + e + "[0m");
     }
         
     public void message(String e) {

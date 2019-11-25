@@ -30,10 +30,8 @@
 
 package org.uecide;
 
-import java.io.File;
-
 public class TodoEntry {
-    File file;
+    SketchFile file;
     int line;
     String comment;
     int type;
@@ -42,7 +40,7 @@ public class TodoEntry {
     public static final int Todo = 2;
     public static final int Fixme = 3;
 
-    public TodoEntry(File f, int l, String c, int t) {
+    public TodoEntry(SketchFile f, int l, String c, int t) {
         file = f;
         line = l;
         comment = c;
@@ -57,7 +55,7 @@ public class TodoEntry {
         return line;
     }
 
-    public File getFile() {
+    public SketchFile getFile() {
         return file;
     }
 

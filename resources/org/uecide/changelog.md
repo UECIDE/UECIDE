@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* ucase and lcase variable commands
 * Open sketches on command line
 * action script gui
 * Improved function bookmarks and prototype handling
@@ -728,6 +729,7 @@ Changelog
 0.8.5
 -----
 
+* ucase and lcase variable commands
 * Open sketches on command line
 * action script gui
 * Improved function bookmarks and prototype handling

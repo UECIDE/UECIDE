@@ -43,6 +43,7 @@ public abstract class VariableCommand {
                 case "exists": vc = new vc_exists(); break;
                 case "ucase": vc = new vc_ucase(); break;
                 case "lcase": vc = new vc_lcase(); break;
+                case "csv": vc = new vc_csv(); break;
                 default: return "BADVCMD";
             }
 

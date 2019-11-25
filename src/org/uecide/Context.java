@@ -311,30 +311,18 @@ public class Context {
     }
         
     public void rawMessageStream(String e) {
-        if (sketch != null) {
-            sketch.outputMessageStream(e);
-            return;
-        }
-        System.err.print(e);
+        gui.streamMessage(e);
     }
 
     public void rawErrorStream(String e) {
-        if (sketch != null) {
-            sketch.outputErrorStream(e);
-            return;
-        }
-        System.err.print(e);
+        gui.streamError(e);
     }
 
     public void errorStream(String e) {
         if  (listener != null) {
             listener.contextError(e);
         } else {
-            if (sketch != null) {
-                sketch.errorStream(e);
-                return;
-            }
-            System.err.print(e);
+            gui.streamError(e);
         }
     }
 
@@ -342,11 +330,7 @@ public class Context {
         if  (listener != null) {
             listener.contextWarning(e);
         } else {
-            if (sketch != null) {
-                sketch.warningStream(e);
-                return;
-            }
-            System.out.print(e);
+            gui.streamWarning(e);
         }
     }
         
@@ -354,11 +338,7 @@ public class Context {
         if  (listener != null) {
             listener.contextMessage(e);
         } else {
-            if (sketch != null) {
-                sketch.messageStream(e);
-                return;
-            }
-            System.out.print(e);
+            gui.streamMessage(e);
         }
     }
         
@@ -776,7 +756,7 @@ public class Context {
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-                    if (buffer == null) rawMessageStream(inch);
+//                    if (buffer == null) rawMessageStream(inch);
                     if (parser != null) {
                         if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
                             outline += inch;
@@ -807,7 +787,7 @@ public class Context {
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-                    if (buffer == null) rawErrorStream(inch);
+//                    if (buffer == null) rawErrorStream(inch);
                     if (parser != null) {
                         if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
                             errline += inch;
@@ -856,7 +836,7 @@ public class Context {
                     outline += inch;
                 }
 
-                if (buffer == null) rawMessageStream(inch);
+//                if (buffer == null) rawMessageStream(inch);
                 if (inch.equals("\n")) {
                     if (parser != null) {
 //                        rawMessageStream(outline);
@@ -895,7 +875,7 @@ public class Context {
                     errline += inch;
                 }
 
-                if (buffer == null) rawErrorStream(inch);
+//                if (buffer == null) rawErrorStream(inch);
 
                 if (inch.equals("\n")) {
                     if (parser != null) {

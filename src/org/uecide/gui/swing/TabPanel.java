@@ -12,15 +12,21 @@ public class TabPanel extends JPanel {
 
     String name;
     Component tabLabel;
+    AutoTab defaultPanel;
 
-    public TabPanel(String n) {
+    public TabPanel(String n, AutoTab p) {
         super();
         name = n;
+        defaultPanel = p;
         setLayout(new BorderLayout());
         tabLabel = new JLabel(name);
     }
 
     public Component getTab() {
         return tabLabel;
+    }
+
+    public void reset() {
+        defaultPanel.add(this);
     }
 }

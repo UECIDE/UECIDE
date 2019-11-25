@@ -34,8 +34,8 @@ public class CodeEditor extends TabPanel  {
 
     JPanel tabPanel = null;
 
-    public CodeEditor(Context c, SketchFile f) {
-        super(f.getFile().getName());
+    public CodeEditor(Context c, AutoTab def, SketchFile f) {
+        super(f.getFile().getName(), def);
         ctx = c;
         file = f;
 

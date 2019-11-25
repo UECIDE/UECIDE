@@ -46,6 +46,15 @@ public class ActionGui extends Gui {
         System.exit(0);
     };
 
+    public void streamMessage(String m) {
+        System.out.print(m);
+    };
+    public void streamWarning(String m) {
+        System.out.print(m);
+    };
+    public void streamError(String m) {
+        System.err.print(m);
+    };
     public void message(String m) {
         System.out.println(m);
     };

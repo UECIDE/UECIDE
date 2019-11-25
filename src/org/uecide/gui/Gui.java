@@ -18,6 +18,9 @@ public abstract class Gui {
 
     public abstract void open();
     public abstract void close();
+    public abstract void streamMessage(String m);
+    public abstract void streamError(String m);
+    public abstract void streamWarning(String m);
     public abstract void message(String m);
     public abstract void warning(String m);
     public abstract void error(String m);

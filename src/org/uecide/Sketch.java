@@ -848,7 +848,7 @@ public class Sketch {
             if (f.getType() == FileType.SKETCH) {
                 if (!f.isMainFile()) {
                     pw.println("#line 1 \"" + f.getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
-                    pw.print(f.getFileData());
+                    pw.println(f.getFileData());
                 }
             }
         }

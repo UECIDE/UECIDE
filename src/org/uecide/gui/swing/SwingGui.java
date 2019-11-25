@@ -46,7 +46,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     EditMenu editMenu;
     SketchMenu sketchMenu;
     HardwareMenu hardwareMenu;
-    JMenu toolsMenu;
+    ToolsMenu toolsMenu;
     JMenu helpMenu;
 
     SketchTreePanel sketchTree;
@@ -71,7 +71,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         editMenu = new EditMenu(ctx);
         sketchMenu = new SketchMenu(ctx);
         hardwareMenu = new HardwareMenu(ctx);
-        toolsMenu = new JMenu("Tools");
+        toolsMenu = new ToolsMenu(ctx);
         helpMenu = new JMenu("Help");
 
         menu.add(fileMenu);
@@ -135,10 +135,10 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         leftmid.setLeftSize(200);
         topbottom.setBottomSize(250);
 
-        sketchTree = new SketchTreePanel(ctx);
+        sketchTree = new SketchTreePanel(ctx, leftPane);
         leftPane.add(sketchTree);
 
-        console = new Console(ctx);
+        console = new Console(ctx, bottomPane);
         bottomPane.add(console);
 
         window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -156,6 +156,21 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     @Override
     public void message(String m) {
         console.message(m);
+    }
+
+    @Override
+    public void streamError(String m) {
+        console.streamError(m);
+    }
+
+    @Override
+    public void streamWarning(String m) {
+        console.streamWarning(m);
+    }
+
+    @Override
+    public void streamMessage(String m) {
+        console.streamMessage(m);
     }
 
     @Override
@@ -421,7 +436,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
             }
         }
 
-        CodeEditor ce = new CodeEditor(ctx, f);
+        CodeEditor ce = new CodeEditor(ctx, centerPane, f);
         centerPane.add(ce);
         ce.requestFocus();
     }
@@ -635,14 +650,18 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                                             if (comp2 instanceof AutoTab) {
                                                 AutoTab at = (AutoTab)comp2;
                                                 ctx.triggerEvent("fileDataRead");
-                                                for (int i = 0; i < at.getTabCount(); i++) {
-                                                    if (at.getComponentAt(i) instanceof CodeEditor) {
-                                                        SketchFile f = ((CodeEditor)at.getComponentAt(i)).getSketchFile();
-                                                        if (!(ctx.action("closeSketchFile", f))) {
-                                                            return;
-                                                        }
-                                                    }
+                                                while (at.getTabCount() > 0) {
+                                                    TabPanel pan = (TabPanel)at.getComponentAt(0);
+                                                    pan.reset();
                                                 }
+                                                //for (int i = 0; i < at.getTabCount(); i++) {
+                                                //    if (at.getComponentAt(i) instanceof CodeEditor) {
+                                                //        SketchFile f = ((CodeEditor)at.getComponentAt(i)).getSketchFile();
+                                                //        if (!(ctx.action("closeSketchFile", f))) {
+                                                //            return;
+                                                //        }
+                                                //    }
+                                                //}
                                                 panes.remove(at);
                                             }
                                         }

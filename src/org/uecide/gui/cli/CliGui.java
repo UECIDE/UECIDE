@@ -293,8 +293,22 @@ public class CliGui extends Gui {
 
 
     @Override
+    public void streamMessage(String m) {
+        System.out.print(m);
+    }
+
+    @Override
     public void message(String m) {
         System.out.println(m);
+    }
+
+    @Override
+    public void streamWarning(String m) {
+        if (!Base.isWindows()) {
+            System.out.print("[33m" + m + "[0m");
+        } else {
+            System.out.print(m);
+        }
     }
 
     @Override
@@ -312,6 +326,15 @@ public class CliGui extends Gui {
             System.err.println("[31m" + m + "[0m");
         } else {
             System.err.println(m);
+        }
+    }
+
+    @Override
+    public void streamError(String m) {
+        if (!Base.isWindows()) {
+            System.err.print("[31m" + m + "[0m");
+        } else {
+            System.err.print(m);
         }
     }
 

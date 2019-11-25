@@ -229,8 +229,15 @@ public class Serial {
                 names.add(devfile.getAbsolutePath());
                 continue;
             }
-
-            if(devfile.getName().startsWith("ttyS")) {
+        
+            if(devfile.getName().startsWith("ttyNVT")) {
+                names.add(devfile.getAbsolutePath());
+                continue;
+            }
+        
+            // It would be nice if we could find out which of the ttyS* entries
+            // are real, but we can't. Bah!
+            if(devfile.getName().equals("ttyS0")) {
                 names.add(devfile.getAbsolutePath());
                 continue;
             }
