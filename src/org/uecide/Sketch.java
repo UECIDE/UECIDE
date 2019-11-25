@@ -1575,7 +1575,7 @@ public class Sketch {
                         int thisLine = 1;
 
                         String data = getFileContent(f);
-                        pw.print(data);
+                        pw.println(data);
 
                         pw.close();
                     } catch (Exception e) {
