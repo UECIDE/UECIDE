@@ -143,4 +143,10 @@ public class UsbHidDevice implements CommunicationPort {
         return true;
     }
 
+    public void setDTR(boolean d) {}
+    public void setRTS(boolean d) {}
+
+    public boolean getDTR() { return false; }
+    public boolean getRTS() { return false; }
+
 }

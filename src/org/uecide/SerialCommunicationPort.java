@@ -473,6 +473,10 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
         }
     }
 
+    public boolean getDTR() {
+        return serialPort.getDTR();
+    }
+
     public void setRTS(boolean s) {
         try {
             if (s)
@@ -482,6 +486,10 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
         } catch (Exception e) {
             lastError = e.getMessage();
         }
+    }
+
+    public boolean getRTS() {
+        return serialPort.getRTS();
     }
 
     public String getBaseName() {

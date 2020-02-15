@@ -113,6 +113,7 @@ public class NetworkDiscoveryService extends Service {
                 String value = board.get("mdns.model.value");
                 String btype = txt.get(key); //info.getPropertyString(key);
                 if (btype != null) {
+                    btype = btype.replaceAll("^\"|\"$", "");
                     if(btype.equals(value)) {
                         return board;
                     }

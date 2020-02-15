@@ -102,4 +102,9 @@ public interface CommunicationPort {
     public String get(String key);
 
     public boolean exists();
+
+    public void setDTR(boolean d);
+    public void setRTS(boolean r);
+    public boolean getDTR();
+    public boolean getRTS();
 }

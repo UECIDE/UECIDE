@@ -4,6 +4,10 @@ Changelog
 0.11.0
 ------
 
+* Add null pointer protection to options;
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Update internal package versions
+* dpkg-buildpackage now needs a TODO.md file
 * Removed delays in jSerialPort
 * Separate mDNS programmers in programmers menu
 * Added SPIFFS building support
@@ -715,6 +719,10 @@ Changelog
 0.8.5
 -----
 
+* Add null pointer protection to options;
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Update internal package versions
+* dpkg-buildpackage now needs a TODO.md file
 * Removed delays in jSerialPort
 * Separate mDNS programmers in programmers menu
 * Added SPIFFS building support

@@ -626,6 +626,14 @@ public final class SerialPort
 		return (isOpened ? setRTS(portHandle) : presetRTS());
 	}
 
+    public final boolean getRTS() {
+        return isRtsEnabled;
+    }
+
+    public final boolean getDTR() {
+        return isDtrEnabled;
+    }
+
 	/**
 	 * Clears the state of the RTS line to 0.
 	 * @return true if successful, false if not.
