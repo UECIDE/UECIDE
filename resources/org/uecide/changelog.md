@@ -1,9 +1,10 @@
 Changelog
 =========
 
-0.11.0
+0.11.1
 ------
 
+* More work on gui. Swiched to Hola for mDNS
 * Context-aware tools menu
 * ucase and lcase variable commands
 * Open sketches on command line
@@ -15,6 +16,11 @@ Changelog
 * Open sketch
 * Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
+
+
+0.11.0
+------
+
 * Add null pointer protection to options;
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Update internal package versions
@@ -730,6 +736,7 @@ Changelog
 0.8.5
 -----
 
+* More work on gui. Swiched to Hola for mDNS
 * Context-aware tools menu
 * ucase and lcase variable commands
 * Open sketches on command line

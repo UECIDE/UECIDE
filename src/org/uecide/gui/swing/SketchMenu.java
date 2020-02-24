@@ -7,6 +7,8 @@ import javax.swing.KeyStroke;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import org.uecide.Context;
 import org.uecide.FileType;
@@ -48,10 +50,20 @@ public class SketchMenu extends JMenu {
 
         compileMenu = new JMenuItem("Compile");
         compileMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, defaultModifiers));
+        compileMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                ctx.actionThread("build");
+            }
+        });
         add(compileMenu);
 
         uploadMenu = new JMenuItem("Compile & Upload");
         uploadMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, defaultModifiers));
+        uploadMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                ctx.actionThread("buildandupload");
+            }
+        });
         add(uploadMenu);
 
         addSeparator();

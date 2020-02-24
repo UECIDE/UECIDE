@@ -16,7 +16,7 @@ import javax.swing.event.MenuEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class FileListMenu extends JMenu implements MenuListener {
+public class FileListMenu extends JMenu implements MenuListener, ActionListener {
 
     Context ctx;
     int type;
@@ -42,9 +42,15 @@ public class FileListMenu extends JMenu implements MenuListener {
         for (SketchFile f : sketchFiles.values()) {
             if (f.getGroup() == type) {
                 ObjectMenuItem item = new ObjectMenuItem(f.toString(), f);
+                item.addActionListener(this);
                 add(item);
             }
         }
+    }
+
+    public void actionPerformed(ActionEvent evt) {
+        ObjectMenuItem item = (ObjectMenuItem)evt.getSource();
+        ctx.action("openSketchFile", (SketchFile)item.getObject());
     }
     
 }
