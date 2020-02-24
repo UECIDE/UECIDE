@@ -32,7 +32,11 @@ public class ActionsAction extends Action {
             new SaveSketchAsAction(ctx),
             new CloseSessionAction(ctx),
             new CloseSketchFileAction(ctx),
-            new ActionsAction(ctx)
+            new ActionsAction(ctx),
+            new AddLibraryAction(ctx),
+            new AddLibraryLocationAction(ctx),
+            new RescanLibrariesAction(ctx),
+            new ReloadFilesAction(ctx)
         };
 
         for (Action a : actions) {

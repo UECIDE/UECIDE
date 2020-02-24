@@ -6,51 +6,63 @@ compiler.type=section
 compiler.buildinsketch.type=checkbox
 compiler.buildinsketch.name=Compile the sketch in the sketch folder
 compiler.buildinsketch.default=false
+compiler.buildinsketch.tooltip=This will cause all compilation to take place within a folder "build" inside your sketch. It keeps everything nicely self contained.
 
 compiler.disableline.type=checkbox
 compiler.disableline.name=Disable insertion of #line numbering (useful for debugging)
 compiler.disableline.default=false
+compiler.disableline.tooltip=Removes #line entries in generated files. You should leave this off unless you know what a #line entry is.
 
 compiler.generate_lss.type=checkbox
 compiler.generate_lss.name=Generate assembly listing (requires core support)
 compiler.generate_lss.default=false
+compiler.generate_lss.tooltip=Redundant. Does nothing. Needs re-implementing.
 
 compiler.disable_prototypes.type=checkbox
 compiler.disable_prototypes.name=Disable generation of function prototypes
 compiler.disable_prototypes.default=false
+compiler.disable_prototypes.tooltip=Redundant. Does nothing. Needs re-implementing.
 
 compiler.combine_ino.type=checkbox
 compiler.combine_ino.name=Combine all .INO and .PDE files into a single .CPP file
 compiler.combine_ino.default=true
+compiler.combine_ino.tooltip=Redundant. Does nothing. Needs re-implementing.
 
 compiler.generate_makefile.type=checkbox
 compiler.generate_makefile.name=Generate / update a Makefile each compile (core support required)
 compiler.generate_makefile.default=false
+compiler.generate_makefile.tooltip=If the core supports it this will generate a Makefile which can be used to build the project in other IDEs.
 
 compiler.verbose_compile.type=checkbox
 compiler.verbose_compile.name=Verbose command execution
 compiler.verbose_compile.default=false
+compiler.verbose_compile.tooltip=Causes all the commands that are executed to be displayed in the output console. Gets visually noisy.
 
 compiler.verbose_files.type=checkbox
 compiler.verbose_files.name=List files as they are compiled
 compiler.verbose_files.default=false
+compiler.verbose_files.tooltip=Lists each file in each library and the core as they are compiled.
 
 compiler.verbose_upload.type=checkbox
 compiler.verbose_upload.name=Verbose output during upload
 compiler.verbose_upload.default=false
+compiler.verbose_upload.tooltip=Gives more visual feedback during the upload process.
 
 compiler.purge.type=checkbox
 compiler.purge.name=Purge project on every build
 compiler.purge.default=false
+compiler.purge.tooltip=Delete all cached data before each build. Makes building much slower but can be good when developing a core.
 
 compiler.save_hex.type=checkbox
 compiler.save_hex.name=Save compiled output to sketch folder
 compiler.save_hex.default=false
+compiler.save_hex.tooltip=Copies the compiled output into your sketch folder.
 
 compiler.save_lss.type=checkbox
 compiler.save_lss.name=Save generated LSS file to sketch folder
 compiler.save_lss.depends=compiler.generate_lss
 compiler.save_lss.default=false
+compiler.save_lss.tooltip=Redundant. Does nothing. Needs re-implementing.
 
 # Editor settings
 
@@ -78,70 +90,86 @@ editor.toolbars.type=section
 editor.dialog.crash.name=Enable crash reporter
 editor.dialog.crash.type=checkbox
 editor.dialog.crash.default=true
+editor.dialog.crash.tooltip=Redundant. Does nothing. Needs re-implementing or deleting.
 
 editor.dialog.missinglibs.name=Suggest installing missing libraries
 editor.dialog.missinglibs.type=checkbox
 editor.dialog.missinglibs.default=true
+editor.dialog.missinglibs.tooltip=If you don't have a library installed that a sketch requires this will try and offer to install it for you.
 
 editor.external.command.name=External editor command
 editor.external.command.type=string
 editor.external.command.default=
+editor.external.command.tooltip=External command to run when opting to use an external editor program.
 
 editor.find.keep.name=Keep Find & Replace permanantly open
 editor.find.keep.type=checkbox
 editor.find.keep.default=false
+editor.find.keep.tooltip=Always have the "find and replace" panel open at the bottom of the editing window.
 
 editor.save.loadlast.name=Open last sketch automatically
 editor.save.loadlast.type=checkbox
 editor.save.loadlast.default=false
+editor.save.loadlast.tooltip=When you open UECIDE the last sketch you used will be automatically opened for you.
 
 editor.save.remloc.name=Remember last load/save location for file dialogs
 editor.save.remloc.type=checkbox
 editor.save.remloc.default=false
+editor.save.remloc.tooltip=UECIDE will remember where you were the last time you saved or loaded something.
 
 editor.save.auto.name=Automatically save sketch before each compile
 editor.save.auto.type=checkbox
 editor.save.auto.default=false
+editor.save.auto.tooltip=When you hit the compile button the sketch will automatically be saved for you.
 
 editor.save.version.name=Save backup versions of your sketch
 editor.save.version.type=checkbox
 editor.save.version.default=false
+editor.save.version.tootip=Broken - do not use.
 
 editor.save.version_num.name=Number of backup copies to save
 editor.save.version_num.type=range
 editor.save.version_num.min=1
 editor.save.version_num.max=10
 editor.save.version_num.default=1
+editor.save.version_num.tooltip=Broken - do not use.
 
 editor.tabs.expand.name=Editor uses spaces for tabs
 editor.tabs.expand.type=checkbox
 editor.tabs.expand.default=true
+editor.tabs.expand.tooltip=Whenevr you press the TAB key you will get spaces instead of a tab character.
 
 editor.tabs.size.name=Number of spaces to use for a tab
 editor.tabs.size.type=range
 editor.tabs.size.min=1
 editor.tabs.size.max=10
 editor.tabs.size.default=4
+editor.tabs.size.tooltip=This is the number of spaces a TAB equates to.
 
 editor.tabs.show.name=Show tabs and indents
 editor.tabs.show.type=checkbox
 editor.tabs.show.default=false;
+editor.tabs.show.tooltip=Shows you in the editor where the tabs are in the text.
 
 editor.toolbars.sub_hidden.name=Hide the secondary editor toolbar
 editor.toolbars.sub_hidden.type=checkbox
 editor.toolbars.sub_hidden.default=false
+editor.toolbars.sub_hidden.tooltip=Removes the toolbar at the top of the editor tab.
 
 editor.version_check.name=Check for a new version at startup
 editor.version_check.type=checkbox
 editor.version_check.default=true
+editor.version_check.tooltip=Query the UECIDE servers to see if a new version has been released.
 
 editor.newonclose.name=Create new empty editor when last one closes
 editor.newonclose.type=checkbox
 editor.newonclose.default=false
+editor.newonclose.tooltip=This will keep UECIDE loaded and running even when you close the last window. A new empty sketch will automatically be created for you.
 
 editor.hwaccel.name=Enable hardware acceleration
 editor.hwaccel.type=checkbox
 editor.hwaccel.default=false
+editor.hwaccel.tooltip=This turns on Java's hardware accelerated graphics drawing.
 
 theme.name=Theme
 theme.type=section
@@ -151,6 +179,7 @@ theme.scale.name=UI Scale x
 theme.scale.min=1
 theme.scale.max=4
 theme.scale.default=1
+theme.scale.tooltip=Increases the size of everything. Good of high resolution displays. Requires Java 9 or newer.
 
 theme.laf.name=Window Style
 theme.laf.type=dropdown
@@ -184,6 +213,7 @@ theme.laf.options.tinysilver=Silver
 theme.laf.options.tinyunicode=Unicode
 theme.laf.options.vs2005=Visual Studio 2005*
 theme.laf.default=aluminium
+theme.laf.tooltip=Defines the overall look of UECIDE. Have a play, there's lots to choose from.
 
 theme.jtattoo.name=JTattoo Options
 theme.jtattoo.type=section
@@ -195,14 +225,17 @@ theme.jtattoo.aafont.options.Small-Font=Small
 theme.jtattoo.aafont.options.Large-Font=Large
 theme.jtattoo.aafont.options.Giant-Font=Giant
 theme.jtattoo.aafont.default=Default
+theme.jtattoo.aafont.tooltip=Sets the relative size of fonts in JTattoo window styles.
 
 theme.jtattoo.customdec.name=Custom window dectorator
 theme.jtattoo.customdec.type=checkbox
 theme.jtattoo.customdec.default=false
+theme.jtattoo.customdec.tooltip=Turns on or off the custom window decorator in JTattoo. This can solve some window rendering issues.
 
 theme.jtattoo.macdec.name=Mac-style dectorator
 theme.jtattoo.macdec.type=checkbox
 theme.jtattoo.macdec.default=false
+theme.jtattoo.macdec.tooltip=Moves the window controls to the other end of the title bar - like on OS X.
 
 
 theme.jtattoo.themes.name=Themes

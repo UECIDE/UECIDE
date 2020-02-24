@@ -187,6 +187,9 @@ public class Programmer extends UObject {
         return true;
     }
 
+    public boolean isHidden() {
+        return _properties.getBoolean("hidden", false);
+    }
     
 
 }

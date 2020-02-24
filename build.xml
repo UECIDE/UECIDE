@@ -388,8 +388,6 @@
                 <native arch="windows-x86_64" />
             </maven>
             <maven group="com.googlecode.json-simple"              artifact="json-simple"              version="1.1.1" />
-            <maven group="org.jmdns"                               artifact="jmdns"                    version="3.5.3" />
-            <!--maven group="org.scream3r"                            artifact="jssc"                     version="2.8.0" /-->
             <maven group="com.sun.jna"                             artifact="jna"                      version="3.0.9" />
             <maven group="org.commonjava.googlecode.markdown4j"    artifact="markdown4j"               version="2.2-cj-1.1" />
             <maven group="com.jcraft"                              artifact="jsch"                     version="0.1.54" />
@@ -398,14 +396,9 @@
             <maven group="org.tukaani"                             artifact="xz"                       version="1.8" />
             <maven group="org.jline"                               artifact="jline"                    version="3.6.0" />
             <maven group="com.apple"                               artifact="AppleJavaExtensions"      version="1.4" />
-            <maven group="net.posick"                              artifact="mdnsjava"                 version="2.2.0" />
             <maven group="jfree"                                   artifact="jcommon"                  version="1.0.16" />
             <maven group="jfree"                                   artifact="jfreechart"               version="1.0.13" />
-            <!--maven group="junit"                                   artifact="junit"                    version="4.10" /-->
-            <maven group="dnsjava"                             artifact="dnsjava"                  version="2.1.9" />
-            <!--download url="http://www.dnsjava.org/download/dnsjava-2.1.8.jar" filename="dnsjava.jar" /-->
             <maven group="org.swinglabs"                        artifact="swingx"   version="1.6.1" />
-            <!--maven group="com.fazecast"                         artifact="jSerialComm"              version="2.5.1" /-->
             <maven group="de.waldheinz"                         artifact="fat32-lib"                version="0.6.5" />
         </depends>
     </target>

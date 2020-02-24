@@ -33,11 +33,6 @@ package org.uecide;
 import java.io.*;
 import java.util.*;
 
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceEvent;
-import javax.jmdns.ServiceListener;
-import javax.jmdns.ServiceInfo;
-
 import org.usb4java.*;
 
 import javax.usb.*;

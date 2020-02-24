@@ -35,6 +35,7 @@ import org.uecide.gui.swing.SwingGui;
 import org.uecide.gui.cli.CliGui;
 import org.uecide.gui.action.ActionGui;
 import org.uecide.gui.none.NoneGui;
+import org.uecide.gui.html.HTMLGui;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -589,6 +590,7 @@ public class Base {
             case "swing": SwingGui.init(); break;
             case "action": ActionGui.init(); break;
             case "none": NoneGui.init(); break;
+            case "html": HTMLGui.init(); break;
             default:
                 System.err.println("Unknown GUI specified. Cannot continue.");
                 System.exit(10);
@@ -637,6 +639,7 @@ public class Base {
             case "swing": SwingGui.endinit(); break;
             case "action": ActionGui.endinit(); break;
             case "none": NoneGui.endinit(); break;
+            case "html": HTMLGui.endinit(); break;
             default:
                 System.err.println("Unknown GUI specified. Cannot continue.");
                 System.exit(10);
@@ -1912,6 +1915,7 @@ public class Base {
                 case "swing": guiObject = new SwingGui(ctx); break;
                 case "action": guiObject = new ActionGui(ctx); break;
                 case "none": guiObject = new NoneGui(ctx); break;
+                case "html": guiObject = new HTMLGui(ctx); break;
                 default:
                     System.err.println("Unknown GUI specified. Cannot continue.");
                     System.exit(10);

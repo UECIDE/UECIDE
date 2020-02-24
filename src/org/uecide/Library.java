@@ -40,8 +40,13 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class Library implements Comparable {
-    public ArrayList<String> requiredLibraries = new ArrayList<String>();
     public File root;
+    int priority;
+    String category;
+
+
+
+    public ArrayList<String> requiredLibraries = new ArrayList<String>();
     public String name;
     public File examplesFolder = null;
     public TreeSet<File> sourceFiles;
@@ -75,6 +80,11 @@ public class Library implements Comparable {
     File propertyFile = null;
 
     boolean utilRecurse = false;
+
+    public Library(File loc, int pri) {
+        root = loc;
+        priority = pri;
+    }
 
     public Library(File loc, String t, String c) {
         type = t;
@@ -845,5 +855,49 @@ public class Library implements Comparable {
     public String getMainInclude() {
         return mainInclude.getName();
     }
+
+
+
+
+
+
+    public String getMainHeader() { 
+        return mainInclude.getName();
+    }
+
+    public Version getVersion() {
+        return new Version("1.0.0-old");
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public boolean worksWith(Core c) {
+        if (core.equals("all")) return true;
+        if (c.getName().equals(core)) return true;
+        return false;
+    }
+
+    public void setCore(String c) {
+        core = c;
+    }
+
+    public void setCore(Core c) {
+        core = c.getName();
+    }
+
+    public void setCategory(String name) {
+        category = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public ArrayList<File>getHeaderFiles() {
+        return null;
+    }
 }
+
 

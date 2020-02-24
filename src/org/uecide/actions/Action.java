@@ -15,6 +15,7 @@ public abstract class Action {
     public static boolean run(Context c, String name, Object[] args) {
         Action action = null;
 
+        // I must find a better way to do this...
         switch (name.toLowerCase()) {
             case "opensketch": action = new OpenSketchAction(c); break;
             case "newsketch": action = new NewSketchAction(c); break;
@@ -35,6 +36,10 @@ public abstract class Action {
             case "closesession": action = new CloseSessionAction(c); break;
             case "closesketchfile": action = new CloseSketchFileAction(c); break;
             case "actions": action = new ActionsAction(c); break;
+            case "addlibrary": action = new AddLibraryAction(c); break;
+            case "addlibrarylocation": action = new AddLibraryLocationAction(c); break;
+            case "rescanlibraries": action = new RescanLibrariesAction(c); break;
+            case "reloadfiles": action = new ReloadFilesAction(c); break;
             default:
                 c.error("Unknown action " + name);
                 return false;
@@ -43,7 +48,7 @@ public abstract class Action {
         try {
             return action.actionPerformed(args);
         } catch (ActionException ex) {
-            c.error(ex);
+            c.error(ex.toString());
         }
         return false;
     }

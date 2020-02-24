@@ -3,22 +3,22 @@ package org.uecide;
 import java.net.*;
 import java.io.*;
 import java.util.*;
-import net.posick.mDNS.*;
 
+import net.straylightlabs.hola.sd.Instance;
 
 public class mDNSProgrammer extends Programmer {
 
     Board _board;
-    ServiceInstance _info;
+    Instance _info;
     InetAddress _ip;
     Programmer _programmer;
 
     @SuppressWarnings("unchecked")
-    public mDNSProgrammer(ServiceInstance info, Board b) {
+    public mDNSProgrammer(Instance info, Board b) {
         _info = info;
         _board = b;
 
-        InetAddress[] ips = _info.getAddresses();
+        InetAddress[] ips = _info.getAddresses().toArray(new InetAddress[0]);
         
         _ip = ips[0];
 
@@ -29,7 +29,7 @@ public class mDNSProgrammer extends Programmer {
         }
         getProperties().mergeData(_programmer.getProperties());
         
-        Map<String,String> txt = _info.getTextAttributes();
+        Map<String,String> txt = _info.getAttributes();
         for (String k : txt.keySet()) {
             set("mdns.data." + k, txt.get(k));
         }
@@ -37,7 +37,7 @@ public class mDNSProgrammer extends Programmer {
         setRelatedObject(_board);
 
         set("name", _programmer.getName() + "-" + _ip.getHostAddress());
-        set("description", _board.getDescription() + " on " + _ip.getHostAddress() + " (" + _info.getName().getInstance() + ")");
+        set("description", _board.getDescription() + " on " + _ip.getHostAddress() + " (" + _info.getName() + ")");
         set("mdns.created", "true");
         unset("hidden");
     }
@@ -73,11 +73,8 @@ public class mDNSProgrammer extends Programmer {
         return get("description");
     }
 
-//    public void onSelected(Editor e) {
-//        try {
-//            e.getContext().setBoard(_board);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-//    }
+    @Override
+    public void onSelected(Context ctx) {
+        ctx.action("SetBoard", _board);
+    }
 }

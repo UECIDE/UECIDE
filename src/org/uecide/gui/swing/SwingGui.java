@@ -415,9 +415,18 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     @Override
     public String askString(String question, String defaultValue) {
-        Icon i = null;
-        try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
-        return (String)JOptionPane.showInputDialog(window, question, "Excuse me, but...", JOptionPane.QUESTION_MESSAGE, i, null, defaultValue);
+        CleverIcon i = null;
+        try { i = IconManager.getIcon(48, "misc.input"); } catch (IOException ignored) {}
+        FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", question, i, FancyDialog.INPUT_OKCANCEL);
+        if (dialog.getResult() == FancyDialog.ANSWER_OK) {
+            return dialog.getText();
+        } else {
+            return null;
+        }
+
+//        Icon i = null;
+//        try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
+//        return (String)JOptionPane.showInputDialog(window, question, "Excuse me, but...", JOptionPane.QUESTION_MESSAGE, i, null, defaultValue);
     }
 
     @Override
@@ -444,6 +453,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     @Override
     public void closeSketchFileEditor(SketchFile f) {
         flushDocumentData();
+        ArrayList<AutoTab> toRemove = new ArrayList<AutoTab>();
         for (AutoTab pane : panes) {
             for (int i = 0; i < pane.getTabCount(); i++) {
                 Component c = pane.getComponentAt(i);
@@ -451,9 +461,18 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                     CodeEditor ce = (CodeEditor)c;
                     if (ce.getSketchFile() == f) {
                         pane.remove(ce);
+                        if (pane.isSeparateWindow()) {
+                            if (pane.getTabCount() == 0) {
+                                toRemove.add(pane);
+                            }
+                        }
                     }
                 }
             }
+        }
+        for (AutoTab pane : toRemove) {
+            panes.remove(pane);
+            pane.getParentWindow().dispose();
         }
     }
 
@@ -505,19 +524,30 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     @Override
     public boolean askYesNo(String question) {
-        Icon i = null;
+        CleverIcon i = null;
         try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
-        return (JOptionPane.showConfirmDialog(window, question, "Excuse me, but...", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, i) == JOptionPane.YES_OPTION);
+        FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", question, i, FancyDialog.QUESTION_YESNO);
+        return dialog.getResult() == FancyDialog.ANSWER_YES;
+
+//        return (JOptionPane.showConfirmDialog(window, question, "Excuse me, but...", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, i) == JOptionPane.YES_OPTION);
     }
 
     @Override
     public int askYesNoCancel(String question) {
-        Icon i = null;
+System.err.println("YesNoCancel");
+        CleverIcon i = null;
         try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
-        int rv = JOptionPane.showConfirmDialog(window, question, "Excuse me, but...", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, i);
-        if (rv == JOptionPane.YES_OPTION) return 0;
-        if (rv == JOptionPane.NO_OPTION) return 1;
-        if (rv == JOptionPane.CANCEL_OPTION) return 2;
+        FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", question, i, FancyDialog.QUESTION_YESNOCANCEL);
+        if (dialog.getResult() == FancyDialog.ANSWER_YES) return 0;
+        if (dialog.getResult() == FancyDialog.ANSWER_NO) return 1;
+        if (dialog.getResult() == FancyDialog.ANSWER_CANCEL) return 2;
+
+//        Icon i = null;
+//        try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
+//        int rv = JOptionPane.showConfirmDialog(window, question, "Excuse me, but...", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, i);
+//        if (rv == JOptionPane.YES_OPTION) return 0;
+//        if (rv == JOptionPane.NO_OPTION) return 1;
+//        if (rv == JOptionPane.CANCEL_OPTION) return 2;
         return -1;
     }
 

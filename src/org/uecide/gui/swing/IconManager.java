@@ -158,7 +158,7 @@ public class IconManager {
             public void run() {
                 IconManager.tick();
             }
-        }, 100, 100);
+        }, 50, 50);
     }
 
     static public void tick() {

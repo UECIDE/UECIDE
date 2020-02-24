@@ -4,6 +4,7 @@ Changelog
 0.11.0
 ------
 
+* Context-aware tools menu
 * ucase and lcase variable commands
 * Open sketches on command line
 * action script gui
@@ -729,6 +730,7 @@ Changelog
 0.8.5
 -----
 
+* Context-aware tools menu
 * ucase and lcase variable commands
 * Open sketches on command line
 * action script gui

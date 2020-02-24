@@ -21,7 +21,9 @@ public class SetProgrammerAction extends Action {
             }
 
             if (args[0] instanceof Programmer) {
-                ctx.setProgrammer((Programmer)args[0]);
+                Programmer prog = (Programmer)args[0];
+                ctx.setProgrammer(prog);
+                prog.onSelected(ctx);
                 return true;
             } else if (args[0] instanceof String) {
                 String s = (String)args[0];
@@ -30,6 +32,7 @@ public class SetProgrammerAction extends Action {
                     throw new ActionException("Unknown Programmer");
                 }
                 ctx.setProgrammer(b);
+                b.onSelected(ctx);
                 return true;
             }
             throw new BadArgumentActionException();

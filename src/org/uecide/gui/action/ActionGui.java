@@ -31,13 +31,11 @@ public class ActionGui extends Gui {
                     args[i - 1] = parts[i];
                 }
 
-                if (!ctx.action(command, args)) {
-                    System.err.println("Error");
-                }
+                ctx.action(command, (Object[])args);
             }
 
         } catch (Exception e) {
-            ctx.error(e);
+            ctx.error(e.getMessage());
         }
     };
 

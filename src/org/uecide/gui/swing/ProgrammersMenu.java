@@ -49,8 +49,10 @@ public class ProgrammersMenu extends JMenu implements MenuListener {
         removeAll();
         for (Programmer programmer : Base.programmers.values()) {
             if (programmer.worksWith(ctx.getBoard())) {
-                ProgrammersMenuItem menu = new ProgrammersMenuItem(ctx, programmer);
-                add(menu);
+                if (!programmer.isHidden()) {
+                    ProgrammersMenuItem menu = new ProgrammersMenuItem(ctx, programmer);
+                    add(menu);
+                }
             }
         }
     }

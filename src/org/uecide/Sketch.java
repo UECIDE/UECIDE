@@ -1495,7 +1495,6 @@ public class Sketch {
 
     public boolean compile() throws IOException {
 
-        
         long startTime = System.currentTimeMillis();
 
 //        ctx.clearSettings();
@@ -1660,13 +1659,14 @@ public class Sketch {
                 if (exeSuffix == null) {
                     exeSuffix = ".hex";
                 }
-                File dest = new File(sketchFolder, sketchName + exeSuffix);
-                Files.copy(new File(buildFolder, sketchName + exeSuffix).toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                if (dest.exists()) {
-                    dest.setExecutable(true);
+                File src = new File(buildFolder, sketchName + exeSuffix);
+                if (src.exists()) {
+                    File dest = new File(sketchFolder, sketchName + exeSuffix);
+                    Files.copy(src.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    if (dest.exists()) {
+                        dest.setExecutable(true);
+                    }
                 }
-                
-
             } catch(Exception e) {
                 ctx.error(e);
             }

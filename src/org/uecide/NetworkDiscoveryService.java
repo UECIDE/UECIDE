@@ -34,11 +34,13 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
-import net.posick.mDNS.*;
-import org.xbill.DNS.Type;
+import net.straylightlabs.hola.dns.Domain;
+import net.straylightlabs.hola.sd.Instance;
+import net.straylightlabs.hola.sd.Query;
+import net.straylightlabs.hola.sd.Service;
 
 
-public class NetworkDiscoveryService extends Service {
+public class NetworkDiscoveryService extends org.uecide.Service {
 
     public NetworkDiscoveryService() {
         setInterval(15000);
@@ -53,30 +55,36 @@ public class NetworkDiscoveryService extends Service {
 
     @SuppressWarnings("unchecked")
     public void loop() {
-        Lookup lookup = null;
         try {
             ArrayList<String> fullServiceList = getServices();
             for (String svc : fullServiceList) {
-                ServiceName service = new ServiceName(svc);
-                lookup = new Lookup(service, Type.PTR);
-                ServiceInstance[] services = lookup.lookupServices();
-                for (ServiceInstance s : services) {
-                    InetAddress[] addresses = s.getAddresses();
-                    int port = s.getPort();
-                    Map<String, String>txt = s.getTextAttributes();
-                    String serviceName = s.getName().getFullType() + "." + s.getName().getDomain();
-                    Board b = getBoardByService(serviceName, txt);
-                    if (b != null) {
-                        mDNSProgrammer p = new mDNSProgrammer(s, b);
-                        Programmer oldP = Base.programmers.get(p.getName());
-                        if (oldP == null) {
-                            Base.programmers.put(p.getName(), p);
+                Service service = Service.fromName(svc);
+
+                for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                    NetworkInterface intf = en.nextElement();
+                    for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                        InetAddress myAddress = enumIpAddr.nextElement();
+                        try {
+                            Query query = Query.createFor(service, Domain.LOCAL);
+                            Set<Instance> instances = query.runOnceOn(myAddress);
+                            for (Instance i : instances) {
+                                Board b = getBoardByService(svc, i);
+                                if (b != null) {
+                                    mDNSProgrammer p = new mDNSProgrammer(i, b);
+                                    Programmer oldP = Base.programmers.get(p.getName());
+                                    if (oldP == null) {
+                                        Base.programmers.put(p.getName(), p);
+                                    }
+                                }
+                            }
+                        } catch (Exception exc) {
+                            //exc.printStackTrace();
                         }
                     }
                 }
-                lookup.close();
             }
-        } catch (Exception e) {
+        } catch (Exception exc) {
+//            System.err.println(exc.toString());
         }
     }
 
@@ -90,6 +98,10 @@ public class NetworkDiscoveryService extends Service {
                 continue;
             }
 
+            if (service.endsWith(".local.")) {
+                service = service.substring(0, service.length() - 7);
+            }
+
             if(serviceList.indexOf(service) == -1) {
                 serviceList.add(service);
             }
@@ -99,19 +111,22 @@ public class NetworkDiscoveryService extends Service {
     }
 
     //public static Board getBoardByService(ServiceInfo info) {
-    public static Board getBoardByService(String svc, Map<String,String>txt) {
+    public static Board getBoardByService(String svc, Instance i) {
         for(Board board : Base.boards.values()) {
             String service = board.get("mdns.service");
-
             if(service == null) {
                 continue;
             }
+            if (service.endsWith(".local.")) {
+                service = service.substring(0, service.length() - 7);
+            }
 
-            if(service.equals(svc)) { //info.getTypeWithSubtype())) {
+            if(service.equals(svc)) { 
                 String key = board.get("mdns.model.key");
                 String value = board.get("mdns.model.value");
-                String btype = txt.get(key); //info.getPropertyString(key);
+                String btype = i.lookupAttribute(key); //info.getPropertyString(key);
                 if (btype != null) {
+                    btype = btype.replaceAll("^\"|\"$", "");
                     if(btype.equals(value)) {
                         return board;
                     }

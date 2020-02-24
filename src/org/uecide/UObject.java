@@ -338,6 +338,6 @@ public class UObject implements Comparable {
         _related = o;
     }
 
-//    public void onSelected(Editor e) {
-//    }
+    public void onSelected(Context ctx) {
+    }
 }
