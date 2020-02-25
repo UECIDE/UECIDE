@@ -539,7 +539,6 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     @Override
     public int askYesNoCancel(String question) {
-System.err.println("YesNoCancel");
         CleverIcon i = null;
         try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
         FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", question, i, FancyDialog.QUESTION_YESNOCANCEL);
@@ -547,12 +546,6 @@ System.err.println("YesNoCancel");
         if (dialog.getResult() == FancyDialog.ANSWER_NO) return 1;
         if (dialog.getResult() == FancyDialog.ANSWER_CANCEL) return 2;
 
-//        Icon i = null;
-//        try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
-//        int rv = JOptionPane.showConfirmDialog(window, question, "Excuse me, but...", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, i);
-//        if (rv == JOptionPane.YES_OPTION) return 0;
-//        if (rv == JOptionPane.NO_OPTION) return 1;
-//        if (rv == JOptionPane.CANCEL_OPTION) return 2;
         return -1;
     }
 

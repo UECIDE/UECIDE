@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Upgraded questionmark animation. Fixed OTA programmer selection bug
 * Added library insert functionality
 * Moved messages to context events
 * Added create new file and associated action
@@ -740,6 +741,7 @@ Changelog
 0.8.5
 -----
 
+* Upgraded questionmark animation. Fixed OTA programmer selection bug
 * Added library insert functionality
 * Moved messages to context events
 * Added create new file and associated action

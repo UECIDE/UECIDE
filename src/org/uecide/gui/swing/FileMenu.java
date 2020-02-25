@@ -109,6 +109,11 @@ public class FileMenu extends JMenu {
         add(preferencesMenu);
 
         quitMenu = new JMenuItem("Quit");
+        quitMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                ctx.action("closeAllSessions");
+            }
+        });
         add(quitMenu);
 
     
