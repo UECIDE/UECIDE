@@ -13,6 +13,8 @@ public class SetBoardAction extends Action {
         };
     }
 
+    public String getCommand() { return "setboard"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

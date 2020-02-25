@@ -13,6 +13,8 @@ public class OpenSketchAction extends Action {
         };
     }
 
+    public String getCommand() { return "opensketch"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         File file = null;

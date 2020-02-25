@@ -1,7 +1,10 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.ContextEvent;
+import org.uecide.ContextEventListener;
 import org.uecide.Preferences;
+import org.uecide.Message;
 
 import javax.swing.JScrollPane;
 
@@ -13,7 +16,7 @@ import java.awt.event.MouseWheelEvent;
 import com.wittams.gritty.swing.TermPanel;
 import com.wittams.gritty.swing.GrittyTerminal;
 
-public class Console extends TabPanel implements MouseWheelListener {
+public class Console extends TabPanel implements MouseWheelListener, ContextEventListener {
     Context ctx;
 
     GrittyTerminal terminal;
@@ -36,6 +39,7 @@ public class Console extends TabPanel implements MouseWheelListener {
         terminal.start();
 
         add(terminal, BorderLayout.CENTER);
+        c.listenForEvent("message", this);
     }
 
     public void streamError(String e) {
@@ -88,5 +92,23 @@ public class Console extends TabPanel implements MouseWheelListener {
                 e.getScrollAmount() * e.getWheelRotation()
             )
         );
+    }
+
+    @Override
+    public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("message")) {
+            Message m = (Message)e.getObject();
+
+            switch (m.getMessageType()) {
+                case Message.HEADING: heading(m.getText()); break;
+                case Message.BULLET1: bullet(m.getText()); break;
+                case Message.BULLET2: bullet2(m.getText()); break;
+                case Message.BULLET3: bullet3(m.getText()); break;
+                case Message.COMMAND: command(m.getText()); break;
+                case Message.NORMAL: message(m.getText()); break;
+                case Message.WARNING: warning(m.getText()); break;
+                case Message.ERROR: error(m.getText()); break;
+            }
+        }
     }
 }

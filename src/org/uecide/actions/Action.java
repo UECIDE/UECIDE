@@ -2,58 +2,70 @@ package org.uecide.actions;
 
 import org.uecide.*;
 
+import java.util.TreeMap;
+import java.util.Set;
+import org.reflections.Reflections;
+import java.lang.reflect.Constructor;
+import java.lang.NoSuchMethodException;
+import java.lang.InstantiationException;
+import java.lang.reflect.InvocationTargetException;
+
 public abstract class Action {
 
     public Context ctx;
+
+    static TreeMap<String, Class<? extends Action>> actionList = null;
 
     public Action(Context c) {
         ctx = c;
     }
 
+    public static TreeMap<String, Class<? extends Action>> getActions() {
+        return actionList;
+    }
+
+    public static void initActions() {
+        actionList = new TreeMap<String, Class<? extends Action>>();
+        Reflections ref = new Reflections("org.uecide.actions");
+        Set<Class<? extends Action>> classes = ref.getSubTypesOf(Action.class);
+
+        for (Class<? extends Action> cl : classes) {
+            try {
+                Action a = constructAction(cl, (Context)null);
+                String cmd = a.getCommand();
+                actionList.put(cmd, cl);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public static Action constructAction(Class<? extends Action>cl, Context ctx) throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        Constructor<?> cons = cl.getConstructor(Context.class);
+        Action a = (Action)cons.newInstance(ctx);
+        return a;
+    }
+
     public abstract boolean actionPerformed(Object[] args) throws ActionException;
 
     public static boolean run(Context c, String name, Object[] args) {
-        Action action = null;
-
-        // I must find a better way to do this...
-        switch (name.toLowerCase()) {
-            case "opensketch": action = new OpenSketchAction(c); break;
-            case "newsketch": action = new NewSketchAction(c); break;
-            case "build": action = new BuildAction(c); break;
-            case "buildandupload": action = new BuildAndUploadAction(c); break;
-            case "purge": action = new PurgeAction(c); break;
-            case "upload": action = new UploadAction(c); break;
-            case "setboard": action = new SetBoardAction(c); break;
-            case "setcore": action = new SetCoreAction(c); break;
-            case "setcompiler": action = new SetCompilerAction(c); break;
-            case "setprogrammer": action = new SetProgrammerAction(c); break;
-            case "setdevice": action = new SetDeviceAction(c); break;
-            case "abort": action = new AbortAction(c); break;
-            case "setpref": action = new SetPrefAction(c); break;
-            case "opensketchfile": action = new OpenSketchFileAction(c); break;
-            case "savesketch": action = new SaveSketchAction(c); break;
-            case "savesketchas": action = new SaveSketchAsAction(c); break;
-            case "closesession": action = new CloseSessionAction(c); break;
-            case "closesketchfile": action = new CloseSketchFileAction(c); break;
-            case "actions": action = new ActionsAction(c); break;
-            case "addlibrary": action = new AddLibraryAction(c); break;
-            case "addlibrarylocation": action = new AddLibraryLocationAction(c); break;
-            case "rescanlibraries": action = new RescanLibrariesAction(c); break;
-            case "reloadfiles": action = new ReloadFilesAction(c); break;
-            case "newsketchfile": action = new NewSketchFileAction(c); break;
-            default:
+        try {
+            Class<? extends Action> cl = actionList.get(name.toLowerCase());
+            if (cl == null) {
                 c.error("Unknown action " + name);
                 return false;
-        }
-
-        try {
+            }
+            Action action = constructAction(cl, c);
             return action.actionPerformed(args);
         } catch (ActionException ex) {
             c.error(ex.toString());
+        } catch (Exception ex) {
+            c.error(ex);
         }
         return false;
     }
 
     public abstract String[] getUsage();
+    public abstract String getCommand();
 
 }

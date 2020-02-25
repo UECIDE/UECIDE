@@ -17,6 +17,8 @@ public class AbortAction extends Action {
         };
     }
 
+    public String getCommand() { return "abort"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         if (args.length != 1) {
             throw new SyntaxErrorActionException();

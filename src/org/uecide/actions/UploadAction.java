@@ -12,6 +12,8 @@ public class UploadAction extends Action {
         };
     }
 
+    public String getCommand() { return "upload"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
             ctx.triggerEvent("uploadStart");

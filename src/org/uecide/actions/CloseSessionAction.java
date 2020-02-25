@@ -14,6 +14,8 @@ public class CloseSessionAction extends Action {
         };
     }
 
+    public String getCommand() { return "closesession"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         if (ctx.getSketch().isModified()) {

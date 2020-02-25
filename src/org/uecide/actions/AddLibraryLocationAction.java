@@ -16,6 +16,8 @@ public class AddLibraryLocationAction extends Action {
         };
     }
 
+    public String getCommand() { return "addlibrarylocation"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         File source = null;

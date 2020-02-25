@@ -32,14 +32,18 @@ import java.util.*;
 
 import org.uecide.Compiler;
 import org.uecide.Package;
+import org.uecide.ContextEvent;
+import org.uecide.ContextEventListener;
+import org.uecide.Message;
 
-public class CliGui extends Gui {
+public class CliGui extends Gui implements ContextEventListener {
     LineReader _reader;
     Completer _completer = null;
     APT _apt;
 
     public CliGui(Context c) {
         super(c);
+        c.listenForEvent("message", this);
     }
 
     void updateComplete() {
@@ -558,6 +562,24 @@ public class CliGui extends Gui {
 
     @Override
     public void navigateToLine(SketchFile f, Integer l) {
+    }
+
+    @Override
+    public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("message")) {
+            Message m = (Message)e.getObject();
+
+            switch (m.getMessageType()) {
+                case Message.HEADING: heading(m.getText()); break;
+                case Message.BULLET1: bullet(m.getText()); break;
+                case Message.BULLET2: bullet2(m.getText()); break;
+                case Message.BULLET3: bullet3(m.getText()); break;
+                case Message.COMMAND: command(m.getText()); break;
+                case Message.NORMAL: message(m.getText()); break;
+                case Message.WARNING: warning(m.getText()); break;
+                case Message.ERROR: error(m.getText()); break;
+            }
+        }
     }
 
 }

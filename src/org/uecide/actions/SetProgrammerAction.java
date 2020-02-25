@@ -13,6 +13,8 @@ public class SetProgrammerAction extends Action {
         };
     }
 
+    public String getCommand() { return "setprogrammer"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

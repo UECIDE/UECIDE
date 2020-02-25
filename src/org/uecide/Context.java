@@ -112,12 +112,12 @@ public class Context {
 
     // At least one of these should be called to configure the context:
 
-    public void setProgrammer(Programmer p) { programmer = p; triggerEvent("setProgrammer"); updateSystem(); }
-    public void setBoard(Board b) { board = b; triggerEvent("setBoard"); updateSystem(); }
-    public void setCore(Core c) { core = c; triggerEvent("setCore"); updateSystem(); }
-    public void setCompiler(Compiler c) { compiler = c; triggerEvent("setCompiler"); updateSystem(); }
-    public void setSketch(Sketch s) { sketch = s; triggerEvent("setSketch"); updateSystem(); }
-    public void setGui(Gui g) { gui = g; triggerEvent("setGui"); updateSystem(); }
+    public void setProgrammer(Programmer p) { programmer = p; triggerEvent("setProgrammer", programmer); updateSystem(); }
+    public void setBoard(Board b) { board = b; triggerEvent("setBoard", board); updateSystem(); }
+    public void setCore(Core c) { core = c; triggerEvent("setCore", core); updateSystem(); }
+    public void setCompiler(Compiler c) { compiler = c; triggerEvent("setCompiler", compiler); updateSystem(); }
+    public void setSketch(Sketch s) { sketch = s; triggerEvent("setSketch", sketch); updateSystem(); }
+    public void setGui(Gui g) { gui = g; triggerEvent("setGui", gui); updateSystem(); }
     public void setDevice(CommunicationPort p) { 
         port = p; 
         if (port != null) {
@@ -125,16 +125,20 @@ public class Context {
             set("port.base", port.getBaseName());
             set("ip", port.getProgrammingAddress());
         }
-        triggerEvent("setDevice");
+        triggerEvent("setDevice", port);
     }
 
     public synchronized void updateSystem() {
     }
 
     public void triggerEvent(String event) {
+        triggerEvent(event, null);
+    }
+
+    public void triggerEvent(String event, Object ob) {
         Debug.message("Event triggered: " + event);
         if (contextEventListeners.get(event) == null) return;
-        ContextEvent ce = new ContextEvent(this, event);
+        ContextEvent ce = new ContextEvent(this, event, ob);
         for (ContextEventListener target : contextEventListeners.get(event)) {
             target.contextEventTriggered(ce);
         }
@@ -244,14 +248,14 @@ public class Context {
     // Reporting and messaging functions.
 
     public void error(Throwable e) {
-        gui.error(e);
+        triggerEvent("message", new Message(Message.ERROR, e.toString()));
     }
 
     public void error(String e) {
         if (listener != null) {
             listener.contextError(e);
         } else {
-            gui.error(e);
+            triggerEvent("message", new Message(Message.ERROR, e));
         }
     }
 
@@ -259,7 +263,7 @@ public class Context {
         if (listener != null) {
             listener.contextWarning(e);
         } else {
-            gui.warning(e);
+            triggerEvent("message", new Message(Message.WARNING, e));
         }
     }
         
@@ -267,7 +271,7 @@ public class Context {
         if (listener != null) {
             listener.contextMessage(e);
         } else {
-            gui.message(e);
+            triggerEvent("message", new Message(Message.NORMAL, e));
         }
     }
 
@@ -291,24 +295,24 @@ public class Context {
 
     public void command(String e) {
         if ((Preferences.getBoolean("compiler.verbose_compile")) || (Base.cli.isSet("verbose"))) {
-            gui.command(e);
+            triggerEvent("message", new Message(Message.COMMAND, e));
         }
     }
         
     public void bullet(String e) {
-        gui.bullet(e);
+        triggerEvent("message", new Message(Message.BULLET1, e));
     }
         
     public void bullet2(String e) {
-        gui.bullet2(e);
+        triggerEvent("message", new Message(Message.BULLET2, e));
     }
 
     public void bullet3(String e) {
-        gui.bullet3(e);
+        triggerEvent("message", new Message(Message.BULLET3, e));
     }
 
     public void heading(String e) {
-        gui.heading(e);
+        triggerEvent("message", new Message(Message.HEADING, e));
     }
         
     public void rawMessageStream(String e) {
@@ -745,71 +749,52 @@ public class Context {
 
         byte[] tmp = new byte[1];
 
-
         String outline = "";
         String errline = "";
 
         while(isProcessRunning(runningProcess)) {
             try {
+
                 while(in.available() > 0) {
                     int i = in.read(tmp, 0, 1);
-
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-//                    if (buffer == null) rawMessageStream(inch);
-                    if (parser != null) {
-                        if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
-                            outline += inch;
-                        }
-                        if (inch.equals("\n")) {
-//                            rawMessageStream(outline);
+                    if (inch.equals("\n")) {
+
+                        if (parser != null) {
                             outline = parser.parseStreamMessage(this, outline);
                             outline = parser.parseStreamError(this, outline);
-                            if (buffer != null) {
-                                buffer.append(inch);
-                            } else {                        
-                                messageStream(inch);
-                            }
-                            outline = "";
+                        }
+
+                        if (buffer != null) {
+                            buffer.append(outline);
+                        } else {
+                            message(outline);
                         }
                     } else {
-                        if (buffer != null) {
-                            buffer.append(inch);
-                        } else {                        
-                            messageStream(inch);
-                        }
+                        outline += inch;
                     }
                 }
-
                 while(err.available() > 0) {
                     int i = err.read(tmp, 0, 1);
-
                     if(i < 0)break;
                     
                     String inch = new String(tmp, 0, i);
-//                    if (buffer == null) rawErrorStream(inch);
-                    if (parser != null) {
-                        if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
-                            errline += inch;
-                        }
-                        if (inch.equals("\n")) {
-//                            rawErrorStream(errline);
+                    if (inch.equals("\n")) {
+
+                        if (parser != null) {
                             errline = parser.parseStreamMessage(this, errline);
                             errline = parser.parseStreamError(this, errline);
-                            if (buffer != null) {
-                                buffer.append(inch);
-                            } else {                        
-                                errorStream(inch);
-                            }
-                            errline = "";
+                        }
+
+                        if (buffer != null) {
+                            buffer.append(errline);
+                        } else {
+                            error(errline);
                         }
                     } else {
-                        if (buffer != null) {
-                            buffer.append(inch);
-                        } else {                        
-                            errorStream(inch);
-                        }
+                        errline += inch;
                     }
                 }
 
@@ -826,104 +811,7 @@ public class Context {
             }
         }
 
-        try {
-            while(in.available() > 0) {
-                int i = in.read(tmp, 0, 1);
-
-                if(i < 0)break;
-                
-                String inch = new String(tmp, 0, i);
-                if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
-                    outline += inch;
-                }
-
-//                if (buffer == null) rawMessageStream(inch);
-                if (inch.equals("\n")) {
-                    if (parser != null) {
-//                        rawMessageStream(outline);
-                        outline = parser.parseStreamMessage(this, outline);
-                        outline = parser.parseStreamError(this, outline);
-                    }
-                    if (buffer != null) {
-                        buffer.append(outline);
-                    } else {                        
-                        messageStream(outline);
-                    }
-                    outline = "";
-                }
-            }
-
-            if (!outline.equals("")) {
-                if (parser != null) {
-//                    rawMessageStream(outline);
-                    outline = parser.parseStreamMessage(this, outline);
-                    outline = parser.parseStreamError(this, outline);
-                }
-                if (buffer != null) {
-                    buffer.append(outline);
-                } else {                        
-                    messageStream(outline);
-                }
-            }
-
-            while(err.available() > 0) {
-                int i = err.read(tmp, 0, 1);
-
-                if(i < 0)break;
-                
-                String inch = new String(tmp, 0, i);
-                if (((inch.charAt(0) >= ' ') && (inch.charAt(0) <= (char)127)) || (inch.charAt(0) == '\n')) {
-                    errline += inch;
-                }
-
-//                if (buffer == null) rawErrorStream(inch);
-
-                if (inch.equals("\n")) {
-                    if (parser != null) {
-//                        rawErrorStream(errline);
-                        errline = parser.parseStreamMessage(this, errline);
-                        errline = parser.parseStreamError(this, errline);
-                    }
-                    if (bufferError) {
-                        if (buffer != null) {
-                            buffer.append(errline);
-                        } else {                        
-                            errorStream(errline);
-                        }
-                    } else {
-                        errorStream(errline);
-                    }
-                    errline = "";
-                }
-            }
-
-            if (!errline.equals("")) {
-                if (parser != null) {
-//                    rawErrorStream(errline);
-                    errline = parser.parseStreamMessage(this, errline);
-                    errline = parser.parseStreamError(this, errline);
-                }
-                if (bufferError) {
-                    if (buffer != null) {
-                        buffer.append(errline);
-                    } else {                        
-                        errorStream(errline);
-                    }
-                } else {
-                    errorStream(errline);
-                }
-            }
-
-        } catch(Exception ignored) {
-            String igm = ignored.getMessage();
-            if (igm != null) {
-                if (igm.equals("Stream closed")) {
-                    error(Base.i18n.string("misc.cancelled"));
-                } else {
-                    error(ignored);
-                }
-            }
-        }
+        // Should we catch any trailing data here?
 
         if (runningProcess != null) {
             result = runningProcess.exitValue();

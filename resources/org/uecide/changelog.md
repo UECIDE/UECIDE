@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Added create new file and associated action
 * More work on GUI
 * More work on gui. Swiched to Hola for mDNS
 * Context-aware tools menu
@@ -737,6 +738,7 @@ Changelog
 0.8.5
 -----
 
+* Added create new file and associated action
 * More work on GUI
 * More work on gui. Swiched to Hola for mDNS
 * Context-aware tools menu

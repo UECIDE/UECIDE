@@ -16,6 +16,8 @@ public class ReloadFilesAction extends Action {
         };
     }
 
+    public String getCommand() { return "reloadfiles"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         for (SketchFile f : ctx.getSketch().getSketchFiles().values()) {
             try {

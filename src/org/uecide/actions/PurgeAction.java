@@ -13,6 +13,8 @@ public class PurgeAction extends Action {
         };
     }
 
+    public String getCommand() { return "purge"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
             ctx.getSketch().purgeCache();

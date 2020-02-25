@@ -3,12 +3,18 @@ package org.uecide.gui.swing;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.JFrame;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.Toolkit;
+import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import java.io.File;
 
 import org.uecide.Context;
 import org.uecide.FileType;
@@ -84,10 +90,40 @@ public class SketchMenu extends JMenu {
         add(createMenu);
 
         importMenu = new JMenuItem("Import File...");
+        importMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                importSketchFile();
+            }
+        });
         add(importMenu);
 
         librariesMenu = new LibrariesMenu(ctx);
         add(librariesMenu);
 
+    }
+
+    public void importSketchFile() {
+        JFileChooser fc = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(
+            "Source code files", "ino", "pde", "cpp", "c", "h", "S", "hpp", "hh"
+        );
+        fc.setFileFilter(filter);
+        int ret = fc.showOpenDialog(stepUpToFrame());
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            File f = fc.getSelectedFile();
+            if (f.exists()) {
+                if (!(f.isDirectory())) {
+                    ctx.action("importsource", f);
+                }
+            }
+        }
+    }
+
+    public JFrame stepUpToFrame() {
+        Component c = (Component)this;
+        while ((c != null) && (!(c instanceof JFrame))) {
+            c = (Component)c.getParent();
+        }
+        return (JFrame)c;
     }
 }

@@ -37,6 +37,8 @@ import org.uecide.gui.action.ActionGui;
 import org.uecide.gui.none.NoneGui;
 import org.uecide.gui.html.HTMLGui;
 
+import org.uecide.actions.Action;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.IOException;
@@ -229,6 +231,7 @@ public class Base {
 
     /*! The constructor is the main execution routine. */
     public Base(String[] args) throws IOException {
+        Action.initActions();
         cli.addParameter("debug",               "",         Boolean.class,  "cli.help.debug");
         cli.addParameter("verbose",             "",         Boolean.class,  "cli.help.verbose");
         cli.addParameter("exceptions",          "",         Boolean.class,  "cli.help.exceptions");

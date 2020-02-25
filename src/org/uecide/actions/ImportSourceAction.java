@@ -2,20 +2,21 @@ package org.uecide.actions;
 
 import org.uecide.Base;
 import org.uecide.Context;
+import org.uecide.Utils;
 import java.io.File;
 import java.io.IOException;
 
-public class NewSketchFileAction extends Action {
+public class ImportSourceAction extends Action {
 
-    public NewSketchFileAction(Context c) { super(c); }
+    public ImportSourceAction(Context c) { super(c); }
 
     public String[] getUsage() {
         return new String[] {
-            "NewSketchFile <name.ext>"
+            "ImportSource <file>"
         };
     }
 
-    public String getCommand() { return "newsketchfile"; }
+    public String getCommand() { return "importsource"; }
 
     public boolean actionPerformed(Object[] args) throws ActionException {
 
@@ -23,24 +24,29 @@ public class NewSketchFileAction extends Action {
             throw new SyntaxErrorActionException();
         }
 
-        String name = null;
+        File source = null;
 
         if (args[0] instanceof File) {
-            File f = (File)args[0];
-            name = f.getName();
+            source = (File)args[0];
         } else if (args[0] instanceof String) {
-            name = (String)args[0];
+            source = new File((String)args[0]);
         } else {
             throw new BadArgumentActionException();
         }
 
-        File f = new File(ctx.getSketch().getFolder(), name);
-        if (f.exists()) {
+        if (!source.exists()) {
+            throw new ActionException("File not found");
+        }
+        
+
+        File dest = new File(ctx.getSketch().getFolder(), source.getName());
+        if (dest.exists()) {
             throw new ActionException("File already exists");
         }
 
         try {
-            ctx.getSketch().createNewFile(name);
+            String data = Utils.getFileAsString(source);
+            ctx.getSketch().createNewFile(dest.getName(), data);
         } catch (IOException ex) {
             throw new ActionException(ex.getMessage());
         }

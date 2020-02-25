@@ -14,6 +14,8 @@ public class NewSketchAction extends Action {
         };
     }
 
+    public String getCommand() { return "newsketch"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         if (args.length != 0) {

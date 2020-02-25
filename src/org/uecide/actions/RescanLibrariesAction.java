@@ -13,6 +13,8 @@ public class RescanLibrariesAction extends Action {
         };
     }
 
+    public String getCommand() { return "rescanlibraries"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         LibraryManager.rescanAllLibraries();
         return true;

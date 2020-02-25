@@ -13,6 +13,8 @@ public class SetCoreAction extends Action {
         };
     }
 
+    public String getCommand() { return "setcore"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

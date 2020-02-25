@@ -1,16 +1,20 @@
 package org.uecide.gui.action;
 
 import org.uecide.Context;
+import org.uecide.ContextEvent;
+import org.uecide.ContextEventListener;
+import org.uecide.Message;
 import org.uecide.SketchFile;
 import org.uecide.gui.Gui;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-public class ActionGui extends Gui {
+public class ActionGui extends Gui implements ContextEventListener {
 
     public ActionGui(Context c) {
         super(c);
+        c.listenForEvent("message", this);
     }
 
     public void open() {
@@ -97,4 +101,23 @@ public class ActionGui extends Gui {
 
     public static void endinit() {
     }
+
+    @Override
+    public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("message")) {
+            Message m = (Message)e.getObject();
+
+            switch (m.getMessageType()) {
+                case Message.HEADING: heading(m.getText()); break;
+                case Message.BULLET1: bullet(m.getText()); break;
+                case Message.BULLET2: bullet2(m.getText()); break;
+                case Message.BULLET3: bullet3(m.getText()); break;
+                case Message.COMMAND: command(m.getText()); break;
+                case Message.NORMAL: message(m.getText()); break;
+                case Message.WARNING: warning(m.getText()); break;
+                case Message.ERROR: error(m.getText()); break;
+            }
+        }
+    }
+
 }

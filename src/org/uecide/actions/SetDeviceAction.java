@@ -13,6 +13,8 @@ public class SetDeviceAction extends Action {
         };
     }
 
+    public String getCommand() { return "setdevice"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

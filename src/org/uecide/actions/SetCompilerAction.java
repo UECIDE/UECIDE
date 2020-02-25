@@ -14,6 +14,8 @@ public class SetCompilerAction extends Action {
         };
     }
 
+    public String getCommand() { return "setcompiler"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
         try {
 

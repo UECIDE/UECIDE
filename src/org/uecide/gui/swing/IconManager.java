@@ -27,21 +27,25 @@ public class IconManager {
     }
 
     public static void updateIconCache() throws IOException {
-        for (CleverIcon i : iconCache.values()) {
-            i.updateIcon();
+        synchronized (iconCache) {
+            for (CleverIcon i : iconCache.values()) {
+                i.updateIcon();
+            }
         }
     }
 
     public static CleverIcon getIcon(int size, String... name) throws IOException, MalformedURLException {
 
-        String cacheName = String.join(",", name);
+        synchronized (iconCache) {
+                String cacheName = String.join(",", name);
 
-        if (iconCache.get(cacheName + "." + size) != null) {
-            return iconCache.get(cacheName + "." + size);
+            if (iconCache.get(cacheName + "." + size) != null) {
+                return iconCache.get(cacheName + "." + size);
+            }
+            CleverIcon i = new CleverIcon(size, name);
+            iconCache.put(cacheName + "." + size, i);
+            return i;
         }
-        CleverIcon i = new CleverIcon(size, name);
-        iconCache.put(cacheName + "." + size, i);
-        return i;
     }
 
     public static void loadIconSets() throws IOException {
@@ -162,8 +166,10 @@ public class IconManager {
     }
 
     static public void tick() {
-        for (CleverIcon i : iconCache.values()) {
-            i.animate();
+        synchronized (iconCache) {
+            for (CleverIcon i : iconCache.values()) {
+                i.animate();
+            }
         }
     }
 

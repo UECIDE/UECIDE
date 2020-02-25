@@ -16,6 +16,8 @@ public class SaveSketchAction extends Action {
         };
     }
 
+    public String getCommand() { return "savesketch"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         try {

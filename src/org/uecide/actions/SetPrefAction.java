@@ -21,6 +21,8 @@ public class SetPrefAction extends Action {
         };
     }
 
+    public String getCommand() { return "setpref"; }
+
     public boolean actionPerformed(Object[] args) throws ActionException {
 
         if (args.length != 2) throw new SyntaxErrorActionException();
