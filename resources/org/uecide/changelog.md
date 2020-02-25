@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Added quit and closeallsessions action
 * Upgraded questionmark animation. Fixed OTA programmer selection bug
 * Added library insert functionality
 * Moved messages to context events
@@ -741,6 +742,7 @@ Changelog
 0.8.5
 -----
 
+* Added quit and closeallsessions action
 * Upgraded questionmark animation. Fixed OTA programmer selection bug
 * Added library insert functionality
 * Moved messages to context events

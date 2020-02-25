@@ -40,6 +40,7 @@ public class stdin extends BuiltinCommand {
             return false;
         }
 
+
         File out = new File(arg[0]);
         String command = "";
         for (int i = 1; i < arg.length; i++) {
@@ -49,21 +50,17 @@ public class stdin extends BuiltinCommand {
             command += arg[i];
         }
 
-        ctx.startBuffer();
+        try {
+            ctx.setOutputStream(new PrintWriter(out));
+        } catch (IOException ex) {
+            throw new BuiltinCommandException(ex.toString());
+        }
         if (!(Boolean)ctx.executeCommand(command, null)) {
-            String edat = ctx.endBuffer();
-            ctx.error(edat);
+            ctx.clearOutputStream();
             return false;
         }
-        try {
-            PrintWriter pw = new PrintWriter(out);
-            pw.print(ctx.endBuffer());
-            pw.close();
-            return true;
-        } catch (Exception e) {
-            ctx.error(e);
-        }
-        return false;
+        ctx.clearOutputStream();
+        return true;
     }
 
     public void kill() {

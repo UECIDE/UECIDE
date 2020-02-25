@@ -80,6 +80,8 @@ public class Context {
 
     // Make a new empty context.
 
+    PrintWriter outputStream = null;
+
     public Context(Context src) {
         board = src.board;
         core = src.core;
@@ -762,16 +764,22 @@ public class Context {
                     String inch = new String(tmp, 0, i);
                     if (inch.equals("\n")) {
 
-                        if (parser != null) {
-                            outline = parser.parseStreamMessage(this, outline);
-                            outline = parser.parseStreamError(this, outline);
+                        if (outputStream != null) {
+                            outputStream.println(outline);
+                        } else {
+                            if (parser != null) {
+                                outline = parser.parseStreamMessage(this, outline);
+                                outline = parser.parseStreamError(this, outline);
+                            }
+
+                            if (buffer != null) {
+                                buffer.append(outline);
+                            } else {
+                                message(outline);
+                            }
                         }
 
-                        if (buffer != null) {
-                            buffer.append(outline);
-                        } else {
-                            message(outline);
-                        }
+                        outline = "";
                     } else {
                         outline += inch;
                     }
@@ -793,6 +801,7 @@ public class Context {
                         } else {
                             error(errline);
                         }
+                        errline = "";
                     } else {
                         errline += inch;
                     }
@@ -990,5 +999,12 @@ public class Context {
     }
 
 
+    public void setOutputStream(PrintWriter pw) {
+        outputStream = pw;
+    }
+
+    public void clearOutputStream() {
+        outputStream = null;
+    }
 
 }
