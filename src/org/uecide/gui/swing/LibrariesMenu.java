@@ -36,7 +36,7 @@ public class LibrariesMenu extends JMenu implements MenuListener {
     public void menuSelected(MenuEvent e) {
         removeAll();
 
-        add(new JMenuItem("Install library archive... (placeholder)"));
+        add(new JMenuItem("Install library archive... (TODO)"));
         addSeparator();
 
         Core core = ctx.getCore();

@@ -63,6 +63,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     public void open() {
 
         window = new JFrame();
+        window.setExtendedState(JFrame.MAXIMIZED_BOTH);
         window.setLayout(new BorderLayout());
 
         menu = new JMenuBar();
@@ -127,7 +128,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         toolbar = new MainToolbar(this);
         window.add(toolbar, BorderLayout.NORTH);
 
-        window.setTitle("UECIDE :: " + ctx.getSketch().getName());
+        if (ctx.getSketch() != null) {
+            window.setTitle("UECIDE :: " + ctx.getSketch().getName());
+        } else {
+            window.setTitle("UECIDE");
+        }
         window.setSize(300, 300);
         window.setVisible(true);
 

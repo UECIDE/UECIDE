@@ -50,8 +50,9 @@ public class mDNSProgrammer extends Programmer {
         return get("name");
     }
 
+    @Override
     public String getDescription() {
-        return get("description");
+        return _board.getDescription() + " on " + _ip.getHostAddress() + " (" + _info.getName() + ")";
     }
 
     public boolean programFile(Context ctx, String file) {
@@ -60,17 +61,19 @@ public class mDNSProgrammer extends Programmer {
         return _programmer.programFile(ctx, file);
     }
 
+    @Override
     public int compareTo(Object o) {
         if(o == null) {
             return 0;
         }
 
         UObject ob = (UObject)o;
-        return get("description").compareTo(ob.getDescription());
+        return getDescription().compareTo(ob.getDescription());
     }
 
+    @Override
     public String toString() {
-        return get("description");
+        return getDescription();
     }
 
     @Override

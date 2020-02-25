@@ -43,7 +43,7 @@ import net.straylightlabs.hola.sd.Service;
 public class NetworkDiscoveryService extends org.uecide.Service {
 
     public NetworkDiscoveryService() {
-        setInterval(15000);
+        setInterval(5000);
         setName("Network Discovery");
     }
 

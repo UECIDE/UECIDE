@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Added library insert functionality
 * Moved messages to context events
 * Added create new file and associated action
 * More work on GUI
@@ -739,6 +740,7 @@ Changelog
 0.8.5
 -----
 
+* Added library insert functionality
 * Moved messages to context events
 * Added create new file and associated action
 * More work on GUI
