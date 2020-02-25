@@ -386,9 +386,9 @@ public class Sketch {
     }
 
     public TreeSet<SketchFile> getModifiedFiles() {
-        ctx.triggerEvent("fileDataRead");
         TreeSet<SketchFile> list = new TreeSet<SketchFile>();
         for (SketchFile f : sketchFiles.values()) {
+            ctx.triggerEvent("fileDataRead", f);
             if (f.isModified()) {
                 list.add(f);
             }
@@ -398,8 +398,8 @@ public class Sketch {
     }
 
     public boolean isModified() {
-        ctx.triggerEvent("fileDataRead");
         for (SketchFile f : sketchFiles.values()) {
+            ctx.triggerEvent("fileDataRead", f);
             if (f.isModified()) return true;
         }
         return false;
@@ -712,9 +712,9 @@ public class Sketch {
 
         filesToCompile = new ArrayList<File>();
 
-        ctx.triggerEvent("fileDataRead");
 
         for (SketchFile f : sketchFiles.values()) {
+            ctx.triggerEvent("fileDataRead", f);
             switch (f.getType()) {
                 case FileType.ASMSOURCE:
                 case FileType.CSOURCE:

@@ -679,9 +679,12 @@ System.err.println("YesNoCancel");
                                         for (Component comp2 : comps2) {
                                             if (comp2 instanceof AutoTab) {
                                                 AutoTab at = (AutoTab)comp2;
-                                                ctx.triggerEvent("fileDataRead");
                                                 while (at.getTabCount() > 0) {
                                                     TabPanel pan = (TabPanel)at.getComponentAt(0);
+                                                    if (pan instanceof CodeEditor) {
+                                                        CodeEditor ce = (CodeEditor)pan;
+                                                        ctx.triggerEvent("fileDataRead", ce.getSketchFile());
+                                                    }
                                                     pan.reset();
                                                 }
                                                 //for (int i = 0; i < at.getTabCount(); i++) {

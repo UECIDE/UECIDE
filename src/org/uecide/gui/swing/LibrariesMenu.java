@@ -51,8 +51,7 @@ public class LibrariesMenu extends JMenu implements MenuListener {
         TreeMap<String, TreeSet<Library>> libs = Library.getFilteredLibraries(core.getName());
 
         for(String cat : libs.keySet()) {
-            String name = Library.getCategoryName(cat);
-            JMenu item = new JMenu(name + " - " + cat);
+            LibraryCategoryMenu item = new LibraryCategoryMenu(ctx, cat);
             add(item);
         }
     }

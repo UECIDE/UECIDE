@@ -127,7 +127,10 @@ public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextE
 
     public void contextEventTriggered(ContextEvent e) {
         if (e.getEvent().equals("sketchDataModified")) {
-            updateChildren();
+            SketchFile sf = (SketchFile)e.getObject();
+            if (sketchFile == sf) {
+                updateChildren();
+            }
         }
     }
 

@@ -39,11 +39,16 @@ public class SketchFile implements Comparable {
         bufferModified = fileModified;
     }
 
+    boolean inhibitUpdate = false;
+
     public void setFileData(String d) {
+        if (inhibitUpdate) return; // I hate this!
         if ((data == null) || (!(data.equals(d)))) {
+            inhibitUpdate = true;
             data = d;
             bufferModified = System.currentTimeMillis();
-            ctx.triggerEvent("sketchDataModified");
+            ctx.triggerEvent("sketchDataModified", this);
+            inhibitUpdate = false;
         }
     }
 
@@ -230,7 +235,7 @@ public class SketchFile implements Comparable {
 
     public ArrayList<FunctionBookmark> scanForFunctions() throws IOException {
 
-        ctx.triggerEvent("fileDataRead");
+        ctx.triggerEvent("fileDataRead", this);
 
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
 

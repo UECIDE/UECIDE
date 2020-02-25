@@ -4,6 +4,8 @@ import org.uecide.Context;
 import org.uecide.FileType;
 import org.uecide.SketchFile;
 import org.uecide.Preferences;
+import org.uecide.ContextEvent;
+import org.uecide.ContextEventListener;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -24,7 +26,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class CodeEditor extends TabPanel  {
+public class CodeEditor extends TabPanel implements ContextEventListener {
     Context ctx;
     SketchFile file;
 
@@ -33,6 +35,8 @@ public class CodeEditor extends TabPanel  {
     RSyntaxDocument document;
 
     JPanel tabPanel = null;
+
+    int savedCaretPosition = 0;
 
     public CodeEditor(Context c, AutoTab def, SketchFile f) {
         super(f.getFile().getName(), def);
@@ -53,6 +57,10 @@ public class CodeEditor extends TabPanel  {
                 flushData();
             }
         }, 5000, 5000);
+
+        ctx.listenForEvent("sketchDataModified", this);
+        ctx.listenForEvent("saveCursorLocation", this);
+        ctx.listenForEvent("restoreCursorLocation", this);
     }
 
     public SketchFile getSketchFile() {
@@ -101,5 +109,32 @@ public class CodeEditor extends TabPanel  {
             textArea.setCaretPosition(textArea.getLineStartOffset(lineno - 1));
         } catch(BadLocationException e) {
         }
+    }
+
+    public void contextEventTriggered(ContextEvent evt) {
+        if (evt.getEvent().equals("sketchDataModified")) {
+            SketchFile sf = (SketchFile)evt.getObject();
+            if (sf == file) {
+                String data = sf.getFileData();
+                if (!(data.equals(textArea.getText()))) {
+                    textArea.setText(data);
+                }
+            }
+        }
+
+        if (evt.getEvent().equals("saveCursorLocation")) {
+            SketchFile sf = (SketchFile)evt.getObject();
+            if (sf == file) {
+                savedCaretPosition = textArea.getCaretPosition();
+            }
+        }
+
+        if (evt.getEvent().equals("restoreCursorLocation")) {
+            SketchFile sf = (SketchFile)evt.getObject();
+            if (sf == file) {
+                textArea.setCaretPosition(savedCaretPosition);
+            }
+        }
+
     }
 }
