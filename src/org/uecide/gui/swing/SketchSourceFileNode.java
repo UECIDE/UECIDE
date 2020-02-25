@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-
+import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
 
 public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextEventListener {
@@ -25,7 +25,7 @@ public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextE
         super(c, m, sf.getFile().getName());
         sketchFile = sf;
         updateChildren();
-        ctx.listenForEvent("SketchDataModified", this);
+        ctx.listenForEvent("sketchDataModified", this);
     }
 
     public SketchFile getSketchFile() {
@@ -125,8 +125,10 @@ public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextE
         ctx.action("openSketchFile", sketchFile);
     }
 
-    public void contextEventTriggered(String event, Context c) {
-        updateChildren();
+    public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("sketchDataModified")) {
+            updateChildren();
+        }
     }
 
 }

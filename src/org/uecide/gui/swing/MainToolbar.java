@@ -124,7 +124,8 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
 
     }
 
-    public void contextEventTriggered(String event, Context ctx) {
+    public void contextEventTriggered(ContextEvent e) {
+        String event = e.getEvent();
         if (event.equals("buildFail") || event.equals("buildFinished") || event.equals("uploadFail") || event.equals("uploadFinished")) {
             compileButton.setSelected(false);
             uploadButton.setSelected(false);

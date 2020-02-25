@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
 
 public class ClassBookmarkNode extends FunctionBookmarkNode implements ContextEventListener {
@@ -98,7 +99,9 @@ public class ClassBookmarkNode extends FunctionBookmarkNode implements ContextEv
     }
 
     @Override
-    public void contextEventTriggered(String event, Context c) {
-        updateChildren();
+    public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("functionBookmarksUpdated")) {
+            updateChildren();
+        }
     }
 }

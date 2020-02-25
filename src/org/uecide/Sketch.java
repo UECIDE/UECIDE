@@ -253,7 +253,7 @@ public class Sketch {
     }
 
     public void createNewFile(String filename) throws IOException {
-        createNewFile(filename, null);
+        createNewFile(filename, "");
     }
 
     public void createNewFile(String filename, String content) throws IOException {
@@ -261,6 +261,7 @@ public class Sketch {
         f.setFileData(content);
         f.saveDataToDisk();
         sketchFiles.put(filename, f);
+        ctx.triggerEvent("sketchFileAdded");
     }
 
     public File createBlankFile(String fileName) {

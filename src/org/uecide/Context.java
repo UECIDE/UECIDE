@@ -134,8 +134,9 @@ public class Context {
     public void triggerEvent(String event) {
         Debug.message("Event triggered: " + event);
         if (contextEventListeners.get(event) == null) return;
+        ContextEvent ce = new ContextEvent(this, event);
         for (ContextEventListener target : contextEventListeners.get(event)) {
-            target.contextEventTriggered(event, this);
+            target.contextEventTriggered(ce);
         }
     }
 

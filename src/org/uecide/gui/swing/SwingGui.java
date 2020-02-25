@@ -401,13 +401,13 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         return full;
     }
 
-    public void contextEventTriggered(String event, Context ctx) {
-        if (event.equals("fileDataRead")) {
+    public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("fileDataRead")) {
             flushDocumentData();
             return;
         }
 
-        if (event.equals("sketchLoaded")) {
+        if (e.getEvent().equals("sketchLoaded")) {
             window.setTitle("UECIDE :: " + ctx.getSketch().getName());
             return;
         }

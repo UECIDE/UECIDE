@@ -22,6 +22,7 @@ public class SketchTree extends JTree implements MouseListener {
         setCellRenderer(new SketchTreeCellRenderer(ctx));
         addMouseListener(this);
     }
+
     public void mousePressed(MouseEvent evt) {
 
         int selRow = getRowForLocation(evt.getX(), evt.getY());

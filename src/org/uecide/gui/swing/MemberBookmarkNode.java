@@ -14,6 +14,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
 
 public class MemberBookmarkNode extends FunctionBookmarkNode implements ContextEventListener {
@@ -34,8 +35,10 @@ public class MemberBookmarkNode extends FunctionBookmarkNode implements ContextE
     }
 
     @Override
-    public void contextEventTriggered(String event, Context c) {
-        updateChildren();
+    public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("functionBookmarksUpdated")) {
+            updateChildren();
+        }
     }
 
     @Override

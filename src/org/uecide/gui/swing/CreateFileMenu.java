@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.io.File;
 
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,5 +27,9 @@ public class CreateFileMenu extends JMenuItem implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
+        String name = JOptionPane.showInputDialog(null, "Enter filename (without extension)");
+        if (name != null) {
+            ctx.action("NewSketchFile", name + "." + extension);
+        }
     }
 }

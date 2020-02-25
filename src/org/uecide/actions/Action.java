@@ -40,6 +40,7 @@ public abstract class Action {
             case "addlibrarylocation": action = new AddLibraryLocationAction(c); break;
             case "rescanlibraries": action = new RescanLibrariesAction(c); break;
             case "reloadfiles": action = new ReloadFilesAction(c); break;
+            case "newsketchfile": action = new NewSketchFileAction(c); break;
             default:
                 c.error("Unknown action " + name);
                 return false;

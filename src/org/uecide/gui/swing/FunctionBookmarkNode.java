@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.uecide.ContextEventListener;
+import org.uecide.ContextEvent;
 
 public class FunctionBookmarkNode extends SketchTreeNodeBase implements ContextEventListener {
     protected FunctionBookmark bookmark;
@@ -43,8 +44,10 @@ public class FunctionBookmarkNode extends SketchTreeNodeBase implements ContextE
         ctx.action("OpenSketchFile", sf, (Integer)bookmark.getLine());
     }
 
-    public void contextEventTriggered(String event, Context c) {
-        updateChildren();
+    public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("functionBookmarksUpdated")) {
+            updateChildren();
+        }
     }
 
     public FunctionBookmark getBookmark() {

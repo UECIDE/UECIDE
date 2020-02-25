@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* More work on GUI
 * More work on gui. Swiched to Hola for mDNS
 * Context-aware tools menu
 * ucase and lcase variable commands
@@ -736,6 +737,7 @@ Changelog
 0.8.5
 -----
 
+* More work on GUI
 * More work on gui. Swiched to Hola for mDNS
 * Context-aware tools menu
 * ucase and lcase variable commands

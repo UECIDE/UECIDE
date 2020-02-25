@@ -36,7 +36,8 @@ public class ActionsAction extends Action {
             new AddLibraryAction(ctx),
             new AddLibraryLocationAction(ctx),
             new RescanLibrariesAction(ctx),
-            new ReloadFilesAction(ctx)
+            new ReloadFilesAction(ctx),
+            new NewSketchFileAction(ctx)
         };
 
         for (Action a : actions) {
