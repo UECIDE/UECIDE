@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Fixed closing all sessions bug
 * Removed maximize
 * Fixed command output streaming
 * Added quit and closeallsessions action
@@ -744,6 +745,7 @@ Changelog
 0.8.5
 -----
 
+* Fixed closing all sessions bug
 * Removed maximize
 * Fixed command output streaming
 * Added quit and closeallsessions action

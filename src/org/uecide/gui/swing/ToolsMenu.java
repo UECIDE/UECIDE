@@ -32,7 +32,7 @@ public class ToolsMenu extends JMenu implements MenuListener {
     public void menuSelected(MenuEvent e) {
         removeAll();
 
-        JMenuItem pluginManagerMenu = new JMenuItem("Plugin Manager");
+        JMenuItem pluginManagerMenu = new JMenuItem("Plugin Manager (TODO)");
         add(pluginManagerMenu);
 
         addSeparator();

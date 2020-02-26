@@ -30,41 +30,41 @@ public class EditMenu extends JMenu {
 
         int defaultModifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-        copyMenu = new JMenuItem("Copy");
+        copyMenu = new JMenuItem("Copy (TODO)");
         copyMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, defaultModifiers));
         add(copyMenu);
 
-        cutMenu = new JMenuItem("Cut");
+        cutMenu = new JMenuItem("Cut (TODO)");
         cutMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, defaultModifiers));
         add(cutMenu);
 
-        pasteMenu = new JMenuItem("Paste");
+        pasteMenu = new JMenuItem("Paste (TODO)");
         pasteMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, defaultModifiers));
         add(pasteMenu);
    
         addSeparator();
 
-        selectAllMenu = new JMenuItem("Select All");
+        selectAllMenu = new JMenuItem("Select All (TODO)");
         selectAllMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, defaultModifiers));
         add(selectAllMenu);
    
-        copyForForumBB = new JMenuItem("Copy for forum (BBCode)");
+        copyForForumBB = new JMenuItem("Copy for forum (BBCode) (TODO)");
         add(copyForForumBB);
    
-        copyForForumMD = new JMenuItem("Copy for forum (Markdown)");
+        copyForForumMD = new JMenuItem("Copy for forum (Markdown) (TODO)");
         add(copyForForumMD);
 
         addSeparator();
    
-        findMenu = new JMenuItem("Find & Replace");
+        findMenu = new JMenuItem("Find & Replace (TODO)");
         findMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, defaultModifiers));
         add(findMenu);
 
-        undoMenu = new JMenuItem("Undo");
+        undoMenu = new JMenuItem("Undo (TODO)");
         undoMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, defaultModifiers));
         add(undoMenu);
 
-        redoMenu = new JMenuItem("Redo");
+        redoMenu = new JMenuItem("Redo (TODO)");
         redoMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, defaultModifiers));
         add(redoMenu);
         

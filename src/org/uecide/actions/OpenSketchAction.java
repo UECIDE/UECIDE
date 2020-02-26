@@ -66,6 +66,8 @@ public class OpenSketchAction extends Action {
                 ctx.action("closeSession");
             }
 
+            Base.updateMRU(file);
+
             return true;
         } catch (Exception ex) {
             throw new ActionException(ex.getMessage());

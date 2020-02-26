@@ -20,6 +20,7 @@ public class FileMenu extends JMenu {
     JMenuItem openMenu;
     JMenuItem openGit;
     RecentFileMenu recentMenu;
+    FrequentFileMenu frequentMenu;
     ExampleFileMenu examplesMenu;
     JMenuItem revertMenu;
     JMenuItem closeMenu;
@@ -60,12 +61,15 @@ public class FileMenu extends JMenu {
         recentMenu = new RecentFileMenu(ctx);
         add(recentMenu);
 
+        frequentMenu = new FrequentFileMenu(ctx);
+        add(frequentMenu);
+
         examplesMenu = new ExampleFileMenu(ctx);
         add(examplesMenu);
 
         addSeparator();
 
-        revertMenu = new JMenuItem("Revert File");
+        revertMenu = new JMenuItem("Revert File (TODO)");
         add(revertMenu);
 
         closeMenu = new JMenuItem("Close");
@@ -97,15 +101,15 @@ public class FileMenu extends JMenu {
 
         addSeparator();
     
-        exportSarMenu = new JMenuItem("Export as SAR...");
+        exportSarMenu = new JMenuItem("Export as SAR... (TODO)");
         add(exportSarMenu);
 
-        importSarMenu = new JMenuItem("Import SAR...");
+        importSarMenu = new JMenuItem("Import SAR... (TODO)");
         add(importSarMenu);
 
         addSeparator();
 
-        preferencesMenu = new JMenuItem("Preferences...");
+        preferencesMenu = new JMenuItem("Preferences... (TODO)");
         add(preferencesMenu);
 
         quitMenu = new JMenuItem("Quit");
@@ -115,7 +119,5 @@ public class FileMenu extends JMenu {
             }
         });
         add(quitMenu);
-
-    
     }
 }

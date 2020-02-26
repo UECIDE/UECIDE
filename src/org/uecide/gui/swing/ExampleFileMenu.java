@@ -21,7 +21,7 @@ public class ExampleFileMenu extends JMenu implements MenuListener {
     Context ctx;
 
     public ExampleFileMenu(Context c) {
-        super("Examples");
+        super("Examples (TODO)");
         ctx = c;
         addMenuListener(this);
     }
@@ -35,7 +35,7 @@ public class ExampleFileMenu extends JMenu implements MenuListener {
     public void menuSelected(MenuEvent e) {
         removeAll();
 
-        JMenuItem browser = new JMenuItem("Example Browser...");
+        JMenuItem browser = new JMenuItem("Example Browser... (TODO)");
         add(browser);
         addSeparator();
 
