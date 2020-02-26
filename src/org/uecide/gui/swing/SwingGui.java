@@ -63,7 +63,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     public void open() {
 
         window = new JFrame();
-        window.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//        window.setExtendedState(JFrame.MAXIMIZED_BOTH);
         window.setLayout(new BorderLayout());
 
         menu = new JMenuBar();
@@ -133,7 +133,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         } else {
             window.setTitle("UECIDE");
         }
-        window.setSize(300, 300);
+        window.setSize(1280, 768);
         window.setVisible(true);
 
         midright.setRightSize(150);

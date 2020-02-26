@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Fixed command output streaming
 * Added quit and closeallsessions action
 * Upgraded questionmark animation. Fixed OTA programmer selection bug
 * Added library insert functionality
@@ -742,6 +743,7 @@ Changelog
 0.8.5
 -----
 
+* Fixed command output streaming
 * Added quit and closeallsessions action
 * Upgraded questionmark animation. Fixed OTA programmer selection bug
 * Added library insert functionality
