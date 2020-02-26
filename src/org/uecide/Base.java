@@ -1926,7 +1926,6 @@ public class Base {
 
             ctx.setGui(guiObject);
 
-
             if (startSession) {
                 sessions.add(ctx);
                 ctx.action("openSketch", sf);

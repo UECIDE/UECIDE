@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Removed maximize
 * Fixed command output streaming
 * Added quit and closeallsessions action
 * Upgraded questionmark animation. Fixed OTA programmer selection bug
@@ -743,6 +744,7 @@ Changelog
 0.8.5
 -----
 
+* Removed maximize
 * Fixed command output streaming
 * Added quit and closeallsessions action
 * Upgraded questionmark animation. Fixed OTA programmer selection bug
