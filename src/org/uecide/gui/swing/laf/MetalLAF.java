@@ -5,9 +5,9 @@ import org.uecide.*;
 import javax.swing.UIManager;
 
 public class MetalLAF extends LookAndFeel {
-    public static String getName() { return "Metal"; }
+    public String getName() { return "Metal"; }
 
-    public static void applyLAF() {
+    public void applyLAF() {
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
         } catch (Exception e) {
@@ -15,9 +15,4 @@ public class MetalLAF extends LookAndFeel {
         }
     }
 
-    public static PropertyFile getPreferencesTree() {
-        return null;
-    }
-
-    public static boolean isCompatible() { return true; }
 }

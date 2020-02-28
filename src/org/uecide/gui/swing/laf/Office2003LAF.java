@@ -5,9 +5,9 @@ import org.uecide.*;
 import javax.swing.UIManager;
 
 public class Office2003LAF extends LookAndFeel {
-    public static String getName() { return "Office 2003"; }
+    public String getName() { return "Office 2003"; }
 
-    public static void applyLAF() {
+    public void applyLAF() {
         if (!Base.isWindows()) {
             Base.error("The selected Look and Feel is only compatible with Windows. Select another.");
             return;
@@ -20,9 +20,6 @@ public class Office2003LAF extends LookAndFeel {
         }
     }
 
-    public static PropertyFile getPreferencesTree() {
-        return null;
-    }
+    public boolean isCompatible() { return Base.isWindows(); }
 
-    public static boolean isCompatible() { return Base.isWindows(); }
 }

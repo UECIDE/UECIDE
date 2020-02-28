@@ -5,9 +5,9 @@ import org.uecide.*;
 import javax.swing.UIManager;
 
 public class SystemDefaultLAF extends LookAndFeel {
-    public static String getName() { return "System Default"; }
+    public String getName() { return "System Default"; }
 
-    public static void applyLAF() {
+    public void applyLAF() {
         try {
             if (Base.isMacOS()) {
                 System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -19,9 +19,4 @@ public class SystemDefaultLAF extends LookAndFeel {
         }
     }
 
-    public static PropertyFile getPreferencesTree() {
-        return null;
-    }
-
-    public static boolean isCompatible() { return true; }
 }

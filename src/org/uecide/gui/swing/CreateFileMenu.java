@@ -27,8 +27,10 @@ public class CreateFileMenu extends JMenuItem implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        String name = JOptionPane.showInputDialog(null, "Enter filename (without extension)");
+        String name = ctx.getGui().askString("Enter filename (without extension)", "");
+
         if (name != null) {
+            System.err.println("NewSketchFile(" +  name + "." + extension + ")");
             ctx.action("NewSketchFile", name + "." + extension);
         }
     }

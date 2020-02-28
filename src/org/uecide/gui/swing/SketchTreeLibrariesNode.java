@@ -5,9 +5,12 @@ import org.uecide.Context;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JLabel;
 import javax.swing.JTree;
 
 import java.io.IOException;
+
+import java.awt.Font;
 
 public class SketchTreeLibrariesNode extends SketchTreeNodeBase {
     public SketchTreeLibrariesNode(Context c, SketchTreeModel m) {
@@ -33,4 +36,9 @@ public class SketchTreeLibrariesNode extends SketchTreeNodeBase {
     }
     public void performDoubleClick() {
     }
+
+    public Font getFont() {
+        return new JLabel().getFont();
+    }
+
 }

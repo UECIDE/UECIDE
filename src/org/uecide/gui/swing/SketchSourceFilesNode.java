@@ -7,6 +7,8 @@ import org.uecide.SketchFile;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JTree;
 
 import java.io.IOException;
@@ -15,6 +17,8 @@ import java.util.TreeMap;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Enumeration;
+
+import java.awt.Font;
 
 public class SketchSourceFilesNode extends SketchTreeNodeBase {
     public SketchSourceFilesNode(Context c, SketchTreeModel m) {
@@ -82,9 +86,27 @@ public class SketchSourceFilesNode extends SketchTreeNodeBase {
     
     public JPopupMenu getPopupMenu() {
         JPopupMenu menu = new JPopupMenu();
+
+        JMenu createMenu = new JMenu("Create New");
+
+        CreateFileMenu createSketchFile = new CreateFileMenu(ctx, "Sketch File (.ino)", "ino");
+        createMenu.add(createSketchFile);
+        CreateFileMenu createCppFile = new CreateFileMenu(ctx, "C++ Source (.cpp)", "cpp");
+        createMenu.add(createCppFile);
+        CreateFileMenu createCFile = new CreateFileMenu(ctx, "C Source (.c)", "c");
+        createMenu.add(createCFile);
+        CreateFileMenu createAssemblyFile = new CreateFileMenu(ctx, "Assembler Source (.S)", "S");
+        createMenu.add(createAssemblyFile);
+
+        menu.add(createMenu);
+
         return menu;
     }
     public void performDoubleClick() {
+    }
+
+    public Font getFont() {
+        return new JLabel().getFont();
     }
 
 }

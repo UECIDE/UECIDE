@@ -13,6 +13,7 @@ import javax.swing.JPopupMenu;
 
 import java.io.IOException;
 
+import java.awt.Font;
 
 public abstract class SketchTreeNodeBase extends DefaultMutableTreeNode {
     protected Context ctx;
@@ -42,4 +43,6 @@ public abstract class SketchTreeNodeBase extends DefaultMutableTreeNode {
 
     public abstract JPopupMenu getPopupMenu();
     public abstract void performDoubleClick();
+
+    public abstract Font getFont();
 }

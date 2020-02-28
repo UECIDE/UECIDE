@@ -1,14 +1,36 @@
 package org.uecide.gui.swing;
 
-import org.uecide.gui.*;
-import org.uecide.*;
+import org.uecide.gui.Gui;
+import org.uecide.Base;
+import org.uecide.Context;
+import org.uecide.ContextEventListener;
+import org.uecide.ContextEvent;
+import org.uecide.Preferences;
 import org.uecide.actions.*;
 import org.uecide.gui.swing.laf.*;
+import org.uecide.Compiler;
+import org.uecide.Package;
+import org.uecide.SketchFile;
+import org.uecide.gui.swing.laf.LookAndFeel;
 
-import java.util.*;
-import java.io.*;
-import java.awt.*;
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import java.io.IOException;
+import java.io.File;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.MouseListener;
@@ -16,9 +38,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-import org.uecide.Compiler;
-import org.uecide.Package;
-import org.uecide.gui.swing.laf.LookAndFeel;
 
 
 public class SwingGui extends Gui implements ContextEventListener, TabChangeListener, TabMouseListener {
@@ -38,6 +57,8 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     ArrayList<AutoTab> panes = new ArrayList<AutoTab>();
 
+    static LookAndFeel laf = null;
+
     MainToolbar toolbar;
 
     JMenuBar menu;
@@ -53,17 +74,19 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     Console console;
 
+    Timer tabTicker = new Timer();
+
     public SwingGui(Context c) {
         super(c);
         ctx.listenForEvent("sketchLoaded", this);
         ctx.listenForEvent("fileDataRead", this);
+        ctx.listenForEvent("sketchDataModified", this);
     }
 
     @Override
     public void open() {
 
         window = new JFrame();
-//        window.setExtendedState(JFrame.MAXIMIZED_BOTH);
         window.setLayout(new BorderLayout());
 
         menu = new JMenuBar();
@@ -154,6 +177,12 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                 ctx.action("closeSession");
             }
         });
+
+        tabTicker.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                updateTabs();
+            }
+        }, 1000, 1000);
 
         System.err.println("Sorry, Swing GUI not fully implemented yet.");
     }
@@ -253,143 +282,48 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     public static void setLookAndFeel() {
         String lafname = Preferences.get("theme.laf");
 
-        LookAndFeel laf = null;
-
-        try {
-
-            if (lafname.equals("gnome")) {
-                new GnomeLAF().applyLAF();
-            } else if (lafname.equals("acryl")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme(jTattooTheme("acryl"));
-                com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme(p);
-                new JTattooAcrylLAF().applyLAF();
-            } else if (lafname.equals("aero")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.aero.AeroLookAndFeel.setTheme(jTattooTheme("aero"));
-                com.jtattoo.plaf.aero.AeroLookAndFeel.setTheme(p);
-                new JTattooAeroLAF().applyLAF();
-            } else if (lafname.equals("aluminium")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme(jTattooTheme("aluminium"));
-                com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme(p);
-                new JTattooAluminiumLAF().applyLAF();
-            } else if (lafname.equals("bernstein")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.bernstein.BernsteinLookAndFeel.setTheme(jTattooTheme("bernstein"));
-                com.jtattoo.plaf.bernstein.BernsteinLookAndFeel.setTheme(p);
-                new JTattooBernsteinLAF().applyLAF();
-            } else if (lafname.equals("fast")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.fast.FastLookAndFeel.setTheme(jTattooTheme("fast"));
-                com.jtattoo.plaf.fast.FastLookAndFeel.setTheme(p);
-                new JTattooFastLAF().applyLAF();
-            } else if (lafname.equals("graphite")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.graphite.GraphiteLookAndFeel.setTheme(jTattooTheme("graphite"));
-                com.jtattoo.plaf.graphite.GraphiteLookAndFeel.setTheme(p);
-                new JTattooGraphiteLAF().applyLAF();
-            } else if (lafname.equals("hifi")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.hifi.HiFiLookAndFeel.setTheme(jTattooTheme("hifi"));
-                com.jtattoo.plaf.hifi.HiFiLookAndFeel.setTheme(p);
-                new JTattooHiFiLAF().applyLAF();
-            } else if (lafname.equals("luna")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.luna.LunaLookAndFeel.setTheme(jTattooTheme("luna"));
-                com.jtattoo.plaf.luna.LunaLookAndFeel.setTheme(p);
-                new JTattooLunaLAF().applyLAF();
-            } else if (lafname.equals("mcwin")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.mcwin.McWinLookAndFeel.setTheme(jTattooTheme("mcwin"));
-                com.jtattoo.plaf.mcwin.McWinLookAndFeel.setTheme(p);
-                new JTattooMcWinLAF().applyLAF();
-            } else if (lafname.equals("mint")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.mint.MintLookAndFeel.setTheme(jTattooTheme("mint"));
-                com.jtattoo.plaf.mint.MintLookAndFeel.setTheme(p);
-                new JTattooMintLAF().applyLAF();
-            } else if (lafname.equals("noire")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.noire.NoireLookAndFeel.setTheme(jTattooTheme("noire"));
-                com.jtattoo.plaf.noire.NoireLookAndFeel.setTheme(p);
-                new JTattooNoireLAF().applyLAF();
-            } else if (lafname.equals("smart")) {
-                Properties p = new Properties();
-                p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-                p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-                p.put("logoString", "UECIDE");
-                p.put("textAntiAliasing", "on");
-                com.jtattoo.plaf.smart.SmartLookAndFeel.setTheme(jTattooTheme("smart"));
-                com.jtattoo.plaf.smart.SmartLookAndFeel.setTheme(p);
-                new JTattooSmartLAF().applyLAF();
-            }
-            else if (lafname.equals("liquid")) { new LiquidLAF().applyLAF(); }
-            else if (lafname.equals("metal")) { new MetalLAF().applyLAF(); }
-            else if (lafname.equals("motif")) { new MotifLAF().applyLAF(); }
-            else if (lafname.equals("nimbus")) { new NimbusLAF().applyLAF(); }
-            else if (lafname.equals("office2003")) { new Office2003LAF().applyLAF(); }
-            else if (lafname.equals("officexp")) { new OfficeXPLAF().applyLAF(); }
-            else if (lafname.equals("systemdefault")) { new SystemDefaultLAF().applyLAF(); }
-            else if (lafname.equals("tinyforest")) { new TinyForestLAF().applyLAF(); }
-            else if (lafname.equals("tinygolden")) { new TinyGoldenLAF().applyLAF(); }
-            else if (lafname.equals("tinynightly")) { new TinyNightlyLAF().applyLAF(); }
-            else if (lafname.equals("tinyplastic")) { new TinyPlasticLAF().applyLAF(); }
-            else if (lafname.equals("tinysilver")) { new TinySilverLAF().applyLAF(); }
-            else if (lafname.equals("tinyunicode")) { new TinyUnicodeLAF().applyLAF(); }
-            else if (lafname.equals("vs2005")) { new VisualStudio2005LAF().applyLAF(); }
-            else if (lafname.equals("material")) { new MaterialLAF().applyLAF(); }
-            else if (lafname.equals("arduino")) { new ArduinoLAF().applyLAF(); }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        if (Base.cli.isSet("laf")) {
+            lafname = Base.cli.getString("laf");
         }
+
+        laf = null;
+
+        switch (lafname) {
+            case "gnome": laf = new GnomeLAF(); break;
+            case "acryl": laf = new JTattooAcrylLAF(); break;
+            case "aero": laf = new JTattooAeroLAF(); break;
+            case "aluminium": laf = new JTattooAluminiumLAF(); break;
+            case "bernstein": laf = new JTattooBernsteinLAF(); break;
+            case "fast": laf = new JTattooFastLAF(); break;
+            case "graphite": laf = new JTattooGraphiteLAF(); break;
+            case "hifi": laf = new JTattooHiFiLAF(); break;
+            case "luna": laf = new JTattooLunaLAF(); break;
+            case "mcwin": laf = new JTattooMcWinLAF(); break;
+            case "mint": laf = new JTattooMintLAF(); break;
+            case "noire": laf = new JTattooNoireLAF(); break;
+            case "smart": laf = new JTattooSmartLAF(); break;
+            case "liquid": laf = new LiquidLAF(); break;
+            case "metal": laf = new MetalLAF(); break;
+            case "motif": laf = new MotifLAF(); break;
+            case "nimbus": laf = new NimbusLAF(); break;
+            case "office2003": laf = new Office2003LAF(); break;
+            case "officexp": laf = new OfficeXPLAF(); break;
+            case "systemdefault": laf = new SystemDefaultLAF(); break;
+            case "tinyforest": laf = new TinyForestLAF(); break;
+            case "tinygolden": laf = new TinyGoldenLAF(); break;
+            case "tinynightly": laf = new TinyNightlyLAF(); break;
+            case "tinyplastic": laf = new TinyPlasticLAF(); break;
+            case "tinysilver": laf = new TinySilverLAF(); break;
+            case "tinyunicode": laf = new TinyUnicodeLAF(); break;
+            case "vs2005": laf = new VisualStudio2005LAF(); break;
+            case "material": laf = new MaterialLAF(); break;
+            case "arduino": laf = new ArduinoLAF(); break;
+            default:
+                laf = new SystemDefaultLAF();
+        }
+
+        laf.applyLAF();
     }
-
-
 
     static String jTattooTheme(String name) {
         String fontData = Preferences.get("theme.jtattoo.aafont");
@@ -406,7 +340,25 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         return full;
     }
 
+    boolean tabsNeedUpdating = false;
+
+    public void updateTabs() {
+        if (tabsNeedUpdating) {
+            tabsNeedUpdating = false;
+            for (AutoTab p : panes) {
+                for (int i = 0; i < p.getTabCount(); i++) {
+                    TabPanel pan = (TabPanel)p.getComponentAt(i);
+                    p.setTabComponentAt(i, pan.getTab());
+                }
+            }
+        }
+    }
+
     public void contextEventTriggered(ContextEvent e) {
+        if (e.getEvent().equals("sketchDataModified")) {
+            tabsNeedUpdating = true;
+        }
+        
         if (e.getEvent().equals("fileDataRead")) {
             flushDocumentData();
             return;
@@ -428,10 +380,6 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         } else {
             return null;
         }
-
-//        Icon i = null;
-//        try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
-//        return (String)JOptionPane.showInputDialog(window, question, "Excuse me, but...", JOptionPane.QUESTION_MESSAGE, i, null, defaultValue);
     }
 
     @Override
@@ -452,6 +400,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
         CodeEditor ce = new CodeEditor(ctx, centerPane, f);
         centerPane.add(ce);
+        centerPane.setSelectedComponent(ce);
         ce.requestFocus();
     }
 
@@ -752,5 +701,9 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                 }
             }
         }
+    }
+
+    public static LookAndFeel getLAF() {
+        return laf;
     }
 }

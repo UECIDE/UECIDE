@@ -20,12 +20,12 @@ public class CloseSessionAction extends Action {
 
         if (ctx.getSketch().isModified()) {
             TreeSet<SketchFile> modifiedFiles = ctx.getSketch().getModifiedFiles();
-            String message = "Do you want to save " + ctx.getSketch().getName() + " before closing?\n";
+            String message = "Do you want to save *" + ctx.getSketch().getName() + "* before closing?\n\n";
 
             message += "The following files have been modified:\n";
 
             for (SketchFile f : modifiedFiles) {
-                message += "    " + f.getFile().getName() + "\n";
+                message += "* " + f.getFile().getName() + "\n";
             }
 
             int resp = ctx.getGui().askYesNoCancel(message);

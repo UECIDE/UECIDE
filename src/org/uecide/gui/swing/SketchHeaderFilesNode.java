@@ -7,9 +7,12 @@ import org.uecide.SketchFile;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JLabel;
 import javax.swing.JTree;
 
 import java.io.IOException;
+
+import java.awt.Font;
 
 public class SketchHeaderFilesNode extends SketchTreeNodeBase {
     public SketchHeaderFilesNode(Context c, SketchTreeModel m) {
@@ -44,4 +47,9 @@ public class SketchHeaderFilesNode extends SketchTreeNodeBase {
 
     public void performDoubleClick() {
     }
+
+    public Font getFont() {
+        return new JLabel().getFont();
+    }
+
 }

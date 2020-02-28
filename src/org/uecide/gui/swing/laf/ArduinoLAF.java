@@ -11,7 +11,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 public class ArduinoLAF extends LookAndFeel {
-    public static String getName() { return "Arduino"; }
+    public String getName() { return "Arduino"; }
 
     final static Color DARK_BLUE = new Color(0x00, 0x64, 0x68);
     final static Color MID_BLUE = new Color(0x17, 0xa1, 0xa5);
@@ -24,7 +24,7 @@ public class ArduinoLAF extends LookAndFeel {
     final static Color WHITE = new Color(0xff, 0xff, 0xff);
     final static Color MID_GRAY = new Color(0xb6, 0xb8, 0xba);
 
-    public static void applyLAF() {
+    public void applyLAF() {
         try {
 
             UIManager.setLookAndFeel(new MaterialLookAndFeel());
@@ -74,12 +74,6 @@ public class ArduinoLAF extends LookAndFeel {
             Base.error(e);
         }
     }
-
-    public static PropertyFile getPreferencesTree() {
-        return null;
-    }
-
-    public static boolean isCompatible() { return true; }
 }
 /*
 Button.background

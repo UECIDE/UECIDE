@@ -6,12 +6,14 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import java.awt.Dialog;
+import org.uecide.gui.swing.laf.LookAndFeel;
 
 public class FancyDialog extends JDialog implements AnimationListener {
 
@@ -53,6 +55,7 @@ public class FancyDialog extends JDialog implements AnimationListener {
         iconLabel.setIcon(icon);
         icon.addAnimationListener(this);
         iconLabel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        ((JPanel)getContentPane()).setBorder(new EmptyBorder(5, 5, 5, 5));
         add(iconLabel, BorderLayout.WEST);
 
 
@@ -64,17 +67,32 @@ public class FancyDialog extends JDialog implements AnimationListener {
 
         add(buttons, BorderLayout.SOUTH);
         pack();
-        setLocationRelativeTo(owner);
+
 
         Dimension d = getSize();
-        d.width *= 1.1;
-        d.height *= 1.1;
-        setSize(d);
+//        d.width *= 1.1;
+//        d.height *= 1.1;
+//        setSize(d);
+
+        if (owner == null) {
+            setLocationRelativeTo(null);
+        } else {
+            Point oloc = owner.getLocationOnScreen();
+            Dimension osz = owner.getSize();
+
+            Point nloc = new Point(
+                oloc.x + osz.width/2  - d.width/2,
+                oloc.y + osz.height/2 - d.height/2
+            );
+
+            setLocation(nloc);
+        }
         setVisible(true);
     }
 
     void qYesNo() {
-        JLabel message = new JLabel("<html>" + questionText.replaceAll("\n", "<br/>") + "</html>");
+//        JLabel message = new JLabel("<html>" + questionText.replaceAll("\n", "<br/>") + "</html>");
+        MarkdownPane message = new MarkdownPane(questionText, SwingGui.getLAF().getStyleSheet(LookAndFeel.STYLESHEET_DIALOG));
         message.setBorder(new EmptyBorder(5, 15, 5, 5));
         add(message, BorderLayout.CENTER);
 
@@ -97,7 +115,8 @@ public class FancyDialog extends JDialog implements AnimationListener {
     }
 
     void qYesNoCancel() {
-        JLabel message = new JLabel("<html>" + questionText.replaceAll("\n", "<br/>") + "</html>");
+//        JLabel message = new JLabel("<html>" + questionText.replaceAll("\n", "<br/>") + "</html>");
+        MarkdownPane message = new MarkdownPane(questionText, SwingGui.getLAF().getStyleSheet(LookAndFeel.STYLESHEET_DIALOG));
         message.setBorder(new EmptyBorder(5, 5, 5, 5));
         add(message, BorderLayout.CENTER);
 
@@ -132,7 +151,8 @@ public class FancyDialog extends JDialog implements AnimationListener {
         JPanel inner = new JPanel();
         inner.setLayout(new BorderLayout());
 
-        JLabel message = new JLabel("<html>" + questionText.replaceAll("\n", "<br/>") + "</html>");
+//        JLabel message = new JLabel("<html>" + questionText.replaceAll("\n", "<br/>") + "</html>");
+        MarkdownPane message = new MarkdownPane(questionText, SwingGui.getLAF().getStyleSheet(LookAndFeel.STYLESHEET_DIALOG));
         message.setBorder(new EmptyBorder(5, 5, 5, 5));
         inner.add(message, BorderLayout.CENTER);
 
@@ -159,6 +179,8 @@ public class FancyDialog extends JDialog implements AnimationListener {
             }
         });
         buttons.add(cancel);
+
+        input.requestFocus();
     }
 
     public void animationUpdated(CleverIcon i) {

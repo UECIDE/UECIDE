@@ -6,9 +6,9 @@ import javax.swing.UIManager;
 import java.util.*;
 
 public class TinyUnicodeLAF extends LookAndFeel {
-    public static String getName() { return "Tiny: Unicode"; }
+    public String getName() { return "Tiny: Unicode"; }
 
-    public static void applyLAF() {
+    public void applyLAF() {
         try {
             UIManager.setLookAndFeel("de.muntjak.tinylookandfeel.TinyLookAndFeel");
 
@@ -28,9 +28,4 @@ public class TinyUnicodeLAF extends LookAndFeel {
 
     }
 
-    public static PropertyFile getPreferencesTree() {
-        return null;
-    }
-
-    public static boolean isCompatible() { return true; }
 }

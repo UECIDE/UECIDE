@@ -8,14 +8,18 @@ import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.Component;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 
 import org.fife.ui.rtextarea.RTextScrollPane;
@@ -32,9 +36,10 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
 
     RTextScrollPane scrollPane;
     RSyntaxTextArea textArea;
-    RSyntaxDocument document;
+    AbstractDocument document;
 
     JPanel tabPanel = null;
+    JLabel tabLabel = null;
 
     int savedCaretPosition = 0;
 
@@ -43,20 +48,25 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
         ctx = c;
         file = f;
 
-        document = new RSyntaxDocument(FileType.getSyntaxStyle(file.getFile().getName()));
-        textArea = new RSyntaxTextArea(document);
+        document = f.getDocument();
+        if (!(document instanceof RSyntaxDocument)) {
+            f.promoteDocument(new RSyntaxDocument(FileType.getSyntaxStyle(file.getFile().getName())));
+            document = f.getDocument();
+        }
+        textArea = new RSyntaxTextArea((RSyntaxDocument)document);
         scrollPane = new RTextScrollPane(textArea);
         add(scrollPane, BorderLayout.CENTER);
         textArea.setText(f.getFileData());
         textArea.requestFocus();
+        textArea.setAntiAliasingEnabled(Preferences.getBoolean("theme.editor.fonts.editor_aa"));
 
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                flushData();
-            }
-        }, 5000, 5000);
+//        Timer t = new Timer();
+//        t.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                flushData();
+//            }
+//        }, 1000, 1000);
 
         ctx.listenForEvent("sketchDataModified", this);
         ctx.listenForEvent("saveCursorLocation", this);
@@ -68,7 +78,13 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
     }
 
     public void flushData() {
-        file.setFileData(textArea.getText());
+//        file.setFileData(textArea.getText());
+//        SwingUtilities.invokeLater(new Runnable() {
+//            public void run() {
+//                tabPanel.repaint();
+//                tabPanel.revalidate();
+//            }
+//        });
     }
 
     public void requestFocus() {
@@ -79,9 +95,11 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
     public Component getTab() {
         if (tabPanel == null) {
             tabPanel = new JPanel();
+            tabPanel.setOpaque(false);
             tabPanel.setLayout(new BorderLayout());
-            JLabel l = new JLabel(file.getFile().getName());
-            tabPanel.add(l, BorderLayout.CENTER);
+            tabLabel = new JLabel(file.getFile().getName());
+            tabLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
+            tabPanel.add(tabLabel, BorderLayout.CENTER);
             try {
                 JLabel ico = new JLabel("");
                 ico.setIcon(IconManager.getIcon(16, "mime." + FileType.getIcon(file.getFile().getName())));
@@ -101,6 +119,19 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
                 tabPanel.add(ico, BorderLayout.EAST);
             } catch (Exception ex) { }
         }
+
+        JLabel fl = new JLabel("");
+        Font basefont = fl.getFont();
+
+        Font newfont;
+
+        if (file.isModified()) {
+            newfont = basefont.deriveFont(Font.BOLD);
+        } else {
+            newfont = basefont.deriveFont(Font.PLAIN);
+        }
+        tabLabel.setFont(newfont);
+
         return tabPanel;
     }
 
@@ -113,13 +144,8 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
 
     public void contextEventTriggered(ContextEvent evt) {
         if (evt.getEvent().equals("sketchDataModified")) {
-            SketchFile sf = (SketchFile)evt.getObject();
-            if (sf == file) {
-                String data = sf.getFileData();
-                if (!(data.equals(textArea.getText()))) {
-                    textArea.setText(data);
-                }
-            }
+//            tabPanel.getTopLevelAncestor().revalidate();
+//            tabPanel.getTopLevelAncestor().repaint();
         }
 
         if (evt.getEvent().equals("saveCursorLocation")) {

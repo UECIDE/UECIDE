@@ -5,31 +5,19 @@ import org.uecide.*;
 import javax.swing.UIManager;
 import java.util.*;
 
-import com.jtattoo.plaf.AbstractTheme;
-import com.jtattoo.plaf.aluminium.AluminiumLookAndFeel;
+public class JTattooAluminiumLAF extends JTattooLAF {
+    public String getName() { return "JTattoo: Aluminium"; }
 
-public class JTattooAluminiumLAF extends LookAndFeel {
-    public static String getName() { return "JTattoo: Aluminium"; }
-    public static boolean isCompatible() { return true; }
-
-    public static void applyLAF() {
-        try {
-
-            UIManager.setLookAndFeel("com.jtattoo.plaf.aluminium.AluminiumLookAndFeel");
-
-            Properties p = new Properties();
-            p.put("windowDecoration", Preferences.getBoolean("theme.jtattoo.customdec") ? "on" : "off");
-            p.put("macStyleWindowDecoration", Preferences.getBoolean("theme.jtattoo.macdec") ? "on" : "off");
-            p.put("logoString", "UECIDE");
-            p.put("textAntiAliasing", "on");
-
-            AbstractTheme theme = AluminiumLookAndFeel.getTheme();
-            theme.setProperties(p);
-
-        } catch (Exception e) {
-            Base.error(e); 
-        }
+    public void applyLAF() {
+        doApplyLAF("Aluminium");
     }
 
+    public String getStyleSheet(int type) {
+        switch (type) {
+            case LookAndFeel.STYLESHEET_DIALOG:
+                return "body { font-family: Arial, Helvetica, Sans-Serif; font-size: 12px; }  p { margin: 0px 0px 5px 0px; } ";
+        }
+        return "";
+    }
 
 }

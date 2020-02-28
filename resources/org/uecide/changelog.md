@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Add MCU and update MRU/MCU lists
 * Fixed closing all sessions bug
 * Removed maximize
 * Fixed command output streaming
@@ -745,6 +746,7 @@ Changelog
 0.8.5
 -----
 
+* Add MCU and update MRU/MCU lists
 * Fixed closing all sessions bug
 * Removed maximize
 * Fixed command output streaming

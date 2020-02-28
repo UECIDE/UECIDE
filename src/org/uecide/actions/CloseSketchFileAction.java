@@ -24,18 +24,18 @@ public class CloseSketchFileAction extends Action {
 
         if (args[0] instanceof SketchFile) {
             SketchFile f = (SketchFile)args[0];
-            if (f.isModified()) {
-                int v = ctx.getGui().askYesNoCancel(f.getFile().getName() + " has been modified. Save before closing?");
-                if (v == 0) { // Yes
-                    try {
-                        f.saveDataToDisk();
-                    } catch (IOException exc) {
-                        throw new ActionException(exc.getMessage());
-                    }
-                } else if (v == 2) { // Cancel
-                    return false;
-                }
-            }
+//            if (f.isModified()) {
+//                int v = ctx.getGui().askYesNoCancel(f.getFile().getName() + " has been modified. Save before closing?");
+//                if (v == 0) { // Yes
+//                    try {
+//                        f.saveDataToDisk();
+//                    } catch (IOException exc) {
+//                        throw new ActionException(exc.getMessage());
+//                    }
+//                } else if (v == 2) { // Cancel
+//                    return false;
+//                }
+//            }
             ctx.getGui().closeSketchFileEditor(f);
             return true;
         }
@@ -46,18 +46,18 @@ public class CloseSketchFileAction extends Action {
             if (f == null) {
                 throw new ActionException("Sketch file not found: " + s);
             }
-            if (f.isModified()) {
-                int v = ctx.getGui().askYesNoCancel(f.getFile().getName() + " has been modified. Save before closing?");
-                if (v == 0) { // Yes
-                    try {
-                        f.saveDataToDisk();
-                    } catch (IOException exc) {
-                        throw new ActionException(exc.getMessage());
-                    }
-                } else if (v == 2) { // Cancel
-                    return false;
-                }
-            }
+//            if (f.isModified()) {
+//                int v = ctx.getGui().askYesNoCancel(f.getFile().getName() + " has been modified. Save before closing?");
+//                if (v == 0) { // Yes
+//                    try {
+//                        f.saveDataToDisk();
+//                    } catch (IOException exc) {
+//                        throw new ActionException(exc.getMessage());
+//                    }
+//                } else if (v == 2) { // Cancel
+//                    return false;
+//                }
+//            }
             ctx.getGui().closeSketchFileEditor(f);
             return true;
         }

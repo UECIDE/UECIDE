@@ -27,6 +27,7 @@ import java.nio.channels.FileChannel;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Date;
 
 public class Utils {
     public static Image getScaledImage(Image srcImg, int w, int h){
@@ -266,5 +267,10 @@ public class Utils {
         }
 
         return true;
+    }
+
+    public static long millis() {
+        Date d = new Date();
+        return d.getTime();
     }
 }

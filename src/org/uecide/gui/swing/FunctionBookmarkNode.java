@@ -8,6 +8,7 @@ import org.uecide.FunctionBookmark;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 
 import org.uecide.ContextEventListener;
 import org.uecide.ContextEvent;
+
+import java.awt.Font;
 
 public class FunctionBookmarkNode extends SketchTreeNodeBase implements ContextEventListener {
     protected FunctionBookmark bookmark;
@@ -53,5 +56,11 @@ public class FunctionBookmarkNode extends SketchTreeNodeBase implements ContextE
     public FunctionBookmark getBookmark() {
         return bookmark;
     }
+
+    public Font getFont() {
+        Font originalFont = new JLabel().getFont();
+        return originalFont.deriveFont(Font.PLAIN, originalFont.getSize() * 0.75f);
+    }
+
 
 }

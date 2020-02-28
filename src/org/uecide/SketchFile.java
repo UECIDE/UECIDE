@@ -8,74 +8,122 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class SketchFile implements Comparable {
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.BadLocationException;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+
+public class SketchFile implements Comparable, DocumentListener {
     long bufferModified = 0;
-    long fileModified = 0;
-    String data;
+    AbstractDocument content;
 
     Context ctx;
     Sketch sketch;
     File file;
+    String storedData = "";
 
     HashMap<Integer, String> lineComments = new HashMap<Integer, String>();
 
+    Timer fileMonitor;
+
     public SketchFile(Context c, Sketch s, File f) throws IOException {
+try {
         ctx = c;
         sketch = s;
         file = f;
         loadFileData();
+
+        fileMonitor = new Timer(f.getName());
+
+        fileMonitor.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                checkFileDate();
+            }
+        }, 1000, 1000);
+} catch (Exception ex) { ex.printStackTrace(); }
+    }
+
+    public AbstractDocument getDocument() {
+        return content;
+    }
+
+    public void promoteDocument(AbstractDocument newdoc) {
+        try {
+            newdoc.replace(0, newdoc.getLength(), getFileData(), null);
+        } catch (BadLocationException ex) {
+            ex.printStackTrace();
+        }
+        DocumentListener[] l = content.getDocumentListeners();
+        content = newdoc;
+        for (DocumentListener lis : l) {
+            content.addDocumentListener(lis);
+        }
     }
 
     public void loadFileData() throws IOException {
         if (!file.exists()) {
-            // We're making a new file
-            setFileData("");
-            saveDataToDisk();
-            return;
+            file.createNewFile();
         }
-        data = Utils.getFileAsString(file);
-        fileModified = file.lastModified();
-        bufferModified = fileModified;
+        storedData = Utils.getFileAsString(file);
+        content = new PlainDocument();
+        try {
+            content.replace(0, content.getLength(), storedData, null);
+        } catch (BadLocationException ex) {
+            ex.printStackTrace();
+        }
+        content.addDocumentListener(this);
     }
 
     boolean inhibitUpdate = false;
 
     public void setFileData(String d) {
-        if (inhibitUpdate) return; // I hate this!
-        if ((data == null) || (!(data.equals(d)))) {
-            inhibitUpdate = true;
-            data = d;
-            bufferModified = System.currentTimeMillis();
-            ctx.triggerEvent("sketchDataModified", this);
-            inhibitUpdate = false;
+        try {
+            if (!(getFileData().equals(d))) {
+                content.replace(0, content.getLength(), d, null);
+//                ctx.triggerEvent("sketchDataModified", this);
+            }
+        } catch (BadLocationException ex) {
+            ex.printStackTrace();
         }
     }
 
     public String getFileData() {
-        return data;
+        if (content == null) return "";
+        try {
+            return content.getText(0, content.getLength());
+        } catch (BadLocationException ex) {
+            ex.printStackTrace();
+        }
+        return "";
     }
 
     public boolean isModified() {
-        return bufferModified > fileModified;
+        return !(getFileData().equals(storedData));
     }
 
     public boolean isOutdated() {
-        return bufferModified < fileModified;
+        if (file == null) return true;
+        return bufferModified < file.lastModified();
     }
 
     public void saveDataToDisk() throws IOException {
+        storedData = getFileData();
         PrintWriter pw = new PrintWriter(new FileWriter(file));
-        pw.print(data);
+        pw.print(storedData);
         pw.close();
-        fileModified = file.lastModified();
-        bufferModified = fileModified;
     }
 
     public void saveDataToDisk(File out) throws IOException {
         PrintWriter pw = new PrintWriter(new FileWriter(out));
-        pw.print(data);
+        pw.print(getFileData());
         pw.close();
+        if (out == file) {
+            storedData = getFileData();
+        }
     }
 
     public File getFile() {
@@ -83,7 +131,8 @@ public class SketchFile implements Comparable {
     }
 
     public long getFileModified() {
-        return fileModified;
+        if (file == null) return 0;
+        return file.lastModified();
     }
 
     public long getBufferModified() {
@@ -137,6 +186,8 @@ public class SketchFile implements Comparable {
         // string builder if we want it, or pushing a space if we don't.
 
         StringBuilder out = new StringBuilder();
+
+        String data = getFileData();
 
         while (cpos < data.length()) {
             char thisChar = data.charAt(cpos);
@@ -448,7 +499,7 @@ public class SketchFile implements Comparable {
 
         ArrayList<TodoEntry> found = new ArrayList<TodoEntry>();
 
-        String[] lines = data.split("\n");
+        String[] lines = getFileData().split("\n");
         int lineno = 1;
         for (String line : lines) {
             Matcher m = p.matcher(line);
@@ -472,6 +523,33 @@ public class SketchFile implements Comparable {
         }
 
         return found;
+    }
+
+    public void changedUpdate(DocumentEvent evt) {
+        bufferModified = Utils.millis();
+        ctx.triggerEvent("sketchDataModified", this);
+    }
+
+    public void removeUpdate(DocumentEvent evt) {
+//        bufferModified = Utils.millis();
+//        ctx.triggerEvent("sketchDataModified", this);
+    }
+
+    public void insertUpdate(DocumentEvent evt) {
+//        bufferModified = Utils.millis();
+//        ctx.triggerEvent("sketchDataModified", this);
+    }
+
+    public void checkFileDate() {
+        if (isOutdated()) {
+            try {
+                storedData = Utils.getFileAsString(file);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            setFileData(storedData);
+            bufferModified = Utils.millis();
+        }
     }
 
 }

@@ -283,6 +283,7 @@ public class Base {
         cli.addParameter("locale",              "name",     String.class,   "cli.help.locale");
 
         cli.addParameter("gui",                 "name",     String.class,   "Select a GUI to run (cli / swing / none)");
+        cli.addParameter("laf",                 "name",     String.class,   "Select a LookAndFeel for the Swing GUI");
 
         String[] argv = cli.process(args);
 

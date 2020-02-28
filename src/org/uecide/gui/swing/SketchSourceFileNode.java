@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
+import javax.swing.JLabel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import java.io.IOException;
@@ -17,6 +18,8 @@ import java.util.Enumeration;
 
 import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
+
+import java.awt.Font;
 
 public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextEventListener {
     SketchFile sketchFile;
@@ -131,7 +134,18 @@ public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextE
             if (sketchFile == sf) {
                 updateChildren();
             }
+            model.reload(this);
         }
+    }
+
+    public Font getFont() {
+        Font f = new JLabel().getFont();
+        if (sketchFile.isModified()) {
+            f = f.deriveFont(Font.BOLD);
+        } else {
+            f = f.deriveFont(Font.PLAIN);
+        }
+        return f;
     }
 
 }

@@ -27,6 +27,7 @@ public class SketchTreeCellRenderer extends DefaultTreeCellRenderer {
 
         if (value instanceof SketchTreeNodeBase) {
             SketchTreeNodeBase n = (SketchTreeNodeBase)value;
+            ret.setFont(n.getFont());
             try {
                 ImageIcon i = n.getIcon(tree);
                 if (i != null) {
@@ -34,20 +35,6 @@ public class SketchTreeCellRenderer extends DefaultTreeCellRenderer {
                 }
             } catch (IOException ignored) {
             }
-        }
-
-        if (value instanceof FunctionBookmarkNode) {
-            Font originalFont = new JLabel().getFont();
-            ret.setFont(originalFont.deriveFont(Font.PLAIN, originalFont.getSize() * 0.75f));
-        } else if (value instanceof ClassBookmarkNode) {
-            Font originalFont = new JLabel().getFont();
-            ret.setFont(originalFont.deriveFont(Font.PLAIN, originalFont.getSize() * 0.75f));
-        } else if (value instanceof MemberBookmarkNode) {
-            Font originalFont = new JLabel().getFont();
-            ret.setFont(originalFont.deriveFont(Font.PLAIN, originalFont.getSize() * 0.75f));
-        } else {
-            Font originalFont = new JLabel().getFont();
-            ret.setFont(originalFont);
         }
 
         return ret;

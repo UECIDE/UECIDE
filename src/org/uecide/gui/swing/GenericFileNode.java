@@ -6,12 +6,15 @@ import org.uecide.FileType;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JLabel;
 import javax.swing.JTree;
 
 import java.io.File;
 import java.io.IOException;
 
 import java.util.Enumeration;
+
+import java.awt.Font;
 
 
 public class GenericFileNode extends SketchTreeNodeBase {
@@ -91,5 +94,9 @@ public class GenericFileNode extends SketchTreeNodeBase {
     }
 
     public void performDoubleClick() {
+    }
+
+    public Font getFont() {
+        return new JLabel().getFont();
     }
 }

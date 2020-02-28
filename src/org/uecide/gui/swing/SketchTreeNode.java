@@ -7,7 +7,10 @@ import java.io.IOException;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JLabel;
 import javax.swing.JTree;
+
+import java.awt.Font;
 
 public class SketchTreeNode extends SketchTreeNodeBase {
 
@@ -50,4 +53,9 @@ public class SketchTreeNode extends SketchTreeNodeBase {
 
     public void performDoubleClick() {
     }
+
+    public Font getFont() {
+        return new JLabel().getFont();
+    }
+
 }

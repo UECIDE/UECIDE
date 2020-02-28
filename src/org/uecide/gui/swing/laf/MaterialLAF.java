@@ -11,9 +11,9 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 public class MaterialLAF extends LookAndFeel {
-    public static String getName() { return "Material"; }
+    public String getName() { return "Material"; }
 
-    public static void applyLAF() {
+    public void applyLAF() {
         try {
             UIManager.setLookAndFeel(new MaterialLookAndFeel());
             UIManager.put("Button.background", new Color(1f, 1f, 1f, 0f));
@@ -24,12 +24,6 @@ public class MaterialLAF extends LookAndFeel {
             Base.error(e);
         }
     }
-
-    public static PropertyFile getPreferencesTree() {
-        return null;
-    }
-
-    public static boolean isCompatible() { return true; }
 }
 /*
 Button.background
