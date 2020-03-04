@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 
 import java.awt.Font;
+import java.awt.Component;
 
 public class SketchSourceFilesNode extends SketchTreeNodeBase {
     public SketchSourceFilesNode(Context c, SketchTreeModel m) {
@@ -105,8 +106,14 @@ public class SketchSourceFilesNode extends SketchTreeNodeBase {
     public void performDoubleClick() {
     }
 
-    public Font getFont() {
-        return new JLabel().getFont();
+    public Component getRenderComponent(JLabel original, JTree tree) {
+        try {
+            original.setIcon(getIcon(tree));
+        } catch (Exception ex) {
+        }
+
+        return original;
     }
+
 
 }

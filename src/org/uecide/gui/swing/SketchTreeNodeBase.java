@@ -8,16 +8,20 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.JPopupMenu;
 
 import java.io.IOException;
 
 import java.awt.Font;
+import java.awt.Component;
 
 public abstract class SketchTreeNodeBase extends DefaultMutableTreeNode {
     protected Context ctx;
     protected SketchTreeModel model;
+
+    public abstract Component getRenderComponent(JLabel original, JTree tree);
 
     public SketchTreeNodeBase(Context c, SketchTreeModel m, String name) {
         super(name);
@@ -43,6 +47,4 @@ public abstract class SketchTreeNodeBase extends DefaultMutableTreeNode {
 
     public abstract JPopupMenu getPopupMenu();
     public abstract void performDoubleClick();
-
-    public abstract Font getFont();
 }

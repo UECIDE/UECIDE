@@ -636,7 +636,7 @@ public class Sketch {
                 orderedLibraries.add(importedLibraries.get(inclib));
             }
         }
-
+        ctx.triggerEvent("sketchLibraryListUpdated");
     }
 
     public String getReturnTypeFromProtoAndName(String proto, String name) {
@@ -2079,6 +2079,7 @@ public class Sketch {
                     lib.setCompiledPercent(0);
 
                     Base.tryDelete(libBuildFolder);
+                    localCtx.dispose();
                     return false;
                 }
 
@@ -2091,6 +2092,7 @@ public class Sketch {
 
                     Base.tryDelete(out);
                     Base.tryDelete(libBuildFolder);
+                    localCtx.dispose();
                     return false;
                 }
 
@@ -2106,7 +2108,8 @@ public class Sketch {
 
 
         Base.tryDelete(libBuildFolder);
-
+  
+        localCtx.dispose();
         return true;
     }
 

@@ -296,7 +296,6 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
         outer.add(buttonLine, BorderLayout.SOUTH);
 
-        Context ctx = new Context();
 /*
         for(Class<?> pluginClass : Base.plugins.values()) {
             try {
@@ -763,6 +762,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                     if (source.startsWith("compiler:")) { ctx.setCompiler(Base.compilers.get(source.substring(9))); } 
                     keyToExecute = "prefs." + keyToExecute;
                 }
+                ctx.dispose();
 
                 Object hash = ctx.executeKey(keyToExecute);
                 if (hash instanceof HashMap) {

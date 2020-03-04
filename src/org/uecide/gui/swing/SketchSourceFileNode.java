@@ -8,6 +8,7 @@ import org.uecide.FunctionBookmark;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.JLabel;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -20,6 +21,8 @@ import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
 
 import java.awt.Font;
+import java.awt.Component;
+import java.awt.BorderLayout;
 
 public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextEventListener {
     SketchFile sketchFile;
@@ -138,14 +141,29 @@ public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextE
         }
     }
 
-    public Font getFont() {
-        Font f = new JLabel().getFont();
-        if (sketchFile.isModified()) {
-            f = f.deriveFont(Font.BOLD);
-        } else {
-            f = f.deriveFont(Font.PLAIN);
+    public Component getRenderComponent(JLabel original, JTree tree) {
+
+        JPanel p = new JPanel();
+        p.setLayout(new BorderLayout());
+
+        p.add(original, BorderLayout.CENTER);
+        p.setOpaque(false);
+        try {
+            original.setIcon(getIcon(tree));
+        } catch (Exception ex) {
         }
-        return f;
+
+        original.setOpaque(false);
+
+        Font orig = original.getFont();
+
+        if (sketchFile.isModified()) {
+            original.setFont(orig.deriveFont(Font.BOLD));
+        } else {
+            original.setFont(orig.deriveFont(Font.PLAIN));
+        }
+
+        return p;
     }
 
 }

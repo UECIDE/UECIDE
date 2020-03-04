@@ -25,16 +25,19 @@ public class SketchTreeCellRenderer extends DefaultTreeCellRenderer {
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
         JLabel ret = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
+        ret.setFont(new JLabel().getFont());
+
         if (value instanceof SketchTreeNodeBase) {
             SketchTreeNodeBase n = (SketchTreeNodeBase)value;
-            ret.setFont(n.getFont());
-            try {
-                ImageIcon i = n.getIcon(tree);
-                if (i != null) {
-                    ret.setIcon(i);
-                }
-            } catch (IOException ignored) {
-            }
+            return n.getRenderComponent(ret, tree);
+//            ret.setFont(n.getFont());
+//            try {
+//                ImageIcon i = n.getIcon(tree);
+//                if (i != null) {
+//                    ret.setIcon(i);
+//                }
+//            } catch (IOException ignored) {
+//            }
         }
 
         return ret;

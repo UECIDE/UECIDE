@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Overhaul of LAF system
 * Add MCU and update MRU/MCU lists
 * Fixed closing all sessions bug
 * Removed maximize
@@ -746,6 +747,7 @@ Changelog
 0.8.5
 -----
 
+* Overhaul of LAF system
 * Add MCU and update MRU/MCU lists
 * Fixed closing all sessions bug
 * Removed maximize

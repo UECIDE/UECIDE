@@ -42,6 +42,7 @@ public class Tool extends UObject {
         localCtx.mergeSettings(_properties);
         localCtx.set("tool.root", getFolder().getAbsolutePath());
         boolean res = (Boolean)localCtx.executeKey(key, true);
+        localCtx.dispose();
         return res;
     }
 }

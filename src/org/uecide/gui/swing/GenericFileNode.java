@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 import java.awt.Font;
+import java.awt.Component;
 
 
 public class GenericFileNode extends SketchTreeNodeBase {
@@ -96,7 +97,12 @@ public class GenericFileNode extends SketchTreeNodeBase {
     public void performDoubleClick() {
     }
 
-    public Font getFont() {
-        return new JLabel().getFont();
+    public Component getRenderComponent(JLabel original, JTree tree) {
+        try {
+            original.setIcon(getIcon(tree));
+        } catch (Exception ex) {
+        }
+        return original;
     }
+
 }

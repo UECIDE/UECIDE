@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JTree;
 
 import java.awt.Font;
+import java.awt.Component;
 
 public class SketchTreeNode extends SketchTreeNodeBase {
 
@@ -54,8 +55,12 @@ public class SketchTreeNode extends SketchTreeNodeBase {
     public void performDoubleClick() {
     }
 
-    public Font getFont() {
-        return new JLabel().getFont();
+    public Component getRenderComponent(JLabel original, JTree tree) {
+        try {
+            original.setIcon(getIcon(tree));
+        } catch (Exception ex) {
+        }
+        return original;
     }
 
 }

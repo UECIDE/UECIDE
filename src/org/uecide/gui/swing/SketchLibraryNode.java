@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Library;
 import org.uecide.SketchFile;
 import org.uecide.FileType;
 import org.uecide.FunctionBookmark;
@@ -8,30 +9,37 @@ import org.uecide.FunctionBookmark;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTree;
+import javax.swing.JLabel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
-import org.uecide.ContextEventListener;
 import org.uecide.ContextEvent;
+import org.uecide.ContextEventListener;
 
 import java.awt.Font;
 import java.awt.Component;
+import java.awt.BorderLayout;
 
-public class FunctionBookmarkNode extends SketchTreeNodeBase implements ContextEventListener {
-    protected FunctionBookmark bookmark;
+public class SketchLibraryNode extends SketchTreeNodeBase implements ContextEventListener {
+    Library library;
 
-    public FunctionBookmarkNode(Context c, SketchTreeModel m, FunctionBookmark bm) {
-        super(c, m, bm.toString());
-        bookmark = bm;
+    public SketchLibraryNode(Context c, SketchTreeModel m, Library l) {
+        super(c, m, l.getName());
+        library = l;
         updateChildren();
     }
 
+    public Library getLibrary() {
+        return library;
+    }
+
     public ImageIcon getIcon(JTree tree) throws IOException {
-        return IconManager.getIcon(12, "tree.function");
+        return IconManager.getIcon(16, "library");
     }
 
     public boolean updateChildren() {
@@ -44,28 +52,12 @@ public class FunctionBookmarkNode extends SketchTreeNodeBase implements ContextE
     }
 
     public void performDoubleClick() {
-        SketchFile sf = bookmark.getFile();
-        ctx.action("OpenSketchFile", sf, (Integer)bookmark.getLine());
     }
 
     public void contextEventTriggered(ContextEvent e) {
-        if (e.getEvent().equals("functionBookmarksUpdated")) {
-            updateChildren();
-        }
-    }
-
-    public FunctionBookmark getBookmark() {
-        return bookmark;
     }
 
     public Component getRenderComponent(JLabel original, JTree tree) {
-        Font f = original.getFont();
-        original.setFont(f.deriveFont(Font.PLAIN, f.getSize() * 0.8f));
-        try {
-            original.setIcon(getIcon(tree));
-        } catch (IOException ex) {
-        }
         return original;
     }
-
 }

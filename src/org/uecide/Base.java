@@ -1630,8 +1630,6 @@ public class Base {
         }
 
         loadPreferencesTree("/org/uecide/config/prefs.txt");
-        Context ctx = new Context();
-
     }
 
     public static void registerPreference(String key, String type, String name, String def) {
@@ -1661,6 +1659,7 @@ public class Base {
                 Context ctx = new Context();
                 ctx.setBoard(b);
                 ctx.executeKey("init.script");
+                ctx.dispose();
             }
         }
         for (Core c : cores.values()) {
@@ -1668,6 +1667,7 @@ public class Base {
                 Context ctx = new Context();
                 ctx.setCore(c);
                 ctx.executeKey("init.script");
+                ctx.dispose();
             }
         }
         for (Compiler c : compilers.values()) {
@@ -1675,6 +1675,7 @@ public class Base {
                 Context ctx = new Context();
                 ctx.setCompiler(c);
                 ctx.executeKey("init.script");
+                ctx.dispose();
             }
         }
         for (Programmer c : programmers.values()) {
@@ -1682,6 +1683,7 @@ public class Base {
                 Context ctx = new Context();
                 ctx.setProgrammer(c);
                 ctx.executeKey("init.script");
+                ctx.dispose();
             }
         }
     }
@@ -1950,6 +1952,7 @@ public class Base {
     }
 
     public static void cleanupSession(Context ctx) {
+        ctx.dispose();
         sessions.remove(ctx);
         if (sessions.size() == 0) {
             System.err.println("Last session exited - quitting");

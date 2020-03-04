@@ -78,6 +78,10 @@ public class Context {
 
     public HashMap<String, Thread> threads = new HashMap<String, Thread>();
 
+    Timer oneSecondTimer;
+    Timer fifteenSecondTimer;
+    Timer oneMinuteTimer;
+
     // Make a new empty context.
 
     PrintWriter outputStream = null;
@@ -100,12 +104,16 @@ public class Context {
         settings = new PropertyFile(src.settings);
         sketchSettings = new PropertyFile(src.sketchSettings);
         savedSettings = new PropertyFile(src.savedSettings);
+
+        startTimers();
     }
 
     public Context() {
         settings = new PropertyFile();
         sketchSettings = new PropertyFile();
         updateSystem();
+
+        startTimers();
     }
 
     class ThreadRet extends Thread {
@@ -973,6 +981,7 @@ public class Context {
                 Context ctx = new Context(this);
                 ctx.setBoard(b);
                 ctx.executeKey("init.script");
+                ctx.dispose();
             }
         }
         for (Core c : Base.cores.values()) {
@@ -980,6 +989,7 @@ public class Context {
                 Context ctx = new Context(this);
                 ctx.setCore(c);
                 ctx.executeKey("init.script");
+                ctx.dispose();
             }
         }
         for (Compiler c : Base.compilers.values()) {
@@ -987,6 +997,7 @@ public class Context {
                 Context ctx = new Context(this);
                 ctx.setCompiler(c);
                 ctx.executeKey("init.script");
+                ctx.dispose();
             }
         }
         for (Programmer c : Base.programmers.values()) {
@@ -994,6 +1005,7 @@ public class Context {
                 Context ctx = new Context(this);
                 ctx.setProgrammer(c);
                 ctx.executeKey("init.script");
+                ctx.dispose();
             }
         }
     }
@@ -1005,6 +1017,44 @@ public class Context {
 
     public void clearOutputStream() {
         outputStream = null;
+    }
+
+    void startTimers() {
+        oneSecondTimer = new Timer();
+        fifteenSecondTimer = new Timer();
+        oneMinuteTimer = new Timer();
+        oneSecondTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                triggerEvent("oneSecondTimer");
+            }
+        }, 1000, 1000);
+
+        fifteenSecondTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                triggerEvent("fifteenSecondTimer");
+            }
+        }, 15000, 15000);
+
+        oneMinuteTimer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                triggerEvent("oneMinuteTimer");
+            }
+        }, 60000, 60000);
+
+
+    }
+
+    public void dispose() {
+        try {
+            oneSecondTimer.cancel();
+            fifteenSecondTimer.cancel();
+            oneMinuteTimer.cancel();
+        } catch (Exception ex) {
+        }
+    }
+
+    public void finalize() {
+        dispose();
     }
 
 }

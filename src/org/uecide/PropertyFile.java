@@ -919,7 +919,9 @@ public class PropertyFile {
         }
         Context ctx = new Context();
         ctx.mergeSettings(this);
-        return ctx.parseString(data);
+        String out = ctx.parseString(data);
+        ctx.dispose();
+        return out;
     }
 
     public void fullyParseFile() {
@@ -930,6 +932,7 @@ public class PropertyFile {
             data = ctx.parseString(data);
             set(key, data);
         }
+        ctx.dispose();
     }
 
     public boolean loadProperties(TreeMap<String, String> p, BufferedReader r) {

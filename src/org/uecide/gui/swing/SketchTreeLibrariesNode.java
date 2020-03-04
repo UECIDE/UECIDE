@@ -1,6 +1,10 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Sketch;
+import org.uecide.Library;
+import org.uecide.ContextEvent;
+import org.uecide.ContextEventListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
@@ -11,15 +15,50 @@ import javax.swing.JTree;
 import java.io.IOException;
 
 import java.awt.Font;
+import java.awt.Component;
 
-public class SketchTreeLibrariesNode extends SketchTreeNodeBase {
+import java.util.Enumeration;
+import java.util.HashMap;
+
+public class SketchTreeLibrariesNode extends SketchTreeNodeBase implements ContextEventListener {
     public SketchTreeLibrariesNode(Context c, SketchTreeModel m) {
         super(c, m, "Libraries");
         updateChildren();
+        ctx.listenForEvent("sketchLibraryListUpdated", this);
     }
 
     public boolean updateChildren() {
-        return false;
+System.err.println("Updating library tree children");
+        Sketch sketch = ctx.getSketch();
+
+        HashMap<String, Library> libraries = sketch.getLibraries();
+
+        boolean somethingRemoved = false;
+        boolean hasBeenModified = false;
+        do {
+            somethingRemoved = false;
+            for (Enumeration e = children(); e.hasMoreElements();) {
+                SketchLibraryNode child = (SketchLibraryNode)e.nextElement();
+                if (!(libraries.containsValue(child.getLibrary()))) {
+                    remove(child);
+                    System.err.println("Removed " + child.getLibrary().getName());
+                    somethingRemoved = true;
+                    hasBeenModified = true;
+                    break;
+                }
+            }
+        } while (somethingRemoved);
+
+        for (Library l : libraries.values()) {
+            if (!hasChildLibrary(l)) {
+                SketchLibraryNode sfn = new SketchLibraryNode(ctx, model, l);
+                add(sfn);
+                System.err.println("Added " + l.getName());
+                hasBeenModified = true;
+            }
+        }
+        
+        return hasBeenModified;
     }
 
     public ImageIcon getIcon(JTree tree) throws IOException {
@@ -37,8 +76,29 @@ public class SketchTreeLibrariesNode extends SketchTreeNodeBase {
     public void performDoubleClick() {
     }
 
-    public Font getFont() {
-        return new JLabel().getFont();
+    public Component getRenderComponent(JLabel original, JTree tree) {
+        try {
+            original.setIcon(getIcon(tree));
+        } catch (Exception ex) {
+        }
+
+        return original;
+    }
+
+    boolean hasChildLibrary(Library l) {
+        for (Enumeration e = children(); e.hasMoreElements();) {
+            SketchLibraryNode child = (SketchLibraryNode)e.nextElement();
+            if (child.getLibrary() == l) return true;
+        }
+        return false;
+    }
+
+    public void contextEventTriggered(ContextEvent event) {
+        if (event.getEvent().equals("sketchLibraryListUpdated")) {
+            if (updateChildren()) {
+                model.reload(this);
+            }
+        }
     }
 
 }

@@ -13,6 +13,7 @@ import javax.swing.JTree;
 import java.io.IOException;
 
 import java.awt.Font;
+import java.awt.Component;
 
 public class SketchTreeOutputNode extends SketchTreeNodeBase {
     public SketchTreeOutputNode(Context c, SketchTreeModel m) {
@@ -47,8 +48,14 @@ public class SketchTreeOutputNode extends SketchTreeNodeBase {
     public void performDoubleClick() {
     }
 
-    public Font getFont() {
-        return new JLabel().getFont();
+    public Component getRenderComponent(JLabel original, JTree tree) {
+        try {
+            original.setIcon(getIcon(tree));
+        } catch (Exception ex) {
+        }
+
+        return original;
     }
+
 
 }
