@@ -78,9 +78,9 @@ public class Context {
 
     public HashMap<String, Thread> threads = new HashMap<String, Thread>();
 
-    Timer oneSecondTimer;
-    Timer fifteenSecondTimer;
-    Timer oneMinuteTimer;
+    Context parentContext = null;
+
+    Timer eventTimer;
 
     // Make a new empty context.
 
@@ -104,8 +104,8 @@ public class Context {
         settings = new PropertyFile(src.settings);
         sketchSettings = new PropertyFile(src.sketchSettings);
         savedSettings = new PropertyFile(src.savedSettings);
-
-        startTimers();
+//        startTimers(); // Don't want timers on a copied context
+        parentContext = src;
     }
 
     public Context() {
@@ -258,10 +258,18 @@ public class Context {
     // Reporting and messaging functions.
 
     public void error(Throwable e) {
+        if (parentContext != null) {
+            parentContext.error(e);
+            return;
+        }
         triggerEvent("message", new Message(Message.ERROR, e.toString()));
     }
 
     public void error(String e) {
+        if (parentContext != null) {
+            parentContext.error(e);
+            return;
+        }
         if (listener != null) {
             listener.contextError(e);
         } else {
@@ -270,6 +278,10 @@ public class Context {
     }
 
     public void warning(String e) {
+        if (parentContext != null) {
+            parentContext.warning(e);
+            return;
+        }
         if (listener != null) {
             listener.contextWarning(e);
         } else {
@@ -278,6 +290,10 @@ public class Context {
     }
         
     public void message(String e) {
+        if (parentContext != null) {
+            parentContext.message(e);
+            return;
+        }
         if (listener != null) {
             listener.contextMessage(e);
         } else {
@@ -286,6 +302,10 @@ public class Context {
     }
 
     public void parsedMessage(String e) {
+        if (parentContext != null) {
+            parentContext.parsedMessage(e);
+            return;
+        }
         if (sketch != null) {
             sketch.parsedMessage(e);
             return;
@@ -295,6 +315,10 @@ public class Context {
 
 
     public void link(String e) {
+        if (parentContext != null) {
+            parentContext.link(e);
+            return;
+        }
         if (!e.endsWith("\n")) { e += "\n"; }
         if (sketch != null) {
             sketch.link(e);
@@ -304,36 +328,68 @@ public class Context {
     }
 
     public void command(String e) {
+        if (parentContext != null) {
+            parentContext.command(e);
+            return;
+        }
         if ((Preferences.getBoolean("compiler.verbose_compile")) || (Base.cli.isSet("verbose"))) {
             triggerEvent("message", new Message(Message.COMMAND, e));
         }
     }
         
     public void bullet(String e) {
+        if (parentContext != null) {
+            parentContext.bullet(e);
+            return;
+        }
         triggerEvent("message", new Message(Message.BULLET1, e));
     }
         
     public void bullet2(String e) {
+        if (parentContext != null) {
+            parentContext.bullet2(e);
+            return;
+        }
         triggerEvent("message", new Message(Message.BULLET2, e));
     }
 
     public void bullet3(String e) {
+        if (parentContext != null) {
+            parentContext.bullet3(e);
+            return;
+        }
         triggerEvent("message", new Message(Message.BULLET3, e));
     }
 
     public void heading(String e) {
+        if (parentContext != null) {
+            parentContext.heading(e);
+            return;
+        }
         triggerEvent("message", new Message(Message.HEADING, e));
     }
         
     public void rawMessageStream(String e) {
+        if (parentContext != null) {
+            parentContext.rawMessageStream(e);
+            return;
+        }
         gui.streamMessage(e);
     }
 
     public void rawErrorStream(String e) {
+        if (parentContext != null) {
+            parentContext.rawErrorStream(e);
+            return;
+        }
         gui.streamError(e);
     }
 
     public void errorStream(String e) {
+        if (parentContext != null) {
+            parentContext.errorStream(e);
+            return;
+        }
         if  (listener != null) {
             listener.contextError(e);
         } else {
@@ -342,6 +398,10 @@ public class Context {
     }
 
     public void warningStream(String e) {
+        if (parentContext != null) {
+            parentContext.warningStream(e);
+            return;
+        }
         if  (listener != null) {
             listener.contextWarning(e);
         } else {
@@ -350,6 +410,10 @@ public class Context {
     }
         
     public void messageStream(String e) {
+        if (parentContext != null) {
+            parentContext.messageStream(e);
+            return;
+        }
         if  (listener != null) {
             listener.contextMessage(e);
         } else {
@@ -1020,22 +1084,20 @@ public class Context {
     }
 
     void startTimers() {
-        oneSecondTimer = new Timer();
-        fifteenSecondTimer = new Timer();
-        oneMinuteTimer = new Timer();
-        oneSecondTimer.scheduleAtFixedRate(new TimerTask() {
+        eventTimer = new Timer();
+        eventTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 triggerEvent("oneSecondTimer");
             }
         }, 1000, 1000);
 
-        fifteenSecondTimer.scheduleAtFixedRate(new TimerTask() {
+        eventTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 triggerEvent("fifteenSecondTimer");
             }
         }, 15000, 15000);
 
-        oneMinuteTimer.scheduleAtFixedRate(new TimerTask() {
+        eventTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 triggerEvent("oneMinuteTimer");
             }
@@ -1046,15 +1108,137 @@ public class Context {
 
     public void dispose() {
         try {
-            oneSecondTimer.cancel();
-            fifteenSecondTimer.cancel();
-            oneMinuteTimer.cancel();
+            eventTimer.cancel();
         } catch (Exception ex) {
         }
     }
 
     public void finalize() {
         dispose();
+    }
+
+    public File getCacheDir() {
+        File dataDir = Base.getDataFolder();
+        File cacheRoot = new File(dataDir, "cache");
+        File coreRoot = new File(cacheRoot, core.getName());
+        File boardRoot = new File(coreRoot, board.getName());
+        if (!boardRoot.exists()) {
+            boardRoot.mkdirs();
+        }
+        return boardRoot;
+    }
+
+    public String getArch() {
+        if (getBoard().get("arch") != null) {
+            return getBoard().get("arch");
+        }
+        if (getCore().get("arch") != null) {
+            return getCore().get("arch");
+        }
+        if (getCompiler().get("arch") != null) {
+            return getCompiler().get("arch");
+        }
+        return getBoard().get("family");
+    }
+
+
+    public File getBuildDir() {
+        return getSketch().getBuildFolder();
+    }
+
+    public File compileFile(File src, File buildFolder) {
+        return compileFile(null, src, buildFolder);
+    }
+
+    public File compileFile(Context localCtx, File src, File buildFolder) {
+        if (localCtx == null) {
+            localCtx = new Context(this);
+        }
+
+        String fileName = src.getName();
+        String recipe = null;
+
+        triggerEvent("fileCompilationStarted", src);
+
+        PropertyFile props = localCtx.getMerged();
+        
+        switch (FileType.getType(src)) {
+            case FileType.CPPSOURCE:
+                recipe = "compile.cpp";
+                break;
+
+            case FileType.CSOURCE:
+                recipe = "compile.c";
+                break;  
+
+            case FileType.ASMSOURCE:
+                recipe = "compile.S";
+                break;
+        }
+    
+        if (recipe == null) {
+            error(Base.i18n.string("err.badfile", fileName));
+            triggerEvent("fileCompilationFailed", src);
+            localCtx.dispose();
+            return null;
+        }
+
+        if (Preferences.getBoolean("compiler.verbose_files")) {
+            bullet3(fileName);
+        }
+
+        String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+        String objExt = localCtx.parseString(props.get("compiler.object", "o"));
+
+        String bfPath = buildFolder.getAbsolutePath();
+        String srcPath = src.getParentFile().getAbsolutePath();
+
+        if (srcPath.startsWith(bfPath + "/")) {
+            buildFolder = src.getParentFile();
+        }
+
+        File dest = new File(buildFolder, fileName + "." + objExt);
+
+        if (dest.exists()) {
+            if (dest.lastModified() > src.lastModified()) {
+                triggerEvent("fileCompilationFinished", src);
+                localCtx.dispose();
+                return dest;
+            }
+        }
+        
+        localCtx.set("build.path", buildFolder.getAbsolutePath());
+        localCtx.set("source.name", src.getAbsolutePath());
+        localCtx.set("object.name", dest.getAbsolutePath());
+
+        localCtx.addDataStreamParser(new DataStreamParser() {
+            public String parseStreamMessage(Context ctx, String m) {
+                return m;
+            }
+            public String parseStreamError(Context ctx, String m) {
+                return m;
+            }
+        });
+
+        String output = "";
+
+        if (!(Boolean)localCtx.executeKey(recipe)) {
+            localCtx.removeDataStreamParser();
+            localCtx.dispose();
+            triggerEvent("fileCompilationFailed", src);
+            return null;
+        }
+
+        localCtx.removeDataStreamParser();
+        if (!dest.exists()) {
+            localCtx.dispose();
+            triggerEvent("fileCompilationFailed", src);
+            return null;
+        }
+
+        localCtx.dispose();
+        triggerEvent("fileCompilationFinished", src);
+        return dest;
     }
 
 }

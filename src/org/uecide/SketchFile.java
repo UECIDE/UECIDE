@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.BadLocationException;
@@ -28,23 +25,20 @@ public class SketchFile implements Comparable, DocumentListener {
 
     HashMap<Integer, String> lineComments = new HashMap<Integer, String>();
 
-    Timer fileMonitor;
-
     public SketchFile(Context c, Sketch s, File f) throws IOException {
-try {
-        ctx = c;
-        sketch = s;
-        file = f;
-        loadFileData();
+        try {
+            ctx = c;
+            sketch = s;
+            file = f;
+            loadFileData();
 
-        fileMonitor = new Timer(f.getName());
+            ctx.listenForEvent("oneSecondTimer", new ContextEventListener() {
+                public void contextEventTriggered(ContextEvent evt) {
+                    checkFileDate();
+                }
+            });
 
-        fileMonitor.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                checkFileDate();
-            }
-        }, 1000, 1000);
-} catch (Exception ex) { ex.printStackTrace(); }
+        } catch (Exception ex) { ex.printStackTrace(); }
     }
 
     public AbstractDocument getDocument() {

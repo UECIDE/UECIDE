@@ -355,13 +355,32 @@ public class Library implements Comparable {
             if (arch != null) {
                 TreeSet<File>af = sourceFilesByArch.get(arch);
                 if (af != null) {
-                    sf.addAll(sourceFiles);
+                    sf.addAll(af);
                 }
             }
         }
 
         if (sourceFiles != null) {
             sf.addAll(sourceFiles);
+        }
+        return sf;
+    }
+
+    public TreeSet<File> getHeaderFiles(Sketch s) {
+        TreeSet<File> sf = new TreeSet<File>();
+
+        if (headerFilesByArch!=null && s != null) {
+            String arch = s.getArch();
+            if (arch != null) {
+                TreeSet<File>af = headerFilesByArch.get(arch);
+                if (af != null) {
+                    sf.addAll(af);
+                }
+            }
+        }
+
+        if (headerFiles != null) {
+            sf.addAll(headerFiles);
         }
         return sf;
     }
@@ -898,6 +917,136 @@ public class Library implements Comparable {
     public ArrayList<File>getHeaderFiles() {
         return null;
     }
+
+    public static final int COMP_NONE       = 0;
+    public static final int COMP_RUN        = 1;
+    public static final int COMP_FAIL       = 2;
+    public static final int COMP_DONE       = 3;
+
+    public static final int RECOMPILE_NONE  = 0;
+    public static final int RECOMPILE_LIGHT = 1;
+    public static final int RECOMPILE_ALL   = 2;
+
+    int compilingState = COMP_NONE;
+
+    // Compile the library
+    public boolean compile(Context ctx) {
+
+        rescan();
+
+        int recompile = needsCompile(ctx);
+        ctx.triggerEvent("libraryCompileStarted", this);
+
+        if (recompile == RECOMPILE_NONE) {
+            compilingState = COMP_DONE;
+            ctx.triggerEvent("libraryCompileFinished", this);
+            return true;
+        }
+
+        compilingState = COMP_RUN;
+
+        File archiveFile = getArchiveFile(ctx);
+
+        long archiveTime = 0;
+
+        if (recompile == RECOMPILE_ALL) {
+            if (archiveFile.exists()) {
+                archiveFile.delete();
+            }
+        } else {
+            archiveTime = archiveFile.lastModified();
+        }
+
+        TreeSet<File> filesToCompile = new TreeSet<File>();
+
+        TreeSet<File>sf = getSourceFiles(ctx.getSketch());
+        for (File f : sf) {
+            if (f.lastModified() > archiveTime) {
+                filesToCompile.add(f);
+            }
+        }
+
+        Context localCtx = new Context(ctx); // Make a copy of the context so we can mess with include paths and such
+        File utility = getUtilityFolder();
+        PropertyFile props = localCtx.getMerged();
+        if (!Base.isQuiet()) ctx.bullet2(toString() + " [" + getFolder().getAbsolutePath() + "]");
+
+        localCtx.set("library", archiveFile.getAbsolutePath());
+
+        File libBuildFolder = new File(ctx.getBuildDir(), "lib" + getLinkName());
+        libBuildFolder.mkdirs();
+        int fileCount = filesToCompile.size();
+        int count = 0;
+
+        for (File f : filesToCompile) {
+            File out = ctx.compileFile(localCtx, f, libBuildFolder);
+            if (out == null) {
+                localCtx.dispose();
+                compilingState = COMP_FAIL;
+                ctx.triggerEvent("libraryCompileFailed", this);
+                return false;
+            }
+
+            localCtx.set("object.name", out.getAbsolutePath());
+            boolean ok = (Boolean)localCtx.executeKey("compile.ar");
+
+            if (!ok) {
+                localCtx.dispose();
+                compilingState = COMP_FAIL;
+                ctx.triggerEvent("libraryCompileFailed", this);
+                return false;
+            }
+
+            count++;
+            setCompiledPercent(count * 100 / fileCount);
+            ctx.triggerEvent("libraryFileCompiled", this);
+        }
+
+        localCtx.dispose();
+        setCompiledPercent(100);
+        Base.tryDelete(libBuildFolder); 
+        compilingState = COMP_DONE;
+        ctx.triggerEvent("libraryCompileFinished", this);
+        return true;
+    }
+
+    public boolean isCompiled() { return compilingState == COMP_DONE; }
+    public boolean isCompiling() { return compilingState == COMP_RUN; }
+    public boolean compilingFailed() { return compilingState == COMP_FAIL; }
+
+    // Compare all the files of this library with the archive for the
+    // current board. If any file is newer than the archive then it
+    // needs recompiling.
+    public int needsCompile(Context ctx) {
+        File archiveFile = getArchiveFile(ctx);
+
+        // If there is no archive we recompile everything
+        if (!archiveFile.exists()) {
+            return RECOMPILE_ALL;
+        }
+
+        long archiveTime = archiveFile.lastModified();
+
+        // If a header is newer we recompile everything
+        for (File f : getHeaderFiles(ctx.getSketch())) {
+            if (f.lastModified() > archiveTime) return RECOMPILE_ALL;
+        }
+
+        // If it's just a source file that's newer we just compile the newer source files
+        for (File f : getSourceFiles(ctx.getSketch())) {
+            if (f.lastModified() > archiveTime) return RECOMPILE_LIGHT;
+        }
+        
+        // Nothing seems to be newer, so don't touch it.
+        return RECOMPILE_NONE;
+    }
+
+    public File getArchiveFile(Context ctx) {
+        File cacheDir = ctx.getCacheDir();
+        File archiveFile = new File(cacheDir, "lib" + getLinkName() + ".a");
+        return archiveFile;
+    }
+
 }
 
 

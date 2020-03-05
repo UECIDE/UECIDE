@@ -29,8 +29,6 @@ public class CleverIcon extends ImageIcon {
     }
 
     public void updateIcon() throws IOException, MalformedURLException {
-
-
         ArrayList<URL> frameList = new ArrayList<URL>();
 
         for (int i = 0; i < name.length; i++) {

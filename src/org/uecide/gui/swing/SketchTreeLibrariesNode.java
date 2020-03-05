@@ -28,7 +28,6 @@ public class SketchTreeLibrariesNode extends SketchTreeNodeBase implements Conte
     }
 
     public boolean updateChildren() {
-System.err.println("Updating library tree children");
         Sketch sketch = ctx.getSketch();
 
         HashMap<String, Library> libraries = sketch.getLibraries();
@@ -41,7 +40,6 @@ System.err.println("Updating library tree children");
                 SketchLibraryNode child = (SketchLibraryNode)e.nextElement();
                 if (!(libraries.containsValue(child.getLibrary()))) {
                     remove(child);
-                    System.err.println("Removed " + child.getLibrary().getName());
                     somethingRemoved = true;
                     hasBeenModified = true;
                     break;
@@ -53,7 +51,6 @@ System.err.println("Updating library tree children");
             if (!hasChildLibrary(l)) {
                 SketchLibraryNode sfn = new SketchLibraryNode(ctx, model, l);
                 add(sfn);
-                System.err.println("Added " + l.getName());
                 hasBeenModified = true;
             }
         }

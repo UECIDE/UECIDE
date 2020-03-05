@@ -26,9 +26,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 
 public class CodeEditor extends TabPanel implements ContextEventListener {
     Context ctx;
@@ -59,14 +56,6 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
         textArea.setText(f.getFileData());
         textArea.requestFocus();
         textArea.setAntiAliasingEnabled(Preferences.getBoolean("theme.editor.fonts.editor_aa"));
-
-//        Timer t = new Timer();
-//        t.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                flushData();
-//            }
-//        }, 1000, 1000);
 
         ctx.listenForEvent("sketchDataModified", this);
         ctx.listenForEvent("saveCursorLocation", this);

@@ -14,8 +14,6 @@ import org.uecide.SketchFile;
 import org.uecide.gui.swing.laf.LookAndFeel;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import java.io.IOException;
 import java.io.File;
@@ -73,8 +71,6 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     SketchTreePanel sketchTree;
 
     Console console;
-
-    Timer tabTicker = new Timer();
 
     public SwingGui(Context c) {
         super(c);
@@ -178,11 +174,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
             }
         });
 
-        tabTicker.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
+        ctx.listenForEvent("oneSecondTimer", new ContextEventListener() {
+            public void contextEventTriggered(ContextEvent evt) {
                 updateTabs();
             }
-        }, 1000, 1000);
+        });
 
         System.err.println("Sorry, Swing GUI not fully implemented yet.");
     }

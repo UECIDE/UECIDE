@@ -181,6 +181,12 @@ public class Sketch {
         loadSketchFromFolder(path);
         buildFolder = createBuildFolder();
 
+        ctx.listenForEvent("fifteenSecondTimer", new ContextEventListener() {
+            public void contextEventTriggered(ContextEvent evt) {
+                updateLibraryList();
+            }
+        });
+
     }
 
     /**************************************************************************
@@ -1766,7 +1772,7 @@ public class Sketch {
             target = tgt;
         }
         public void run() {
-            compiled = compileLibrary(target);
+            compiled = target.compile(ctx);
         }
     }
 
@@ -1818,11 +1824,11 @@ public class Sketch {
         return ok;
     }
 
-    private File compileFile(Context localCtx, File src) {
+    public File compileFile(Context localCtx, File src) {
         return compileFile(localCtx, src, buildFolder);
     }
 
-    private File compileFile(Context localCtx, File src, File fileBuildFolder) {
+    public File compileFile(Context localCtx, File src, File fileBuildFolder) {
 
     
         String fileName = src.getName();
@@ -3157,17 +3163,9 @@ public class Sketch {
     }
 
     public String getArch() {
-        if (ctx.getBoard().get("arch") != null) {
-            return ctx.getBoard().get("arch");
-        }
-        if (ctx.getCore().get("arch") != null) {
-            return ctx.getCore().get("arch");
-        }
-        if (ctx.getCompiler().get("arch") != null) {
-            return ctx.getCompiler().get("arch");
-        }
-        return ctx.getBoard().get("family");
+        return ctx.getArch();
     }
+
 /* TODO: Move this to SketchFile 
     public ArrayList<TodoEntry> todo(SketchFile f) {
         if (!sketchFiles.contains(f)) {

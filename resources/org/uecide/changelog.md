@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Added session event timers and start of libraries in tree
 * Overhaul of LAF system
 * Add MCU and update MRU/MCU lists
 * Fixed closing all sessions bug
@@ -747,6 +748,7 @@ Changelog
 0.8.5
 -----
 
+* Added session event timers and start of libraries in tree
 * Overhaul of LAF system
 * Add MCU and update MRU/MCU lists
 * Fixed closing all sessions bug
