@@ -63,8 +63,10 @@ public class OpenSketchAction extends Action {
             // If we have an unmodified blank sketch (freshly opened), then just close it.
             // Note: this has to happen after the new context, or there's a good chance
             // UECIDE will quit as the last session closed.
-            if (ctx.getSketch().isUntitled() && !(ctx.getSketch().isModified())) {
-                ctx.action("closeSession");
+            if (!ctx.isSystemContext()) {
+                if (ctx.getSketch().isUntitled() && !(ctx.getSketch().isModified())) {
+                    ctx.action("closeSession");
+                }
             }
 
             Base.updateMRU(file);

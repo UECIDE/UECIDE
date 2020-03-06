@@ -58,7 +58,7 @@ public abstract class Action {
             Action action = constructAction(cl, c);
             return action.actionPerformed(args);
         } catch (ActionException ex) {
-            c.error(ex.toString());
+            c.error(ex);
         } catch (Exception ex) {
             c.error(ex);
         }

@@ -25,4 +25,13 @@ public class NoneGui extends CliGui {
 
     public static void endinit() {
     }
+
+    @Override
+    public void openSketchFileEditor(SketchFile f) {
+    }
+
+    @Override
+    public boolean isEphemeral() {
+        return true;
+    }
 }

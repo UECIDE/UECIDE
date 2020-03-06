@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Implemented command line options and filenames as sequences of actions
 * Improve context streaming. Add src folder to sketch building
 * Move library compilation to library object
 * Added session event timers and start of libraries in tree
@@ -750,6 +751,7 @@ Changelog
 0.8.5
 -----
 
+* Implemented command line options and filenames as sequences of actions
 * Improve context streaming. Add src folder to sketch building
 * Move library compilation to library object
 * Added session event timers and start of libraries in tree

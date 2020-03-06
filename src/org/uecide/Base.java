@@ -690,6 +690,10 @@ public class Base {
         if (cli.isSet("compile")) { startupActions.add(new ActionSpec("Build")); }
         if (cli.isSet("upload")) { startupActions.add(new ActionSpec("BuildAndUpload")); }
 
+        if (systemContext.getGui().isEphemeral()) {
+            startupActions.add(new ActionSpec("CloseSession"));
+        }
+
         for (Context session : sessions) {
             if (session.isSystemContext()) continue;
             for (ActionSpec action : startupActions) {

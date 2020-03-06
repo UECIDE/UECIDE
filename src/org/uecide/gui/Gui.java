@@ -42,4 +42,8 @@ public abstract class Gui {
     public abstract File askOpenSketch(String question, File location);
     public abstract void navigateToLine(SketchFile f, Integer lineno);
 
+    public boolean isEphemeral() {
+        return false;
+    }
+
 }

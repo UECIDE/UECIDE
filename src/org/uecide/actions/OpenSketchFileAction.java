@@ -43,6 +43,7 @@ public class OpenSketchFileAction extends Action {
             String s = (String)args[0];
             SketchFile f = ctx.getSketch().getFileByName(s);
             if (f == null) {
+System.err.println("This bit");
                 throw new ActionException("Sketch file not found: " + s);
             }
             ctx.gui.openSketchFileEditor(f);
