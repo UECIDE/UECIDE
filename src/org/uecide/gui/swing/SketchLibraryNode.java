@@ -24,6 +24,8 @@ import org.uecide.ContextEventListener;
 import java.awt.Font;
 import java.awt.Component;
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class SketchLibraryNode extends SketchTreeNodeBase implements ContextEventListener, AnimationListener {
     Library library;
@@ -77,6 +79,31 @@ public class SketchLibraryNode extends SketchTreeNodeBase implements ContextEven
 
     public JPopupMenu getPopupMenu() {
         JPopupMenu menu = new JPopupMenu();
+        JMenuItem item = new JMenuItem("Quick build now");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                Thread t = new Thread(new Runnable() {
+                    public void run() {
+                        library.compile(ctx);
+                    }
+                });
+                t.start();
+            }
+        });
+        menu.add(item);
+        item = new JMenuItem("Full build now");
+        item.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                Thread t = new Thread(new Runnable() {
+                    public void run() {
+                        library.purge(ctx);
+                        library.compile(ctx);
+                    }
+                });
+                t.start();
+            }
+        });
+        menu.add(item);
         return menu;
     }
 

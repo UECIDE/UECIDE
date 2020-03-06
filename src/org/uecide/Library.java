@@ -986,6 +986,7 @@ public class Library implements Comparable {
                 ctx.triggerEvent("libraryCompileFailed", this);
                 return false;
             }
+            ctx.triggerEvent("buildFileAdded", out);
 
             localCtx.set("object.name", out.getAbsolutePath());
             boolean ok = (Boolean)localCtx.executeKey("compile.ar");
@@ -999,6 +1000,8 @@ public class Library implements Comparable {
 
             count++;
             setCompiledPercent(count * 100 / fileCount);
+            out.delete();
+            ctx.triggerEvent("buildFileRemoved", out);
             ctx.triggerEvent("libraryFileCompiled", this);
         }
 
@@ -1047,6 +1050,12 @@ public class Library implements Comparable {
         return archiveFile;
     }
 
+    public void purge(Context ctx) {
+        File a = getArchiveFile(ctx);
+        if (a.exists()) {
+            a.delete();
+        }
+    }
 }
 
 

@@ -670,15 +670,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         t.setSelectedComponent(p);
     }
 
-    AutoTab getPanelByTab(TabPanel p) {
-        int i = leftPane.indexOfComponent(p);
-        if (i > -1) return leftPane;
-        i = centerPane.indexOfComponent(p);
-        if (i > -1) return centerPane;
-        i = rightPane.indexOfComponent(p);
-        if (i > -1) return rightPane;
-        i = bottomPane.indexOfComponent(p);
-        if (i > -1) return bottomPane;
+    public AutoTab getPanelByTab(TabPanel p) {
+        for (AutoTab panel : panes) {
+            int i = panel.indexOfComponent(p);
+            if (i > -1) return panel;
+        }
         return null;
     }
 
@@ -702,4 +698,9 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     public static LookAndFeel getLAF() {
         return laf;
     }
+
+    public AutoTab getDefaultTab() {
+        return centerPane;
+    }
+
 }

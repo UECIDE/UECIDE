@@ -606,10 +606,12 @@ public class Sketch {
                 PrintWriter pw = new PrintWriter(tempFile);
                 pw.print(data);
                 pw.close();
+                ctx.triggerEvent("buildFileAdded", tempFile);
                 
                 boolean haveHunted = huntForLibraries(tempFile, importedLibraries, unknownLibraries);
 
                 Base.tryDelete(tempFile);
+                ctx.triggerEvent("buildFileRemoved", tempFile);
 
                 String lines[] = data.split("\n");
 
@@ -727,11 +729,13 @@ public class Sketch {
                 case FileType.CPPSOURCE: { // Save to build area and compile
                         File bff = new File(buildFolder, f.toString());
                         f.saveDataToDisk(bff);
+                        ctx.triggerEvent("buildFileAdded", bff);
                         filesToCompile.add(bff);
                     } break;
                 case FileType.HEADER: { // Save to build area but don't compile
                         File bff = new File(buildFolder, f.toString());
                         f.saveDataToDisk(bff);
+                        ctx.triggerEvent("buildFileAdded", bff);
                     } break;
                 case FileType.SKETCH: // Don't do anything
                     break;
@@ -752,7 +756,8 @@ public class Sketch {
 
         if (binFiles.size() > 0) {
             filesToCompile.addAll(binFiles.keySet());
-            PrintWriter bh = new PrintWriter(new File(buildFolder, "binary/binaries.h"));
+            File binFileHeader = new File(buildFolder, "binary/binaries.h");
+            PrintWriter bh = new PrintWriter(binFileHeader);
             bh.println("#ifndef _UECIDE_BINARY_BINARIES_H");
             bh.println("#define _UECIDE_BINARY_BINARIES_H");
             bh.println();
@@ -764,6 +769,7 @@ public class Sketch {
             }
             bh.println("#endif");
             bh.close();
+            ctx.triggerEvent("buildFileAdded", binFileHeader);
         }
 
         // Find all the function prototypes in sketch files
@@ -821,6 +827,7 @@ public class Sketch {
 
         pw.println("#endif");
         pw.close();
+        ctx.triggerEvent("buildFileAdded", out);
 
         String ext = ctx.parseString(props.get("build.extension"));
         if (ext == null) {
@@ -860,6 +867,7 @@ public class Sketch {
             }
         }
         pw.close();
+        ctx.triggerEvent("buildFileAdded", masterSketchFile);
         return true;
     }
 
@@ -1326,6 +1334,7 @@ public class Sketch {
 
     public void cleanup() {
         Base.removeDescendants(buildFolder);
+        ctx.triggerEvent("buildFileRemoved", buildFolder);
     }
 
 /* TODO: REWRITE THIS FUNCTION */
@@ -1591,6 +1600,7 @@ public class Sketch {
                 if(src.exists()) {
                     File dest = new File(buildFolder, src.getName());
                     Files.copy(src.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    ctx.triggerEvent("buildFileAdded", dest);
                     Debug.message("    ... ok");
                 } else {
                     Debug.message("    ... not found");
@@ -1624,10 +1634,13 @@ public class Sketch {
 
         if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.linking"));
 
+System.err.println("Starting link");
         if(!compileLink(sketchObjects)) {
             ctx.error(Base.i18n.string("err.compiling.failed"));
+System.err.println("Link failed");
             return false;
         }
+System.err.println("Link done");
 
 
 
@@ -1639,23 +1652,24 @@ public class Sketch {
             int pct = 50;
 
             for (String type : types) {
+System.err.println("Generating " + type);
                 ctx.bullet2(Base.i18n.string("msg.compiling.genfile", type));
                 ctx.executeKey("compile.autogen." + type);
                 pct += steps;
             }
         }
 
-        if(Preferences.getBoolean("compiler.save_lss") && !parentIsProtected()) {
-            try {
-                File lss = new File(buildFolder, sketchName + ".lss");
-                if (lss.exists()) {
-                    Files.copy(new File(buildFolder, sketchName + ".lss").toPath(), new File(sketchFolder, sketchName + ".lss").toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-                }
-            } catch(Exception e) {
-                ctx.error(e);
-            }
-        }
+//        if(Preferences.getBoolean("compiler.save_lss") && !parentIsProtected()) {
+//            try {
+//                File lss = new File(buildFolder, sketchName + ".lss");
+//                if (lss.exists()) {
+//                    Files.copy(new File(buildFolder, sketchName + ".lss").toPath(), new File(sketchFolder, sketchName + ".lss").toPath(), StandardCopyOption.REPLACE_EXISTING);
+//
+//                }
+//            } catch(Exception e) {
+//                ctx.error(e);
+//            }
+//        }
 
 
         if((
@@ -1829,92 +1843,7 @@ public class Sketch {
     }
 
     public File compileFile(Context localCtx, File src, File fileBuildFolder) {
-
-    
-        String fileName = src.getName();
-        String recipe = null;
-
-        if(terminateExecution) {
-            terminateExecution = false;
-            ctx.error("Compilation terminated");
-            return null;
-        }
-
-        PropertyFile props = localCtx.getMerged();
-
-        switch (FileType.getType(src)) {
-            case FileType.CPPSOURCE:
-                recipe = "compile.cpp";
-                break;
-            case FileType.CSOURCE:
-                recipe = "compile.c";
-                break;
-            case FileType.ASMSOURCE:
-                recipe = "compile.S";
-                break;
-        }
-
-        if(recipe == null) {
-            ctx.error(Base.i18n.string("err.badfile", fileName));
-            return null;
-        }
-
-        if (Preferences.getBoolean("compiler.verbose_files")) {
-            ctx.bullet3(fileName);
-        }
-
-        String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-        String objExt = localCtx.parseString(props.get("compiler.object","o"));
-
-        String bfPath = fileBuildFolder.getAbsolutePath();
-        String srcPath = src.getParentFile().getAbsolutePath();
-
-        if (srcPath.startsWith(bfPath + "/")) {
-            fileBuildFolder = src.getParentFile();
-        }
-
-        File dest = new File(fileBuildFolder, fileName + "." +objExt);
-
-        if(dest.exists()) {
-            if(dest.lastModified() > src.lastModified()) {
-                return dest;
-            }
-        }
-
-        localCtx.set("build.path", fileBuildFolder.getAbsolutePath());
-        localCtx.set("source.name", src.getAbsolutePath());
-        localCtx.set("object.name", dest.getAbsolutePath());
-
-        localCtx.addDataStreamParser(new DataStreamParser() {
-            public String parseStreamMessage(Context ctx, String m) {
-                if (parseLineForWarningMessage(ctx, m)) {
-                    return "";
-                }
-                return m;
-            }
-            public String parseStreamError(Context ctx, String m) {
-                if (parseLineForErrorMessage(ctx, m)) {
-                    return "";
-                }
-                if (parseLineForWarningMessage(ctx, m)) {
-                    return "";
-                }
-                return m;
-            }
-        });
-
-        String output = "";
-        if(!(Boolean)localCtx.executeKey(recipe)) {
-            localCtx.removeDataStreamParser();
-            return null;
-        }
-        localCtx.removeDataStreamParser();
-
-        if(!dest.exists()) {
-            return null;
-        }
-
-        return dest;
+        return ctx.compileFile(localCtx, src, fileBuildFolder);
     }
 
     public File getCacheFolder() {
@@ -1990,6 +1919,7 @@ public class Sketch {
 
         File coreBuildFolder = new File(buildFolder, "libCore_" + name);
         coreBuildFolder.mkdirs();
+        ctx.triggerEvent("buildFileAdded", coreBuildFolder);
 
         TreeSet<File> fileList = new TreeSet<File>(new CaseInsensitiveFileComparator());
 
@@ -2012,6 +1942,7 @@ public class Sketch {
                     if (archive.exists()) Base.tryDelete(archive);
                     return false;
                 }
+                ctx.triggerEvent("buildFileAdded", out);
 
                 ctx.set("object.name", out.getAbsolutePath());
                 boolean ok = (Boolean)ctx.executeKey("compile.ar");
@@ -2019,15 +1950,18 @@ public class Sketch {
                 if(!ok) {
                     Base.tryDelete(out);
                     Base.tryDelete(coreBuildFolder);
+                    ctx.triggerEvent("buildFileRemoved", out);
                     if (archive.exists()) Base.tryDelete(archive);
                     return false;
                 }
 
                 Base.tryDelete(out);
+                ctx.triggerEvent("buildFileRemoved", out);
             }
         }
 
         Base.tryDelete(coreBuildFolder);
+        ctx.triggerEvent("buildFileRemoved", coreBuildFolder);
         return true;
     }
 
@@ -2044,79 +1978,6 @@ public class Sketch {
         String prefix = ctx.parseString(props.get("compiler.library.prefix","lib"));
         String suffix = ctx.parseString(props.get("compiler.library", "a"));
         return prefix + lib.getLinkName() + "." + suffix;
-    }
-
-    public boolean compileLibrary(Library lib) {
-        Context localCtx = new Context(ctx);
-        File archive = getCacheFile(getArchiveName(lib));  //getCacheFile("lib" + lib.getName() + ".a");
-        File utility = lib.getUtilityFolder();
-        PropertyFile props = localCtx.getMerged();
-        if (!Base.isQuiet()) ctx.bullet2(lib.toString() + " [" + lib.getFolder().getAbsolutePath() + "]");
-
-        localCtx.set("library", archive.getAbsolutePath());
-
-        long archiveDate = 0;
-
-        if(archive.exists()) {
-            archiveDate = archive.lastModified();
-        }
-
-        File libBuildFolder = new File(buildFolder, "lib" + lib.getLinkName());
-        libBuildFolder.mkdirs();
-        if (!libBuildFolder.exists()) {
-            ctx.error("Failed to make build folder " + libBuildFolder);
-        }
-
-        TreeSet<File> fileList = lib.getSourceFiles(this);
-
-        String origIncs = localCtx.get("includes");
-        localCtx.set("includes", origIncs + "::" + "-I" + utility.getAbsolutePath());
-
-        int fileCount = fileList.size();
-
-        int count = 0;
-
-        for(File f : fileList) {
-            if(f.lastModified() > archiveDate) {
-                File out = compileFile(localCtx, f, libBuildFolder);
-
-                if(out == null) {
-                    purgeLibrary(lib);
-                    lib.setCompiledPercent(0);
-
-                    Base.tryDelete(libBuildFolder);
-                    localCtx.dispose();
-                    return false;
-                }
-
-                localCtx.set("object.name", out.getAbsolutePath());
-                boolean ok = (Boolean)localCtx.executeKey("compile.ar");
-
-                if(!ok) {
-                    purgeLibrary(lib);
-                    lib.setCompiledPercent(0);
-
-                    Base.tryDelete(out);
-                    Base.tryDelete(libBuildFolder);
-                    localCtx.dispose();
-                    return false;
-                }
-
-                count++;
-                lib.setCompiledPercent(count * 100 / fileCount);
-
-                Base.tryDelete(out);
-            }
-        }
-
-        localCtx.set("includes", origIncs);
-        lib.setCompiledPercent(100);
-
-
-        Base.tryDelete(libBuildFolder);
-  
-        localCtx.dispose();
-        return true;
     }
 
     private ArrayList<File> convertFiles(File dest, ArrayList<File> sources) throws IOException {
@@ -2160,55 +2021,19 @@ public class Sketch {
         return objectPaths;
     }
 
-    private ArrayList<File> compileFileList(Context localCtx, File dest, ArrayList<File> sources, String key) {
+    private ArrayList<File> compileFileList(Context localCtx, File dest, ArrayList<File> sources) {
+
         ArrayList<File> objectPaths = new ArrayList<File>();
-        PropertyFile props = localCtx.getMerged();
 
-        localCtx.set("build.path", dest.getAbsolutePath());
-        String objExt = localCtx.parseString(props.get("compiler.object","o"));
-
-        localCtx.addDataStreamParser(new DataStreamParser() {
-            public String parseStreamMessage(Context localCtx, String m) {
-                if (parseLineForWarningMessage(localCtx, m)) {
-                    return "";
-                }
-                return m;
-            }
-            public String parseStreamError(Context localCtx, String m) {
-                if (parseLineForErrorMessage(localCtx, m)) {
-                    return "";
-                }
-                if (parseLineForWarningMessage(localCtx, m)) {
-                    return "";
-                }
-                return m;
-            }
-        });
-
-        for(File file : sources) {
-            String fileName = file.getName();
-            String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, fileName + "." + objExt);
-            objectPaths.add(objectFile);
-
-            localCtx.set("source.name", file.getAbsolutePath());
-            localCtx.set("object.name", objectFile.getAbsolutePath());
-
-            if(objectFile.exists() && objectFile.lastModified() > file.lastModified()) {
-                continue;
-            }
-
-            if(!(Boolean)localCtx.executeKey(key)) {
-                localCtx.removeDataStreamParser();
+        for (File f : sources) {
+            File out = ctx.compileFile(localCtx, f, dest);
+            if (out == null) {
                 return null;
             }
-
-            if(!objectFile.exists()) {
-                localCtx.removeDataStreamParser();
-                return null;
-            }
+            objectPaths.add(out);
+            ctx.triggerEvent("buildFileAdded", out);
         }
-        localCtx.removeDataStreamParser();
+
         return objectPaths;
     }
 
@@ -2220,13 +2045,13 @@ public class Sketch {
         localCtx.set("build.path", dest.getAbsolutePath());
         String objExt = localCtx.parseString(props.get("compiler.object","o"));
 
-        ArrayList<File> sObjects = compileFileList(localCtx, dest, sSources, "compile.S");
+        ArrayList<File> sObjects = compileFileList(localCtx, dest, sSources);
         if (sObjects == null) { return null; }
 
-        ArrayList<File> cObjects = compileFileList(localCtx, dest, cSources, "compile.c");
+        ArrayList<File> cObjects = compileFileList(localCtx, dest, cSources);
         if (cObjects == null) { return null; }
 
-        ArrayList<File> cppObjects = compileFileList(localCtx, dest, cppSources, "compile.cpp");
+        ArrayList<File> cppObjects = compileFileList(localCtx, dest, cppSources);
         if (cppObjects == null) { return null; }
 
         objectPaths.addAll(sObjects);
@@ -2295,6 +2120,22 @@ public class Sketch {
         if(suf.exists()) {
             File buf = new File(buildFolder, "utility");
             buf.mkdirs();
+            ctx.triggerEvent("buildFileAdded", buf);
+            ArrayList<File> uf = compileFiles(ctx,
+                                buf,
+                                findFilesInFolder(suf, "S", true),
+                                findFilesInFolder(suf, "c", true),
+                                findFilesInFolder(suf, "cpp", true)
+                            );
+            sf.addAll(uf);
+        }
+
+        suf = new File(sketchFolder, "src");
+
+        if(suf.exists()) {
+            File buf = new File(buildFolder, "src");
+            buf.mkdirs();
+            ctx.triggerEvent("buildFileAdded", buf);
             ArrayList<File> uf = compileFiles(ctx,
                                 buf,
                                 findFilesInFolder(suf, "S", true),
@@ -2433,6 +2274,7 @@ public class Sketch {
 
     public void cleanBuild() {
         Base.removeDescendants(buildFolder);
+        ctx.triggerEvent("buildFileRemoved", buildFolder);
     }
 
     public void about() {
@@ -2892,23 +2734,6 @@ public class Sketch {
         Base.removeDir(getCacheFolder());
     }
 
-    public void precompileLibrary(Library lib) {
-        ctx.set("includes", generateIncludes());
-        ctx.set("filename", sketchName);
-        ctx.set("cache.root", getCacheFolder().getAbsolutePath());
-
-        if(doPrePurge) {
-            doPrePurge = false;
-            Base.removeDir(getCacheFolder());
-        }
-
-        ctx.set("option.flags", getFlags("flags"));
-        ctx.set("option.cflags", getFlags("cflags"));
-        ctx.set("option.cppflags", getFlags("cppflags"));
-        ctx.set("option.ldflags", getFlags("ldflags"));
-
-        compileLibrary(lib);
-    }
 /* TODO: Move to SketchFile */
     public void renameFile(File old, File newFile) {
     }

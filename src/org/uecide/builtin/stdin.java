@@ -51,7 +51,7 @@ public class stdin extends BuiltinCommand {
         }
 
         try {
-            ctx.setOutputStream(new PrintWriter(out));
+            ctx.setOutputStream(new FileOutputStream(out));
         } catch (IOException ex) {
             throw new BuiltinCommandException(ex.toString());
         }

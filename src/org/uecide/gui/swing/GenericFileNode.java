@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Utils;
 import org.uecide.FileType;
 
 import javax.swing.ImageIcon;
@@ -9,6 +10,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JLabel;
 import javax.swing.JTree;
 
+import java.nio.file.Files;
 import java.io.File;
 import java.io.IOException;
 
@@ -20,6 +22,8 @@ import java.awt.Component;
 
 public class GenericFileNode extends SketchTreeNodeBase {
     File file;
+
+    TabPanel viewer = null;
 
     public GenericFileNode(Context c, SketchTreeModel m, File f) {
         super(c, m, f.getName());
@@ -75,6 +79,12 @@ public class GenericFileNode extends SketchTreeNodeBase {
                     hasBeenModified = true;
                 }
             }
+            for (Enumeration e = children(); e.hasMoreElements();) {
+                GenericFileNode child = (GenericFileNode)e.nextElement();
+                if (child.updateChildren()) {
+                    hasBeenModified = true;
+                }
+            }
         }
         return hasBeenModified;
     }
@@ -95,6 +105,25 @@ public class GenericFileNode extends SketchTreeNodeBase {
     }
 
     public void performDoubleClick() {
+        if (file.isDirectory()) return;
+        if (viewer == null) {
+            createViewer();
+            return;
+        }
+        AutoTab at = ((SwingGui)ctx.getGui()).getPanelByTab(viewer);
+        if (at == null) {
+            createViewer();
+            return;
+        }
+        ((TextViewerPanel)viewer).setText(getFileContent());
+        at.setSelectedComponent(viewer);
+    }
+
+    public void createViewer() {
+        AutoTab centerPane = ((SwingGui)ctx.getGui()).getDefaultTab();
+        viewer = new TextViewerPanel(ctx, centerPane, file.getName(), getFileContent());
+        centerPane.add(viewer);
+        centerPane.setSelectedComponent(viewer);
     }
 
     public Component getRenderComponent(JLabel original, JTree tree) {
@@ -103,6 +132,24 @@ public class GenericFileNode extends SketchTreeNodeBase {
         } catch (Exception ex) {
         }
         return original;
+    }
+
+    String getFileContent() {
+        try {
+            String type = Files.probeContentType(file.toPath());
+
+            if (type == null) {
+                return "Unable to determine file type";
+            }
+            System.err.println(type);
+            if (type.startsWith("text")) {
+                return Utils.getFileAsString(file);
+            }
+        } catch (Exception ex) {
+            ctx.error(ex);
+        }
+
+        return "File is binary. Unable to display content.";
     }
 
 }

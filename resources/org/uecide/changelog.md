@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Move library compilation to library object
 * Added session event timers and start of libraries in tree
 * Overhaul of LAF system
 * Add MCU and update MRU/MCU lists
@@ -748,6 +749,7 @@ Changelog
 0.8.5
 -----
 
+* Move library compilation to library object
 * Added session event timers and start of libraries in tree
 * Overhaul of LAF system
 * Add MCU and update MRU/MCU lists

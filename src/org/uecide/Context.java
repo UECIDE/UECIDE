@@ -84,7 +84,7 @@ public class Context {
 
     // Make a new empty context.
 
-    PrintWriter outputStream = null;
+    OutputStream outputStream = null;
 
     public Context(Context src) {
         board = src.board;
@@ -806,99 +806,73 @@ public class Context {
             if (!silent) command(sb.toString());
         }
 
+
+        OutputStream stdout;
+        ByteArrayOutputStream stderr;
+
+        if (outputStream != null) {
+            stdout = outputStream;
+        } else {
+            stdout = new ByteArrayOutputStream();
+        }
+        stderr = new ByteArrayOutputStream();
+
         try {
             runningProcess = process.start();
-        } catch(Exception e) {
-            error(Base.i18n.string("err.process"));
-            error(e);
-            return false;
+            Base.processes.add(runningProcess);
+
+            ProcessStreamThread stdoutStreamer = new ProcessStreamThread(runningProcess.getInputStream(), stdout);
+            ProcessStreamThread stderrStreamer = new ProcessStreamThread(runningProcess.getErrorStream(), stderr);
+
+            Thread stdoutThread = new Thread(stdoutStreamer);
+            Thread stderrThread = new Thread(stderrStreamer);
+
+            stdoutThread.start();
+            stderrThread.start();
+
+            runningProcess.waitFor();
+            stdoutStreamer.stop();
+            stderrStreamer.stop();
+
+            stdoutThread.join();
+            stderrThread.join();
+        } catch (Exception ex) {
+            error(ex);
         }
 
-        Base.processes.add(runningProcess);
-
-        InputStream in = runningProcess.getInputStream();
-        InputStream err = runningProcess.getErrorStream();
-        boolean running = true;
-        int result = -1;
-
-        byte[] tmp = new byte[1];
-
-        String outline = "";
-        String errline = "";
-
-        while(isProcessRunning(runningProcess)) {
-            try {
-
-                while(in.available() > 0) {
-                    int i = in.read(tmp, 0, 1);
-                    if(i < 0)break;
-                    
-                    String inch = new String(tmp, 0, i);
-                    if (inch.equals("\n")) {
-
-                        if (outputStream != null) {
-                            outputStream.println(outline);
-                        } else {
-                            if (parser != null) {
-                                outline = parser.parseStreamMessage(this, outline);
-                                outline = parser.parseStreamError(this, outline);
-                            }
-
-                            if (buffer != null) {
-                                buffer.append(outline);
-                            } else {
-                                message(outline);
-                            }
-                        }
-
-                        outline = "";
-                    } else {
-                        outline += inch;
-                    }
+        if (stderr.size() > 0) {
+            if (parser != null) {
+                String[] lines = stderr.toString().split("\n");
+                for (String line : lines) {
+                    parser.parseStreamError(this, line);
                 }
-                while(err.available() > 0) {
-                    int i = err.read(tmp, 0, 1);
-                    if(i < 0)break;
-                    
-                    String inch = new String(tmp, 0, i);
-                    if (inch.equals("\n")) {
+            } else {
+                error(stderr.toString());
+            }
+        }
 
-                        if (parser != null) {
-                            errline = parser.parseStreamMessage(this, errline);
-                            errline = parser.parseStreamError(this, errline);
-                        }
-
-                        if (buffer != null) {
-                            buffer.append(errline);
-                        } else {
-                            error(errline);
-                        }
-                        errline = "";
-                    } else {
-                        errline += inch;
+        if (outputStream == null) {
+            ByteArrayOutputStream bos = (ByteArrayOutputStream)stdout;
+            if (bos.size() > 0) {
+                if (parser != null) {
+                    String[] lines = bos.toString().split("\n");
+                    for (String line : lines) {
+                        parser.parseStreamMessage(this, line);
+                        parser.parseStreamError(this, line);
                     }
+                } else {
+                    message(bos.toString());
                 }
-
-                Thread.sleep(1);
-
-            } catch (InterruptedException ex) {
-                runningProcess.destroyForcibly();
-                Base.processes.remove(runningProcess);
-                error("Aborted");
-                return false;
-
-            } catch(Exception ignored) {
-                error(ignored);
             }
         }
 
         // Should we catch any trailing data here?
 
+        int result = -1;
         if (runningProcess != null) {
             result = runningProcess.exitValue();
+            Base.processes.remove(runningProcess);
         }
-
-        Base.processes.remove(runningProcess);
 
         if(result == 0) {
             return true;
@@ -1075,7 +1049,7 @@ public class Context {
     }
 
 
-    public void setOutputStream(PrintWriter pw) {
+    public void setOutputStream(OutputStream pw) {
         outputStream = pw;
     }
 
@@ -1235,7 +1209,7 @@ public class Context {
             triggerEvent("fileCompilationFailed", src);
             return null;
         }
-
+        
         localCtx.dispose();
         triggerEvent("fileCompilationFinished", src);
         return dest;
