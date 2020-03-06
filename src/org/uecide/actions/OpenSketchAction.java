@@ -47,13 +47,14 @@ public class OpenSketchAction extends Action {
         }
             
         try {
-
-            // If this is a new context with no sketch (called from base's createContext)
-            // then make a sketch and assign it to the context.
-            if (ctx.getSketch() == null)  {
-                Sketch s = new Sketch(file, ctx);
-                ctx.setSketch(s);
-                return true;
+            if (!ctx.isSystemContext()) {
+                // If this is a new context with no sketch (called from base's createContext)
+                // then make a sketch and assign it to the context.
+                if (ctx.getSketch() == null)  {
+                    Sketch s = new Sketch(file, ctx);
+                    ctx.setSketch(s);
+                    return true;
+                }
             }
 
             // Make a new context - this action then gets called again with the first "if" above.

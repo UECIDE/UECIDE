@@ -82,6 +82,8 @@ public class Context {
 
     Timer eventTimer;
 
+    public boolean systemContext = false;
+
     // Make a new empty context.
 
     OutputStream outputStream = null;
@@ -1213,6 +1215,14 @@ public class Context {
         localCtx.dispose();
         triggerEvent("fileCompilationFinished", src);
         return dest;
+    }
+
+    public boolean isSystemContext() {
+        return systemContext;
+    }
+
+    public void setSystemContext(boolean v) {
+        systemContext = v;
     }
 
 }

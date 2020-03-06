@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Improve context streaming. Add src folder to sketch building
 * Move library compilation to library object
 * Added session event timers and start of libraries in tree
 * Overhaul of LAF system
@@ -749,6 +750,7 @@ Changelog
 0.8.5
 -----
 
+* Improve context streaming. Add src folder to sketch building
 * Move library compilation to library object
 * Added session event timers and start of libraries in tree
 * Overhaul of LAF system

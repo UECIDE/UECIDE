@@ -64,6 +64,22 @@ import java.security.CodeSource;
 
 public class Base {
 
+    class ActionSpec {
+        String action;
+        Object[] args;
+        public ActionSpec(String action, Object... args) {
+            this.action = action; 
+            this.args = args;
+        }
+
+        public String getAction() {
+            return action;
+        }
+        public Object[] getArgs() {
+            return args;
+        }
+    }
+
     public static HashMap<String, PropertyFile> iconSets = new HashMap<String, PropertyFile>();
 
     public static String RELEASE = "release";
@@ -285,6 +301,7 @@ public class Base {
         cli.addParameter("gui",                 "name",     String.class,   "Select a GUI to run (cli / swing / none)");
         cli.addParameter("laf",                 "name",     String.class,   "Select a LookAndFeel for the Swing GUI");
 
+
         String[] argv = cli.process(args);
 
         Authenticator.setDefault(new Authenticator() {
@@ -307,7 +324,6 @@ public class Base {
         }
 
         headless = cli.isSet("headless");
-        boolean loadLastSketch = cli.isSet("last-sketch");
 
         boolean doExit = false;
 
@@ -318,16 +334,6 @@ public class Base {
         Debug.setVerbose(cli.isSet("verbose"));
 
         overrideSettingsFolder = cli.getString("datadir");
-        autoCompile = cli.isSet("compile");
-        autoProgram = cli.isSet("upload");
-        presetPort = cli.getString("port");
-        presetBoard = cli.getString("board");
-        presetCore = cli.getString("core");
-        presetCompiler = cli.getString("compiler");
-        presetProgrammer = cli.getString("programmer");
-        purgeCache = cli.isSet("purge");
-        cleanBuild = cli.isSet("clean");
-
 
         if(!cli.isSet("exceptions")) {
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -601,6 +607,7 @@ public class Base {
         }
 
         systemContext = createContext(null, gui, false);
+        systemContext.setSystemContext(true);
 
         systemContext.getGui().openSplash();
         systemContext.getGui().splashMessage("Loading UECIDE...", 10);
@@ -652,37 +659,43 @@ public class Base {
 
         systemContext.getGui().closeSplash();
 
-        Context newContext = null;
+        ArrayList<ActionSpec> startupActions = new ArrayList<ActionSpec>();
 
-        for (String arg : argv) {
-            if (newContext == null) {
-                newContext = createContext(new File(arg), gui);
-            } else {
-                newContext.action("OpenSketch", arg);
-            }
-        }
-        
-        if (newContext == null) {
-            newContext = createContext(null, gui);
-        }
-
-/*
-        if(isTimeToCheckVersion()) {
-            if(isNewVersionAvailable()) {
-                if(headless) {
-                    System.err.println(i18n.string("msg.version.available"));
-                    System.err.println(i18n.string("msg.version.download", "https://uecide.org/download"));
-                }
+        if (cli.isSet("last-sketch")) {
+            if (MRUList.size() > 0) {
+                startupActions.add(new ActionSpec("OpenSketch", MRUList.get(0)));
             }
         }
 
-        session.set("os.version", getOSVersion());
+        for (String arg : argv) { startupActions.add(new ActionSpec("OpenSketch", new File(arg))); }
 
-        if(headless) {
-            System.exit(0);
+        for (ActionSpec action : startupActions) {
+            systemContext.action(action.getAction(), action.getArgs());
         }
-*/
 
+        if (sessions.size() == 0) { // Only a system context, no GUI has been opened
+            createContext(null);
+        }
+
+        startupActions.clear();
+
+        if (cli.isSet("board")) { startupActions.add(new ActionSpec("SetBoard", cli.getString("board"))); }
+        if (cli.isSet("core")) { startupActions.add(new ActionSpec("SetCore", cli.getString("core"))); }
+        if (cli.isSet("compiler")) { startupActions.add(new ActionSpec("SetCompiler", cli.getString("compiler"))); }
+        if (cli.isSet("programmer")) { startupActions.add(new ActionSpec("SetProgrammer", cli.getString("programmer"))); }
+        if (cli.isSet("port")) { startupActions.add(new ActionSpec("SetDevice", cli.getString("port"))); }
+
+        if (cli.isSet("clean")) { startupActions.add(new ActionSpec("Purge")); }
+        if (cli.isSet("purge")) { startupActions.add(new ActionSpec("Purge")); }
+        if (cli.isSet("compile")) { startupActions.add(new ActionSpec("Build")); }
+        if (cli.isSet("upload")) { startupActions.add(new ActionSpec("BuildAndUpload")); }
+
+        for (Context session : sessions) {
+            if (session.isSystemContext()) continue;
+            for (ActionSpec action : startupActions) {
+                session.action(action.getAction(), action.getArgs());
+            }
+        }
     }
 
     static protected void initPlatform() {
@@ -961,11 +974,6 @@ public class Base {
 //        "jul", "aug", "sep", "oct", "nov", "dec"
 //    };
 
-    /*! Create a new untitled document in a new sketch window.  */
-    public static void handleNew() throws IOException {
-//        createNewEditor(null);
-    }
-
 
     /*! Determine if the provided folder is a sketch folder or not */
     public static boolean isSketchFolder(File folder) {
@@ -1009,41 +1017,9 @@ public class Base {
         return false;
     }
 
-    /*! Opens a sketch given by *path* in a new Editor window */
-/*
-    public static Editor createNewEditor(String path) throws IOException {
-        Sketch s;
-
-        if(path == null) {
-            s = new Sketch((File)null, null);
-        } else {
-            s = new Sketch(path, null);
-        }
-
-        Editor editor = new Editor(s.getContext(), s);
-        editor.setVisible(true);
-
-        if(path != null) {
-            updateMRU(new File(path));
-        }
-
-        editor.getSketch().loadConfig();
-
-        return editor;
-    }
-*/
-
-// .................................................................
-
-
     /*! Load all the libraries in the system */
     public static void gatherLibraries() {
-//        libraryLoaderThread = new Thread() {
-//            public void run() {
-                Library.loadLibraries();
-//            }
-//        };
-//        libraryLoaderThread.start();
+        Library.loadLibraries();
     }
 
     public static Platform getPlatform() {

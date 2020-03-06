@@ -1634,13 +1634,10 @@ public class Sketch {
 
         if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.linking"));
 
-System.err.println("Starting link");
         if(!compileLink(sketchObjects)) {
             ctx.error(Base.i18n.string("err.compiling.failed"));
-System.err.println("Link failed");
             return false;
         }
-System.err.println("Link done");
 
 
 
@@ -1652,7 +1649,6 @@ System.err.println("Link done");
             int pct = 50;
 
             for (String type : types) {
-System.err.println("Generating " + type);
                 ctx.bullet2(Base.i18n.string("msg.compiling.genfile", type));
                 ctx.executeKey("compile.autogen." + type);
                 pct += steps;
