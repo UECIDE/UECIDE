@@ -163,6 +163,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         midright.setRightSize(150);
         leftmid.setLeftSize(200);
         topbottom.setBottomSize(250);
+        midright.hideRight();
 
         sketchTree = new SketchTreePanel(ctx, leftPane);
         leftPane.add(sketchTree);
@@ -416,8 +417,8 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                     CodeEditor ce = (CodeEditor)c;
                     if (ce.getSketchFile() == f) {
                         pane.remove(ce);
-                        if (pane.isSeparateWindow()) {
-                            if (pane.getTabCount() == 0) {
+                        if (pane.getTabCount() == 0) {
+                            if (pane.isSeparateWindow()) {
                                 toRemove.add(pane);
                             }
                         }
@@ -428,6 +429,10 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         for (AutoTab pane : toRemove) {
             panes.remove(pane);
             pane.getParentWindow().dispose();
+        }
+
+        if (rightPane.getTabCount() == 0) {
+            midright.hideRight();
         }
     }
 
@@ -536,6 +541,9 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                             parentTabs.getParentWindow().dispose();
                         }
                     }
+                    if (rightPane.getTabCount() == 0) {
+                        midright.hideRight();
+                    }
                 }
             });
             moveMenu.add(moveLeft);
@@ -552,12 +560,16 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                             parentTabs.getParentWindow().dispose();
                         }
                     }
+                    if (rightPane.getTabCount() == 0) {
+                        midright.hideRight();
+                    }
                 }
             });
             moveMenu.add(moveCenter);
             JMenuItem moveRight = new JMenuItem("Right panel");
             moveRight.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent inner) {
+                    midright.showBoth();
                     AutoTab parentTabs = null;
                     if (p.getParent() instanceof AutoTab) {
                         parentTabs = (AutoTab)p.getParent();
@@ -583,6 +595,9 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                         if (parentTabs.getTabCount() == 0) {
                             parentTabs.getParentWindow().dispose();
                         }
+                    }
+                    if (rightPane.getTabCount() == 0) {
+                        midright.hideRight();
                     }
                 }
             });
@@ -658,6 +673,9 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                             panes.remove(parentTabs);
                             parentTabs.getParentWindow().dispose();
                         }
+                    }
+                    if (rightPane.getTabCount() == 0) {
+                        midright.hideRight();
                     }
                 }
             });

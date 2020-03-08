@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Fix spaces in options
 * Added options handling
 * Improvements to gui startup handling
 * Implemented command line options and filenames as sequences of actions
@@ -753,6 +754,7 @@ Changelog
 0.8.5
 -----
 
+* Fix spaces in options
 * Added options handling
 * Improvements to gui startup handling
 * Implemented command line options and filenames as sequences of actions

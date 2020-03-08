@@ -16,6 +16,9 @@ public class AbsoluteSplitPane extends JSplitPane implements ComponentListener, 
     int right = -1; // and bottom
     int orient;
 
+    boolean leftHidden = false;
+    boolean rightHidden = false;
+
     public AbsoluteSplitPane(int orientation, Component a, Component b) {
         super(orientation, a, b);
         orient = orientation;
@@ -24,15 +27,31 @@ public class AbsoluteSplitPane extends JSplitPane implements ComponentListener, 
     }
 
     void updateDividerLocation() {
-        if (right == -1) {
-            setDividerLocation(left);
-        } else {
+        if (rightHidden) {
             Dimension d = getSize();
             if (orient == JSplitPane.VERTICAL_SPLIT) {
-                setDividerLocation(d.height - right);
+                setDividerLocation(d.height);
             } else {
-                setDividerLocation(d.width - right);
+                setDividerLocation(d.width);
             }
+            return;
+        }
+
+        if (leftHidden) {
+            setDividerLocation(0);
+            return;
+        }
+
+        if (right == -1) {
+            setDividerLocation(left);
+            return;
+        }
+
+        Dimension d = getSize();
+        if (orient == JSplitPane.VERTICAL_SPLIT) {
+            setDividerLocation(d.height - right);
+        } else {
+            setDividerLocation(d.width - right);
         }
     }
 
@@ -98,5 +117,23 @@ public class AbsoluteSplitPane extends JSplitPane implements ComponentListener, 
     }
 
     public void mouseClicked(MouseEvent e) {
+    }
+
+    public void hideLeft() {
+        leftHidden = true;
+        rightHidden = false;
+        updateDividerLocation();
+    }
+
+    public void hideRight() {
+        leftHidden = false;
+        rightHidden = true;
+        updateDividerLocation();
+    }
+    
+    public void showBoth() {
+        leftHidden = false;
+        rightHidden = false;
+        updateDividerLocation();
     }
 }
