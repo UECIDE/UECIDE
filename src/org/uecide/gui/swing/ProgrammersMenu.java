@@ -35,7 +35,10 @@ public class ProgrammersMenu extends JMenu implements MenuListener {
             setText("Programmer (None Selected)");
         } else {
             setText("Programmer (" + programmer.getDescription() + ")");
-            setIcon(programmer.getIcon(16));
+            try {
+                setIcon(new CleverIcon(16, programmer.getIcon()));
+            } catch (Exception ex) {
+            }
         }
     }
 

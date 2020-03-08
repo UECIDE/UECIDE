@@ -67,6 +67,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     HardwareMenu hardwareMenu;
     ToolsMenu toolsMenu;
     JMenu helpMenu;
+    StatusBar statusBar;
 
     SketchTreePanel sketchTree;
 
@@ -147,11 +148,15 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         toolbar = new MainToolbar(this);
         window.add(toolbar, BorderLayout.NORTH);
 
+        statusBar = new StatusBar(ctx);
+        window.add(statusBar, BorderLayout.SOUTH);
+
         if (ctx.getSketch() != null) {
             window.setTitle("UECIDE :: " + ctx.getSketch().getName());
         } else {
             window.setTitle("UECIDE");
         }
+
         window.setSize(1280, 768);
         window.setVisible(true);
 
@@ -701,6 +706,10 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     public AutoTab getDefaultTab() {
         return centerPane;
+    }
+
+    public boolean shouldAutoOpen() {
+        return true;
     }
 
 }

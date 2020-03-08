@@ -50,6 +50,8 @@ public class TextViewerPanel extends TabPanel implements ContextEventListener {
         add(scrollPane, BorderLayout.CENTER);
         textArea.setText(txt);
         textArea.setEditable(false);
+        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+        textArea.setCaretPosition(0);
     }
 
     @Override
@@ -92,6 +94,7 @@ public class TextViewerPanel extends TabPanel implements ContextEventListener {
     public void setText(String txt) {
         text = txt;
         textArea.setText(txt);
+        textArea.setCaretPosition(0);
     }
 
     public void closeViewer() {

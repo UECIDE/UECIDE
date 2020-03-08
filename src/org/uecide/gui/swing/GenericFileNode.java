@@ -136,15 +136,7 @@ public class GenericFileNode extends SketchTreeNodeBase {
 
     String getFileContent() {
         try {
-            String type = Files.probeContentType(file.toPath());
-
-            if (type == null) {
-                return "Unable to determine file type";
-            }
-            System.err.println(type);
-            if (type.startsWith("text")) {
-                return Utils.getFileAsString(file);
-            }
+            return Utils.getFileAsString(file);
         } catch (Exception ex) {
             ctx.error(ex);
         }

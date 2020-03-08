@@ -28,7 +28,10 @@ public class CoresMenuItem extends JRadioButtonMenuItem implements ActionListene
         } else {
             setSelected(false);
         }
-        setIcon(core.getIcon(16));
+        try {
+            setIcon(new CleverIcon(16, core.getIcon()));
+        } catch (Exception ex) {
+        }
         addActionListener(this);
     }
 

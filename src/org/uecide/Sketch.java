@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -1708,9 +1709,12 @@ public class Sketch {
         if (props.get("compile.size") != null) {
             if (!Base.isQuiet()) ctx.heading(Base.i18n.string("msg.compiling.memory"));
 
-            ctx.startBuffer();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            ctx.setOutputStream(os);
             ctx.executeKey("compile.size");
-            String output = ctx.endBuffer();
+            ctx.clearOutputStream();
+
+            String output = os.toString();
 
             String reg = props.get("compiler.size.regex", "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");
             int tpos = props.getInteger("compiler.size.text", 1);
@@ -2960,26 +2964,10 @@ public class Sketch {
         return sketchName;
     }
 
-    public ImageIcon getIcon(int size) {
-        ImageIcon i = null;
-
-        if (size == 16) {
-            i = getIcon();
-            if(i != null) return i;
-        }
-
-        if(ctx.getBoard() != null) {
-            i = ctx.getBoard().getIcon(size);
-
-            if(i != null) return i;
-        }
-
-        if(ctx.getCore() != null) {
-            i = ctx.getCore().getIcon(size);
-
-            if(i != null) return i;
-        }
-
+    public File getIcon() {
+        if (get("icon") != null) return new File(getFolder(), get("icon"));
+        if (ctx.getBoard().getIcon() != null) return ctx.getBoard().getIcon();
+        if (ctx.getCore().getIcon() != null) return ctx.getCore().getIcon();
         return null;
     }
 
@@ -3091,10 +3079,6 @@ public class Sketch {
 
     public HashMap<String, Integer> getKeywords() {
         return keywords;
-    }
-
-    public ImageIcon getIcon() {
-        return null;
     }
 
     public void generateFileFromTemplate(String template, File output) {
@@ -3290,9 +3274,10 @@ public class Sketch {
             }
             ctx.set("includes", libPaths);
 
-            ctx.startBuffer(true);
+            NullOutputStream os = new NullOutputStream();
+            ctx.setOutputStream(os);
             ctx.executeKey("compile.preproc");
-            ctx.endBuffer();
+            ctx.clearOutputStream();
 
             if (dst.exists()) {
                 String data = Utils.getFileAsString(dst);

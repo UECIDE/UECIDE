@@ -278,11 +278,14 @@ public class UObject implements Comparable {
         return false;
     }
 
-    public ImageIcon getIcon(int size) {
-        String path = get("icon." + size);
+    public File getIcon() {
+        String path = get("icon");
 
         if(path  == null) {
-            return null;
+            path = get("icon.128");
+            if (path == null) {
+                return null;
+            }
         }
 
         File f = new File(getFolder(), path);
@@ -291,7 +294,7 @@ public class UObject implements Comparable {
             return null;
         }
 
-        return new ImageIcon(f.getAbsolutePath());
+        return f;
     }
 
 

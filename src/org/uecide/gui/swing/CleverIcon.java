@@ -28,6 +28,57 @@ public class CleverIcon extends ImageIcon {
         updateIcon();
     }
 
+    public CleverIcon(int s, File f) throws IOException {
+        super();
+        size = s;
+        if (f == null) {
+            name = new String[1];
+            name[0] = "default";
+            updateIcon();
+            return;
+        } 
+
+        if (!f.exists()) {
+            name = new String[1];
+            name[0] = "default";
+            updateIcon();
+            return;
+        }
+        updateIcon(f);
+    }
+
+    public void updateIcon(File f) throws IOException {
+        BufferedImage image;
+        image = ImageIO.read(f);
+        scaledImage = new BufferedImage[1];
+        Image scaled = Utils.getScaledImage(image, size, size); 
+        scaledImage[0] = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = scaledImage[0].createGraphics();
+        g.drawImage(scaled, 0, 0, size, size, 0, 0, size, size, null);
+
+        BufferedImage disabledImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+
+        Color disabledColor = UIManager.getColor("Button.disabledColor");
+        if (disabledColor == null) {
+            disabledColor = new Color(0x80, 0x80, 0x80);
+        }
+        int col = disabledColor.getRGB();
+        col &= 0x00FFFFFF;
+
+        for (int y = 0; y < size; y++) {
+            for (int x = 0; x < size; x++) {
+                int rgb = scaledImage[0].getRGB(x, y);
+                rgb &= 0xFF000000;
+                rgb |= col;
+                disabledImage.setRGB(x, y, rgb);
+            }
+        }
+
+        disabledIcon = new ImageIcon(disabledImage);
+
+        setImage(scaledImage[0]);
+    }
+         
     public void updateIcon() throws IOException, MalformedURLException {
         ArrayList<URL> frameList = new ArrayList<URL>();
 

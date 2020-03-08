@@ -35,7 +35,10 @@ public class BoardsMenu extends JMenu implements MenuListener {
             setText("Board (None Selected)");
         } else {
             setText("Board (" + board.getDescription() + ")");
-            setIcon(board.getIcon(16));
+            try {
+                setIcon(new CleverIcon(16, board.getIcon()));
+            } catch (Exception ex) {
+            }
         }
     }
 

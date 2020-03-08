@@ -679,6 +679,12 @@ public class Base {
 
         startupActions.clear();
 
+        if (cli.isSet("set")) { 
+            String pref = cli.getString("set");
+            String[] prefset = pref.split("=");
+            startupActions.add(new ActionSpec("SetPref", prefset[0], prefset[1]));
+        }
+
         if (cli.isSet("board")) { startupActions.add(new ActionSpec("SetBoard", cli.getString("board"))); }
         if (cli.isSet("core")) { startupActions.add(new ActionSpec("SetCore", cli.getString("core"))); }
         if (cli.isSet("compiler")) { startupActions.add(new ActionSpec("SetCompiler", cli.getString("compiler"))); }
@@ -1922,7 +1928,9 @@ public class Base {
                 if (autoProgram) { ctx.action("Upload", ctx.getSketch().getName()); }
 
                 guiObject.open();
-                ctx.action("openSketchFile", ctx.getSketch().getMainFile());
+                if (guiObject.shouldAutoOpen()) {
+                    ctx.action("openSketchFile", ctx.getSketch().getMainFile());
+                }
             }
             return ctx;
         } catch (Exception e) {

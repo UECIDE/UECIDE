@@ -18,14 +18,12 @@ public class ProcessStreamThread implements Runnable {
         byte[] buffer = new byte[1024];
         while (running) {
             try {
-                while (in.available() > 0) {
-                    in.read(buffer);
-                    out.write(buffer);
-                }
-                Thread.sleep(10);
+                int v = in.read(buffer);
+                if (v == -1) break;
+                out.write(buffer, 0, v);
             } catch (Exception ignored) {
             }
-         }
+        }
     }
 
     public void stop() {

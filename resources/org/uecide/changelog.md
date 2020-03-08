@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Improvements to gui startup handling
 * Implemented command line options and filenames as sequences of actions
 * Improve context streaming. Add src folder to sketch building
 * Move library compilation to library object
@@ -751,6 +752,7 @@ Changelog
 0.8.5
 -----
 
+* Improvements to gui startup handling
 * Implemented command line options and filenames as sequences of actions
 * Improve context streaming. Add src folder to sketch building
 * Move library compilation to library object

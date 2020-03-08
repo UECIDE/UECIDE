@@ -24,6 +24,8 @@ public class HardwareMenu extends JMenu implements MenuListener {
     ProgrammersMenu programmersMenu;
     PortsMenu portsMenu;
 
+    OptionsMenu optionsMenu;
+
     public HardwareMenu(Context c) {
         super("Hardware");
         ctx = c;
@@ -42,6 +44,11 @@ public class HardwareMenu extends JMenu implements MenuListener {
 
         portsMenu = new PortsMenu(ctx);
         add(portsMenu);
+
+        addSeparator();
+
+        optionsMenu = new OptionsMenu(ctx);
+        add(optionsMenu);
 
         addMenuListener(this);
     }

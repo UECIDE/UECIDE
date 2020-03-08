@@ -35,7 +35,10 @@ public class CoresMenu extends JMenu implements MenuListener {
             setText("Core (None Selected)");
         } else {
             setText("Core (" + core.getDescription() + ")");
-            setIcon(core.getIcon(16));
+            try {
+                setIcon(new CleverIcon(16, core.getIcon()));
+            } catch (Exception ex) {
+            }
         }
     }
 

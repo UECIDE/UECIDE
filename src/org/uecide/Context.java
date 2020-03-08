@@ -810,14 +810,14 @@ public class Context {
 
 
         OutputStream stdout;
-        ByteArrayOutputStream stderr;
+        OutputStream stderr;
 
         if (outputStream != null) {
             stdout = outputStream;
         } else {
-            stdout = new ByteArrayOutputStream();
+            stdout = new ContextStream(this, Message.STREAM_MESSAGE);
         }
-        stderr = new ByteArrayOutputStream();
+        stderr = new ContextStream(this, Message.STREAM_ERROR);
 
         try {
             runningProcess = process.start();
@@ -842,31 +842,31 @@ public class Context {
             error(ex);
         }
 
-        if (stderr.size() > 0) {
-            if (parser != null) {
-                String[] lines = stderr.toString().split("\n");
-                for (String line : lines) {
-                    parser.parseStreamError(this, line);
-                }
-            } else {
-                error(stderr.toString());
-            }
-        }
+//        if (stderr.size() > 0) {
+//            if (parser != null) {
+//                String[] lines = stderr.toString().split("\n");
+//                for (String line : lines) {
+//                    parser.parseStreamError(this, line);
+//                }
+//            } else {
+//                error(stderr.toString());
+//            }
+//        }
 
-        if (outputStream == null) {
-            ByteArrayOutputStream bos = (ByteArrayOutputStream)stdout;
-            if (bos.size() > 0) {
-                if (parser != null) {
-                    String[] lines = bos.toString().split("\n");
-                    for (String line : lines) {
-                        parser.parseStreamMessage(this, line);
-                        parser.parseStreamError(this, line);
-                    }
-                } else {
-                    message(bos.toString());
-                }
-            }
-        }
+//        if (outputStream == null) {
+//            ByteArrayOutputStream bos = (ByteArrayOutputStream)stdout;
+//            if (bos.size() > 0) {
+//                if (parser != null) {
+//                    String[] lines = bos.toString().split("\n");
+//                    for (String line : lines) {
+//                        parser.parseStreamMessage(this, line);
+//                        parser.parseStreamError(this, line);
+//                    }
+//                } else {
+//                    message(bos.toString());
+//                }
+//            }
+//        }
 
         // Should we catch any trailing data here?
 
@@ -904,15 +904,6 @@ public class Context {
 //            runningProcess.destroy();
 //            Base.processes.remove(runningProcess);
         }
-    }
-
-    public void startBuffer() {
-        startBuffer(false);
-    }
-
-    public void startBuffer(boolean be) {
-        bufferError = be;
-        buffer = new StringBuilder();
     }
 
     public String endBuffer() {

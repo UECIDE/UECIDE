@@ -34,7 +34,7 @@ import org.uecide.*;
 
 public class start_buffer extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
-        ctx.startBuffer(arg.length == 1);
+//        ctx.startBuffer(arg.length == 1);
         return true;
     }
 

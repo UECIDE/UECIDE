@@ -46,4 +46,8 @@ public abstract class Gui {
         return false;
     }
 
+    public boolean shouldAutoOpen() {
+        return false;
+    }
+
 }

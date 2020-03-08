@@ -298,9 +298,9 @@ public class SketchFile implements Comparable, DocumentListener {
             ctx.set("build.root", sketch.buildFolder.getAbsolutePath());
             ctx.set("build.path", sketch.buildFolder.getAbsolutePath());
             ctx.set("tmp.root", tmp.getAbsolutePath());
-            ctx.startBuffer(true);
+            ctx.setOutputStream(new NullOutputStream());
             t.execute(ctx, "ctags.bookmark");
-            ctx.endBuffer();
+            ctx.clearOutputStream();
 
             File tags = new File(tmp, file.getName() + ".tags");
             if (tags.exists()) { // We got the tags

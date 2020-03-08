@@ -28,7 +28,10 @@ public class CompilersMenuItem extends JRadioButtonMenuItem implements ActionLis
         } else {
             setSelected(false);
         }
-        setIcon(compiler.getIcon(16));
+        try {
+            setIcon(new CleverIcon(16, compiler.getIcon()));
+        } catch (Exception ex) {
+        }
         addActionListener(this);
     }
 

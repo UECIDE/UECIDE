@@ -31,12 +31,15 @@
 package org.uecide.varcmd;
 
 import org.uecide.*;
+import java.io.ByteArrayOutputStream;
 
 public class vc_system extends VariableCommand {
     public String main(Context ctx, String args) throws VariableCommandException {
-        ctx.startBuffer();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ctx.setOutputStream(os);
         ctx.runSystemCommand(args, null);
-        String out = ctx.endBuffer();
+        ctx.clearOutputStream();
+        String out = os.toString();
         out = out.trim();
         out = out.replaceAll("\r", "");
         out = out.replaceAll("\n", "::");

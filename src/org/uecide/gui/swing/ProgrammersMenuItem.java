@@ -28,7 +28,10 @@ public class ProgrammersMenuItem extends JRadioButtonMenuItem implements ActionL
         } else {
             setSelected(false);
         }
-        setIcon(programmer.getIcon(16));
+        try {
+            setIcon(new CleverIcon(16, programmer.getIcon()));
+        } catch (Exception ex) {
+        }
         addActionListener(this);
     }
 

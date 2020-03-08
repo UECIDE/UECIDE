@@ -35,7 +35,10 @@ public class CompilersMenu extends JMenu implements MenuListener {
             setText("Compiler (None Selected)");
         } else {
             setText("Compiler (" + compiler.getDescription() + ")");
-            setIcon(compiler.getIcon(16));
+            try {
+                setIcon(new CleverIcon(16, compiler.getIcon()));
+            } catch (Exception ex) {
+            }
         }
     }
 

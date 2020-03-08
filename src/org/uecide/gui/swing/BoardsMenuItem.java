@@ -28,7 +28,10 @@ public class BoardsMenuItem extends JRadioButtonMenuItem implements ActionListen
         } else {
             setSelected(false);
         }
-        setIcon(board.getIcon(16));
+        try {
+            setIcon(new CleverIcon(16, board.getIcon()));
+        } catch (Exception ex) {
+        }
         addActionListener(this);
     }
 

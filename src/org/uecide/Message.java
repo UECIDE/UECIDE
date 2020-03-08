@@ -9,6 +9,8 @@ public class Message {
     public static final int BULLET3     = 5;
     public static final int COMMAND     = 6;
     public static final int HEADING     = 7;
+    public static final int STREAM_MESSAGE      = 8;
+    public static final int STREAM_ERROR        = 9;
 
     int type;
     String text;
