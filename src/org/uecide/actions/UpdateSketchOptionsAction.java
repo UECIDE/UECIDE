@@ -34,7 +34,7 @@ public class UpdateSketchOptionsAction extends Action {
 
         TreeMap<String, String> opts = sketch.getOptionGroups();
 
-        Pattern p = Pattern.compile("^\\s*#\\s*pragma\\s+option\\s+(.*)\\s*=\\s*(.*)\\s*$");
+        Pattern p = Pattern.compile("^\\s*#\\s*pragma\\s+option\\s+([^\\s]+)\\s*=\\s*([^\\s]+)\\s*$");
 
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i];
