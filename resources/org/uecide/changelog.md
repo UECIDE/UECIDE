@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Made preferences self-contained
 * Most of edit menu done
 * New application icon, and add icon to windows
 * Hide right panel when empty
@@ -757,6 +758,7 @@ Changelog
 0.8.5
 -----
 
+* Made preferences self-contained
 * Most of edit menu done
 * New application icon, and add icon to windows
 * Hide right panel when empty

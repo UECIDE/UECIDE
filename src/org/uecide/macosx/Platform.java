@@ -76,16 +76,6 @@ public class Platform extends org.uecide.Platform {
     }
 
 
-    public boolean openFolderAvailable() {
-        return true;
-    }
-
-
-    public void openFolder(File file) {
-        Base.open(file.getAbsolutePath());
-    }
-
-
     // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 

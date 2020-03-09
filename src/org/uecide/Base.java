@@ -92,8 +92,6 @@ public class Base {
 
     static Platform platform;
 
-    public static PropertyFile manualPages;
-
     static private boolean headless;
 
     // these are static because they're used by Sketch
@@ -138,14 +136,6 @@ public class Base {
     public static TreeSet<CommunicationPort> communicationPorts = new TreeSet<CommunicationPort>();
 
     public static I18N i18n = new I18N("Core");
-
-    static Thread compilerLoaderThread = null;
-    static Thread coreLoaderThread = null;
-    static Thread boardLoaderThread = null;
-    static Thread programmerLoaderThread = null;
-    static Thread toolLoaderThread = null;
-    static Thread libraryLoaderThread = null;
-    static Thread cleanupThread = null;
 
 
     /*! Get a Board from the internal boards list by its short name. */
@@ -339,15 +329,6 @@ public class Base {
         }
 
         overrideSettingsFolder = cli.getString("datadir");
-
-        if(!cli.isSet("exceptions")) {
-            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-                public void uncaughtException(Thread t, Throwable e) {
-                    Base.broken(t, e);
-                }
-            });
-        }
-
 
 
         Context bootContext = createContext(null, "none", false);
@@ -558,12 +539,12 @@ public class Base {
 
 
         if (cli.isSet("cli")) {
-            System.err.println("Warning: --cli is deprecated. Use --gui=cli instead");
+            bootContext.warning("Warning: --cli is deprecated. Use --gui=cli instead");
             cli.set("gui", "cli");
         }
 
         if (cli.isSet("headless")) {
-            System.err.println("Warning: --headless is deprecated. Use --gui=none instead");
+            bootContext.warning("Warning: --headless is deprecated. Use --gui=none instead");
             cli.set("gui", "none");
         }
 
@@ -586,8 +567,8 @@ public class Base {
             case "none": NoneGui.init(); break;
             case "html": HTMLGui.init(); break;
             default:
-                System.err.println("Unknown GUI specified. Cannot continue.");
-                System.exit(10);
+                bootContext.error("Unknown GUI specified. Cannot continue.");
+                bootContext.action("CloseSession");
         }
 
         systemContext = createContext(null, gui, false);
@@ -634,8 +615,8 @@ public class Base {
             case "none": NoneGui.endinit(); break;
             case "html": HTMLGui.endinit(); break;
             default:
-                System.err.println("Unknown GUI specified. Cannot continue.");
-                System.exit(10);
+                bootContext.error("Unknown GUI specified. Cannot continue.");
+                bootContext.action("CloseSession");
         }
         
 
@@ -831,70 +812,53 @@ public class Base {
 
     public static void loadCompilers() {
         compilers.clear();
-//        compilerLoaderThread = new Thread() {
-//            public void run() {
-                ArrayList<File> compilerFiles = FileCache.getFilesByName("compiler.txt");
-                for (File cfile : compilerFiles) {
-                    if(cfile.exists()) {
-                        Debug.message("    Loading compiler " + cfile.getAbsolutePath());
-                        Compiler newCompiler = new Compiler(cfile.getParentFile());
+        ArrayList<File> compilerFiles = FileCache.getFilesByName("compiler.txt");
+        for (File cfile : compilerFiles) {
+            if(cfile.exists()) {
+                Debug.message("    Loading compiler " + cfile.getAbsolutePath());
+                Compiler newCompiler = new Compiler(cfile.getParentFile());
 
-                        if(newCompiler.isValid()) {
-                            compilers.put(newCompiler.getName(), newCompiler);
-                        } else {
-                            Debug.message("    ==> IS NOT VALID!!!");
-                        }
-                    }
+                if(newCompiler.isValid()) {
+                    compilers.put(newCompiler.getName(), newCompiler);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
                 }
-//            }
-//        };
-//        compilerLoaderThread.start();
+            }
+        }
     }
 
     public static void loadCores() {
         cores.clear();
-//        coreLoaderThread = new Thread() {
-//            public void run() {
+        ArrayList<File> coreFiles = FileCache.getFilesByName("core.txt");
+        for (File cfile : coreFiles) {
+            if(cfile.exists()) {
+                Debug.message("    Loading core " + cfile.getAbsolutePath());
+                Core newCore = new Core(cfile.getParentFile());
 
-                ArrayList<File> coreFiles = FileCache.getFilesByName("core.txt");
-                for (File cfile : coreFiles) {
-                    if(cfile.exists()) {
-                        Debug.message("    Loading core " + cfile.getAbsolutePath());
-                        Core newCore = new Core(cfile.getParentFile());
-
-                        if(newCore.isValid()) {
-                            cores.put(newCore.getName(), newCore);
-                        } else {
-                            Debug.message("    ==> IS NOT VALID!!!");
-                        }
-                    }
+                if(newCore.isValid()) {
+                    cores.put(newCore.getName(), newCore);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
                 }
-//            }
-//        };
-//        coreLoaderThread.start();
+            }
+        }
     }
 
     public static void loadBoards() {
         boards.clear();
-//        boardLoaderThread = new Thread() {
-//            public void run() {
+        ArrayList<File> boardFiles = FileCache.getFilesByName("board.txt");
+        for (File bfile : boardFiles) {
+            if(bfile.exists()) {
+                Debug.message("    Loading board " + bfile.getAbsolutePath());
+                Board newBoard = new Board(bfile.getParentFile());
 
-                ArrayList<File> boardFiles = FileCache.getFilesByName("board.txt");
-                for (File bfile : boardFiles) {
-                    if(bfile.exists()) {
-                        Debug.message("    Loading board " + bfile.getAbsolutePath());
-                        Board newBoard = new Board(bfile.getParentFile());
-
-                        if(newBoard.isValid()) {
-                            boards.put(newBoard.getName(), newBoard);
-                        } else {
-                            Debug.message("    ==> IS NOT VALID!!!");
-                        }
-                    }
+                if(newBoard.isValid()) {
+                    boards.put(newBoard.getName(), newBoard);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
                 }
-//            }
-//        };
-//        boardLoaderThread.start();
+            }
+        }
     }
 
     public static void loadProgrammers() {
@@ -912,56 +876,39 @@ public class Base {
         for (Programmer p : savedProgrammers) {
             programmers.put(p.getName(), p);
         }
-//        programmerLoaderThread = new Thread() {
-//            public void run() {
 
-                ArrayList<File> programmerFiles = FileCache.getFilesByName("programmer.txt");
-                for (File pfile : programmerFiles) {
-                    if(pfile.exists()) {
-                        Debug.message("    Loading programmer " + pfile.getAbsolutePath());
-                        Programmer newProgrammer = new Programmer(pfile.getParentFile());
+        ArrayList<File> programmerFiles = FileCache.getFilesByName("programmer.txt");
+        for (File pfile : programmerFiles) {
+            if(pfile.exists()) {
+                Debug.message("    Loading programmer " + pfile.getAbsolutePath());
+                Programmer newProgrammer = new Programmer(pfile.getParentFile());
 
-                        if(newProgrammer.isValid()) {
-                            programmers.put(newProgrammer.getName(), newProgrammer);
-                        } else {
-                            Debug.message("    ==> IS NOT VALID!!!");
-                        }
-                    }
+                if(newProgrammer.isValid()) {
+                    programmers.put(newProgrammer.getName(), newProgrammer);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
                 }
-//            }
-//        };
-//        programmerLoaderThread.start();
+            }
+        }
     }
 
     public static void loadTools() {
         tools.clear();
-//        toolLoaderThread = new Thread() {
-//            public void run() {
 
-                ArrayList<File> toolFiles = FileCache.getFilesByName("tool.txt");
-                for (File tfile : toolFiles) {
-                    if(tfile.exists()) {
-                        Debug.message("    Loading tool " + tfile.getAbsolutePath());
-                        Tool newTool = new Tool(tfile.getParentFile());
+        ArrayList<File> toolFiles = FileCache.getFilesByName("tool.txt");
+        for (File tfile : toolFiles) {
+            if(tfile.exists()) {
+                Debug.message("    Loading tool " + tfile.getAbsolutePath());
+                Tool newTool = new Tool(tfile.getParentFile());
 
-                        if(newTool.isValid()) {
-                            tools.put(newTool.getName(), newTool);
-                        } else {
-                            Debug.message("    ==> IS NOT VALID!!!");
-                        }
-                    }
+                if(newTool.isValid()) {
+                    tools.put(newTool.getName(), newTool);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
                 }
-//            }
-//        };
-//        toolLoaderThread.start();
+            }
+        }
     }
-
-
-//    boolean breakTime = false;
-//    String[] months = {
-//        "jan", "feb", "mar", "apr", "may", "jun",
-//        "jul", "aug", "sep", "oct", "nov", "dec"
-//    };
 
 
     /*! Determine if the provided folder is a sketch folder or not */
@@ -1214,76 +1161,6 @@ public class Base {
         return new File(System.getProperty("java.io.tmpdir"));
     }
 
-    static String openLauncher;
-    static public void open(String filename) {
-        open(new String[] { filename });
-    }
-
-    static public Process open(String argv[]) {
-        String[] params = null;
-
-        if(isWindows()) {
-            params = new String[] { "cmd", "/c" };
-
-        } else if(isMacOS()) {
-            params = new String[] { "open" };
-
-        } else if(isUnix()) {
-            if(openLauncher == null) {
-                try {
-                    Process p = Runtime.getRuntime().exec(new String[] { "gnome-open" });
-                    /*int result =*/ p.waitFor();
-                    openLauncher = "gnome-open";
-                } catch(Exception e) { }
-            }
-
-            if(openLauncher == null) {
-                // Attempt with kde-open
-                try {
-                    Process p = Runtime.getRuntime().exec(new String[] { "kde-open" });
-                    /*int result =*/ p.waitFor();
-                    openLauncher = "kde-open";
-                } catch(Exception e) { }
-            }
-
-            if(openLauncher == null) {
-                System.err.println("Could not find gnome-open or kde-open, " +
-                                   "the open() command may not work.");
-            }
-
-            if(openLauncher != null) {
-                params = new String[] { openLauncher };
-            }
-        }
-
-        if(params != null) {
-            if(params[0].equals(argv[0])) {
-                return exec(argv);
-            } else {
-                params = concat(params, argv);
-                return exec(params);
-            }
-        } else {
-            return exec(argv);
-        }
-    }
-
-    static public Process exec(String[] argv) {
-        try {
-            return Runtime.getRuntime().exec(argv);
-        } catch(Exception e) {
-            error(e);
-            return null;
-        }
-    }
-
-    static public String[] concat(String a[], String b[]) {
-        String c[] = new String[a.length + b.length];
-        System.arraycopy(a, 0, c, 0, a.length);
-        System.arraycopy(b, 0, c, a.length, b.length);
-        return c;
-    }
-
     static public File getDataFolder() {
         File out = null;
         if (overrideSettingsFolder != null) {
@@ -1346,47 +1223,12 @@ public class Base {
     static public File[] getLibrariesFolders() { return getAnyFolders("libraries"); }
     static public File[] getIconsFolders() { return getAnyFolders("icons"); }
 
-    static public void broken(Thread t, Throwable e) {
-        if (headless) {
-            e.printStackTrace();
-            return;
-        }
-        try {
-            e.printStackTrace();
-            if(e.getCause() == null) {
-                return;
-            }
-
-
-            Debug.message("");
-            Debug.message("******************** EXCEPTION ********************");
-            Debug.message("An uncaught exception occurred in thread " + t.getName() + " (" + t.getId() + ")");
-            Debug.message("    The cause is: " + e.getCause());
-            Debug.message("    The message is: " + e.getMessage());
-            Debug.message("");
-
-            for(StackTraceElement element : e.getStackTrace()) {
-                if(element != null) {
-                    Debug.message("        " + element);
-                }
-            }
-
-            Debug.message("******************** EXCEPTION ********************");
-            Debug.message("");
-        } catch(Exception ee) {
-            ee.printStackTrace();
-        }
-    }
-
     public static void error(String e) {
-//        Editor.broadcastError(e);
         System.err.println(e);
         Debug.message(e);
     }
 
     public static void error(Throwable e) {
-
-//        Editor.broadcastError(e.getMessage());
 
         try {
             Debug.message("");
@@ -1423,7 +1265,6 @@ public class Base {
         rescanProgrammers();
         rescanTools();
         rescanLibraries();
-        waitForAssetLoading();
         Preferences.buildPreferencesTree();
     }
 
@@ -1536,23 +1377,6 @@ public class Base {
         }
 
         return false;
-    }
-
-    public static void debug(String msg) {
-        if(!extraDebug) return;
-
-        if(msg == null) {
-            msg = "(null)";
-        }
-
-        if(!msg.endsWith("\n")) {
-            msg += "\n";
-        }
-
-        Thread t = Thread.currentThread();
-        StackTraceElement[] st = t.getStackTrace();
-        StackTraceElement caller = st[2];
-        System.err.print(caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): " + msg);
     }
 
     // This little routine works through each and every board, core and compiler and
@@ -1678,64 +1502,6 @@ public class Base {
         if (!file.exists()) return;
     }
 
-    public static void waitForAssetLoading() {
-//        while (coreLoaderThread != null) {
-//            try {
-//                coreLoaderThread.join();
-//                coreLoaderThread = null;
-//            } catch (Exception e) {
-//            }
-//        }
-//
-//        while (compilerLoaderThread != null) {
-//            try {
-//                compilerLoaderThread.join();
-//                compilerLoaderThread = null;
-//            } catch (Exception e) {
-//            }
-//        }
-//
-//        while (boardLoaderThread != null) {
-//            try {
-//                boardLoaderThread.join();
-//                boardLoaderThread = null;
-//            } catch (Exception e) {
-//            }
-//        }
-//       
-//        while (programmerLoaderThread != null) {
-//            try {
-//                programmerLoaderThread.join();
-//                programmerLoaderThread = null;
-//            } catch (Exception e) {
-//            }
-//        }
-//       
-//        while (toolLoaderThread != null) {
-//            try {
-//                toolLoaderThread.join();
-//                toolLoaderThread = null;
-//            } catch (Exception e) {
-//            }
-//        }
-//       
-//        while (libraryLoaderThread != null) {
-//            try {
-//                libraryLoaderThread.join();
-//                libraryLoaderThread = null;
-//            } catch (Exception e) {
-//            }
-//        }
-//
-//        while (cleanupThread != null) {
-//            try {
-//                cleanupThread.join();
-//                cleanupThread = null;
-//            } catch (Exception e) {
-//            }
-//        }
-    }
-
     public static String getFileExtension(File f) {
         String fileName = f.getName();
         String extension = "";
@@ -1752,52 +1518,17 @@ public class Base {
     }
 
     public static void loadAssets() throws IOException {
-        Debug.message("Loading assets");
-        Debug.message("Caching system files");
         cacheSystemFiles();
-
-        loadManualPages();
-
-        Debug.message("Loading cores");
         loadCores();
-
-        Debug.message("Loading compilers");
         loadCompilers();
-
-        Debug.message("Loading boards");
         loadBoards();
-
-        Debug.message("Loading programmers");
         loadProgrammers();
-
-        Debug.message("Loading tools");
         loadTools();
-
-        Debug.message("Loading icon sets");
-
-
-        Debug.message("Loading libraries");
         gatherLibraries();
-
-        Debug.message("Loading assets done");
     }
 
     public static boolean isHeadless() {
         return headless;
-    }
-
-    public static void loadManualPages() {
-        manualPages = new PropertyFile();
-        PropertyFile manualIndex = new PropertyFile("/org/uecide/manual.txt");
-        for (String k : manualIndex.keySet()) {
-            String filename = manualIndex.get(k);
-            PropertyFile partFile = new PropertyFile("/org/uecide/manual/" + filename + ".txt");
-            if (k.equals("Global")) {
-                manualPages.mergeData(partFile);
-            } else {
-                manualPages.mergeData(partFile, k);
-            }
-        }
     }
 
     public void setDisplayScaling() {

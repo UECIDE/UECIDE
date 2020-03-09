@@ -110,22 +110,6 @@ public class Platform extends org.uecide.Platform {
     }
 
 
-    public boolean openFolderAvailable() {
-        return true;
-    }
-
-
-    public void openFolder(File file) {
-        try {
-            String folder = file.getAbsolutePath(); //There seems to be a weird discrepency here, in the older code when this function was called, loadedSketch.getFolder().getAbsolutePath() was passed here - A 'String' is not a 'File' which is presumably why it failed to work.
-
-            Runtime.getRuntime().exec("explorer \"" + folder + "\"");
-        } catch(Exception e) {
-            Base.error(e);
-        }
-    }
-
-
     // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 

@@ -41,12 +41,10 @@ public class Preferences {
     static public Font stringToFont(String value) {
         if(value == null) {
             value = "Monospaced,plain,12";
-            System.err.println("Warning: NULL font requested");
         }
 
         if (value.equals("default")) {
             if (get("theme.editor.fonts.default.font").equals("default")) {
-                System.err.println("Warning: default font loop detected!");
                 return new Font("Monospaced", Font.PLAIN, 12);
             } 
             return stringToFont(get("theme.editor.fonts.default.font"));
@@ -55,7 +53,6 @@ public class Preferences {
         String[] pieces = value.split(",");
 
         if(pieces.length != 3) {
-            System.err.println("Warning: Badly formatted font: [" + value + "]");
             return new Font("Monospaced", Font.PLAIN, 12);
         }
 
@@ -81,14 +78,12 @@ public class Preferences {
         }
 
         if (!fontExists(name)) {
-            System.err.println("Warning: substituting default font for missing font " + name);
             return new Font("Monospaced", Font.PLAIN, 12);
         }
 
         Font font = new Font(name, style, size);
 
         if(font == null) {
-            System.err.println("Warning: something untoward happened when creating the font object");
             font = new Font("Monospaced", Font.PLAIN, 12);
         }
 
@@ -212,7 +207,6 @@ public class Preferences {
             }
         }
         cachedFontList.put(fontName, false);
-        System.err.println("Warning: missing font " + fontName);
         return false;
     }
 
@@ -322,7 +316,6 @@ public class Preferences {
             if (key.endsWith(".default")) {
                 String trimmed = "theme." + key.substring(0, key.length()-8);
                 String value = get(trimmed);
-                System.err.println(trimmed + "=" + value);
 
                 newFile.set(trimmed, get(trimmed));
             }
