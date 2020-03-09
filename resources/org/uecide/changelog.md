@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* New application icon, and add icon to windows
 * Hide right panel when empty
 * Fix spaces in options
 * Added options handling
@@ -755,6 +756,7 @@ Changelog
 0.8.5
 -----
 
+* New application icon, and add icon to windows
 * Hide right panel when empty
 * Fix spaces in options
 * Added options handling

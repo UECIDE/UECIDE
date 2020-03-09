@@ -51,7 +51,7 @@ public class FancyDialog extends JDialog implements AnimationListener {
         questionText = question;
 
         try {
-            setIconImage(IconManager.getIcon(64, "apps.uecide").getImage());
+            setIconImage(IconManager.getIcon(64, "internal:uecide").getImage());
         } catch (Exception ex) {
         }
         

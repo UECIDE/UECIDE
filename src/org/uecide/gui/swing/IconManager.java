@@ -37,7 +37,7 @@ public class IconManager {
     public static CleverIcon getIcon(int size, String... name) throws IOException, MalformedURLException {
 
         synchronized (iconCache) {
-                String cacheName = String.join(",", name);
+            String cacheName = String.join(",", name);
 
             if (iconCache.get(cacheName + "." + size) != null) {
                 return iconCache.get(cacheName + "." + size);
@@ -90,6 +90,14 @@ public class IconManager {
     }
 
     static public URL[] getIconPaths(String name) throws IOException {
+        if (name.startsWith("internal:")) {
+            String[] bits = name.split(":");
+            URL[] paths = new URL[1];
+            paths[0] = FileManager.getURLFromPath("res://org/uecide/icons/internal/" + bits[1] + ".png");
+            System.err.println(paths[0]);
+            return paths;
+        }
+
         HashMap<String, String> iconData = iconSets.get(iconFamily);
         if (iconData == null) {
             iconData = iconSets.get("gnomic");
@@ -97,6 +105,7 @@ public class IconManager {
         if (iconData == null) {
             throw new IOException("No icon family could be loaded!");
         }
+
         String filename = iconData.get("icon." + name);
         if (filename == null) {
             iconData = iconSets.get("gnomic");

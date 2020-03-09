@@ -35,7 +35,7 @@ public class SketchFileView extends FileView {
     public Icon getIcon(File f) {
         try {
             if(Base.isSketchFolder(f)) {
-                return IconManager.getIcon(16, "apps.uecide");
+                return IconManager.getIcon(16, "internal:uecide");
             }
         } catch (Exception ex) {
             ex.printStackTrace();

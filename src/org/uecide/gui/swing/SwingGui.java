@@ -53,6 +53,8 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     AutoTab rightPane;
     AutoTab bottomPane;
 
+    TabPanel lastActiveTab = null;
+
     ArrayList<AutoTab> panes = new ArrayList<AutoTab>();
 
     static LookAndFeel laf = null;
@@ -87,7 +89,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         window.setLayout(new BorderLayout());
 
         try {
-            window.setIconImage(IconManager.getIcon(64, "apps.uecide").getImage());
+            window.setIconImage(IconManager.getIcon(64, "internal:uecide").getImage());
         } catch (Exception ex) {
         }
 
@@ -619,7 +621,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
                     JFrame f = new JFrame();
                     try {
-                        f.setIconImage(IconManager.getIcon(64, "apps.uecide").getImage());
+                        f.setIconImage(IconManager.getIcon(64, "internal:uecide").getImage());
                     } catch (Exception ex) {
                     }
  
@@ -738,6 +740,14 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     public boolean shouldAutoOpen() {
         return true;
+    }
+
+    public void setActiveTab(TabPanel p) {
+        lastActiveTab = p;
+    }
+
+    public TabPanel getActiveTab() {
+        return lastActiveTab;
     }
 
 }

@@ -10,9 +10,15 @@ import org.uecide.ContextEventListener;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Component;
+import java.awt.Toolkit;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Clipboard;
 
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
@@ -27,7 +33,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 
-public class CodeEditor extends TabPanel implements ContextEventListener {
+public class CodeEditor extends TabPanel implements ContextEventListener, FocusListener, CopyAndPaste {
     Context ctx;
     SketchFile file;
 
@@ -53,6 +59,7 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
         textArea = new RSyntaxTextArea((RSyntaxDocument)document);
         scrollPane = new RTextScrollPane(textArea);
         add(scrollPane, BorderLayout.CENTER);
+        textArea.addFocusListener(this);
         textArea.setText(f.getFileData());
         textArea.requestFocus();
         textArea.setAntiAliasingEnabled(Preferences.getBoolean("theme.editor.fonts.editor_aa"));
@@ -152,4 +159,25 @@ public class CodeEditor extends TabPanel implements ContextEventListener {
         }
 
     }
+
+    public void focusGained(FocusEvent evt) {
+        ((SwingGui)ctx.getGui()).setActiveTab(this);
+    }
+
+    public void focusLost(FocusEvent evt) {
+    }
+
+
+    public void copy() { textArea.copy(); }
+    public void cut() { textArea.cut(); }
+    public void paste() { textArea.paste(); }
+    public void selectAll() { textArea.selectAll(); }
+    public void copyAll(String prefix, String suffix) {
+        StringSelection selection = new StringSelection(prefix + "\n" + file.getFileData() + "\n" + suffix + "\n");
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(selection, selection);
+    }
+
+    public void undo() { textArea.undoLastAction(); }
+    public void redo() { textArea.redoLastAction(); }
 }

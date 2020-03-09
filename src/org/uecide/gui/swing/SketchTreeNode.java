@@ -34,7 +34,7 @@ public class SketchTreeNode extends SketchTreeNodeBase {
     }
 
     public ImageIcon getIcon(JTree tree) throws IOException {
-        return IconManager.getIcon(16, "apps.uecide");
+        return IconManager.getIcon(16, "internal:uecide");
     }
 
     public boolean updateChildren() {
