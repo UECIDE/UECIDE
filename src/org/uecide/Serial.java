@@ -417,7 +417,7 @@ public class Serial {
         int pnum = 0;
         clearExtraPorts();
 
-        PropertyFile sub = Base.preferences.getChildren("editor.serial.port");
+        PropertyFile sub = Preferences.getChildren("editor.serial.port");
         for (String k : sub.keySet()) {
             String pname = sub.get(k);
             if (Base.isPosix()) {

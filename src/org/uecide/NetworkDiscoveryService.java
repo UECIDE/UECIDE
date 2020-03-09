@@ -84,7 +84,6 @@ public class NetworkDiscoveryService extends org.uecide.Service {
                 }
             }
         } catch (Exception exc) {
-//            System.err.println(exc.toString());
         }
     }
 

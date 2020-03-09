@@ -18,6 +18,11 @@ public class CloseSessionAction extends Action {
 
     public boolean actionPerformed(Object[] args) throws ActionException {
 
+        // If we're closing a system context then let's just quit. 
+        if (ctx.isSystemContext()) {
+            System.exit(0);
+        }
+
         if (ctx.getSketch().isModified()) {
             TreeSet<SketchFile> modifiedFiles = ctx.getSketch().getModifiedFiles();
             String message = "Do you want to save *" + ctx.getSketch().getName() + "* before closing?\n\n";

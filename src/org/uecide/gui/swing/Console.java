@@ -109,6 +109,7 @@ public class Console extends TabPanel implements MouseWheelListener, ContextEven
                 case Message.WARNING: warning(m.getText()); break;
                 case Message.ERROR: error(m.getText()); break;
                 case Message.STREAM_MESSAGE: tty.feed(m.getText()); break;
+                case Message.STREAM_WARNING: tty.feed(m.getText()); break;
                 case Message.STREAM_ERROR: tty.feed(m.getText()); break;
             }
         }

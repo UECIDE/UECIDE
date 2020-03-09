@@ -376,7 +376,7 @@ public class Context {
             parentContext.rawMessageStream(e);
             return;
         }
-        gui.streamMessage(e);
+        triggerEvent("message", new Message(Message.STREAM_MESSAGE, e));
     }
 
     public void rawErrorStream(String e) {
@@ -384,7 +384,7 @@ public class Context {
             parentContext.rawErrorStream(e);
             return;
         }
-        gui.streamError(e);
+        triggerEvent("message", new Message(Message.STREAM_ERROR, e));
     }
 
     public void errorStream(String e) {

@@ -2509,7 +2509,7 @@ public class Sketch {
 
     public String getOption(String opt) {
         PropertyFile props = ctx.getMerged();
-        PropertyFile opts = Base.preferences.getChildren("board." + ctx.getBoard().getName() + ".options");
+        PropertyFile opts = Preferences.getChildren("board." + ctx.getBoard().getName() + ".options");
         String optval = opts.get(opt);
 
 
@@ -2628,7 +2628,7 @@ public class Sketch {
 
     public String getFlags(String type) {
         PropertyFile props = ctx.getMerged();
-        PropertyFile opts = Base.preferences.getChildren("board." + ctx.getBoard().getName() + ".options");
+        PropertyFile opts = Preferences.getChildren("board." + ctx.getBoard().getName() + ".options");
         TreeMap<String, String> options = getOptionGroups();
 
         String flags = "";

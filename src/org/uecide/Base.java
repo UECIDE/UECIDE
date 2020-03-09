@@ -62,6 +62,8 @@ import java.net.URL;
 import java.security.ProtectionDomain;
 import java.security.CodeSource;
 
+import java.awt.GraphicsEnvironment;
+
 public class Base {
 
     class ActionSpec {
@@ -125,11 +127,7 @@ public class Base {
 
     public static CommandLine cli = new CommandLine();
 
-    // Location for untitled items
-    public static PropertyFile preferences;
     public static PropertyFile session = new PropertyFile();
-
-    public static PropertyFile preferencesTree = new PropertyFile();
 
     public static PropertyFile webLinks;
 
@@ -248,7 +246,7 @@ public class Base {
     /*! The constructor is the main execution routine. */
     public Base(String[] args) throws IOException {
         Action.initActions();
-        cli.addParameter("debug",               "",         Boolean.class,  "cli.help.debug");
+//        cli.addParameter("debug",               "",         Boolean.class,  "cli.help.debug");
         cli.addParameter("verbose",             "",         Boolean.class,  "cli.help.verbose");
         cli.addParameter("exceptions",          "",         Boolean.class,  "cli.help.exceptions");
         cli.addParameter("headless",            "",         Boolean.class,  "cli.help.headless");
@@ -304,6 +302,10 @@ public class Base {
 
         String[] argv = cli.process(args);
 
+
+
+
+
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 Pattern pat = Pattern.compile(":\\/\\/([a-zA-Z0-9]+):([a-zA-Z0-9]+)@");
@@ -316,6 +318,9 @@ public class Base {
             }
         });
 
+
+
+
         i18n = new I18N("Core");
 
         if (cli.isSet("help")) {
@@ -323,15 +328,15 @@ public class Base {
             System.exit(0);
         }
 
-        headless = cli.isSet("headless");
-
         boolean doExit = false;
 
-        if (cli.isSet("mkmf")) {
-            headless = true;
-        }
 
-        Debug.setVerbose(cli.isSet("verbose"));
+
+        // Early debugging flags. Must be the first to process
+
+        if (cli.isSet("verbose")) {
+            Debug.setVerbose(cli.isSet("verbose"));
+        }
 
         overrideSettingsFolder = cli.getString("datadir");
 
@@ -345,27 +350,30 @@ public class Base {
 
 
 
-        if(isUnix()) {
-            if((System.getenv("DISPLAY") == null) || (System.getenv("DISPLAY").equals(""))) {
-                headless = true;
-            }
-        }
+        Context bootContext = createContext(null, "none", false);
+        bootContext.setSystemContext(true);
 
         PropertyFile versionInfo = new PropertyFile("/org/uecide/version.txt");
-
         RELEASE = versionInfo.get("Release");
         systemVersion = new Version(versionInfo.get("Version"));
 
-        Debug.message("Version: " + systemVersion);
+        // One-off single-shot commands that enforce a "none" GUI, or commands that
+        // want to run in a "none" GUI regardless of which GUI is selected.
 
         if (cli.isSet("version")) {
-            System.out.println(i18n.string("msg.version", systemVersion));
-            System.exit(0);
+            bootContext.message("UECIDE Version " + systemVersion);
+            bootContext.message("(c) 2020 Majenko Technologies");
+            bootContext.action("CloseSession");
         }
+
+
+
 
         initPlatform();
 
+
         if (cli.isSet("reset-preferences")) {
+            
             File prefsFile = getDataFile("preferences.txt");
             try {
                 prefsFile.delete();
@@ -376,10 +384,9 @@ public class Base {
             System.out.println(">>> All preferences reset to default! <<<");
         }
 
-        preferences = new PropertyFile(getDataFile("preferences.txt"), "/org/uecide/config/preferences.txt");
-        preferences.setPlatformAutoOverride(true);
+        Preferences.init();
 
-        if (preferences.getBoolean("editor.hwaccel")) {
+        if (Preferences.getBoolean("editor.hwaccel")) {
             Properties props = System.getProperties();
             props.setProperty("sun.java2d.opengl", "true");
         } else {
@@ -389,7 +396,7 @@ public class Base {
 
         platform.setSettingsFolderEnvironmentVariable();
 
-        if (preferences.getBoolean("network.offline")) {
+        if (Preferences.getBoolean("network.offline")) {
             setOfflineMode();
         }
 
@@ -402,182 +409,153 @@ public class Base {
         }
         
         if (cli.isSet("update")) {
-            try {
-                APT apt = APT.factory();
-                apt.update();
-            } catch (Exception ex) { error(ex); }
+            bootContext.action("AptUpdate");
             doExit = true;
         }
 
         if (cli.isSet("upgrade")) {
-            try {
-                APT apt = APT.factory();
-                Package[] pl = apt.getUpgradeList();
-                for (Package p : pl) {
-                    apt.upgradePackage(p);
-                }
-            } catch (Exception e) {
-                error(e);
-            }
+            bootContext.action("AptUpgrade");
             doExit = true;
         }
 
         if (cli.isSet("install")) {
-            try {
-                APT apt = APT.factory();
-                String packageName = cli.getString("install");
-                if (packageName == null) {
-                    System.err.println(i18n.string("err.selpkginst"));
-                } else {
-                    Package p = apt.getPackage(packageName);
-                    if (p == null) {
-                        System.err.println(i18n.string("err.pkgnotfound", packageName));
-                        System.err.println(i18n.string("msg.usesearch"));
-                    } else {
-                        System.out.println(i18n.string("msg.installing", p.getName()));
-                        apt.installPackage(p);
-                        System.out.println(i18n.string("msg.done"));
-                    }
-                }
-            } catch (Exception ex) { error(ex); }
+            String packageName = cli.getString("install");
+            bootContext.action("AptInstall", packageName);
             doExit = true;
         }
 
-        if (cli.isSet("remove-all")) {
-            try {
-                if (!cli.isSet("force")) {
-                    System.err.println(i18n.string("err.notremove"));
-                } else {
-                    APT apt = APT.factory();
-                    for (Package p : apt.getInstalledPackages()) {
-                        apt.uninstallPackage(p, true);
-                    }
-                }
-            } catch (Exception ex) { error(ex); }
-            doExit = true;
-        }
-            
         if (cli.isSet("remove")) {
-            try {
-                APT apt = APT.factory();
-                String packageName = cli.getString("remove");
-                if (packageName == null) {
-                    System.err.println(i18n.string("err.selpkguninst"));
-                    doExit = true;
-                }
-
-                Package p = apt.getPackage(packageName);
-                if (p == null) {
-                    System.err.println(i18n.string("err.notfound", packageName));
-                    System.err.println(i18n.string("msg.usesearch"));
-                } else {
-                    System.out.println(i18n.string("msg.uninstalling", p.getName()));
-                    apt.uninstallPackage(p, cli.isSet("force"));
-                }
-            } catch (Exception ex) { error(ex); }
+            String packageName = cli.getString("remove");
+            bootContext.action("AptRemove", packageName);
             doExit = true;
         }
 
-        if (cli.isSet("list")) {
-            try {
-                APT apt = APT.factory();
-                Package[] pkgs = apt.getPackages();
-                String format = "%-50s %10s %10s %s";
-                System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
-                ArrayList<Package> out = new ArrayList<Package>();
-                for (Package p : pkgs) {
-                    if (cli.isSet("section")) {
-                        if (p.get("Section") == null) { continue; }
-                        if (!p.get("Section").equals(cli.getString("section"))) { continue; }
-                    }
-                    if (cli.isSet("family")) {
-                        if (p.get("Family") == null) { continue; }
-                        if (!p.get("Family").equals(cli.getString("family"))) { continue; }
-                    }
-                    if (cli.isSet("group")) {
-                        if (p.get("Group") == null) { continue; }
-                        if (!p.get("Group").equals(cli.getString("group"))) { continue; }
-                    }
-                    if (cli.isSet("subgroup")) {
-                        if (p.get("Subgroup") == null) { continue; }
-                        if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
-                    }
+//        if (cli.isSet("remove-all")) {
+//            try {
+//                if (!cli.isSet("force")) {
+//                    System.err.println(i18n.string("err.notremove"));
+//                } else {
+//                    APT apt = APT.factory();
+//                    for (Package p : apt.getInstalledPackages()) {
+//                        apt.uninstallPackage(p, true);
+//                    }
+//                }
+//            } catch (Exception ex) { error(ex); }
+//            doExit = true;
+//        }
 
-                    String name = p.getName();
-                    Package instPack = apt.getInstalledPackage(p.getName());
-                    Version avail = p.getVersion();
-                    Version inst = null;
-                    String msg = "";
-                    if (instPack != null) {
-                        inst = instPack.getVersion();
-                        if (avail.compareTo(inst) > 0) {
-                            msg = i18n.string("apt.list.update");
-                        }
-                    }
-                    System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
-                    System.out.println("  " + p.getDescriptionLineOne());
-
-                }
-            } catch (Exception ex) { error(ex); }
-            doExit = true;
-        }
-                
-        if (cli.isSet("search")) {
-            try {
-                APT apt = APT.factory();
-                Package[] pkgs = apt.getPackages();
-                String format = "%-50s %10s %10s %s";
-                System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
-                ArrayList<Package> out = new ArrayList<Package>();
-                String term = cli.getString("search").toLowerCase();
-                for (Package p : pkgs) {
-                    if (cli.isSet("section")) {
-                        if (p.get("Section") == null) { continue; }
-                        if (!p.get("Section").equals(cli.getString("section"))) { continue; }
-                    }
-                    if (cli.isSet("family")) {
-                        if (p.get("Family") == null) { continue; }
-                        if (!p.get("Family").equals(cli.getString("family"))) { continue; }
-                    }
-                    if (cli.isSet("group")) {
-                        if (p.get("Group") == null) { continue; }
-                        if (!p.get("Group").equals(cli.getString("group"))) { continue; }
-                    }
-                    if (cli.isSet("subgroup")) {
-                        if (p.get("Subgroup") == null) { continue; }
-                        if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
-                    }
-
-                    String name = p.getName();
-                    Package instPack = apt.getInstalledPackage(p.getName());
-                    Version avail = p.getVersion();
-                    Version inst = null;
-                    String msg = "";
-                    if (instPack != null) {
-                        inst = instPack.getVersion();
-                        if (avail.compareTo(inst) > 0) {
-                            msg = i18n.string("apt.list.update");
-                        }
-                    }
-                    String comp = p.getName() + " " + p.getDescription();
-                    if (comp.toLowerCase().contains(term)) {
-                        System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
-                        System.out.println("  " + p.getDescriptionLineOne());
-                    }
-
-                }
-            } catch (Exception ex) { error(ex); }
-            doExit = true;
-        }
+//        if (cli.isSet("list")) {
+//            try {
+//                APT apt = APT.factory();
+//                Package[] pkgs = apt.getPackages();
+//                String format = "%-50s %10s %10s %s";
+//                System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
+//                ArrayList<Package> out = new ArrayList<Package>();
+//                for (Package p : pkgs) {
+//                    if (cli.isSet("section")) {
+//                        if (p.get("Section") == null) { continue; }
+//                        if (!p.get("Section").equals(cli.getString("section"))) { continue; }
+//                    }
+//                    if (cli.isSet("family")) {
+//                        if (p.get("Family") == null) { continue; }
+//                        if (!p.get("Family").equals(cli.getString("family"))) { continue; }
+//                    }
+//                    if (cli.isSet("group")) {
+//                        if (p.get("Group") == null) { continue; }
+//                        if (!p.get("Group").equals(cli.getString("group"))) { continue; }
+//                    }
+//                    if (cli.isSet("subgroup")) {
+//                        if (p.get("Subgroup") == null) { continue; }
+//                        if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
+//                    }
+//
+//                    String name = p.getName();
+//                    Package instPack = apt.getInstalledPackage(p.getName());
+//                    Version avail = p.getVersion();
+//                    Version inst = null;
+//                    String msg = "";
+//                    if (instPack != null) {
+//                        inst = instPack.getVersion();
+//                        if (avail.compareTo(inst) > 0) {
+//                            msg = i18n.string("apt.list.update");
+//                        }
+//                    }
+//                    System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+//                    System.out.println("  " + p.getDescriptionLineOne());
+//
+//                }
+//            } catch (Exception ex) { error(ex); }
+//            doExit = true;
+//        }
+//                
+//        if (cli.isSet("search")) {
+//            try {
+//                APT apt = APT.factory();
+//                Package[] pkgs = apt.getPackages();
+//                String format = "%-50s %10s %10s %s";
+//                System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
+//                ArrayList<Package> out = new ArrayList<Package>();
+//                String term = cli.getString("search").toLowerCase();
+//                for (Package p : pkgs) {
+//                    if (cli.isSet("section")) {
+//                        if (p.get("Section") == null) { continue; }
+//                        if (!p.get("Section").equals(cli.getString("section"))) { continue; }
+//                    }
+//                    if (cli.isSet("family")) {
+//                        if (p.get("Family") == null) { continue; }
+//                        if (!p.get("Family").equals(cli.getString("family"))) { continue; }
+//                    }
+//                    if (cli.isSet("group")) {
+//                        if (p.get("Group") == null) { continue; }
+//                        if (!p.get("Group").equals(cli.getString("group"))) { continue; }
+//                    }
+//                    if (cli.isSet("subgroup")) {
+//                        if (p.get("Subgroup") == null) { continue; }
+//                        if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
+//                    }
+//
+//                    String name = p.getName();
+//                    Package instPack = apt.getInstalledPackage(p.getName());
+//                    Version avail = p.getVersion();
+//                    Version inst = null;
+//                    String msg = "";
+//                    if (instPack != null) {
+//                        inst = instPack.getVersion();
+//                        if (avail.compareTo(inst) > 0) {
+//                            msg = i18n.string("apt.list.update");
+//                        }
+//                    }
+//                    String comp = p.getName() + " " + p.getDescription();
+//                    if (comp.toLowerCase().contains(term)) {
+//                        System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+//                        System.out.println("  " + p.getDescriptionLineOne());
+//                    }
+//
+//                }
+//            } catch (Exception ex) { error(ex); }
+//            doExit = true;
+//        }
 
         if (doExit) {
             System.exit(0);
         }
 
 
+
+
+
+
+
+
+
+
+
+
+
         // From here on in we create a new context, load a sketch into it if needed, then start our GUI, whatever that may be.
 
         // Our first task is to load all the settings.
+
 
         if (cli.isSet("cli")) {
             System.err.println("Warning: --cli is deprecated. Use --gui=cli instead");
@@ -591,6 +569,12 @@ public class Base {
 
         if (!cli.isSet("gui")) {
             cli.set("gui", "swing");
+        }
+
+        if (GraphicsEnvironment.isHeadless()) {
+            if (cli.getString("gui").equals("swing")) {
+                cli.set("gui", "none");
+            }
         }
 
         gui = cli.getString("gui");
@@ -632,15 +616,13 @@ public class Base {
 
         systemContext.getGui().splashMessage(i18n.string("splash.msg.assets"), 40);
         loadAssets();
-        buildPreferencesTree();
+        Preferences.buildPreferencesTree();
 
   //      ctx.runInitScripts();
         initMRU();
         systemContext.getGui().splashMessage(i18n.string("splash.msg.complete"), 100);
 
         ServiceManager.addService(new UsbDiscoveryService());
-        ServiceManager.addService(new BackgroundLibraryCompileService());
-//        ServiceManager.addService(new ChangedFileService());
         ServiceManager.addService(new NetworkDiscoveryService());
 //        ServiceManager.addService(new TreeUpdaterService());        
         ServiceManager.addService(new PortListUpdaterService());
@@ -730,8 +712,8 @@ public class Base {
         MCUList = new HashMap<File,Integer>();
 
         for(int i = 0; i < 10; i++) {
-            if(preferences.get("sketch.mru." + i) != null) {
-                File f = new File(preferences.get("sketch.mru." + i));
+            if(Preferences.get("sketch.mru." + i) != null) {
+                File f = new File(Preferences.get("sketch.mru." + i));
 
                 if(f.exists()) {
                     if(MRUList.indexOf(f) == -1) {
@@ -742,8 +724,8 @@ public class Base {
         }
 
         for(int i = 0; i < 10; i++) {
-            if(preferences.get("sketch.mcu." + i) != null) {
-                String[] mcuEntry = preferences.getArray("sketch.mcu." + i);
+            if(Preferences.get("sketch.mcu." + i) != null) {
+                String[] mcuEntry = Preferences.getArray("sketch.mcu." + i);
 
                 int hits = 0;
                 try {
@@ -791,9 +773,9 @@ public class Base {
 
         for(int i = 0; i < 10; i++) {
             if(i < MRUList.size()) {
-                preferences.set("sketch.mru." + i, MRUList.get(i).getAbsolutePath());
+                Preferences.set("sketch.mru." + i, MRUList.get(i).getAbsolutePath());
             } else {
-                preferences.unset("sketch.mru." + i);
+                Preferences.unset("sketch.mru." + i);
             }
         }
 
@@ -816,18 +798,15 @@ public class Base {
 
         int z = 0;
         for (Map.Entry<File,Integer> i : MCUList.entrySet()) {
-            preferences.set("sketch.mcu." + z, i.getKey().getAbsolutePath() + "::" + i.getValue());
+            Preferences.set("sketch.mcu." + z, i.getKey().getAbsolutePath() + "::" + i.getValue());
             z++;
         }
-
-
-        preferences.saveDelay();
     }
 
     /*! Get the default board to use if no current board can be found */
     public static Board getDefaultBoard() {
         Board tb;
-        String prefsBoard = preferences.get("board");
+        String prefsBoard = Preferences.get("board");
         String[] entries;
 
         if(boards.size() == 0) {
@@ -1149,12 +1128,12 @@ public class Base {
     }
 
     public static File getSketchbookFolder() {
-        String sbPath = preferences.get("locations.sketchbook");
+        String sbPath = Preferences.get("locations.sketchbook");
         if (sbPath == null) {
-            preferences.setFile("locations.sketchbook", platform.getDefaultSketchbookFolder());
+            Preferences.setFile("locations.sketchbook", platform.getDefaultSketchbookFolder());
             return platform.getDefaultSketchbookFolder();
         }
-        return new File(preferences.get("locations.sketchbook"));
+        return new File(Preferences.get("locations.sketchbook"));
     }
 
     protected File getDefaultSketchbookFolder() {
@@ -1235,9 +1214,6 @@ public class Base {
         return new File(System.getProperty("java.io.tmpdir"));
     }
 
-    public static void applyPreferences() {
-    }
-
     static String openLauncher;
     static public void open(String filename) {
         open(new String[] { filename });
@@ -1313,13 +1289,13 @@ public class Base {
         if (overrideSettingsFolder != null) {
             out = new File(overrideSettingsFolder);
         } else {
-            if ((preferences != null) && (preferences.getFile("locations.data") != null)) {
-                out = preferences.getFile("locations.data");
+            if (Preferences.getFile("locations.data") != null) {
+                out = Preferences.getFile("locations.data");
                 if (out.getName().equals("")) {
                     System.err.println("Warning: invalid data location detected in preferences file.");
                     System.err.println("         Ignoring and using system default instead.");
                     out = platform.getSettingsFolder();
-                    preferences.unset("locations.data");
+                    Preferences.unset("locations.data");
                 }
             } else {
                 File portable = new File(getJarLocation().getParentFile(), "portable");
@@ -1448,7 +1424,7 @@ public class Base {
         rescanTools();
         rescanLibraries();
         waitForAssetLoading();
-        buildPreferencesTree();
+        Preferences.buildPreferencesTree();
     }
 
     public static void rescanCompilers() {
@@ -1579,64 +1555,6 @@ public class Base {
         System.err.print(caller.getFileName() + " " + caller.getLineNumber() + " (" + caller.getMethodName() + "): " + msg);
     }
 
-    public static void buildPreferencesTree() {
-        preferencesTree = new PropertyFile();
-
-
-        for(Programmer c : programmers.values()) {
-            PropertyFile prefs = c.getProperties().getChildren("prefs");
-            for (String k : prefs.keySet()) {
-                prefs.setSource(k, "programmer:" + c.getName());
-            }
-            preferencesTree.mergeData(prefs);
-        }
-
-        for(Compiler c : compilers.values()) {
-            PropertyFile prefs = c.getProperties().getChildren("prefs");
-            for (String k : prefs.keySet()) {
-                prefs.setSource(k, "compiler:" + c.getName());
-            }
-            preferencesTree.mergeData(prefs);
-        }
-
-        for(Core c : cores.values()) {
-            PropertyFile prefs = c.getProperties().getChildren("prefs");
-            for (String k : prefs.keySet()) {
-                prefs.setSource(k, "core:" + c.getName());
-            }
-            preferencesTree.mergeData(prefs);
-        }
-
-        for(Board c : boards.values()) {
-            PropertyFile prefs = c.getProperties().getChildren("prefs");
-            for (String k : prefs.keySet()) {
-                prefs.setSource(k, "board:" + c.getName());
-            }
-            preferencesTree.mergeData(prefs);
-        }
-
-        loadPreferencesTree("/org/uecide/config/prefs.txt");
-    }
-
-    public static void registerPreference(String key, String type, String name, String def) {
-        registerPreference(key, type, name, def, null);
-    }
-        
-    public static void registerPreference(String key, String type, String name, String def, String plat) {
-        preferencesTree.set(key + ".type", type);
-        preferencesTree.set(key + ".name", name);
-        if (plat == null) {
-            preferencesTree.set(key + ".default", def);
-        } else {
-            preferencesTree.set(key + ".default." + plat, def);
-        }
-    }
-
-    public static void loadPreferencesTree(String res) {
-        PropertyFile pf = new PropertyFile(res);
-        preferencesTree.mergeData(pf);
-    }
-
     // This little routine works through each and every board, core and compiler and
     // runs any "init.script.*" lines.
     public static void runInitScripts() {
@@ -1708,7 +1626,7 @@ public class Base {
                 pw.close();
             }
 
-            APT reqapt = APT.factory();
+            APT reqapt = APT.factory(systemContext);
             reqapt.update(true, true);
             Package[] reqpkgs = reqapt.getPackages();
             for (Package p : reqpkgs) {

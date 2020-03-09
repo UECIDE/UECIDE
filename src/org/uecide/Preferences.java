@@ -1,90 +1,19 @@
-/*
- * Copyright (c) 2015, Majenko Technologies
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
- * * Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * * Neither the name of Majenko Technologies nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.uecide;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
-import java.net.URI;
+import java.io.File;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.event.*;
+import java.util.HashMap;
+import java.util.ArrayList;
 
-import javax.swing.tree.*;
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.GraphicsEnvironment;
 
-import org.json.simple.*;
-import org.json.simple.parser.*;
+public class Preferences {
 
-import javax.swing.filechooser.*;
+    public static PropertyFile preferences = new PropertyFile();
+    public static PropertyFile preferencesTree = new PropertyFile();
 
-
-import say.swing.*;
-
-import de.muntjak.tinylookandfeel.*;
-
-public class Preferences extends JDialog implements TreeSelectionListener {
-
-    ScrollablePanel advancedTreeBody;
-
-    PropertyFile changedPrefs = new PropertyFile();
-
-    static class KVPair implements Comparable {
-        String key;
-        String value;
-
-        public KVPair(String k, String v) {
-            key = k;
-            value = v;
-        }
-
-        public String toString() {
-            return value;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public int compareTo(Object b) {
-            KVPair bo = (KVPair)b;
-            return value.compareTo(bo.getValue());
-        }
-    }
 
     static public String fontToString(Font f) {
         String font = f.getName();
@@ -166,179 +95,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return font;
     }
 
-    public Dimension getMinimumSize() {
-        return new Dimension(700, 500);
-    }
-
-    public Dimension getPreferredSize() {
-        return new Dimension(700, 500);
-    }
-
     public Preferences() {
-        // setup dialog for the prefs
-
-        JMenuBar menuBar = new JMenuBar();
-        JMenu themeMenu = new JMenu("Theme");
-        JMenuItem importTheme = new JMenuItem("Import Theme");
-        JMenuItem exportTheme = new JMenuItem("Export Theme");
-        menuBar.add(themeMenu);
-        themeMenu.add(importTheme);
-        themeMenu.add(exportTheme);
-
-        importTheme.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-    
-                FileNameExtensionFilter ff = new FileNameExtensionFilter("UECIDE Theme", "utheme");
-                JFileChooser fc = new JFileChooser();
-                fc.addChoosableFileFilter(ff);
-                fc.setFileFilter(ff);
-                int n = fc.showOpenDialog(Preferences.this);
-                if (n == JFileChooser.APPROVE_OPTION) {
-                    importThemeData(fc.getSelectedFile());
-                }
-            }
-        });
-
-        exportTheme.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                FileNameExtensionFilter ff = new FileNameExtensionFilter("UECIDE Theme", "utheme");
-                JFileChooser fc = new JFileChooser();
-                fc.addChoosableFileFilter(ff);
-                fc.setFileFilter(ff);
-                int n = fc.showSaveDialog(Preferences.this);
-                if (n == JFileChooser.APPROVE_OPTION) {
-                    exportThemeData(fc.getSelectedFile());
-                }
-            }
-        });
-
-
-        setTitle(Base.i18n.string("win.preferences"));
-        setResizable(true);
-        setLayout(new BorderLayout());
-        setModalityType(ModalityType.APPLICATION_MODAL);
-        JPanel outer = new JPanel();
-        add(menuBar, BorderLayout.NORTH);
-
-        outer.setBorder(new EmptyBorder(10, 10, 10, 10));
-        outer.setLayout(new BorderLayout());
-
-        Box buttonLine = Box.createHorizontalBox();
-
-        buttonLine.add(new JLabel(Base.i18n.string("misc.theme") + ": "));
-
-        JButton themeLoad = new JButton(Base.i18n.string("misc.load"));
-        themeLoad.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-
-                FileNameExtensionFilter ff = new FileNameExtensionFilter("UECIDE Theme", "utheme");
-                JFileChooser fc = new JFileChooser();
-                fc.addChoosableFileFilter(ff);
-                fc.setFileFilter(ff);
-                int n = fc.showOpenDialog(Preferences.this);
-                if (n == JFileChooser.APPROVE_OPTION) {
-                    importThemeData(fc.getSelectedFile());
-                }
-            }
-        });
-
-        buttonLine.add(themeLoad);
-
-        JButton themeSave = new JButton(Base.i18n.string("misc.save"));
-        themeSave.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                FileNameExtensionFilter ff = new FileNameExtensionFilter("UECIDE Theme", "utheme");
-                JFileChooser fc = new JFileChooser();
-                fc.addChoosableFileFilter(ff);
-                fc.setFileFilter(ff);
-                int n = fc.showSaveDialog(Preferences.this);
-                if (n == JFileChooser.APPROVE_OPTION) {
-                    exportThemeData(fc.getSelectedFile());
-                }
-            }
-        });
-
-        buttonLine.add(themeSave);
-
-        buttonLine.add(Box.createHorizontalGlue());
-
-        JButton applyButton = new JButton(Base.i18n.string("misc.apply"));
-        applyButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    applyFrame();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
-        JButton cancelButton = new JButton(Base.i18n.string("misc.cancel"));
-        cancelButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                disposeFrame();
-            }
-        });
-        JButton okButton = new JButton(Base.i18n.string("misc.ok"));
-        okButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    applyFrame();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-                disposeFrame();
-            }
-        });
-
-        buttonLine.add(cancelButton);
-        buttonLine.add(applyButton);
-        buttonLine.add(okButton);
-
-        outer.add(buttonLine, BorderLayout.SOUTH);
-
-/*
-        for(Class<?> pluginClass : Base.plugins.values()) {
-            try {
-                Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
-                if (getPreferencesTree != null) {
-                    PropertyFile pf = (PropertyFile)(getPreferencesTree.invoke(null));
-                    Base.preferencesTree.mergeData(pf);
-                }
-            } catch (Exception e) {
-            }
-        }
-
-        for(Class<?> pluginClass : Base.lookAndFeels.values()) {
-            try {
-                Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");
-                if (getPreferencesTree != null) {
-                    PropertyFile pf = (PropertyFile)(getPreferencesTree.invoke(null));
-                    Base.preferencesTree.mergeData(pf);
-                }
-            } catch (Exception e) {
-            }
-        }
-*/
-        JPanel treeSettings = new JPanel();
-        populateAdvancedSettings(treeSettings);
-        outer.add(treeSettings, BorderLayout.CENTER);
-
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                disposeFrame();
-            }
-        });
-
-        add(outer, BorderLayout.CENTER);
-
-        ActionListener disposer = new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                disposeFrame();
-            }
-        };
-
-        pack();
-        setVisible(true);
     }
 
     static class PrefTreeEntry {
@@ -355,558 +112,14 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         public String toString() { return name; }
     }
 
-    public void populateAdvancedSettings(JPanel p) {
-        p.setLayout(new BorderLayout());
-
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(Base.i18n.string("tree.preferences"));
-        DefaultTreeModel treeModel = new DefaultTreeModel(root);
-
-        JTree tree = new JTree(treeModel);
-        advancedTreeBody = new ScrollablePanel();
-        advancedTreeBody.setLayout(new GridBagLayout());
-
-        
-        JScrollPane tscroll = new JScrollPane(tree);
-        JScrollPane bscroll = new JScrollPane(advancedTreeBody, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tscroll, bscroll);
-        split.setDividerLocation(250);
-
-        advancedTreeBody.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        populatePreferencesTree(root, Base.preferencesTree, null);
-
-        tree.expandPath(new TreePath(root.getPath()));
-        tree.setRootVisible(true);
-
-        p.add(split, BorderLayout.CENTER);
-        tree.addTreeSelectionListener(this);
-    }
-
-    public void populatePreferencesTree(DefaultMutableTreeNode root, PropertyFile pf, String parents) {
-
-        for (String prop : pf.childKeys()) {
-            if (pf.keyExists(prop + ".type")) {
-                if (pf.get(prop + ".type").equals("section")) {
-                    String par = prop;
-                    if (parents != null) {
-                        par = parents + "." + prop;
-                    }
-                    PrefTreeEntry pe = new PrefTreeEntry(par, pf.get(prop + ".name"));
-                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(pe);
-                    root.add(node);
-                    populatePreferencesTree(node, pf.getChildren(prop), par);
-                }
-            }
-        }
-    }
-
-
-    /**
-     * Close the window after an OK or Cancel.
-     */
-    protected void disposeFrame() {
-        dispose();
-    }
-
-
-    /**
-     * Change internal settings based on what was chosen in the prefs,
-     * then send a message to the editor saying that it's time to do the same.
-     */
-    protected void applyFrame() throws IOException {
-
-        // Two special areas need to have any old subkeys removed - the port list and the library list.
-
-        PropertyFile sub = changedPrefs.getChildren("editor.serial.ports");
-        if (sub.size() > 0) {
-            Base.preferences.removeAll("editor.serial.ports");
-        }
-
-        sub = changedPrefs.getChildren("locations.library");
-        if (sub.size() > 0) {
-            Base.preferences.removeAll("locations.library");
-        }
-
-        Base.preferences.mergeData(changedPrefs);
-        Base.preferences.save();
-        Base.applyPreferences();
-        Base.cleanAndScanAllSettings();
-    }
-
-    @SuppressWarnings("unchecked")
-    public Box addPreferenceEntry(final String key) {
-
-        final String fkey = key;
-        Box b = Box.createHorizontalBox();
-        b.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        String type = Base.preferencesTree.get(key + ".type");
-        if (type == null) {
-            return null;
-        }
-
-        String name = Base.preferencesTree.get(key + ".name");
-        if (name == null) {
-            return null;
-        }
-
-        // Load the default setting
-        String def = Base.preferencesTree.getPlatformSpecific(key + ".default");
-        if (def == null) {
-            def = "";
-        }
-
-        // Override it with our saved preference
-        String value = Base.preferences.get(key);
-        if (value == null) {
-            value = def;
-        }
-
-        // Override it again with whatever we have already edited
-        String preset = changedPrefs.get(fkey);
-        if (preset != null) {
-            value = preset;
-        }
-
-        if (type.equals("section")) {
-            return null;
-        } else if (type.equals("dirselect")) {
-            b.add(new JLabel(name + ": "));
-            final JTextField f = new JTextField();
-            f.setText(value);
-
-            f.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                }
-            });
-
-            f.addKeyListener(new KeyListener() {
-                public void keyReleased(KeyEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                }
-
-                public void keyPressed(KeyEvent e) {
-                }
-
-                public void keyTyped(KeyEvent e) {
-                }
-            });
-
-            b.add(f);
-            JButton btn = new JButton("Select...");
-            btn.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JFileChooser fc = new JFileChooser();
-                    fc.setDialogType(JFileChooser.OPEN_DIALOG);
-                    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                    fc.setCurrentDirectory(new File(f.getText()));
-                    fc.setDialogTitle("Select Directory");
-                    int n = fc.showDialog(Preferences.this, "Select");
-                    if (n == JFileChooser.APPROVE_OPTION) {
-                        f.setText(fc.getSelectedFile().getAbsolutePath());
-                        changedPrefs.set(fkey, f.getText());
-                    }
-                }
-            });
-            b.add(btn);
-        } else if (type.equals("fileselect")) {
-            b.add(new JLabel(name + ": "));
-            final JTextField f = new JTextField();
-            f.setText(value);
-
-            f.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                }
-            });
-
-            f.addKeyListener(new KeyListener() {
-                public void keyReleased(KeyEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                }
-
-                public void keyPressed(KeyEvent e) {
-                }
-
-                public void keyTyped(KeyEvent e) {
-                }
-            });
-
-            b.add(f);
-            JButton btn = new JButton("Select...");
-            btn.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JFileChooser fc = new JFileChooser();
-                    fc.setDialogType(JFileChooser.OPEN_DIALOG);
-                    fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                    fc.setCurrentDirectory(new File(f.getText()));
-                    fc.setDialogTitle("Select File");
-                    int n = fc.showDialog(Preferences.this, Base.i18n.string("misc.select"));
-                    if (n == JFileChooser.APPROVE_OPTION) {
-                        f.setText(fc.getSelectedFile().getAbsolutePath());
-                        changedPrefs.set(fkey, f.getText());
-                    }
-                }
-            });
-            b.add(btn);
-        } else if (type.equals("colorselect")) {
-            b.add(new JLabel(name + ": "));
-
-            final JTextField f = new JTextField();
-
-            final JLabel sample = new JLabel("   ");
-            sample.setOpaque(true);
-            f.setText(value);
-            try {
-                sample.setBackground(Color.decode(f.getText()));
-            } catch (Exception e) {
-            }
-
-            f.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                    try {
-                        sample.setBackground(Color.decode(f.getText()));
-                    } catch (Exception ex) {
-                    }
-                }
-            });
-
-            f.addKeyListener(new KeyListener() {
-                public void keyReleased(KeyEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                    try {
-                        sample.setBackground(Color.decode(f.getText()));
-                    } catch (Exception ex) {
-                    }
-                }
-
-                public void keyPressed(KeyEvent e) {
-                }
-
-                public void keyTyped(KeyEvent e) {
-                }
-            });
-
-            b.add(f);
-            b.add(sample);
-
-            JButton btn = new JButton("Select...");
-            btn.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-
-
-                    JColorChooser fc = new JColorChooser();
-
-                    Color orig = Color.BLACK;
-
-                    try {
-                        orig = Color.decode(f.getText());
-                    } catch (Exception ex) {
-                    }
-                    Color clr = fc.showDialog(Preferences.this, "Select Color", orig);
-
-                    if(clr != null) {
-                        changedPrefs.setColor(fkey, clr);
-                        f.setText(String.format("#%02x%02x%02x", clr.getRed(), clr.getGreen(), clr.getBlue()));
-                        sample.setBackground(clr);
-                    }
-                }
-            });
-            b.add(btn);
-
-                
-        } else if (type.equals("fontselect")) {
-            b.add(new JLabel(name + ": "));
-            final JTextField f = new JTextField();
-            f.setText(value);
-
-            f.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                }
-            });
-
-            f.addKeyListener(new KeyListener() {
-                public void keyReleased(KeyEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                }
-
-                public void keyPressed(KeyEvent e) {
-                }
-
-                public void keyTyped(KeyEvent e) {
-                }
-            });
-
-            b.add(f);
-            JButton btn = new JButton("Select...");
-            btn.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-
-
-                    JFontChooser fc = new JFontChooser();
-                    fc.setSelectedFont(stringToFont(f.getText()));
-                    int res = fc.showDialog(Preferences.this);
-
-                    if(res == JFontChooser.OK_OPTION) {
-                        Font fnt = fc.getSelectedFont();
-                        changedPrefs.setFont(fkey, fnt);
-                        f.setText(fontToString(fnt));
-                    }
-                }
-            });
-            b.add(btn);
-        } else if (type.equals("string")) {
-            b.add(new JLabel(name + ": "));
-            final JTextField f = new JTextField();
-            f.setText(value);
-
-            f.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                }
-            });
-
-            f.addKeyListener(new KeyListener() {
-                public void keyReleased(KeyEvent e) {
-                    changedPrefs.set(fkey, f.getText());
-                }
-
-                public void keyPressed(KeyEvent e) {
-                }
-
-                public void keyTyped(KeyEvent e) {
-                }
-            });
-            b.add(f);
-        } else if (type.equals("checkbox")) {
-            JCheckBox cb = new JCheckBox(name);
-            cb.setSelected(value.equals("true"));
-            cb.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JCheckBox ecb = (JCheckBox)e.getSource();
-                    changedPrefs.setBoolean(fkey, ecb.isSelected());
-                }
-            });
-            b.add(cb);
-        } else if (type.equals("range")) {
-            b.add(new JLabel(name + ": "));
-            final int vmin = Base.preferencesTree.getInteger(key + ".min");
-            final int vmax = Base.preferencesTree.getInteger(key + ".max");
-            int ival = vmin;
-            try {
-                ival = Integer.parseInt(value);
-            } catch (Exception ee) {
-                ival = vmin;
-            }
-                
-            final JSpinner sb = new JSpinner(new SpinnerNumberModel(
-                ival, vmin, vmax, 1
-            ));
-
-            sb.addChangeListener(new ChangeListener() {
-                public void stateChanged(ChangeEvent e) {
-                    int val = (Integer)sb.getValue();
-                    changedPrefs.setInteger(fkey, val);
-                }
-            });
-
-
-            b.add(sb);
-        } else if (type.equals("iconlist")) {
-//            b.add(new JLabel(name + ": "));
-//            HashMap<String, String> options = IconManager.getIconList();
-//
-//            ArrayList<KVPair> kvlist = new ArrayList<KVPair>();
-//            for (String k : options.keySet()) {
-//                KVPair kv = new KVPair(k, options.get(k));
-//                kvlist.add(kv);
-//            }
-//            KVPair opList[] = kvlist.toArray(new KVPair[0]);
-//            Arrays.sort(opList);
-//            JComboBox cb = new JComboBox(opList);
-//
-//            for (KVPair op : opList) {
-//                if (op.getKey().equals(get(key))) {
-//                    cb.setSelectedItem(op);
-//                }
-//            }
-//
-//            cb.addActionListener(new ActionListener() {
-//                public void actionPerformed(ActionEvent e) {
-//                    JComboBox widget = (JComboBox)e.getSource();
-//                    KVPair data = (KVPair)widget.getSelectedItem();
-//                    changedPrefs.set(fkey, data.getKey());
-//                }
-//            });
-//            b.add(cb);
-//
-//    
-        } else if (type.equals("dropdown")) {
-            b.add(new JLabel(name + ": "));
-
-            HashMap<String, String> options = new HashMap<String, String>();
-
-
-            if (Base.preferencesTree.get(key + ".options.script") != null) {
-                String source = Base.preferencesTree.getSource(key + ".options.script");
-                Context ctx = new Context();;
-                ctx.mergeSettings(Base.preferencesTree);
-                String keyToExecute = key + ".options.script";
-                if (source != null) {
-                    if (source.startsWith("board:")) { ctx.setBoard(Base.boards.get(source.substring(6))); } 
-                    if (source.startsWith("core:")) { ctx.setCore(Base.cores.get(source.substring(5))); } 
-                    if (source.startsWith("compiler:")) { ctx.setCompiler(Base.compilers.get(source.substring(9))); } 
-                    keyToExecute = "prefs." + keyToExecute;
-                }
-                ctx.dispose();
-
-                Object hash = ctx.executeKey(keyToExecute);
-                if (hash instanceof HashMap) {
-                    options = (HashMap<String, String>)hash;
-                }
-
-            } else {
-                PropertyFile opts = Base.preferencesTree.getChildren(key + ".options");
-                String[] keys = opts.childKeys();
-                for (String k : keys) {
-                    options.put(k, opts.get(k));
-                }
-            }
-
-            ArrayList<KVPair> kvlist = new ArrayList<KVPair>();
-            for (String k : options.keySet()) {
-                KVPair kv = new KVPair(k, options.get(k));
-                kvlist.add(kv);
-            }
-            KVPair opList[] = kvlist.toArray(new KVPair[0]);
-            Arrays.sort(opList);
-            JComboBox cb = new JComboBox(opList);
-
-            for (KVPair op : opList) {
-                if (op.getKey().equals(get(key))) {
-                    cb.setSelectedItem(op);
-                }
-            }
-
-            cb.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JComboBox widget = (JComboBox)e.getSource();
-                    KVPair data = (KVPair)widget.getSelectedItem();
-                    changedPrefs.set(fkey, data.getKey());
-                }
-            });
-            b.add(cb);
-        } else if (type.equals("liblist")) {
-            JPanel p = new JPanel();
-            p.setLayout(new BorderLayout());
-            final LibraryLocationList liblist = new LibraryLocationList();
-
-            PropertyFile items = changedPrefs.getChildren(key);
-
-            if (items.size() == 0) {
-                items = Base.preferences.getChildren(key);
-            }
-
-            String[] subKeys = items.childKeys();
-            for (String subKey : subKeys) {
-                String itemName = items.get(subKey + ".name");
-                String itemPath = items.get(subKey + ".path");
-                liblist.addLibraryLocation(itemName, itemPath);
-            }
-
-            liblist.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    HashMap<String, String> list = liblist.getLibraryList();
-                    for (String k : list.keySet()) {
-                        String libName = k.trim();
-                        String libPath = list.get(k);
-                        String libCode = libName.toLowerCase().replaceAll("\\s+","");
-
-                        changedPrefs.set(key + "." + libCode + ".name", libName);
-                        changedPrefs.set(key + "." + libCode + ".path", libPath);
-                    }
-                }
-            });
-
-            p.add(new JLabel(name + ":"), BorderLayout.NORTH);
-            p.add(liblist, BorderLayout.CENTER);
-            b.add(p);
-        } else if (type.equals("portlist")) {
-            JPanel p = new JPanel();
-            p.setLayout(new BorderLayout());
-            final PortList portlist = new PortList();
-
-            PropertyFile items = changedPrefs.getChildren(key);
-
-            if (items.size() == 0) {
-                items = Base.preferences.getChildren(key);
-            }
-
-            String[] subKeys = items.childKeys();
-            for (String subKey : subKeys) {
-                String itemName = items.get(subKey);
-                portlist.addPort(itemName);
-            }
-
-            portlist.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    ArrayList<String> list = portlist.getPortList();
-                    int i = 0;
-                    for (String k : list) {
-                        String libName = k.trim();
-                        changedPrefs.set(key + "." + i, k);
-                        i++;
-                    }
-                }
-            });
-
-            p.add(new JLabel(name + ":"), BorderLayout.NORTH);
-            p.add(portlist, BorderLayout.CENTER);
-            b.add(p);
-        } else {
-            b.add(new JLabel(name + ": "));
-            b.add(new JLabel(value));
-        }
-
-        b.setBorder(new EmptyBorder(2, 2, 2, 2));
-
-        return b;
-    }
-
-    static class ScrollablePanel extends JPanel implements Scrollable {
-        public Dimension getPreferredScrollableViewportSize() {
-            return super.getPreferredSize();
-        }
-
-        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-           return 10;
-        }
-
-        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-            return ((orientation == SwingConstants.VERTICAL) ? visibleRect.height : visibleRect.width) - 10;
-        }
-
-        public boolean getScrollableTracksViewportWidth() {
-            return true;
-        }
-
-        public boolean getScrollableTracksViewportHeight() {
-            return false;
-        }
-    }
-
     // Interface to the global preferences.  These will first check the user's preferences
     // file for the value and if not found then will get the value from the .default entry
     // for the key in the preferences tree.
 
     public static String get(String key) {
-        String data = Base.preferences.get(key);
+        String data = preferences.get(key);
         if (data == null) {
-            data = Base.preferencesTree.get(key + ".default");
+            data = preferencesTree.get(key + ".default");
         }
         return data;
     }
@@ -1063,70 +276,34 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         return val;
     }
 
-    public static void set(String key, String value) { Base.preferences.set(key, value); Base.preferences.saveDelay(); }
-    public static void setBoolean(String key, Boolean value) { Base.preferences.setBoolean(key, value); Base.preferences.saveDelay(); }
-    public static void setColor(String key, Color value) { Base.preferences.setColor(key, value); Base.preferences.saveDelay(); }
-    public static void setFile(String key, File value) { Base.preferences.setFile(key, value); Base.preferences.saveDelay(); }
+    public static void set(String key, String value) { preferences.set(key, value); preferences.saveDelay(); }
+    public static void setBoolean(String key, Boolean value) { preferences.setBoolean(key, value); preferences.saveDelay(); }
+    public static void setColor(String key, Color value) { preferences.setColor(key, value); preferences.saveDelay(); }
+    public static void setFile(String key, File value) { preferences.setFile(key, value); preferences.saveDelay(); }
 
     public static void setFont(String key, Font value) { 
-        if (Base.preferences != null) {
-            Base.preferences.setFont(key, value); 
-            Base.preferences.saveDelay(); 
+        if (preferences != null) {
+            preferences.setFont(key, value); 
+            preferences.saveDelay(); 
         }
     }
 
     public static void setInteger(String key, int value) { 
-        if (Base.preferences != null) {
-            Base.preferences.setInteger(key, value); 
-            Base.preferences.saveDelay(); 
+        if (preferences != null) {
+            preferences.setInteger(key, value); 
+            preferences.saveDelay(); 
         }
     }
 
-    public static void setFloat(String key, float value) { Base.preferences.setFloat(key, value); Base.preferences.saveDelay(); }
+    public static void setFloat(String key, float value) { preferences.setFloat(key, value); preferences.saveDelay(); }
 
-    public static void save() { Base.preferences.save(); }
+    public static void save() { preferences.save(); }
 
-    public static void unset(String key) { Base.preferences.unset(key); Base.preferences.saveDelay(); }
+    public static void unset(String key) { preferences.unset(key); preferences.saveDelay(); }
         
-    public void valueChanged(TreeSelectionEvent e) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)(e.getPath().getLastPathComponent());
-        PrefTreeEntry pe = (PrefTreeEntry)(node.getUserObject());
-
-        PropertyFile pf = Base.preferencesTree.getChildren(pe.getKey());
-        advancedTreeBody.removeAll();
-        advancedTreeBody.setBorder(new EmptyBorder(15, 15, 15, 15));
-        GridBagConstraints c = new GridBagConstraints();
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 1;
-        c.gridheight = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.weightx = 1.0;
-
-        int size = 0;
-        for (String pref : pf.childKeys()) {
-            if (pf.keyExists(pref + ".type")) {
-                Box b = addPreferenceEntry(pe.getKey() + "." + pref);
-                if (b != null) {
-                    Dimension s = b.getPreferredSize();
-                    size += s.height;
-                    advancedTreeBody.add(b, c);
-                    c.gridy++;
-                }
-            }
-        }
-
-        Dimension s1 = advancedTreeBody.getPreferredSize();
-        advancedTreeBody.setSize(new Dimension(size, s1.width));
-
-        advancedTreeBody.validate();
-        advancedTreeBody.repaint();
-    }
-
-    public void importThemeData(File f) {
+    public static void importThemeData(File f) {
         PropertyFile pf = new PropertyFile(f);
-        changedPrefs.mergeData(pf);
+        preferences.mergeData(pf);
     }
 
     public void exportThemeData(File f) {
@@ -1136,7 +313,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
             f = new File(fpath);
         }
 
-        PropertyFile pf = Base.preferencesTree.getChildren("theme");
+        PropertyFile pf = preferencesTree.getChildren("theme");
         PropertyFile newFile = new PropertyFile();
 
         ArrayList<String> keys = pf.keySet();
@@ -1150,15 +327,75 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                 newFile.set(trimmed, get(trimmed));
             }
         }
+        newFile.save(f);
+    }
 
-        if (f.exists()) {
-            int n = JOptionPane.showConfirmDialog(this, "File exists. Overwrite?", "Warning", JOptionPane.WARNING_MESSAGE);
-            if (n == JOptionPane.OK_OPTION) {
-                newFile.save(f);
+    public static void buildPreferencesTree() {
+        preferencesTree = new PropertyFile();
+
+
+        for(Programmer c : Base.programmers.values()) {
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "programmer:" + c.getName());
             }
-        } else {
-            newFile.save(f);
+            preferencesTree.mergeData(prefs);
         }
+
+        for(Compiler c : Base.compilers.values()) {
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "compiler:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
+        }
+
+        for(Core c : Base.cores.values()) {
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "core:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
+        }
+
+        for(Board c : Base.boards.values()) {
+            PropertyFile prefs = c.getProperties().getChildren("prefs");
+            for (String k : prefs.keySet()) {
+                prefs.setSource(k, "board:" + c.getName());
+            }
+            preferencesTree.mergeData(prefs);
+        }
+
+        loadPreferencesTree("/org/uecide/config/prefs.txt");
+    }
+
+    public static void registerPreference(String key, String type, String name, String def) {
+        registerPreference(key, type, name, def, null);
+    }
+
+    public static void registerPreference(String key, String type, String name, String def, String plat) {
+        preferencesTree.set(key + ".type", type);
+        preferencesTree.set(key + ".name", name);
+        if (plat == null) {
+            preferencesTree.set(key + ".default", def);
+        } else {
+            preferencesTree.set(key + ".default." + plat, def);
+        }
+    }
+
+    public static void loadPreferencesTree(String res) {
+        PropertyFile pf = new PropertyFile(res);
+        preferencesTree.mergeData(pf);
+    }
+
+
+    public static void init() {
+        preferences = new PropertyFile(Base.getDataFile("preferences.txt"), "/org/uecide/config/preferences.txt");
+        preferences.setPlatformAutoOverride(true);
+    }
+
+    public static PropertyFile getChildren(String key) {
+        return preferences.getChildren(key);
     }
 
 }

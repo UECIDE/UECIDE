@@ -49,15 +49,19 @@ public class Package implements Comparable, Serializable {
 
     public int stateCode = 0;
 
+    Context ctx;
+
     public int getState() { return stateCode; }
     public void setState(int c) { 
         stateCode = c; 
     }
 
-    public Package() {
+    public Package(Context context) {
+        ctx = context;
     }
 
-    public Package(String data) {
+    public Package(Context context, String data) {
+        ctx = context;
         parseData(data);
     }
 
@@ -300,13 +304,13 @@ public class Package implements Comparable, Serializable {
                         }
                         in = Base.class.getResourceAsStream(reps + "/" + properties.get("Filename"));
                         if (in == null) {
-                            System.err.println("Error: Resource not found: " + reps + "/" + properties.get("Filename"));
+                            ctx.error("Error: Resource not found: " + reps + "/" + properties.get("Filename"));
                             return false;
                         }
                     } else if (repo.startsWith("file://")) {
                         return false;
                     } else {
-                        System.err.println("Error: No URI handler for " + repo);
+                        ctx.error("Error: No URI handler for " + repo);
                         return false;
                     }
 
@@ -325,7 +329,7 @@ public class Package implements Comparable, Serializable {
                         tname += " ";
                     }
 
-                    System.out.print("\rDownloading " + tname + " [.........................]");
+                    ctx.rawMessageStream("\rDownloading " + tname + " [.........................]");
 
                     String existingSha = properties.get("SHA256");
                     MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -341,15 +345,15 @@ public class Package implements Comparable, Serializable {
                             if (now != ts) {
                                 ts = now;
                                 lastVal = tpct;
-                                System.out.print("\rDownloading " + tname + " [");
+                                ctx.rawMessageStream("\rDownloading " + tname + " [");
                                 for (int i = 0; i < 25; i++) {
                                     if (i <= tpct) {
-                                        System.out.print("#");
+                                        ctx.rawMessageStream("#");
                                     } else {
-                                        System.out.print(".");
+                                        ctx.rawMessageStream(".");
                                     }
                                 }
-                                System.out.print("] ");
+                                ctx.rawMessageStream("] ");
 
                                 long diff = now - start;
                                 if (diff > 0) {
@@ -360,11 +364,11 @@ public class Package implements Comparable, Serializable {
                                     long min = (trem / 60) % 60;
                                     long hour = (trem / 3600);
                                     if (bps >= (1024 * 1024)) {
-                                        System.out.print(String.format("%7.2f MBps %02d:%02d:%02d", (float)bps / 1048576f, hour, min, sec));
+                                        ctx.rawMessageStream(String.format("%7.2f MBps %02d:%02d:%02d", (float)bps / 1048576f, hour, min, sec));
                                     } else if (bps >= 1024) {
-                                        System.out.print(String.format("%7.2f kBps %02d:%02d:%02d", (float)bps / 1024f, hour, min, sec));
+                                        ctx.rawMessageStream(String.format("%7.2f kBps %02d:%02d:%02d", (float)bps / 1024f, hour, min, sec));
                                     } else {
-                                        System.out.print(String.format("%4d Bps    %02d:%02d:%02d", bps, hour, min, sec));
+                                        ctx.rawMessageStream(String.format("%4d Bps    %02d:%02d:%02d", bps, hour, min, sec));
                                     }
                                 }
                             }
@@ -382,12 +386,12 @@ public class Package implements Comparable, Serializable {
                     }
 
                     if (!hexString.toString().equalsIgnoreCase(existingSha)) {
-                        System.out.println("\rDownloading " + tname + " [#########################] [31mchecksum error[0m[0K");
+                        ctx.error("\rDownloading " + tname + " [#########################] checksum error                 ");
                         Base.tryDelete(downloadTo);
                         return false;
                     }
 
-                    System.out.println("\rDownloading " + tname + " [#########################] done[0K");
+                    ctx.message("\rDownloading " + tname + " [#########################] done                         ");
 
                     if (checkFileIntegrity(folder)) {
                         return true;
@@ -395,8 +399,8 @@ public class Package implements Comparable, Serializable {
                 } catch (FileNotFoundException ignore) {
                 } catch (Exception e) {
                     errorMessage = e.toString();
-                    System.err.println();
-                    System.err.println("[31mDownload failed: " + errorMessage + "[0m");
+                    ctx.error("");
+                    ctx.error("Download failed: " + errorMessage);
                     if (downloadTo.exists()) {
                         Base.tryDelete(downloadTo);
                     }
@@ -417,12 +421,12 @@ public class Package implements Comparable, Serializable {
     public boolean doExtractPackage(File src, File db, File root) {
 
         try {
-            System.out.print("Installing " + getName() + " ... ");
+            ctx.message("Installing " + getName() + " ... ");
             DebFile df = new DebFile(src);
             File pf = new File(db, getName());
             pf.mkdirs();
             df.extract(pf, root);
-            System.out.println("done");
+            ctx.message("done");
         } catch (Exception e) {
             Base.error(e);
             return false;

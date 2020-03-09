@@ -663,7 +663,7 @@ public class Library implements Comparable {
 
         // And finally let's work through the categories.
 
-        PropertyFile liblocs = Base.preferences.getChildren("locations.library");
+        PropertyFile liblocs = Preferences.getChildren("locations.library");
 
         for (String k : liblocs.childKeys()) {
             String cName = liblocs.get(k + ".name");

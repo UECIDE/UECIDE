@@ -180,7 +180,7 @@ public class CliGui extends Gui implements ContextEventListener {
         String line;
 
         try {
-            _apt = APT.factory();
+            _apt = APT.factory(ctx);
         } catch (IOException ex) {
             ctx.error(ex);
         }
@@ -578,6 +578,9 @@ public class CliGui extends Gui implements ContextEventListener {
                 case Message.NORMAL: message(m.getText()); break;
                 case Message.WARNING: warning(m.getText()); break;
                 case Message.ERROR: error(m.getText()); break;
+                case Message.STREAM_MESSAGE: streamMessage(m.getText()); break;
+                case Message.STREAM_WARNING: streamWarning(m.getText()); break;
+                case Message.STREAM_ERROR: streamError(m.getText()); break;
             }
         }
     }

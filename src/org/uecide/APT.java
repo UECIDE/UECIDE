@@ -44,6 +44,8 @@ public class APT {
     File packagesFolder;
     File packagesDB;
 
+    Context ctx;
+
     HashMap<String, Package> cachedPackages;
     HashMap<String, Package> installedPackages;
 
@@ -51,28 +53,30 @@ public class APT {
 
     static APT apt = null;
 
-    public APT(String rootPath) throws FileNotFoundException, IOException {
+    public APT(Context context, String rootPath) throws FileNotFoundException, IOException {
+        ctx = context;
         root = new File(rootPath);
         initRepository();
     }
 
-    public APT(File rootFile) throws FileNotFoundException, IOException {
+    public APT(Context context, File rootFile) throws FileNotFoundException, IOException {
+        ctx = context;
         root = rootFile;
         initRepository();
     }
 
     public void makeTree() {
         if (!aptFolder.exists()) {  
-            if (!aptFolder.mkdirs()) { System.err.println("Unable to make apt folder"); return; }
+            if (!aptFolder.mkdirs()) { ctx.error("Unable to make apt folder"); return; }
         }
         if (!dbFolder.exists()) {
-            if (!dbFolder.mkdir()) { System.err.println("Unable to make db folder"); }
+            if (!dbFolder.mkdir()) { ctx.error("Unable to make db folder"); return; }
         }
         if (!cacheFolder.exists()) {
-            if (!cacheFolder.mkdir()) { System.err.println("Unable to make cache folder"); }
+            if (!cacheFolder.mkdir()) { ctx.error("Unable to make cache folder"); return; }
         }
         if (!packagesFolder.exists()) {
-            if (!packagesFolder.mkdir()) { System.err.println("Unable to make packages folder"); }
+            if (!packagesFolder.mkdir()) { ctx.error("Unable to make packages folder"); return; }
         }
     }
 
@@ -183,7 +187,7 @@ public class APT {
             while ((line = in.readLine()) != null) {
                 if (line.equals("")) {
                     if (chunk.toString().length() > 0) {
-                        Package p = new Package(chunk.toString());
+                        Package p = new Package(ctx, chunk.toString());
                         if (p.isValid) {
                             out.put(p.getName(), p);
                         }
@@ -197,7 +201,7 @@ public class APT {
             in.close();
             fis.close();
             if (chunk.toString().length() > 0) {
-                Package p = new Package(chunk.toString());
+                Package p = new Package(ctx, chunk.toString());
                 if (p.isValid) {
                     out.put(p.getName(), p);
                 }
@@ -286,12 +290,12 @@ public class APT {
         }
 
         Package[] ul = getUpgradeList();
-        System.out.println(ul.length + " packages can be upgraded.");
+        ctx.message(ul.length + " packages can be upgraded.");
     }
 
     public void listPackages(String section) {
         String format = "%-50s %10s %10s %s";
-        System.out.println(String.format(format, "Package", "Installed", "Available", ""));
+        ctx.message(String.format(format, "Package", "Installed", "Available", ""));
         Package[] plist = getPackages(section);
         for (Package p : plist) {
             if ((section != null) && (!(p.getSection().equals(section)))) {
@@ -307,7 +311,7 @@ public class APT {
                     msg = "UPDATE!";
                 }
             }
-            System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
+            ctx.message(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
         }
         for (Package p : installedPackages.values()) {
             if ((section != null) && (!(p.getSection().equals(section)))) {
@@ -318,7 +322,7 @@ public class APT {
             Version inst = null;
             String msg = "";
             if (cachedPackages.get(name) == null) {
-                System.out.println(String.format(format, name, avail.toString(), "", msg));
+                ctx.message(String.format(format, name, avail.toString(), "", msg));
             }
         }
     }
@@ -343,7 +347,6 @@ public class APT {
         ArrayList<Package> out = new ArrayList<Package>();
         for (Package p : cachedPackages.values()) {
             if (p.getPriority().equals("required")) {
-System.err.println("Required package " + p.getName());
                 out.add(p);
             }
         }
@@ -378,7 +381,7 @@ System.err.println("Required package " + p.getName());
             while ((adep = depList.poll()) != null) {
                 Package foundPkg = cachedPackages.get(adep);
                 if (foundPkg == null) {
-                    System.err.println("Broken dependency: " + adep);
+                    ctx.error("Broken dependency: " + adep);
                 } else {
                     if (pkgList.get(adep) == null) {
                         pkgList.put(adep, foundPkg);
@@ -427,13 +430,13 @@ System.err.println("Required package " + p.getName());
         for (Package dep : deps) {
             if (!isInstalled(dep) || isUpgradable(dep)) {
                 if (!dep.fetchPackage(cacheFolder)) {
-                    System.err.println("Error downloading " + dep);
+                    ctx.error("Error downloading " + dep);
                     return;
                 }
             }
         }
         if (!p.fetchPackage(cacheFolder)) {
-            System.err.println("Error downloading " + p);
+            ctx.error("Error downloading " + p);
         }
 
         for (Package dep : deps) {
@@ -453,13 +456,13 @@ System.err.println("Required package " + p.getName());
         for (Package dep : deps) {
             if (!isInstalled(dep)) {
                 if (!dep.fetchPackage(cacheFolder)) {
-                    System.err.println("Error downloading " + dep);
+                    ctx.error("Error downloading " + dep);
                     return;
                 }
             }
         }
         if (!p.fetchPackage(cacheFolder)) {
-            System.err.println("Error downloading " + p);
+            ctx.error("Error downloading " + p);
         }
 
         for (Package dep : deps) {
@@ -528,29 +531,29 @@ System.err.println("Required package " + p.getName());
         for (Package dep : deps) {
             recursivelyUninstallPackage(dep);
         }
-        System.out.println("Uninstalling " + p);
+        ctx.message("Uninstalling " + p);
         uninstallPackage(p, false);
     }
 
     public boolean uninstallPackage(Package p, boolean force) {
         if (!isInstalled(p)) {
-            System.err.println(p.getName() + " is not installed.");
+            ctx.error(p.getName() + " is not installed.");
             return false;
         }
         try {
             if (!force) {
                 Package[] deps = getDependants(p);
                 if (deps.length > 0) {
-                    System.err.println(p.getName() + " is required by:");
+                    ctx.error(p.getName() + " is required by:");
                     for (Package dep : deps) {
-                        System.err.println("    " + dep.getName());
+                        ctx.bullet(dep.getName());
                     }
-                    System.err.println("It cannot be removed.");
+                    ctx.error("It cannot be removed.");
                     return false;
                 }
             }
 
-            System.out.print("Uninstalling " + p.getName() + " ... ");
+            ctx.message("Uninstalling " + p.getName() + " ... ");
             
             File pdir = new File(packagesFolder, p.getName());
             if (pdir.exists()) {
@@ -605,7 +608,7 @@ System.err.println("Required package " + p.getName());
                 
             }
             initRepository();
-            System.out.println("done");
+            ctx.message("done");
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -706,7 +709,7 @@ System.err.println("Required package " + p.getName());
                 if (inst == null) {
                     inst = cachedPackages.get(dep);
                     if (inst == null) {
-                        System.err.println("Error: Unresolved dependency: " + dep);
+                        ctx.error("Error: Unresolved dependency: " + dep);
                     } else {
                         install.add(inst);
                         madeChanges = true;
@@ -733,7 +736,7 @@ System.err.println("Required package " + p.getName());
                 if (inst == null) {
                     inst = cachedPackages.get(dep);
                     if (inst == null) {
-                        System.err.println("Error: Unresolved dependency: " + dep);
+                        ctx.error("Error: Unresolved dependency: " + dep);
                     } else {
                         install.add(inst);
                         madeChanges = true;
@@ -757,7 +760,7 @@ System.err.println("Required package " + p.getName());
         return installedPackages.values();
     }
 
-    public static APT factory() throws IOException {
+    public static APT factory(Context context) throws IOException {
         if (apt == null) {
             File dd = Base.getDataFolder();
 
@@ -771,7 +774,7 @@ System.err.println("Required package " + p.getName());
                 dbFolder.mkdirs();
             }
 
-            apt = new APT(dd);
+            apt = new APT(context, dd);
         }
         return apt;
     }

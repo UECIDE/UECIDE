@@ -251,46 +251,4 @@ public class DebFile {
 
         return files;
     }
-
-/*
-                } else {
-                    try {
-                        }
-                        installedFiles.put(dest.getAbsolutePath(), tsize);
-                    } catch (Exception fex) {
-                        Base.error("Error extracting " + dest + ": " + fex + " (ignoring)");
-                    }
-                }
-                te = tar.getNextTarEntry();
-            }
-            for (String link : symbolicLinks.keySet()) {
-                String tgt = symbolicLinks.get(link);
-                File linkFile = new File(root, link);
-                File linkParent = linkFile.getParentFile();
-                File troot = root;
-                if (!tgt.startsWith("./")) {
-                    troot = linkParent;
-                }
-                File tgtFile = new File(troot, tgt); //linkParent, tgt);
-                FileInputStream copyFrom = new FileInputStream(tgtFile);
-                FileOutputStream copyTo = new FileOutputStream(linkFile);
-                byte[] copyBuffer = new byte[1024];
-                int bytesCopied = 0;
-
-                while ((bytesCopied = copyFrom.read(copyBuffer, 0, 1024)) > 0) {
-                    copyTo.write(copyBuffer, 0, bytesCopied);
-                }
-                copyFrom.close();
-                copyTo.close();
-                linkFile.setExecutable(tgtFile.canExecute());
-                linkFile.setReadable(tgtFile.canRead());
-                linkFile.setWritable(tgtFile.canWrite());
-            }
-        } catch (Exception e) {
-            Base.error(e);
-        }
-        return installedFiles;
-    }
-*/
-
 }

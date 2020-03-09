@@ -94,7 +94,6 @@ public class IconManager {
             String[] bits = name.split(":");
             URL[] paths = new URL[1];
             paths[0] = FileManager.getURLFromPath("res://org/uecide/icons/internal/" + bits[1] + ".png");
-            System.err.println(paths[0]);
             return paths;
         }
 
