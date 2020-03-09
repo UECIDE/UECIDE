@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Hide right panel when empty
 * Fix spaces in options
 * Added options handling
 * Improvements to gui startup handling
@@ -754,6 +755,7 @@ Changelog
 0.8.5
 -----
 
+* Hide right panel when empty
 * Fix spaces in options
 * Added options handling
 * Improvements to gui startup handling

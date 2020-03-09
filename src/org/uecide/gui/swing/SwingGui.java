@@ -86,6 +86,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         window = new JFrame();
         window.setLayout(new BorderLayout());
 
+        try {
+            window.setIconImage(IconManager.getIcon(64, "apps.uecide").getImage());
+        } catch (Exception ex) {
+        }
+
         menu = new JMenuBar();
 
         fileMenu = new FileMenu(ctx);
@@ -613,6 +618,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                     }
 
                     JFrame f = new JFrame();
+                    try {
+                        f.setIconImage(IconManager.getIcon(64, "apps.uecide").getImage());
+                    } catch (Exception ex) {
+                    }
+ 
                     JPanel pan = new JPanel();
                     AutoTab t = new AutoTab();
                     t.setSeparateWindow(true);

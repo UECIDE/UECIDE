@@ -3,8 +3,10 @@ package org.uecide.gui.swing;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JFrame;
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.BorderLayout;
@@ -47,6 +49,11 @@ public class FancyDialog extends JDialog implements AnimationListener {
 //        setSize(300, 200);
         defaultValue = def;
         questionText = question;
+
+        try {
+            setIconImage(IconManager.getIcon(64, "apps.uecide").getImage());
+        } catch (Exception ex) {
+        }
         
         setLayout(new BorderLayout());
         buttons = new JPanel();
@@ -67,7 +74,6 @@ public class FancyDialog extends JDialog implements AnimationListener {
 
         add(buttons, BorderLayout.SOUTH);
         pack();
-
 
         Dimension d = getSize();
 //        d.width *= 1.1;
@@ -144,6 +150,11 @@ public class FancyDialog extends JDialog implements AnimationListener {
             }
         });
         buttons.add(cancel);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                cancel.requestFocus();
+            }
+        });
     }
 
     void iOkCancel() {

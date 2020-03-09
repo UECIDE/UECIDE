@@ -22,7 +22,6 @@ public class FileMenu extends JMenu {
     RecentFileMenu recentMenu;
     FrequentFileMenu frequentMenu;
     ExampleFileMenu examplesMenu;
-    JMenuItem revertMenu;
     JMenuItem closeMenu;
     JMenuItem saveMenu;
     JMenuItem saveAsMenu;
@@ -68,9 +67,6 @@ public class FileMenu extends JMenu {
         add(examplesMenu);
 
         addSeparator();
-
-        revertMenu = new JMenuItem("Revert File (TODO)");
-        add(revertMenu);
 
         closeMenu = new JMenuItem("Close");
         closeMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, defaultModifiers));
