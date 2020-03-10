@@ -43,6 +43,7 @@ public class UObjectLabel extends JLabel {
             setIcon(new CleverIcon(16, object.getIcon()));
         } catch (Exception ex) {
         }
+        if (object == null) return;
         setText(object.getDescription());
     }
 }

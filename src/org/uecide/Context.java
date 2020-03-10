@@ -165,7 +165,11 @@ public class Context {
         listeners.add(target);
     }
 
-    // Getters for all the above.
+    public void stopListeningForEvent(String event, ContextEventListener target) {
+        if (contextEventListeners.get(event) == null) return;
+        ArrayList<ContextEventListener> listeners = contextEventListeners.get(event);
+        listeners.remove(target);
+    }
 
     public Programmer getProgrammer() { return programmer; }
     public Board getBoard() { return board; }

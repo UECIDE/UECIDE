@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Cleanup of base
 * Made preferences self-contained
 * Most of edit menu done
 * New application icon, and add icon to windows
@@ -758,6 +759,7 @@ Changelog
 0.8.5
 -----
 
+* Cleanup of base
 * Made preferences self-contained
 * Most of edit menu done
 * New application icon, and add icon to windows

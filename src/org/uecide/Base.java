@@ -411,6 +411,12 @@ public class Base {
             doExit = true;
         }
 
+        if (cli.isSet("search")) {
+            String packageName = cli.getString("search");
+            bootContext.action("AptSearch", packageName);
+            doExit = true;
+        }
+
 //        if (cli.isSet("remove-all")) {
 //            try {
 //                if (!cli.isSet("force")) {

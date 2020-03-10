@@ -38,6 +38,7 @@ public class vc_option extends VariableCommand {
         String[] bits = args.split("\\.");
 
         if (bits.length < 2) {
+System.err.println(args);
             throw new VariableCommandException("Syntax Error");
         }
 
@@ -50,14 +51,14 @@ public class vc_option extends VariableCommand {
         String optval = ctx.getSketch().getOption(opt);
 
         if (optval == null) {
-            throw new VariableCommandException("Invalid Option");
+            return "ERR";
         }
 
         String val = "options." + opt + "." + optval + "." + key;
         PropertyFile props = ctx.getMerged();
         String retval = props.get(val);
         if (retval == null) {
-            throw new VariableCommandException("Invalid Option Value");
+            return "ERR";
         }
         return retval;
     }
