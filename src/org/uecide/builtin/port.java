@@ -144,7 +144,7 @@ public class port extends BuiltinCommand {
                                     int newvid = sp.getVID();
                                     int newpid = sp.getPID();
 
-                                    if (Base.isWindows()) { // Can't do it yet
+                                    if (UECIDE.isWindows()) { // Can't do it yet
                                         ctx.set("port.found", port);
                                         return true;
                                     }
@@ -181,7 +181,7 @@ public class port extends BuiltinCommand {
             UsbHub rootHub = services.getRootUsbHub();
             return getAllUsbDevices(rootHub);
         } catch (Exception e) { 
-            Base.error(e);
+            UECIDE.error(e);
         }
         return null;
     }
@@ -204,7 +204,7 @@ public class port extends BuiltinCommand {
                 }
             }
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
         return devs;
     }

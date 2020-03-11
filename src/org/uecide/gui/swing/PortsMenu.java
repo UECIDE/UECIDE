@@ -1,6 +1,6 @@
 package org.uecide.gui.swing;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.CommunicationPort;
 
@@ -38,7 +38,7 @@ public class PortsMenu extends JMenu implements MenuListener {
 
     public void menuSelected(MenuEvent e) {
         removeAll();
-        for (CommunicationPort port : Base.communicationPorts) {
+        for (CommunicationPort port : UECIDE.communicationPorts) {
             PortsMenuItem i = new PortsMenuItem(ctx, port);
             add(i);
         }

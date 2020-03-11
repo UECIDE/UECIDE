@@ -23,7 +23,7 @@ public class TinyNightlyLAF extends LookAndFeel {
             }
 
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
 
     }

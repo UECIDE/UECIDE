@@ -11,7 +11,7 @@ public class MotifLAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 }

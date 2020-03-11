@@ -100,9 +100,9 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
     }
 
     public HashMap<String, String> getUSBAttributes() {
-        if (Base.isLinux()) {
+        if (UECIDE.isLinux()) {
             return getUSBAttributesLinux();
-        } else if (Base.isMacOS()) {
+        } else if (UECIDE.isMacOS()) {
             return getUSBAttributesMacOS();
         }
         return null;
@@ -213,7 +213,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                             String vid = String.format("%04x", Integer.parseInt(par.get("idVendor")));
                             String pid = String.format("%04x", Integer.parseInt(par.get("idProduct")));
 
-                            for (Board b : Base.boards.values()) {
+                            for (Board b : UECIDE.boards.values()) {
                                 if (b.get("usb.vid") != null && b.get("usb.pid") != null) {
                                     if (b.get("usb.vid").equals(vid) && b.get("usb.pid").equals(pid)) {
                                         board = b;
@@ -289,7 +289,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 String pid = reader.readLine();
                 reader.close();
 
-                for (Board b : Base.boards.values()) {
+                for (Board b : UECIDE.boards.values()) {
                     if (b.get("usb.vid") != null && b.get("usb.pid") != null) {
                         if (b.get("usb.vid").equals(vid) && b.get("usb.pid").equals(pid)) {
                             board = b;
@@ -310,7 +310,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             }
             return portName + " (" + manufacturer + " " + product + ")";
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return portName;
         }
     }
@@ -486,7 +486,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
 
     public String getBaseName() {
         String n = serialPort.getSystemPortName();
-        if (Base.isWindows()) { 
+        if (UECIDE.isWindows()) { 
             return n;
         } else {
             File f = new File(n);
@@ -504,9 +504,9 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
 
 
     public int getVID() {
-        if (Base.isLinux()) {
+        if (UECIDE.isLinux()) {
             return getVIDPIDLinux("idVendor");
-        } else if (Base.isMacOS()) {
+        } else if (UECIDE.isMacOS()) {
             return getVIDPIDMacOS("idVendor");
         } else {
             return 0;
@@ -514,9 +514,9 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
     }
 
     public int getPID() {
-        if (Base.isLinux()) {
+        if (UECIDE.isLinux()) {
             return getVIDPIDLinux("idProduct");
-        } else if (Base.isMacOS()) {
+        } else if (UECIDE.isMacOS()) {
             return getVIDPIDMacOS("idProduct");
         } else {
             return 0;
@@ -562,7 +562,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             int vid = Integer.parseInt(vidstr, 16);
             return vid;
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return 0;
         }
     }
@@ -607,7 +607,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
 
 
     public boolean exists() {
-        if (Base.isWindows()) {
+        if (UECIDE.isWindows()) {
             return true;
         } 
         File f = new File(portName);

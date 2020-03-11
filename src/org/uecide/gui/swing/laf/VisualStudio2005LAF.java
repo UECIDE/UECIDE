@@ -8,17 +8,17 @@ public class VisualStudio2005LAF extends LookAndFeel {
     public String getName() { return "Office XP"; }
 
     public void applyLAF() {
-        if (!Base.isWindows()) {
-            Base.error("The selected Look and Feel is only compatible with Windows. Select another.");
+        if (!UECIDE.isWindows()) {
+            UECIDE.error("The selected Look and Feel is only compatible with Windows. Select another.");
             return;
         }
         try {
             UIManager.setLookAndFeel("org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel");
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
-    public boolean isCompatible() { return Base.isWindows(); }
+    public boolean isCompatible() { return UECIDE.isWindows(); }
 
 }

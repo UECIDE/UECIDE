@@ -8,18 +8,18 @@ public class Office2003LAF extends LookAndFeel {
     public String getName() { return "Office 2003"; }
 
     public void applyLAF() {
-        if (!Base.isWindows()) {
-            Base.error("The selected Look and Feel is only compatible with Windows. Select another.");
+        if (!UECIDE.isWindows()) {
+            UECIDE.error("The selected Look and Feel is only compatible with Windows. Select another.");
             return;
         }
 
         try {
             UIManager.setLookAndFeel("org.fife.plaf.Office2003.Office2003LookAndFeel");
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
-    public boolean isCompatible() { return Base.isWindows(); }
+    public boolean isCompatible() { return UECIDE.isWindows(); }
 
 }

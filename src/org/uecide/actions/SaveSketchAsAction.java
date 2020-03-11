@@ -1,6 +1,6 @@
 package org.uecide.actions;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class SaveSketchAsAction extends Action {
                     return ctx.getSketch().saveAs((File)args[0]);
                 } else if (args[0] instanceof String) { // It was provided as a simple filename
                     // Save sketch as
-                    return ctx.getSketch().saveAs(new File(Base.getSketchbookFolder(), (String)args[0]));
+                    return ctx.getSketch().saveAs(new File(UECIDE.getSketchbookFolder(), (String)args[0]));
                 } else {
                     throw new BadArgumentActionException();
                 }
@@ -35,7 +35,7 @@ public class SaveSketchAsAction extends Action {
 
             // No filename - if it's untitled then ask for a filename.
 
-            File f = ctx.gui.askSketchFilename("Save sketch as...", Base.getSketchbookFolder());
+            File f = ctx.gui.askSketchFilename("Save sketch as...", UECIDE.getSketchbookFolder());
             if (f == null) {    
                 return false;
             }

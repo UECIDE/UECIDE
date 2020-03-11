@@ -1,6 +1,6 @@
 package org.uecide.gui.swing;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.Compiler;
 
@@ -50,7 +50,7 @@ public class CompilersMenu extends JMenu implements MenuListener {
 
     public void menuSelected(MenuEvent e) {
         removeAll();
-        for (Compiler compiler : Base.compilers.values()) {
+        for (Compiler compiler : UECIDE.compilers.values()) {
             if (compiler.worksWith(ctx.getBoard())) {
                 CompilersMenuItem menu = new CompilersMenuItem(ctx, compiler);
                 add(menu);

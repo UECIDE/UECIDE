@@ -1,6 +1,6 @@
 package org.uecide.gui.swing;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 
 import java.io.File;
 
@@ -8,7 +8,7 @@ import javax.swing.filechooser.FileFilter;
 
 public class SketchFolderFilter extends FileFilter {
     public boolean accept(File f) {
-        if(Base.isSketchFolder(f)) {
+        if(UECIDE.isSketchFolder(f)) {
             return true;
         }
 
@@ -20,6 +20,6 @@ public class SketchFolderFilter extends FileFilter {
     }
 
     public String getDescription() {
-        return Base.i18n.string("filter.sketch");
+        return UECIDE.i18n.string("filter.sketch");
     }
 }

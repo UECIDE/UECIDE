@@ -11,7 +11,7 @@ public class MetalLAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 

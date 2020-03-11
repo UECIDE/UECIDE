@@ -40,7 +40,7 @@ import javax.swing.UIManager;
 
 import com.apple.eio.FileManager;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.PropertyFile;
 
 /**
@@ -54,12 +54,12 @@ public class Platform extends org.uecide.Platform {
             // hacked that in, bit by bit, over the years
             UIManager.put("Component.visualMargin", new Insets(1, 1, 1, 1));
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
 
-    public void init(Base base) {
+    public void init(UECIDE base) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
 //        ThinkDifferent.init(base);
         probeInfo();
@@ -109,7 +109,7 @@ public class Platform extends org.uecide.Platform {
         try {
             return FileManager.findFolder(kUserDomain, kDomainLibraryFolderType);
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return null;
         }
     }
@@ -119,7 +119,7 @@ public class Platform extends org.uecide.Platform {
         try {
             return FileManager.findFolder(kUserDomain, kDocumentsFolderType);
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return null;
         }
     }

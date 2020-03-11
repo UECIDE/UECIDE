@@ -51,7 +51,7 @@ public class Serial {
     static HashMap<String, SerialPort> serialPorts = new HashMap<String, SerialPort>();
 
     public static boolean waitLock(String name) {
-        if (Base.isLinux()) {
+        if (UECIDE.isLinux()) {
             int timeout = 1000;
             String bn = new File(name).getName();
             File lock = new File("/var/lock/", "LCK.." + bn);
@@ -71,7 +71,7 @@ public class Serial {
     }
 
     public static void lockPort(String name) {
-        if (Base.isLinux()) {
+        if (UECIDE.isLinux()) {
             String bn = new File(name).getName();
             File lock = new File("/var/lock/", "LCK.." + bn);
             String procName = ManagementFactory.getRuntimeMXBean().getName();
@@ -86,7 +86,7 @@ public class Serial {
     }
 
     public static void unlockPort(String name) {
-        if (Base.isLinux()) {
+        if (UECIDE.isLinux()) {
             String bn = new File(name).getName();
             File lock = new File("/var/lock/", "LCK.." + bn);
             if (lock.exists()) {
@@ -105,7 +105,7 @@ public class Serial {
         }
 
         if(port == null) {
-            Base.error("The port could not be found.\nCheck you have the right port selected in the Hardware menu.");
+            UECIDE.error("The port could not be found.\nCheck you have the right port selected in the Hardware menu.");
             return null;
         }
 
@@ -121,7 +121,7 @@ public class Serial {
                 Debug.message("Purged and closed " + name);
             } else {
                 if (!waitLock(name)) {
-                    Base.error("Timeout waiting for lock on port");
+                    UECIDE.error("Timeout waiting for lock on port");
                     return null;
                 }
             }
@@ -132,7 +132,7 @@ public class Serial {
             try {
                 Thread.sleep(100); // Arduino has this, so I guess we should too.
             } catch(Exception e) {
-                Base.error(e);
+                UECIDE.error(e);
             }
 
             // If we're on linux then check for a lock on the port:
@@ -142,7 +142,7 @@ public class Serial {
             Debug.message("Re-opened port");
 
             if(!port.isOpen()) {
-                Base.error("The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.");
+                UECIDE.error("The port could not be opened.\nCheck you have the right port\nselected in the Hardware menu.");
                 return null;
             }
 
@@ -151,7 +151,7 @@ public class Serial {
             return port;
 
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
 
         return null;
@@ -175,13 +175,13 @@ public class Serial {
             unlockPort(p.getSystemPortName());
             Debug.message("Port closed OK");
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
 
     }
 
     public static CommunicationPort getPortByName(String name) {
-        for (CommunicationPort cp : Base.communicationPorts) {
+        for (CommunicationPort cp : UECIDE.communicationPorts) {
             if (cp.toString().equals(name)) {
                 return cp;
             }
@@ -203,7 +203,7 @@ public class Serial {
             nsp.setNumDataBits(8);
             return nsp;
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
 
         return null;
@@ -297,9 +297,9 @@ public class Serial {
 
         fillExtraPorts();
 
-        if(Base.isLinux()) {
+        if(UECIDE.isLinux()) {
             names = getPortListLinux();
-        } else if(Base.isMacOS()) {
+        } else if(UECIDE.isMacOS()) {
             names = getPortListOSX();
         } else {
             names = getPortListDefault();
@@ -310,7 +310,7 @@ public class Serial {
 
         names.addAll(extraPorts);
 
-        for (CommunicationPort port : Base.communicationPorts) {
+        for (CommunicationPort port : UECIDE.communicationPorts) {
             if (port instanceof SerialCommunicationPort) {
                 String name = port.toString();
                 if (names.indexOf(name) == -1) {
@@ -321,7 +321,7 @@ public class Serial {
 
         for (String name : names) {
             boolean found = false;
-            for (CommunicationPort port : Base.communicationPorts) {
+            for (CommunicationPort port : UECIDE.communicationPorts) {
                 if (port instanceof SerialCommunicationPort) {
                     String pname = port.toString();
                     if (pname.equals(name)) {
@@ -335,14 +335,14 @@ public class Serial {
         }
 
         for (CommunicationPort port : toRemove) {
-            Base.communicationPorts.remove(port);
+            UECIDE.communicationPorts.remove(port);
         }
 
         for (CommunicationPort port : toAdd) {
-            Base.communicationPorts.add(port);
+            UECIDE.communicationPorts.add(port);
         }
 
-        if (Base.isUnix()) {
+        if (UECIDE.isUnix()) {
             for(String p : extraPorts) {
                 if(names.indexOf(p) == -1) {
                     File fp = new File(p);
@@ -420,7 +420,7 @@ public class Serial {
         PropertyFile sub = Preferences.getChildren("editor.serial.port");
         for (String k : sub.keySet()) {
             String pname = sub.get(k);
-            if (Base.isPosix()) {
+            if (UECIDE.isPosix()) {
                 File f = new File(pname);
                 if (f.exists()) {
                     addExtraPort(pname);
@@ -492,7 +492,7 @@ public class Serial {
                     return ueventData.get("PRODUCT");
             */
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return "";
         }
     }
@@ -502,7 +502,7 @@ public class Serial {
             return "";
         }
 
-        if(Base.isLinux()) {
+        if(UECIDE.isLinux()) {
             return getNameLinux(port);
         }
 

@@ -42,7 +42,7 @@ public class vc_tool extends VariableCommand {
             throw new VariableCommandException("Syntax Error");
         }
 
-        Tool tool = Base.tools.get(alist[0]);
+        Tool tool = UECIDE.tools.get(alist[0]);
         prop = alist[1];
 
         if (tool == null) {

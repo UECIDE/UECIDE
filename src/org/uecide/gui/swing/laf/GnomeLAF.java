@@ -11,9 +11,9 @@ public class GnomeLAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
-    public boolean isCompatible() { return Base.isLinux(); }
+    public boolean isCompatible() { return UECIDE.isLinux(); }
 }

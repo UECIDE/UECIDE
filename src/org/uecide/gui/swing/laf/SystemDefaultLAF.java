@@ -9,13 +9,13 @@ public class SystemDefaultLAF extends LookAndFeel {
 
     public void applyLAF() {
         try {
-            if (Base.isMacOS()) {
+            if (UECIDE.isMacOS()) {
                 System.setProperty("apple.laf.useScreenMenuBar", "true");
                 System.setProperty("com.apple.mrj.application.apple.menu.about.name", "UECIDE");
             }
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 

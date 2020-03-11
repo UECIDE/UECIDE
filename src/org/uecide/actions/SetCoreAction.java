@@ -28,7 +28,7 @@ public class SetCoreAction extends Action {
                 core = (Core)args[0];
             } else if (args[0] instanceof String) {
                 String s = (String)args[0];
-                core = Base.cores.get(s);
+                core = UECIDE.cores.get(s);
             }
 
             if (core == null) {

@@ -284,7 +284,7 @@ public class SketchFile implements Comparable, DocumentListener {
 
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
 
-        Tool t = Base.getTool("ctags");
+        Tool t = UECIDE.getTool("ctags");
         if (t != null) {
             File tmp = new File(sketch.buildFolder, "tmp");
             if (!tmp.exists()) {

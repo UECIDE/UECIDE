@@ -1,6 +1,6 @@
 package org.uecide.gui.swing;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 
 import javax.swing.JMenu;
@@ -33,7 +33,7 @@ public class FrequentFileMenu extends JMenu implements MenuListener {
     }
 
     public void menuSelected(MenuEvent e) {
-        HashMap<File,Integer> MCU = Base.MCUList;
+        HashMap<File,Integer> MCU = UECIDE.MCUList;
 
         removeAll();
         for (File f : MCU.keySet()) {

@@ -71,9 +71,9 @@ public class NetworkDiscoveryService extends org.uecide.Service {
                                 Board b = getBoardByService(svc, i);
                                 if (b != null) {
                                     mDNSProgrammer p = new mDNSProgrammer(i, b);
-                                    Programmer oldP = Base.programmers.get(p.getName());
+                                    Programmer oldP = UECIDE.programmers.get(p.getName());
                                     if (oldP == null) {
-                                        Base.programmers.put(p.getName(), p);
+                                        UECIDE.programmers.put(p.getName(), p);
                                     }
                                 }
                             }
@@ -90,7 +90,7 @@ public class NetworkDiscoveryService extends org.uecide.Service {
     public ArrayList<String> getServices() {
         ArrayList<String>serviceList = new ArrayList<String>();
 
-        for(Board board : Base.boards.values()) {
+        for(Board board : UECIDE.boards.values()) {
             String service = board.get("mdns.service");
 
             if(service == null) {
@@ -111,7 +111,7 @@ public class NetworkDiscoveryService extends org.uecide.Service {
 
     //public static Board getBoardByService(ServiceInfo info) {
     public static Board getBoardByService(String svc, Instance i) {
-        for(Board board : Base.boards.values()) {
+        for(Board board : UECIDE.boards.values()) {
             String service = board.get("mdns.service");
             if(service == null) {
                 continue;

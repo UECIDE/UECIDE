@@ -45,10 +45,10 @@ import java.util.regex.*;
  * sketchbook location using the Windows registry, or OS X event handling.
  *
  * The methods in this implementation are used by default, and can be
- * overridden by a subclass, if loaded by Base.main().
+ * overridden by a subclass, if loaded by UECIDE.main().
  *
  * These methods throw vanilla-flavored Exceptions, so that error handling
- * occurs inside Base.
+ * occurs inside UECIDE.
  *
  * There is currently no mechanism for adding new platforms, as the setup is
  * not automated. We could use getProperty("os.arch") perhaps, but that's
@@ -56,17 +56,17 @@ import java.util.regex.*;
  * know if name is proper Java package syntax.)
  */
 public class Platform {
-    Base base;
+    UECIDE base;
 
     public void setLookAndFeel() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
-    public void init(Base base) {
+    public void init(UECIDE base) {
         this.base = base;
         Debug.message("-> Platform Init Start");
         Debug.message("-> Probe Info (Super)");
@@ -86,7 +86,7 @@ public class Platform {
 
             return dataFolder;
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return null;
         }
     }
@@ -102,7 +102,7 @@ public class Platform {
 
     public void setSettingsFolderEnvironmentVariable() {
         String ev = System.getenv("UECIDE");
-        File fn = Base.getDataFolder();
+        File fn = UECIDE.getDataFolder();
         String fp = fn.getAbsolutePath();
 
         if(ev == null || !(ev.equals(fp))) {

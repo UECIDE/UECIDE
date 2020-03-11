@@ -1,7 +1,7 @@
 package org.uecide.gui.cli;
 
 import org.uecide.APT;
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Board;
 import org.uecide.Compiler;
 import org.uecide.Context;
@@ -56,7 +56,7 @@ public class CliGui extends Gui implements ContextEventListener {
 
 
         ArrayList<String> brdList = new ArrayList<String>();
-        for (Board b : Base.boards.values()) {
+        for (Board b : UECIDE.boards.values()) {
             brdList.add(b.getName());
         }
         String[] boardNames = brdList.toArray(new String[0]);
@@ -68,7 +68,7 @@ public class CliGui extends Gui implements ContextEventListener {
         }
 
         ArrayList<String> corList = new ArrayList<String>();
-        for (Core c : Base.cores.values()) {
+        for (Core c : UECIDE.cores.values()) {
             if (c.getFamily().equals(family)) {
                 corList.add(c.getName());
             }
@@ -76,7 +76,7 @@ public class CliGui extends Gui implements ContextEventListener {
         String[] coreNames = corList.toArray(new String[0]);
 
         ArrayList<String> comList = new ArrayList<String>();
-        for (Compiler c : Base.compilers.values()) {
+        for (Compiler c : UECIDE.compilers.values()) {
             if (c.getFamily().equals(family)) {
                 comList.add(c.getName());
             }
@@ -102,8 +102,8 @@ public class CliGui extends Gui implements ContextEventListener {
 
         TreeMap<String, Programmer> pl = new TreeMap<String, Programmer>();
 
-        for (String k : Base.programmers.keySet()) {
-            Programmer p = Base.programmers.get(k);
+        for (String k : UECIDE.programmers.keySet()) {
+            Programmer p = UECIDE.programmers.get(k);
             if (p.worksWith(ctx.getBoard())) {
                 pl.put(k, p);
             }
@@ -308,7 +308,7 @@ public class CliGui extends Gui implements ContextEventListener {
 
     @Override
     public void streamWarning(String m) {
-        if (!Base.isWindows()) {
+        if (!UECIDE.isWindows()) {
             System.out.print("[33m" + m + "[0m");
         } else {
             System.out.print(m);
@@ -317,7 +317,7 @@ public class CliGui extends Gui implements ContextEventListener {
 
     @Override
     public void warning(String m) {
-        if (!Base.isWindows()) {
+        if (!UECIDE.isWindows()) {
             System.out.println("[33m" + m + "[0m");
         } else {
             System.out.println(m);
@@ -326,7 +326,7 @@ public class CliGui extends Gui implements ContextEventListener {
 
     @Override
     public void error(String m) {
-        if (!Base.isWindows()) {
+        if (!UECIDE.isWindows()) {
             System.err.println("[31m" + m + "[0m");
         } else {
             System.err.println(m);
@@ -335,7 +335,7 @@ public class CliGui extends Gui implements ContextEventListener {
 
     @Override
     public void streamError(String m) {
-        if (!Base.isWindows()) {
+        if (!UECIDE.isWindows()) {
             System.err.print("[31m" + m + "[0m");
         } else {
             System.err.print(m);
@@ -344,11 +344,11 @@ public class CliGui extends Gui implements ContextEventListener {
 
     @Override
     public void error(Throwable m) {
-        if (!Base.isWindows()) {
+        if (!UECIDE.isWindows()) {
             System.err.print("[31m");
         } 
         m.printStackTrace();
-        if (!Base.isWindows()) {
+        if (!UECIDE.isWindows()) {
             System.err.print("[0m");
         } 
     }
@@ -364,7 +364,7 @@ public class CliGui extends Gui implements ContextEventListener {
 
     @Override
     public void command(String m) {
-        if (!Base.isWindows()) {
+        if (!UECIDE.isWindows()) {
             System.out.println("[32m" + m + "[0m");
         } else {
             System.out.println(m);

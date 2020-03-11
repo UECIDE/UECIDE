@@ -46,7 +46,7 @@ public class Programmer extends UObject {
 
     public boolean programFile(Context ctx, String file) {
         PropertyFile props = ctx.getMerged();
-        if (!Base.isQuiet()) ctx.heading("Uploading firmware...");
+        if (!UECIDE.isQuiet()) ctx.heading("Uploading firmware...");
 
         ctx.set("filename", file);
 
@@ -95,7 +95,7 @@ public class Programmer extends UObject {
                 }
             }
 
-            if (!Base.isQuiet()) ctx.bullet("Uploading...");
+            if (!UECIDE.isQuiet()) ctx.bullet("Uploading...");
 
             if (!Preferences.getBoolean("compiler.verbose_upload")) {
                 if (props.get("programmer.quiet") != null) {
@@ -116,7 +116,7 @@ public class Programmer extends UObject {
 
 
             if(res) {
-                if (!Base.isQuiet()) ctx.bullet("Upload Complete");
+                if (!UECIDE.isQuiet()) ctx.bullet("Upload Complete");
                 return true;
             } else {
                 ctx.error("Upload Failed");
@@ -127,7 +127,7 @@ public class Programmer extends UObject {
     }
 
     public boolean performSerialReset(Context ctx, boolean dtr, boolean rts, int speed, int predelay, int delay, int postdelay) {
-        if (!Base.isQuiet()) ctx.bullet("Resetting board.");
+        if (!UECIDE.isQuiet()) ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
             if (port instanceof SerialCommunicationPort) {
@@ -156,7 +156,7 @@ public class Programmer extends UObject {
     }
 
     public boolean performBaudBasedReset(Context ctx, int b, int predelay, int delay, int postdelay) {
-        if (!Base.isQuiet()) ctx.bullet("Resetting board.");
+        if (!UECIDE.isQuiet()) ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
             if (port instanceof SerialCommunicationPort) {

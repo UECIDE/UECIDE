@@ -77,7 +77,7 @@ public abstract class BuiltinCommand {
         try {
             return cmd.main(ctx, arg);
         } catch (BuiltinCommandException ex) {
-            Base.error(ex);
+            UECIDE.error(ex);
             return false;
         }
 

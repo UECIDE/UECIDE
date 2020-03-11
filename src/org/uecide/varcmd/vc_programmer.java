@@ -43,7 +43,7 @@ public class vc_programmer extends VariableCommand {
         if (alist.length == 1) {
             prop = alist[0];
         } else {
-            prog = Base.programmers.get(alist[0]);
+            prog = UECIDE.programmers.get(alist[0]);
             prop = alist[1];
         }
 

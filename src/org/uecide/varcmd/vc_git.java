@@ -126,7 +126,7 @@ public class vc_git extends VariableCommand {
             localRepo = new FileRepository(dotGit);
             git = new Git(localRepo);
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             localRepo = null;
             repoRoot = null;
             return false;

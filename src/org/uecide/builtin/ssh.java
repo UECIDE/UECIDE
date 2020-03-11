@@ -69,7 +69,7 @@ public class ssh  extends BuiltinCommand {
             String password = Preferences.get("ssh." + host + "." + user);
 
             if(password == null) {
-                password = Base.session.get("ssh." + host + "." + user);
+                password = UECIDE.session.get("ssh." + host + "." + user);
             }
 
             if(password == null) {
@@ -89,8 +89,8 @@ public class ssh  extends BuiltinCommand {
                 if(e.getMessage().equals("Auth fail")) {
                     password = null;
                     Preferences.unset("ssh." + host + "." + user);
-                    Base.session.unset("ssh." + host + "." + user);
-                    ctx.error(Base.i18n.string("err.ssh.auth"));
+                    UECIDE.session.unset("ssh." + host + "." + user);
+                    ctx.error(UECIDE.i18n.string("err.ssh.auth"));
                     session.disconnect();
                     return false;
                 } else {
@@ -102,7 +102,7 @@ public class ssh  extends BuiltinCommand {
                 return false;
             }
 
-            Base.session.set("ssh." + host + "." + user, password);
+            UECIDE.session.set("ssh." + host + "." + user, password);
 
 
             String command = arg[1];
@@ -158,12 +158,12 @@ public class ssh  extends BuiltinCommand {
 
     public String askPassword() {
         JTextField passwordField = (JTextField)new JPasswordField(20);
-        JCheckBox save = new JCheckBox(Base.i18n.string("form.ssh.rempass"));
+        JCheckBox save = new JCheckBox(UECIDE.i18n.string("form.ssh.rempass"));
         Object[] ob = {passwordField, save};
         int result = JOptionPane.showConfirmDialog(
             null, 
             ob, 
-            Base.i18n.string("form.ssh.askpass", user, host),
+            UECIDE.i18n.string("form.ssh.askpass", user, host),
             JOptionPane.OK_CANCEL_OPTION
         );
 

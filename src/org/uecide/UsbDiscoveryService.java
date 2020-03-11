@@ -117,7 +117,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
         return devs;
     }
@@ -127,12 +127,12 @@ public class UsbDiscoveryService extends Service {
             Board b = getBoardByDevice(dev);
             if (b != null) {
                 UsbHidDevice newPort = new UsbHidDevice(b, dev);
-                synchronized(Base.communicationPorts) {
-                    Base.communicationPorts.add(newPort);
+                synchronized(UECIDE.communicationPorts) {
+                    UECIDE.communicationPorts.add(newPort);
                 }
             }
         } catch (Exception exex) {
-            Base.error(exex);
+            UECIDE.error(exex);
         }
     }
     public void deviceDetached(UsbDevice dev) {
@@ -141,9 +141,9 @@ public class UsbDiscoveryService extends Service {
             short vid = desc.idVendor();
             short pid = desc.idProduct();
             String key = String.format("%04x:%04x", vid, pid);
-            synchronized(Base.communicationPorts) {
+            synchronized(UECIDE.communicationPorts) {
                 CommunicationPort fp = null;
-                for (CommunicationPort cp  : Base.communicationPorts) {
+                for (CommunicationPort cp  : UECIDE.communicationPorts) {
                     if (cp instanceof UsbHidDevice) {
                         UsbHidDevice scp = (UsbHidDevice)cp;
                         if (scp.getKey().equals(key)) {
@@ -152,11 +152,11 @@ public class UsbDiscoveryService extends Service {
                     }
                 }
                 if (fp != null) {
-                    Base.communicationPorts.remove(fp);
+                    UECIDE.communicationPorts.remove(fp);
                 }
             }
         } catch (Exception exex) {
-            Base.error(exex);
+            UECIDE.error(exex);
         }
     }
 
@@ -165,7 +165,7 @@ public class UsbDiscoveryService extends Service {
             UsbDeviceDescriptor desc = dev.getUsbDeviceDescriptor();
             short vid = desc.idVendor();
             short pid = desc.idProduct();
-            for (Board b : Base.boards.values()) {
+            for (Board b : UECIDE.boards.values()) {
                 String bvids = b.get("usb.vid");
                 if (bvids == null) {
                     continue;
@@ -193,7 +193,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
         return null;
     } 

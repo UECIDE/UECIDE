@@ -21,7 +21,7 @@ public class MaterialLAF extends LookAndFeel {
             UIManager.put("Button.backgroundCircle", true);
 
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 }

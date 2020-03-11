@@ -99,7 +99,7 @@ public class Utils {
     public static void copyDir(File sourceDir, File targetDir) throws IOException {
         if (!targetDir.exists()) {
             if (!targetDir.mkdirs()) {
-                Base.error("Unable to make target folder " + targetDir.getAbsolutePath());
+                UECIDE.error("Unable to make target folder " + targetDir.getAbsolutePath());
                 return;
             }
         }
@@ -262,7 +262,7 @@ public class Utils {
             fs.close();
 
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return false;
         }
 

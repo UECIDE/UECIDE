@@ -87,9 +87,9 @@ public class Board extends UObject {
             return null;
         }
         Debug.message("Board's core is [" + c + "]");
-        Core cc = Base.cores.get(c);
+        Core cc = UECIDE.cores.get(c);
         Debug.message("Found base core " + cc);
 
-        return Base.cores.get(c);
+        return UECIDE.cores.get(c);
     }
 }

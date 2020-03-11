@@ -1,7 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.gui.Gui;
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.ContextEventListener;
 import org.uecide.ContextEvent;
@@ -291,8 +291,8 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     public static void setLookAndFeel() {
         String lafname = Preferences.get("theme.laf");
 
-        if (Base.cli.isSet("laf")) {
-            lafname = Base.cli.getString("laf");
+        if (UECIDE.cli.isSet("laf")) {
+            lafname = UECIDE.cli.getString("laf")[0];
         }
 
         laf = null;
@@ -513,7 +513,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     public void close() {
         window.dispose();
-        Base.cleanupSession(ctx);
+        UECIDE.cleanupSession(ctx);
     }
 
     public void tabAdded(TabChangeEvent e) {

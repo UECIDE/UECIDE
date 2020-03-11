@@ -95,7 +95,7 @@ public class PropertyFile {
 
             br.close();
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
@@ -131,7 +131,7 @@ public class PropertyFile {
                 }
             }
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
@@ -154,7 +154,7 @@ public class PropertyFile {
                     r.close();
                     fis.close();
                 } catch(Exception e) {
-                    Base.error(e);
+                    UECIDE.error(e);
                 }
             }
         }
@@ -173,7 +173,7 @@ public class PropertyFile {
                     r.close();
                     fis.close();
                 } catch(Exception e) {
-                    Base.error(e);
+                    UECIDE.error(e);
                 }
             }
         }
@@ -291,7 +291,7 @@ public class PropertyFile {
 
                 Debug.message("Saved property file " + userFile.getAbsolutePath());
             } catch(Exception e) {
-                Base.error(e);
+                UECIDE.error(e);
             }
         }
     }
@@ -327,13 +327,13 @@ public class PropertyFile {
      *  key.*os* and finally the plain key by itself.
      */
     public String getPlatformSpecific(String attribute) {
-        String t = properties.get(attribute + "." + Base.getOSFullName());
+        String t = properties.get(attribute + "." + UECIDE.getOSFullName());
 
         if(t != null) {
             return t.trim();
         }
 
-        t = properties.get(attribute + "." + Base.getOSName());
+        t = properties.get(attribute + "." + UECIDE.getOSName());
 
         if(t != null) {
             return t.trim();
@@ -350,14 +350,14 @@ public class PropertyFile {
 
     // Get the platform specific flavour of a key if it exists.
     public String getPlatformSpecificKey(String attribute) {
-        String k = attribute + "." + Base.getOSFullName();
+        String k = attribute + "." + UECIDE.getOSFullName();
         String t = properties.get(k);
 
         if(t != null) {
             return k.trim();
         }
 
-        k = attribute + "." + Base.getOSName();
+        k = attribute + "." + UECIDE.getOSName();
         t = properties.get(k);
 
         if(t != null) {
@@ -735,12 +735,12 @@ public class PropertyFile {
         Font font = null;
 
         if (name.startsWith("res://")) {
-            InputStream is = Base.class.getResourceAsStream(name.substring(5));
+            InputStream is = UECIDE.class.getResourceAsStream(name.substring(5));
             try {
                 Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
                 font = baseFont.deriveFont(style, size);
             } catch (Exception e) {
-                Base.error(e);
+                UECIDE.error(e);
                 font = new Font("Monospaced", Font.PLAIN, 12);
             }
         } else {
@@ -772,12 +772,12 @@ public class PropertyFile {
 
         for(String name : properties.keySet()) {
             if(ps) {
-                if(name.endsWith("." + Base.getOSFullName())) {
-                    name = name.substring(0, name.length() - Base.getOSFullName().length() - 1);
+                if(name.endsWith("." + UECIDE.getOSFullName())) {
+                    name = name.substring(0, name.length() - UECIDE.getOSFullName().length() - 1);
                 }
 
-                if(name.endsWith("." + Base.getOSName())) {
-                    name = name.substring(0, name.length() - Base.getOSName().length() - 1);
+                if(name.endsWith("." + UECIDE.getOSName())) {
+                    name = name.substring(0, name.length() - UECIDE.getOSName().length() - 1);
                 }
 
                 map.put(name, getPlatformSpecific(name));
@@ -806,7 +806,7 @@ public class PropertyFile {
                     fis.close();
                     properties = newProperties;
                 } catch(Exception e) {
-                    Base.error(e);
+                    UECIDE.error(e);
                 }
             }
         }
@@ -898,8 +898,8 @@ public class PropertyFile {
 
     /*! Obtain the best match key for the current operating system. */
     public String keyForOS(String key) {
-        String os = Base.getOSName();
-        String arch = Base.getOSArch();
+        String os = UECIDE.getOSName();
+        String arch = UECIDE.getOSArch();
 
         if(properties.get(key + "." + os + "_" + arch) != null) {
             return key + "." + os + "_" + arch;
@@ -1008,7 +1008,7 @@ public class PropertyFile {
                 }
             }
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return false;
         }
         return true;
@@ -1055,7 +1055,7 @@ public class PropertyFile {
             br.close();
             return props;
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
         return null;
     }

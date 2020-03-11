@@ -327,7 +327,7 @@ public class Preferences {
         preferencesTree = new PropertyFile();
 
 
-        for(Programmer c : Base.programmers.values()) {
+        for(Programmer c : UECIDE.programmers.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");
             for (String k : prefs.keySet()) {
                 prefs.setSource(k, "programmer:" + c.getName());
@@ -335,7 +335,7 @@ public class Preferences {
             preferencesTree.mergeData(prefs);
         }
 
-        for(Compiler c : Base.compilers.values()) {
+        for(Compiler c : UECIDE.compilers.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");
             for (String k : prefs.keySet()) {
                 prefs.setSource(k, "compiler:" + c.getName());
@@ -343,7 +343,7 @@ public class Preferences {
             preferencesTree.mergeData(prefs);
         }
 
-        for(Core c : Base.cores.values()) {
+        for(Core c : UECIDE.cores.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");
             for (String k : prefs.keySet()) {
                 prefs.setSource(k, "core:" + c.getName());
@@ -351,7 +351,7 @@ public class Preferences {
             preferencesTree.mergeData(prefs);
         }
 
-        for(Board c : Base.boards.values()) {
+        for(Board c : UECIDE.boards.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");
             for (String k : prefs.keySet()) {
                 prefs.setSource(k, "board:" + c.getName());
@@ -383,7 +383,7 @@ public class Preferences {
 
 
     public static void init() {
-        preferences = new PropertyFile(Base.getDataFile("preferences.txt"), "/org/uecide/config/preferences.txt");
+        preferences = new PropertyFile(UECIDE.getDataFile("preferences.txt"), "/org/uecide/config/preferences.txt");
         preferences.setPlatformAutoOverride(true);
     }
 

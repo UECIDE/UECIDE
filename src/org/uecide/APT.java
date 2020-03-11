@@ -570,7 +570,7 @@ public class APT {
                     while ((line = br.readLine()) != null) {
                         String[] bits = line.split("\\s+");
                         if (bits.length == 2) {
-                            File f = new File(Base.getDataFolder(), bits[1]);
+                            File f = new File(UECIDE.getDataFolder(), bits[1]);
                             files.add(f);
                         }
                     }
@@ -594,17 +594,17 @@ public class APT {
 
                 for (File f : files) {
                     File par = f.getParentFile();
-                    if (!par.getCanonicalPath().equals(Base.getDataFolder().getCanonicalPath())) {
+                    if (!par.getCanonicalPath().equals(UECIDE.getDataFolder().getCanonicalPath())) {
                         if (dirs.indexOf(par) == -1) {    
                             dirs.add(par);
                         }
                     }
-                    Base.tryDelete(f);
+                    UECIDE.tryDelete(f);
                 }
 
                 cleanDirectoryList(dirs);
 
-                Base.removeDir(pdir);
+                UECIDE.removeDir(pdir);
                 
             }
             initRepository();
@@ -623,12 +623,12 @@ public class APT {
                 String[] files = d.list();
                 if (files.length == 0) {
                     File p = d.getParentFile();
-                    if (!p.getCanonicalPath().equals(Base.getDataFolder().getCanonicalPath())) {
+                    if (!p.getCanonicalPath().equals(UECIDE.getDataFolder().getCanonicalPath())) {
                         if (todo.indexOf(p) == -1) {    
                             todo.add(p);
                         }
                         
-                        Base.tryDelete(d);
+                        UECIDE.tryDelete(d);
                     }
                 }
             }
@@ -762,7 +762,7 @@ public class APT {
 
     public static APT factory(Context context) throws IOException {
         if (apt == null) {
-            File dd = Base.getDataFolder();
+            File dd = UECIDE.getDataFolder();
 
             File aptFolder = new File(dd, "apt");
             if (!aptFolder.exists()) {

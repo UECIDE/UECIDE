@@ -59,6 +59,11 @@ public abstract class Action {
             return action.actionPerformed(args);
         } catch (ActionException ex) {
             c.error(ex);
+            c.error("Action name: " + name);
+            c.error("Action parameters: ");
+            for (Object o : args) {
+                c.error("    " + o.toString());
+            }
         } catch (Exception ex) {
             c.error(ex);
         }

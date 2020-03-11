@@ -66,7 +66,7 @@ public class scp extends BuiltinCommand {
             String password = Preferences.get("ssh." + host + "." + user);
 
             if(password == null) {
-                password = Base.session.get("ssh." + host + "." + user);
+                password = UECIDE.session.get("ssh." + host + "." + user);
             }
 
             if(password == null) {
@@ -86,7 +86,7 @@ public class scp extends BuiltinCommand {
                 if(e.getMessage().equals("Auth fail")) {
                     password = null;
                     Preferences.unset("ssh." + host + "." + user);
-                    Base.session.unset("ssh." + host + "." + user);
+                    UECIDE.session.unset("ssh." + host + "." + user);
                     session.disconnect();
                     throw new BuiltinCommandException("Authentication Failed");
                 } else {
@@ -96,7 +96,7 @@ public class scp extends BuiltinCommand {
                 throw new BuiltinCommandException(e.getMessage());
             }
 
-            Base.session.set("ssh." + host + "." + user, password);
+            UECIDE.session.set("ssh." + host + "." + user, password);
 
 
             boolean ptimestamp = true;
@@ -168,7 +168,7 @@ public class scp extends BuiltinCommand {
                 fis.close();
                 fis = null;
             } catch(Exception e) {
-                ctx.error(Base.i18n.string("err.ssh.copy", e.getMessage()));
+                ctx.error(UECIDE.i18n.string("err.ssh.copy", e.getMessage()));
                 session.disconnect();
 
                 try {
@@ -184,7 +184,7 @@ public class scp extends BuiltinCommand {
             out.flush();
 
             if(checkAck(in) != 0) {
-                ctx.error(Base.i18n.string("err.ssh.flush"));
+                ctx.error(UECIDE.i18n.string("err.ssh.flush"));
                 session.disconnect();
                 return false;
             }
@@ -200,7 +200,7 @@ public class scp extends BuiltinCommand {
                 session.disconnect();
             }
 
-            ctx.error(Base.i18n.string("err.ssh.copy", e.getMessage()));
+            ctx.error(UECIDE.i18n.string("err.ssh.copy", e.getMessage()));
 
             System.out.println(e);
 
@@ -246,12 +246,12 @@ public class scp extends BuiltinCommand {
 
     public String askPassword() {
         JTextField passwordField = (JTextField)new JPasswordField(20);
-        JCheckBox save = new JCheckBox(Base.i18n.string("form.ssh.rempass"));
+        JCheckBox save = new JCheckBox(UECIDE.i18n.string("form.ssh.rempass"));
         Object[] ob = {passwordField, save};
         int result = JOptionPane.showConfirmDialog(
             null, 
             ob, 
-            Base.i18n.string("form.ssh.askpass", user, host), 
+            UECIDE.i18n.string("form.ssh.askpass", user, host), 
             JOptionPane.OK_CANCEL_OPTION
         );
 

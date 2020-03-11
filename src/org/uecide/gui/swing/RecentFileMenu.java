@@ -1,6 +1,6 @@
 package org.uecide.gui.swing;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 
 import javax.swing.JMenu;
@@ -33,7 +33,7 @@ public class RecentFileMenu extends JMenu implements MenuListener {
     }
 
     public void menuSelected(MenuEvent e) {
-        ArrayList<File> MRU = Base.MRUList;
+        ArrayList<File> MRU = UECIDE.MRUList;
 
         removeAll();
         for (File f : MRU) {

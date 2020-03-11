@@ -57,6 +57,6 @@ public class Core extends UObject {
             return null;
         }
 
-        return Base.compilers.get(c);
+        return UECIDE.compilers.get(c);
     }
 }

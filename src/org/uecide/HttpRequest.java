@@ -18,7 +18,7 @@ public class HttpRequest {
 
     public String getText() throws IOException {
         URLConnection conn = url.openConnection();
-        conn.setRequestProperty("User-Agent", "UECIDE/" + Base.systemVersion.toString() + " (" + Base.getOSFullName() + "; Java " + System.getProperty("java.version") + ")");
+        conn.setRequestProperty("User-Agent", "UECIDE/" + UECIDE.systemVersion.toString() + " (" + UECIDE.getOSFullName() + "; Java " + System.getProperty("java.version") + ")");
         conn.connect();
         BufferedReader r = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         StringBuilder o = new StringBuilder();
@@ -35,7 +35,7 @@ public class HttpRequest {
         StringBuilder inData = new StringBuilder();
         byte[] buffer = new byte[1024];
         URLConnection conn = url.openConnection();
-        conn.setRequestProperty("User-Agent", "UECIDE/" + Base.systemVersion.toString() + " (" + Base.getOSFullName() + "; Java " + System.getProperty("java.version") + ")");
+        conn.setRequestProperty("User-Agent", "UECIDE/" + UECIDE.systemVersion.toString() + " (" + UECIDE.getOSFullName() + "; Java " + System.getProperty("java.version") + ")");
         conn.connect();
         int contentLength = conn.getContentLength();
 

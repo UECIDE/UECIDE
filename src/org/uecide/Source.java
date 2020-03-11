@@ -71,7 +71,7 @@ public class Source {
         StringBuilder inData = new StringBuilder();
         try {
             byte[] buffer = new byte[1024];
-            InputStream rawIn = Base.class.getResourceAsStream(url);
+            InputStream rawIn = UECIDE.class.getResourceAsStream(url);
             GZIPInputStream in = new GZIPInputStream(rawIn);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             int n;
@@ -81,7 +81,7 @@ public class Source {
             in.close();
             inData.append(out.toString("UTF-8"));
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             System.err.println("Error downloading " + url + ": " + e.getMessage());
         }
         return inData.toString();

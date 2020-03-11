@@ -95,7 +95,7 @@ public class DebFile {
     public String getPackageName() throws IOException, FileNotFoundException {
         HashMap<String, File> files = extractOuterFiles();
         HashMap<File, FileInfo> pendingFiles = null;
-        File db = Base.createTempFolder("udeb_");
+        File db = UECIDE.createTempFolder("udeb_");
         if (files.get("control.tar.gz") != null) pendingFiles = extractTarGzFile(files.get("control.tar.gz"), db);
         if (files.get("control.tar.xz") != null) pendingFiles = extractTarXzFile(files.get("control.tar.xz"), db);
         if (files.get("control.tar.bz2") != null) pendingFiles = extractTarBz2File(files.get("control.tar.bz2"), db);
@@ -111,7 +111,7 @@ public class DebFile {
                     packageName = bits[1];
                 }
             }
-            Base.removeDir(db);
+            UECIDE.removeDir(db);
         }
 
         return packageName;
@@ -125,7 +125,7 @@ public class DebFile {
             if (fi.type == FILE) {
                 // Remove the old file if it's there
                 if (d.exists()) {
-                    Base.tryDelete(d);
+                    UECIDE.tryDelete(d);
                 }
                 fi.source.renameTo(d);
             }
@@ -137,7 +137,7 @@ public class DebFile {
             File d = dest.getKey();
             if (fi.type == LINK) {
                 if (d.exists()) {
-                    Base.tryDelete(d);
+                    UECIDE.tryDelete(d);
                 }
                 Files.copy(fi.source.toPath(), d.toPath(), REPLACE_EXISTING);
                 d.setExecutable(fi.source.canExecute());
@@ -150,7 +150,7 @@ public class DebFile {
 
     HashMap<String, File> extractOuterFiles() throws IOException {
         HashMap<String, File> filelist = new HashMap<String, File>();
-        tempLoc = Base.createTempFolder("udeb_");
+        tempLoc = UECIDE.createTempFolder("udeb_");
         FileInputStream fis = new FileInputStream(debFile);
         ArArchiveInputStream ar = new ArArchiveInputStream(fis);
         ArArchiveEntry file = ar.getNextArEntry();
@@ -185,7 +185,7 @@ public class DebFile {
     }
 
     void cleanup() {
-        Base.removeDir(tempLoc);
+        UECIDE.removeDir(tempLoc);
         tempLoc = null;
     }
 

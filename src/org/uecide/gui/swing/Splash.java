@@ -100,7 +100,7 @@ public class Splash extends JDialog { //Window {
 
         g2.setFont(new Font("SansSerif", Font.BOLD, 14));
         g2.setColor(new Color(0xbe, 0xbe, 0xbe));
-        drawCenteredString(g2, 285, 135, "v" + Base.systemVersion, new Color(0xbe, 0xbe, 0xbe), new Color(0, 0, 0, 96));
+        drawCenteredString(g2, 285, 135, "v" + UECIDE.systemVersion, new Color(0xbe, 0xbe, 0xbe), new Color(0, 0, 0, 96));
 
         int barHeight = 20;
 

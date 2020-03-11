@@ -28,7 +28,7 @@ public class SetBoardAction extends Action {
                 brd = (Board)args[0];
             } else if (args[0] instanceof String) {
                 String s = (String)args[0];
-                brd = Base.boards.get(s);
+                brd = UECIDE.boards.get(s);
             }
 
             if (brd == null) {

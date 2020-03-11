@@ -12,7 +12,7 @@ public class I18N {
 
     public I18N(String f) {
         source = f;
-        locale = Base.getLocale();
+        locale = UECIDE.getLocale();
         bundle = ResourceBundle.getBundle("org/uecide/i18n/" + f + "/MessageBundle", locale);
         formatter = new MessageFormat("");
         formatter.setLocale(locale);

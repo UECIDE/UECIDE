@@ -8,7 +8,7 @@ import javax.swing.event.MenuEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.PropertyFile;
 import org.uecide.Tool;
@@ -37,7 +37,7 @@ public class ToolsMenu extends JMenu implements MenuListener {
 
         addSeparator();
 
-        for (Tool t : Base.tools.values()) {
+        for (Tool t : UECIDE.tools.values()) {
             if (t.worksWith(ctx.getCore())) {
 
                 PropertyFile pf = t.getProperties();

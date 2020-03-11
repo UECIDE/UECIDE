@@ -338,7 +338,7 @@ public class Context {
             parentContext.command(e);
             return;
         }
-        if ((Preferences.getBoolean("compiler.verbose_compile")) || (Base.cli.isSet("verbose"))) {
+        if ((Preferences.getBoolean("compiler.verbose_compile")) || (UECIDE.cli.isSet("verbose"))) {
             triggerEvent("message", new Message(Message.COMMAND, e));
         }
     }
@@ -555,7 +555,7 @@ public class Context {
                     lineno = Integer.parseInt(num);
                     continue;
                 } catch(Exception e) {
-                    error(Base.i18n.string("err.syntax", key, lineno));
+                    error(UECIDE.i18n.string("err.syntax", key, lineno));
                     error(ld);
                     if (script.keyExists("fail")) {
                         String failKey = String.format("%s.fail", key);
@@ -571,7 +571,7 @@ public class Context {
                 int epos = param.indexOf("=");
 
                 if(epos == -1) {
-                    error(Base.i18n.string("err.syntax", key, lineno));
+                    error(UECIDE.i18n.string("err.syntax", key, lineno));
                     error(ld);
                     if (script.keyExists("fail")) {
                         String failKey = String.format("%s.fail", key);
@@ -747,7 +747,7 @@ public class Context {
             return BuiltinCommand.run(this, cmdName, arg);
 
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
 
         return false;
@@ -825,7 +825,7 @@ public class Context {
 
         try {
             runningProcess = process.start();
-            Base.processes.add(runningProcess);
+            UECIDE.processes.add(runningProcess);
 
             ProcessStreamThread stdoutStreamer = new ProcessStreamThread(runningProcess.getInputStream(), stdout);
             ProcessStreamThread stderrStreamer = new ProcessStreamThread(runningProcess.getErrorStream(), stderr);
@@ -877,7 +877,7 @@ public class Context {
         int result = -1;
         if (runningProcess != null) {
             result = runningProcess.exitValue();
-            Base.processes.remove(runningProcess);
+            UECIDE.processes.remove(runningProcess);
         }
 
         if(result == 0) {
@@ -906,7 +906,7 @@ public class Context {
     public void killRunningProcess() {
         if(runningProcess != null) {
 //            runningProcess.destroy();
-//            Base.processes.remove(runningProcess);
+//            UECIDE.processes.remove(runningProcess);
         }
     }
 
@@ -1011,7 +1011,7 @@ public class Context {
     }
 
     public void runInitScripts() {
-        for (Board b : Base.boards.values()) {
+        for (Board b : UECIDE.boards.values()) {
             if (b.get("init.script.0") != null) {
                 Context ctx = new Context(this);
                 ctx.setBoard(b);
@@ -1019,7 +1019,7 @@ public class Context {
                 ctx.dispose();
             }
         }
-        for (Core c : Base.cores.values()) {
+        for (Core c : UECIDE.cores.values()) {
             if (c.get("init.script.0") != null) {
                 Context ctx = new Context(this);
                 ctx.setCore(c);
@@ -1027,7 +1027,7 @@ public class Context {
                 ctx.dispose();
             }
         }
-        for (Compiler c : Base.compilers.values()) {
+        for (Compiler c : UECIDE.compilers.values()) {
             if (c.get("init.script.0") != null) {
                 Context ctx = new Context(this);
                 ctx.setCompiler(c);
@@ -1035,7 +1035,7 @@ public class Context {
                 ctx.dispose();
             }
         }
-        for (Programmer c : Base.programmers.values()) {
+        for (Programmer c : UECIDE.programmers.values()) {
             if (c.get("init.script.0") != null) {
                 Context ctx = new Context(this);
                 ctx.setProgrammer(c);
@@ -1089,7 +1089,7 @@ public class Context {
     }
 
     public File getCacheDir() {
-        File dataDir = Base.getDataFolder();
+        File dataDir = UECIDE.getDataFolder();
         File cacheRoot = new File(dataDir, "cache");
         File coreRoot = new File(cacheRoot, core.getName());
         File boardRoot = new File(coreRoot, board.getName());
@@ -1148,7 +1148,7 @@ public class Context {
         }
     
         if (recipe == null) {
-            error(Base.i18n.string("err.badfile", fileName));
+            error(UECIDE.i18n.string("err.badfile", fileName));
             triggerEvent("fileCompilationFailed", src);
             localCtx.dispose();
             return null;

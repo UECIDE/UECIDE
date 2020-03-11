@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.IOException;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.TreeMap;
@@ -64,7 +65,7 @@ import java.security.CodeSource;
 
 import java.awt.GraphicsEnvironment;
 
-public class Base {
+public class UECIDE {
 
     class ActionSpec {
         String action;
@@ -159,7 +160,7 @@ public class Base {
     public static void main(String args[]) {
 //        replaceSystemClassLoader();
         try {
-            new Base(args);
+            new UECIDE(args);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -168,7 +169,7 @@ public class Base {
     /*! Return a File representing the location of the JAR file the
      *  application was loaded from. */
     public static File getJarLocation() {
-        return getJarLocation(Base.class);
+        return getJarLocation(UECIDE.class);
     }
 
     public static File getJarLocation(Class<?> cl) {
@@ -191,7 +192,7 @@ public class Base {
             URI ui = sl.toURI();
             return new File(ui);
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
 
         return new File("/");
@@ -234,7 +235,7 @@ public class Base {
     }
 
     /*! The constructor is the main execution routine. */
-    public Base(String[] args) throws IOException {
+    public UECIDE(String[] args) throws IOException {
         Action.initActions();
 //        cli.addParameter("debug",               "",         Boolean.class,  "cli.help.debug");
         cli.addParameter("verbose",             "",         Boolean.class,  "cli.help.verbose");
@@ -289,6 +290,8 @@ public class Base {
         cli.addParameter("gui",                 "name",     String.class,   "Select a GUI to run (cli / swing / none)");
         cli.addParameter("laf",                 "name",     String.class,   "Select a LookAndFeel for the Swing GUI");
 
+        cli.addParameter("action",              "string",   String.class,   "Execute an action (parameters separated by ::)");
+
 
         String[] argv = cli.process(args);
 
@@ -328,8 +331,9 @@ public class Base {
             Debug.setVerbose(cli.isSet("verbose"));
         }
 
-        overrideSettingsFolder = cli.getString("datadir");
-
+        if (cli.isSet("datadir")) {
+            overrideSettingsFolder = cli.getString("datadir")[0];
+        }
 
         Context bootContext = createContext(null, "none", false);
         bootContext.setSystemContext(true);
@@ -400,20 +404,23 @@ public class Base {
         }
 
         if (cli.isSet("install")) {
-            String packageName = cli.getString("install");
-            bootContext.action("AptInstall", packageName);
+            for (String packageName : cli.getString("install")) {
+                bootContext.action("AptInstall", packageName);
+            }
             doExit = true;
         }
 
         if (cli.isSet("remove")) {
-            String packageName = cli.getString("remove");
-            bootContext.action("AptRemove", packageName);
+            for (String packageName : cli.getString("remove")) {
+                bootContext.action("AptRemove", packageName);
+            }
             doExit = true;
         }
 
         if (cli.isSet("search")) {
-            String packageName = cli.getString("search");
-            bootContext.action("AptSearch", packageName);
+            for (String packageName : cli.getString("search")) {
+                bootContext.action("AptSearch", packageName);
+            }
             doExit = true;
         }
 
@@ -546,25 +553,25 @@ public class Base {
 
         if (cli.isSet("cli")) {
             bootContext.warning("Warning: --cli is deprecated. Use --gui=cli instead");
-            cli.set("gui", "cli");
+            cli.set("gui", new String[] {"cli"});
         }
 
         if (cli.isSet("headless")) {
             bootContext.warning("Warning: --headless is deprecated. Use --gui=none instead");
-            cli.set("gui", "none");
+            cli.set("gui", new String[] {"none"});
         }
 
         if (!cli.isSet("gui")) {
-            cli.set("gui", "swing");
+            cli.set("gui", new String[] {"swing"});
         }
 
         if (GraphicsEnvironment.isHeadless()) {
-            if (cli.getString("gui").equals("swing")) {
-                cli.set("gui", "none");
+            if (cli.getString("gui")[0].equals("swing")) {
+                cli.set("gui", new String[] {"none"});
             }
         }
 
-        gui = cli.getString("gui");
+        gui = cli.getString("gui")[0];
 
         switch (gui) {
             case "cli": CliGui.init(); break;
@@ -649,21 +656,38 @@ public class Base {
         startupActions.clear();
 
         if (cli.isSet("set")) { 
-            String pref = cli.getString("set");
-            String[] prefset = pref.split("=");
-            startupActions.add(new ActionSpec("SetPref", prefset[0], prefset[1]));
+            for (String pref : cli.getString("set")) {
+                String[] prefset = pref.split("=");
+                startupActions.add(new ActionSpec("SetPref", prefset[0], prefset[1]));
+            }
         }
 
-        if (cli.isSet("board")) { startupActions.add(new ActionSpec("SetBoard", cli.getString("board"))); }
-        if (cli.isSet("core")) { startupActions.add(new ActionSpec("SetCore", cli.getString("core"))); }
-        if (cli.isSet("compiler")) { startupActions.add(new ActionSpec("SetCompiler", cli.getString("compiler"))); }
-        if (cli.isSet("programmer")) { startupActions.add(new ActionSpec("SetProgrammer", cli.getString("programmer"))); }
-        if (cli.isSet("port")) { startupActions.add(new ActionSpec("SetDevice", cli.getString("port"))); }
+        if (cli.isSet("board")) { startupActions.add(new ActionSpec("SetBoard", cli.getString("board")[0])); }
+        if (cli.isSet("core")) { startupActions.add(new ActionSpec("SetCore", cli.getString("core")[0])); }
+        if (cli.isSet("compiler")) { startupActions.add(new ActionSpec("SetCompiler", cli.getString("compiler")[0])); }
+        if (cli.isSet("programmer")) { startupActions.add(new ActionSpec("SetProgrammer", cli.getString("programmer")[0])); }
+        if (cli.isSet("port")) { startupActions.add(new ActionSpec("SetDevice", cli.getString("port")[0])); }
 
         if (cli.isSet("clean")) { startupActions.add(new ActionSpec("Purge")); }
         if (cli.isSet("purge")) { startupActions.add(new ActionSpec("Purge")); }
         if (cli.isSet("compile")) { startupActions.add(new ActionSpec("Build")); }
         if (cli.isSet("upload")) { startupActions.add(new ActionSpec("BuildAndUpload")); }
+
+        if (cli.isSet("action")) {
+            for (String action : cli.getString("action")) {
+                String[] bits = action.split("::");
+                String actionName = bits[0];
+                if (bits.length > 1) {
+                    String[] actionParameters = new String[bits.length-1];
+                    for (int i = 0; i < bits.length-1; i++) {
+                        actionParameters[i] = bits[i+1];
+                    }
+                    startupActions.add(new ActionSpec(actionName, (Object[])actionParameters));
+                } else {
+                    startupActions.add(new ActionSpec(actionName));
+                }
+            }
+        }
 
         if (systemContext.getGui().isEphemeral()) {
             startupActions.add(new ActionSpec("CloseSession"));
@@ -680,11 +704,11 @@ public class Base {
     static protected void initPlatform() {
         try {
 
-            if(Base.isMacOS()) {
+            if(UECIDE.isMacOS()) {
                 platform = new org.uecide.macosx.Platform();
-            } else if(Base.isWindows()) {
+            } else if(UECIDE.isWindows()) {
                 platform = new org.uecide.windows.Platform();
-            } else if(Base.isUnix()) {
+            } else if(UECIDE.isUnix()) {
                 platform = new org.uecide.unix.Platform();
             }
 
@@ -1108,7 +1132,7 @@ public class Base {
         String path = System.getProperty("user.dir");
 
         // Get a path to somewhere inside the .app folder
-        if(Base.isMacOS()) {
+        if(UECIDE.isMacOS()) {
             //      <key>javaroot</key>
             //      <string>$JAVAROOT</string>
             String javaroot = System.getProperty("javaroot");
@@ -1156,7 +1180,7 @@ public class Base {
             File dead = new File(dir, files[i]);
 
             if(!dead.isDirectory()) {
-                Base.tryDelete(dead);
+                UECIDE.tryDelete(dead);
             } else {
                 removeDir(dead);
             }
@@ -1483,7 +1507,7 @@ public class Base {
     public static Locale getLocale() {
         if (cli != null) {
             if (cli.isSet("locale")) {
-                String[] bits = cli.getString("locale").split("_");
+                String[] bits = cli.getString("locale")[0].split("_");
                 if (bits.length == 2) {
                     return new Locale(bits[0], bits[1]);
                 }
@@ -1544,7 +1568,7 @@ public class Base {
     }
 
     public static Context createContext(File sf) {
-        String gui = cli.getString("gui");
+        String gui = cli.getString("gui")[0];
         return createContext(sf, gui, true);
     }
 

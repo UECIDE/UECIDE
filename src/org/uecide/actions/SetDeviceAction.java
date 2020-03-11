@@ -33,18 +33,18 @@ public class SetDeviceAction extends Action {
             } else if (args[0] instanceof String) {
                 String name = (String)args[0];
 
-                for (CommunicationPort dev : Base.communicationPorts) {
+                for (CommunicationPort dev : UECIDE.communicationPorts) {
                     if (dev.toString().equals(name)) {
                         ctx.setDevice(dev);
                         ctx.action("setPref", "board." + ctx.getBoard().getName() + ".port", ctx.getDevice().toString());
                         return true;
                     }
                 }
-                if (Base.isPosix()) {
+                if (UECIDE.isPosix()) {
                     File f = new File(name);
                     if (f.exists() && !f.isDirectory()) {
                         SerialCommunicationPort p = new SerialCommunicationPort(f.getAbsolutePath());
-                        Base.communicationPorts.add(p);
+                        UECIDE.communicationPorts.add(p);
                         ctx.setDevice(p);
                         ctx.action("setPref", "board." + ctx.getBoard().getName() + ".port", ctx.getDevice().toString());
                         return true;

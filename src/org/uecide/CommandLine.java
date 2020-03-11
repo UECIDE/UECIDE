@@ -35,7 +35,7 @@ import java.util.*;
 public class CommandLine {
     HashMap<String, Class<?>> parameterTypes = new HashMap<String, Class<?>>();
     HashMap<String, String> parameterComments = new HashMap<String, String>();
-    HashMap<String, Object> parameterValues = new HashMap<String, Object>();
+    HashMap<String, ArrayList<Object>> parameterValues = new HashMap<String, ArrayList<Object>>();
     HashMap<String, String> parameterNames = new HashMap<String, String>();
     ArrayList<String> extraValues = new ArrayList<String>();
 
@@ -49,7 +49,7 @@ public class CommandLine {
     }
 
     public String[] process(String[] args) {
-        parameterValues = new HashMap<String, Object>();
+        parameterValues = new HashMap<String, ArrayList<Object>>();
         extraValues = new ArrayList<String>();
 
         for (String arg : args) {
@@ -67,44 +67,54 @@ public class CommandLine {
                     help();
                     System.exit(0);
                 }
+
+
+
+                // A boolean could be there multiple times, but it makes no sense to record such a fact.
                 if (aclass == Boolean.class) {
                     Boolean b = true;
-                    parameterValues.put(arg, b);
+                    addParameterEntry(arg, b);
                     continue;
                 }
+
+                // Everything else takes a parameter. 
                 if (value.equals("")) {
                     help();
                     System.exit(0);
                 }
+
                 if (aclass == Integer.class) {
                     Integer i = 0;
                     try {
                         i = Integer.parseInt(value);
                     } catch (Exception ignored) {
                     }
-                    parameterValues.put(arg, i);
+                    addParameterEntry(arg, i);
                     continue;
                 }
+
                 if (aclass == Float.class) {
                     Float f = 0F;
                     try {
                         f = Float.parseFloat(value);
                     } catch (Exception ignored) {
                     }
-                    parameterValues.put(arg, f);
+                    addParameterEntry(arg, f);
                     continue;
                 }
+
                 if (aclass == Double.class) {
                     Double d = 0D;
                     try {
                         d = Double.parseDouble(value);
                     } catch (Exception ignored) {
                     }
-                    parameterValues.put(arg, d);
+                    addParameterEntry(arg, d);
                     continue;
                 }
+
                 if (aclass == String.class) {
-                    parameterValues.put(arg, value);
+                    addParameterEntry(arg, value);
                     continue;
                 }
             } else {
@@ -145,76 +155,72 @@ public class CommandLine {
             }
             System.out.print(sb.toString());
             System.out.print("  ");
-            System.out.println(Base.i18n.string(parameterComments.get(s)));
+            System.out.println(UECIDE.i18n.string(parameterComments.get(s)));
         }
     }
 
     public boolean isSet(String key) {
-        Object value = parameterValues.get(key);
+        ArrayList<Object> value = parameterValues.get(key);
         if (value == null) {
             return false;
         }
         return true;
     }
 
-    public String getString(String key) {
-        Class<?> type = parameterTypes.get(key);
-        if (type == null) {
-            return null;
-        }
-        if (type != String.class) {
-            return null;
-        }
-        String value = (String)parameterValues.get(key);
-        return value;
+    public int count(String key) {
+        ArrayList<Object> value = parameterValues.get(key);
+        if (value == null) return 0;
+        return value.size();
     }
 
-    public int getInteger(String key) {
-        Class<?> type = parameterTypes.get(key);
-        if (type == null) {
-            return 0;
-        }
-        if (type != Integer.class) {
-            return 0;
-        }
-        Integer value = (Integer)parameterValues.get(key);
-        if (value == null) {
-            return 0;
-        }
-        return (int)value;
+    public String[] getString(String key) { return parameterValues.get(key).toArray(new String[0]); }
+    public Integer[] getInteger(String key) { return parameterValues.get(key).toArray(new Integer[0]); }
+    public Float[] getFloat(String key) { return parameterValues.get(key).toArray(new Float[0]); }
+    public Double[] getDouble(String key) { return parameterValues.get(key).toArray(new Double[0]); }
+
+    public void set(String key, String value) { addParameterEntry(key, value); }
+    public void set(String key, Integer value) { addParameterEntry(key, value); }
+    public void set(String key, Boolean value) { addParameterEntry(key, value); }
+    public void set(String key, Float value) { addParameterEntry(key, value); }
+    public void set(String key, Double value) { addParameterEntry(key, value); }
+
+    public void set(String key, String[] value) { 
+        ArrayList<Object> newArray = new ArrayList<Object>();
+        Collections.addAll(newArray, value);
+        parameterValues.put(key, newArray);
     }
 
-    public float getFloat(String key) {
-        Class<?> type = parameterTypes.get(key);
-        if (type == null) {
-            return 0f;
-        }
-        if (type != Float.class) {
-            return 0f;
-        }
-        Float value = (Float)parameterValues.get(key);
-        if (value == null) {
-            return 0f;
-        }
-        return (float)value;
+    public void set(String key, Integer[] value) { 
+        ArrayList<Object> newArray = new ArrayList<Object>();
+        Collections.addAll(newArray, value);
+        parameterValues.put(key, newArray);
     }
 
-    public double getDouble(String key) {
-        Class<?> type = parameterTypes.get(key);
-        if (type == null) {
-            return 0d;
-        }
-        if (type != Double.class) {
-            return 0d;
-        }
-        Double value = (Double)parameterValues.get(key);
-        if (value == null) {
-            return 0d;
-        }
-        return (double)value;
+    public void set(String key, Boolean[] value) { 
+        ArrayList<Object> newArray = new ArrayList<Object>();
+        Collections.addAll(newArray, value);
+        parameterValues.put(key, newArray);
     }
 
-    public void set(String key, String value) {
-        parameterValues.put(key, value);
+    public void set(String key, Float[] value) { 
+        ArrayList<Object> newArray = new ArrayList<Object>();
+        Collections.addAll(newArray, value);
+        parameterValues.put(key, newArray);
+    }
+
+    public void set(String key, Double[] value) { 
+        ArrayList<Object> newArray = new ArrayList<Object>();
+        Collections.addAll(newArray, value);
+        parameterValues.put(key, newArray);
+    }
+
+
+    public void addParameterEntry(String key, Object value) {
+        ArrayList<Object> array = parameterValues.get(key);
+        if (array == null) {
+            array = new ArrayList<Object>();
+        }
+        array.add(value);
+        parameterValues.put(key, array);
     }
 }

@@ -36,19 +36,19 @@ import java.io.File;
 public class vc_os extends VariableCommand {
     public String main(Context sketch, String args) throws VariableCommandException {
         if (args.equals("name")) {
-            return Base.getOSName();
+            return UECIDE.getOSName();
         }
         if (args.equals("arch")) {
-            return Base.getOSArch();
+            return UECIDE.getOSArch();
         }
         if (args.equals("version")) {
-            return Base.getOSVersion();
+            return UECIDE.getOSVersion();
         }
         if (args.equals("flavour")) {
-            return Base.getOSFlavour();
+            return UECIDE.getOSFlavour();
         }
         if (args.equals("flavor")) {
-            return Base.getOSFlavour();
+            return UECIDE.getOSFlavour();
         }
         throw new VariableCommandException("Unknown Key");
     }

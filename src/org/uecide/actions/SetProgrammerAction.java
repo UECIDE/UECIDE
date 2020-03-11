@@ -33,7 +33,7 @@ public class SetProgrammerAction extends Action {
                 return true;
             } else if (args[0] instanceof String) {
                 String s = (String)args[0];
-                Programmer b = Base.programmers.get(s);
+                Programmer b = UECIDE.programmers.get(s);
                 if (b == null) {
                     throw new ActionException("Unknown Programmer");
                 }

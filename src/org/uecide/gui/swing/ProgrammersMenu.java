@@ -1,6 +1,6 @@
 package org.uecide.gui.swing;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.Programmer;
 
@@ -50,7 +50,7 @@ public class ProgrammersMenu extends JMenu implements MenuListener {
 
     public void menuSelected(MenuEvent e) {
         removeAll();
-        for (Programmer programmer : Base.programmers.values()) {
+        for (Programmer programmer : UECIDE.programmers.values()) {
             if (programmer.worksWith(ctx.getBoard())) {
                 if (!programmer.isHidden()) {
                     ProgrammersMenuItem menu = new ProgrammersMenuItem(ctx, programmer);

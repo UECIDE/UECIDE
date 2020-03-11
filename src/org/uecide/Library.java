@@ -275,7 +275,7 @@ public class Library implements Comparable {
             in.close();
             data = contents.toString().split("\n");
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return;
         }
 
@@ -587,7 +587,7 @@ public class Library implements Comparable {
                 if(core.equals("all")) {
                     boolean sub = false;
 
-                    for(String c : Base.cores.keySet()) {
+                    for(String c : UECIDE.cores.keySet()) {
                         if(f.getName().equals(c)) {
                             Debug.message("  Found sub-library core group " + f);
                             loadLibrariesFromFolder(f, group, f.getName());
@@ -641,19 +641,19 @@ public class Library implements Comparable {
 // We never have these any more. They're all split out into core-centric library folders
 /*
         // Start with the compiler.  It's rare that there would be any here.
-        for(Compiler c : Base.compilers.values()) {
+        for(Compiler c : UECIDE.compilers.values()) {
             setCategoryName("compiler:" + c.getName(), c.getDescription());
             loadLibrariesFromFolder(c.getLibrariesFolder(), "compiler:" + c.getName());
         }
 
         // Now we'll do the cores.  This is almost guaranteed to have libraries.
-        for(Core c : Base.cores.values()) {
+        for(Core c : UECIDE.cores.values()) {
             setCategoryName("core:" + c.getName(), c.getDescription());
             loadLibrariesFromFolder(c.getLibrariesFolder(), "core:" + c.getName(), c.getName());
         }
 
         // And now boards.
-        for(Board c : Base.boards.values()) {
+        for(Board c : UECIDE.boards.values()) {
             setCategoryName("board:" + c.getName(), c.getDescription());
             loadLibrariesFromFolder(c.getLibrariesFolder(), "core:" + c.getName());
         }
@@ -679,7 +679,7 @@ public class Library implements Comparable {
         }
 
         if(foundCats == 0) {
-            File f = new File(Base.getSketchbookFolder(), "libraries");
+            File f = new File(UECIDE.getSketchbookFolder(), "libraries");
             Preferences.set("locations.library.contributed.name", "Contributed");
             Preferences.setFile("locations.library.contributed.path", f);
 
@@ -694,7 +694,7 @@ public class Library implements Comparable {
         // And now we have our new repo-based libraries.  First scan
         // a list of categories and their folders:
 
-        File[] repoLibsList = Base.getLibrariesFolders();
+        File[] repoLibsList = UECIDE.getLibrariesFolders();
         for (File repoLibs : repoLibsList) {
             if (!repoLibs.exists()) {
                 continue;
@@ -789,7 +789,7 @@ public class Library implements Comparable {
         }
 
         if(bits[0].equals("core")) {
-            Core c = Base.cores.get(bits[1]);
+            Core c = UECIDE.cores.get(bits[1]);
 
             if(c == null) {
                 return null;
@@ -799,7 +799,7 @@ public class Library implements Comparable {
         }
 
         if(bits[0].equals("compiler")) {
-            Compiler c = Base.compilers.get(bits[1]);
+            Compiler c = UECIDE.compilers.get(bits[1]);
 
             if(c == null) {
                 return null;
@@ -809,7 +809,7 @@ public class Library implements Comparable {
         }
 
         if(bits[0].equals("board")) {
-            Board c = Base.boards.get(bits[1]);
+            Board c = UECIDE.boards.get(bits[1]);
 
             if(c == null) {
                 return null;
@@ -969,7 +969,7 @@ public class Library implements Comparable {
         Context localCtx = new Context(ctx); // Make a copy of the context so we can mess with include paths and such
         File utility = getUtilityFolder();
         PropertyFile props = localCtx.getMerged();
-        if (!Base.isQuiet()) ctx.bullet2(toString() + " [" + getFolder().getAbsolutePath() + "]");
+        if (!UECIDE.isQuiet()) ctx.bullet2(toString() + " [" + getFolder().getAbsolutePath() + "]");
 
         localCtx.set("library", archiveFile.getAbsolutePath());
 
@@ -1007,7 +1007,7 @@ public class Library implements Comparable {
 
         localCtx.dispose();
         setCompiledPercent(100);
-        Base.tryDelete(libBuildFolder); 
+        UECIDE.tryDelete(libBuildFolder); 
         compilingState = COMP_DONE;
         ctx.triggerEvent("libraryCompileFinished", this);
         return true;

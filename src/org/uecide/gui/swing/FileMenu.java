@@ -43,7 +43,6 @@ public class FileMenu extends JMenu {
                 ctx.action("newSketch");
             }
         });
-        add(newMenu);
 
         openMenu = new JMenuItem("Open...");
         openMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, defaultModifiers));
@@ -52,21 +51,12 @@ public class FileMenu extends JMenu {
                 ctx.action("openSketch");
             }
         });
-        add(openMenu);
 
         openGit = new JMenuItem("Open Git Repository...");
-        add(openGit);
 
         recentMenu = new RecentFileMenu(ctx);
-        add(recentMenu);
-
         frequentMenu = new FrequentFileMenu(ctx);
-        add(frequentMenu);
-
         examplesMenu = new ExampleFileMenu(ctx);
-        add(examplesMenu);
-
-        addSeparator();
 
         closeMenu = new JMenuItem("Close");
         closeMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, defaultModifiers));
@@ -75,7 +65,6 @@ public class FileMenu extends JMenu {
                 ctx.action("closeSession");
             }
         });
-        add(closeMenu);
 
         saveMenu = new JMenuItem("Save");
         saveMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, defaultModifiers));
@@ -84,7 +73,6 @@ public class FileMenu extends JMenu {
                 ctx.action("saveSketch");
             }
         });
-        add(saveMenu);
     
         saveAsMenu = new JMenuItem("Save As...");
         saveAsMenu.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, defaultModifiers | InputEvent.SHIFT_DOWN_MASK));
@@ -93,20 +81,10 @@ public class FileMenu extends JMenu {
                 ctx.action("saveSketchAs");
             }
         });
-        add(saveAsMenu);
-
-        addSeparator();
     
         exportSarMenu = new JMenuItem("Export as SAR... (TODO)");
-        add(exportSarMenu);
-
         importSarMenu = new JMenuItem("Import SAR... (TODO)");
-        add(importSarMenu);
-
-        addSeparator();
-
         preferencesMenu = new JMenuItem("Preferences... (TODO)");
-        add(preferencesMenu);
 
         quitMenu = new JMenuItem("Quit");
         quitMenu.addActionListener(new ActionListener() {
@@ -114,6 +92,31 @@ public class FileMenu extends JMenu {
                 ctx.action("closeAllSessions");
             }
         });
+
+        add(newMenu);
+        add(openMenu);
+        add(openGit);
+        add(recentMenu);
+        add(frequentMenu);
+        add(examplesMenu);
+
+        addSeparator();
+
+        add(saveMenu);
+        add(saveAsMenu);
+
+        addSeparator();
+
+        add(exportSarMenu);
+        add(importSarMenu);
+
+        addSeparator();
+
+        add(preferencesMenu);
+
+        addSeparator();
+
+        add(closeMenu);
         add(quitMenu);
     }
 }

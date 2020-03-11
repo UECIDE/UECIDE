@@ -1,6 +1,6 @@
 package org.uecide.gui.swing;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.Board;
 
@@ -44,7 +44,7 @@ public class BoardsMenu extends JMenu implements MenuListener {
 
     TreeSet<String> getGroupList() {
         TreeSet<String> groups = new TreeSet<String>();
-        for (Board board : Base.boards.values()) {
+        for (Board board : UECIDE.boards.values()) {
             String group = board.getGroup();
             if (!groups.contains(group)) {
                 groups.add(group);

@@ -255,7 +255,7 @@ public class Sketch {
             out.close();
 
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
@@ -290,7 +290,7 @@ public class Sketch {
         sketchFolder = folder;
 
         if(!isUntitled()) {
-            Base.updateMRU(sketchFolder);
+            UECIDE.updateMRU(sketchFolder);
         }
 
         File fileList[] = sketchFolder.listFiles();
@@ -346,7 +346,7 @@ public class Sketch {
     }
 
     public File createBuildFolder() {
-        if(Preferences.getBoolean("compiler.buildinsketch") || Base.cli.isSet("force-local-build") || Base.cli.isSet("cli")) {
+        if(Preferences.getBoolean("compiler.buildinsketch") || UECIDE.cli.isSet("force-local-build") || UECIDE.cli.isSet("cli")) {
             if(!parentIsProtected()) {
                 File f = new File(sketchFolder, "build");
 
@@ -360,7 +360,7 @@ public class Sketch {
 
         String name = "build-" + uuid;
         Debug.message("Creating build folder " + name);
-        File f = new File(Base.getTmpDir(), name);
+        File f = new File(UECIDE.getTmpDir(), name);
 
         if(!f.exists()) {
             f.mkdirs();
@@ -378,7 +378,7 @@ public class Sketch {
         do {
             num++;
             String name = "untitled" + Integer.toString(num);
-            f = new File(Base.getTmpDir(), name);
+            f = new File(UECIDE.getTmpDir(), name);
         } while(f.exists());
 
         f.deleteOnExit();
@@ -611,7 +611,7 @@ public class Sketch {
                 
                 boolean haveHunted = huntForLibraries(tempFile, importedLibraries, unknownLibraries);
 
-                Base.tryDelete(tempFile);
+                UECIDE.tryDelete(tempFile);
                 ctx.triggerEvent("buildFileRemoved", tempFile);
 
                 String lines[] = data.split("\n");
@@ -706,12 +706,12 @@ public class Sketch {
         PropertyFile props = ctx.getMerged();
 
         if(ctx.getBoard() == null) {
-            ctx.error(Base.i18n.string("err.noboard"));
+            ctx.error(UECIDE.i18n.string("err.noboard"));
             return false;
         }
 
         if(ctx.getCore() == null) {
-            ctx.error(Base.i18n.string("err.nocore"));
+            ctx.error(UECIDE.i18n.string("err.nocore"));
             return false;
         }
 
@@ -986,7 +986,7 @@ public class Sketch {
     }
 
     public boolean performSerialReset(boolean dtr, boolean rts, int speed, int predelay, int delay, int postdelay) {
-        if (!Base.isQuiet()) ctx.bullet("Resetting board.");
+        if (!UECIDE.isQuiet()) ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
             if (port instanceof SerialCommunicationPort) {
@@ -1014,7 +1014,7 @@ public class Sketch {
     }
 
     public boolean performBaudBasedReset(int b, int predelay, int delay, int postdelay) {
-        if (!Base.isQuiet()) ctx.bullet("Resetting board.");
+        if (!UECIDE.isQuiet()) ctx.bullet("Resetting board.");
         try {
             CommunicationPort port = ctx.getDevice();
             if (port instanceof SerialCommunicationPort) {
@@ -1053,29 +1053,29 @@ public class Sketch {
         terminateExecution = false;
 
         if(ctx.getBoard() == null) {
-            ctx.error(Base.i18n.string("err.noboard"));
+            ctx.error(UECIDE.i18n.string("err.noboard"));
             ctx.triggerEvent("buildFail");
             return false;
         }
 
         if(ctx.getCore() == null) {
-            ctx.error(Base.i18n.string("err.nocore"));
+            ctx.error(UECIDE.i18n.string("err.nocore"));
             ctx.triggerEvent("buildFail");
             return false;
         }
 
         if(ctx.getCompiler() == null) {
-            ctx.error(Base.i18n.string("err.nocompiler"));
+            ctx.error(UECIDE.i18n.string("err.nocompiler"));
             ctx.triggerEvent("buildFail");
             return false;
         }
 
-        if (!Base.isQuiet()) ctx.heading(Base.i18n.string("msg.compiling"));
+        if (!UECIDE.isQuiet()) ctx.heading(UECIDE.i18n.string("msg.compiling"));
 
-        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.preprocessing"));
+        if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.preprocessing"));
         try {
             if(!prepare()) {
-                ctx.error(Base.i18n.string("err.compiling.failed"));
+                ctx.error(UECIDE.i18n.string("err.compiling.failed"));
                 ctx.triggerEvent("buildFail");
                 return false;
             }
@@ -1113,7 +1113,7 @@ public class Sketch {
         if(newPath.exists()) {
             boolean overwrite = ctx.getGui().askYesNo("Overwrite " + newPath.getName() + "?");
             if (!overwrite) return false;
-            Base.removeDescendants(newPath);
+            UECIDE.removeDescendants(newPath);
         }
 
         Debug.message("Save as " + newPath.getAbsolutePath());
@@ -1334,7 +1334,7 @@ public class Sketch {
     }
 
     public void cleanup() {
-        Base.removeDescendants(buildFolder);
+        UECIDE.removeDescendants(buildFolder);
         ctx.triggerEvent("buildFileRemoved", buildFolder);
     }
 
@@ -1503,10 +1503,10 @@ public class Sketch {
 
         if (!apt.isInstalled(pkg)) {
             ctx.bullet2("Downloading " + pkg.getName());
-            pkg.fetchPackage(Base.getDataFile("apt/cache"));
+            pkg.fetchPackage(UECIDE.getDataFile("apt/cache"));
         
             ctx.bullet2("Installing " + pkg.getName());
-            pkg.extractPackage(Base.getDataFile("apt/cache"), Base.getDataFile("apt/db/packages"), Base.getDataFolder());
+            pkg.extractPackage(UECIDE.getDataFile("apt/cache"), UECIDE.getDataFile("apt/db/packages"), UECIDE.getDataFolder());
         }
     }
 
@@ -1535,13 +1535,13 @@ public class Sketch {
         ctx.set("filename", sketchName);
 
         try {
-            if ((Preferences.getBoolean("editor.dialog.missinglibs")) && (Base.isOnline())) {
+            if ((Preferences.getBoolean("editor.dialog.missinglibs")) && (UECIDE.isOnline())) {
             }
         } catch (Exception ex) { ctx.error(ex); }
 
         if(doPrePurge) {
             doPrePurge = false;
-            Base.removeDir(getCacheFolder());
+            UECIDE.removeDir(getCacheFolder());
         }
 
         ctx.set("option.flags", getFlags("flags"));
@@ -1609,34 +1609,34 @@ public class Sketch {
             }
         }
 
-        if (!Base.isQuiet()) ctx.bullet("Compiling sketch...");
+        if (!UECIDE.isQuiet()) ctx.bullet("Compiling sketch...");
         ArrayList<File>sketchObjects = compileSketch();
 
         if(sketchObjects == null) {
-            ctx.error(Base.i18n.string("err.compiling.failed"));
+            ctx.error(UECIDE.i18n.string("err.compiling.failed"));
             return false;
         }
 
-        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.compiling.core"));
+        if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.compiling.core"));
 
         if(!compileCore()) {
-            ctx.error(Base.i18n.string("err.compiling.failed"));
+            ctx.error(UECIDE.i18n.string("err.compiling.failed"));
             return false;
         }
 
 
-        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.compiling.libraries"));
+        if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.compiling.libraries"));
 
         if(!compileLibraries()) {
-            ctx.error(Base.i18n.string("err.compiling.failed"));
+            ctx.error(UECIDE.i18n.string("err.compiling.failed"));
             return false;
         }
 
 
-        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.linking"));
+        if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.linking"));
 
         if(!compileLink(sketchObjects)) {
-            ctx.error(Base.i18n.string("err.compiling.failed"));
+            ctx.error(UECIDE.i18n.string("err.compiling.failed"));
             return false;
         }
 
@@ -1650,7 +1650,7 @@ public class Sketch {
             int pct = 50;
 
             for (String type : types) {
-                ctx.bullet2(Base.i18n.string("msg.compiling.genfile", type));
+                ctx.bullet2(UECIDE.i18n.string("msg.compiling.genfile", type));
                 ctx.executeKey("compile.autogen." + type);
                 pct += steps;
             }
@@ -1670,7 +1670,7 @@ public class Sketch {
 
 
         if((
-            Preferences.getBoolean("compiler.save_hex") || Base.cli.isSet("force-save-hex") || Base.cli.isSet("cli")) 
+            Preferences.getBoolean("compiler.save_hex") || UECIDE.cli.isSet("force-save-hex") || UECIDE.cli.isSet("cli")) 
             && !parentIsProtected()) {
             try {
                 String exeSuffix = props.get("exe.extension");
@@ -1691,14 +1691,14 @@ public class Sketch {
         }
 
 
-        if (!Base.isQuiet()) ctx.heading(Base.i18n.string("msg.compiling.done"));
+        if (!UECIDE.isQuiet()) ctx.heading(UECIDE.i18n.string("msg.compiling.done"));
 
 
         compileSize();
 
         long endTime = System.currentTimeMillis();
         double compileTime = (double)(endTime - startTime) / 1000d;
-        if (!Base.isQuiet()) ctx.bullet(Base.i18n.string("msg.compiling.time", compileTime));
+        if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.compiling.time", compileTime));
         ctx.executeKey("compile.postcmd");
         return true;
     }
@@ -1707,7 +1707,7 @@ public class Sketch {
         PropertyFile props = ctx.getMerged();
 
         if (props.get("compile.size") != null) {
-            if (!Base.isQuiet()) ctx.heading(Base.i18n.string("msg.compiling.memory"));
+            if (!UECIDE.isQuiet()) ctx.heading(UECIDE.i18n.string("msg.compiling.memory"));
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             ctx.setOutputStream(os);
@@ -1757,22 +1757,22 @@ public class Sketch {
             ctx.set("size.flash", (textSize + dataSize + rodataSize) + "");
             ctx.set("size.ram", (bssSize + dataSize) + "");
 
-            if (!Base.isQuiet()) {
+            if (!UECIDE.isQuiet()) {
                 int max_ram = props.getInteger("memory.sram");
                 int max_rom = props.getInteger("memory.flash");
 
                 if (max_rom > 0) {
                     int romperc = (textSize + dataSize + rodataSize) * 100 / max_rom;
-                    ctx.bullet(Base.i18n.string("msg.compiling.progsize.perc", (textSize + dataSize + rodataSize), romperc)); 
+                    ctx.bullet(UECIDE.i18n.string("msg.compiling.progsize.perc", (textSize + dataSize + rodataSize), romperc)); 
                 } else {
-                    ctx.bullet(Base.i18n.string("msg.compiling.progsize", (textSize + dataSize + rodataSize))); 
+                    ctx.bullet(UECIDE.i18n.string("msg.compiling.progsize", (textSize + dataSize + rodataSize))); 
                 }
 
                 if (max_ram > 0) {
                     int ramperc = (bssSize + dataSize) * 100 / max_ram;
-                    ctx.bullet(Base.i18n.string("msg.compiling.ramsize.perc", (bssSize + dataSize), ramperc)); 
+                    ctx.bullet(UECIDE.i18n.string("msg.compiling.ramsize.perc", (bssSize + dataSize), ramperc)); 
                 } else {
-                    ctx.bullet(Base.i18n.string("msg.compiling.ramsize", (bssSize + dataSize))); 
+                    ctx.bullet(UECIDE.i18n.string("msg.compiling.ramsize", (bssSize + dataSize))); 
                 }
             }
         }
@@ -1847,7 +1847,7 @@ public class Sketch {
     }
 
     public File getCacheFolder() {
-        File cacheRoot = Base.getCacheFolder();
+        File cacheRoot = UECIDE.getCacheFolder();
         Core c = ctx.getCore();
         File boardCache = new File(cacheRoot, "unknownCache");
         if (c != null) {
@@ -1885,14 +1885,14 @@ public class Sketch {
                     File cachedStubObject = getCacheFile(mainStubObject.getName());
                     if (mainStubObject.exists()) {
                         Files.copy(mainStubObject.toPath(), cachedStubObject.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                        Base.tryDelete(mainStubObject);
+                        UECIDE.tryDelete(mainStubObject);
                     }
                 }
             }
         }
 
         for(String lib : coreLibs.keySet()) {
-            if (!Base.isQuiet()) ctx.bullet2(lib);
+            if (!UECIDE.isQuiet()) ctx.bullet2(lib);
 
             if(!compileCore(coreLibs.get(lib), "Core_" + lib)) {
                 return false;
@@ -1938,8 +1938,8 @@ public class Sketch {
                 File out = compileFile(ctx, f, coreBuildFolder);
 
                 if(out == null) {
-                    Base.tryDelete(coreBuildFolder);
-                    if (archive.exists()) Base.tryDelete(archive);
+                    UECIDE.tryDelete(coreBuildFolder);
+                    if (archive.exists()) UECIDE.tryDelete(archive);
                     return false;
                 }
                 ctx.triggerEvent("buildFileAdded", out);
@@ -1948,19 +1948,19 @@ public class Sketch {
                 boolean ok = (Boolean)ctx.executeKey("compile.ar");
 
                 if(!ok) {
-                    Base.tryDelete(out);
-                    Base.tryDelete(coreBuildFolder);
+                    UECIDE.tryDelete(out);
+                    UECIDE.tryDelete(coreBuildFolder);
                     ctx.triggerEvent("buildFileRemoved", out);
-                    if (archive.exists()) Base.tryDelete(archive);
+                    if (archive.exists()) UECIDE.tryDelete(archive);
                     return false;
                 }
 
-                Base.tryDelete(out);
+                UECIDE.tryDelete(out);
                 ctx.triggerEvent("buildFileRemoved", out);
             }
         }
 
-        Base.tryDelete(coreBuildFolder);
+        UECIDE.tryDelete(coreBuildFolder);
         ctx.triggerEvent("buildFileRemoved", coreBuildFolder);
         return true;
     }
@@ -2256,7 +2256,7 @@ public class Sketch {
 
     public boolean isInternal() {
         String path = sketchFolder.getAbsolutePath();
-        String basePath = Base.getContentFile(".").getAbsolutePath() + File.separator;
+        String basePath = UECIDE.getContentFile(".").getAbsolutePath() + File.separator;
         String cachePath = getCacheFolder().getAbsolutePath() + File.separator;
         String corePath = ctx.getCore().getFolder().getAbsolutePath() + File.separator;
         String boardPath = ctx.getBoard().getFolder().getAbsolutePath() + File.separator;
@@ -2273,7 +2273,7 @@ public class Sketch {
     }
 
     public void cleanBuild() {
-        Base.removeDescendants(buildFolder);
+        UECIDE.removeDescendants(buildFolder);
         ctx.triggerEvent("buildFileRemoved", buildFolder);
     }
 
@@ -2294,7 +2294,7 @@ public class Sketch {
     public boolean programFile(Programmer programmer, String file) {
         Programmer p = ctx.getProgrammer();
         if (p == null) {
-            ctx.error(Base.i18n.string("err.noprogrammer"));
+            ctx.error(UECIDE.i18n.string("err.noprogrammer"));
             return false;
         }
         return p.programFile(ctx, file);
@@ -2495,7 +2495,7 @@ public class Sketch {
         if(!s.endsWith("\n")) {
             s += "\n";
         }
-            if (Base.cli.isSet("verbose")) {
+            if (UECIDE.cli.isSet("verbose")) {
                 System.out.print(s);
             }
     }        
@@ -2727,11 +2727,11 @@ public class Sketch {
 
     public void purgeLibrary(Library lib) {
         File arch = new File(getCacheFolder(), getArchiveName(lib));
-        Base.tryDelete(arch);
+        UECIDE.tryDelete(arch);
     }
 
     public void purgeCache() {
-        Base.removeDir(getCacheFolder());
+        UECIDE.removeDir(getCacheFolder());
     }
 
 /* TODO: Move to SketchFile */
@@ -2748,7 +2748,7 @@ public class Sketch {
     }
 
     public void purgeBuildFiles() {
-        Base.removeDescendants(buildFolder);
+        UECIDE.removeDescendants(buildFolder);
     }
 
     public boolean isChildOf(File dir) {
@@ -2794,15 +2794,15 @@ public class Sketch {
     }
 
     public boolean parentIsBoard() {
-        return parentIsIn(Base.getBoardsFolders());
+        return parentIsIn(UECIDE.getBoardsFolders());
     }
 
     public boolean parentIsCore() {
-        return parentIsIn(Base.getCoresFolders());
+        return parentIsIn(UECIDE.getCoresFolders());
     }
 
     public boolean parentIsCompiler() {
-        return parentIsIn(Base.getCompilersFolders());
+        return parentIsIn(UECIDE.getCompilersFolders());
     }
 
     public boolean parentIsProtected() {
@@ -2821,7 +2821,7 @@ public class Sketch {
     public boolean generateSarFile(File archiveFile) {
         try {
             if(archiveFile.exists()) {
-                Base.tryDelete(archiveFile);
+                UECIDE.tryDelete(archiveFile);
             }
 
             FileOutputStream outfile = new FileOutputStream(archiveFile);
@@ -2919,33 +2919,33 @@ public class Sketch {
         PropertyFile m = ctx.getMerged();
         if (m.get("sketch.board") != null) {
             String wantedBoard = m.get("sketch.board");
-            Board b = Base.getBoard(wantedBoard);
+            Board b = UECIDE.getBoard(wantedBoard);
             if (b == null) {
-                ctx.error(Base.i18n.string("err.badboard", wantedBoard));
+                ctx.error(UECIDE.i18n.string("err.badboard", wantedBoard));
             } else {
-                ctx.bullet(Base.i18n.string("msg.selecting.board", b));
+                ctx.bullet(UECIDE.i18n.string("msg.selecting.board", b));
                 ctx.action("SetBoard", b);
             }
         }
 
         if (m.get("sketch.core") != null) {
             String wantedCore = m.get("sketch.core");
-            Core c = Base.getCore(wantedCore);
+            Core c = UECIDE.getCore(wantedCore);
             if (c == null) {
-                ctx.error(Base.i18n.string("err.badcore", wantedCore));
+                ctx.error(UECIDE.i18n.string("err.badcore", wantedCore));
             } else {
-                ctx.bullet(Base.i18n.string("msg.selecting.core", c));
+                ctx.bullet(UECIDE.i18n.string("msg.selecting.core", c));
                 ctx.setCore(c);
             }
         }
 
         if (m.get("sketch.compiler") != null) {
             String wantedCompiler = m.get("sketch.compiler");
-            Compiler c = Base.getCompiler(wantedCompiler);
+            Compiler c = UECIDE.getCompiler(wantedCompiler);
             if (c == null) {
-                ctx.error(Base.i18n.string("err.badcompiler", wantedCompiler));
+                ctx.error(UECIDE.i18n.string("err.badcompiler", wantedCompiler));
             } else {
-                ctx.bullet(Base.i18n.string("msg.selecting.compiler", c));
+                ctx.bullet(UECIDE.i18n.string("msg.selecting.compiler", c));
                 ctx.action("SetCompiler", c);
             }
         }
@@ -3091,7 +3091,7 @@ public class Sketch {
             }
             out.close();
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
@@ -3174,7 +3174,7 @@ public class Sketch {
             in.close();
             data = contents.toString().split("\n");
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return null;
         }
 
@@ -3323,13 +3323,13 @@ public class Sketch {
     }
 
     public void outputErrorStream(String msg) {
-        if (Base.cli.isSet("verbose")) {
+        if (UECIDE.cli.isSet("verbose")) {
             System.err.print(msg);
         }
     }
    
     public void outputMessageStream(String msg) {
-        if (Base.cli.isSet("verbose")) {
+        if (UECIDE.cli.isSet("verbose")) {
             System.out.print(msg);
         }
     }

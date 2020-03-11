@@ -8,18 +8,18 @@ public class OfficeXPLAF extends LookAndFeel {
     public String getName() { return "Office XP"; }
 
     public void applyLAF() {
-        if (!Base.isWindows()) {
-            Base.error("The selected Look and Feel is only compatible with Windows. Select another.");
+        if (!UECIDE.isWindows()) {
+            UECIDE.error("The selected Look and Feel is only compatible with Windows. Select another.");
             return;
         }
 
         try {
             UIManager.setLookAndFeel("org.fife.plaf.OfficeXP.OfficeXPLookAndFeel");
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 
-    public boolean isCompatible() { return Base.isWindows(); }
+    public boolean isCompatible() { return UECIDE.isWindows(); }
 
 }

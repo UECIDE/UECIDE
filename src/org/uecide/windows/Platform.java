@@ -40,7 +40,7 @@ import com.sun.jna.Native;
 import javax.swing.*;
 import java.util.regex.*;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Debug;
 import org.uecide.Preferences;
 import org.uecide.PropertyFile;
@@ -63,7 +63,7 @@ public class Platform extends org.uecide.Platform {
     }
 
     public void setSettingsFolderEnvironmentVariable() {
-        File settingsFolder = Base.getDataFolder();
+        File settingsFolder = UECIDE.getDataFolder();
         String variablePath = Registry.getStringValue(REGISTRY_ROOT_KEY.CURRENT_USER, "Environment", "UECIDE");
 
         if(variablePath == null || !(variablePath.equals(settingsFolder.getAbsolutePath()))) {
@@ -90,7 +90,7 @@ public class Platform extends org.uecide.Platform {
 
             return localDataFolder;
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return null;
         }
     }
@@ -104,7 +104,7 @@ public class Platform extends org.uecide.Platform {
 
             return new File(personalPath, "UECIDE");
         } catch(Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return null;
         }
     }

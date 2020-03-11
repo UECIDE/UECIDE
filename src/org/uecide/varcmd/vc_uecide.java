@@ -40,18 +40,18 @@ public class vc_uecide extends VariableCommand {
             return "UECIDE";
         }
         if (args.equals("version")) {
-            return Base.systemVersion.toString();
+            return UECIDE.systemVersion.toString();
         }
         if (args.equals("uuid")) {
             return UUID.randomUUID().toString();
         }
         if (args.equals("root")) {
-            File jar = Base.getJarLocation();
+            File jar = UECIDE.getJarLocation();
             File idir = jar.getParentFile();
             return idir.getAbsolutePath();
         }
         if (args.equals("jar")) {
-            File jar = Base.getJarLocation();
+            File jar = UECIDE.getJarLocation();
             return jar.getAbsolutePath();
         }
         throw new VariableCommandException("Unknown Key");

@@ -1,6 +1,6 @@
 package org.uecide.gui.swing;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.Core;
 
@@ -50,7 +50,7 @@ public class CoresMenu extends JMenu implements MenuListener {
 
     public void menuSelected(MenuEvent e) {
         removeAll();
-        for (Core core : Base.cores.values()) {
+        for (Core core : UECIDE.cores.values()) {
             if (core.worksWith(ctx.getBoard())) {
                 CoresMenuItem menu = new CoresMenuItem(ctx, core);
                 add(menu);

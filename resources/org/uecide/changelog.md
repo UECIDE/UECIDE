@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Fix options bug
 * Cleanup of base
 * Made preferences self-contained
 * Most of edit menu done
@@ -759,6 +760,7 @@ Changelog
 0.8.5
 -----
 
+* Fix options bug
 * Cleanup of base
 * Made preferences self-contained
 * Most of edit menu done

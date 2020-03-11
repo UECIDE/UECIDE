@@ -46,7 +46,7 @@ public class getauth extends BuiltinCommand {
         String value = "";
         String exist = Preferences.get(dest);
 
-        if (Base.isHeadless()) {
+        if (UECIDE.isHeadless()) {
             LineReader reader = LineReaderBuilder.builder().build();
             System.out.print(prompt + ": ");
             String in = reader.readLine();

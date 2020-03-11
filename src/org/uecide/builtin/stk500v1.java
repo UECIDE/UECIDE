@@ -147,12 +147,12 @@ public class stk500v1 extends BuiltinCommand implements CommsListener {
         }
 
         if(!loadHexFile(new File(fle))) {
-            ctx.error(Base.i18n.string("err.notfound", fle));
+            ctx.error(UECIDE.i18n.string("err.notfound", fle));
             return false;
         }
 
         if (!connect(1000)) {
-            ctx.error(Base.i18n.string("err.noconnect"));
+            ctx.error(UECIDE.i18n.string("err.noconnect"));
             return false;
         }
 
@@ -191,7 +191,7 @@ public class stk500v1 extends BuiltinCommand implements CommsListener {
         timeout = to;
 
         port = null;
-        for (CommunicationPort p : Base.communicationPorts) {
+        for (CommunicationPort p : UECIDE.communicationPorts) {
             if (p.toString().equals(portName)) {
                 port = p;
             }
@@ -346,7 +346,7 @@ System.err.println("Programming chunk " + currentChunk + " at address " + start)
         }
 
         if(!sendCommand(message)) {
-            ctx.error(Base.i18n.string("err.upload"));
+            ctx.error(UECIDE.i18n.string("err.upload"));
             return false;
         }
 

@@ -11,7 +11,7 @@ public class LiquidLAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel("com.birosoft.liquid.LiquidLookAndFeel");
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
         }
     }
 

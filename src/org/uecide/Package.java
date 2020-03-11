@@ -279,7 +279,7 @@ public class Package implements Comparable, Serializable {
         if (!checkFileIntegrity(folder)) {
             File downloadTo = new File(folder, getFilename());
             if (downloadTo.exists()) {
-                Base.tryDelete(downloadTo);
+                UECIDE.tryDelete(downloadTo);
             }
             String[] repos = properties.get("Repository").split(";");
             shuffleArray(repos);
@@ -302,7 +302,7 @@ public class Package implements Comparable, Serializable {
                         if (!reps.startsWith("/")) {
                             reps = "/" + reps;
                         }
-                        in = Base.class.getResourceAsStream(reps + "/" + properties.get("Filename"));
+                        in = UECIDE.class.getResourceAsStream(reps + "/" + properties.get("Filename"));
                         if (in == null) {
                             ctx.error("Error: Resource not found: " + reps + "/" + properties.get("Filename"));
                             return false;
@@ -387,7 +387,7 @@ public class Package implements Comparable, Serializable {
 
                     if (!hexString.toString().equalsIgnoreCase(existingSha)) {
                         ctx.error("\rDownloading " + tname + " [#########################] checksum error                 ");
-                        Base.tryDelete(downloadTo);
+                        UECIDE.tryDelete(downloadTo);
                         return false;
                     }
 
@@ -402,7 +402,7 @@ public class Package implements Comparable, Serializable {
                     ctx.error("");
                     ctx.error("Download failed: " + errorMessage);
                     if (downloadTo.exists()) {
-                        Base.tryDelete(downloadTo);
+                        UECIDE.tryDelete(downloadTo);
                     }
                 }
             }
@@ -428,7 +428,7 @@ public class Package implements Comparable, Serializable {
             df.extract(pf, root);
             ctx.message("done");
         } catch (Exception e) {
-            Base.error(e);
+            UECIDE.error(e);
             return false;
         }
         return true;

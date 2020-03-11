@@ -40,7 +40,7 @@ public abstract class JTattooLAF extends LookAndFeel {
             UIManager.setLookAndFeel(className);
 
         } catch (Exception e) {
-            Base.error(e); 
+            UECIDE.error(e); 
         }
     }
 }

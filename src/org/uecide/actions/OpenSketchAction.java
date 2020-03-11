@@ -20,7 +20,7 @@ public class OpenSketchAction extends Action {
         File file = null;
 
         if (args.length == 0) { 
-            file = ctx.getGui().askOpenSketch("Open Sketch", Base.getSketchbookFolder());
+            file = ctx.getGui().askOpenSketch("Open Sketch", UECIDE.getSketchbookFolder());
             if (file == null) {
                 return false;
             }
@@ -58,7 +58,7 @@ public class OpenSketchAction extends Action {
             }
 
             // Make a new context - this action then gets called again with the first "if" above.
-            Base.createContext(file);
+            UECIDE.createContext(file);
 
             // If we have an unmodified blank sketch (freshly opened), then just close it.
             // Note: this has to happen after the new context, or there's a good chance
@@ -69,7 +69,7 @@ public class OpenSketchAction extends Action {
                 }
             }
 
-            Base.updateMRU(file);
+            UECIDE.updateMRU(file);
 
             return true;
         } catch (Exception ex) {

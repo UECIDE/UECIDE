@@ -1,6 +1,6 @@
 package org.uecide.actions;
 
-import org.uecide.Base;
+import org.uecide.UECIDE;
 import org.uecide.Context;
 import java.io.File;
 import java.io.IOException;
