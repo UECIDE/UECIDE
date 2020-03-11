@@ -63,7 +63,7 @@
       </array>
 
       <key>MainClass</key>
-      <string>org.uecide.Base</string>
+      <string>org.uecide.UECIDE</string>
 
       <key>JVMVersion</key>
       <string>1.8*</string>

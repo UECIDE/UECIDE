@@ -14,7 +14,7 @@
   <manifest></manifest>
   <icon>application.ico</icon>
   <classPath>
-    <mainClass>org.uecide.Base</mainClass>
+    <mainClass>org.uecide.UECIDE</mainClass>
     <cp>lib/uecide.jar</cp>
     <cp>lib/jna.jar</cp>
     <cp>lib/ecj.jar</cp>

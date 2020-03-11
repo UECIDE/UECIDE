@@ -78,7 +78,7 @@
             <fileset dir="bin" />
             <fileset dir="resources" />
             <manifest>
-                <attribute name="Main-Class" value="org.uecide.Base" />
+                <attribute name="Main-Class" value="org.uecide.UECIDE" />
                 <attribute name="Class-Path" value="uecide.jar" />
                 <!--attribute name="Version" value="${Version}" />
                 <attribute name="Release" value="${Release}" /-->
@@ -94,7 +94,7 @@
             <zipgroupfileset dir="deps" includes="*.jar" />
             <zipgroupfileset dir="deps-bundle" includes="*.jar" />
             <manifest>
-                <attribute name="Main-Class" value="org.uecide.Base" />
+                <attribute name="Main-Class" value="org.uecide.UECIDE" />
                 <attribute name="Class-Path" value="uecide.jar" />
                 <!--attribute name="Version" value="${Version}" />
                 <attribute name="Release" value="${Release}" /-->
@@ -152,7 +152,7 @@
         dir="bundle/macosx"
         useJavaXKey="true"
         jar="uecide.jar"
-        mainclass="org.uecide.Base"
+        mainclass="org.uecide.UECIDEe"
         jvmversion="1.8+"
         >
         <documenttype
