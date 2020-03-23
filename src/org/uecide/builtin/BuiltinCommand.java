@@ -30,7 +30,8 @@
 
 package org.uecide.builtin;
 
-import org.uecide.*;
+import org.uecide.UECIDE;
+import org.uecide.Context;
 
 public abstract class BuiltinCommand {
     public abstract boolean main(Context ctx, String[] arg) throws BuiltinCommandException ;
@@ -69,6 +70,11 @@ public abstract class BuiltinCommand {
         else if (cmdName.equals("unlock_port")) cmd = new unlock_port();
         else if (cmdName.equals("warning")) cmd = new warning();
         else if (cmdName.equals("write")) cmd = new write();
+        else if (cmdName.equals("askyesno")) cmd = new askyesno();
+        else if (cmdName.equals("askyesnocancel")) cmd = new askyesno();
+        else if (cmdName.equals("alert")) cmd = new alert();
+        else if (cmdName.equals("input")) cmd = new input();
+        else if (cmdName.equals("action")) cmd = new action();
         else {
             ctx.error("Unknown builtin command " + cmdName);
             return false;

@@ -821,8 +821,13 @@ public class Sketch {
         pw.println();
         pw.println("// This should be inserted at line " + protoLocation);
         pw.println();
-        for (FunctionBookmark p : protos) {
-            pw.println(p + ";");
+
+        if (Preferences.getBoolean("compiler.disable_prototypes")) {
+            pw.println("// *** PROTOTYPES DISABLED IN PREFERENCES ***");
+        } else {
+            for (FunctionBookmark p : protos) {
+                pw.println(p + ";");
+            }
         }
         pw.println();
 
@@ -845,7 +850,12 @@ public class Sketch {
                 pw.println("#include <binary/binaries.h>");
             }
         }
-        pw.println("#line 1 \"" + getMainFile().getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+
+        boolean includeLines = (Preferences.getBoolean("compiler.disableline") == false);
+
+        if (includeLines) {
+            pw.println("#line 1 \"" + getMainFile().getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+        }
 
         int thisLine = 1;
         String data = getMainFile().getFileData();
@@ -853,7 +863,9 @@ public class Sketch {
         for (String line : lines) {
             if (thisLine == protoLocation) {
                 pw.println("#include <" + getName() + "_proto.h>");
-                pw.println("#line " + thisLine + " \"" + getMainFile().getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+                if (includeLines) {
+                    pw.println("#line " + thisLine + " \"" + getMainFile().getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+                }
             }
             pw.println(line);
             thisLine++;
@@ -862,7 +874,9 @@ public class Sketch {
         for (SketchFile f : sketchFiles.values()) {
             if (f.getType() == FileType.SKETCH) {
                 if (!f.isMainFile()) {
-                    pw.println("#line 1 \"" + f.getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+                    if (includeLines) {
+                        pw.println("#line 1 \"" + f.getFile().getAbsolutePath().replaceAll("\\\\", "\\\\\\\\") + "\"");
+                    }
                     pw.println(f.getFileData());
                 }
             }

@@ -38,6 +38,7 @@ public abstract class Gui {
     public abstract String askString(String question, String defaultValue);
     public abstract File askSketchFilename(String question, File location);
     public abstract boolean askYesNo(String question);
+    public abstract void alert(String message);
     public abstract int askYesNoCancel(String question);
     public abstract File askOpenSketch(String question, File location);
     public abstract void navigateToLine(SketchFile f, Integer lineno);

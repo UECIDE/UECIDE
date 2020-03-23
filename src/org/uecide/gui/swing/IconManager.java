@@ -1,16 +1,22 @@
 package org.uecide.gui.swing;
 
-import org.uecide.*;
+import org.uecide.Board;
+import org.uecide.Core;
+import org.uecide.Compiler;
+import org.uecide.Context;
+import org.uecide.Programmer;
+import org.uecide.PropertyFile;
+import org.uecide.UObject;
+import org.uecide.FileCache;
+import org.uecide.FileManager;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.*;
-import java.awt.image.*;
-import java.awt.event.*;
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import javax.imageio.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.io.IOException;
+import java.io.File;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.util.TimerTask;
 import java.util.Timer;
 
 public class IconManager {
@@ -32,6 +38,49 @@ public class IconManager {
                 i.updateIcon();
             }
         }
+    }
+
+    public static File getIconFileFromUObject(UObject ob, String name) {
+        PropertyFile pf = ob.getProperties();
+        String filename = pf.get("icon." + name);
+        if (filename == null) return null;
+        File f = new File(ob.getFolder(), filename);
+        if (f.exists()) {
+            return f;
+        }
+        return null;
+    }
+
+    public static CleverIcon getIconFromContext(Context ctx, String name, int size) throws IOException {
+        Board board = ctx.getBoard();
+        Core core = ctx.getCore();
+        Compiler compiler = ctx.getCompiler();
+        Programmer programmer = ctx.getProgrammer();
+
+        File iconFile = null;
+
+        if (board != null) {
+            iconFile = getIconFileFromUObject(board, name);
+        } 
+
+        if ((core != null) && (iconFile == null)) {
+            iconFile = getIconFileFromUObject(core, name);
+        }
+
+        if ((compiler != null) && (iconFile == null)) {
+            iconFile = getIconFileFromUObject(compiler, name);
+        }
+
+        if ((programmer != null) && (iconFile == null)) {
+            iconFile = getIconFileFromUObject(programmer, name);
+        }
+
+        if (iconFile == null) {
+            return getIcon(size, name);
+        }
+
+        CleverIcon ci = new CleverIcon(size, iconFile);
+        return ci;
     }
 
     public static CleverIcon getIcon(int size, String... name) throws IOException, MalformedURLException {

@@ -31,11 +31,15 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
         ctx.listenForEvent("uploadFail", this);
         ctx.listenForEvent("uploadFinished", this);
 
+        ctx.listenForEvent("setBoard", this);
+        ctx.listenForEvent("setCore", this);
+        ctx.listenForEvent("setCompiler", this);
+        ctx.listenForEvent("setProgrammer", this);
+
         setFloatable(false);
         setBorderPainted(false);
 
         try {
-
             compileButton = new ToolbarToggleButton(
                 "Compile the sketch (Shift: clean compile)",
                 "main.compile", "main.spin",
@@ -54,8 +58,6 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
                     }
                 }
             );
-
-            add(compileButton);
 
             uploadButton = new ToolbarToggleButton(
                 "Compile and upload the sketch (Shift: clean compile)",
@@ -76,52 +78,43 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
                 }
             );
 
-            add(uploadButton);
+            newSketchButton = new ActionToolbarButton(ctx, "New Sketch", "main.new", "newSketch");
+            openSketchButton = new ActionToolbarButton(ctx, "Open Sketch", "main.open", "openSketch");
+            saveSketchButton = new ActionToolbarButton(ctx, "Save Sketch", "main.save", "saveSketch");
 
-
-            add(new ToolbarSpacer());
-
-            newSketchButton = new ToolbarButton(
-                "New Sketch", 
-                "main.new",
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent ev) {
-                        ctx.action("newSketch");
-                    }
-                }
-            );
-
-            add(newSketchButton);
-
-            openSketchButton = new ToolbarButton(
-                "Open Sketch",
-                "main.open",
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent ev) {
-                        ctx.action("openSketch");
-                    }
-                }
-            );
-
-            add(openSketchButton);
-
-            saveSketchButton = new ToolbarButton(
-                "Save Sketch",
-                "main.save",
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent ev) {
-                        ctx.action("saveSketch");
-                    }
-                }
-            );
-
-            add(saveSketchButton);
-
+            updateIcons();
 
         } catch (IOException ex) {
             ex.printStackTrace();
         }
 
+    }
+
+    public void updateIcons() {
+        removeAll();
+
+        add(compileButton);
+        add(uploadButton);
+        add(new ToolbarSpacer());
+        add(newSketchButton);
+        add(openSketchButton);
+        add(saveSketchButton);
+        add(new ToolbarSpacer());
+        addUObjectIcons();
+    }
+
+    public void addUObjectIcons() {
+        PropertyFile props = ctx.getMerged();
+        String[] scripts = props.childKeysOf("script");
+        for (String script : scripts) {
+            String name = props.get("script." + script + ".name");
+            String icon = props.get("script." + script + ".icon");
+            if (name == null) continue;
+            if (icon == null) continue;
+
+            ActionToolbarButton button = new ActionToolbarButton(ctx, name, icon, "runKey", "script." + script);
+            add(button);
+        }
     }
 
     public void contextEventTriggered(ContextEvent e) {
@@ -144,6 +137,10 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
             compileButton.setSelected(false);
             lockAll();
             uploadButton.setEnabled(true);
+        }
+
+        if (event.equals("setBoard") || event.equals("setCore") || event.equals("setCompiler") || event.equals("setProgrammer")) {
+            updateIcons();
         }
     }
 

@@ -4,6 +4,8 @@ Changelog
 0.11.1
 ------
 
+* Fix bundling class name
+* Rename Base to UECIDE. Support multiple-instance command line arguments
 * Fix options bug
 * Cleanup of base
 * Made preferences self-contained
@@ -760,6 +762,8 @@ Changelog
 0.8.5
 -----
 
+* Fix bundling class name
+* Rename Base to UECIDE. Support multiple-instance command line arguments
 * Fix options bug
 * Cleanup of base
 * Made preferences self-contained

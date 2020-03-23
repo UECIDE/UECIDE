@@ -111,6 +111,22 @@ public class Preferences {
     // file for the value and if not found then will get the value from the .default entry
     // for the key in the preferences tree.
 
+    public static boolean keyExists(String key) {
+        return (preferencesTree.get(key + ".name") != null);
+    }
+
+    public static String getType(String key) {
+        return preferencesTree.get(key + ".type");
+    }
+
+    public static String getDefault(String key) {
+        return preferencesTree.get(key + ".default");
+    }
+
+    public static String getTreeEntry(String key) {
+        return preferencesTree.get(key);
+    }
+
     public static String get(String key) {
         String data = preferences.get(key);
         if (data == null) {

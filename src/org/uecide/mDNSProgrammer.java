@@ -36,7 +36,7 @@ public class mDNSProgrammer extends Programmer {
 
         setRelatedObject(_board);
 
-        set("name", _programmer.getName() + "-" + _ip.getHostAddress());
+        set("name", _programmer.getName() + "@" + _ip.getHostAddress());
         set("description", _board.getDescription() + " on " + _ip.getHostAddress() + " (" + _info.getName() + ")");
         set("mdns.created", "true");
         unset("hidden");

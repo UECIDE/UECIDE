@@ -36,7 +36,8 @@ public class UObjectLabel extends JLabel {
 
     void update() {
         if (object == null) {
-            setText("[null]");
+            setText("Nothing Selected");
+            return;
         }
 
         try {
@@ -45,5 +46,6 @@ public class UObjectLabel extends JLabel {
         }
         if (object == null) return;
         setText(object.getDescription());
+        setToolTipText(object.getName());
     }
 }

@@ -29,6 +29,9 @@ public class SetPrefAction extends Action {
         if (!(args[0] instanceof String)) throw new BadArgumentActionException();
 
         String key = (String)args[0];
+        if (!Preferences.keyExists(key)) {
+            throw new ActionException("Preference key does not exist");
+        }
    
         if (args[1] instanceof String) {
             String value = (String)args[1];

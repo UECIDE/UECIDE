@@ -21,12 +21,12 @@ compiler.generate_lss.tooltip=Redundant. Does nothing. Needs re-implementing.
 compiler.disable_prototypes.type=checkbox
 compiler.disable_prototypes.name=Disable generation of function prototypes
 compiler.disable_prototypes.default=false
-compiler.disable_prototypes.tooltip=Redundant. Does nothing. Needs re-implementing.
+compiler.disable_prototypes.tooltip=Prevents the IDE generating function prototypes and inserting them at the start of your sketch.
 
-compiler.combine_ino.type=checkbox
-compiler.combine_ino.name=Combine all .INO and .PDE files into a single .CPP file
-compiler.combine_ino.default=true
-compiler.combine_ino.tooltip=Redundant. Does nothing. Needs re-implementing.
+#compiler.combine_ino.type=checkbox
+#compiler.combine_ino.name=Combine all .INO and .PDE files into a single .CPP file
+#compiler.combine_ino.default=true
+#compiler.combine_ino.tooltip=Redundant. Does nothing. Needs re-implementing.
 
 compiler.generate_makefile.type=checkbox
 compiler.generate_makefile.name=Generate / update a Makefile each compile (core support required)
@@ -58,11 +58,11 @@ compiler.save_hex.name=Save compiled output to sketch folder
 compiler.save_hex.default=false
 compiler.save_hex.tooltip=Copies the compiled output into your sketch folder.
 
-compiler.save_lss.type=checkbox
-compiler.save_lss.name=Save generated LSS file to sketch folder
-compiler.save_lss.depends=compiler.generate_lss
-compiler.save_lss.default=false
-compiler.save_lss.tooltip=Redundant. Does nothing. Needs re-implementing.
+#compiler.save_lss.type=checkbox
+#compiler.save_lss.name=Save generated LSS file to sketch folder
+#compiler.save_lss.depends=compiler.generate_lss
+#compiler.save_lss.default=false
+#compiler.save_lss.tooltip=Redundant. Does nothing. Needs re-implementing.
 
 # Editor settings
 

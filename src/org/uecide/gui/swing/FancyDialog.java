@@ -34,6 +34,7 @@ public class FancyDialog extends JDialog implements AnimationListener {
     static final int QUESTION_YESNO = 1;
     static final int QUESTION_YESNOCANCEL = 2;
     static final int INPUT_OKCANCEL = 3;
+    static final int ALERT = 4;
 
     static final int ANSWER_YES = 1;
     static final int ANSWER_NO = 2;
@@ -70,6 +71,7 @@ public class FancyDialog extends JDialog implements AnimationListener {
             case QUESTION_YESNO: qYesNo(); break;
             case QUESTION_YESNOCANCEL: qYesNoCancel(); break;
             case INPUT_OKCANCEL: iOkCancel(); break;
+            case ALERT: alert(); break;
         }
 
         add(buttons, BorderLayout.SOUTH);
@@ -118,6 +120,21 @@ public class FancyDialog extends JDialog implements AnimationListener {
             }
         });
         buttons.add(no);
+    }
+
+    void alert() {
+        MarkdownPane message = new MarkdownPane(questionText, SwingGui.getLAF().getStyleSheet(LookAndFeel.STYLESHEET_DIALOG));
+        message.setBorder(new EmptyBorder(5, 15, 5, 5));
+        add(message, BorderLayout.CENTER);
+
+        ok = new JButton("Ok");
+        ok.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent E) {
+                result = ANSWER_YES;
+                dispose();
+            }
+        });
+        buttons.add(ok);
     }
 
     void qYesNoCancel() {

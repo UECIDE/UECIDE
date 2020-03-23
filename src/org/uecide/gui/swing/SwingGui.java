@@ -500,6 +500,14 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     }
 
     @Override
+    public void alert(String message) {
+        CleverIcon i = null;
+        try { i = IconManager.getIcon(48, "misc.error"); } catch (IOException ignored) {}
+        FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", message, i, FancyDialog.ALERT);
+        return;
+    }
+
+    @Override
     public int askYesNoCancel(String question) {
         CleverIcon i = null;
         try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
