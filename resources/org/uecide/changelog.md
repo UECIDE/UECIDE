@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Improvements to uscript engine and builtin commands.
 * Fix bundling class name
 * Rename Base to UECIDE. Support multiple-instance command line arguments
 * Fix options bug
@@ -762,6 +763,7 @@ Changelog
 0.8.5
 -----
 
+* Improvements to uscript engine and builtin commands.
 * Fix bundling class name
 * Rename Base to UECIDE. Support multiple-instance command line arguments
 * Fix options bug
