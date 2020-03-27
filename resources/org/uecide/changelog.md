@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Added link from alert to error in gui base class
 * Improvements to uscript engine and builtin commands.
 * Fix bundling class name
 * Rename Base to UECIDE. Support multiple-instance command line arguments
@@ -763,6 +764,7 @@ Changelog
 0.8.5
 -----
 
+* Added link from alert to error in gui base class
 * Improvements to uscript engine and builtin commands.
 * Fix bundling class name
 * Rename Base to UECIDE. Support multiple-instance command line arguments

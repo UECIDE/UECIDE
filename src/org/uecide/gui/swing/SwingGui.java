@@ -25,12 +25,16 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Toolkit;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
@@ -69,6 +73,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     HardwareMenu hardwareMenu;
     ToolsMenu toolsMenu;
     JMenu helpMenu;
+    JMenu debugMenu;
     StatusBar statusBar;
 
     SketchTreePanel sketchTree;
@@ -101,6 +106,21 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         hardwareMenu = new HardwareMenu(ctx);
         toolsMenu = new ToolsMenu(ctx);
         helpMenu = new JMenu("Help");
+        debugMenu = new JMenu("Debug");
+
+        helpMenu.add(debugMenu);
+
+        int defaultModifiers = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
+        JMenuItem commandPrompt = new JMenuItem("Show / hide command prompt");
+        commandPrompt.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
+        commandPrompt.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                console.showHideCommandPrompt();
+            }
+        });
+
+        debugMenu.add(commandPrompt);
 
         menu.add(fileMenu);
         menu.add(editMenu);

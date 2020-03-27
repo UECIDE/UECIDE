@@ -7,25 +7,37 @@ import org.uecide.Preferences;
 import org.uecide.Message;
 
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
+import java.awt.Font;
 import java.awt.BorderLayout;
 
 import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import com.wittams.gritty.swing.TermPanel;
 import com.wittams.gritty.swing.GrittyTerminal;
 
-public class Console extends TabPanel implements MouseWheelListener, ContextEventListener {
+public class Console extends TabPanel implements MouseWheelListener, ContextEventListener, KeyListener {
     Context ctx;
 
     GrittyTerminal terminal;
     ConsoleTty tty;
     TermPanel panel;
+    JTextField input;
+
+    boolean promptShown = false;
 
     public Console(Context c, AutoTab def) {
         super("Output", def);
         ctx = c;
+   
         terminal = new GrittyTerminal();
         tty = new ConsoleTty(c);
         panel = terminal.getTermPanel();
@@ -40,6 +52,16 @@ public class Console extends TabPanel implements MouseWheelListener, ContextEven
 
         add(terminal, BorderLayout.CENTER);
         c.listenForEvent("message", this);
+
+        input = new JTextField();
+
+        input.setVisible(false);
+
+        input.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+        add(input, BorderLayout.SOUTH);
+
+        input.addKeyListener(this);
+
     }
 
     public void streamError(String e) {
@@ -113,5 +135,93 @@ public class Console extends TabPanel implements MouseWheelListener, ContextEven
                 case Message.STREAM_ERROR: tty.feed(m.getText()); break;
             }
         }
+    }
+
+    ArrayList<String> history = new ArrayList<String>();
+    int historyPointer = 0;
+
+    @Override
+    public void keyPressed(KeyEvent evt) {
+        int keyCode = evt.getExtendedKeyCode();
+
+        if (keyCode == KeyEvent.VK_UP) {
+            historyPointer++;
+            if (historyPointer > history.size()) {
+                historyPointer = history.size();
+            }
+
+            input.setText(history.get(history.size() - historyPointer));
+        }
+
+        if (keyCode == KeyEvent.VK_DOWN) {
+            historyPointer--;
+            if (historyPointer < 0) {
+                historyPointer = 0;
+            }
+
+            if (historyPointer == 0) {
+                input.setText("");
+            } else {
+                input.setText(history.get(history.size() - historyPointer));
+            }
+        }
+
+        if (keyCode == KeyEvent.VK_ENTER) {
+            String command = input.getText();
+            input.setText("");
+
+            history.add(command);
+            historyPointer = 0;
+
+            final String regex = "\"([^\"]*)\"|(\\S+)";
+
+            ArrayList<String> bits = new ArrayList<String>();
+
+            Matcher m = Pattern.compile(regex).matcher(command);
+            while (m.find()) {
+                if (m.group(1) != null) {
+                    bits.add(m.group(1));
+                } else {
+                    bits.add(m.group(2));
+                }
+            }
+
+            String out = "";
+            for (String s : bits) {
+                if (out == "") {
+                    out = s;
+                } else {
+                    out = out + "::" + s;
+                }
+            }
+            out = ctx.parseString(out);
+            String[] parts = out.split("::");
+            if (parts.length == 1) {
+                ctx.actionThread(parts[0]);
+            } else {
+                String[] args = new String[parts.length - 1];
+                for (int i = 0; i < parts.length - 1; i++) {
+                    args[i] = parts[i+1];
+                }
+                ctx.actionThread(parts[0], (Object[]) args);
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent evt) {
+    }
+
+    @Override
+    public void keyTyped(KeyEvent evt) {
+    }
+
+    public void showHideCommandPrompt() {
+        promptShown = !promptShown;
+        input.setVisible(promptShown);
+        if (promptShown) {
+            input.requestFocus();
+        }
+        revalidate();
     }
 }

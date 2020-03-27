@@ -75,6 +75,8 @@ public abstract class BuiltinCommand {
         else if (cmdName.equals("alert")) cmd = new alert();
         else if (cmdName.equals("input")) cmd = new input();
         else if (cmdName.equals("action")) cmd = new action();
+        else if (cmdName.equals("exists")) cmd = new exists();
+        else if (cmdName.equals("isset")) cmd = new isset();
         else {
             ctx.error("Unknown builtin command " + cmdName);
             return false;

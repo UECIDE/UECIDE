@@ -22,7 +22,7 @@ public class ActionsAction extends Action {
                 Action a = Action.constructAction(cl, ctx);
                 String[] usage = a.getUsage();
                 for (String s : usage) {
-                    System.out.println(s);
+                    ctx.message(s);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
