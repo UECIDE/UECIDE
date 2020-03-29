@@ -4,6 +4,7 @@ Changelog
 0.11.2
 ------
 
+* Add logging output support
 
 
 0.11.1
@@ -732,6 +733,7 @@ Changelog
 0.8.5
 -----
 
+* Add logging output support
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Add facility to query RTS and DTR
 * Fixed missing line feed after inner files

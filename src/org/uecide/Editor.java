@@ -1375,6 +1375,10 @@ public class Editor extends JFrame {
     }
 
     public void updateDocsTree() {
+
+        if (loadedSketch == null) return;
+        if (!loadedSketch.getFolder().exists()) return;
+        if (!loadedSketch.getFolder().isDirectory()) return;
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 TreePath[] saved = saveTreeState(sketchContentTree);
