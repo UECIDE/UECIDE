@@ -1,6 +1,19 @@
 Changelog
 =========
 
+0.11.2
+------
+
+
+
+0.11.1
+------
+
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Add facility to query RTS and DTR
+* Fixed missing line feed after inner files
+
+
 0.11.0
 ------
 
@@ -719,6 +732,9 @@ Changelog
 0.8.5
 -----
 
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Add facility to query RTS and DTR
+* Fixed missing line feed after inner files
 * Add null pointer protection to options;
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Update internal package versions

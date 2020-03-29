@@ -676,7 +676,11 @@ public class Library implements Comparable {
             if (!repoLibs.exists()) {
                 continue;
             }
+            if (!repoLibs.isDirectory()) {
+                continue;
+            }
             File[] subcats = repoLibs.listFiles();
+            if (subcats == null) continue;
             for (File subcat : subcats) {
                 if ((!subcat.getName().startsWith(".")) && (subcat.isDirectory())) {
                     setCategoryName("repo:" + subcat.getName(), subcat.getName());

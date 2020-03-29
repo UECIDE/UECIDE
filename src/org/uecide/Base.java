@@ -275,6 +275,7 @@ public class Base {
         cli.addParameter("programmer",          "name",     String.class,   "cli.help.programmer");
         cli.addParameter("purge",               "",         Boolean.class,  "cli.help.purge");
         cli.addParameter("help",                "",         Boolean.class,  "cli.help.help");
+        cli.addParameter("log",                 "file",     String.class,   "cli.help.log");
 
         cli.addParameter("update",              "",         Boolean.class,  "cli.help.update");
         cli.addParameter("install",             "package",  String.class,   "cli.help.install");
@@ -310,6 +311,16 @@ public class Base {
         cli.addParameter("locale",              "name",     String.class,   "cli.help.locale");
 
         String[] argv = cli.process(args);
+
+
+        if (cli.isSet("log")) {
+            File f = new File(cli.getString("log"));
+            FileOutputStream fos = new FileOutputStream(f);
+            PrintStream ps = new PrintStream(fos);
+            System.out.println("Logging to " + f.getAbsolutePath());
+            System.setErr(ps);
+            System.setOut(ps);
+        }
 
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {

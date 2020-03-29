@@ -1,3 +1,78 @@
+uecide (0.11.1) unstable; urgency=low 
+
+  * Fixed missing line feed after inner files
+  * Add facility to query RTS and DTR
+  * Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Released 0.11.1
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 21 Oct 2019 11:41:33 +0100
+
+uecide (0.11.0-beta-5) unstable; urgency=low 
+
+  * Removed delays in jSerialPort
+  * dpkg-buildpackage now needs a TODO.md file
+  * Update internal package versions
+  * Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Add null pointer protection to options;
+  * Released new beta version
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 27 Aug 2019 10:17:57 +0100
+
+uecide (0.11.0-beta-4) unstable; urgency=low 
+
+  * Switch to bundled OpenJDK 11
+  * Fix serial terminal font
+  * Moved icon selection to icons.txt file based on extension
+  * Updated internal gnomic icon set
+  * Turn "compile.script" into a system for running arbitrary commands before compilation
+  * FAT filesystem building support
+  * Added SPIFFS building support
+  * Separate mDNS programmers in programmers menu
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Tue, 09 Jul 2019 00:21:45 +0100
+
+uecide (0.11.0-beta-3) unstable; urgency=low 
+
+  * Switch to JSerialComm instead of jSSC
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Thu, 04 Jul 2019 17:39:10 +0100
+
+uecide (0.11.0-beta-2) unstable; urgency=low 
+
+  * Added git core varcmd
+  * Add display scaling option in preferences
+  * Update built in repos
+  * Released new beta version
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sat, 18 May 2019 13:59:54 +0100
+
+uecide (0.11.0-beta-1) unstable; urgency=low 
+
+  * Improved search panel
+  * Provide right-click menu on tabs for easier navigation on themes that don't provide a tab menu button
+  * Overhaul of message and option dialogs
+  * Add sketch name to serial terminal title#
+  * Added changing icon for toggle button
+  * Complete overhaul of the icon system;
+  * Added Material LAF and cleaned up icons and buttons
+  * Added Arduino-like LAF
+  * Incorporate Material into core code and tweak for better Arduino LAF effect
+  * Fix margin in Material LAF
+  * Rewritten library importer
+  * Trap invalid locations.data setting
+  * Delete empty changed properties
+  * Undo setMargin replacement - as I feared it breaks cursor control
+  * Fixed markdown line formatting
+  * Fixed repo data erasing at boot
+  * Improved missing library detection
+  * Reverted to Aluminium LAF until problems with Material are ironed out
+  * Improved programmer refresh
+  * Check for * at start of function name when generating prototype
+  * Removed redundant embedded binary support in PropertyFile
+  * Added new version of jarbundler
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sun, 24 Feb 2019 21:30:46 +0000
+
 uecide (0.10.6) unstable; urgency=low 
 
   * Fix default editor font
