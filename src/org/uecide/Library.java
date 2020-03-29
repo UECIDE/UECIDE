@@ -171,7 +171,7 @@ public class Library implements Comparable {
         headerFiles.addAll(Sketch.findFilesInFolder(sourceFolder, "h", (compat == COMPAT_15X)));
 
         if (archFolder != null) {
-            if (archFolder.exists()) {
+            if (archFolder.exists() && archFolder.isDirectory()) {
                 File[] arches = archFolder.listFiles();
                 sourceFilesByArch = new HashMap<String, TreeSet<File>>();
                 headerFilesByArch = new HashMap<String, TreeSet<File>>();
@@ -574,6 +574,8 @@ public class Library implements Comparable {
     }
 
     public static void loadLibrariesFromFolder(File folder, String group, String core) {
+        if (!folder.exists()) return;
+        if (!folder.isDirectory()) return;
         File[] list = folder.listFiles();
 
         if(list == null) {
@@ -697,6 +699,9 @@ public class Library implements Comparable {
         File[] repoLibsList = UECIDE.getLibrariesFolders();
         for (File repoLibs : repoLibsList) {
             if (!repoLibs.exists()) {
+                continue;
+            }
+            if (!repoLibs.isDirectory()) {
                 continue;
             }
             File[] subcats = repoLibs.listFiles();

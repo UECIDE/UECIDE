@@ -40,6 +40,8 @@ import org.uecide.gui.html.HTMLGui;
 import org.uecide.actions.Action;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.IOException;
 
@@ -254,6 +256,8 @@ public class UECIDE {
         cli.addParameter("purge",               "",         Boolean.class,  "cli.help.purge");
         cli.addParameter("help",                "",         Boolean.class,  "cli.help.help");
 
+        cli.addParameter("log",                 "file",     String.class,   "cli.help.log");
+
         cli.addParameter("update",              "",         Boolean.class,  "cli.help.update");
         cli.addParameter("install",             "package",  String.class,   "cli.help.install");
         cli.addParameter("remove",              "package",  String.class,   "cli.help.remove");
@@ -295,9 +299,14 @@ public class UECIDE {
 
         String[] argv = cli.process(args);
 
-
-
-
+        if (cli.isSet("log")) {
+            File f = new File(cli.getString("log")[0]);
+            FileOutputStream fos = new FileOutputStream(f);
+            PrintStream ps = new PrintStream(fos);
+            System.out.println("Logging to " + f.getAbsolutePath());
+            System.setErr(ps);
+            System.setOut(ps);
+        }
 
         Authenticator.setDefault(new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {

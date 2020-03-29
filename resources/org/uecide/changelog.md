@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Added command prompt in console
 * Added link from alert to error in gui base class
 * Improvements to uscript engine and builtin commands.
 * Fix bundling class name
@@ -764,6 +765,7 @@ Changelog
 0.8.5
 -----
 
+* Added command prompt in console
 * Added link from alert to error in gui base class
 * Improvements to uscript engine and builtin commands.
 * Fix bundling class name

@@ -167,8 +167,10 @@ public class Console extends TabPanel implements MouseWheelListener, ContextEven
         }
 
         if (keyCode == KeyEvent.VK_ENTER) {
-            String command = input.getText();
+            String command = input.getText().trim();
             input.setText("");
+
+            if (command.equals("")) return;
 
             history.add(command);
             historyPointer = 0;
