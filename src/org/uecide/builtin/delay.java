@@ -37,6 +37,7 @@ public class delay extends BuiltinCommand {
         try {
             Thread.sleep(Integer.parseInt(arg[0]));
         } catch (Exception e) {
+            Debug.exception(e);
         }
         return true;
     }

@@ -71,26 +71,29 @@ public class NetworkDiscoveryService extends org.uecide.Service {
                                 Board b = getBoardByService(svc, i);
                                 if (b != null) {
                                     mDNSProgrammer p = new mDNSProgrammer(i, b);
-                                    Programmer oldP = UECIDE.programmers.get(p.getName());
+                                    Programmer oldP = Programmer.programmers.get(p.getName());
                                     if (oldP == null) {
-                                        UECIDE.programmers.put(p.getName(), p);
+                                        Programmer.programmers.put(p.getName(), p);
                                     }
                                 }
                             }
                         } catch (Exception exc) {
-                            //exc.printStackTrace();
+                            if (!exc.getMessage().equals("Network is unreachable")) {
+                                Debug.exception(exc);
+                            }
                         }
                     }
                 }
             }
         } catch (Exception exc) {
+            Debug.exception(exc);
         }
     }
 
     public ArrayList<String> getServices() {
         ArrayList<String>serviceList = new ArrayList<String>();
 
-        for(Board board : UECIDE.boards.values()) {
+        for(Board board : Board.boards.values()) {
             String service = board.get("mdns.service");
 
             if(service == null) {
@@ -111,7 +114,7 @@ public class NetworkDiscoveryService extends org.uecide.Service {
 
     //public static Board getBoardByService(ServiceInfo info) {
     public static Board getBoardByService(String svc, Instance i) {
-        for(Board board : UECIDE.boards.values()) {
+        for(Board board : Board.boards.values()) {
             String service = board.get("mdns.service");
             if(service == null) {
                 continue;

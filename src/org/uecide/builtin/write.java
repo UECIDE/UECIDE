@@ -47,6 +47,7 @@ public class write extends BuiltinCommand {
 
             return true;
         } catch (Exception e) {
+            Debug.exception(e);
             ctx.error(e);
         }
         return false;

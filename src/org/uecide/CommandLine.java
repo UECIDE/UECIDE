@@ -88,6 +88,7 @@ public class CommandLine {
                     try {
                         i = Integer.parseInt(value);
                     } catch (Exception ignored) {
+                        Debug.exception(ignored);
                     }
                     addParameterEntry(arg, i);
                     continue;
@@ -98,6 +99,7 @@ public class CommandLine {
                     try {
                         f = Float.parseFloat(value);
                     } catch (Exception ignored) {
+                        Debug.exception(ignored);
                     }
                     addParameterEntry(arg, f);
                     continue;
@@ -108,6 +110,7 @@ public class CommandLine {
                     try {
                         d = Double.parseDouble(value);
                     } catch (Exception ignored) {
+                        Debug.exception(ignored);
                     }
                     addParameterEntry(arg, d);
                     continue;

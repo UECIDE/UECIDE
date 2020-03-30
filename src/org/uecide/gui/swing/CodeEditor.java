@@ -6,6 +6,7 @@ import org.uecide.SketchFile;
 import org.uecide.Preferences;
 import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
+import org.uecide.Debug;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -100,7 +101,9 @@ public class CodeEditor extends TabPanel implements ContextEventListener, FocusL
                 JLabel ico = new JLabel("");
                 ico.setIcon(IconManager.getIcon(16, "mime." + FileType.getIcon(file.getFile().getName())));
                 tabPanel.add(ico, BorderLayout.WEST);
-            } catch (Exception ex) { }
+            } catch (Exception ex) { 
+                Debug.exception(ex);
+            }
             
             try {
                 JButton ico = new JButton(IconManager.getIcon(16, "tabs.close"));
@@ -113,7 +116,9 @@ public class CodeEditor extends TabPanel implements ContextEventListener, FocusL
                     }
                 });
                 tabPanel.add(ico, BorderLayout.EAST);
-            } catch (Exception ex) { }
+            } catch (Exception ex) { 
+                Debug.exception(ex);
+            }
         }
 
         JLabel fl = new JLabel("");
@@ -135,6 +140,7 @@ public class CodeEditor extends TabPanel implements ContextEventListener, FocusL
         try {
             textArea.setCaretPosition(textArea.getLineStartOffset(lineno - 1));
         } catch(BadLocationException e) {
+            Debug.exception(e);
         }
     }
 

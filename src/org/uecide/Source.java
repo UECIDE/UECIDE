@@ -60,6 +60,7 @@ public class Source {
             HttpRequest req = new HttpRequest(url);
             return req.getCompressedText();
         } catch (Exception e) {
+            Debug.exception(e);
             return "";
         }
     }
@@ -81,6 +82,7 @@ public class Source {
             in.close();
             inData.append(out.toString("UTF-8"));
         } catch (Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             System.err.println("Error downloading " + url + ": " + e.getMessage());
         }

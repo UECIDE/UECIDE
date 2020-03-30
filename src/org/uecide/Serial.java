@@ -64,6 +64,7 @@ public class Serial {
                 try {
                     Thread.sleep(1);
                 } catch (Exception e) {
+                    Debug.exception(e);
                 }
             }
         }
@@ -81,6 +82,7 @@ public class Serial {
                 pw.println(bits[0]);
                 pw.close();
             } catch (Exception e) {
+                Debug.exception(e);
             }
         }
     }
@@ -132,6 +134,7 @@ public class Serial {
             try {
                 Thread.sleep(100); // Arduino has this, so I guess we should too.
             } catch(Exception e) {
+                Debug.exception(e);
                 UECIDE.error(e);
             }
 
@@ -151,6 +154,7 @@ public class Serial {
             return port;
 
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
 
@@ -175,6 +179,7 @@ public class Serial {
             unlockPort(p.getSystemPortName());
             Debug.message("Port closed OK");
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
 
@@ -203,6 +208,7 @@ public class Serial {
             nsp.setNumDataBits(8);
             return nsp;
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
 
@@ -354,6 +360,7 @@ public class Serial {
                                 names.remove(dst);
                             }
                         } catch (IOException ex) {
+                            Debug.exception(ex);
                         }
                     }
                 }
@@ -373,6 +380,7 @@ public class Serial {
                 try {
                     serialPorts.put(port, SerialPort.getCommPort(port));
                 } catch(Exception e) {
+                    Debug.exception(e);
                 }
             }
         }
@@ -492,6 +500,7 @@ public class Serial {
                     return ueventData.get("PRODUCT");
             */
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return "";
         }

@@ -37,6 +37,7 @@ public class LibraryManager {
                 }
             }
         } catch (LibraryFormatException ex) {
+            Debug.exception(ex);
             System.err.println(location.getAbsolutePath() + ": " + ex.getMessage());
         }
         return false;

@@ -47,6 +47,7 @@ public class I18N {
         try {
             return bundle.getString(key);
         } catch (Exception e) {
+            Debug.exception(e);
             return "{" + source + "/" + key + "}";
         }
     }

@@ -3,6 +3,7 @@ package org.uecide.actions;
 import org.uecide.Package;
 import org.uecide.APT;
 import org.uecide.Context;
+import org.uecide.Debug;
 import java.util.TreeMap;
 
 public class AptInstallAction extends Action {
@@ -29,6 +30,7 @@ public class AptInstallAction extends Action {
         try {
             apt = APT.factory(ctx);
         } catch (Exception ex) {
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
 
@@ -47,6 +49,7 @@ public class AptInstallAction extends Action {
         try {
             apt.installPackage(pkg);
         } catch (Exception ex) {
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
         ctx.message("Done");

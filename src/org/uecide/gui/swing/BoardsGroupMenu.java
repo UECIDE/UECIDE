@@ -31,7 +31,7 @@ public class BoardsGroupMenu extends JMenu implements MenuListener {
 
     TreeSet<String> getGroupList() {
         TreeSet<String> groups = new TreeSet<String>();
-        for (Board board : UECIDE.boards.values()) {
+        for (Board board : Board.boards.values()) {
             String group = board.getGroup();
             if (!groups.contains(group)) {
                 groups.add(group);
@@ -48,7 +48,7 @@ public class BoardsGroupMenu extends JMenu implements MenuListener {
 
     public void menuSelected(MenuEvent e) {
         removeAll();
-        for (Board board : UECIDE.boards.values()) {
+        for (Board board : Board.boards.values()) {
             if (board.getGroup().equals(group)) {
                 BoardsMenuItem bi = new BoardsMenuItem(ctx, board);
                 add(bi);

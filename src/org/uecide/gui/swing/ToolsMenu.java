@@ -37,7 +37,7 @@ public class ToolsMenu extends JMenu implements MenuListener {
 
         addSeparator();
 
-        for (Tool t : UECIDE.tools.values()) {
+        for (Tool t : Tool.tools.values()) {
             if (t.worksWith(ctx.getCore())) {
 
                 PropertyFile pf = t.getProperties();

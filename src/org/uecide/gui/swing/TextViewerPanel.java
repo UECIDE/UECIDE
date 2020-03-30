@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.FileType;
 import org.uecide.SketchFile;
 import org.uecide.Preferences;
@@ -74,7 +75,9 @@ public class TextViewerPanel extends TabPanel implements ContextEventListener {
                     }
                 });
                 tabPanel.add(ico, BorderLayout.EAST);
-            } catch (Exception ex) { }
+            } catch (Exception ex) { 
+                Debug.exception(ex);
+            }
         }
 
         JLabel fl = new JLabel("");

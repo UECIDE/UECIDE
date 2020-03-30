@@ -35,7 +35,7 @@ public abstract class Action {
                 String cmd = a.getCommand();
                 actionList.put(cmd, cl);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Debug.exception(ex);
             }
         }
     }

@@ -1,5 +1,7 @@
 package org.uecide.gui.swing;
 
+import org.uecide.Debug;
+
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -54,6 +56,7 @@ public class FancyDialog extends JDialog implements AnimationListener {
         try {
             setIconImage(IconManager.getIcon(64, "internal:uecide").getImage());
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
         
         setLayout(new BorderLayout());

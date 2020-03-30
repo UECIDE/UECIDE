@@ -28,7 +28,7 @@ public class SetCoreAction extends Action {
                 core = (Core)args[0];
             } else if (args[0] instanceof String) {
                 String s = (String)args[0];
-                core = UECIDE.cores.get(s);
+                core = Core.getCore(s);
             }
 
             if (core == null) {
@@ -48,6 +48,7 @@ public class SetCoreAction extends Action {
             }
             throw new ActionException("No Compiler Available");
         } catch (Exception ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
             throw new ActionException(ex.getMessage());
         }

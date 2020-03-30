@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.SketchFile;
 import org.uecide.FileType;
 import org.uecide.FunctionBookmark;
@@ -64,6 +65,7 @@ public class FunctionBookmarkNode extends SketchTreeNodeBase implements ContextE
         try {
             original.setIcon(getIcon(tree));
         } catch (IOException ex) {
+            Debug.exception(ex);
         }
         return original;
     }

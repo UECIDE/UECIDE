@@ -1,5 +1,6 @@
 package org.uecide.gui.swing;
 
+import org.uecide.Debug;
 import org.uecide.UECIDE;
 import org.uecide.PropertyFile;
 
@@ -38,6 +39,7 @@ public class SketchFileView extends FileView {
                 return IconManager.getIcon(16, "internal:uecide");
             }
         } catch (Exception ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
         }
 

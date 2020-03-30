@@ -5,6 +5,7 @@ import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.ContextEventListener;
 import org.uecide.ContextEvent;
+import org.uecide.Debug;
 import org.uecide.Preferences;
 import org.uecide.actions.*;
 import org.uecide.gui.swing.laf.*;
@@ -96,6 +97,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         try {
             window.setIconImage(IconManager.getIcon(64, "internal:uecide").getImage());
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
 
         menu = new JMenuBar();
@@ -304,6 +306,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
             IconManager.setIconFamily(Preferences.get("theme.icons"));
             setLookAndFeel();
         } catch (IOException ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
         }
     }
@@ -402,7 +405,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     @Override
     public String askString(String question, String defaultValue) {
         CleverIcon i = null;
-        try { i = IconManager.getIcon(48, "misc.input"); } catch (IOException ignored) {}
+        try { 
+            i = IconManager.getIcon(48, "misc.input"); 
+        } catch (IOException ignored) {
+            Debug.exception(ignored);
+        }
         FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", question, i, FancyDialog.INPUT_OKCANCEL);
         if (dialog.getResult() == FancyDialog.ANSWER_OK) {
             return dialog.getText();
@@ -512,7 +519,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     @Override
     public boolean askYesNo(String question) {
         CleverIcon i = null;
-        try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
+        try { 
+            i = IconManager.getIcon(48, "misc.question"); 
+        } catch (IOException ignored) {
+            Debug.exception(ignored);
+        }
         FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", question, i, FancyDialog.QUESTION_YESNO);
         return dialog.getResult() == FancyDialog.ANSWER_YES;
 
@@ -522,7 +533,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     @Override
     public void alert(String message) {
         CleverIcon i = null;
-        try { i = IconManager.getIcon(48, "misc.error"); } catch (IOException ignored) {}
+        try { 
+            i = IconManager.getIcon(48, "misc.error"); 
+        } catch (IOException ignored) {
+            Debug.exception(ignored);
+        }
         FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", message, i, FancyDialog.ALERT);
         return;
     }
@@ -530,7 +545,11 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     @Override
     public int askYesNoCancel(String question) {
         CleverIcon i = null;
-        try { i = IconManager.getIcon(48, "misc.question"); } catch (IOException ignored) {}
+        try { 
+            i = IconManager.getIcon(48, "misc.question"); 
+        } catch (IOException ignored) {
+            Debug.exception(ignored);
+        }
         FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", question, i, FancyDialog.QUESTION_YESNOCANCEL);
         if (dialog.getResult() == FancyDialog.ANSWER_YES) return 0;
         if (dialog.getResult() == FancyDialog.ANSWER_NO) return 1;
@@ -651,6 +670,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
                     try {
                         f.setIconImage(IconManager.getIcon(64, "internal:uecide").getImage());
                     } catch (Exception ex) {
+                        Debug.exception(ex);
                     }
  
                     JPanel pan = new JPanel();

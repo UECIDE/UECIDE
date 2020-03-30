@@ -3,6 +3,7 @@ package org.uecide.gui.swing;
 import org.uecide.Context;
 import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
+import org.uecide.Debug;
 import org.uecide.FileType;
 import org.uecide.SketchFile;
 
@@ -87,6 +88,7 @@ public class SketchTreeOutputNode extends SketchTreeNodeBase implements ContextE
         try {
             original.setIcon(getIcon(tree));
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
 
         return original;

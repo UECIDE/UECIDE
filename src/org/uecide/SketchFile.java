@@ -38,7 +38,9 @@ public class SketchFile implements Comparable, DocumentListener {
                 }
             });
 
-        } catch (Exception ex) { ex.printStackTrace(); }
+        } catch (Exception ex) { 
+            Debug.exception(ex);
+        }
     }
 
     public AbstractDocument getDocument() {
@@ -49,6 +51,7 @@ public class SketchFile implements Comparable, DocumentListener {
         try {
             newdoc.replace(0, newdoc.getLength(), getFileData(), null);
         } catch (BadLocationException ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
         }
         DocumentListener[] l = content.getDocumentListeners();
@@ -67,7 +70,7 @@ public class SketchFile implements Comparable, DocumentListener {
         try {
             content.replace(0, content.getLength(), storedData, null);
         } catch (BadLocationException ex) {
-            ex.printStackTrace();
+            Debug.exception(ex);
         }
         content.addDocumentListener(this);
     }
@@ -81,6 +84,7 @@ public class SketchFile implements Comparable, DocumentListener {
 //                ctx.triggerEvent("sketchDataModified", this);
             }
         } catch (BadLocationException ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
         }
     }
@@ -90,6 +94,7 @@ public class SketchFile implements Comparable, DocumentListener {
         try {
             return content.getText(0, content.getLength());
         } catch (BadLocationException ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
         }
         return "";
@@ -284,7 +289,7 @@ public class SketchFile implements Comparable, DocumentListener {
 
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
 
-        Tool t = UECIDE.getTool("ctags");
+        Tool t = Tool.getTool("ctags");
         if (t != null) {
             File tmp = new File(sketch.buildFolder, "tmp");
             if (!tmp.exists()) {
@@ -539,6 +544,7 @@ public class SketchFile implements Comparable, DocumentListener {
             try {
                 storedData = Utils.getFileAsString(file);
             } catch (IOException ex) {
+                Debug.exception(ex);
                 ex.printStackTrace();
             }
             setFileData(storedData);

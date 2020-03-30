@@ -86,7 +86,7 @@ public class BasicFileConverter implements FileConverter {
             return true;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Debug.exception(ex);
             return false;
         }
     }

@@ -73,6 +73,7 @@ public class OpenSketchAction extends Action {
 
             return true;
         } catch (Exception ex) {
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
     }

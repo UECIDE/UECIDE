@@ -3,6 +3,7 @@ package org.uecide.gui.swing;
 import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.Core;
+import org.uecide.Debug;
 
 import java.util.TreeSet;
 import java.util.TreeMap;
@@ -31,6 +32,7 @@ public class CoresMenuItem extends JRadioButtonMenuItem implements ActionListene
         try {
             setIcon(new CleverIcon(16, core.getIcon()));
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
         addActionListener(this);
     }

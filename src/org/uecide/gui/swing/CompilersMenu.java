@@ -3,6 +3,7 @@ package org.uecide.gui.swing;
 import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.Compiler;
+import org.uecide.Debug;
 
 import java.util.TreeSet;
 import java.util.TreeMap;
@@ -38,6 +39,7 @@ public class CompilersMenu extends JMenu implements MenuListener {
             try {
                 setIcon(new CleverIcon(16, compiler.getIcon()));
             } catch (Exception ex) {
+                Debug.exception(ex);
             }
         }
     }
@@ -50,7 +52,7 @@ public class CompilersMenu extends JMenu implements MenuListener {
 
     public void menuSelected(MenuEvent e) {
         removeAll();
-        for (Compiler compiler : UECIDE.compilers.values()) {
+        for (Compiler compiler : Compiler.compilers.values()) {
             if (compiler.worksWith(ctx.getBoard())) {
                 CompilersMenuItem menu = new CompilersMenuItem(ctx, compiler);
                 add(menu);

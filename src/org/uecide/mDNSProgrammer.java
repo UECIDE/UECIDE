@@ -22,7 +22,7 @@ public class mDNSProgrammer extends Programmer {
         
         _ip = ips[0];
 
-        _programmer = UECIDE.programmers.get(_board.get("mdns.programmer"));
+        _programmer = org.uecide.Programmer.getProgrammer(_board.get("mdns.programmer"));
 
         if (_programmer == null) {
             return;

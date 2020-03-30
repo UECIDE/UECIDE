@@ -3,6 +3,7 @@ package org.uecide.gui.swing;
 import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.Board;
+import org.uecide.Debug;
 
 import java.util.TreeSet;
 import java.util.TreeMap;
@@ -38,13 +39,14 @@ public class BoardsMenu extends JMenu implements MenuListener {
             try {
                 setIcon(new CleverIcon(16, board.getIcon()));
             } catch (Exception ex) {
+                Debug.exception(ex);
             }
         }
     }
 
     TreeSet<String> getGroupList() {
         TreeSet<String> groups = new TreeSet<String>();
-        for (Board board : UECIDE.boards.values()) {
+        for (Board board : Board.boards.values()) {
             String group = board.getGroup();
             if (!groups.contains(group)) {
                 groups.add(group);

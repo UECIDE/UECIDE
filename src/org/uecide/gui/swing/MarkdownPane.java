@@ -1,5 +1,6 @@
 package org.uecide.gui.swing;
 
+import org.uecide.Debug;
 import org.uecide.Preferences;
 
 import org.markdown4j.Markdown4jProcessor;
@@ -127,6 +128,7 @@ public class MarkdownPane extends JTextPane {
             setDocument(doc);
             super.setText("<html><body>" + html + "</body></html>");
         } catch (Exception e) {
+            Debug.exception(e);
         }
     }
 }

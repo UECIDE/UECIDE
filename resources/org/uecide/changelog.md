@@ -4,6 +4,7 @@ Changelog
 0.11.1
 ------
 
+* Add output logging redirection
 * Added command prompt in console
 * Added link from alert to error in gui base class
 * Improvements to uscript engine and builtin commands.
@@ -765,6 +766,7 @@ Changelog
 0.8.5
 -----
 
+* Add output logging redirection
 * Added command prompt in console
 * Added link from alert to error in gui base class
 * Improvements to uscript engine and builtin commands.

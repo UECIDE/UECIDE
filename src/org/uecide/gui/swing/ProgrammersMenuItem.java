@@ -1,8 +1,9 @@
 package org.uecide.gui.swing;
 
-import org.uecide.UECIDE;
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.Programmer;
+import org.uecide.UECIDE;
 
 import java.util.TreeSet;
 import java.util.TreeMap;
@@ -31,6 +32,7 @@ public class ProgrammersMenuItem extends JRadioButtonMenuItem implements ActionL
         try {
             setIcon(new CleverIcon(16, programmer.getIcon()));
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
         addActionListener(this);
     }

@@ -35,7 +35,13 @@ import java.util.*;
 
 import java.util.regex.*;
 
+import org.uecide.Compiler;
+import org.uecide.Core;
+
 public class Board extends UObject {
+
+    public static TreeMap<String, Board> boards = new TreeMap<String, Board>();
+
     public Board(File folder) {
         super(folder);
         if (get("group") == null) {
@@ -87,9 +93,29 @@ public class Board extends UObject {
             return null;
         }
         Debug.message("Board's core is [" + c + "]");
-        Core cc = UECIDE.cores.get(c);
+        Core cc = org.uecide.Core.getCore(c);
         Debug.message("Found base core " + cc);
+        return cc;
+    }
 
-        return UECIDE.cores.get(c);
+    public static void load() {
+        boards.clear();
+        ArrayList<File> boardFiles = FileCache.getFilesByName("board.txt");
+        for (File bfile : boardFiles) {
+            if(bfile.exists()) {
+                Debug.message("    Loading board " + bfile.getAbsolutePath());
+                Board newBoard = new Board(bfile.getParentFile());
+
+                if(newBoard.isValid()) {
+                    boards.put(newBoard.getName(), newBoard);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
+                }
+            }
+        }
+    }
+
+    public static Board getBoard(String name) {
+        return boards.get(name);
     }
 }

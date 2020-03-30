@@ -45,6 +45,7 @@ public class UploadAction extends Action {
             }
             return r;
         } catch (Exception ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
             ctx.triggerEvent("uploadFail");
             throw new ActionException(ex.getMessage());

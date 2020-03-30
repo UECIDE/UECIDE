@@ -20,6 +20,7 @@ public class CleanAction extends Action {
             ctx.getSketch().purgeBuildFiles();
             return true;
         } catch (Exception ex) {
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
     }

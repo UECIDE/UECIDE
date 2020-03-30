@@ -31,8 +31,13 @@
 package org.uecide;
 
 import java.io.File;
+import java.util.TreeMap;
+import java.util.ArrayList;
 
 public class Tool extends UObject {
+
+    public static TreeMap<String, Tool> tools = new TreeMap<String, Tool>();
+
     public Tool(File folder) {
         super(folder);
     }
@@ -45,4 +50,27 @@ public class Tool extends UObject {
         localCtx.dispose();
         return res;
     }
+
+    public static void load() {
+        tools.clear();
+
+        ArrayList<File> toolFiles = FileCache.getFilesByName("tool.txt");
+        for (File tfile : toolFiles) {
+            if(tfile.exists()) {
+                Debug.message("    Loading tool " + tfile.getAbsolutePath());
+                Tool newTool = new Tool(tfile.getParentFile());
+
+                if(newTool.isValid()) {
+                    tools.put(newTool.getName(), newTool);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
+                }
+            }
+        }
+    }
+
+    public static Tool getTool(String name) {
+        return tools.get(name);
+    }
+
 }

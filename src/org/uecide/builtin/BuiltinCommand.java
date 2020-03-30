@@ -32,6 +32,7 @@ package org.uecide.builtin;
 
 import org.uecide.UECIDE;
 import org.uecide.Context;
+import org.uecide.Debug;
 
 public abstract class BuiltinCommand {
     public abstract boolean main(Context ctx, String[] arg) throws BuiltinCommandException ;
@@ -85,6 +86,7 @@ public abstract class BuiltinCommand {
         try {
             return cmd.main(ctx, arg);
         } catch (BuiltinCommandException ex) {
+            Debug.exception(ex);
             UECIDE.error(ex);
             return false;
         }

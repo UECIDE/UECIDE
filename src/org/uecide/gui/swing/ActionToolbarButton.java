@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,6 +20,7 @@ public class ActionToolbarButton extends ToolbarButton implements ActionListener
         try {
             setIcon(IconManager.getIconFromContext(ctx, icon, 24));
         } catch (Exception ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
         }
     }

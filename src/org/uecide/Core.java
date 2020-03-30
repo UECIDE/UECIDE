@@ -34,7 +34,11 @@ import java.io.*;
 import java.util.*;
 import javax.swing.*;
 
+import org.uecide.Compiler;
+
 public class Core extends UObject {
+
+    public static TreeMap<String, Core> cores = new TreeMap<String, Core>();
 
     public Core(File folder) {
         super(folder);
@@ -57,6 +61,27 @@ public class Core extends UObject {
             return null;
         }
 
-        return UECIDE.compilers.get(c);
+        return org.uecide.Compiler.getCompiler(c);
+    }
+
+    public static void load() {
+        cores.clear();
+        ArrayList<File> coreFiles = FileCache.getFilesByName("core.txt");
+        for (File cfile : coreFiles) {
+            if(cfile.exists()) {
+                Debug.message("    Loading core " + cfile.getAbsolutePath());
+                Core newCore = new Core(cfile.getParentFile());
+
+                if(newCore.isValid()) {
+                    cores.put(newCore.getName(), newCore);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
+                }
+            }
+        }
+    }
+
+    public static Core getCore(String name) { 
+        return cores.get(name); 
     }
 }

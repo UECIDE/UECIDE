@@ -56,6 +56,7 @@ public class SetDeviceAction extends Action {
             }
             throw new BadArgumentActionException();
         } catch (Exception ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
             throw new ActionException(ex.getMessage());
         }

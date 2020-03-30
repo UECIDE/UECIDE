@@ -37,6 +37,7 @@ public class SketchTreeCellRenderer extends DefaultTreeCellRenderer {
 //                    ret.setIcon(i);
 //                }
 //            } catch (IOException ignored) {
+//                Debug.exception(ignored);
 //            }
         }
 

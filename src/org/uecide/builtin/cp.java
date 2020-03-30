@@ -63,6 +63,7 @@ public class cp extends BuiltinCommand {
         try {
             Files.copy(from.toPath(), to.toPath(), REPLACE_EXISTING);
         } catch (IOException e) {
+            Debug.exception(e);
             throw new BuiltinCommandException(e.getMessage());
         }
         return true;

@@ -53,6 +53,7 @@ public class stdin extends BuiltinCommand {
         try {
             ctx.setOutputStream(new FileOutputStream(out));
         } catch (IOException ex) {
+            Debug.exception(ex);
             throw new BuiltinCommandException(ex.getMessage());
         }
         if (!(Boolean)ctx.executeCommand(command, null)) {

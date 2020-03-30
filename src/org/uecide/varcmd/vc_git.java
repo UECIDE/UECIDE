@@ -90,7 +90,7 @@ public class vc_git extends VariableCommand {
             }
             throw new VariableCommandException("No Commit Found");
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
         throw new VariableCommandException("General Exception Error");
     }
@@ -101,6 +101,7 @@ public class vc_git extends VariableCommand {
             String desc = cmd.call();
             return desc;
         } catch (Exception e) {
+            Debug.exception(e);
             e.printStackTrace();
             throw new VariableCommandException("No Tag Found");
         }
@@ -126,6 +127,7 @@ public class vc_git extends VariableCommand {
             localRepo = new FileRepository(dotGit);
             git = new Git(localRepo);
         } catch (Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             localRepo = null;
             repoRoot = null;

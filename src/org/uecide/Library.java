@@ -275,6 +275,7 @@ public class Library implements Comparable {
             in.close();
             data = contents.toString().split("\n");
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return;
         }
@@ -589,7 +590,7 @@ public class Library implements Comparable {
                 if(core.equals("all")) {
                     boolean sub = false;
 
-                    for(String c : UECIDE.cores.keySet()) {
+                    for(String c : Core.cores.keySet()) {
                         if(f.getName().equals(c)) {
                             Debug.message("  Found sub-library core group " + f);
                             loadLibrariesFromFolder(f, group, f.getName());
@@ -794,7 +795,7 @@ public class Library implements Comparable {
         }
 
         if(bits[0].equals("core")) {
-            Core c = UECIDE.cores.get(bits[1]);
+            Core c = Core.cores.get(bits[1]);
 
             if(c == null) {
                 return null;
@@ -804,7 +805,7 @@ public class Library implements Comparable {
         }
 
         if(bits[0].equals("compiler")) {
-            Compiler c = UECIDE.compilers.get(bits[1]);
+            Compiler c = Compiler.compilers.get(bits[1]);
 
             if(c == null) {
                 return null;
@@ -814,7 +815,7 @@ public class Library implements Comparable {
         }
 
         if(bits[0].equals("board")) {
-            Board c = UECIDE.boards.get(bits[1]);
+            Board c = Board.boards.get(bits[1]);
 
             if(c == null) {
                 return null;

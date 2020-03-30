@@ -83,6 +83,7 @@ public class scp extends BuiltinCommand {
             try {
                 session.connect();
             } catch(JSchException e) {
+                Debug.exception(e);
                 if(e.getMessage().equals("Auth fail")) {
                     password = null;
                     Preferences.unset("ssh." + host + "." + user);
@@ -93,6 +94,7 @@ public class scp extends BuiltinCommand {
                     throw new BuiltinCommandException(e.getMessage());
                 }
             } catch(Exception e) {
+                Debug.exception(e);
                 throw new BuiltinCommandException(e.getMessage());
             }
 
@@ -168,12 +170,15 @@ public class scp extends BuiltinCommand {
                 fis.close();
                 fis = null;
             } catch(Exception e) {
+                Debug.exception(e);
                 ctx.error(UECIDE.i18n.string("err.ssh.copy", e.getMessage()));
                 session.disconnect();
 
                 try {
                     if(fis != null)fis.close();
-                } catch(Exception ee) {}
+                } catch(Exception ee) {
+                    Debug.exception(ee);
+                }
 
                 return false;
             }
@@ -196,6 +201,7 @@ public class scp extends BuiltinCommand {
 
             return true;
         } catch(Exception e) {
+            Debug.exception(e);
             if(session != null) {
                 session.disconnect();
             }
@@ -206,7 +212,9 @@ public class scp extends BuiltinCommand {
 
             try {
                 if(fis != null)fis.close();
-            } catch(Exception ee) {}
+            } catch(Exception ee) {
+                Debug.exception(ee);
+            }
         }
 
         return false;

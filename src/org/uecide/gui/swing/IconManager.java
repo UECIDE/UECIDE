@@ -4,6 +4,7 @@ import org.uecide.Board;
 import org.uecide.Core;
 import org.uecide.Compiler;
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.Programmer;
 import org.uecide.PropertyFile;
 import org.uecide.UObject;
@@ -178,6 +179,7 @@ public class IconManager {
                     u = null;
                 }
             } catch (Exception ex) {
+                Debug.exception(ex);
                 u = null;
             }
 

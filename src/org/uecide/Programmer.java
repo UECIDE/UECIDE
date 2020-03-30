@@ -36,6 +36,9 @@ import java.util.*;
 import java.util.regex.*;
 
 public class Programmer extends UObject {
+
+    public static TreeMap<String, Programmer> programmers = new TreeMap<String, Programmer>();
+
     public Programmer(File folder) {
         super(folder);
     }
@@ -83,6 +86,7 @@ public class Programmer extends UObject {
                     String b = ctx.parseString(props.get("programmer.reset.baud"));
                     baud = Integer.parseInt(b);
                 } catch (Exception e) {
+                    Debug.exception(e);
                 }
                 if (!performBaudBasedReset(ctx, baud, predelay, delay, postdelay)) {
                     return false;
@@ -149,6 +153,7 @@ public class Programmer extends UObject {
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
+            Debug.exception(e);
             ctx.error(e);
             return false;
         }
@@ -181,6 +186,7 @@ public class Programmer extends UObject {
 //                System.gc();
             }
         } catch (Exception e) {
+            Debug.exception(e);
             ctx.error(e);
             return false;
         }
@@ -191,5 +197,39 @@ public class Programmer extends UObject {
         return _properties.getBoolean("hidden", false);
     }
     
+    public static void load() {
+        ArrayList<Programmer> savedProgrammers = new ArrayList<Programmer>();
+
+        for (Programmer p : programmers.values()) {
+            if (p instanceof mDNSProgrammer) {
+                savedProgrammers.add(p);
+                continue;
+            }
+        }
+
+        programmers.clear();
+
+        for (Programmer p : savedProgrammers) {
+            programmers.put(p.getName(), p);
+        }
+
+        ArrayList<File> programmerFiles = FileCache.getFilesByName("programmer.txt");
+        for (File pfile : programmerFiles) {
+            if(pfile.exists()) {
+                Debug.message("    Loading programmer " + pfile.getAbsolutePath());
+                Programmer newProgrammer = new Programmer(pfile.getParentFile());
+
+                if(newProgrammer.isValid()) {
+                    programmers.put(newProgrammer.getName(), newProgrammer);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
+                }
+            }
+        }
+    }
+
+    public static Programmer getProgrammer(String name) {
+        return programmers.get(name);
+    }
 
 }

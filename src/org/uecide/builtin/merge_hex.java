@@ -50,6 +50,7 @@ public class merge_hex extends BuiltinCommand {
 
             return true;
         } catch (Exception ex) { 
+            Debug.exception(ex);
             throw new BuiltinCommandException(ex.getMessage());
         }
     }

@@ -53,6 +53,7 @@ public class UsbDiscoveryService extends Service {
         try {
             services = UsbHostManager.getUsbServices();
         } catch (UsbException ex) {
+            Debug.exception(ex);
             stop();
             return;
         }
@@ -64,6 +65,7 @@ public class UsbDiscoveryService extends Service {
         try {
             rootHub = services.getRootUsbHub();
         } catch (UsbException ex) {
+            Debug.exception(ex);
             stop();
             return;
         }
@@ -117,6 +119,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
         return devs;
@@ -132,6 +135,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception exex) {
+            Debug.exception(exex);
             UECIDE.error(exex);
         }
     }
@@ -156,6 +160,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception exex) {
+            Debug.exception(exex);
             UECIDE.error(exex);
         }
     }
@@ -165,7 +170,7 @@ public class UsbDiscoveryService extends Service {
             UsbDeviceDescriptor desc = dev.getUsbDeviceDescriptor();
             short vid = desc.idVendor();
             short pid = desc.idProduct();
-            for (Board b : UECIDE.boards.values()) {
+            for (Board b : Board.boards.values()) {
                 String bvids = b.get("usb.vid");
                 if (bvids == null) {
                     continue;
@@ -186,6 +191,7 @@ public class UsbDiscoveryService extends Service {
                     bvid = (short)Integer.parseInt(bvids, 16);
                     bpid = (short)Integer.parseInt(bpids, 16);
                 } catch (Exception pie) {
+                    Debug.exception(pie);
                     continue;
                 }
                 if (vid == bvid && pid == bpid) {
@@ -193,6 +199,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
         return null;

@@ -115,6 +115,7 @@ public class PortList extends JPanel {
                 try {
                     table.setRowSelectionInterval(r, r);
                 } catch (Exception ex) {
+                    Debug.exception(ex);
                 }
             }
         });

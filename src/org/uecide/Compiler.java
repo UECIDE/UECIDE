@@ -34,6 +34,9 @@ import java.io.*;
 import java.util.*;
 
 public class Compiler extends UObject {
+
+    public static TreeMap<String, Compiler> compilers = new TreeMap<String, Compiler>();
+
     public Compiler(File folder) {
         super(folder);
     }
@@ -57,5 +60,28 @@ public class Compiler extends UObject {
 
         return r;
     }
+
+    public static void load() {
+        compilers.clear();
+        ArrayList<File> compilerFiles = FileCache.getFilesByName("compiler.txt");
+        for (File cfile : compilerFiles) {
+            if(cfile.exists()) {
+                Debug.message("    Loading compiler " + cfile.getAbsolutePath());
+                Compiler newCompiler = new Compiler(cfile.getParentFile());
+
+                if(newCompiler.isValid()) {
+                    compilers.put(newCompiler.getName(), newCompiler);
+                } else {
+                    Debug.message("    ==> IS NOT VALID!!!");
+                }
+            }
+        }
+    }
+
+    public static Compiler getCompiler(String name) {
+        return compilers.get(name);
+    }
+
 }
+
 

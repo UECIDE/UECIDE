@@ -178,7 +178,7 @@ public class FunctionBookmark {
         try {
             return formatted().trim() + " @ " + file.getFile().getCanonicalPath() + " line " + line + " type " + type;
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
         return "Error";
     }
@@ -223,7 +223,7 @@ public class FunctionBookmark {
         try {
             if (!(file.getFile().getCanonicalPath().equals(other.getFile().getFile().getCanonicalPath()))) { return false; }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Debug.exception(ex);
             return false;
         }
         return true;

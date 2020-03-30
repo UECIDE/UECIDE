@@ -48,6 +48,7 @@ public class Utils {
         try {
             return Long.decode(s);
         } catch (Exception e) {
+            Debug.exception(e);
         }
         return 0;
     }
@@ -56,6 +57,7 @@ public class Utils {
         try {
             return Integer.decode(s);
         } catch (Exception e) {
+            Debug.exception(e);
         }
         return 0;
     }
@@ -65,6 +67,7 @@ public class Utils {
         try {
             return Integer.decode(s);
         } catch (Exception e) {
+            Debug.exception(e);
         }
         return d;
     }
@@ -73,6 +76,7 @@ public class Utils {
         try {
             return Float.parseFloat(s);
         } catch (Exception e) {
+            Debug.exception(e);
         }
         return 0.0f;
     }
@@ -82,6 +86,7 @@ public class Utils {
             try {
                 Desktop.getDesktop().browse(new URI(url));
             } catch (Exception ex) {
+                Debug.exception(ex);
                 ex.printStackTrace();
             }
         }
@@ -92,6 +97,7 @@ public class Utils {
             try {
                 Desktop.getDesktop().open(new File(url));
             } catch (Exception ex) {
+                Debug.exception(ex);
             }
         }
     }
@@ -262,6 +268,7 @@ public class Utils {
             fs.close();
 
         } catch (Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return false;
         }

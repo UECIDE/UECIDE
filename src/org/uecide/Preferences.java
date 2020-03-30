@@ -74,6 +74,7 @@ public class Preferences {
 
             if(size <= 0) size = 12;
         } catch(Exception e) {
+            Debug.exception(e);
             size = 12;
         }
 
@@ -166,7 +167,9 @@ public class Preferences {
         if((s != null) && (s.indexOf("#") == 0)) {
             try {
                 parsed = new Color(Integer.parseInt(s.substring(1), 16));
-            } catch(Exception e) { }
+            } catch(Exception e) { 
+                Debug.exception(e);
+            }
         }
 
         return parsed;
@@ -269,6 +272,7 @@ public class Preferences {
         try {
             val = Integer.parseInt(data);
         } catch (Exception e) {
+            Debug.exception(e);
         }
         return val;
     }
@@ -282,6 +286,7 @@ public class Preferences {
         try {
             val = Float.parseFloat(data);
         } catch (Exception e) {
+            Debug.exception(e);
         }
         return val;
     }
@@ -343,7 +348,7 @@ public class Preferences {
         preferencesTree = new PropertyFile();
 
 
-        for(Programmer c : UECIDE.programmers.values()) {
+        for(Programmer c : Programmer.programmers.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");
             for (String k : prefs.keySet()) {
                 prefs.setSource(k, "programmer:" + c.getName());
@@ -351,7 +356,7 @@ public class Preferences {
             preferencesTree.mergeData(prefs);
         }
 
-        for(Compiler c : UECIDE.compilers.values()) {
+        for(Compiler c : Compiler.compilers.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");
             for (String k : prefs.keySet()) {
                 prefs.setSource(k, "compiler:" + c.getName());
@@ -359,7 +364,7 @@ public class Preferences {
             preferencesTree.mergeData(prefs);
         }
 
-        for(Core c : UECIDE.cores.values()) {
+        for(Core c : Core.cores.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");
             for (String k : prefs.keySet()) {
                 prefs.setSource(k, "core:" + c.getName());
@@ -367,7 +372,7 @@ public class Preferences {
             preferencesTree.mergeData(prefs);
         }
 
-        for(Board c : UECIDE.boards.values()) {
+        for(Board c : Board.boards.values()) {
             PropertyFile prefs = c.getProperties().getChildren("prefs");
             for (String k : prefs.keySet()) {
                 prefs.setSource(k, "board:" + c.getName());

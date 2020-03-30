@@ -198,7 +198,7 @@ public class ImageFileConverter implements FileConverter {
             return true;
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Debug.exception(ex);
             return false;
         }
     }

@@ -99,6 +99,7 @@ public class CleverIcon extends ImageIcon {
             try {
                 image = ImageIO.read(u);
             } catch (Exception ex) {
+                Debug.exception(ex);
                 image = ImageIO.read(FileManager.getURLFromPath("res://org/uecide/icons/unknown.png"));
             }
 

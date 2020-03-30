@@ -2,6 +2,7 @@ package org.uecide.actions;
 
 import org.uecide.UECIDE;
 import org.uecide.Context;
+import org.uecide.Debug;
 import java.io.File;
 import java.io.IOException;
 
@@ -42,6 +43,7 @@ public class NewSketchFileAction extends Action {
         try {
             ctx.getSketch().createNewFile(name);
         } catch (IOException ex) {
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
         return true;

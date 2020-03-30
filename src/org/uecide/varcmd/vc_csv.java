@@ -42,6 +42,7 @@ public class vc_csv extends VariableCommand {
             br.close();
             return "NOTFOUND";
         } catch (Exception ex) {
+            Debug.exception(ex);
             throw new VariableCommandException(ex.getMessage());
         }
     }

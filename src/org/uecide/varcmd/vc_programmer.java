@@ -30,7 +30,8 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+import org.uecide.Programmer;
 
 public class vc_programmer extends VariableCommand {
     public String main(Context sketch, String args) throws VariableCommandException {
@@ -43,7 +44,7 @@ public class vc_programmer extends VariableCommand {
         if (alist.length == 1) {
             prop = alist[0];
         } else {
-            prog = UECIDE.programmers.get(alist[0]);
+            prog = Programmer.getProgrammer(alist[0]);
             prop = alist[1];
         }
 

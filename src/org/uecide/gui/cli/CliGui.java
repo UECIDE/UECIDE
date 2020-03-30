@@ -6,6 +6,7 @@ import org.uecide.Board;
 import org.uecide.Compiler;
 import org.uecide.Context;
 import org.uecide.Core;
+import org.uecide.Debug;
 import org.uecide.Package;
 import org.uecide.Preferences;
 import org.uecide.Programmer;
@@ -56,7 +57,7 @@ public class CliGui extends Gui implements ContextEventListener {
 
 
         ArrayList<String> brdList = new ArrayList<String>();
-        for (Board b : UECIDE.boards.values()) {
+        for (Board b : Board.boards.values()) {
             brdList.add(b.getName());
         }
         String[] boardNames = brdList.toArray(new String[0]);
@@ -68,7 +69,7 @@ public class CliGui extends Gui implements ContextEventListener {
         }
 
         ArrayList<String> corList = new ArrayList<String>();
-        for (Core c : UECIDE.cores.values()) {
+        for (Core c : Core.cores.values()) {
             if (c.getFamily().equals(family)) {
                 corList.add(c.getName());
             }
@@ -76,7 +77,7 @@ public class CliGui extends Gui implements ContextEventListener {
         String[] coreNames = corList.toArray(new String[0]);
 
         ArrayList<String> comList = new ArrayList<String>();
-        for (Compiler c : UECIDE.compilers.values()) {
+        for (Compiler c : Compiler.compilers.values()) {
             if (c.getFamily().equals(family)) {
                 comList.add(c.getName());
             }
@@ -102,8 +103,8 @@ public class CliGui extends Gui implements ContextEventListener {
 
         TreeMap<String, Programmer> pl = new TreeMap<String, Programmer>();
 
-        for (String k : UECIDE.programmers.keySet()) {
-            Programmer p = UECIDE.programmers.get(k);
+        for (String k : Programmer.programmers.keySet()) {
+            Programmer p = Programmer.getProgrammer(k);
             if (p.worksWith(ctx.getBoard())) {
                 pl.put(k, p);
             }
@@ -182,6 +183,7 @@ public class CliGui extends Gui implements ContextEventListener {
         try {
             _apt = APT.factory(ctx);
         } catch (IOException ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         }
 
@@ -282,13 +284,16 @@ public class CliGui extends Gui implements ContextEventListener {
                 }
             }
         } catch (UserInterruptException ex) {
+            Debug.exception(ex);
             message("Quit");
             System.exit(10);
         } catch (EndOfFileException ex) {
+            Debug.exception(ex);
             Preferences.save();
             message("Bye");
             System.exit(0);
 //        } catch (Exception ex) {
+//            Debug.exception(ex);
 //            ex.printStackTrace();
 //            Preferences.save();
 //            System.exit(10);
@@ -419,8 +424,10 @@ public class CliGui extends Gui implements ContextEventListener {
                     p.waitFor();
                     ctx.getSketch().rescanFileTree();
                 } catch (InterruptedException e) {
+                    Debug.exception(e);
                     ctx.error(e);
                 } catch (IOException e) {
+                    Debug.exception(e);
                     ctx.error(e);
                 }
                 return;
@@ -478,6 +485,7 @@ public class CliGui extends Gui implements ContextEventListener {
                 return true;
             }
         } catch (IOException ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         }
         return false;
@@ -501,6 +509,7 @@ public class CliGui extends Gui implements ContextEventListener {
                 return 2;
             }
         } catch (IOException ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         }
         return -1;
@@ -517,6 +526,7 @@ public class CliGui extends Gui implements ContextEventListener {
             File outFile = new File(location, fn);
             return outFile;
         } catch (IOException ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         }
         return null;
@@ -533,6 +543,7 @@ public class CliGui extends Gui implements ContextEventListener {
             File outFile = new File(location, fn);
             return outFile;
         } catch (IOException ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         }
         return null;
@@ -546,6 +557,7 @@ public class CliGui extends Gui implements ContextEventListener {
             String fn = r.readLine();
             return fn;
         } catch (IOException ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         }
         return "";

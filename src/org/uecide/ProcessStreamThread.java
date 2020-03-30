@@ -22,6 +22,7 @@ public class ProcessStreamThread implements Runnable {
                 if (v == -1) break;
                 out.write(buffer, 0, v);
             } catch (Exception ignored) {
+                Debug.exception(ignored);
             }
         }
     }

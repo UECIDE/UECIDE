@@ -166,6 +166,7 @@ public class port extends BuiltinCommand {
                 }
             }
         } catch (Exception e) {
+            Debug.exception(e);
             throw new BuiltinCommandException(e.getMessage());
         }
         return true;
@@ -181,6 +182,7 @@ public class port extends BuiltinCommand {
             UsbHub rootHub = services.getRootUsbHub();
             return getAllUsbDevices(rootHub);
         } catch (Exception e) { 
+            Debug.exception(e);
             UECIDE.error(e);
         }
         return null;
@@ -204,6 +206,7 @@ public class port extends BuiltinCommand {
                 }
             }
         } catch (Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
         return devs;

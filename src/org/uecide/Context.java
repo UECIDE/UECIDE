@@ -555,6 +555,7 @@ public class Context {
                     lineno = Integer.parseInt(num);
                     continue;
                 } catch(Exception e) {
+                    Debug.exception(e);
                     error(UECIDE.i18n.string("err.syntax", key, lineno));
                     error(ld);
                     if (script.keyExists("fail")) {
@@ -747,6 +748,7 @@ public class Context {
             return BuiltinCommand.run(this, cmdName, arg);
 
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
 
@@ -843,6 +845,7 @@ public class Context {
             stdoutThread.join();
             stderrThread.join();
         } catch (Exception ex) {
+            Debug.exception(ex);
             error(ex);
         }
 
@@ -872,7 +875,7 @@ public class Context {
 //            }
 //        }
 
-        // Should we catch any trailing data here?
+        // Should we trap any trailing data here?
 
         int result = -1;
         if (runningProcess != null) {
@@ -897,8 +900,8 @@ public class Context {
             process.exitValue();
             return false;
         }
-        catch(IllegalThreadStateException e)
-        {
+        catch(IllegalThreadStateException e) {
+            Debug.exception(e);
             return true;
         }
     }
@@ -982,6 +985,7 @@ public class Context {
         try {
             return Integer.parseInt(v);
         } catch (Exception e) {
+            Debug.exception(e);
         }
         return d;
     }
@@ -1005,46 +1009,11 @@ public class Context {
         try {
             t.join();
         } catch (Exception ex) {
+            Debug.exception(ex);
             error(ex);
         }
         return true;
     }
-
-    public void runInitScripts() {
-        for (Board b : UECIDE.boards.values()) {
-            if (b.get("init.script.0") != null) {
-                Context ctx = new Context(this);
-                ctx.setBoard(b);
-                ctx.executeKey("init.script");
-                ctx.dispose();
-            }
-        }
-        for (Core c : UECIDE.cores.values()) {
-            if (c.get("init.script.0") != null) {
-                Context ctx = new Context(this);
-                ctx.setCore(c);
-                ctx.executeKey("init.script");
-                ctx.dispose();
-            }
-        }
-        for (Compiler c : UECIDE.compilers.values()) {
-            if (c.get("init.script.0") != null) {
-                Context ctx = new Context(this);
-                ctx.setCompiler(c);
-                ctx.executeKey("init.script");
-                ctx.dispose();
-            }
-        }
-        for (Programmer c : UECIDE.programmers.values()) {
-            if (c.get("init.script.0") != null) {
-                Context ctx = new Context(this);
-                ctx.setProgrammer(c);
-                ctx.executeKey("init.script");
-                ctx.dispose();
-            }
-        }
-    }
-
 
     public void setOutputStream(OutputStream pw) {
         outputStream = pw;
@@ -1079,8 +1048,11 @@ public class Context {
 
     public void dispose() {
         try {
-            eventTimer.cancel();
+            if (eventTimer != null) {
+                eventTimer.cancel();
+            }
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
     }
 
@@ -1219,4 +1191,5 @@ public class Context {
     public void setSystemContext(boolean v) {
         systemContext = v;
     }
+
 }

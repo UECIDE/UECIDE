@@ -28,7 +28,7 @@ public class SetBoardAction extends Action {
                 brd = (Board)args[0];
             } else if (args[0] instanceof String) {
                 String s = (String)args[0];
-                brd = UECIDE.boards.get(s);
+                brd = Board.getBoard(s);
             }
 
             if (brd == null) {
@@ -59,6 +59,7 @@ public class SetBoardAction extends Action {
             }
             throw new ActionException("No Core Available");
         } catch (Exception ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
             throw new ActionException(ex.getMessage());
         }

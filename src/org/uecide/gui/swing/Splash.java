@@ -68,7 +68,7 @@ public class Splash extends JDialog { //Window {
             setLocationRelativeTo(null);
             setVisible(true);
         } catch(Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
     }
 

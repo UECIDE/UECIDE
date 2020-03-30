@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 
 import com.wittams.gritty.Questioner;
 import com.wittams.gritty.Tty;
@@ -42,6 +43,7 @@ public class ConsoleTty implements Tty {
             }
             return i;
         } catch (InterruptedException e) {
+            Debug.exception(e);
             throw new IOException(e.getMessage());
         }
     }

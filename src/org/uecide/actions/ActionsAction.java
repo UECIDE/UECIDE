@@ -25,7 +25,7 @@ public class ActionsAction extends Action {
                     ctx.message(s);
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Debug.exception(ex);
             }
         }
         return true;

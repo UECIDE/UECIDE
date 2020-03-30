@@ -3,6 +3,7 @@ package org.uecide.gui.swing;
 import org.uecide.UECIDE;
 import org.uecide.Context;
 import org.uecide.Core;
+import org.uecide.Debug;
 
 import java.util.TreeSet;
 import java.util.TreeMap;
@@ -38,6 +39,7 @@ public class CoresMenu extends JMenu implements MenuListener {
             try {
                 setIcon(new CleverIcon(16, core.getIcon()));
             } catch (Exception ex) {
+                Debug.exception(ex);
             }
         }
     }
@@ -50,7 +52,7 @@ public class CoresMenu extends JMenu implements MenuListener {
 
     public void menuSelected(MenuEvent e) {
         removeAll();
-        for (Core core : UECIDE.cores.values()) {
+        for (Core core : Core.cores.values()) {
             if (core.worksWith(ctx.getBoard())) {
                 CoresMenuItem menu = new CoresMenuItem(ctx, core);
                 add(menu);

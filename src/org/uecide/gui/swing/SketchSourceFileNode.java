@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.SketchFile;
 import org.uecide.FileType;
 import org.uecide.FunctionBookmark;
@@ -48,6 +49,7 @@ public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextE
         try {
             bookmarks = sketchFile.scanForFunctions();
         } catch (Exception ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
             return false;
         }
@@ -151,6 +153,7 @@ public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextE
         try {
             original.setIcon(getIcon(tree));
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
 
         original.setOpaque(false);

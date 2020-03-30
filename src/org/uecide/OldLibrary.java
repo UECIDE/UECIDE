@@ -8,7 +8,7 @@ public class OldLibrary extends Library {
         super(location, priority);
 
         File parent = location.getParentFile();
-        Core c = UECIDE.getCore(parent.getName());
+        Core c = Core.getCore(parent.getName());
         if (c == null) {
             setCore("any");
         } else {

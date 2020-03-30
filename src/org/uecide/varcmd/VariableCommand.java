@@ -50,8 +50,10 @@ public abstract class VariableCommand {
             String ret = vc.main(ctx, param);
             return ret;
         } catch (VariableCommandException ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         } catch (Exception ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         }
 

@@ -3,6 +3,7 @@ package org.uecide.gui.action;
 import org.uecide.Context;
 import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
+import org.uecide.Debug;
 import org.uecide.Message;
 import org.uecide.SketchFile;
 import org.uecide.gui.Gui;
@@ -39,6 +40,7 @@ public class ActionGui extends Gui implements ContextEventListener {
             }
 
         } catch (Exception e) {
+            Debug.exception(e);
             ctx.error(e.getMessage());
         }
     };

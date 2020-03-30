@@ -51,6 +51,7 @@ public class append extends BuiltinCommand {
 
             return true;
         } catch (Exception e) {
+            Debug.exception(e);
             throw new BuiltinCommandException(e.getMessage());
         }
     }

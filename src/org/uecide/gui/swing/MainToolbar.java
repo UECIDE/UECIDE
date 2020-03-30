@@ -85,6 +85,7 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
             updateIcons();
 
         } catch (IOException ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
         }
 

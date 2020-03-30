@@ -19,7 +19,7 @@ public class BuildAction extends Action {
         try {
             return ctx.getSketch().build();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
     }

@@ -37,7 +37,7 @@ public class BuildAndUploadAction extends Action {
             }
             return r;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Debug.exception(ex);
             ctx.triggerEvent("uploadFail");
             throw new ActionException(ex.getMessage());
         }

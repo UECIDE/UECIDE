@@ -96,11 +96,13 @@ public class IOKit {
                             try {
                                 if (db.startsWith("id 0x")) { newNode.setId(Integer.parseInt(db.substring(5), 16)); }
                             } catch (Exception ex) {
+                                Debug.exception(ex);
                                 newNode.setId(0);
                             }
                             try {
                                 if (db.startsWith("retain ")) { newNode.setRetain(Integer.parseInt(db.substring(7), 10)); }
                             } catch (Exception ex) {
+                                Debug.exception(ex);
                                 newNode.setRetain(0);
                             }
                             if (db.startsWith("busy ")) {
@@ -115,6 +117,7 @@ public class IOKit {
                                         newNode.setBusyTime(0);
                                     }
                                 } catch (Exception ex) {
+                                    Debug.exception(ex);
                                     newNode.setBusy(0);
                                     newNode.setBusyTime(0);
                                 }
@@ -144,7 +147,7 @@ public class IOKit {
             br.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
         return 0;
     }
@@ -174,7 +177,7 @@ public class IOKit {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
     }
 

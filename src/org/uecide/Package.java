@@ -228,7 +228,7 @@ public class Package implements Comparable, Serializable {
         File downloadTo = new File(cacheFolder, getFilename());
 
         // First off do some lightweight checks. If these fail the SHA check is bound to fail so
-        // why bother trugding through that when we can catch a failure quickly with this?
+        // why bother trugding through that when we can trap a failure quickly with this?
         if (!downloadTo.exists()) {
             return false;
         }
@@ -237,6 +237,7 @@ public class Package implements Comparable, Serializable {
         try {
             size = Integer.parseInt(properties.get("Size"));
         } catch (Exception ignored) {
+            Debug.exception(ignored);
         }
 
         if (downloadTo.length() != size) {
@@ -397,7 +398,9 @@ public class Package implements Comparable, Serializable {
                         return true;
                     }
                 } catch (FileNotFoundException ignore) {
+                    Debug.exception(ignore);
                 } catch (Exception e) {
+                    Debug.exception(e);
                     errorMessage = e.toString();
                     ctx.error("");
                     ctx.error("Download failed: " + errorMessage);
@@ -428,6 +431,7 @@ public class Package implements Comparable, Serializable {
             df.extract(pf, root);
             ctx.message("done");
         } catch (Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return false;
         }

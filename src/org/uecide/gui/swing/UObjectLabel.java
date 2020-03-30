@@ -1,5 +1,6 @@
 package org.uecide.gui.swing;
 
+import org.uecide.Debug;
 import org.uecide.UObject;
 
 import javax.swing.JLabel;
@@ -43,6 +44,7 @@ public class UObjectLabel extends JLabel {
         try {
             setIcon(new CleverIcon(16, object.getIcon()));
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
         if (object == null) return;
         setText(object.getDescription());

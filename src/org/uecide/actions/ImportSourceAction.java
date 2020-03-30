@@ -2,6 +2,7 @@ package org.uecide.actions;
 
 import org.uecide.UECIDE;
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.Utils;
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +49,7 @@ public class ImportSourceAction extends Action {
             String data = Utils.getFileAsString(source);
             ctx.getSketch().createNewFile(dest.getName(), data);
         } catch (IOException ex) {
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
         return true;

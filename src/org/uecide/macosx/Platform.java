@@ -41,6 +41,7 @@ import javax.swing.UIManager;
 import com.apple.eio.FileManager;
 
 import org.uecide.UECIDE;
+import org.uecide.Debug;
 import org.uecide.PropertyFile;
 
 /**
@@ -54,6 +55,7 @@ public class Platform extends org.uecide.Platform {
             // hacked that in, bit by bit, over the years
             UIManager.put("Component.visualMargin", new Insets(1, 1, 1, 1));
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
     }
@@ -109,6 +111,7 @@ public class Platform extends org.uecide.Platform {
         try {
             return FileManager.findFolder(kUserDomain, kDomainLibraryFolderType);
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return null;
         }
@@ -119,6 +122,7 @@ public class Platform extends org.uecide.Platform {
         try {
             return FileManager.findFolder(kUserDomain, kDocumentsFolderType);
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return null;
         }
@@ -156,6 +160,7 @@ public class Platform extends org.uecide.Platform {
                 }
                 in.close();
             } catch (Exception e) {
+                Debug.exception(e);
                 e.printStackTrace();
             }
 

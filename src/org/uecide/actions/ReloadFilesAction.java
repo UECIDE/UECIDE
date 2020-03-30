@@ -1,6 +1,7 @@
 package org.uecide.actions;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.Sketch;
 import org.uecide.SketchFile;
 
@@ -23,6 +24,7 @@ public class ReloadFilesAction extends Action {
             try {
                 f.loadFileData();
             } catch (IOException ex) {
+                Debug.exception(ex);
                 throw new ActionException(ex.getMessage());
             }
         }

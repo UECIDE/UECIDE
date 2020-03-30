@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.FileType;
 import org.uecide.SketchFile;
 
@@ -53,6 +54,7 @@ public class SketchHeaderFilesNode extends SketchTreeNodeBase {
         try {
             original.setIcon(getIcon(tree));
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
 
         return original;

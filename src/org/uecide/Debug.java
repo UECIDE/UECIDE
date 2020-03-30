@@ -70,4 +70,10 @@ public class Debug {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
     }
 
+    public static void exception(Throwable e) {
+        if (UECIDE.cli.isSet("exceptions")) {
+            e.printStackTrace();
+        }
+    }
+
 }

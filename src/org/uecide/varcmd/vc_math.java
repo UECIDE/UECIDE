@@ -53,6 +53,7 @@ public class vc_math extends VariableCommand {
                     isNumber = true;
                 }
             } catch (Exception e) {
+                Debug.exception(e);
                 isNumber = false;
             }
 

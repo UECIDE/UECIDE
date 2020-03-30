@@ -255,6 +255,7 @@ public class Sketch {
             out.close();
 
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
     }
@@ -281,6 +282,7 @@ public class Sketch {
         try {
             f.createNewFile();
         } catch(Exception e) {
+            Debug.exception(e);
         }
 
         return f;
@@ -636,6 +638,7 @@ public class Sketch {
                     }
                 }
             } catch (Exception e) {
+                Debug.exception(e);
             }
         }
 
@@ -1021,6 +1024,7 @@ public class Sketch {
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
+            Debug.exception(e);
             ctx.error(e);
             return false;
         }
@@ -1052,6 +1056,7 @@ public class Sketch {
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
+            Debug.exception(e);
             ctx.error(e);
             return false;
         }
@@ -1094,6 +1099,7 @@ public class Sketch {
                 return false;
             }
         } catch(Exception e) {
+            Debug.exception(e);
             ctx.error(e);
             ctx.triggerEvent("buildFail");
             return false;
@@ -1108,6 +1114,7 @@ public class Sketch {
             }
             return done;
         } catch (IOException ex) {
+            Debug.exception(ex);
             ctx.error(ex);
             ctx.triggerEvent("buildFail");
             return false;
@@ -1551,7 +1558,10 @@ public class Sketch {
         try {
             if ((Preferences.getBoolean("editor.dialog.missinglibs")) && (UECIDE.isOnline())) {
             }
-        } catch (Exception ex) { ctx.error(ex); }
+        } catch (Exception ex) { 
+            Debug.exception(ex);
+            ctx.error(ex); 
+        }
 
         if(doPrePurge) {
             doPrePurge = false;
@@ -1670,19 +1680,6 @@ public class Sketch {
             }
         }
 
-//        if(Preferences.getBoolean("compiler.save_lss") && !parentIsProtected()) {
-//            try {
-//                File lss = new File(buildFolder, sketchName + ".lss");
-//                if (lss.exists()) {
-//                    Files.copy(new File(buildFolder, sketchName + ".lss").toPath(), new File(sketchFolder, sketchName + ".lss").toPath(), StandardCopyOption.REPLACE_EXISTING);
-//
-//                }
-//            } catch(Exception e) {
-//                ctx.error(e);
-//            }
-//        }
-
-
         if((
             Preferences.getBoolean("compiler.save_hex") || UECIDE.cli.isSet("force-save-hex") || UECIDE.cli.isSet("cli")) 
             && !parentIsProtected()) {
@@ -1700,6 +1697,7 @@ public class Sketch {
                     }
                 }
             } catch(Exception e) {
+                Debug.exception(e);
                 ctx.error(e);
             }
         }
@@ -1760,6 +1758,7 @@ public class Sketch {
                         }
                     }
                 } catch (Exception e) {
+                    Debug.exception(e);
                 }
             }
 
@@ -1824,6 +1823,7 @@ public class Sketch {
                             break;
                         }
                     } catch (Exception e) {
+                        Debug.exception(e);
                         ctx.error(e);
                     }
                 }
@@ -1837,6 +1837,7 @@ public class Sketch {
             try {
                 Thread.sleep(10);
             } catch (Exception e) {
+                Debug.exception(e);
             }
         }
 
@@ -1845,6 +1846,7 @@ public class Sketch {
                 t.join();
                 if (t.compiled == false) ok = false;
             } catch (Exception e) {
+                Debug.exception(e);
                 ctx.error(e);
             }
         }
@@ -2380,6 +2382,7 @@ public class Sketch {
                         }
                     }
                 } catch(Exception e) {
+                    Debug.exception(e);
                     ctx.error(e);
                 }
             }
@@ -2396,6 +2399,7 @@ public class Sketch {
                     File warningFile = new File(wMat.group(wFilename));
 
                 } catch(Exception e) {
+                    Debug.exception(e);
                     ctx.error(e);
                 }
             }
@@ -2887,6 +2891,7 @@ public class Sketch {
             sar.flush();
             sar.close();
         } catch(Exception e) {
+            Debug.exception(e);
             ctx.error(e);
             return false;
         }
@@ -2933,7 +2938,7 @@ public class Sketch {
         PropertyFile m = ctx.getMerged();
         if (m.get("sketch.board") != null) {
             String wantedBoard = m.get("sketch.board");
-            Board b = UECIDE.getBoard(wantedBoard);
+            Board b = Board.getBoard(wantedBoard);
             if (b == null) {
                 ctx.error(UECIDE.i18n.string("err.badboard", wantedBoard));
             } else {
@@ -2944,7 +2949,7 @@ public class Sketch {
 
         if (m.get("sketch.core") != null) {
             String wantedCore = m.get("sketch.core");
-            Core c = UECIDE.getCore(wantedCore);
+            Core c = Core.getCore(wantedCore);
             if (c == null) {
                 ctx.error(UECIDE.i18n.string("err.badcore", wantedCore));
             } else {
@@ -2955,7 +2960,7 @@ public class Sketch {
 
         if (m.get("sketch.compiler") != null) {
             String wantedCompiler = m.get("sketch.compiler");
-            Compiler c = UECIDE.getCompiler(wantedCompiler);
+            Compiler c = Compiler.getCompiler(wantedCompiler);
             if (c == null) {
                 ctx.error(UECIDE.i18n.string("err.badcompiler", wantedCompiler));
             } else {
@@ -3105,6 +3110,7 @@ public class Sketch {
             }
             out.close();
         } catch (Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
     }
@@ -3188,6 +3194,7 @@ public class Sketch {
             in.close();
             data = contents.toString().split("\n");
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return null;
         }

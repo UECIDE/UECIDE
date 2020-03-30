@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.Utils;
 import org.uecide.FileType;
 
@@ -130,6 +131,7 @@ public class GenericFileNode extends SketchTreeNodeBase {
         try {
             original.setIcon(getIcon(tree));
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
         return original;
     }
@@ -138,6 +140,7 @@ public class GenericFileNode extends SketchTreeNodeBase {
         try {
             return Utils.getFileAsString(file);
         } catch (Exception ex) {
+            Debug.exception(ex);
             ctx.error(ex);
         }
 

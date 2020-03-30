@@ -2,6 +2,7 @@ package org.uecide.actions;
 
 import org.uecide.UECIDE;
 import org.uecide.Context;
+import org.uecide.Debug;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +42,7 @@ public class SaveSketchAsAction extends Action {
             }
             return ctx.getSketch().saveAs(f);
         } catch (IOException ex) {
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
     }

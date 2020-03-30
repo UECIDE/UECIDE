@@ -74,6 +74,7 @@ public class vc_preproc extends VariableCommand {
             pw.print(data);
             pw.close();
         } catch (Exception e) {
+            Debug.exception(e);
             ctx.rollback();
             throw new VariableCommandException(e.getMessage());
         }

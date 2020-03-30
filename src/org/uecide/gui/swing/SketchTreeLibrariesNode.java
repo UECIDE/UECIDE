@@ -5,6 +5,7 @@ import org.uecide.Sketch;
 import org.uecide.Library;
 import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
+import org.uecide.Debug;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
@@ -77,6 +78,7 @@ public class SketchTreeLibrariesNode extends SketchTreeNodeBase implements Conte
         try {
             original.setIcon(getIcon(tree));
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
 
         return original;

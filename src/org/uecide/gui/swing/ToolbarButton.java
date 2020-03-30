@@ -38,6 +38,7 @@ public class ToolbarButton extends JButton implements AnimationListener {
             buttonIcon.addAnimationListener(this);
             setIcon(buttonIcon);
         } catch (IOException ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
         }
 

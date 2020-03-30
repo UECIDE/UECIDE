@@ -149,7 +149,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
 
         portAttributeCache.put(deviceName, attributes);
@@ -180,7 +180,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             }
             input.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
         portAttributeCache.put(deviceName, attributes);
         return attributes;
@@ -213,7 +213,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                             String vid = String.format("%04x", Integer.parseInt(par.get("idVendor")));
                             String pid = String.format("%04x", Integer.parseInt(par.get("idProduct")));
 
-                            for (Board b : UECIDE.boards.values()) {
+                            for (Board b : Board.boards.values()) {
                                 if (b.get("usb.vid") != null && b.get("usb.pid") != null) {
                                     if (b.get("usb.vid").equals(vid) && b.get("usb.pid").equals(pid)) {
                                         board = b;
@@ -232,7 +232,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
 
         macPortNameCache.put(deviceName, deviceName);
@@ -289,7 +289,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 String pid = reader.readLine();
                 reader.close();
 
-                for (Board b : UECIDE.boards.values()) {
+                for (Board b : Board.boards.values()) {
                     if (b.get("usb.vid") != null && b.get("usb.pid") != null) {
                         if (b.get("usb.vid").equals(vid) && b.get("usb.pid").equals(pid)) {
                             board = b;
@@ -310,6 +310,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             }
             return portName + " (" + manufacturer + " " + product + ")";
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return portName;
         }
@@ -336,6 +337,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             serialPort.writeBytes(b, b.length);
             return true;
         } catch (Exception e) {
+            Debug.exception(e);
             lastError = e.getMessage();
         }
         return false;
@@ -356,6 +358,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 serialPort.closePort();
             }
         } catch (Exception e) {
+            Debug.exception(e);
         }
     }
 
@@ -371,6 +374,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             serialPort.setRTS();
             return true;
         } catch (Exception e) {
+            Debug.exception(e);
             lastError = e.getMessage();
             e.printStackTrace();
         }
@@ -396,7 +400,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                     listener.commsDataReceived(bytes);
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Debug.exception(ex);
             }
         }
     }
@@ -408,6 +412,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             serialPort.setNumDataBits(8);
             serialPort.setParity(SerialPort.NO_PARITY);
         } catch (Exception e) {
+            Debug.exception(e);
             lastError = e.getMessage();
             return false;
         }
@@ -458,6 +463,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             serialPort.setDTR();
             serialPort.setRTS();
         } catch (Exception e) {
+            Debug.exception(e);
             lastError = e.getMessage();
         }
     }
@@ -469,6 +475,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             else
                 serialPort.clearDTR();
         } catch (Exception e) {
+            Debug.exception(e);
             lastError = e.getMessage();
         }
     }
@@ -480,6 +487,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             else
                 serialPort.clearRTS();
         } catch (Exception e) {
+            Debug.exception(e);
             lastError = e.getMessage();
         }
     }
@@ -562,6 +570,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             int vid = Integer.parseInt(vidstr, 16);
             return vid;
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
             return 0;
         }
@@ -598,6 +607,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 }
             }
         } catch (Exception e) {
+            Debug.exception(e);
             e.printStackTrace();
         }
 

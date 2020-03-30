@@ -116,12 +116,6 @@ public class UECIDE {
 
     public static Version systemVersion;
 
-    public static TreeMap<String, Compiler> compilers;
-    public static TreeMap<String, Board> boards;
-    public static TreeMap<String, Core> cores;
-    public static TreeMap<String, Programmer> programmers;
-    public static TreeMap<String, Tool> tools;
-
     public static Context systemContext;
 
     public static ArrayList<Context> sessions = new ArrayList<Context>();
@@ -140,31 +134,12 @@ public class UECIDE {
 
     public static I18N i18n = new I18N("Core");
 
-
-    /*! Get a Board from the internal boards list by its short name. */
-    public static Board getBoard(String name) {
-        return boards.get(name);
-    }
-
-    /*! Get a Core from the internal cores list by its short name. */
-    public static Core getCore(String name) {
-        return cores.get(name);
-    }
-
-    /*! Get a Compiler from the internal compilers list by its short name. */
-    public static Compiler getCompiler(String name) {
-        return compilers.get(name);
-    }
-
-    /*! The main execution entry function. It just creates an instance of this
-     *  object and passes the command line arguments.
-     */
     public static void main(String args[]) {
 //        replaceSystemClassLoader();
         try {
             new UECIDE(args);
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
     }
 
@@ -194,6 +169,7 @@ public class UECIDE {
             URI ui = sl.toURI();
             return new File(ui);
         } catch(Exception e) {
+            Debug.exception(e);
             UECIDE.error(e);
         }
 
@@ -372,7 +348,7 @@ public class UECIDE {
             try {
                 prefsFile.delete();
             } catch (Exception e) {
-                e.printStackTrace();
+                Debug.exception(e);
                 System.exit(10);
             }
             System.out.println(">>> All preferences reset to default! <<<");
@@ -603,12 +579,6 @@ public class UECIDE {
         systemContext.getGui().splashMessage(i18n.string("splash.msg.application"), 20);
         platform.init(this);
 
-        compilers = new TreeMap<String, Compiler>();
-        cores = new TreeMap<String, Core>();
-        tools = new TreeMap<String, Tool>();
-        boards = new TreeMap<String, Board>();
-        programmers = new TreeMap<String, Programmer>();
-
         Thread t = new Thread() {
             public void run() {
                 Serial.updatePortList();
@@ -722,6 +692,7 @@ public class UECIDE {
             }
 
         } catch(Exception e) {
+            Debug.exception(e);
             error("An unknown error occurred while trying to load platform-specific code for your machine.");
         }
     }
@@ -751,6 +722,7 @@ public class UECIDE {
                 try {
                     hits = Integer.parseInt(mcuEntry[1]);
                 } catch (Exception e) {
+                    Debug.exception(e);
                 }
 
                 File f = new File(mcuEntry[0]);
@@ -765,6 +737,13 @@ public class UECIDE {
     /*! Update the internal MRU list with a new File */
     public static void updateMRU(File f) {
         if (f == null) {
+            return;
+        }
+
+        try {
+            f = new File(f.getCanonicalPath());
+        } catch (Exception err) {
+            Debug.exception(err);
             return;
         }
 
@@ -787,6 +766,7 @@ public class UECIDE {
         try {
             hits = MCUList.get(f);
         } catch (Exception e) {
+            Debug.exception(e);
         }
         hits++;
         MCUList.put(f, hits);
@@ -824,6 +804,7 @@ public class UECIDE {
     }
 
     /*! Get the default board to use if no current board can be found */
+/*
     public static Board getDefaultBoard() {
         Board tb;
         String prefsBoard = Preferences.get("board");
@@ -848,107 +829,7 @@ public class UECIDE {
 
         return null;
     }
-
-    public static void loadCompilers() {
-        compilers.clear();
-        ArrayList<File> compilerFiles = FileCache.getFilesByName("compiler.txt");
-        for (File cfile : compilerFiles) {
-            if(cfile.exists()) {
-                Debug.message("    Loading compiler " + cfile.getAbsolutePath());
-                Compiler newCompiler = new Compiler(cfile.getParentFile());
-
-                if(newCompiler.isValid()) {
-                    compilers.put(newCompiler.getName(), newCompiler);
-                } else {
-                    Debug.message("    ==> IS NOT VALID!!!");
-                }
-            }
-        }
-    }
-
-    public static void loadCores() {
-        cores.clear();
-        ArrayList<File> coreFiles = FileCache.getFilesByName("core.txt");
-        for (File cfile : coreFiles) {
-            if(cfile.exists()) {
-                Debug.message("    Loading core " + cfile.getAbsolutePath());
-                Core newCore = new Core(cfile.getParentFile());
-
-                if(newCore.isValid()) {
-                    cores.put(newCore.getName(), newCore);
-                } else {
-                    Debug.message("    ==> IS NOT VALID!!!");
-                }
-            }
-        }
-    }
-
-    public static void loadBoards() {
-        boards.clear();
-        ArrayList<File> boardFiles = FileCache.getFilesByName("board.txt");
-        for (File bfile : boardFiles) {
-            if(bfile.exists()) {
-                Debug.message("    Loading board " + bfile.getAbsolutePath());
-                Board newBoard = new Board(bfile.getParentFile());
-
-                if(newBoard.isValid()) {
-                    boards.put(newBoard.getName(), newBoard);
-                } else {
-                    Debug.message("    ==> IS NOT VALID!!!");
-                }
-            }
-        }
-    }
-
-    public static void loadProgrammers() {
-        ArrayList<Programmer> savedProgrammers = new ArrayList<Programmer>();
-
-        for (Programmer p : programmers.values()) {
-            if (p instanceof mDNSProgrammer) {
-                savedProgrammers.add(p);
-                continue;
-            }
-        }
-
-        programmers.clear();
-
-        for (Programmer p : savedProgrammers) {
-            programmers.put(p.getName(), p);
-        }
-
-        ArrayList<File> programmerFiles = FileCache.getFilesByName("programmer.txt");
-        for (File pfile : programmerFiles) {
-            if(pfile.exists()) {
-                Debug.message("    Loading programmer " + pfile.getAbsolutePath());
-                Programmer newProgrammer = new Programmer(pfile.getParentFile());
-
-                if(newProgrammer.isValid()) {
-                    programmers.put(newProgrammer.getName(), newProgrammer);
-                } else {
-                    Debug.message("    ==> IS NOT VALID!!!");
-                }
-            }
-        }
-    }
-
-    public static void loadTools() {
-        tools.clear();
-
-        ArrayList<File> toolFiles = FileCache.getFilesByName("tool.txt");
-        for (File tfile : toolFiles) {
-            if(tfile.exists()) {
-                Debug.message("    Loading tool " + tfile.getAbsolutePath());
-                Tool newTool = new Tool(tfile.getParentFile());
-
-                if(newTool.isValid()) {
-                    tools.put(newTool.getName(), newTool);
-                } else {
-                    Debug.message("    ==> IS NOT VALID!!!");
-                }
-            }
-        }
-    }
-
+*/
 
     /*! Determine if the provided folder is a sketch folder or not */
     public static boolean isSketchFolder(File folder) {
@@ -963,29 +844,6 @@ public class UECIDE {
 
             if(testFile.exists()) {
                 return true;
-            }
-        }
-
-        return false;
-    }
-
-    /*! Find if a folder has at least one sketch underneath it */
-    public static boolean pathContainsSketchSomewhere(File root) {
-        if(!root.isDirectory()) {
-            return false;
-        }
-
-        if(isSketchFolder(root)) {
-            return true;
-        }
-
-        File[] files = root.listFiles();
-
-        for(File f : files) {
-            if(f.isDirectory()) {
-                if(pathContainsSketchSomewhere(f)) {
-                    return true;
-                }
             }
         }
 
@@ -1081,6 +939,7 @@ public class UECIDE {
             return folder;
 
         } catch(Exception e) {
+            Debug.exception(e);
             error(e);
         }
 
@@ -1127,7 +986,10 @@ public class UECIDE {
 
         try {
             sketchbookFolder = platform.getDefaultSketchbookFolder();
-        } catch(Exception e) { return null; }
+        } catch(Exception e) { 
+            Debug.exception(e);
+            return null; 
+        }
 
         // create the folder if it doesn't exist already
         if(!sketchbookFolder.exists()) {
@@ -1286,7 +1148,7 @@ public class UECIDE {
             Debug.message("******************** EXCEPTION ********************");
             Debug.message("");
         } catch(Exception ee) {
-            ee.printStackTrace();
+            Debug.exception(ee);
         }
 
         e.printStackTrace();
@@ -1308,40 +1170,23 @@ public class UECIDE {
     }
 
     public static void rescanCompilers() {
-        compilers = new TreeMap<String, Compiler>();
-        loadCompilers();
+        Compiler.load();
     }
 
     public static void rescanTools() {
-        tools = new TreeMap<String, Tool>();
-        loadTools();
+        Tool.load();
     }
 
     public static void rescanCores() {
-        cores = new TreeMap<String, Core>();
-        loadCores();
+        Core.load();
     }
 
     public static void rescanProgrammers() {
-        try {
-//            programmers = new TreeMap<String, Programmer>();
-            loadProgrammers();
-//            Editor.updateAllEditors();
-//            Editor.selectAllEditorProgrammers();
-        } catch(Exception e) {
-            error(e);
-        }
+        Programmer.load();
     }
 
     public static void rescanBoards() {
-        try {
-            boards = new TreeMap<String, Board>();
-            loadBoards();
-//            Editor.updateAllEditors();
-//            Editor.selectAllEditorBoards();
-        } catch(Exception e) {
-            error(e);
-        }
+        Board.load();
     }
 
     public static void rescanLibraries() {
@@ -1361,6 +1206,7 @@ public class UECIDE {
             return new Version(data);
 */
         } catch(Exception e) {
+            Debug.exception(e);
             // Unable to get new version details - return nothing.
             // Also switch to offline mode since there was an error.
             onlineMode = false;
@@ -1418,43 +1264,6 @@ public class UECIDE {
         return false;
     }
 
-    // This little routine works through each and every board, core and compiler and
-    // runs any "init.script.*" lines.
-    public static void runInitScripts() {
-        for (Board b : boards.values()) {
-            if (b.get("init.script.0") != null) {
-                Context ctx = new Context();
-                ctx.setBoard(b);
-                ctx.executeKey("init.script");
-                ctx.dispose();
-            }
-        }
-        for (Core c : cores.values()) {
-            if (c.get("init.script.0") != null) {
-                Context ctx = new Context();
-                ctx.setCore(c);
-                ctx.executeKey("init.script");
-                ctx.dispose();
-            }
-        }
-        for (Compiler c : compilers.values()) {
-            if (c.get("init.script.0") != null) {
-                Context ctx = new Context();
-                ctx.setCompiler(c);
-                ctx.executeKey("init.script");
-                ctx.dispose();
-            }
-        }
-        for (Programmer c : programmers.values()) {
-            if (c.get("init.script.0") != null) {
-                Context ctx = new Context();
-                ctx.setProgrammer(c);
-                ctx.executeKey("init.script");
-                ctx.dispose();
-            }
-        }
-    }
-
     // If the package manager hasn't been configured then 
     // configure it, do an update, and then install the base packages.
 
@@ -1504,6 +1313,7 @@ public class UECIDE {
 //            reqapt.save();
 
         } catch (Exception e) {
+            Debug.exception(e);
             error(e);
         }
 
@@ -1535,6 +1345,7 @@ public class UECIDE {
         try {
             file.delete();
         } catch (Exception e) {
+            Debug.exception(e);
         }
 
         // If it deleted then return
@@ -1552,17 +1363,13 @@ public class UECIDE {
         return extension;
     }
 
-    public static Tool getTool(String name) {
-        return tools.get(name);
-    }
-
     public static void loadAssets() throws IOException {
         cacheSystemFiles();
-        loadCores();
-        loadCompilers();
-        loadBoards();
-        loadProgrammers();
-        loadTools();
+        Core.load();
+        Compiler.load();
+        Board.load();
+        Programmer.load();
+        Tool.load();
         gatherLibraries();
     }
 
@@ -1622,6 +1429,7 @@ public class UECIDE {
             }
             return ctx;
         } catch (Exception e) {
+            Debug.exception(e);
             error(e);
         }
         return null;

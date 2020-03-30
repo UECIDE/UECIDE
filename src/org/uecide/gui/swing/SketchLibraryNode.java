@@ -1,6 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.Library;
 import org.uecide.SketchFile;
 import org.uecide.FileType;
@@ -50,6 +51,7 @@ public class SketchLibraryNode extends SketchTreeNodeBase implements ContextEven
             compilingIcon = IconManager.getIcon(16, "main.spin");
             compilingIcon.addAnimationListener(this);
         } catch (Exception ex) {
+            Debug.exception(ex);
         }
     }
 
@@ -123,6 +125,7 @@ public class SketchLibraryNode extends SketchTreeNodeBase implements ContextEven
         try {
             original.setIcon(getIcon(tree));
         } catch (IOException ex) {
+            Debug.exception(ex);
         }
         return original;
     }

@@ -3,6 +3,7 @@ package org.uecide.actions;
 import org.uecide.Package;
 import org.uecide.APT;
 import org.uecide.Context;
+import org.uecide.Debug;
 import java.util.TreeMap;
 
 public class AptUpgradeAction extends Action {
@@ -46,6 +47,7 @@ public class AptUpgradeAction extends Action {
                 apt.upgradePackage(p);
             }
         } catch (Exception ex) {
+            Debug.exception(ex);
             throw new ActionException(ex.getMessage());
         }
         return true;

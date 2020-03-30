@@ -208,7 +208,7 @@ public class APT {
             }
             return out; 
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
             return null;
         }
     }
@@ -224,7 +224,7 @@ public class APT {
             }
             pw.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
     }
 
@@ -611,7 +611,7 @@ public class APT {
             ctx.message("done");
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Debug.exception(e);
         }
         return false;
     }

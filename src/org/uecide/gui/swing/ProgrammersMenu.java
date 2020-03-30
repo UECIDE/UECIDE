@@ -2,6 +2,7 @@ package org.uecide.gui.swing;
 
 import org.uecide.UECIDE;
 import org.uecide.Context;
+import org.uecide.Debug;
 import org.uecide.Programmer;
 
 import java.util.TreeSet;
@@ -38,6 +39,7 @@ public class ProgrammersMenu extends JMenu implements MenuListener {
             try {
                 setIcon(new CleverIcon(16, programmer.getIcon()));
             } catch (Exception ex) {
+                Debug.exception(ex);
             }
         }
     }
@@ -50,7 +52,7 @@ public class ProgrammersMenu extends JMenu implements MenuListener {
 
     public void menuSelected(MenuEvent e) {
         removeAll();
-        for (Programmer programmer : UECIDE.programmers.values()) {
+        for (Programmer programmer : Programmer.programmers.values()) {
             if (programmer.worksWith(ctx.getBoard())) {
                 if (!programmer.isHidden()) {
                     ProgrammersMenuItem menu = new ProgrammersMenuItem(ctx, programmer);

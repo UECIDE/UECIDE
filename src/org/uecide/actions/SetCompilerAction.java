@@ -29,7 +29,7 @@ public class SetCompilerAction extends Action {
                 return true;
             } else if (args[0] instanceof String) {
                 String s = (String)args[0];
-                Compiler b = UECIDE.compilers.get(s);
+                Compiler b = Compiler.getCompiler(s);
                 if (b == null) {
                     throw new ActionException("Unknown Compiler");
                 }
@@ -39,6 +39,7 @@ public class SetCompilerAction extends Action {
             }
             throw new BadArgumentActionException();
         } catch (Exception ex) {
+            Debug.exception(ex);
             ex.printStackTrace();
             throw new ActionException(ex.getMessage());
         }
