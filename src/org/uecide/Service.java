@@ -56,6 +56,7 @@ public abstract class Service implements Runnable {
                 try {
                     Thread.sleep(100);
                 } catch (Exception e) {
+                    Base.exception(e);
                 }
                 continue;
             }
@@ -101,6 +102,7 @@ public abstract class Service implements Runnable {
             try {
                 Thread.sleep(interval);
             } catch (InterruptedException e) {
+                Base.exception(e);
                 continue;
             }
             loop();

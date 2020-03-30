@@ -118,6 +118,7 @@ class BufferedStyledDocument extends DefaultStyledDocument {
             super.insert(super.getLength(), elementArray);
 
         } catch(BadLocationException e) {
+            Base.exception(e);
             // ignore the error otherwise this will cause an infinite loop
             // maybe not a good idea in the long run?
         }

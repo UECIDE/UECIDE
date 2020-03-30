@@ -39,6 +39,7 @@ public class vc_char implements VariableCommand {
                 int ch = Integer.parseInt(args.substring(2, 16));
                 return Character.toString((char)ch);
             } catch (Exception e) {
+                Base.exception(e);
                 return " ";
             }
         }

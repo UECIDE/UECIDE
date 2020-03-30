@@ -77,7 +77,7 @@ public class bitmap extends JPanel implements EditorBase {
         try {
             bmpEditor.loadImage(f);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
             return false;
         }
         return true;
@@ -195,7 +195,7 @@ public class bitmap extends JPanel implements EditorBase {
         try {
             return bmpEditor.saveImage(file);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
         return false;
     }

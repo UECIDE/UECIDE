@@ -51,6 +51,7 @@ public class append implements BuiltinCommand {
 
             return true;
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;

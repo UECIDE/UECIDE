@@ -113,6 +113,7 @@ public class SSHCommunicationPort implements CommunicationPort {
             byte[] b = s.getBytes("UTF-8");
             return write(b);
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
             return false;
         }
@@ -124,6 +125,7 @@ public class SSHCommunicationPort implements CommunicationPort {
             byte[] b = s.getBytes("UTF-8");
             return write(b);
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
             return false;
         }
@@ -133,6 +135,7 @@ public class SSHCommunicationPort implements CommunicationPort {
         try {
             stdin.write(b);
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
             return false;
         }
@@ -143,6 +146,7 @@ public class SSHCommunicationPort implements CommunicationPort {
         try {
             stdin.write(b);
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
             return false;
         }
@@ -155,6 +159,7 @@ public class SSHCommunicationPort implements CommunicationPort {
             channel.disconnect();
             session.disconnect();
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
         }
     }
@@ -183,6 +188,7 @@ public class SSHCommunicationPort implements CommunicationPort {
             try {
                 session.connect();
             } catch(JSchException e) {
+                Base.exception(e);
                 if(e.getMessage().equals("Auth fail")) {
                     Preferences.unset("ssh." + hostname + "." + get("user"));
                     Base.session.unset("ssh." + hostname + "." + get("user"));
@@ -196,9 +202,7 @@ public class SSHCommunicationPort implements CommunicationPort {
                     return false;
                 }
             } catch(Exception e) {
-                lastError = e.getMessage();
-            e.printStackTrace();
-                    System.err.println(lastError);
+                Base.exception(e);
                 return false;
             }
 
@@ -218,9 +222,7 @@ public class SSHCommunicationPort implements CommunicationPort {
 
             channel.connect();
         } catch (Exception ex) {
-            lastError = ex.getMessage();
-            ex.printStackTrace();
-            System.err.println(lastError);
+            Base.exception(ex);
             return false;
         }
         return true;
@@ -265,6 +267,7 @@ public class SSHCommunicationPort implements CommunicationPort {
                         listener.commsDataReceived(b);
                     }
                 } catch (Exception e) {
+                    Base.exception(e);
                     lastError = e.getMessage();
                 }
             }

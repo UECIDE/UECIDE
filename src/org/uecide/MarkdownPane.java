@@ -94,6 +94,7 @@ public class MarkdownPane extends JTextPane {
 
             super.setText("<html><body>" + html + "</body></html>");
         } catch (Exception e) {
+            Base.exception(e);
         }
     }
 }

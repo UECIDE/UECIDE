@@ -81,6 +81,7 @@ public class About {
 
             mainContainer.add(picLabel, BorderLayout.NORTH);
         } catch(Exception ex) {
+            Base.exception(ex);
             Base.error(ex);
         }
 
@@ -166,6 +167,7 @@ public class About {
             }
             reader.close();
         } catch(Exception ex) {
+            Base.exception(ex);
             Base.error(ex);
         }
     }
@@ -197,6 +199,7 @@ public class About {
             }
             reader.close();
         } catch(Exception ex) {
+            Base.exception(ex);
             Base.error(ex);
         }
 

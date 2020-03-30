@@ -75,6 +75,7 @@ public class Platform {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -100,6 +101,7 @@ public class Platform {
 
             return dataFolder;
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -172,7 +174,7 @@ public class Platform {
                 out.close();
                 temprc.renameTo(bashrc);
             } catch(Exception e) {
-                e.printStackTrace();
+                Base.exception(e);
             }
         }
     }
@@ -193,6 +195,7 @@ public class Platform {
                 showLauncherWarning();
             }
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }

@@ -85,6 +85,7 @@ public class ecma implements BuiltinCommand {
                 stde_pr = new PipedReader();
                 stde_pw = new PipedWriter(stde_pr);
             } catch (Exception ex) {
+                Base.exception(ex);
             }
 
             engine.getContext().setWriter(stdo_pw);
@@ -100,6 +101,7 @@ public class ecma implements BuiltinCommand {
                                 ctx.messageStream(new String(tmp, 0, i));
                             }
                         } catch (Exception ex) {
+                            Base.exception(ex);
                         }
                     }
                 }
@@ -116,6 +118,7 @@ public class ecma implements BuiltinCommand {
                                 ctx.messageStream("+" + new String(tmp, 0, i));
                             }
                         } catch (Exception ex) {
+                            Base.exception(ex);
                         }
                     }
                 }
@@ -136,6 +139,7 @@ public class ecma implements BuiltinCommand {
             running = false;
             return ret;
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error("Exception...");
             ctx.error(e);
         }

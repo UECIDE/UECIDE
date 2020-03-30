@@ -88,6 +88,7 @@ public class PropertyFile {
 
             br.close();
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -124,6 +125,7 @@ public class PropertyFile {
                 }
             }
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -147,6 +149,7 @@ public class PropertyFile {
                     r.close();
                     fis.close();
                 } catch(Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -166,6 +169,7 @@ public class PropertyFile {
                     r.close();
                     fis.close();
                 } catch(Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -284,6 +288,7 @@ public class PropertyFile {
 
                 Debug.message("Saved property file " + userFile.getAbsolutePath());
             } catch(Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
         }
@@ -299,11 +304,13 @@ public class PropertyFile {
             try {
                 saveTimer.cancel();
             } catch (Exception e) {
+                Base.exception(e);
             }
 
             try {
                 saveTimer.purge();
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
 
@@ -502,6 +509,7 @@ public class PropertyFile {
         try {
             return Integer.parseInt(get(attribute));
         } catch(Exception e) {
+            Base.exception(e);
             return def;
         }
     }
@@ -511,6 +519,7 @@ public class PropertyFile {
         try {
             return Long.parseLong(get(attribute));
         } catch(Exception e) {
+            Base.exception(e);
             return def;
         }
     }
@@ -520,6 +529,7 @@ public class PropertyFile {
         try {
             return Float.parseFloat(get(attribute));
         } catch(Exception e) {
+            Base.exception(e);
             return def;
         }
     }
@@ -529,6 +539,7 @@ public class PropertyFile {
         try {
             return Integer.parseInt(get(attribute));
         } catch(Exception e) {
+            Base.exception(e);
             return 0;
         }
     }
@@ -538,6 +549,7 @@ public class PropertyFile {
         try {
             return Long.parseLong(get(attribute));
         } catch(Exception e) {
+            Base.exception(e);
             return 0;
         }
     }
@@ -547,6 +559,7 @@ public class PropertyFile {
         try {
             return Float.parseFloat(get(attribute));
         } catch(Exception e) {
+            Base.exception(e);
             return 0;
         }
     }
@@ -575,7 +588,9 @@ public class PropertyFile {
         if((s != null) && (s.indexOf("#") == 0)) {
             try {
                 parsed = new Color(Integer.parseInt(s.substring(1), 16));
-            } catch(Exception e) { }
+            } catch(Exception e) {
+                Base.exception(e);
+            }
         }
 
         return parsed;
@@ -657,6 +672,7 @@ public class PropertyFile {
                 InetAddress myHost = InetAddress.getLocalHost();
                 hostname = myHost.getHostName();
             } catch (Exception e) {
+                Base.exception(e);
             }
             s = s.replace("${hostname}", hostname);
             return new File(s);
@@ -722,6 +738,7 @@ public class PropertyFile {
 
             if(size <= 0) size = 12;
         } catch(Exception e) {
+            Base.exception(e);
             size = 12;
         }
 
@@ -733,6 +750,7 @@ public class PropertyFile {
                 Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
                 font = baseFont.deriveFont(style, size);
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
                 font = new Font("Monospaced", Font.PLAIN, 12);
             }
@@ -799,6 +817,7 @@ public class PropertyFile {
                     fis.close();
                     properties = newProperties;
                 } catch(Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -998,6 +1017,7 @@ public class PropertyFile {
                 }
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
             return false;
         }
@@ -1045,6 +1065,7 @@ public class PropertyFile {
             br.close();
             return props;
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return null;

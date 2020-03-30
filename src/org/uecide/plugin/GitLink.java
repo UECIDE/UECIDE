@@ -96,6 +96,7 @@ public class GitLink extends Plugin {
             git = new Git(localRepo);
             hasRepo = true;
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
             hasRepo = false;
             localRepo = null;
@@ -134,6 +135,7 @@ public class GitLink extends Plugin {
                 return true;
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;
@@ -155,6 +157,7 @@ public class GitLink extends Plugin {
                 return true;
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;
@@ -176,6 +179,7 @@ public class GitLink extends Plugin {
                 return true;
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;
@@ -196,6 +200,7 @@ public class GitLink extends Plugin {
                 return true;
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;
@@ -219,6 +224,7 @@ public class GitLink extends Plugin {
                 return true;
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;
@@ -244,6 +250,7 @@ public class GitLink extends Plugin {
                 return true;
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;
@@ -268,6 +275,7 @@ public class GitLink extends Plugin {
                 return true;
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;
@@ -299,6 +307,7 @@ public class GitLink extends Plugin {
                 }
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return false;
@@ -332,6 +341,7 @@ public class GitLink extends Plugin {
             }
 
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -361,6 +371,7 @@ public class GitLink extends Plugin {
                 }
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -392,6 +403,7 @@ public class GitLink extends Plugin {
                 editor.warning("and open it manually.");
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -613,6 +625,7 @@ public class GitLink extends Plugin {
                             menu.show(pullButton, 0, size.height);
                         }
                     } catch (Exception ex) {
+                        Base.exception(ex);
                         Base.error(ex);
                     }
                 }
@@ -664,6 +677,7 @@ public class GitLink extends Plugin {
                             menu.show(pushButton, 0, size.height);
                         }
                     } catch (Exception ex) {
+                        Base.exception(ex);
                         Base.error(ex);
                     }
                 }
@@ -730,6 +744,7 @@ public class GitLink extends Plugin {
                                                 editor.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                                             }
                                         } catch (Exception aexa) {
+                                            Base.exception(aexa);
                                             Base.error(aexa);
                                         }
                                     }
@@ -765,6 +780,7 @@ public class GitLink extends Plugin {
                                                     editor.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                                                 }
                                             } catch (Exception aexa) {
+                                                Base.exception(aexa);
                                                 Base.error(aexa);
                                             }
                                         }
@@ -776,6 +792,7 @@ public class GitLink extends Plugin {
                             menu.show(branchButton, 0, size.height);
                         }
                     } catch (Exception ex) {
+                        Base.exception(ex);
                         Base.error(ex);
                     }
                 }
@@ -798,7 +815,7 @@ public class GitLink extends Plugin {
                 commitButton.setEnabled(hasRepo);
                 branchButton.setEnabled(hasRepo);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.exception(ex);
             }
             toolbar.add(new ToolbarSpacer()); // Separator();
         }
@@ -839,6 +856,7 @@ public class GitLink extends Plugin {
 
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return null;
@@ -892,6 +910,7 @@ public class GitLink extends Plugin {
                 }
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -924,6 +943,7 @@ public class GitLink extends Plugin {
                 keyPair.writePrivateKey(key.getAbsolutePath());
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
 
@@ -934,6 +954,7 @@ public class GitLink extends Plugin {
                     final JSch jsch = getJSch(hc, FS.DETECTED);
                     jsch.addIdentity(key.getAbsolutePath(), pub.getAbsolutePath(), null);
                 } catch (Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }

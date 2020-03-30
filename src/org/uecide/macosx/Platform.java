@@ -55,6 +55,7 @@ public class Platform extends org.uecide.Platform {
             // hacked that in, bit by bit, over the years
             UIManager.put("Component.visualMargin", new Insets(1, 1, 1, 1));
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -120,6 +121,7 @@ public class Platform extends org.uecide.Platform {
         try {
             return FileManager.findFolder(kUserDomain, kDomainLibraryFolderType);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -130,6 +132,7 @@ public class Platform extends org.uecide.Platform {
         try {
             return FileManager.findFolder(kUserDomain, kDocumentsFolderType);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -167,7 +170,7 @@ public class Platform extends org.uecide.Platform {
                 }
                 in.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.exception(e);
             }
 
             platformInfo.set("flavour", "osx");

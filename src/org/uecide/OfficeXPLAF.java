@@ -14,6 +14,7 @@ class OfficeXPLAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel("org.fife.plaf.OfficeXP.OfficeXPLookAndFeel");
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }

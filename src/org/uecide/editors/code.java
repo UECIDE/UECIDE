@@ -308,6 +308,7 @@ public class code extends JPanel implements EditorBase {
                         }
                     }
                 } catch(Exception ex) {
+                    Base.exception(ex);
                 }
 
                 return null;
@@ -326,7 +327,7 @@ public class code extends JPanel implements EditorBase {
                 try {
                     toggleComment();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         });
@@ -650,7 +651,7 @@ public class code extends JPanel implements EditorBase {
 
 
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.exception(e);
             }
         }
         return out.toArray(new Object[0]);
@@ -794,6 +795,7 @@ public class code extends JPanel implements EditorBase {
         try {
             return textArea.getText(s, e);
         } catch(Exception ex) {
+            Base.exception(ex);
             return "";
         }
     }
@@ -1020,7 +1022,7 @@ public class code extends JPanel implements EditorBase {
                     try {
                         openFindPanel();
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                 }
             });
@@ -1060,6 +1062,7 @@ public class code extends JPanel implements EditorBase {
             setModified(false);
             return true;
         } catch(Exception e) {
+            Base.exception(e);
             sketch.error(e);
         }
 
@@ -1079,6 +1082,7 @@ public class code extends JPanel implements EditorBase {
         try {
             textArea.setCaretPosition(cp);
         } catch (Exception e) {
+            Base.exception(e);
             textArea.setCaretPosition(0);
             scrollTo(0);
         }
@@ -1146,6 +1150,7 @@ public class code extends JPanel implements EditorBase {
         try {
             textArea.addLineHighlight(line-1, color);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -1203,6 +1208,7 @@ public class code extends JPanel implements EditorBase {
             try {
                 gutter.addLineTrackingIcon(f.getLine() - 1, i);
             } catch (BadLocationException ex) {
+                Base.exception(ex);
             }
         }
     }
@@ -1212,6 +1218,7 @@ public class code extends JPanel implements EditorBase {
         try {
             textArea.setCaretPosition(textArea.getLineStartOffset(line - 1));
         } catch(BadLocationException e) {
+            Base.exception(e);
         }
     }
 
@@ -1221,6 +1228,7 @@ public class code extends JPanel implements EditorBase {
         try {
             textArea.setCaretPosition(pos);
         } catch (Exception e) {
+            Base.exception(e);
         }
     }
 

@@ -73,6 +73,7 @@ public class vc_preproc implements VariableCommand {
             pw.print(data);
             pw.close();
         } catch (Exception e) {
+            Base.exception(e);
         }
 
         ctx.rollback();

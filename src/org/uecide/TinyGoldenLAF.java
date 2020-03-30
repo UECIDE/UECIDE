@@ -22,6 +22,7 @@ class TinyGoldenLAF extends LookAndFeel {
             }
 
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
 

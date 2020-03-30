@@ -185,7 +185,7 @@ public class Base {
         try {
             new Base(args);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 
@@ -215,6 +215,7 @@ public class Base {
             URI ui = sl.toURI();
             return new File(ui);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
 
@@ -402,7 +403,7 @@ public class Base {
             try {
                 prefsFile.delete();
             } catch (Exception e) {
-                e.printStackTrace();
+                Base.exception(e);
                 System.exit(10);
             }
             System.out.println(">>> All preferences reset to default! <<<");
@@ -438,7 +439,10 @@ public class Base {
                 PluginManager pm = new PluginManager();
                 APT apt = pm.getApt();
                 apt.update();
-            } catch (Exception ex) { error(ex); }
+            } catch (Exception ex) { 
+                Base.exception(ex);
+                error(ex); 
+            }
             doExit = true;
         }
 
@@ -451,6 +455,7 @@ public class Base {
                     apt.upgradePackage(p);
                 }
             } catch (Exception e) {
+                Base.exception(e);
                 error(e);
             }
             doExit = true;
@@ -474,7 +479,10 @@ public class Base {
                         System.out.println(i18n.string("msg.done"));
                     }
                 }
-            } catch (Exception ex) { error(ex); }
+            } catch (Exception ex) { 
+                Base.exception(ex);
+                error(ex); 
+            }
             doExit = true;
         }
 
@@ -489,7 +497,10 @@ public class Base {
                         apt.uninstallPackage(p, true);
                     }
                 }
-            } catch (Exception ex) { error(ex); }
+            } catch (Exception ex) { 
+                Base.exception(ex);
+                error(ex); 
+            }
             doExit = true;
         }
             
@@ -511,7 +522,10 @@ public class Base {
                     System.out.println(i18n.string("msg.uninstalling", p.getName()));
                     apt.uninstallPackage(p, cli.isSet("force"));
                 }
-            } catch (Exception ex) { error(ex); }
+            } catch (Exception ex) { 
+                Base.exception(ex);
+                error(ex); 
+            }
             doExit = true;
         }
 
@@ -556,7 +570,10 @@ public class Base {
                     System.out.println("  " + p.getDescriptionLineOne());
 
                 }
-            } catch (Exception ex) { error(ex); }
+            } catch (Exception ex) { 
+                Base.exception(ex);
+                error(ex); 
+            }
             doExit = true;
         }
                 
@@ -605,7 +622,10 @@ public class Base {
                     }
 
                 }
-            } catch (Exception ex) { error(ex); }
+            } catch (Exception ex) { 
+                Base.exception(ex);
+                error(ex); 
+            }
             doExit = true;
         }
 
@@ -764,6 +784,7 @@ public class Base {
                 try {
                     s = new Sketch(path);
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                     return;
                 }
@@ -830,6 +851,7 @@ public class Base {
                     File file = new File(argv[i]);
                     path = file.getCanonicalPath();
                 } catch(IOException e) {
+                    Base.exception(e);
                     error(e);
                 }
             }
@@ -844,6 +866,7 @@ public class Base {
                 try {
                     opened = doOpenThings(p);
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                     return;
                 }
@@ -858,6 +881,7 @@ public class Base {
                 try {
                     opened = doOpenThings(lastFile);
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                     return;
                 }
@@ -869,6 +893,7 @@ public class Base {
             try {
                 handleNew();
             } catch (IOException ex) {
+                Base.exception(ex);
                 error(ex);
                 return;
             }
@@ -917,7 +942,11 @@ public class Base {
                         pm.openWindow(Editor.editorList.get(0), true);
                     }
                 }
-            } catch (Exception ex) { error(ex); }
+            } catch (Exception ex) { 
+                Base.exception(ex);
+                error(ex); 
+            }
+
         }
 
         if(isTimeToCheckVersion()) {
@@ -976,6 +1005,7 @@ public class Base {
             }
             Base.addURL(f.toURI().toURL());
         } catch (Exception e) {
+            Base.exception(e);
             error(e);
         }
     }
@@ -1023,7 +1053,7 @@ System.err.println("Loading class " + className);
             }
 */
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Base.exception(ex);
         }
     }
 
@@ -1119,6 +1149,7 @@ System.err.println("Loading class " + className);
 
 //            platform = (Platform) platformClass.newInstance();
         } catch(Exception e) {
+            Base.exception(e);
             Base.showError("Problem Setting the Platform",
                            "An unknown error occurred while trying to load\n" +
                            "platform-specific code for your machine.", e);
@@ -1150,6 +1181,7 @@ System.err.println("Loading class " + className);
                 try {
                     hits = Integer.parseInt(mcuEntry[1]);
                 } catch (Exception e) {
+                    Base.exception(e);
                 }
 
                 File f = new File(mcuEntry[0]);
@@ -1186,6 +1218,7 @@ System.err.println("Loading class " + className);
         try {
             hits = MCUList.get(f);
         } catch (Exception e) {
+            Base.exception(e);
         }
         hits++;
         MCUList.put(f, hits);
@@ -1552,6 +1585,7 @@ System.err.println("Loading class " + className);
             return folder;
 
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
 
@@ -1604,7 +1638,10 @@ System.err.println("Loading class " + className);
 
         try {
             sketchbookFolder = platform.getDefaultSketchbookFolder();
-        } catch(Exception e) { return null; }
+        } catch(Exception e) { 
+            Base.exception(e);
+            return null; 
+        }
 
         // create the folder if it doesn't exist already
         if(!sketchbookFolder.exists()) {
@@ -1632,6 +1669,7 @@ System.err.println("Loading class " + className);
             platform.openFolder(file);
 
         } catch(Exception e) {
+            Base.exception(e);
             showWarning(
                 i18n.string("err.badfolder.title"),
                 i18n.string("err.badfolder.body", file),
@@ -1705,6 +1743,7 @@ System.err.println("Loading class " + className);
         try {
             frame.setIconImage(loadImageFromResource("icons/icon.png"));
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
     }
@@ -1816,6 +1855,7 @@ System.err.println("Loading class " + className);
         try {
             Files.copy(sourceFile.toPath(), targetFile.toPath(), REPLACE_EXISTING);
         } catch (IOException e) {
+            Base.exception(e);
             error(e);
         }
     }
@@ -1852,6 +1892,7 @@ System.err.println("Loading class " + className);
                 }
             }
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
     }
@@ -1909,7 +1950,7 @@ System.err.println("Loading class " + className);
                     Class cl = Class.forName(pluginClass);
                     plugins.put(cl.getName(), cl);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Base.exception(e);
                 }
             }
         }
@@ -1933,6 +1974,7 @@ System.err.println("Loading class " + className);
 
             return new Version(manifestContents.getValue("Version"));
         } catch (IOException ex) {
+            Base.exception(ex);
         }
         return new Version(null);
     }
@@ -1968,6 +2010,7 @@ System.err.println("Loading class " + className);
             }
             zipFile.close();
         } catch(IOException e) {
+            Base.exception(e);
             error(e);
         }
 
@@ -2008,7 +2051,9 @@ System.err.println("Loading class " + className);
                     Process p = Runtime.getRuntime().exec(new String[] { "gnome-open" });
                     /*int result =*/ p.waitFor();
                     openLauncher = "gnome-open";
-                } catch(Exception e) { }
+                } catch(Exception e) { 
+                    Base.exception(e);
+                }
             }
 
             if(openLauncher == null) {
@@ -2017,7 +2062,9 @@ System.err.println("Loading class " + className);
                     Process p = Runtime.getRuntime().exec(new String[] { "kde-open" });
                     /*int result =*/ p.waitFor();
                     openLauncher = "kde-open";
-                } catch(Exception e) { }
+                } catch(Exception e) { 
+                    Base.exception(e);
+                }
             }
 
             if(openLauncher == null) {
@@ -2046,6 +2093,7 @@ System.err.println("Loading class " + className);
         try {
             return Runtime.getRuntime().exec(argv);
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
             return null;
         }
@@ -2128,12 +2176,11 @@ System.err.println("Loading class " + className);
     }
 
     static public void broken(Thread t, Throwable e) {
+        Base.exception(e);
         if (headless) {
-            e.printStackTrace();
             return;
         }
         try {
-            e.printStackTrace();
             if(e.getCause() == null) {
                 return;
             }
@@ -2155,7 +2202,7 @@ System.err.println("Loading class " + className);
             Debug.message("******************** EXCEPTION ********************");
             Debug.message("");
         } catch(Exception ee) {
-            ee.printStackTrace();
+            Base.exception(ee);
         }
     }
 
@@ -2205,7 +2252,7 @@ System.err.println("Loading class " + className);
             Debug.message("******************** EXCEPTION ********************");
             Debug.message("");
         } catch(Exception ee) {
-            ee.printStackTrace();
+            Base.exception(ee);
         }
 
         StringWriter sw = new StringWriter();
@@ -2251,9 +2298,9 @@ System.err.println("Loading class " + className);
                 protected void done() {
                     Editor.unlockAll();
                     Editor.bulletAll(i18n.string("msg.loading.updating"));
-                    try { Editor.updateAllEditors(); } catch (Exception e) {}
-                    try { Editor.selectAllEditorBoards(); } catch (Exception e) {}
-                    try { Editor.refreshAllEditors(); } catch (Exception e) {}
+                    try { Editor.updateAllEditors(); } catch (Exception e) { Base.exception(e); }
+                    try { Editor.selectAllEditorBoards(); } catch (Exception e) { Base.exception(e); }
+                    try { Editor.refreshAllEditors(); } catch (Exception e) { Base.exception(e); }
                     Editor.bulletAll(i18n.string("msg.done"));
                 }
             };
@@ -2261,6 +2308,7 @@ System.err.println("Loading class " + className);
 
             //Editor.unlockAll();
         } catch (Exception e) {
+            Base.exception(e);
         }
     }
 
@@ -2293,6 +2341,7 @@ System.err.println("Loading class " + className);
             Editor.updateAllEditors();
             Editor.selectAllEditorProgrammers();
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
     }
@@ -2304,6 +2353,7 @@ System.err.println("Loading class " + className);
             Editor.updateAllEditors();
             Editor.selectAllEditorBoards();
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
     }
@@ -2331,6 +2381,7 @@ System.err.println("Loading class " + className);
             BufferedImage im = ImageIO.read(loc);
             return im;
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
 
@@ -2353,6 +2404,7 @@ System.err.println("Loading class " + className);
             from.close();
             to.close();
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
             return false;
         }
@@ -2373,6 +2425,7 @@ System.err.println("Loading class " + className);
             return new Version(data);
 */
         } catch(Exception e) {
+            Base.exception(e);
             // Unable to get new version details - return nothing.
             // Also switch to offline mode since there was an error.
             onlineMode = false;
@@ -2468,7 +2521,9 @@ System.err.println("Loading class " + className);
             reader.close();
             return sb.toString();
         } catch (FileNotFoundException ex) {
+            Base.exception(ex);
         } catch (IOException ex) {
+            Base.exception(ex);
         }
         return "";
     }
@@ -2527,6 +2582,7 @@ System.err.println("Loading class " + className);
                 }
                 preferencesTree.mergeData(prefs);
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
 
@@ -2579,7 +2635,7 @@ System.err.println("Loading class " + className);
             ret = inv.invokeFunction(function, args);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
 
         return ret;
@@ -2606,6 +2662,7 @@ System.err.println("Loading class " + className);
             reader.close();
             from.close();
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
         return out;
@@ -2694,6 +2751,7 @@ System.err.println("Loading class " + className);
 //            reqapt.save();
 
         } catch (Exception e) {
+            Base.exception(e);
             error(e);
         }
 
@@ -2849,7 +2907,7 @@ System.err.println("Loading class " + className);
             else if (lafname.equals("material")) { new MaterialLAF().applyLAF(); }
             else if (lafname.equals("arduino")) { new ArduinoLAF().applyLAF(); }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Base.exception(ex);
         }
     }
 
@@ -2914,6 +2972,7 @@ System.err.println("Loading class " + className);
         try {
             file.delete();
         } catch (Exception e) {
+            Base.exception(e);
         }
 
         // If it deleted then return
@@ -3059,7 +3118,7 @@ System.err.println("Loading class " + className);
             scl.set(null, urlClassLoader);
             Thread.currentThread().setContextClassLoader(urlClassLoader);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Base.exception(ex);
         }
     }
 
@@ -3067,6 +3126,12 @@ System.err.println("Loading class " + className);
         int scale = Preferences.getInteger("theme.scale");
         Properties props = System.getProperties();
         props.setProperty("sun.java2d.uiScale", String.format("%d", scale));
+    }
+
+    public static void exception(Throwable e) {
+        if (cli.isSet("exceptions")) {
+            e.printStackTrace();
+        }
     }
 }
 

@@ -128,7 +128,7 @@ public class UObject implements Comparable {
 
                 _valid = true;
             } catch(Exception e) {
-                e.printStackTrace();
+                Base.exception(e);
             }
         }
     }

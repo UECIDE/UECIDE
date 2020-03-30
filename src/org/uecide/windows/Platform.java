@@ -90,6 +90,7 @@ public class Platform extends org.uecide.Platform {
 
             return localDataFolder;
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -104,6 +105,7 @@ public class Platform extends org.uecide.Platform {
 
             return new File(personalPath, "UECIDE");
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -121,6 +123,7 @@ public class Platform extends org.uecide.Platform {
 
             Runtime.getRuntime().exec("explorer \"" + folder + "\"");
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }

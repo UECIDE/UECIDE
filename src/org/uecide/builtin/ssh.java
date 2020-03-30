@@ -86,6 +86,7 @@ public class ssh  implements BuiltinCommand {
             try {
                 session.connect();
             } catch(JSchException e) {
+                Base.exception(e);
                 if(e.getMessage().equals("Auth fail")) {
                     password = null;
                     Preferences.unset("ssh." + host + "." + user);
@@ -98,6 +99,7 @@ public class ssh  implements BuiltinCommand {
                     return false;
                 }
             } catch(Exception e) {
+                Base.exception(e); 
                 ctx.error(e);
                 return false;
             }
@@ -144,12 +146,13 @@ public class ssh  implements BuiltinCommand {
 
                 try {
                     Thread.sleep(1000);
-                } catch(Exception ee) {}
+                } catch(Exception ee) { Base.exception(ee); }
             }
 
             channel.disconnect();
             session.disconnect();
         } catch(Exception e) {
+            Base.exception(e);
             ctx.error(e);
         }
 

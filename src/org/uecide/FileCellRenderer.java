@@ -66,7 +66,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                             text.setIcon(IconManager.getIcon(16, "tree.folder-closed"));
                         }
                     } catch (Exception ex) {
-//                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                 } else {
                     try {
@@ -81,8 +81,9 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                         }
                         text.setIcon((ImageIcon)oicon);
                     } catch(AbstractMethodError e) {
+                        Base.exception(e);
                     } catch(Exception e) {
-                        e.printStackTrace();
+                        Base.exception(e);
                     }
 
                 }
@@ -105,7 +106,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                         text.setIcon(IconManager.getIcon(16, "tree.info"));
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
 
                 return text;
@@ -118,7 +119,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                 try {
                     text.setIcon(IconManager.getIcon(16, "tree.todo"));
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
                 return text;
             }
@@ -129,7 +130,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                 try {
                     text.setIcon(IconManager.getIcon(16, "tree.function"));
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
                 return text;
             }
@@ -145,7 +146,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                     try {
                         text.setIcon(IconManager.getIcon(16, "tree.lib-good"));
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                     return text;
                 } else {
@@ -157,7 +158,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                                 text.setIcon(IconManager.getIcon(16, "tree.lib-bad"));
                             }
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            Base.exception(ex);
                         }
 
                         text.setText("");
@@ -178,7 +179,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                         try {
                             text.setIcon(IconManager.getIcon(16, "tree.lib-bad"));
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            Base.exception(ex);
                         }
                         text.setText(lib.getName());
                         return text;
@@ -195,7 +196,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                     try {
                         icon = IconManager.getIcon(16, "apps.uecide");
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                 }
                 text.setIcon(icon);
@@ -210,7 +211,7 @@ public class FileCellRenderer extends DefaultTreeCellRenderer {
                     text.setIcon(IconManager.getIcon(16, "tree.folder-closed"));
                 }
             } catch (Exception ex) {
-//                ex.printStackTrace();
+                Base.exception(ex);
             }
         }
         return text;

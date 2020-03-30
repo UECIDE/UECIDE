@@ -31,6 +31,7 @@
 package org.uecide.debug;
 
 import java.io.*;
+import org.uecide.Base;
 
 
 /**
@@ -91,24 +92,12 @@ public class MessageSiphon implements Runnable {
             thread = null;
 
         } catch(NullPointerException npe) {
+            Base.exception(npe);
             // Fairly common exception during shutdown
             thread = null;
 
         } catch(Exception e) {
-            // On Linux and sometimes on Mac OS X, a "bad file descriptor"
-            // message comes up when closing an applet that's run externally.
-            // That message just gets supressed here..
-            String mess = e.getMessage();
-
-            if((mess != null) &&
-                    (mess.indexOf("Bad file descriptor") != -1)) {
-                //if (e.getMessage().indexOf("Bad file descriptor") == -1) {
-                //System.err.println("MessageSiphon err " + e);
-                //e.printStackTrace();
-            } else {
-                e.printStackTrace();
-            }
-
+            Base.exception(e);
             thread = null;
         }
     }

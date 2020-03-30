@@ -177,6 +177,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
                 String text = craftPage(page);
                 setText(text);
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
         } else {
@@ -187,6 +188,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
         try {
             setCaretPosition(0);
         } catch (Exception e) {
+            Base.exception(e);
         }
     }
 
@@ -194,7 +196,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
         try {
             editorKit.insertHTML(browserDoc, browserDoc.getLength(), s, 0, 0, null);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
         setCaretPosition(0);
     }
@@ -238,6 +240,7 @@ public class Browser extends JTextPane implements HyperlinkListener {
         try {
             browserDoc.remove(0, browserDoc.getLength());
         } catch(BadLocationException e) {
+            Base.exception(e);
         }
     }
 }

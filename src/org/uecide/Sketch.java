@@ -546,6 +546,7 @@ public class Sketch {
                 editor.openOrSelectFile(code);
             }
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -586,6 +587,7 @@ public class Sketch {
         try {
             f.createNewFile();
         } catch(Exception e) {
+            Base.exception(e);
         }
 
         return f;
@@ -845,6 +847,7 @@ public class Sketch {
                 c.loadArduBlockFile(f);
                 return org.uecide.editors.ardublock.generateCode(c, editor);
             } catch (Exception e) {
+                Base.exception(e);
                 error(e);
                 return "";
             }
@@ -866,6 +869,7 @@ public class Sketch {
 
             br.close();
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
         return sb.toString();
@@ -880,6 +884,7 @@ public class Sketch {
             out.print(getFileContent(file));
             out.close();
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
     }
@@ -1185,6 +1190,7 @@ public class Sketch {
                     }
                 }
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
 
@@ -1456,6 +1462,7 @@ public class Sketch {
                 bh.println("#endif");
                 bh.close();
             } catch (Exception ex) {
+                Base.exception(ex);
                 error(ex);
                 return false;
             }
@@ -1511,6 +1518,7 @@ public class Sketch {
             pw.println("#endif");
             pw.close();
         } catch (Exception e) {
+            Base.exception(e);
             error(e);
             return false;
         }
@@ -1551,6 +1559,7 @@ public class Sketch {
 
             pw.close();
         } catch (Exception e) {
+            Base.exception(e);
             error(e);
             return false;
         }
@@ -1579,6 +1588,7 @@ public class Sketch {
 
                         pw.close();
                     } catch (Exception e) {
+                        Base.exception(e);
                         error(e);
                         return false;
                     }
@@ -1727,6 +1737,7 @@ public class Sketch {
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error(e);
             return false;
         }
@@ -1758,6 +1769,7 @@ public class Sketch {
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error(e);
             return false;
         }
@@ -1798,6 +1810,7 @@ public class Sketch {
                 return false;
             }
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
             setCompilingProgress(0);
             return false;
@@ -1808,6 +1821,7 @@ public class Sketch {
             setCompilingProgress(0);
             return done;
         } catch (IOException ex) {
+            Base.exception(ex);
             error(ex);
             setCompilingProgress(0);
             return false;
@@ -2159,6 +2173,7 @@ public class Sketch {
                 canWrite = true;
             }
         } catch(Exception e) {
+            Base.exception(e);
             return true;
         }
 
@@ -2453,7 +2468,10 @@ public class Sketch {
                     }
                 }
             }
-        } catch (Exception ex) { error(ex); }
+        } catch (Exception ex) { 
+            Base.exception(ex);
+            error(ex); 
+        }
 
         if(doPrePurge) {
             doPrePurge = false;
@@ -2588,6 +2606,7 @@ public class Sketch {
                     }
                 }
             } catch(Exception e) {
+                Base.exception(e);
                 error(e);
             }
         }
@@ -2613,6 +2632,7 @@ public class Sketch {
                     editor.updateFilesTree();
                 }
             } catch(Exception e) {
+                Base.exception(e);
                 error(e);
             }
         }
@@ -2675,6 +2695,7 @@ public class Sketch {
                         }
                     }
                 } catch (Exception e) {
+                    Base.exception(e);
                 }
             }
 
@@ -2739,6 +2760,7 @@ public class Sketch {
                             break;
                         }
                     } catch (Exception e) {
+                        Base.exception(e);
                         error(e);
                     }
                 }
@@ -2752,6 +2774,7 @@ public class Sketch {
             try {
                 Thread.sleep(10);
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
 
@@ -2760,6 +2783,7 @@ public class Sketch {
                 t.join();
                 if (t.compiled == false) ok = false;
             } catch (Exception e) {
+                Base.exception(e);
                 error(e);
             }
         }
@@ -3184,6 +3208,7 @@ public class Sketch {
             pw.close();
             return out;
         } catch (Exception e) {
+            Base.exception(e);
             error(e);
         }
         return null;
@@ -3485,6 +3510,7 @@ public class Sketch {
                         float perc = Float.parseFloat(ps);
                         setCompilingProgress((int)(perc * pctMultiply));
                     } catch (Exception e) {
+                        Base.exception(e);
                         Base.error(e);
                     }
                 }
@@ -3568,6 +3594,7 @@ public class Sketch {
                         setLineComment(errorFile, errorLineNumber, eMat.group(eMessage));
                     }
                 } catch(Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -3596,6 +3623,7 @@ public class Sketch {
                         setLineComment(warningFile, warningLineNumber, wMat.group(wMessage));
                     }
                 } catch(Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -3798,6 +3826,7 @@ public class Sketch {
                     setCompilingProgress((int)(perc * percentageMultiplier));
                     return;
                 } catch (Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -3857,6 +3886,7 @@ public class Sketch {
                     setCompilingProgress((int)(perc * percentageMultiplier));
                     return;
                 } catch (Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -4274,6 +4304,7 @@ public class Sketch {
             sar.flush();
             sar.close();
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return false;
         }
@@ -4519,6 +4550,7 @@ public class Sketch {
             }
             out.close();
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -4575,6 +4607,7 @@ public class Sketch {
                     }
 
                 } catch (Exception execpt) {
+                    Base.exception(execpt);
                 }
             } else {
                 ctx.parsedMessage("{\\bullet}{\\error Error at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
@@ -4616,6 +4649,7 @@ public class Sketch {
                     }
 
                 } catch (Exception execpt) {
+                    Base.exception(execpt);
                 }
             } else {
                 ctx.parsedMessage("{\\bullet}{\\warning Warning at line " + errorLineNumber + " in file " + errorFile.getName() + ":}\n");
@@ -4658,6 +4692,7 @@ public class Sketch {
             in.close();
             data = contents.toString().split("\n");
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }

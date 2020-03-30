@@ -109,6 +109,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
             port.exists();
             havePortExists = true;
         } catch (NoSuchMethodError e) {
+            Base.exception(e);
             havePortExists = false;
         }
 
@@ -122,6 +123,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                         try {
                             Thread.sleep(100);
                         } catch (Exception e) {
+                            Base.exception(e);
                         }
                         if (!port.exists()) {
                             if (portIsPresent) {
@@ -165,6 +167,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                     try {
                         saveSession();
                     } catch (Exception ex) {
+                        Base.exception(ex);
                         Base.error(ex);
                     }
                 }
@@ -202,7 +205,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
 
             toolbar.add(as);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Base.exception(ex);
         }
 
         win.add(toolbar, BorderLayout.NORTH);
@@ -242,6 +245,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                     try {
                         i = Integer.parseInt(e.getActionCommand());
                     } catch (Exception ex) {
+                        Base.exception(ex);
                     }
             
                     if ((e.getModifiers() & InputEvent.CTRL_MASK) != 0) {
@@ -364,6 +368,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                     lineEntryBox.setText("");
                     lineEntryBox.requestFocusInWindow();
                 } catch (Exception ex) {
+                    Base.exception(ex);
                     ctx.error(ex);
                 }
             }
@@ -433,6 +438,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                 try {
                     saveSession();
                 } catch (Exception exc) {
+                    Base.exception(exc);
                     Base.error(exc);
                 }
             }
@@ -520,6 +526,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
             }
             port.setSpeed(baudRate);
         } catch(Exception e) {
+            Base.exception(e);
             running = false;
             ctx.error("Error: Unable to open serial port:");
             ctx.error(e);
@@ -581,7 +588,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                     }
                 }));
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.exception(ex);
             }
         }
     }
@@ -722,6 +729,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
             try {
                 Thread.sleep(10);
             } catch (Exception ex) {
+                Base.exception(ex);
             }
             tries--;
         }
@@ -747,6 +755,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
                 captureFile = new FileOutputStream(f);
                 tty.captureToFile(captureFile);
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
     }
@@ -756,6 +765,7 @@ public class SerialTerminal extends Plugin //implements MessageConsumer
             tty.endCapture();
             captureFile.close();
         } catch (Exception e) {
+            Base.exception(e);
         }
     }
 

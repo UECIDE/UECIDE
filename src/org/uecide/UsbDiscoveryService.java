@@ -58,6 +58,7 @@ public class UsbDiscoveryService extends Service {
         try {
             services = UsbHostManager.getUsbServices();
         } catch (UsbException ex) {
+            Base.exception(ex);
             stop();
             return;
         }
@@ -69,6 +70,7 @@ public class UsbDiscoveryService extends Service {
         try {
             rootHub = services.getRootUsbHub();
         } catch (UsbException ex) {
+            Base.exception(ex);
             stop();
             return;
         }
@@ -122,6 +124,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return devs;
@@ -137,6 +140,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception exex) {
+            Base.exception(exex);
             Base.error(exex);
         }
     }
@@ -161,6 +165,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception exex) {
+            Base.exception(exex);
             Base.error(exex);
         }
     }
@@ -191,6 +196,7 @@ public class UsbDiscoveryService extends Service {
                     bvid = (short)Integer.parseInt(bvids, 16);
                     bpid = (short)Integer.parseInt(bpids, 16);
                 } catch (Exception pie) {
+                    Base.exception(pie);
                     continue;
                 }
                 if (vid == bvid && pid == bpid) {
@@ -199,6 +205,7 @@ public class UsbDiscoveryService extends Service {
                 }
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return null;

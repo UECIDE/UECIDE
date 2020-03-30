@@ -134,6 +134,7 @@ public class LibraryLocationList extends JPanel {
                 try {
                     table.setRowSelectionInterval(r, r);
                 } catch (Exception ex) {
+                    Base.exception(ex);
                 }
             }
         });

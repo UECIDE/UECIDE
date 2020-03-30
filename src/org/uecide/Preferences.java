@@ -151,6 +151,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
             if(size <= 0) size = 12;
         } catch(Exception e) {
+            Base.exception(e);
             size = 12;
         }
 
@@ -273,7 +274,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                 try {
                     applyFrame();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         });
@@ -289,7 +290,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                 try {
                     applyFrame();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
                 disposeFrame();
             }
@@ -318,6 +319,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                     Base.preferencesTree.mergeData(pf);
                 }
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
 
@@ -329,6 +331,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                     Base.preferencesTree.mergeData(pf);
                 }
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
 
@@ -580,6 +583,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
             try {
                 sample.setBackground(Color.decode(f.getText()));
             } catch (Exception e) {
+                Base.exception(e);
             }
 
             f.addActionListener(new ActionListener() {
@@ -588,6 +592,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                     try {
                         sample.setBackground(Color.decode(f.getText()));
                     } catch (Exception ex) {
+                        Base.exception(ex);
                     }
                 }
             });
@@ -598,6 +603,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                     try {
                         sample.setBackground(Color.decode(f.getText()));
                     } catch (Exception ex) {
+                        Base.exception(ex);
                     }
                 }
 
@@ -623,6 +629,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
                     try {
                         orig = Color.decode(f.getText());
                     } catch (Exception ex) {
+                        Base.exception(ex);
                     }
                     Color clr = fc.showDialog(Preferences.this, "Select Color", orig);
 
@@ -718,6 +725,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
             try {
                 ival = Integer.parseInt(value);
             } catch (Exception ee) {
+                Base.exception(ee);
                 ival = vmin;
             }
                 
@@ -959,7 +967,9 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         if((s != null) && (s.indexOf("#") == 0)) {
             try {
                 parsed = new Color(Integer.parseInt(s.substring(1), 16));
-            } catch(Exception e) { }
+            } catch(Exception e) { 
+                Base.exception(e);
+            }
         }
 
         return parsed;
@@ -1063,6 +1073,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         try {
             val = Integer.parseInt(data);
         } catch (Exception e) {
+            Base.exception(e);
         }
         return val;
     }
@@ -1076,6 +1087,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         try {
             val = Float.parseFloat(data);
         } catch (Exception e) {
+            Base.exception(e);
         }
         return val;
     }

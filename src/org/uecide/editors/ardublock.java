@@ -50,7 +50,7 @@ public class ardublock extends JPanel implements EditorBase {
             context.loadArduBlockFile(file);
             context.setWorkspaceChanged(false);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Base.exception(ex);
         }
     }
     
@@ -76,7 +76,7 @@ public class ardublock extends JPanel implements EditorBase {
             context.setWorkspaceChanged(false);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
         return false;
     }
@@ -95,7 +95,7 @@ public class ardublock extends JPanel implements EditorBase {
             context.loadArduBlockFile(file);
             context.setWorkspaceChanged(false);
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 
@@ -205,6 +205,7 @@ public class ardublock extends JPanel implements EditorBase {
 					try {
 						translator.addFunctionName(block.getBlockID(), functionName);
 					} catch (SubroutineNameDuplicatedException e1) {
+                        Base.exception(e1);
 						context.highlightBlock(renderableBlock);
 						//find the second subroutine whose name is defined, and make it highlight. though it cannot happen due to constraint of OpenBlocks -_-
                         if (editor != null) editor.error(e1);
@@ -217,6 +218,7 @@ public class ardublock extends JPanel implements EditorBase {
 					try {
 						translator.addFunctionName(block.getBlockID(), functionName);
 					} catch (SubroutineNameDuplicatedException e1) {
+                        Base.exception(e1);
 						context.highlightBlock(renderableBlock);
 						//find the second subroutine whose name is defined, and make it highlight. though it cannot happen due to constraint of OpenBlocks -_-
                         if (editor != null) editor.error(e1);
@@ -279,7 +281,7 @@ public class ardublock extends JPanel implements EditorBase {
 			translator.beforeGenerateHeader();
 			code.insert(0, translator.genreateHeaderCommand());
 		} catch (SocketNullException e1) {
-			e1.printStackTrace();
+            Base.exception(e1);
 			success = false;
 			Long blockId = e1.getBlockId();
 			Iterable<RenderableBlock> blocks = workspace.getRenderableBlocks();
@@ -292,7 +294,7 @@ public class ardublock extends JPanel implements EditorBase {
 			}
             if (editor != null) editor.error(e1);
 		} catch (BlockException e2) {
-			e2.printStackTrace();
+            Base.exception(e2);
 			success = false;
 			Long blockId = e2.getBlockId();
 			Iterable<RenderableBlock> blocks = workspace.getRenderableBlocks();
@@ -305,7 +307,7 @@ public class ardublock extends JPanel implements EditorBase {
 			}
             if (editor != null) editor.error(e2);
 		} catch (SubroutineNotDeclaredException e3) {
-			e3.printStackTrace();
+            Base.exception(e3);
 			success = false;
 			Long blockId = e3.getBlockId();
 			Iterable<RenderableBlock> blocks = workspace.getRenderableBlocks();

@@ -405,9 +405,10 @@ public class InteractiveCLI {
                 }
             }
         } catch (EndOfFileException ex) {
+            Base.exception(ex);
             System.out.println("Byebye.");
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
         Preferences.save();
     }
@@ -448,7 +449,7 @@ public class InteractiveCLI {
                     p.waitFor();
                     _loadedSketch.rescanFileTree();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Base.exception(e);
                 }
                 return;
             }
@@ -468,7 +469,7 @@ public class InteractiveCLI {
             p.waitFor();
             _loadedSketch.rescanFileTree();
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 

@@ -13,6 +13,7 @@ class VisualStudio2005LAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel("org.fife.plaf.VisualStudio2005.VisualStudio2005LookAndFeel");
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }

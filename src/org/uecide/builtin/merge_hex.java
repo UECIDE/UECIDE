@@ -49,7 +49,7 @@ public class merge_hex implements BuiltinCommand {
             hex.saveFile(new File(arg[0]));
 
             return true;
-        } catch (Exception ex) { ctx.error(ex); }
+        } catch (Exception ex) { Base.exception(ex); ctx.error(ex); }
         return false;
     }
 

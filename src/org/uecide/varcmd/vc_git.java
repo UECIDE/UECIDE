@@ -90,7 +90,7 @@ public class vc_git implements VariableCommand {
             }
             return "ERR:NOCOMMIT";
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
         return "ERR:EXCEPT";
     }
@@ -101,7 +101,7 @@ public class vc_git implements VariableCommand {
             String desc = cmd.call();
             return desc;
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
             return "ERR:NOTAG";
         }
     }
@@ -126,6 +126,7 @@ public class vc_git implements VariableCommand {
             localRepo = new FileRepository(dotGit);
             git = new Git(localRepo);
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
             localRepo = null;
             repoRoot = null;

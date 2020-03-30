@@ -29,6 +29,7 @@ public class PackageAnalyser extends JDialog {
                 try {
                     analysePackages();
                 } catch (Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -114,6 +115,7 @@ public class PackageAnalyser extends JDialog {
                     continue;
                 }
             } catch (Exception ignored) {
+                Base.exception(ignored);
             }
         }
 

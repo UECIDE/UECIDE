@@ -90,6 +90,7 @@ public class ExampleBrowser extends JDialog {
                     try {
                         editor.loadSketch(selectedExample.getFolder());
                     } catch (IOException ex) {
+                        Base.exception(ex);
                         editor.error(ex);
                     }
                     closeBrowser();
@@ -153,7 +154,7 @@ public class ExampleBrowser extends JDialog {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 

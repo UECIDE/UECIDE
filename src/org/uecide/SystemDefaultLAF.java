@@ -13,6 +13,7 @@ class SystemDefaultLAF extends LookAndFeel {
             }
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }

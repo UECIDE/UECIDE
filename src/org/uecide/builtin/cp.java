@@ -64,6 +64,7 @@ public class cp implements BuiltinCommand {
         try {
             Files.copy(from.toPath(), to.toPath(), REPLACE_EXISTING);
         } catch (IOException e) {
+            Base.exception(e);
             ctx.error(e);
             return false;
         }

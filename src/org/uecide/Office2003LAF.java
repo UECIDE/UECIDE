@@ -14,6 +14,7 @@ class Office2003LAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel("org.fife.plaf.Office2003.Office2003LookAndFeel");
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }

@@ -116,6 +116,7 @@ public class Registry {
         try {
             return(new String(buf, 0, buf.length - 2, "UTF-16LE"));
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -167,6 +168,7 @@ public class Registry {
 
             return(ret);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -272,6 +274,7 @@ public class Registry {
 
             return(ret);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return false;
         }
@@ -303,6 +306,7 @@ public class Registry {
 
             return(ret);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return false;
         }
@@ -548,6 +552,7 @@ public class Registry {
 
             return(values);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }

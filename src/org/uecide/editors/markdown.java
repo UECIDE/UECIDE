@@ -224,6 +224,7 @@ public class markdown extends JPanel implements EditorBase {
         try {
             return textArea.getText(s, e);
         } catch(Exception ex) {
+            Base.exception(ex);
             return "";
         }
     }
@@ -364,6 +365,7 @@ public class markdown extends JPanel implements EditorBase {
             setModified(false);
             return true;
         } catch(Exception e) {
+            Base.exception(e);
             sketch.error(e);
         }
 
@@ -383,6 +385,7 @@ public class markdown extends JPanel implements EditorBase {
         try {
             textArea.setCaretPosition(cp);
         } catch (Exception e) {
+            Base.exception(e);
             textArea.setCaretPosition(0);
             scrollTo(0);
         }
@@ -450,6 +453,7 @@ public class markdown extends JPanel implements EditorBase {
         try {
             textArea.addLineHighlight(line-1, color);
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -478,6 +482,7 @@ public class markdown extends JPanel implements EditorBase {
         try {
             textArea.setCaretPosition(textArea.getLineStartOffset(line - 1));
         } catch(BadLocationException e) {
+            Base.exception(e);
         }
     }
 
@@ -487,6 +492,7 @@ public class markdown extends JPanel implements EditorBase {
         try {
             textArea.setCaretPosition(pos);
         } catch (Exception e) {
+            Base.exception(e);
         }
     }
 

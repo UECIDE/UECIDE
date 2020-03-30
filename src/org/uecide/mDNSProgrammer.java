@@ -77,7 +77,7 @@ public class mDNSProgrammer extends Programmer {
         try {
             e.getSketch().setBoard(_board);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Base.exception(ex);
         }
     }
 }

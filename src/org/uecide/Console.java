@@ -358,7 +358,7 @@ public class Console extends JTextPane implements ClipboardOwner {
             document.insertAll();
             setCaretPosition(document.getLength());
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 
@@ -368,6 +368,7 @@ public class Console extends JTextPane implements ClipboardOwner {
             int lastLineBreak = content.lastIndexOf('\n') + 1;
             document.remove(lastLineBreak, document.getLength() - lastLineBreak); 
         } catch (Exception ignored) {
+            Base.exception(ignored);
         }
     }
 
@@ -484,6 +485,7 @@ public class Console extends JTextPane implements ClipboardOwner {
         try {
             document.remove(0, document.getLength());
         } catch (Exception e) {
+            Base.exception(e);
         }
     }
 
@@ -550,6 +552,7 @@ public class Console extends JTextPane implements ClipboardOwner {
                         fla.execute();
                     }
                 } catch(Exception x) {
+                    Base.exception(x);
                 }
             }
         }
@@ -580,6 +583,7 @@ public class Console extends JTextPane implements ClipboardOwner {
         try {
             return document.getText(0, document.getLength());
         } catch (Exception e) {
+            Base.exception(e);
             return "";
         }
     }

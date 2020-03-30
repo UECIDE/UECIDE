@@ -139,6 +139,7 @@ public class ElfInspector extends Plugin {
                         name = "";
                     }
                 } catch (Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -206,6 +207,7 @@ public class ElfInspector extends Plugin {
                     sh_entsize = readInt();
                     name = loadString(sh_name);
                 } catch (Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             }
@@ -214,6 +216,7 @@ public class ElfInspector extends Plugin {
                 try {
                     file.seek(offset);
                 } catch (Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 } 
             }
@@ -281,6 +284,7 @@ public class ElfInspector extends Plugin {
                 }
 
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
         }
@@ -297,6 +301,7 @@ public class ElfInspector extends Plugin {
                 p_flags = readInt();
                 p_align = readInt();
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
         }
@@ -316,6 +321,7 @@ public class ElfInspector extends Plugin {
                 shst_addralign = readInt();
                 shst_entsize = readInt();
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
         }
@@ -324,6 +330,7 @@ public class ElfInspector extends Plugin {
             try {
                 return file.readByte();
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
             return 0;
@@ -339,6 +346,7 @@ public class ElfInspector extends Plugin {
                 int s = ((b2 << 8) | b1) & 0xFFFF;
                 return s;
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
             return 0;
@@ -360,6 +368,7 @@ public class ElfInspector extends Plugin {
                 long l = (l1 | l2 | l3 | l4) & 0xFFFFFFFF;
                 return l;
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
             return (long)0;
@@ -383,6 +392,7 @@ public class ElfInspector extends Plugin {
                 }
                 return out;
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
             return "";
@@ -402,6 +412,7 @@ public class ElfInspector extends Plugin {
                 }
                 return out;
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
             return "";
@@ -446,6 +457,7 @@ public class ElfInspector extends Plugin {
                 return out.toString();
 
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
             return "";
@@ -606,6 +618,7 @@ public class ElfInspector extends Plugin {
                 ctx.bullet("Finished");
 
             } catch (Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
         }

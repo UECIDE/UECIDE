@@ -97,6 +97,7 @@ public class TabLabel extends JPanel {
                 try {
                     editor.closeTab(tab);
                 } catch (Exception ex) {
+                    Base.exception(ex);
                 }
             }
         });
@@ -121,6 +122,7 @@ public class TabLabel extends JPanel {
             try {
                 nameLabel.setIcon(IconManager.getIcon(12, "tabs.modified"));
             } catch (IOException ex) {
+                Base.exception(ex);
             }
         } else {
             nameLabel.setIcon(null);

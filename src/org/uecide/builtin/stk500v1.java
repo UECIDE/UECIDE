@@ -143,6 +143,7 @@ public class stk500v1 implements BuiltinCommand, CommsListener {
         try {
             baudRate = Integer.parseInt(brd);
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error(e);
         }
 
@@ -275,7 +276,7 @@ public class stk500v1 implements BuiltinCommand, CommsListener {
             return true;
 
         } catch(Exception e) {
-e.printStackTrace();
+            Base.exception(e);
             ctx.error(e);
             return false;
         }
@@ -610,6 +611,7 @@ System.err.println("Programming chunk " + currentChunk + " at address " + start)
 
             br.close();
         } catch(Exception e) {
+            Base.exception(e);
             ctx.error(e);
             return false;
         }

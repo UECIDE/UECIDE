@@ -92,6 +92,7 @@ public class stk500v2 implements BuiltinCommand, CommsListener {
         try {
             baudRate = Integer.parseInt(brd);
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error(e);
         }
 
@@ -160,6 +161,7 @@ System.err.println("Port: " + port);
         try {
             Thread.sleep(100); // Initial short delay
         } catch(Exception e) {
+            Base.exception(e);
         }
 
         port.pulseLine();
@@ -262,7 +264,7 @@ System.err.println("Reply: " + replyData.get(1));
             return replyData;
 
         } catch(Exception e) {
-e.printStackTrace();
+            Base.exception(e);
             ctx.error(e);
             return null;
         }
@@ -720,6 +722,7 @@ e.printStackTrace();
 
             br.close();
         } catch(Exception e) {
+            Base.exception(e);
             ctx.error(e);
             return false;
         }

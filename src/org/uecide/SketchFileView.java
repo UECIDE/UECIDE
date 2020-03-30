@@ -77,7 +77,7 @@ public class SketchFileView extends javax.swing.filechooser.FileView {
                 return IconManager.getIcon(16, "apps.uecide");
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Base.exception(ex);
         }
 
         return null;

@@ -149,7 +149,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
 
         portAttributeCache.put(deviceName, attributes);
@@ -180,7 +180,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             }
             input.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
         portAttributeCache.put(deviceName, attributes);
         return attributes;
@@ -232,7 +232,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
 
         macPortNameCache.put(deviceName, deviceName);
@@ -310,6 +310,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             }
             return portName + " (" + manufacturer + " " + product + ")";
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return portName;
         }
@@ -336,6 +337,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             serialPort.writeBytes(b, b.length);
             return true;
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
         }
         return false;
@@ -356,6 +358,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 serialPort.closePort();
             }
         } catch (Exception e) {
+            Base.exception(e);
         }
     }
 
@@ -371,8 +374,8 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             serialPort.setRTS();
             return true;
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
-            e.printStackTrace();
         }
         return false;
     }
@@ -396,7 +399,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                     listener.commsDataReceived(bytes);
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.exception(ex);
             }
         }
     }
@@ -408,6 +411,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             serialPort.setNumDataBits(8);
             serialPort.setParity(SerialPort.NO_PARITY);
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
             return false;
         }
@@ -458,6 +462,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             serialPort.setDTR();
             serialPort.setRTS();
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
         }
     }
@@ -469,6 +474,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             else
                 serialPort.clearDTR();
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
         }
     }
@@ -484,6 +490,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             else
                 serialPort.clearRTS();
         } catch (Exception e) {
+            Base.exception(e);
             lastError = e.getMessage();
         }
     }
@@ -570,6 +577,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             int vid = Integer.parseInt(vidstr, 16);
             return vid;
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return 0;
         }
@@ -606,7 +614,7 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
 
         return 0;

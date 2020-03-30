@@ -207,6 +207,7 @@ public class Editor extends JFrame {
                     }
                 }
             } catch(Exception e) {
+                Base.exception(e);
                 error(e);
             }
 
@@ -225,6 +226,7 @@ public class Editor extends JFrame {
             try {
                 loadedSketch.precompileLibrary(library);
             } catch(Exception e) {
+                Base.exception(e);
                 error(e);
             }
 
@@ -245,7 +247,7 @@ public class Editor extends JFrame {
                 Plugin p = (Plugin)(ctor.newInstance(new Object[] { this }));
                 plugins.add(p);
             } catch(Exception e) {
-//                e.printStackTrace();
+                Base.exception(e);
             }
         }
 
@@ -458,7 +460,7 @@ public class Editor extends JFrame {
                         loadedSketch.rescanFileTree();
                         updateTree();
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                 }
             }
@@ -538,6 +540,7 @@ public class Editor extends JFrame {
                 try {
                     compile();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -552,6 +555,7 @@ public class Editor extends JFrame {
                 try {
                     program();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -562,6 +566,7 @@ public class Editor extends JFrame {
                 try {
                     Base.handleNew();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -572,6 +577,7 @@ public class Editor extends JFrame {
                 try {
                     handleOpenPrompt();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -582,6 +588,7 @@ public class Editor extends JFrame {
                 try {
                     saveAllTabs();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -630,6 +637,7 @@ public class Editor extends JFrame {
                         }
                     }
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -728,6 +736,7 @@ public class Editor extends JFrame {
                 try {
                     compile();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -743,6 +752,7 @@ public class Editor extends JFrame {
                 try {
                     program();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -755,6 +765,7 @@ public class Editor extends JFrame {
                 try {
                     Base.handleNew();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -765,6 +776,7 @@ public class Editor extends JFrame {
                 try {
                     handleOpenPrompt();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -775,6 +787,7 @@ public class Editor extends JFrame {
                 try {
                     saveAllTabs();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -866,6 +879,7 @@ public class Editor extends JFrame {
                 nixFileDataFlavor = new DataFlavor("text/uri-list;class=java.lang.String");
                 flavors[0] = nodesFlavor;
             } catch(ClassNotFoundException e) {
+                Base.exception(e);
                 error(e);
             }
         }
@@ -907,6 +921,7 @@ public class Editor extends JFrame {
                     return true;
                 }
             } catch(Exception e) {
+                Base.exception(e);
                 //error(e);
             }
 
@@ -1018,9 +1033,11 @@ public class Editor extends JFrame {
                         Transferable t = support.getTransferable();
                         nodes = (DefaultMutableTreeNode[])t.getTransferData(nodesFlavor);
                     } catch(UnsupportedFlavorException ufe) {
+                        Base.exception(ufe);
                         System.out.println("UnsupportedFlavor: " + ufe.getMessage());
                         return false;
                     } catch(java.io.IOException ioe) {
+                        Base.exception(ioe);
                         System.out.println("I/O error: " + ioe.getMessage());
                         return false;
                     }
@@ -1111,6 +1128,7 @@ public class Editor extends JFrame {
                                 Files.copy(file.toPath(), destfile.toPath(), REPLACE_EXISTING);
                             }
                         } catch(Exception e) {
+                            Base.exception(e);
                         }
                     }
                 }
@@ -1118,7 +1136,7 @@ public class Editor extends JFrame {
                 loadedSketch.rescanFileTree();
                 updateTree();
             } catch(Exception ee) {
-//                ee.printStackTrace();
+                Base.exception(ee);
             }
 
             return true;
@@ -1282,7 +1300,7 @@ public class Editor extends JFrame {
                                             try {
                                                 eb.flagLine(ent.getLine(), IconManager.getIcon(Preferences.getInteger("theme.treeiconsize"), "tree.note"), 0x2000);
                                             } catch (Exception ex) {    
-                                                ex.printStackTrace();
+                                                Base.exception(ex);
                                             }
                                         }
                                     } else if (ent.getType() == TodoEntry.Todo) {
@@ -1291,7 +1309,7 @@ public class Editor extends JFrame {
                                             try {
                                                 eb.flagLine(ent.getLine(), IconManager.getIcon(Preferences.getInteger("theme.treeiconsize"), "tree.todo"), 0x2000);
                                             } catch (Exception ex) {    
-                                                ex.printStackTrace();
+                                                Base.exception(ex);
                                             }
                                         }
                                     } else if (ent.getType() == TodoEntry.Fixme) {
@@ -1300,7 +1318,7 @@ public class Editor extends JFrame {
                                             try { 
                                                 eb.flagLine(ent.getLine(), IconManager.getIcon(Preferences.getInteger("theme.treeiconsize"), "tree.fixme"), 0x2000);
                                             } catch (Exception ex) {    
-                                                ex.printStackTrace();
+                                                Base.exception(ex);
                                             }
                                         }
                                     }
@@ -1588,7 +1606,7 @@ public class Editor extends JFrame {
                     try {
                         createNewSketchFile(e.getActionCommand());
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                 }
             };
@@ -1597,7 +1615,7 @@ public class Editor extends JFrame {
                     try {
                         importFile(e.getActionCommand());
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                 }
             };
@@ -1842,7 +1860,7 @@ public class Editor extends JFrame {
                                 try {
                                     updateTree();
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    Base.exception(ex);
                                 }
                             }
                         }
@@ -1886,7 +1904,7 @@ public class Editor extends JFrame {
                                 try {
                                     updateTree();
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    Base.exception(ex);
                                 }
                             }
                         }
@@ -2031,7 +2049,7 @@ public class Editor extends JFrame {
                                 try {
                                     updateTree();
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    Base.exception(ex);
                                 }
                             }
                         });
@@ -2115,7 +2133,7 @@ public class Editor extends JFrame {
                                     try {
                                         updateTree();
                                     } catch (Exception ex) {
-                                        ex.printStackTrace();
+                                        Base.exception(ex);
                                     }
                                 }
                             }
@@ -2128,7 +2146,7 @@ public class Editor extends JFrame {
                                 try {
                                     findAndUnzipZipFile(e.getActionCommand());
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    Base.exception(ex);
                                 }
                             }
                         });
@@ -2182,7 +2200,7 @@ public class Editor extends JFrame {
                                 try {
                                     updateTree();
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    Base.exception(ex);
                                 }
                             }
                         }
@@ -2224,7 +2242,7 @@ public class Editor extends JFrame {
                                 try {
                                     updateTree();
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    Base.exception(ex);
                                 }
                             }
                         }
@@ -2550,10 +2568,6 @@ public class Editor extends JFrame {
 
     public void error(Throwable e) {
         error(e.getMessage());
-//        StringWriter sw = new StringWriter();
-//        PrintWriter pw = new PrintWriter(sw);
-//        e.printStackTrace(pw);
-//        error(sw.toString());
     }
 
 
@@ -2682,6 +2696,7 @@ public class Editor extends JFrame {
             ed.requestFocus();
             return tabno;
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
 
@@ -2946,6 +2961,7 @@ public class Editor extends JFrame {
                                 try {
                                     loadSketch(path);
                                 } catch (IOException ex) {
+                                    Base.exception(ex);
                                     error(ex);
                                 }
                             } else {
@@ -2983,6 +2999,7 @@ public class Editor extends JFrame {
                 try {
                     Base.handleNew();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -2993,6 +3010,7 @@ public class Editor extends JFrame {
                 try {
                     handleOpenPrompt();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -3012,6 +3030,7 @@ public class Editor extends JFrame {
                         try {
                             loadSketch(path);
                         } catch (IOException ex) {
+                            Base.exception(ex);
                             error(ex);
                         }
                     } else {
@@ -3050,6 +3069,7 @@ public class Editor extends JFrame {
                                 try {
                                     loadSketch(path);
                                 } catch (IOException ex) {
+                                    Base.exception(ex);
                                     error(ex);
                                 }
                             } else {
@@ -3150,6 +3170,7 @@ public class Editor extends JFrame {
                         }
                     }
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -3160,6 +3181,7 @@ public class Editor extends JFrame {
                 try {
                     saveAllTabs();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -3170,6 +3192,7 @@ public class Editor extends JFrame {
                 try {
                     saveAs();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -3220,6 +3243,7 @@ public class Editor extends JFrame {
                         System.exit(0);
                     }
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -3236,7 +3260,7 @@ public class Editor extends JFrame {
                 try {
                     createNewSketchFile(e.getActionCommand());
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         };
@@ -3291,6 +3315,7 @@ public class Editor extends JFrame {
                 try {
                     compile();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -3301,6 +3326,7 @@ public class Editor extends JFrame {
                 try {
                     program();
                 } catch (IOException ex) {
+                    Base.exception(ex);
                     error(ex);
                 }
             }
@@ -3425,7 +3451,10 @@ public class Editor extends JFrame {
                 try {
                     PluginManager pm = new PluginManager();
                     pm.openWindow(Editor.this);
-                } catch (Exception ex) { error(ex); }
+                } catch (Exception ex) { 
+                    Base.exception(ex);
+                    error(ex); 
+                }
             }
         }));
 
@@ -3438,7 +3467,7 @@ public class Editor extends JFrame {
                 try {
                     ServiceManager.open(Editor.this);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         }));
@@ -3450,6 +3479,7 @@ public class Editor extends JFrame {
                 try {
                     refreshAllEditors();
                 } catch (Exception ex) {
+                    Base.exception(ex);
                 }
             }
         }));
@@ -3526,7 +3556,7 @@ public class Editor extends JFrame {
                 try {
                     Debug.show();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         }));
@@ -3536,7 +3566,7 @@ public class Editor extends JFrame {
                 try {
                     Base.cleanAndScanAllSettings();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         }));
@@ -3656,7 +3686,7 @@ public class Editor extends JFrame {
                         try {
                             loadedSketch.setBoard(i.getPort().getBoard());
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            Base.exception(ex);
                         }
                         updateAll();
                     }
@@ -3818,7 +3848,7 @@ public class Editor extends JFrame {
                     try {
                         loadedSketch.setBoard(b);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                     b.onSelected(Editor.this);
                 }
@@ -3856,7 +3886,7 @@ public class Editor extends JFrame {
                     try {
                         loadedSketch.setCore(c);
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Base.exception(ex);
                     }
                     c.onSelected(Editor.this);
                 }
@@ -3972,8 +4002,9 @@ public class Editor extends JFrame {
             try {
                 plugin.populateContextMenu(menu, filterFlags, node);
             } catch(AbstractMethodError e) {
+                Base.exception(e);
             } catch(Exception e) {
-//                error(e);
+                Base.exception(e);
             }
         }
 
@@ -4017,7 +4048,9 @@ public class Editor extends JFrame {
             try {
                 plugin.populateMenu(menu, filterFlags);
             } catch(AbstractMethodError e) {
+                Base.exception(e);
             } catch(Exception e) {
+                Base.exception(e);
             }
         }
 
@@ -4039,7 +4072,9 @@ public class Editor extends JFrame {
             try {
                 plugin.populateMenu(menu, filterFlags);
             } catch(AbstractMethodError e) {
+                Base.exception(e);
             } catch(Exception e) {
+                Base.exception(e);
             }
         }
 
@@ -4061,8 +4096,9 @@ public class Editor extends JFrame {
             try {
                 plugin.addToolbarButtons(tb, filterFlags);
             } catch(AbstractMethodError e) {
+                Base.exception(e);
             } catch(Exception e) {
-//                error(e);
+                Base.exception(e);
             }
         }
 
@@ -4104,7 +4140,7 @@ public class Editor extends JFrame {
             updateTree();
             attachPluginTabs();
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
         setStatus();
     }
@@ -4443,6 +4479,7 @@ public class Editor extends JFrame {
                     }
                 }
             } catch(Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
         }
@@ -4588,6 +4625,7 @@ public class Editor extends JFrame {
                     ImageIO.write(i, "GIF", o);
                 }
             } catch (Exception ex) {
+                Base.exception(ex);
                 error(ex);
             }
 
@@ -4711,11 +4749,14 @@ public class Editor extends JFrame {
                     oneOptionBox(JOptionPane.ERROR_MESSAGE, Base.i18n.string("err.samefile.title"), Base.i18n.string("err.samefile", src.getName(), dest.getName()));
                     return;
                 }
-            } catch (Exception eee) { }
+            } catch (Exception eee) { 
+                Base.exception(eee);
+            }
 
             try {
                 Files.copy(src.toPath(), dest.toPath(), REPLACE_EXISTING);
             } catch (IOException ex) {
+                Base.exception(ex); 
                 error(ex);
             }
 
@@ -4779,6 +4820,7 @@ public class Editor extends JFrame {
             try {
                 plugin.releasePort(portName);
             } catch(Exception e) {
+                Base.exception(e);
 //                Base.error(e);
             }
         }
@@ -5207,6 +5249,7 @@ public class Editor extends JFrame {
             zis.closeEntry();
             zis.close();
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return;
         }
@@ -5245,6 +5288,7 @@ public class Editor extends JFrame {
             zis.closeEntry();
             zis.close();
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -5353,6 +5397,7 @@ public class Editor extends JFrame {
                 zis.closeEntry();
                 zis.close();
             } catch(Exception e) {
+                Base.exception(e);
                 Base.error(e);
             }
 
@@ -5585,6 +5630,7 @@ public class Editor extends JFrame {
                 zip.close();
             }
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -5594,7 +5640,9 @@ public class Editor extends JFrame {
             try {
                 plugin.catchEvent(event);
             } catch(AbstractMethodError e) {
+                Base.exception(e);
             } catch(Exception e) {
+                Base.exception(e);
             }
         }
     }
@@ -5608,6 +5656,7 @@ public class Editor extends JFrame {
                 goToLineInFile(new File(m.group(2)), line);
 
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
     }
@@ -5628,7 +5677,9 @@ public class Editor extends JFrame {
             try {
                 plugin.addPanelsToTabs(tabs, flags);
             } catch(AbstractMethodError e) {
+                Base.exception(e);
             } catch(Exception e) {
+                Base.exception(e);
             }
         }
     }
@@ -5682,6 +5733,7 @@ public class Editor extends JFrame {
                 try {
                     tickUpdateBlocker();
                 } catch (Exception exex) {
+                    Base.exception(exex);
                 }
             }
         }, 0, 250);
@@ -5851,6 +5903,7 @@ public class Editor extends JFrame {
                 loadedSketch.set("fs.size", d.getFilesystemSize());
             }
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -5881,6 +5934,7 @@ public class Editor extends JFrame {
             File newDir = new File(root, newDirName);
             newDir.mkdirs();
         } catch (Exception e) {
+            Base.exception(e);
             alert(e.getMessage());
         }
         updateFilesystemTree();
@@ -5946,6 +6000,7 @@ public class Editor extends JFrame {
                 Files.copy(src.toPath(), dest.toPath(), REPLACE_EXISTING);
             }
         } catch (Exception e) {
+            Base.exception(e);
             alert(e.getMessage());
         }
     }

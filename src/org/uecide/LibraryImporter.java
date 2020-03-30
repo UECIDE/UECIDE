@@ -197,6 +197,7 @@ public class LibraryImporter extends JFrame {
             zis.closeEntry();
             zis.close();
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return null;
         }
@@ -229,6 +230,7 @@ public class LibraryImporter extends JFrame {
             zis.closeEntry();
             zis.close();
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
 
@@ -480,6 +482,7 @@ public class LibraryImporter extends JFrame {
             zis.closeEntry();
             zis.close();
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
 

@@ -110,6 +110,7 @@ public class IconManager {
                 u = null;
             }
         } catch (Exception ex) {
+            Base.exception(ex);
             u = null;
         }
 

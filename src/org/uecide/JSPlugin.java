@@ -46,6 +46,7 @@ public class JSPlugin {
             engine.put("editor", editor);
             engine.eval(program);
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -82,8 +83,9 @@ public class JSPlugin {
                 ret = inv.invokeFunction(function, args);
             }
         } catch (NoSuchMethodException ee) {
-        
+//            Base.exception(ee);
         } catch (Exception e) {
+            Base.exception(e);
             if (ctx != null) {
                 ctx.error(e);
             } else {

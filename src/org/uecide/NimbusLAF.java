@@ -9,6 +9,7 @@ class NimbusLAF extends LookAndFeel {
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }

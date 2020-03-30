@@ -52,7 +52,7 @@ public class gpio implements BuiltinCommand {
                 setMode(pin, "in");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
             return false;
         }
         return true;
@@ -68,7 +68,7 @@ public class gpio implements BuiltinCommand {
             pw.println(pin);
             pw.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 
@@ -84,7 +84,7 @@ public class gpio implements BuiltinCommand {
             pw.println(dir);
             pw.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 
@@ -100,7 +100,7 @@ public class gpio implements BuiltinCommand {
             pw.println(value);
             pw.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 

@@ -78,6 +78,7 @@ public class VirtualLCD extends Plugin implements CommsListener
                 return;
             }
         } catch(Exception e) {
+            Base.exception(e);
             ctx.error("Unable to open serial port:");
             ctx.error(e);
             return;
@@ -85,6 +86,7 @@ public class VirtualLCD extends Plugin implements CommsListener
         try {
             port.addCommsListener(this);
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error(e);
         }
     }
@@ -106,7 +108,7 @@ public class VirtualLCD extends Plugin implements CommsListener
                     }
                 }));
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.exception(ex);
             }
         }
     }
@@ -303,6 +305,7 @@ public class VirtualLCD extends Plugin implements CommsListener
             }
             //term.message(port.readString());
         } catch (Exception ex) {
+                Base.exception(ex);
                 ctx.error(ex);
         }
     }

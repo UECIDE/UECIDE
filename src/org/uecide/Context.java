@@ -271,6 +271,7 @@ public class Context {
             reader.close();
             from.close();
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
         return out;
@@ -292,7 +293,6 @@ public class Context {
             sketch.error(e);
             return;
         }
-        e.printStackTrace();
     }
 
     public void error(String e) {
@@ -680,6 +680,7 @@ public class Context {
             }
 
         } catch (Exception e) {
+            Base.exception(e);
             error(e);
         }
 
@@ -726,6 +727,7 @@ public class Context {
                     lineno = Integer.parseInt(num);
                     continue;
                 } catch(Exception e) {
+                    Base.exception(e);
                     error(Base.i18n.string("err.syntax", key, lineno));
                     error(ld);
                     if (script.keyExists("fail")) {
@@ -925,9 +927,11 @@ public class Context {
             try {
                 return (String)m.invoke(p, args);
             } catch (Exception e2) {
+                Base.exception(e2);
             }
             return "";
         } catch(Exception e) {
+            Base.exception(e);
             error(e);
         }
 
@@ -995,12 +999,14 @@ public class Context {
             try {
                 retval = (Boolean)m.invoke(p, aa);
             } catch (Exception e2) {
+                Base.exception(e2);
                 error(e2);
                 return false;
             }
             return retval;
 
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
 
@@ -1070,6 +1076,7 @@ public class Context {
         try {
             runningProcess = process.start();
         } catch(Exception e) {
+            Base.exception(e);
             error(Base.i18n.string("err.process"));
             error(e);
             return false;
@@ -1155,6 +1162,7 @@ public class Context {
                 Thread.sleep(1);
 
             } catch(Exception ignored) {
+                Base.exception(ignored);
                 Base.error(ignored);
             }
         }
@@ -1248,6 +1256,7 @@ public class Context {
             }
 
         } catch(Exception ignored) {
+            Base.exception(ignored);
             String igm = ignored.getMessage();
             if (igm != null) {
                 if (igm.equals("Stream closed")) {
@@ -1276,13 +1285,11 @@ public class Context {
         if (process == null) {
             return false;
         }
-        try
-        {
+        try {
             process.exitValue();
             return false;
-        }
-        catch(IllegalThreadStateException e)
-        {
+        } catch(IllegalThreadStateException e) {
+            Base.exception(e);
             return true;
         }
     }
@@ -1375,6 +1382,7 @@ public class Context {
         try {
             return Integer.parseInt(v);
         } catch (Exception e) {
+            Base.exception(e);
         }
         return d;
     }

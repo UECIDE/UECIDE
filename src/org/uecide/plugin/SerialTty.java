@@ -50,6 +50,7 @@ public class SerialTty implements Tty, CommsListener {
             }
             return i;
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return 0;
@@ -88,6 +89,7 @@ public class SerialTty implements Tty, CommsListener {
             try {
                 captureFile.write(bytes);
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
         feed(bytes);

@@ -36,6 +36,7 @@ public class ConsoleTty implements Tty {
             }
             return i;
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
         return 0;

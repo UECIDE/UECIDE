@@ -47,6 +47,7 @@ public class vc_math implements VariableCommand {
                 val = Float.parseFloat(bit);
                 isNumber = true;
             } catch (Exception e) {
+                Base.exception(e);
                 isNumber = false;
             }
 

@@ -31,6 +31,7 @@ class JTattooBase extends LookAndFeel {
             theme.setProperties(p);
 
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }

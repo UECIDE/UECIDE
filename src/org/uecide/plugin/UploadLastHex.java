@@ -47,7 +47,7 @@ public class UploadLastHex extends Plugin
                     }
                 }));
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.exception(ex);
             }
         }
 

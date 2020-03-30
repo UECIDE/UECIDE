@@ -53,6 +53,7 @@ public class Platform extends org.uecide.Platform {
             awtAppClassNameField.setAccessible(true);
             awtAppClassNameField.set(xToolkit, "UECIDE");
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
         }
     }
@@ -107,7 +108,7 @@ public class Platform extends org.uecide.Platform {
             p.waitFor();
             Base.session.set("launcher", "xdg-open");
             return true;
-        } catch(Exception e) { }
+        } catch(Exception e) { Base.exception(e); }
 
         // Attempt to use gnome-open
         try {
@@ -115,7 +116,7 @@ public class Platform extends org.uecide.Platform {
             p.waitFor();
             Base.session.set("launcher", "gnome-open");
             return true;
-        } catch(Exception e) { }
+        } catch(Exception e) { Base.exception(e); }
 
         // Attempt with kde-open
         try {
@@ -123,7 +124,7 @@ public class Platform extends org.uecide.Platform {
             p.waitFor();
             Base.session.set("launcher", "kde-open");
             return true;
-        } catch(Exception e) { }
+        } catch(Exception e) { Base.exception(e); }
 
         return false;
     }
@@ -140,6 +141,7 @@ public class Platform extends org.uecide.Platform {
                     /*Process p =*/ Runtime.getRuntime().exec(params);
                     /*int result =*/ //p.waitFor();
                 } catch(Exception e) {
+                    Base.exception(e);
                     Base.error(e);
                 }
             } else {
@@ -147,6 +149,7 @@ public class Platform extends org.uecide.Platform {
                                    file.getAbsolutePath());
             }
         } catch(Exception ex) {
+            Base.exception(ex);
             Base.error(ex);
         }
     }

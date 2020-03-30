@@ -85,6 +85,7 @@ public class Programmer extends UObject {
                     String b = ctx.parseString(props.get("programmer.reset.baud"));
                     baud = Integer.parseInt(b);
                 } catch (Exception e) {
+                    Base.exception(e);
                 }
                 if (!performBaudBasedReset(ctx, baud, predelay, delay, postdelay)) {
                     return false;
@@ -151,6 +152,7 @@ public class Programmer extends UObject {
                 Thread.sleep(postdelay);
             }
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error(e);
             return false;
         }
@@ -183,6 +185,7 @@ public class Programmer extends UObject {
 //                System.gc();
             }
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error(e);
             return false;
         }

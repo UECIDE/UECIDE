@@ -233,6 +233,7 @@ public class Package implements Comparable, Serializable {
         try {
             size = Integer.parseInt(properties.get("Size"));
         } catch (Exception ignored) {
+            Base.exception(ignored);
         }
 
         if (downloadTo.length() != size) {
@@ -393,7 +394,9 @@ public class Package implements Comparable, Serializable {
                         return true;
                     }
                 } catch (FileNotFoundException ignore) {
+                    Base.exception(ignore);
                 } catch (Exception e) {
+                    Base.exception(e);
                     errorMessage = e.toString();
                     System.err.println();
                     System.err.println("[31mDownload failed: " + errorMessage + "[0m");
@@ -424,6 +427,7 @@ public class Package implements Comparable, Serializable {
             df.extract(pf, root);
             System.out.println("done");
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
             return false;
         }

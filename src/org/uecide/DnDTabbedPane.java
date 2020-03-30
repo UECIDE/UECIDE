@@ -111,7 +111,7 @@ public class DnDTabbedPane extends JTabbedPane {
                     e.startDrag(DragSource.DefaultMoveDrop, 
                             new TabTransferable(DnDTabbedPane.this, dragTabIndex), dsl);
                 } catch (InvalidDnDOperationException idoe) {
-                    idoe.printStackTrace();
+                    Base.exception(idoe);
                 }
             }
         };
@@ -141,7 +141,7 @@ public class DnDTabbedPane extends JTabbedPane {
             TabTransferData data = (TabTransferData) a_event.getTransferable().getTransferData(FLAVOR);             
             return data;
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
 
         return null;
@@ -152,7 +152,7 @@ public class DnDTabbedPane extends JTabbedPane {
             TabTransferData data = (TabTransferData) a_event.getTransferable().getTransferData(FLAVOR);             
             return data;
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
 
         return null;
@@ -164,7 +164,7 @@ public class DnDTabbedPane extends JTabbedPane {
                 .getTransferable().getTransferData(FLAVOR);             
             return data;
         } catch (Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
 
         return null;        

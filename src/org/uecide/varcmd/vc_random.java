@@ -48,6 +48,7 @@ public class vc_random implements VariableCommand {
             val += low;
             return Integer.toString(val);
         } catch (Exception ex) {
+            Base.exception(ex);
         }
         return "ERR";
 

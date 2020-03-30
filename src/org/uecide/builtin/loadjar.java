@@ -51,6 +51,7 @@ public class loadjar implements BuiltinCommand {
             Base.addURL(u);
             return true;
         } catch (Exception e) {
+            Base.exception(e);
             Base.error(e);
             return false;
         }

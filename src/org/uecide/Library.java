@@ -271,6 +271,7 @@ public class Library implements Comparable {
             in.close();
             data = contents.toString().split("\n");
         } catch(Exception e) {
+            Base.exception(e);
             Base.error(e);
             return;
         }

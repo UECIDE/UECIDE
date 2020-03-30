@@ -61,6 +61,7 @@ public class stdin implements BuiltinCommand {
             pw.close();
             return true;
         } catch (Exception e) {
+            Base.exception(e);
             ctx.error(e);
         }
         return false;

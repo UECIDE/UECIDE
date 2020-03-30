@@ -53,6 +53,7 @@ public class Navigator extends Plugin implements MouseListener {
             try {
                 ImageIO.write(im, "PNG", fc.getSelectedFile());
             } catch (Exception e) {
+                Base.exception(e);
             }
         }
     }
@@ -198,6 +199,7 @@ public class Navigator extends Plugin implements MouseListener {
                     }
                 });
             } catch (Exception e) {
+                Base.exception(e);
                 return;
             }
 

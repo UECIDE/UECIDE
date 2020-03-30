@@ -220,6 +220,7 @@ public class Debug {
                         }
                     }
                 } catch(Exception e) {
+                    Base.exception(e);
                 }
             }
         }

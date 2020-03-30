@@ -289,7 +289,7 @@ public class PluginManager implements PropertyChangeListener
                 try {
                     askCloseWindow();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         });
@@ -343,7 +343,10 @@ public class PluginManager implements PropertyChangeListener
             public void actionPerformed(ActionEvent e) {
                 try {
                     downloadPluginList();
-                } catch (Exception ex) { Base.error(ex); }
+                } catch (Exception ex) { 
+                    Base.exception(ex);
+                    Base.error(ex); 
+                }
             }
         });
         toolbar.add(refreshButton);
@@ -366,7 +369,7 @@ public class PluginManager implements PropertyChangeListener
                 try {
                     askCloseWindow();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         });
@@ -400,7 +403,10 @@ public class PluginManager implements PropertyChangeListener
             public void actionPerformed(ActionEvent e) {
                 try {
                     updateTree();
-                } catch (Exception ex) { Base.error(ex); }
+                } catch (Exception ex) { 
+                    Base.exception(ex);
+                    Base.error(ex); 
+                }
             }
         });
 
@@ -414,7 +420,10 @@ public class PluginManager implements PropertyChangeListener
             public void keyReleased(KeyEvent e) {
                 try {
                     updateTree();
-                } catch (Exception ex) { Base.error(ex); }
+                } catch (Exception ex) { 
+                    Base.exception(ex);
+                    Base.error(ex); 
+                }
             }
             public void keyTyped(KeyEvent e) {
             }
@@ -428,7 +437,10 @@ public class PluginManager implements PropertyChangeListener
             public void actionPerformed(ActionEvent e) {
                 try {
                     updateTree();
-                } catch (Exception ex) { Base.error(ex); }
+                } catch (Exception ex) { 
+                    Base.exception(ex);
+                    Base.error(ex); 
+                }
             }
         });
         optionsBox.add(onlyUninstalled);
@@ -570,7 +582,7 @@ public class PluginManager implements PropertyChangeListener
                 try {
                     askCloseWindow();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    Base.exception(ex);
                 }
             }
         });
@@ -644,12 +656,18 @@ public class PluginManager implements PropertyChangeListener
                     if (!apt.isInstalled(p) || apt.isUpgradable(p)) {
                         try {
                             apt.installPackage(p);
-                        } catch (Exception e) { Base.error(e); }
+                        } catch (Exception e) { 
+                            Base.exception(e);
+                            Base.error(e); 
+                        }
                     }
                 }
                 try {
                     updateTree();
-                } catch (Exception ex) { Base.error(ex); }
+                } catch (Exception ex) { 
+                    Base.exception(ex);
+                    Base.error(ex);
+                }
                 return null;
             }
 
@@ -741,7 +759,7 @@ public class PluginManager implements PropertyChangeListener
 
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Base.exception(ex);
             }
             return defaultRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         }
@@ -1082,7 +1100,10 @@ public class PluginManager implements PropertyChangeListener
                 p.setState(0);
                 try {
                     updateTree();
-                } catch (Exception ex) { Base.error(ex); }
+                } catch (Exception ex) { 
+                    Base.exception(ex);
+                    Base.error(ex); 
+                }
             }
         };
 
@@ -1139,7 +1160,10 @@ public class PluginManager implements PropertyChangeListener
                 p.setState(0);
                 try {
                     updateTree();
-                } catch (Exception ex) { Base.error(ex); }
+                } catch (Exception ex) { 
+                    Base.exception(ex);
+                    Base.error(ex); 
+                }
             }
         };
 
@@ -1241,6 +1265,7 @@ public class PluginManager implements PropertyChangeListener
                             df.extract(pf, Base.getDataFolder());
                             System.out.println("done");
                         } catch (Exception e) {
+                            Base.exception(e);
                             Base.error(e);
                         }
 

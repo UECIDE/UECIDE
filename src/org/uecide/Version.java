@@ -85,7 +85,7 @@ public class Version implements Comparable, Cloneable {
                 }
             }
         } catch(Exception e) {
-            e.printStackTrace();
+            Base.exception(e);
         }
     }
 
