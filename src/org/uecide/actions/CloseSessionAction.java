@@ -23,7 +23,15 @@ public class CloseSessionAction extends Action {
             System.exit(0);
         }
 
-        if (ctx.getSketch().isModified()) {
+        boolean force = false;
+
+        if (args.length == 1) {
+            if (args[0] instanceof Boolean) {
+                force = (Boolean)args[0];
+            }
+        }
+
+        if ((!force) && ctx.getSketch().isModified()) {
             TreeSet<SketchFile> modifiedFiles = ctx.getSketch().getModifiedFiles();
             String message = "Do you want to save *" + ctx.getSketch().getName() + "* before closing?\n\n";
 
@@ -39,11 +47,13 @@ public class CloseSessionAction extends Action {
                     ctx.getGui().close();
                 }
             } else if (resp == 1) { // no
+                ctx.cleanup();
                 ctx.getGui().close();
             } else if (resp == 2) { // cancel
                 return false;
             }
         } else {
+            ctx.cleanup();
             ctx.getGui().close();
         }
         return true;

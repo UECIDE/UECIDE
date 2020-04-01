@@ -48,7 +48,7 @@ public class IOKitNode {
 
     String nodeClass;
     String name;
-    int id;
+    long id;
     int flags;
     int busy;
     int busyms;
@@ -155,11 +155,11 @@ public class IOKitNode {
         children.add(n);
     }
 
-    public void setId(int i) {
+    public void setId(long i) {
         id = i;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

@@ -1,9 +1,12 @@
 Changelog
 =========
 
-0.11.1
+0.11.4
 ------
 
+* Improved global exception handling
+* Protect against invalid sketch or file in tree update
+* Add logging output support
 * Add output logging redirection
 * Added command prompt in console
 * Added link from alert to error in gui base class
@@ -35,6 +38,9 @@ Changelog
 * Added create new file and associated action
 * More work on GUI
 * More work on gui. Swiched to Hola for mDNS
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Add facility to query RTS and DTR
+* Fixed missing line feed after inner files
 * Context-aware tools menu
 * ucase and lcase variable commands
 * Open sketches on command line
@@ -46,6 +52,26 @@ Changelog
 * Open sketch
 * Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
+
+
+0.11.3
+------
+
+* Protect against invalid sketch or file in tree update
+* Add logging output support
+
+
+0.11.2
+------
+
+
+
+0.11.1
+------
+
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Add facility to query RTS and DTR
+* Fixed missing line feed after inner files
 
 
 0.11.0
@@ -766,6 +792,7 @@ Changelog
 0.8.5
 -----
 
+* Improved global exception handling
 * Add output logging redirection
 * Added command prompt in console
 * Added link from alert to error in gui base class

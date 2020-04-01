@@ -64,7 +64,6 @@ public class Context {
     boolean bufferError = false;
 
     public PropertyFile settings = null;
-    public PropertyFile sketchSettings = null;
 
     public Process runningProcess = null;
 
@@ -104,7 +103,6 @@ public class Context {
         silence = src.silence;
 
         settings = new PropertyFile(src.settings);
-        sketchSettings = new PropertyFile(src.sketchSettings);
         savedSettings = new PropertyFile(src.savedSettings);
 //        startTimers(); // Don't want timers on a copied context
         parentContext = src;
@@ -112,7 +110,6 @@ public class Context {
 
     public Context() {
         settings = new PropertyFile();
-        sketchSettings = new PropertyFile();
         updateSystem();
 
         startTimers();
@@ -206,7 +203,7 @@ public class Context {
         if (compiler != null) { pf.mergeData(compiler.getProperties()); }
         if (core != null) { pf.mergeData(core.getProperties()); }
         if (board != null) { pf.mergeData(board.getProperties()); }
-        pf.mergeData(sketchSettings);
+        pf.mergeData(sketch.getSettings());
         pf.mergeData(settings);
         return pf;
     }
@@ -217,7 +214,7 @@ public class Context {
         if (compiler != null) { pf.mergeData(compiler.getProperties()); }
         if (core != null) { pf.mergeData(core.getProperties()); }
         if (board != null) { pf.mergeData(board.getProperties()); }
-        pf.mergeData(sketchSettings);
+        pf.mergeData(sketch.getSettings());
         pf.mergeData(settings);
         return pf.get(k);
     }
@@ -252,7 +249,7 @@ public class Context {
             return programmer.getEmbedded(uri.substring(6));
         }
         if (uri.startsWith("sketch:")) {
-            return sketchSettings.getEmbedded(uri.substring(7));
+            return sketch.getSettings().getEmbedded(uri.substring(7));
         }
         if (uri.startsWith("merged:")) {
             PropertyFile pf = getMerged();
@@ -952,26 +949,6 @@ public class Context {
         parser = null;
     }
 
-    public void loadSketchSettings(File pf) {
-        if (pf.exists()) {
-            sketchSettings = new PropertyFile(pf);
-        } else {
-            sketchSettings = new PropertyFile();
-        }
-    }
-
-    public void saveSketchSettings() {
-        if (sketch == null) {
-            return;
-        }
-        File f = new File(sketch.getFolder(), "sketch.cfg");
-        sketchSettings.save(f);
-    }
-
-    public PropertyFile getSketchSettings() {
-        return sketchSettings;
-    }
-
     public int getParsedInteger(String k) {
         return getParsedInteger(k, 0);
     }
@@ -1190,6 +1167,14 @@ public class Context {
 
     public void setSystemContext(boolean v) {
         systemContext = v;
+    }
+
+    public void cleanup() {
+        sketch.cleanup();
+        if (sketch.isUntitled()) {
+            // We are in a temporary folder so let's zap it
+            Utils.deltree(sketch.getFolder());            
+        }
     }
 
 }

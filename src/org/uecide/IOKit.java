@@ -94,7 +94,7 @@ public class IOKit {
                             if (db.equals("!active")) { newNode.clearFlag(IOKitNode.Flags.ACTIVE); }
                             if (db.startsWith("class ")) { newNode.setNodeClass(db.substring(6)); }
                             try {
-                                if (db.startsWith("id 0x")) { newNode.setId(Integer.parseInt(db.substring(5), 16)); }
+                                if (db.startsWith("id 0x")) { newNode.setId(Long.parseLong(db.substring(5), 16)); }
                             } catch (Exception ex) {
                                 Debug.exception(ex);
                                 newNode.setId(0);

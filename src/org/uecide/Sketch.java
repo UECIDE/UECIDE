@@ -85,8 +85,6 @@ public class Sketch {
     public String percentageCharacter = null;
     public int percentageCharacterCount = 0;
 
-    boolean isUntitled;             // Whether or not the sketch has been named
-
     boolean terminateExecution = false;
 
     Process runningProcess = null;
@@ -138,8 +136,6 @@ public class Sketch {
         uuid = UUID.randomUUID().toString();
         ctx = c;
         ctx.setSketch(this);
-
-        isUntitled = false;
 
         if(path == null) {
             path = createUntitledSketch();
@@ -314,11 +310,7 @@ public class Sketch {
 
         ctx.action("SetBoard", Preferences.get("board.recent"));
 
-        updateSketchConfig();
-
         updateLibraryList();
-
-
         loadConfig();
     }
 
@@ -374,7 +366,6 @@ public class Sketch {
 
     public File createUntitledSketch() {
         int num = 0;
-        isUntitled = true;
         File f = null;
 
         do {
@@ -746,7 +737,6 @@ public class Sketch {
             }
         }
 
-        updateSketchConfig();
         updateLibraryList();
 
         if (Preferences.getBoolean("compiler.generate_makefile")) {
@@ -1134,7 +1124,7 @@ public class Sketch {
         if(newPath.exists()) {
             boolean overwrite = ctx.getGui().askYesNo("Overwrite " + newPath.getName() + "?");
             if (!overwrite) return false;
-            UECIDE.removeDescendants(newPath);
+            Utils.deltree(newPath);
         }
 
         Debug.message("Save as " + newPath.getAbsolutePath());
@@ -1173,12 +1163,12 @@ public class Sketch {
             sf.saveDataToDisk(dest);
         }
 
-        // 4. Load the newly created sketch into a new Sketch object and apply it to the context.
-        Sketch newlyCreatedSketch = new Sketch(newPath, ctx);
-        ctx.setSketch(newlyCreatedSketch);
+        // 4. Open the newly created sketch
+        ctx.action("openSketch", newPath);
 
-        // 5. Tell anyone who cares that the sketch object has changed.
-        ctx.triggerEvent("sketchLoaded");
+        // 5. Close the old sketch
+        ctx.action("closeSession", true);
+
         return true;
     }
 
@@ -2263,7 +2253,14 @@ public class Sketch {
     }
 
     public boolean isUntitled() {
-        return isUntitled;
+        // Must be in the tmpdir for a start.
+        if (!getFolder().getParentFile().equals(UECIDE.getTmpDir())) return false;
+
+        // Should start with the word "untitled"
+        if (getFolder().getName().startsWith("untitled")) return true;
+
+        // Not untitled, but saved in the temporary folder. A bit silly, but what can do you, eh?
+        return false;
     }
 
 
@@ -3327,22 +3324,6 @@ public class Sketch {
         return true;
     }
 
-    long lastConfigChange = 0;
-    public boolean updateSketchConfig() {
-        File sketchConfigFile = new File(sketchFolder, "sketch.cfg");
-        if (!sketchConfigFile.exists()) {
-            return false;
-        }
-
-        long lastMod = sketchConfigFile.lastModified();
-        if (lastConfigChange != lastMod) {
-            ctx.loadSketchSettings(sketchConfigFile);
-            lastConfigChange = lastMod;
-            return true;
-        }
-        return false;
-    }
-
     public void outputErrorStream(String msg) {
         if (UECIDE.cli.isSet("verbose")) {
             System.err.print(msg);
@@ -3354,8 +3335,6 @@ public class Sketch {
             System.out.print(msg);
         }
     }
-
-
 
     class CaseInsensitiveFileComparator implements Comparator {
         public int compare(Object o1, Object o2) {
@@ -3412,5 +3391,9 @@ public class Sketch {
 
     public void setContext(Context c) {
         ctx = c;
+    }
+
+    public PropertyFile getSettings() {
+        return settings;
     }
 }

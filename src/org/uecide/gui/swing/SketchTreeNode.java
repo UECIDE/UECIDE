@@ -19,6 +19,7 @@ public class SketchTreeNode extends SketchTreeNodeBase {
     SketchSourceFilesNode sketchSourceFilesNode;
     SketchHeaderFilesNode sketchHeaderFilesNode;
     SketchTreeLibrariesNode sketchTreeLibrariesNode;
+    SketchTreeBinariesNode sketchTreeBinariesNode;
     SketchTreeOutputNode sketchTreeOutputNode;
 
     public SketchTreeNode(Context c, SketchTreeModel m) {
@@ -26,11 +27,13 @@ public class SketchTreeNode extends SketchTreeNodeBase {
         sketchSourceFilesNode = new SketchSourceFilesNode(ctx, model);
         sketchHeaderFilesNode = new SketchHeaderFilesNode(ctx, model);
         sketchTreeLibrariesNode = new SketchTreeLibrariesNode(ctx, model);
+        sketchTreeBinariesNode = new SketchTreeBinariesNode(ctx, model);
         sketchTreeOutputNode = new SketchTreeOutputNode(ctx, model);
 
         add(sketchSourceFilesNode);
         add(sketchHeaderFilesNode);
         add(sketchTreeLibrariesNode);
+        add(sketchTreeBinariesNode);
         add(sketchTreeOutputNode);
     }
 
@@ -43,6 +46,7 @@ public class SketchTreeNode extends SketchTreeNodeBase {
         if(sketchSourceFilesNode.updateChildren()) modified = true;
         if(sketchHeaderFilesNode.updateChildren()) modified = true;
         if(sketchTreeLibrariesNode.updateChildren()) modified = true;
+        if(sketchTreeBinariesNode.updateChildren()) modified = true;
         if(sketchTreeOutputNode.updateChildren()) modified = true;
         if (modified) model.reload(this);
         return modified;
