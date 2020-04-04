@@ -1035,6 +1035,9 @@ public class Context {
             string = string.trim();
 
             if(string != null && string.length() > 0) {
+                if (Base.isWindows()) { // Windows doesn't handle quotes at all well. 
+                    string = string.replaceAll("\"", "\\\\\"");
+                }
                 stringList.add(string);
             }
         }

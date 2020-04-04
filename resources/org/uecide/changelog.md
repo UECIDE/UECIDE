@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.11.4
+------
+
+* Improved exception reporting for debugging
+
+
 0.11.3
 ------
 
@@ -739,6 +745,7 @@ Changelog
 0.8.5
 -----
 
+* Improved exception reporting for debugging
 * Protect against invalid sketch or file in tree update
 * Add logging output support
 * Merge branch 'master' of github.com:UECIDE/UECIDE
