@@ -1,3 +1,21 @@
+uecide (0.11.4) unstable; urgency=low 
+
+  * Improved exception reporting for debugging
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Sun, 29 Mar 2020 21:49:38 +0100
+
+uecide (0.11.3) unstable; urgency=low 
+
+  * Add logging output support
+  * Protect against invalid sketch or file in tree update
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Fri, 21 Feb 2020 15:08:03 +0000
+
+uecide (0.11.2) unstable; urgency=low 
+
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Fri, 21 Feb 2020 15:08:03 +0000
+
 uecide (0.11.1) unstable; urgency=low 
 
   * Fixed missing line feed after inner files

@@ -32,28 +32,29 @@ package org.uecide.varcmd;
 
 import org.uecide.*;
 
-public class vc_programmer implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_tool implements VariableCommand {
+    public String main(Context ctx, String args) {
 
         String[] alist = args.split(",");
-        Programmer prog = sketch.getProgrammer();
 
         String prop = alist[alist.length-1];
+        Tool tool = null;
 
         if (alist.length == 1) {
-            prop = alist[0];
+            ctx.error("No tool name specified");
+            return "ERROR";
         } else {
-            prog = Base.programmers.get(alist[0]);
+            tool = Base.tools.get(alist[0]);
             prop = alist[1];
         }
 
-        if (prog == null) {
+        if (tool == null) {
             return "ERROR";
         }
 
         if (prop.equals("root")) {
-            return prog.getFolder().getAbsolutePath();
+            return tool.getFolder().getAbsolutePath();
         }
-        return prog.getProperties().getPlatformSpecific(prop);
+        return tool.getProperties().getPlatformSpecific(prop);
     }
 }

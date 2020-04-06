@@ -4,6 +4,11 @@ Changelog
 0.11.4
 ------
 
+* Release 0.11.5
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Add escapes for quotes in windows command execution
+* Get dnsjava from Maven
+* New version of Launch4j
 * Improved exception reporting for debugging
 
 
@@ -745,6 +750,11 @@ Changelog
 0.8.5
 -----
 
+* Release 0.11.5
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Add escapes for quotes in windows command execution
+* Get dnsjava from Maven
+* New version of Launch4j
 * Improved exception reporting for debugging
 * Protect against invalid sketch or file in tree update
 * Add logging output support

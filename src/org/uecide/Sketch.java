@@ -1511,7 +1511,9 @@ public class Sketch {
             pw.println("// This should be inserted at line " + lineno);
             pw.println();
             for (FunctionBookmark p : protos) {
-                pw.println(p + ";");
+                if (p.getFile().getName().endsWith(".ino") || p.getFile().getName().endsWith(".pde")) {
+                    pw.println(p + ";");
+                }
             }
             pw.println();
 
