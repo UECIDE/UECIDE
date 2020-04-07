@@ -56,36 +56,24 @@ public class Context {
     public Sketch sketch = null;
     public CommunicationPort port = null;
     public Gui gui = null;
-
     public ContextListener listener = null;
-
     public StringBuilder buffer = null;
-
     boolean bufferError = false;
-
     public PropertyFile settings = null;
-
     public Process runningProcess = null;
-
     public PropertyFile savedSettings = null;
-
     public DataStreamParser parser = null;
-
     public boolean silence = false;
-
     public HashMap<String, ArrayList<ContextEventListener>> contextEventListeners = new HashMap<String, ArrayList<ContextEventListener>>();
-
     public HashMap<String, Thread> threads = new HashMap<String, Thread>();
-
     Context parentContext = null;
-
     Timer eventTimer;
-
     public boolean systemContext = false;
-
-    // Make a new empty context.
-
     OutputStream outputStream = null;
+    public Queue<Runnable> jobQueue;
+    public ArrayList<WorkerThread> workers;
+    public static int contextId = 0;
+    public int thisContextId = 0;
 
     public Context(Context src) {
         board = src.board;
@@ -101,11 +89,15 @@ public class Context {
         runningProcess = src.runningProcess;
         parser = src.parser;
         silence = src.silence;
+        thisContextId = contextId++;
+        contextEventListeners = src.contextEventListeners;
 
         settings = new PropertyFile(src.settings);
         savedSettings = new PropertyFile(src.savedSettings);
 //        startTimers(); // Don't want timers on a copied context
         parentContext = src;
+        jobQueue = src.jobQueue;
+        workers = src.workers;
     }
 
     public Context() {
@@ -113,7 +105,21 @@ public class Context {
         updateSystem();
 
         startTimers();
+        jobQueue = new ArrayDeque<Runnable>();
+        workers = new ArrayList<WorkerThread>();
+        thisContextId = contextId++;
+
+        for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
+            WorkerThread worker = new WorkerThread(jobQueue, this);
+            worker.start();
+            workers.add(worker);
+        }
     }
+
+    public String toString() {
+        return String.format("Context %d", thisContextId);
+    }
+        
 
     class ThreadRet extends Thread {
         public Object retval;
@@ -774,6 +780,9 @@ public class Context {
             string = string.trim();
 
             if(string != null && string.length() > 0) {
+                if (UECIDE.isWindows()) { // Windows doesn't handle quotes at all well. 
+                    string = string.replaceAll("\"", "\\\\\"");
+                }
                 stringList.add(string);
             }
         }
@@ -1131,25 +1140,25 @@ public class Context {
         localCtx.set("source.name", src.getAbsolutePath());
         localCtx.set("object.name", dest.getAbsolutePath());
 
-        localCtx.addDataStreamParser(new DataStreamParser() {
-            public String parseStreamMessage(Context ctx, String m) {
-                return m;
-            }
-            public String parseStreamError(Context ctx, String m) {
-                return m;
-            }
-        });
+//        localCtx.addDataStreamParser(new DataStreamParser() {
+//            public String parseStreamMessage(Context ctx, String m) {
+//                return m;
+//            }
+//            public String parseStreamError(Context ctx, String m) {
+//                return m;
+//            }
+//        });
 
         String output = "";
 
         if (!(Boolean)localCtx.executeKey(recipe)) {
-            localCtx.removeDataStreamParser();
+//            localCtx.removeDataStreamParser();
             localCtx.dispose();
             triggerEvent("fileCompilationFailed", src);
             return null;
         }
 
-        localCtx.removeDataStreamParser();
+//        localCtx.removeDataStreamParser();
         if (!dest.exists()) {
             localCtx.dispose();
             triggerEvent("fileCompilationFailed", src);
@@ -1177,4 +1186,28 @@ public class Context {
         }
     }
 
+    public void queueJob(Runnable r) {
+        synchronized(jobQueue) {
+            jobQueue.add(r);
+            jobQueue.notify();
+        }
+    }
+
+    public void waitQueue() {
+        while (!jobQueue.isEmpty()) {
+            try { Thread.sleep(10); } catch (Exception ex) {    Debug.exception(ex); }
+        }
+        boolean busy = false;
+
+        do {
+            busy = false;
+            for (WorkerThread t : workers) {
+                if (t.isRunning()) {
+                    busy = true;
+                    try { Thread.sleep(10); } catch (Exception ex) {    Debug.exception(ex); }
+                    break;
+                }
+            }
+        } while (busy == true);
+    }
 }

@@ -3,6 +3,7 @@ package org.uecide.gui.swing;
 import org.uecide.Context;
 import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
+import org.uecide.Debug;
 import org.uecide.Preferences;
 import org.uecide.Message;
 
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import java.util.concurrent.Semaphore;
+
 import com.wittams.gritty.swing.TermPanel;
 import com.wittams.gritty.swing.GrittyTerminal;
 
@@ -31,6 +34,8 @@ public class Console extends TabPanel implements MouseWheelListener, ContextEven
     ConsoleTty tty;
     TermPanel panel;
     JTextField input;
+
+    Semaphore printerSem = new Semaphore(1);;
 
     boolean promptShown = false;
 
@@ -121,18 +126,24 @@ public class Console extends TabPanel implements MouseWheelListener, ContextEven
         if (e.getEvent().equals("message")) {
             Message m = (Message)e.getObject();
 
-            switch (m.getMessageType()) {
-                case Message.HEADING: heading(m.getText()); break;
-                case Message.BULLET1: bullet(m.getText()); break;
-                case Message.BULLET2: bullet2(m.getText()); break;
-                case Message.BULLET3: bullet3(m.getText()); break;
-                case Message.COMMAND: command(m.getText()); break;
-                case Message.NORMAL: message(m.getText()); break;
-                case Message.WARNING: warning(m.getText()); break;
-                case Message.ERROR: error(m.getText()); break;
-                case Message.STREAM_MESSAGE: tty.feed(m.getText()); break;
-                case Message.STREAM_WARNING: tty.feed(m.getText()); break;
-                case Message.STREAM_ERROR: tty.feed(m.getText()); break;
+            try {
+                printerSem.acquire();
+                switch (m.getMessageType()) {
+                    case Message.HEADING: heading(m.getText()); break;
+                    case Message.BULLET1: bullet(m.getText()); break;
+                    case Message.BULLET2: bullet2(m.getText()); break;
+                    case Message.BULLET3: bullet3(m.getText()); break;
+                    case Message.COMMAND: command(m.getText()); break;
+                    case Message.NORMAL: message(m.getText()); break;
+                    case Message.WARNING: warning(m.getText()); break;
+                    case Message.ERROR: error(m.getText()); break;
+                    case Message.STREAM_MESSAGE: streamMessage(m.getText()); break;
+                    case Message.STREAM_WARNING: streamWarning(m.getText()); break;
+                    case Message.STREAM_ERROR: streamError(m.getText()); break;
+                }
+                printerSem.release();
+            } catch (Exception ex) {
+                Debug.exception(ex);
             }
         }
     }

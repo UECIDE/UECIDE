@@ -24,7 +24,6 @@ public class AptUpgradeAction extends Action {
         try {
             apt = APT.factory(ctx);
 
-
             if (args.length == 1) {
                 Package p;
                 if (args[0] instanceof String) {
@@ -40,11 +39,11 @@ public class AptUpgradeAction extends Action {
 
                 apt.upgradePackage(p);
                 return true;
-            }
-                
-            Package[] pl = apt.getUpgradeList();
-            for (Package p : pl) {
-                apt.upgradePackage(p);
+            } else {
+                Package[] pl = apt.getUpgradeList();
+                for (Package p : pl) {
+                    apt.upgradePackage(p);
+                }
             }
         } catch (Exception ex) {
             Debug.exception(ex);

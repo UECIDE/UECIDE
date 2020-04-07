@@ -424,6 +424,7 @@ public class APT {
 
     public void upgradePackage(Package p) throws FileNotFoundException, IOException{
         if (!isUpgradable(p)) {
+            ctx.message(p + " is already up to date");
             return;
         }
         Package[] deps = resolveDepends(p);

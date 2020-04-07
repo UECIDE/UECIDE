@@ -68,6 +68,12 @@ public class CodeEditor extends TabPanel implements ContextEventListener, FocusL
         ctx.listenForEvent("sketchDataModified", this);
         ctx.listenForEvent("saveCursorLocation", this);
         ctx.listenForEvent("restoreCursorLocation", this);
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                gotoLine(1);
+            }
+        });
     }
 
     public SketchFile getSketchFile() {
@@ -137,8 +143,10 @@ public class CodeEditor extends TabPanel implements ContextEventListener, FocusL
     }
 
     public void gotoLine(int lineno) {
+        lineno--;
+        if  (lineno < 0) lineno = 0;
         try {
-            textArea.setCaretPosition(textArea.getLineStartOffset(lineno - 1));
+            textArea.setCaretPosition(textArea.getLineStartOffset(lineno));
         } catch(BadLocationException e) {
             Debug.exception(e);
         }

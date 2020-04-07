@@ -60,7 +60,6 @@ public class SetBoardAction extends Action {
             throw new ActionException("No Core Available");
         } catch (Exception ex) {
             Debug.exception(ex);
-            ex.printStackTrace();
             throw new ActionException(ex.getMessage());
         }
     }

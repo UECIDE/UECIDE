@@ -274,7 +274,6 @@ public class stk500v1 extends BuiltinCommand implements CommsListener {
 
         } catch(Exception e) {
             Debug.exception(e);
-e.printStackTrace();
             ctx.error(e);
             return false;
         }

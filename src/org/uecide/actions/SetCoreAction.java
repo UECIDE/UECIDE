@@ -49,7 +49,6 @@ public class SetCoreAction extends Action {
             throw new ActionException("No Compiler Available");
         } catch (Exception ex) {
             Debug.exception(ex);
-            ex.printStackTrace();
             throw new ActionException(ex.getMessage());
         }
     }

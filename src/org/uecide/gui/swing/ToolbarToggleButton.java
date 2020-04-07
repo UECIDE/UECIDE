@@ -36,7 +36,6 @@ public class ToolbarToggleButton extends ToolbarButton implements ActionListener
             deactivateActionListeners.add(deactivate);
         } catch (IOException ex) {
             Debug.exception(ex);
-            ex.printStackTrace(); 
         }
 
         super.addActionListener(this);

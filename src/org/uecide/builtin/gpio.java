@@ -69,7 +69,6 @@ public class gpio extends BuiltinCommand {
             pw.close();
         } catch (Exception e) {
             Debug.exception(e);
-            e.printStackTrace();
         }
     }
 
@@ -86,7 +85,6 @@ public class gpio extends BuiltinCommand {
             pw.close();
         } catch (Exception e) {
             Debug.exception(e);
-            e.printStackTrace();
         }
     }
 
@@ -103,7 +101,6 @@ public class gpio extends BuiltinCommand {
             pw.close();
         } catch (Exception e) {
             Debug.exception(e);
-            e.printStackTrace();
         }
     }
 

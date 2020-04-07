@@ -50,7 +50,6 @@ public class SketchSourceFileNode extends SketchTreeNodeBase implements ContextE
             bookmarks = sketchFile.scanForFunctions();
         } catch (Exception ex) {
             Debug.exception(ex);
-            ex.printStackTrace();
             return false;
         }
 

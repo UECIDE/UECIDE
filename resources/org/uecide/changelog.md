@@ -4,6 +4,7 @@ Changelog
 0.11.4
 ------
 
+* Initial work on binary conversion gui
 * Improved global exception handling
 * Protect against invalid sketch or file in tree update
 * Add logging output support
@@ -792,6 +793,7 @@ Changelog
 0.8.5
 -----
 
+* Initial work on binary conversion gui
 * Improved global exception handling
 * Add output logging redirection
 * Added command prompt in console

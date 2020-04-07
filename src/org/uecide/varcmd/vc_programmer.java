@@ -55,6 +55,6 @@ public class vc_programmer extends VariableCommand {
         if (prop.equals("root")) {
             return prog.getFolder().getAbsolutePath();
         }
-        return prog.get(prop);
+        return prog.getProperties().getPlatformSpecific(prop);
     }
 }

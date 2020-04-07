@@ -88,7 +88,6 @@ public class Utils {
                 Desktop.getDesktop().browse(new URI(url));
             } catch (Exception ex) {
                 Debug.exception(ex);
-                ex.printStackTrace();
             }
         }
     }
@@ -289,7 +288,6 @@ public class Utils {
                 deltree(file);
             }
         }
-        System.err.println("Deleting " + f);
         f.delete();
     }
 

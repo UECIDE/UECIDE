@@ -52,6 +52,6 @@ public class vc_tool extends VariableCommand {
         if (prop.equals("root")) {
             return tool.getFolder().getAbsolutePath();
         }
-        return tool.get(prop);
+        return tool.getProperties().getPlatformSpecific(prop);
     }
 }

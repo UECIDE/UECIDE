@@ -984,25 +984,28 @@ public class Library implements Comparable {
         int fileCount = filesToCompile.size();
         int count = 0;
 
+        ArrayList<FileCompiler> compileJobs = new ArrayList<FileCompiler>();
+
         for (File f : filesToCompile) {
-            File out = ctx.compileFile(localCtx, f, libBuildFolder);
-            if (out == null) {
+            FileCompiler fc = new FileCompiler(localCtx, f, libBuildFolder);
+            compileJobs.add(fc);
+            ctx.queueJob(fc);
+        }
+
+        ctx.waitQueue();
+
+        for (FileCompiler fc : compileJobs) {
+            if (fc.getState() == FileCompiler.FAILED) {
                 localCtx.dispose();
                 compilingState = COMP_FAIL;
                 ctx.triggerEvent("libraryCompileFailed", this);
                 return false;
             }
+            File out = fc.getResult();
             ctx.triggerEvent("buildFileAdded", out);
 
             localCtx.set("object.name", out.getAbsolutePath());
             boolean ok = (Boolean)localCtx.executeKey("compile.ar");
-
-            if (!ok) {
-                localCtx.dispose();
-                compilingState = COMP_FAIL;
-                ctx.triggerEvent("libraryCompileFailed", this);
-                return false;
-            }
 
             count++;
             setCompiledPercent(count * 100 / fileCount);

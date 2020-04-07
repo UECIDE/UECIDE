@@ -238,7 +238,8 @@ public class UECIDE {
         cli.addParameter("install",             "package",  String.class,   "cli.help.install");
         cli.addParameter("remove",              "package",  String.class,   "cli.help.remove");
         cli.addParameter("remove-all",          "",         Boolean.class,  "cli.help.remove-all");
-        cli.addParameter("upgrade",             "",         Boolean.class,  "cli.help.upgrade");
+        cli.addParameter("upgrade-all",         "",         Boolean.class,  "cli.help.upgrade");
+        cli.addParameter("upgrade",             "package",  String.class,   "cli.help.upgrade");
         cli.addParameter("search",              "term",     String.class,   "cli.help.search");
         cli.addParameter("list",                "",         Boolean.class,  "cli.help.list");
         cli.addParameter("section",             "name",     String.class,   "cli.help.section");
@@ -383,8 +384,15 @@ public class UECIDE {
             doExit = true;
         }
 
-        if (cli.isSet("upgrade")) {
+        if (cli.isSet("upgrade-all")) {
             bootContext.action("AptUpgrade");
+            doExit = true;
+        }
+    
+        if (cli.isSet("upgrade")) {
+            for (String p : cli.getString("upgrade")) {
+                bootContext.action("AptUpgrade", p);
+            }
             doExit = true;
         }
 

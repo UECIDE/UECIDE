@@ -819,7 +819,10 @@ public class Sketch {
             pw.println("// *** PROTOTYPES DISABLED IN PREFERENCES ***");
         } else {
             for (FunctionBookmark p : protos) {
-                pw.println(p + ";");
+                String pn = p.getFile().toString().toLowerCase();
+                if (pn.endsWith(".ino") || pn.endsWith(".pde")) {
+                    pw.println(p + ";");
+                }
             }
         }
         pw.println();
@@ -1794,54 +1797,14 @@ public class Sketch {
     }
 
     public boolean compileLibraries() {
-        boolean ok = true;
-        ArrayList<LibCompileThread> threads = new ArrayList<LibCompileThread>();
-
-        int maxThreads = 4;
-        int currentThreads = 0;
 
         for(String lib : importedLibraries.keySet()) {
-
-            while (currentThreads >= maxThreads) {
-                for (LibCompileThread t : threads) {
-                    try {
-                        t.join(10);
-                        if (t.getState() == Thread.State.TERMINATED) {
-                            if (t.compiled == false) ok = false;
-                            currentThreads--;
-                            threads.remove(threads.indexOf(t));
-                            break;
-                        }
-                    } catch (Exception e) {
-                        Debug.exception(e);
-                        ctx.error(e);
-                    }
-                }
-            }
-
-            LibCompileThread t = new LibCompileThread(importedLibraries.get(lib));
-            t.start();
-            threads.add(t);
-            currentThreads++;
-
-            try {
-                Thread.sleep(10);
-            } catch (Exception e) {
-                Debug.exception(e);
+            if (importedLibraries.get(lib).compile(ctx) == false) {
+                return false;
             }
         }
 
-        for (LibCompileThread t : threads) {
-            try {
-                t.join();
-                if (t.compiled == false) ok = false;
-            } catch (Exception e) {
-                Debug.exception(e);
-                ctx.error(e);
-            }
-        }
-
-        return ok;
+        return true;
     }
 
     public File compileFile(Context localCtx, File src) {
@@ -1939,31 +1902,44 @@ public class Sketch {
             }
         }
 
+        ArrayList<FileCompiler> files = new ArrayList<FileCompiler>();
+
         for(File f : fileList) {
             if(f.lastModified() > archiveDate) {
-                File out = compileFile(ctx, f, coreBuildFolder);
-
-                if(out == null) {
-                    UECIDE.tryDelete(coreBuildFolder);
-                    if (archive.exists()) UECIDE.tryDelete(archive);
-                    return false;
-                }
-                ctx.triggerEvent("buildFileAdded", out);
-
-                ctx.set("object.name", out.getAbsolutePath());
-                boolean ok = (Boolean)ctx.executeKey("compile.ar");
-
-                if(!ok) {
-                    UECIDE.tryDelete(out);
-                    UECIDE.tryDelete(coreBuildFolder);
-                    ctx.triggerEvent("buildFileRemoved", out);
-                    if (archive.exists()) UECIDE.tryDelete(archive);
-                    return false;
-                }
-
-                UECIDE.tryDelete(out);
-                ctx.triggerEvent("buildFileRemoved", out);
+                files.add(new FileCompiler(ctx, f, coreBuildFolder));
             }
+        }
+
+        for (FileCompiler fc : files) {
+            ctx.queueJob(fc);
+        }
+
+        ctx.waitQueue();
+
+        for (FileCompiler fc : files) {
+            if (fc.getState() == FileCompiler.FAILED) {
+                UECIDE.tryDelete(coreBuildFolder);
+                if (archive.exists()) UECIDE.tryDelete(archive);
+                return false;
+            }
+
+            File out = fc.getResult();
+        
+            ctx.triggerEvent("buildFileAdded", out);
+
+            ctx.set("object.name", out.getAbsolutePath());
+            boolean ok = (Boolean)ctx.executeKey("compile.ar");
+
+            if(!ok) {
+                UECIDE.tryDelete(out);
+                UECIDE.tryDelete(coreBuildFolder);
+                ctx.triggerEvent("buildFileRemoved", out);
+                if (archive.exists()) UECIDE.tryDelete(archive);
+                return false;
+            }
+
+            UECIDE.tryDelete(out);
+            ctx.triggerEvent("buildFileRemoved", out);
         }
 
         UECIDE.tryDelete(coreBuildFolder);
@@ -2077,11 +2053,21 @@ public class Sketch {
             ext = "cpp";
         }
 
+        ArrayList<FileCompiler> fcs = new ArrayList<FileCompiler>();
+
         for (File f : filesToCompile) {
-            File obj = compileFile(ctx, f, buildFolder);
-            if (obj == null) {
+            FileCompiler fc = new FileCompiler(ctx, f, buildFolder);
+            fcs.add(fc);
+            ctx.queueJob(fc);
+        }
+
+        ctx.waitQueue();
+
+        for (FileCompiler fc : fcs) {
+            if (fc.getState() != FileCompiler.COMPILED) {
                 return null;
             }
+            File obj = fc.getResult();
             sf.add(obj);
         }
         
@@ -2696,34 +2682,26 @@ public class Sketch {
         if (files == null) {
             return conversionData;
         }
+
+        ArrayList<BinaryFileConverter>bcs = new ArrayList<BinaryFileConverter>();
+
         for (File file : files) {
             if (getInteger("binary." + file.getName() + ".conversion") > 0) {
-                int type = FileType.getType(file);
-
-                FileConverter conv = null;
-
-                switch (type) {
-                    case FileType.GRAPHIC:
-                        if (getInteger("binary." + file.getName() + ".conversion") > 1) {
-                            conv = new ImageFileConverter(file, getInteger("binary." + file.getName() + ".conversion"), get("binary." + file.getName() + ".datatype"), get("binary." + file.getName() + ".prefix"), getColor("binary." + file.getName() + ".transparency"), getInteger("binary." + file.getName() + ".threshold"));
-                        } else {
-                            conv = new BasicFileConverter(file, get("binary." + file.getName() + ".prefix"));
-                        }
-                        break;
-
-                    default:
-                        conv = new BasicFileConverter(file, get("binary." + file.getName() + ".prefix"));
-                        break;
-                }
-
-                if (conv != null) {
-                    if (conv.convertFile(getBuildFolder())) {
-                        File cppFile = conv.getFile();
-                        String[] headerLines = conv.getHeaderLines();
-                        conversionData.put(cppFile, headerLines);
-                    }
-                }
+                BinaryFileConverter bc = new BinaryFileConverter(ctx, file, getBuildFolder());
+                bcs.add(bc);
+                ctx.queueJob(bc);
             }
+        }
+
+        ctx.waitQueue();
+
+        for (BinaryFileConverter bc : bcs) {
+            if (bc.getState() != BinaryFileConverter.COMPILED) {
+                ctx.error("Binary file " + bc.getFile().getName() + " failed to convert.");
+                return null;
+            }
+    
+            conversionData.put(bc.getResult(), bc.getHeaders());
         }
 
         return conversionData;

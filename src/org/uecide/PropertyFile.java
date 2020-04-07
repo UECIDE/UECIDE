@@ -217,32 +217,36 @@ public class PropertyFile {
 
     /*! Merge the data from a TreeMap<String, String> object into this PropertyFile. */
     public void mergeData(TreeMap<String, String>data) {
-        if(data == null) {
-            return;
-        }
+        synchronized(properties) {
+            if(data == null) {
+                return;
+            }
 
-        for(String key : data.keySet()) {
-            set(key, data.get(key));
+            for(String key : data.keySet()) {
+                set(key, data.get(key));
+            }
         }
     }
 
     /*! Merge the data from an existing PropertyFile into this PropertyFile. */
     public void mergeData(PropertyFile pf) {
-        if(pf == null) {
-            return;
-        }
-
-        for(String key : pf.getProperties().keySet()) {
-            if (pf.getProperties().get(key).equals("")) {
-                unset(key);
-            } else {
-                set(key, pf.getProperties().get(key));
-                setSource(key, pf.getSource(key));
+        synchronized(properties) {
+            if(pf == null) {
+                return;
             }
-        }
 
-        embeddedTypes.putAll(pf.getEmbeddedTypes());
-        embedded.putAll(pf.getEmbeddedMap());
+            for(String key : pf.getProperties().keySet()) {
+                if (pf.getProperties().get(key).equals("")) {
+                    unset(key);
+                } else {
+                    set(key, pf.getProperties().get(key));
+                    setSource(key, pf.getSource(key));
+                }
+            }
+
+            embeddedTypes.putAll(pf.getEmbeddedTypes());
+            embedded.putAll(pf.getEmbeddedMap());
+        }
     }
 
     /*! Merge the data from an existing PropertyFile into this PropertyFile prepending *prefix* on to each key. */

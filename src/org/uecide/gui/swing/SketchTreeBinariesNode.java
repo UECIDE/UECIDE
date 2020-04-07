@@ -28,7 +28,7 @@ public class SketchTreeBinariesNode extends SketchTreeNodeBase implements Contex
     }
 
     public boolean updateChildren() {
-        File file = new File(ctx.getSketch().getFolder(), "binaries");
+        File file = new File(ctx.getSketch().getFolder(), "objects");
 
         boolean somethingRemoved = false;
         boolean hasBeenModified = false;
