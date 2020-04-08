@@ -80,6 +80,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     SketchTreePanel sketchTree;
 
     Console console;
+    OutputPanel output;
 
     public SwingGui(Context c) {
         super(c);
@@ -197,6 +198,8 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         sketchTree = new SketchTreePanel(ctx, leftPane);
         leftPane.add(sketchTree);
 
+        output = new OutputPanel(ctx, bottomPane);
+        bottomPane.add(output);
         console = new Console(ctx, bottomPane);
         bottomPane.add(console);
 

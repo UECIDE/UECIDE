@@ -40,7 +40,7 @@ public class Console extends TabPanel implements MouseWheelListener, ContextEven
     boolean promptShown = false;
 
     public Console(Context c, AutoTab def) {
-        super("Output", def);
+        super("Console", def);
         ctx = c;
    
         terminal = new GrittyTerminal();

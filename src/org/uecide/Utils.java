@@ -23,12 +23,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.Arrays;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 
 public class Utils {
     public static Image getScaledImage(Image srcImg, int w, int h){
@@ -314,5 +317,28 @@ public class Utils {
         name = name.replaceAll("\\.", "_");
         return name;
     }
+
+    public static BufferedImage loadImageFromResource(String res) {
+        if(!res.startsWith("/")) {
+            res = "/org/uecide/" + res;
+        }
+
+        URL loc = UECIDE.class.getResource(res);
+
+        if(loc == null) {
+            loc = UECIDE.class.getResource("/org/uecide/icons/unknown.png");
+        }
+
+        try {
+            BufferedImage im = ImageIO.read(loc);
+            return im;
+        } catch(Exception e) {
+            Debug.exception(e);
+            UECIDE.error(e);
+        }
+
+        return null;
+    }
+
 
 }

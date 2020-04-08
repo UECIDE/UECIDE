@@ -1,11 +1,14 @@
 Changelog
 =========
 
-0.11.4
+0.11.5
 ------
 
+* Sub-contexts now raise events in the parent context
+* Parallel compilation
 * Initial work on binary conversion gui
 * Improved global exception handling
+* Improved exception reporting for debugging
 * Protect against invalid sketch or file in tree update
 * Add logging output support
 * Add output logging redirection
@@ -53,6 +56,12 @@ Changelog
 * Open sketch
 * Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
+
+
+0.11.4
+------
+
+* Improved exception reporting for debugging
 
 
 0.11.3
@@ -793,6 +802,8 @@ Changelog
 0.8.5
 -----
 
+* Sub-contexts now raise events in the parent context
+* Parallel compilation
 * Initial work on binary conversion gui
 * Improved global exception handling
 * Add output logging redirection
