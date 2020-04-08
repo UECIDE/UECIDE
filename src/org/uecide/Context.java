@@ -90,7 +90,7 @@ public class Context {
         parser = src.parser;
         silence = src.silence;
         thisContextId = contextId++;
-        contextEventListeners = src.contextEventListeners;
+//        contextEventListeners = src.contextEventListeners;
 
         settings = new PropertyFile(src.settings);
         savedSettings = new PropertyFile(src.savedSettings);
@@ -151,11 +151,16 @@ public class Context {
     }
 
     public void triggerEvent(String event, Object ob) {
-        Debug.message("Event triggered: " + event);
-        if (contextEventListeners.get(event) == null) return;
-        ContextEvent ce = new ContextEvent(this, event, ob);
-        for (ContextEventListener target : contextEventListeners.get(event)) {
-            target.contextEventTriggered(ce);
+        if (parentContext != null) {
+            // Chase it up the chain to the top context
+            parentContext.triggerEvent(event, ob);
+        } else {
+            Debug.message("Event triggered: " + event);
+            if (contextEventListeners.get(event) == null) return;
+            ContextEvent ce = new ContextEvent(this, event, ob);
+            for (ContextEventListener target : contextEventListeners.get(event)) {
+                target.contextEventTriggered(ce);
+            }
         }
     }
 

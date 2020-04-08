@@ -23,11 +23,14 @@ public class FileCompiler implements Runnable {
 
     public void run() {
         state = COMPILING;
+        ctx.triggerEvent("fileCompileStarted", this);
         result = ctx.compileFile(null, source, destination);
         if (result == null) {
             state = FAILED;
+            ctx.triggerEvent("fileCompileFailed", this);
         } else {
             state = COMPILED;
+            ctx.triggerEvent("fileCompileFinished", this);
         }
     }
 
