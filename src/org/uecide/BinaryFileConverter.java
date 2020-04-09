@@ -33,18 +33,35 @@ public class BinaryFileConverter implements Runnable {
         }
 
         int type = FileType.getType(source);
+        Sketch s = ctx.getSketch();
+        String prefix = "binary." + Utils.sanitize(source.getName());
 
         switch (type) {
             case FileType.GRAPHIC:
-                if (ctx.getSketch().getInteger("binary." + source.getName() + ".conversion") > 1) {
-                    conv = new ImageFileConverter(source, ctx.getSketch().getInteger("binary." + source.getName() + ".conversion"), ctx.getSketch().get("binary." + source.getName() + ".datatype"), ctx.getSketch().get("binary." + source.getName() + ".prefix"), ctx.getSketch().getColor("binary." + source.getName() + ".transparency"), ctx.getSketch().getInteger("binary." + source.getName() + ".threshold"));
-                } else {
-                    conv = new BasicFileConverter(source, ctx.getSketch().get("binary." + source.getName() + ".prefix"));
+                if (s.getBoolean("binary." + source.getName() + ".conversion")) {
+
+                    String format = s.get(prefix + ".format");
+
+                    switch (format) {
+                        case "verbatim":
+                            conv = new BasicFileConverter(source, s.get(prefix + ".prefix"), s.get(prefix + ".type"), s.get(prefix + ".endian", "little"));
+                            break;
+                        case "rgb565":
+                            break;
+
+
+//                    conv = new ImageFileConverter(source, ctx.getSketch().getInteger("binary." + source.getName() + ".conversion"), ctx.getSketch().get("binary." + source.getName() + ".datatype"), ctx.getSketch().get("binary." + source.getName() + ".prefix"), ctx.getSketch().getColor("binary." + source.getName() + ".transparency"), ctx.getSketch().getInteger("binary." + source.getName() + ".threshold"));
+
+
+
+ //               } else {
+  //                  conv = new BasicFileConverter(source, ctx.getSketch().get("binary." + source.getName() + ".prefix"));
+                    }
                 }
                 break;
 
             default:
-                conv = new BasicFileConverter(source, ctx.getSketch().get("binary." + source.getName() + ".prefix"));
+//                conv = new BasicFileConverter(source, ctx.getSketch().get("binary." + source.getName() + ".prefix"));
                 break;
         }
 

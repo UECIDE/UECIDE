@@ -18,23 +18,14 @@ public class BasicFileConverter implements FileConverter {
     File outputFile = null;
     ArrayList<String> headerLines = null;
 
-    // Chosen nibble meanings:
-    //  0x <bit depth H> <bit depth L> <format> <rgb/bgr>
-    // Bit depths are 0 = special code, n = bits in the format
-    // 0x0000 and 0x0001 are special and always must mean the same. I.e., no inclusion, and
-    // raw inclusion.
+    String progmem = "PROGMEM";
+    String endian = "little";
         
-    public static final int NONE        = 0x0000;
-    public static final int RAW         = 0x0001;
-
-    public static KeyValuePair[] conversionOptions = {
-        new KeyValuePair(NONE, "Do not include"),
-        new KeyValuePair(RAW, "Do not convert (raw inclusion)"),
-    };
-
-    public BasicFileConverter(File in, String pref) {
+    public BasicFileConverter(File in, String pref, String dt, String en) {
         inputFile = in;
         prefix = pref;
+        dataType = dt;
+        endian = en;
     }
 
     public boolean convertFile(File buildFolder) {
@@ -50,19 +41,95 @@ public class BasicFileConverter implements FileConverter {
 
             FileInputStream fis = new FileInputStream(inputFile);
 
-            headerLines.add("static const int " + prefix + "_length = " + inputFile.length() + ";");
-            headerLines.add("extern uint8_t " + prefix + "_data[];");
-
-            PrintWriter pw = new PrintWriter(outputFile);
-            pw.println("#include <Arduino.h>\n");
-            pw.println("const uint8_t " + prefix + "_data[] PROGMEM = {");
 
             boolean start = true;
             int len = 0;
 
-            for (int x = 0; x < inputFile.length(); x++) {
-                int r = fis.read();
-                String formatted = String.format("0x%02X", r & 0xFF);
+            boolean signed = false;
+            int bytes = 1;
+            
+            switch (dataType) {
+                case "uint8_t":
+                    signed = false;
+                    bytes = 1;
+                    break;
+                case "int8_t":
+                    signed = true;
+                    bytes = 1;
+                    break;
+                case "uint16_t":
+                    signed = false;
+                    bytes = 2;
+                    break;
+                case "int16_t":
+                    signed = true;
+                    bytes = 2;
+                    break;
+                case "uint32_t":
+                    signed = false;
+                    bytes = 4;
+                    break;
+                case "int32_t":
+                    signed = true;
+                    bytes = 4;
+                    break;
+            }
+
+            headerLines.add("static const int " + prefix + "_length = " + inputFile.length() / bytes + ";");
+            headerLines.add("extern const " + dataType + " " + prefix + "_data[];");
+
+            PrintWriter pw = new PrintWriter(outputFile);
+            pw.println("#include <Arduino.h>\n");
+            pw.println("extern const " + dataType + " " + prefix + "_data[];");
+            pw.println("const " + dataType + " " + prefix + "_data[] " + progmem + " = {");
+
+            for (int x = 0; x < inputFile.length(); x += bytes) {
+
+                String formatted = null;
+
+                if (bytes == 1) {
+                    int r = fis.read();
+                    if (signed) {
+                        formatted = String.format("%d", r);
+                    } else {
+                        formatted = String.format("0x%02x", r & 0xFF);
+                    }
+                } else if (bytes == 2) {
+                    int b1 = fis.read();
+                    int b2 = fis.read();
+
+                    int r = 0;
+                    if (endian.equals("big")) {
+                        r = (b1 << 8) | b2;
+                    } else {
+                        r = (b2 << 8) | b1;
+                    }
+
+                    if (signed) {
+                        formatted = String.format("%d", r);
+                    } else {
+                        formatted = String.format("0x%04x", r & 0xFFFF);
+                    }
+                } else if (bytes == 4) {
+                    int b1 = fis.read();
+                    int b2 = fis.read();
+                    int b3 = fis.read();
+                    int b4 = fis.read();
+
+                    int r = 0;
+                    if (endian.equals("big")) {
+                        r = (b1 << 24) | (b2 << 16) | (b3 << 8) | b4;
+                    } else {
+                        r = (b4 << 24) | (b3 << 16) | (b2 << 8) | b1;
+                    }
+
+                    if (signed) {
+                        formatted = String.format("%d", r);
+                    } else {
+                        formatted = String.format("0x%08x", r & 0xFFFFFFFF);
+                    }
+                }
+
                 if (start) {
                     pw.print("    ");
                     start = false;

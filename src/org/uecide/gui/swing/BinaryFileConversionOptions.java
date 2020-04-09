@@ -167,7 +167,6 @@ public class BinaryFileConversionOptions extends JDialog {
     }
 
     void populateGraphic() {
-        populateGeneric();
 
         constraints.gridx = 0;
         constraints.weightx = 0.1d;
@@ -177,21 +176,64 @@ public class BinaryFileConversionOptions extends JDialog {
         formats[0] = new KVPair<String, String>("verbatim", "Keep as-is");
         formats[1] = new KVPair<String, String>("rgb565", "RGB565");
         JComboBox<KVPair> format = new JComboBox<KVPair>(formats);
-        String theformat = ctx.getSketch().getSettings().get("binary." + Utils.sanitize(file.getName()) + ".format");
-        if (theformat != null) {
-            int i = 0;
-            for (KVPair p : formats) {
-                if (p.getKey().equals(theformat)) {
-                    format.setSelectedIndex(i);
-                }
-                i++;
-            }
-        }
         components.put("format", format);
         constraints.gridx = 1;
         constraints.weightx = 0.0d;
         options.add(format, constraints);
         constraints.gridy++;
+
+        populateGeneric();
+
+
+
+
+
+
+        String theformat = ctx.getSketch().getSettings().get("binary." + Utils.sanitize(file.getName()) + ".format");
+        format.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                KVPair<String, String> selPair = (KVPair<String, String>)format.getSelectedItem();
+                if (selPair.getKey().equals("verbatim")) {
+                    enableComponent("type");
+                    KVPair<String, String> selPair2 = (KVPair<String, String>)((JComboBox)components.get("type")).getSelectedItem();
+                    if (selPair2.getKey().equals("uint8_t") || selPair2.getKey().equals("int8_t")) {
+                        disableComponent("endian");
+                    } else {
+                        enableComponent("endian");
+                    }
+                } else {
+                    disableComponent("type");
+                    disableComponent("endian");
+                }
+            }
+        });
+
+
+        if (theformat != null) {
+            int i = 0;
+            for (KVPair p : formats) {
+                if (p.getKey().equals(theformat)) {
+                    format.setSelectedIndex(i);
+                    if (p.getKey().equals("verbatim")) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                enableComponent("type");
+                                enableComponent("endian");
+                            }
+                        });
+                    } else {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                disableComponent("type");
+                                disableComponent("endian");
+                            }
+                        });
+                    }
+                }
+                i++;
+            }
+        }
+
     }
 
     void populateAudio() {
@@ -228,6 +270,39 @@ public class BinaryFileConversionOptions extends JDialog {
         types[4] = new KVPair<String, String>("uint32_t", "32-bit, unsigned");
         types[5] = new KVPair<String, String>("int32_t", "32-bit, signed");
         JComboBox<KVPair> vartype = new JComboBox<KVPair>(types);
+        vartype.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                KVPair<String, String> selPair = (KVPair<String, String>)vartype.getSelectedItem();
+                if (selPair.getKey().equals("uint8_t") || selPair.getKey().equals("int8_t")) {
+                    disableComponent("endian");
+                } else {
+                    enableComponent("endian");
+                }
+            }
+        });
+
+        components.put("type", vartype);
+        options.add(vartype, constraints);
+        constraints.gridy++;
+
+        constraints.gridx = 0;
+        constraints.weightx = 0.1d;
+        options.add(new JLabel("Endian:"), constraints);
+
+        constraints.gridx = 1;
+        constraints.weightx = 0.9d;
+        KVPair[] endians = new KVPair[2];
+        endians[0] = new KVPair<String, String>("big", "Big-Endian");
+        endians[1] = new KVPair<String, String>("little", "Little-Endian");
+        JComboBox<KVPair> endian = new JComboBox<KVPair>(endians);
+
+
+        components.put("endian", endian);
+        options.add(endian, constraints);
+        constraints.gridy++;
+
+
+
 
         String thetype = ctx.getSketch().getSettings().get("binary." + Utils.sanitize(file.getName()) + ".type");
         if (thetype != null) {
@@ -235,19 +310,36 @@ public class BinaryFileConversionOptions extends JDialog {
             for (KVPair p : types) {
                 if (p.getKey().equals(thetype)) {
                     vartype.setSelectedIndex(i);
+                    if (p.getKey().equals("uint8_t") || p.getKey().equals("int8_t")) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                disableComponent("endian");
+                            }
+                        });
+                    } else {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                enableComponent("endian");
+                            }
+                        });
+                    }
                 }
                 i++;
             }
         }
             
-
-        components.put("type", vartype);
-        options.add(vartype, constraints);
-        constraints.gridy++;
-
+        String theendian = ctx.getSketch().getSettings().get("binary." + Utils.sanitize(file.getName()) + ".endian");
+        if (theendian != null) {
+            int i = 0;
+            for (KVPair p : endians) {
+                if (p.getKey().equals(theendian)) {
+                    endian.setSelectedIndex(i);
+                }
+                i++;
+            }
+        }
 
     }
-
 
     void forceLocation() {
         Dimension d = getSize();
@@ -268,6 +360,19 @@ public class BinaryFileConversionOptions extends JDialog {
 
 
 
+    public void enableComponent(String name) {
+        JComponent c = components.get(name);
+        if (c != null) {
+            c.setEnabled(true);
+        }
+    }
+
+    public void disableComponent(String name) {
+        JComponent c = components.get(name);
+        if (c != null) {
+            c.setEnabled(false);
+        }
+    }
 
 
 
@@ -298,5 +403,8 @@ public class BinaryFileConversionOptions extends JDialog {
             return value;
         }
     }
+
+
+
 
 }
