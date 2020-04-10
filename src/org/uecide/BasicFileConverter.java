@@ -88,8 +88,12 @@ public class BasicFileConverter implements FileConverter {
                 String formatted = null;
 
                 if (bytes == 1) {
-                    int r = fis.read();
+                    int r = fis.read() & 0xFF;
                     if (signed) {
+                        // sign extend
+                        if ((r & 0x80) == 0x80) {
+                            r |= 0xFFFFFF00;
+                        }
                         formatted = String.format("%d", r);
                     } else {
                         formatted = String.format("0x%02x", r & 0xFF);
@@ -97,6 +101,9 @@ public class BasicFileConverter implements FileConverter {
                 } else if (bytes == 2) {
                     int b1 = fis.read();
                     int b2 = fis.read();
+
+                    if (b1 == -1) { b1 = 0; } else { b1 = b1 & 0xFF; }
+                    if (b2 == -1) { b2 = 0; } else { b2 = b2 & 0xFF; }
 
                     int r = 0;
                     if (endian.equals("big")) {
@@ -106,6 +113,10 @@ public class BasicFileConverter implements FileConverter {
                     }
 
                     if (signed) {
+                        // sign extend
+                        if ((r & 0x8000) == 0x8000) {
+                            r |= 0xFFFF0000;
+                        }
                         formatted = String.format("%d", r);
                     } else {
                         formatted = String.format("0x%04x", r & 0xFFFF);
@@ -115,6 +126,11 @@ public class BasicFileConverter implements FileConverter {
                     int b2 = fis.read();
                     int b3 = fis.read();
                     int b4 = fis.read();
+
+                    if (b1 == -1) { b1 = 0; } else { b1 = b1 & 0xFF; }
+                    if (b2 == -1) { b2 = 0; } else { b2 = b2 & 0xFF; }
+                    if (b3 == -1) { b3 = 0; } else { b3 = b3 & 0xFF; }
+                    if (b4 == -1) { b4 = 0; } else { b4 = b4 & 0xFF; }
 
                     int r = 0;
                     if (endian.equals("big")) {

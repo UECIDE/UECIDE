@@ -38,15 +38,18 @@ public class BinaryFileConverter implements Runnable {
 
         switch (type) {
             case FileType.GRAPHIC:
-                if (s.getBoolean("binary." + source.getName() + ".conversion")) {
+                if (s.getBoolean("binary." + Utils.sanitize(source.getName()) + ".conversion")) {
 
                     String format = s.get(prefix + ".format");
 
                     switch (format) {
                         case "verbatim":
+                            Debug.message("Converting " + source);
                             conv = new BasicFileConverter(source, s.get(prefix + ".prefix"), s.get(prefix + ".type"), s.get(prefix + ".endian", "little"));
                             break;
                         case "rgb565":
+                            Debug.message("Converting " + source + " to RGB565");
+                            conv = new RGB565FileConverter(source, s.get(prefix + ".prefix"));
                             break;
 
 

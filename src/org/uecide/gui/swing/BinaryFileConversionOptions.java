@@ -98,7 +98,6 @@ public class BinaryFileConversionOptions extends JDialog {
             case "jpeg":
             case "bmp":
             case "png":
-            case "565":
                 populateGraphic();
                 break;
             

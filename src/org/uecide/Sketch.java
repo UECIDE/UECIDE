@@ -747,6 +747,7 @@ public class Sketch {
 
         ctx.bullet("Converting binary files");
         HashMap<File, String[]> binFiles = convertBinaryFiles();
+        if (binFiles == null) return false;
 
         if (binFiles.size() > 0) {
             filesToCompile.addAll(binFiles.keySet());
@@ -2686,7 +2687,7 @@ public class Sketch {
         ArrayList<BinaryFileConverter>bcs = new ArrayList<BinaryFileConverter>();
 
         for (File file : files) {
-            if (getInteger("binary." + file.getName() + ".conversion") > 0) {
+            if (getBoolean("binary." + Utils.sanitize(file.getName()) + ".conversion")) {
                 BinaryFileConverter bc = new BinaryFileConverter(ctx, file, getBuildFolder());
                 bcs.add(bc);
                 ctx.queueJob(bc);

@@ -4,6 +4,8 @@ Changelog
 0.11.5
 ------
 
+* More work on binary file conversion
+* Restored old output panel
 * Sub-contexts now raise events in the parent context
 * Parallel compilation
 * Initial work on binary conversion gui
@@ -802,6 +804,8 @@ Changelog
 0.8.5
 -----
 
+* More work on binary file conversion
+* Restored old output panel
 * Sub-contexts now raise events in the parent context
 * Parallel compilation
 * Initial work on binary conversion gui
