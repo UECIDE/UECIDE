@@ -10,6 +10,7 @@ import org.uecide.ContextEventListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 
 import java.awt.FlowLayout;
 
@@ -20,6 +21,7 @@ public class StatusBar extends JPanel implements ContextEventListener {
     UObjectLabel coreName = null;
     UObjectLabel compilerName = null;
     UObjectLabel programmerName = null;
+    JProgressBar percentageIndicator = null;
 
     public StatusBar(Context c) {
         super();
@@ -30,14 +32,17 @@ public class StatusBar extends JPanel implements ContextEventListener {
         ctx.listenForEvent("setCore", this);
         ctx.listenForEvent("setCompiler", this);
         ctx.listenForEvent("setProgrammer", this);
+        ctx.listenForEvent("percentComplete", this);
         boardName = new UObjectLabel(ctx.getBoard());
         coreName = new UObjectLabel(ctx.getCore());
         compilerName = new UObjectLabel(ctx.getCompiler());
         programmerName = new UObjectLabel(ctx.getProgrammer());
+        percentageIndicator = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
         add(boardName);
         add(coreName);
         add(compilerName);
         add(programmerName);
+        add(percentageIndicator);
     }
 
     public void contextEventTriggered(ContextEvent evt) {
@@ -46,6 +51,10 @@ public class StatusBar extends JPanel implements ContextEventListener {
             case "setCore": coreName.setObject((Core)evt.getObject()); break;
             case "setCompiler": compilerName.setObject((Compiler)evt.getObject()); break;
             case "setProgrammer": programmerName.setObject((Programmer)evt.getObject()); break;
+            case "percentComplete":
+                Integer i = (Integer)evt.getObject();
+                percentageIndicator.setValue(i);
+                break;
         }
     }
 }    

@@ -21,6 +21,9 @@ public class ProcessStreamThread implements Runnable {
                 int v = in.read(buffer);
                 if (v == -1) break;
                 out.write(buffer, 0, v);
+                String t = new String(buffer, 0, v);
+                t = t.replaceAll("\n", "<LF>");
+                t = t.replaceAll("\r", "<CR>");
             } catch (Exception ignored) {
                 Debug.exception(ignored);
             }

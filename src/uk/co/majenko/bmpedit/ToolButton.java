@@ -44,8 +44,10 @@ public class ToolButton extends JButton {
     public void setSelected(boolean sel) {
         if (sel) {
             super.setBackground(selectedColor);
+            setOpaque(true);
         } else {
             super.setBackground(backgroundColor);
+            setOpaque(false);
         }
     }
 

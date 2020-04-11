@@ -122,7 +122,12 @@ public class GenericFileNode extends SketchTreeNodeBase {
 
     public void createViewer() {
         AutoTab centerPane = ((SwingGui)ctx.getGui()).getDefaultTab();
-        viewer = new TextViewerPanel(ctx, centerPane, file.getName(), getFileContent());
+        if (file.getName().endsWith(".jpg")) viewer = new ImageEditor(ctx, centerPane, file);
+        else if (file.getName().endsWith(".jpeg")) viewer = new ImageEditor(ctx, centerPane, file);
+        else if (file.getName().endsWith(".png")) viewer = new ImageEditor(ctx, centerPane, file);
+        else if (file.getName().endsWith(".gif")) viewer = new ImageEditor(ctx, centerPane, file);
+        else if (file.getName().endsWith(".bmp")) viewer = new ImageEditor(ctx, centerPane, file);
+        else viewer = new TextViewerPanel(ctx, centerPane, file.getName(), getFileContent());
         centerPane.add(viewer);
         centerPane.setSelectedComponent(viewer);
     }

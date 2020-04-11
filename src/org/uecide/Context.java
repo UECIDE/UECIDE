@@ -70,6 +70,7 @@ public class Context {
     Timer eventTimer;
     public boolean systemContext = false;
     OutputStream outputStream = null;
+    OutputStream stderrStream = null;
     public Queue<Runnable> jobQueue;
     public ArrayList<WorkerThread> workers;
     public static int contextId = 0;
@@ -677,6 +678,7 @@ public class Context {
             if (mid.equals("core.root")) { mid = "core:root"; }
             if (mid.equals("compiler.root")) { mid = "compiler:root"; }
 
+
             if(mid.indexOf(":") > -1) {
                 String command = mid.substring(0, mid.indexOf(":"));
                 String param = mid.substring(mid.indexOf(":") + 1);
@@ -708,6 +710,7 @@ public class Context {
                 iTest = out.indexOf("${", iStart + 1);
             }
         }
+
 
         // This shouldn't be needed as the methodology should always find any tokens put in
         // by other token replacements.  But just in case, eh?
@@ -834,7 +837,12 @@ public class Context {
         } else {
             stdout = new ContextStream(this, Message.STREAM_MESSAGE);
         }
-        stderr = new ContextStream(this, Message.STREAM_ERROR);
+
+        if (stderrStream != null) {
+            stderr = stderrStream;
+        } else {
+            stderr = new ContextStream(this, Message.STREAM_ERROR);
+        }
 
         try {
             runningProcess = process.start();
@@ -1009,9 +1017,17 @@ public class Context {
     public void setOutputStream(OutputStream pw) {
         outputStream = pw;
     }
+   
+    public void setErrorStream(OutputStream pw) {
+        stderrStream = pw;
+    }
 
     public void clearOutputStream() {
         outputStream = null;
+    }
+
+    public void clearErrorStream() {
+        stderrStream = null;
     }
 
     void startTimers() {
@@ -1093,7 +1109,6 @@ public class Context {
         String recipe = null;
 
         triggerEvent("fileCompilationStarted", src);
-
         PropertyFile props = localCtx.getMerged();
         
         switch (FileType.getType(src)) {
@@ -1155,7 +1170,6 @@ public class Context {
 //        });
 
         String output = "";
-
         if (!(Boolean)localCtx.executeKey(recipe)) {
 //            localCtx.removeDataStreamParser();
             localCtx.dispose();

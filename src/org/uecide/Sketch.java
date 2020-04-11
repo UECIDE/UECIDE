@@ -822,6 +822,7 @@ public class Sketch {
             for (FunctionBookmark p : protos) {
                 String pn = p.getFile().toString().toLowerCase();
                 if (pn.endsWith(".ino") || pn.endsWith(".pde")) {
+                    if (p.toString().startsWith("null __anon")) continue;
                     pw.println(p + ";");
                 }
             }
@@ -1166,7 +1167,7 @@ public class Sketch {
             File dest = new File(newPath, sf.isMainFile() ? newPath.getName() + ".ino" : sf.getFile().getName());
             sf.saveDataToDisk(dest);
         }
-
+        ctx.triggerEvent("saveSketch");
         // 4. Open the newly created sketch
         ctx.action("openSketch", newPath);
 
@@ -1190,6 +1191,7 @@ public class Sketch {
         for (SketchFile sf : sketchFiles.values()) {
             sf.saveDataToDisk();
         }
+        ctx.triggerEvent("saveSketch");
         return true;
     }
 

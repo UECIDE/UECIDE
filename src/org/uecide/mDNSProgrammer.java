@@ -39,7 +39,7 @@ public class mDNSProgrammer extends Programmer {
         set("name", _programmer.getName() + "@" + _ip.getHostAddress());
         set("description", _board.getDescription() + " on " + _ip.getHostAddress() + " (" + _info.getName() + ")");
         set("mdns.created", "true");
-        unset("hidden");
+        set("hidden", "false");
     }
 
     public File getFolder() {

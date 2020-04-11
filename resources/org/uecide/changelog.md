@@ -4,6 +4,7 @@ Changelog
 0.11.5
 ------
 
+* Working image file conversion
 * More work on binary file conversion
 * Restored old output panel
 * Sub-contexts now raise events in the parent context
@@ -804,6 +805,7 @@ Changelog
 0.8.5
 -----
 
+* Working image file conversion
 * More work on binary file conversion
 * Restored old output panel
 * Sub-contexts now raise events in the parent context

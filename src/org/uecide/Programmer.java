@@ -64,9 +64,26 @@ public class Programmer extends UObject {
             return false;
         }
 
+        if (get("progress.type") != null) {
+            ContextStream outPassthrough = new ContextStream(ctx, Message.STREAM_MESSAGE);
+            ContextStream errPassthrough = new ContextStream(ctx, Message.STREAM_ERROR);
+
+            if (get("progress.type").equals("percent")) {
+                PercentProgressFilter out = new PercentProgressFilter(ctx, outPassthrough, get("progress.regex"));
+                PercentProgressFilter err = new PercentProgressFilter(ctx, errPassthrough, get("progress.regex"));
+                ctx.setOutputStream(out);
+                ctx.setErrorStream(err);
+            }
+        }
+
         /* --- SCRIPT based upload --- */
         if (method.equals("script")) {
-            return (Boolean)ctx.executeKey("programmer.script");
+            boolean ret = (Boolean)ctx.executeKey("programmer.script");
+            if (get("progress.type") != null) {
+                ctx.clearOutputStream();
+                ctx.clearErrorStream();
+            }
+            return ret;
         };
 
 
@@ -89,12 +106,20 @@ public class Programmer extends UObject {
                     Debug.exception(e);
                 }
                 if (!performBaudBasedReset(ctx, baud, predelay, delay, postdelay)) {
+                    if (get("progress.type") != null) {
+                        ctx.clearOutputStream();
+                        ctx.clearErrorStream();
+                    }
                     return false;
                 }
             } else if (resetMethod.equals("dtr")) {
                 boolean dtr = props.getBoolean("programmer.reset.dtr");
                 boolean rts = props.getBoolean("programmer.reset.rts");
                 if (!performSerialReset(ctx, dtr, rts, progbaud, predelay, delay, postdelay)) {
+                    if (get("progress.type") != null) {
+                        ctx.clearOutputStream();
+                        ctx.clearErrorStream();
+                    }
                     return false;
                 }
             }
@@ -115,9 +140,12 @@ public class Programmer extends UObject {
                 }
             }
 
-
             boolean res = (Boolean)ctx.executeKey("programmer.command");
 
+            if (get("progress.type") != null) {
+                ctx.clearOutputStream();
+                ctx.clearErrorStream();
+            }
 
             if(res) {
                 if (!UECIDE.isQuiet()) ctx.bullet("Upload Complete");
