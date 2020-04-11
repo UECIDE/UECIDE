@@ -37,6 +37,7 @@ public class PortsMenu extends JMenu implements MenuListener {
     }
 
     public void menuSelected(MenuEvent e) {
+        ctx.action("updateSerialPorts");
         removeAll();
         for (CommunicationPort port : UECIDE.communicationPorts) {
             PortsMenuItem i = new PortsMenuItem(ctx, port);

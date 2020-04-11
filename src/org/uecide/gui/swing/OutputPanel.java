@@ -40,7 +40,7 @@ public class OutputPanel extends TabPanel implements ContextEventListener {
                     case Message.BULLET1: outputArea.append(m.getText() + "\n", Output.BULLET); break;
                     case Message.BULLET2: outputArea.append(m.getText() + "\n", Output.BULLET2); break;
                     case Message.BULLET3: outputArea.append(m.getText() + "\n", Output.BULLET3); break;
-                    case Message.COMMAND: outputArea.append(m.getText() + "\n", Output.COMMAND); break;
+// commands go to the console                    case Message.COMMAND: outputArea.append(m.getText() + "\n", Output.COMMAND); break;
                     case Message.NORMAL: outputArea.append(m.getText() + "\n", Output.BODY); break;
                     case Message.WARNING: outputArea.append(m.getText() + "\n", Output.WARNING); break;
                     case Message.ERROR: outputArea.append(m.getText() + "\n", Output.ERROR); break;

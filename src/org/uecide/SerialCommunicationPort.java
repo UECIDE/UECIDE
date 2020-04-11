@@ -76,7 +76,6 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
             return portName;
         }
 
-
         String man = attributes.get("manufacturer");
         String prod = attributes.get("product");
 
@@ -159,7 +158,14 @@ public class SerialCommunicationPort implements CommunicationPort,SerialPortData
     HashMap<String, String> getUSBAttributesLinux() {
         HashMap<String, String> attributes = new HashMap<String, String>();
 
-        String deviceName = portName; //serialPort.getSystemPortName();
+        String deviceName = portName;
+        File f = new File(portName);
+
+        try {
+            deviceName = f.getCanonicalPath();
+        } catch (Exception ex) {
+            Debug.exception (ex);
+        }
 
         Pattern pat = Pattern.compile("ATTRS\\{(.*)\\}==\"(.*)\"");
 

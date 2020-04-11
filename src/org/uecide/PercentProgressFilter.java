@@ -36,7 +36,7 @@ public class PercentProgressFilter extends OutputStream {
                 case '\n':
                 case '\r':
                     if (!processLine()) {
-                        String l = line.toString();
+                        String l = line.toString() + "\r\n";
                         passthrough.write(l.getBytes());
                     }
                     line.setLength(0);

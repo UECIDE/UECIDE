@@ -590,7 +590,6 @@ public class UECIDE {
         Thread t = new Thread() {
             public void run() {
                 Serial.updatePortList();
-                Serial.fillExtraPorts();
             }
         };
         t.start();
@@ -606,7 +605,6 @@ public class UECIDE {
         ServiceManager.addService(new UsbDiscoveryService());
         ServiceManager.addService(new NetworkDiscoveryService());
 //        ServiceManager.addService(new TreeUpdaterService());        
-        ServiceManager.addService(new PortListUpdaterService());
 
         switch (gui) {
             case "cli": CliGui.endinit(); break;

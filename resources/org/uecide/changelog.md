@@ -4,6 +4,7 @@ Changelog
 0.11.5
 ------
 
+* Added percentage stream filter
 * Working image file conversion
 * More work on binary file conversion
 * Restored old output panel
@@ -805,6 +806,7 @@ Changelog
 0.8.5
 -----
 
+* Added percentage stream filter
 * Working image file conversion
 * More work on binary file conversion
 * Restored old output panel

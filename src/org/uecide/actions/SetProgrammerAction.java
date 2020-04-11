@@ -30,6 +30,7 @@ public class SetProgrammerAction extends Action {
                 inhibitUpdate = true;
                 prog.onSelected(ctx);
                 inhibitUpdate = false;
+                ctx.action("setPref", "board." + ctx.getBoard().getName() + ".programmer", ctx.getProgrammer().getName());
                 return true;
             } else if (args[0] instanceof String) {
                 String s = (String)args[0];
@@ -41,6 +42,7 @@ public class SetProgrammerAction extends Action {
                 inhibitUpdate = true;
                 b.onSelected(ctx);
                 inhibitUpdate = false;
+                ctx.action("setPref", "board." + ctx.getBoard().getName() + ".programmer", ctx.getProgrammer().getName());
                 return true;
             }
             throw new BadArgumentActionException();

@@ -6,8 +6,8 @@ public abstract class VariableCommand {
     public abstract String main(Context context, String args) throws VariableCommandException;
 
     public static String run(Context ctx, String command, String param) {
+        VariableCommand vc = null;
         try {
-            VariableCommand vc = null;
 
             switch(command) {
                 case "arduino": vc = new vc_arduino(); break;
@@ -52,6 +52,7 @@ public abstract class VariableCommand {
         } catch (VariableCommandException ex) {
             Debug.exception(ex);
             ctx.error(ex);
+            ctx.error(vc.toString());
         } catch (Exception ex) {
             Debug.exception(ex);
             ctx.error(ex);

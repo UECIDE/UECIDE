@@ -254,6 +254,65 @@ public class Serial {
             }
         }
 
+        fillExtraPorts();
+
+        for (String ep : extraPorts) {
+            if (ep.endsWith("*")) {
+                ep = ep.substring(0, ep.length()-1);
+                devs = dev.listFiles();
+                for (File devfile : devs) {
+                    if (devfile.getName().startsWith(ep) || devfile.getAbsolutePath().startsWith(ep)) {
+                        String ap = devfile.getAbsolutePath();
+                        if (names.indexOf(ap) == -1) {
+                            names.add(ap);
+                            try {
+                                String cp = devfile.getCanonicalPath();
+                                if (!cp.equals(ap)) {
+                                    names.remove(cp);
+                                }
+                            } catch (Exception ex) {
+                                Debug.exception(ex);
+                            }
+                        }
+                    }
+                }
+            } else {
+                File f = new File(ep);
+                if (f.exists()) {
+                    if (names.indexOf(ep) == -1) {
+                        names.add(ep);
+                        try {
+                            String cp = f.getCanonicalPath();
+                            if (!cp.equals(ep)) {
+                                names.remove(cp);
+                            }
+                        } catch (Exception ex) {
+                            Debug.exception(ex);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        for (String p : extraPorts) {
+            File fp = new File(p);
+            if (fp.exists()) {
+                String ap = fp.getAbsolutePath();
+                if (names.indexOf(ap) == -1) {
+                    names.add(ap);
+                    try {
+                        String cp = fp.getCanonicalPath();
+                        if (!cp.equals(ap)) {
+                            names.remove(cp);
+                        }
+                    } catch (Exception ex) {
+                        Debug.exception(ex);
+                    }
+                }
+            }
+        }
+
         return names;
     }
 
@@ -284,6 +343,24 @@ public class Serial {
 //            }
         }
 
+        fillExtraPorts();
+        for (String ep : extraPorts) {
+            if (ep.endsWith("*")) {
+                ep = ep.substring(0, ep.length()-1);
+                devs = dev.listFiles();
+                for (File devfile : devs) {
+                    if (devfile.getName().startsWith(ep)) {
+                        names.add(devfile.getAbsolutePath());
+                    }
+                }
+            } else {
+                File f = new File(ep);
+                if (f.exists()) {
+                    names.add(ep);
+                }
+            }
+        }
+
         return names;
     }
 
@@ -295,13 +372,14 @@ public class Serial {
             names.add(p.getSystemPortName());
         }
 
+        fillExtraPorts();
+        names.addAll(extraPorts);
+
         return names;
     }
 
     public static void updatePortList() {
         ArrayList<String>names = null;
-
-        fillExtraPorts();
 
         if(UECIDE.isLinux()) {
             names = getPortListLinux();
@@ -314,8 +392,7 @@ public class Serial {
         ArrayList<CommunicationPort> toAdd = new ArrayList<CommunicationPort>();
         ArrayList<CommunicationPort> toRemove = new ArrayList<CommunicationPort>();
 
-        names.addAll(extraPorts);
-
+        // Remove any ports that no longer exist
         for (CommunicationPort port : UECIDE.communicationPorts) {
             if (port instanceof SerialCommunicationPort) {
                 String name = port.toString();
@@ -325,6 +402,7 @@ public class Serial {
             }
         }
 
+        // Add any new ports that have appeared
         for (String name : names) {
             boolean found = false;
             for (CommunicationPort port : UECIDE.communicationPorts) {
@@ -339,38 +417,11 @@ public class Serial {
                 toAdd.add(new SerialCommunicationPort(name));
             }
         }
-
         for (CommunicationPort port : toRemove) {
             UECIDE.communicationPorts.remove(port);
         }
-
         for (CommunicationPort port : toAdd) {
             UECIDE.communicationPorts.add(port);
-        }
-
-        if (UECIDE.isUnix()) {
-            for(String p : extraPorts) {
-                if(names.indexOf(p) == -1) {
-                    File fp = new File(p);
-                    if (fp.exists()) {
-                        names.add(p);
-                        try {
-                            String dst = fp.getCanonicalPath();
-                            if (!dst.equals(p)) { // Sym link
-                                names.remove(dst);
-                            }
-                        } catch (IOException ex) {
-                            Debug.exception(ex);
-                        }
-                    }
-                }
-            }
-        } else {
-            for(String p : extraPorts) {
-                if(names.indexOf(p) == -1) {
-                    names.add(p);
-                }
-            }
         }
 
         portList = names.toArray(new String[0]);
@@ -427,15 +478,7 @@ public class Serial {
 
         PropertyFile sub = Preferences.getChildren("editor.serial.port");
         for (String k : sub.keySet()) {
-            String pname = sub.get(k);
-            if (UECIDE.isPosix()) {
-                File f = new File(pname);
-                if (f.exists()) {
-                    addExtraPort(pname);
-                } 
-            } else {
-                addExtraPort(pname);
-            }
+            addExtraPort(sub.get(k));
         }
     }
 
@@ -443,6 +486,7 @@ public class Serial {
         try {
             String pn = port.getSystemPortName();
             File f = new File(pn);
+
             pn = f.getCanonicalPath();
             pn = pn.substring(pn.lastIndexOf("/") + 1);
 
