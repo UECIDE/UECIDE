@@ -33,7 +33,9 @@ package org.uecide.builtin;
 import org.uecide.*;
 
 public class unlock_port extends BuiltinCommand {
-    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
+    public unlock_port(Context c) { super(c); }
+
+    public boolean main(String[] arg) throws BuiltinCommandException {
         Serial.unlockPort(arg[0]);
         return true;
     }

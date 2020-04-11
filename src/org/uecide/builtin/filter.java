@@ -3,12 +3,13 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-public class stdin extends BuiltinCommand {
-    public stdin(Context c) { super(c); }
+// Pass the current editor's text through the stdin of a command and replace it with the stdout
+public class filter extends BuiltinCommand {
+    public filter(Context c) { super(c); }
 
     public boolean main(String[] arg) throws BuiltinCommandException {
 
-        if (arg.length < 2) { // We need at least a file and a command
+        if (arg.length == 0) { // We need a command
             return false;
         }
 

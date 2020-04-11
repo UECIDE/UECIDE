@@ -3,8 +3,8 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-public class append extends BuiltinCommand {
-    public append(Context c) { super(c); }
+public class append_var extends BuiltinCommand {
+    public append_var(Context c) { super(c); }
 
     public boolean main(String[] arg) throws BuiltinCommandException {
         try {
@@ -15,7 +15,7 @@ public class append extends BuiltinCommand {
             PrintWriter pw = new PrintWriter(bw);
 
             for (int i = 1; i < arg.length; i++) {
-                pw.println(arg[i]);
+                pw.println(ctx.get(arg[i]));
             }
             pw.close();
             bw.close();

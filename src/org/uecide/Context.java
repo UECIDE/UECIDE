@@ -756,6 +756,10 @@ public class Context {
                 if (!silent) command(args.toString());
             }
 
+            if (!BuiltinCommand.commandExists(cmdName)) {
+                return false;
+            }
+
             return BuiltinCommand.run(this, cmdName, arg);
 
         } catch(Exception e) {
@@ -1228,5 +1232,9 @@ public class Context {
                 }
             }
         } while (busy == true);
+    }
+
+    public SketchFile getActiveSketchFile() {
+        return gui.getActiveSketchFile();
     }
 }

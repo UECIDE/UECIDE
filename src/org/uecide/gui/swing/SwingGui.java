@@ -812,4 +812,15 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     public JFrame getFrame() {
         return window;
     }
+
+    @Override
+    public SketchFile getActiveSketchFile() {
+        if (lastActiveTab == null) return null;
+        if (lastActiveTab instanceof CodeEditor) {
+            CodeEditor ce = (CodeEditor)lastActiveTab;
+            return ce.getSketchFile();
+        }
+        return null;
+    }
+
 }

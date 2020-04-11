@@ -38,6 +38,7 @@ import org.uecide.gui.none.NoneGui;
 import org.uecide.gui.html.HTMLGui;
 
 import org.uecide.actions.Action;
+import org.uecide.builtin.BuiltinCommand;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -214,6 +215,7 @@ public class UECIDE {
 
     /*! The constructor is the main execution routine. */
     public UECIDE(String[] args) throws IOException {
+        BuiltinCommand.initBuiltinCommands();
         Action.initActions();
 //        cli.addParameter("debug",               "",         Boolean.class,  "cli.help.debug");
         cli.addParameter("verbose",             "",         Boolean.class,  "cli.help.verbose");

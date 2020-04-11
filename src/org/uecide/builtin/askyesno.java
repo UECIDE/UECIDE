@@ -3,8 +3,10 @@ package org.uecide.builtin;
 import org.uecide.Context;
 
 public class askyesno extends BuiltinCommand {
+    public askyesno(Context c) { super(c); }
+
     // __builtin_askyesno::Do you want to do this?::script.yes::script.no
-    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
+    public boolean main(String[] arg) throws BuiltinCommandException {
         if (arg.length != 3) {
             throw new BuiltinCommandException("Syntax error");
         }

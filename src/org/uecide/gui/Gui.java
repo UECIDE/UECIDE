@@ -41,6 +41,7 @@ public abstract class Gui {
     public abstract int askYesNoCancel(String question);
     public abstract File askOpenSketch(String question, File location);
     public abstract void navigateToLine(SketchFile f, Integer lineno);
+    public abstract SketchFile getActiveSketchFile();
 
     public boolean isEphemeral() {
         return false;

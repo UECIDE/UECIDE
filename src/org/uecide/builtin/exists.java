@@ -5,8 +5,9 @@ import org.uecide.Context;
 import java.io.File;
 
 public class exists extends BuiltinCommand {
-    // __builtin_askyesno::Do you want to do this?::script.yes::script.no
-    public boolean main(Context ctx, String[] arg) throws BuiltinCommandException {
+    public exists(Context c) { super(c); }
+
+    public boolean main(String[] arg) throws BuiltinCommandException {
         if (arg.length != 3) {
             throw new BuiltinCommandException("Syntax error");
         }
