@@ -261,6 +261,7 @@ public class Serial {
                 ep = ep.substring(0, ep.length()-1);
                 devs = dev.listFiles();
                 for (File devfile : devs) {
+                    if (devfile.isDirectory()) continue;
                     if (devfile.getName().startsWith(ep) || devfile.getAbsolutePath().startsWith(ep)) {
                         String ap = devfile.getAbsolutePath();
                         if (names.indexOf(ap) == -1) {
@@ -349,7 +350,8 @@ public class Serial {
                 ep = ep.substring(0, ep.length()-1);
                 devs = dev.listFiles();
                 for (File devfile : devs) {
-                    if (devfile.getName().startsWith(ep)) {
+                    if (devfile.isDirectory()) continue;
+                    if (devfile.getName().startsWith(ep) || devfile.getAbsolutePath().startsWith(ep)) {
                         names.add(devfile.getAbsolutePath());
                     }
                 }

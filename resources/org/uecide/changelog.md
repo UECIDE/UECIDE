@@ -4,6 +4,7 @@ Changelog
 0.11.5
 ------
 
+* Improved serial port detection and handling
 * Added percentage stream filter
 * Working image file conversion
 * More work on binary file conversion
@@ -806,6 +807,7 @@ Changelog
 0.8.5
 -----
 
+* Improved serial port detection and handling
 * Added percentage stream filter
 * Working image file conversion
 * More work on binary file conversion
