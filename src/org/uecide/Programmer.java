@@ -260,4 +260,8 @@ public class Programmer extends UObject {
         return programmers.get(name);
     }
 
+    public static void addProgrammer(String name, Programmer p) {
+        programmers.put(name, p);
+    }
+
 }

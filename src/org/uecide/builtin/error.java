@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* Display an error message
+ *
+ * Usage:
+ *     __builtin_error::message
+ */
+
 public class error extends BuiltinCommand {
     public error(Context c) { super(c); }
 

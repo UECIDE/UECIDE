@@ -3,6 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
+/* Control GPIO pins (Pi, etc. Output only)
+ *
+ * Usage:
+ *     __builtin_gpio::pin::{high|low|hiz}
+ */
+
 public class gpio extends BuiltinCommand {
     public gpio(Context c) { super(c); }
 

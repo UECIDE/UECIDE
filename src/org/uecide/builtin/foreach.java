@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* For each item in a list assign it to a variable and run a key
+ *
+ * Usage:
+ *     __builtin_foreach::item,item,item,item::key.assign::key.run
+ */
+
 public class foreach extends BuiltinCommand {
     public foreach(Context c) { super(c); }
 

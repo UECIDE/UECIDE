@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* Display a second-level bullet point
+ *
+ * Usage:
+ *     __builting_bullet2::message
+ */
+
 public class bullet2 extends BuiltinCommand {
     public bullet2(Context c) { super(c); }
 

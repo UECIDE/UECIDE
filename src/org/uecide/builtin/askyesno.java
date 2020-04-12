@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.Context;
 
+/* Ask a "Yes / No" question. Jumps to one of two keys.
+ * 
+ * Usage:
+ *     __builtin_askyesno::question::key.yes::key.no
+ */
+
 public class askyesno extends BuiltinCommand {
     public askyesno(Context c) { super(c); }
 

@@ -4,6 +4,12 @@ import org.uecide.*;
 
 import java.io.File;
 
+/* Create a temporary file and store the path in a key
+ *
+ * Usage:
+ *     __builtin_tmpfile::key.name::prefix::suffix
+ */
+
 public class tmpfile extends BuiltinCommand {
     public tmpfile(Context c) { super(c); }
 

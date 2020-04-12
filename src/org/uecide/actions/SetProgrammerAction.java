@@ -2,6 +2,11 @@ package org.uecide.actions;
 
 import org.uecide.*;
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.net.InetAddress;
+import net.straylightlabs.hola.sd.Instance;
 
 public class SetProgrammerAction extends Action {
 
@@ -36,7 +41,31 @@ public class SetProgrammerAction extends Action {
                 String s = (String)args[0];
                 Programmer b = Programmer.getProgrammer(s);
                 if (b == null) {
-                    throw new ActionException("Unknown Programmer");
+                    if (s.contains("@")) { // It's a network programmer
+                        String[] parts = s.split("@");
+                        String progname = parts[0];
+                        String hostspec = parts[1];
+                        String hostname = hostspec;
+                        int port = 8266;
+                        if (hostspec.contains(":")) {
+                            parts = hostspec.split(":");
+                            hostname = parts[0];
+                            port = Utils.s2i(parts[1]);
+                        }
+                        HashMap<String, String> attribs = new HashMap<String, String>();
+                        attribs.put("board", "\"" + ctx.getBoard().getName() + "\"");
+
+                        // TODO: This slows down the booting of the system when a network programmer is selected by default.
+                        InetAddress[] ips = InetAddress.getAllByName(hostname + ".local");
+                        List<InetAddress> iplist = Arrays.asList(ips);
+                        
+                        Instance i = new Instance(hostname, iplist, port, attribs);
+                        b = new mDNSProgrammer(i, ctx.getBoard());
+                        Programmer.addProgrammer(s, b);
+                        
+                    } else {
+                        throw new ActionException("Unknown Programmer");
+                    }
                 }
                 ctx.setProgrammer(b);
                 inhibitUpdate = true;

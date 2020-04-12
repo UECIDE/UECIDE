@@ -36,6 +36,7 @@ public abstract class Gui {
     public abstract void openSketchFileEditor(SketchFile f);
     public abstract void closeSketchFileEditor(SketchFile f);
     public abstract String askString(String question, String defaultValue);
+    public abstract String askPassword(String question, String defaultValue);
     public abstract File askSketchFilename(String question, File location);
     public abstract boolean askYesNo(String question);
     public abstract int askYesNoCancel(String question);

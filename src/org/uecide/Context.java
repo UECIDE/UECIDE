@@ -71,6 +71,7 @@ public class Context {
     public boolean systemContext = false;
     OutputStream outputStream = null;
     OutputStream stderrStream = null;
+    InputStream inputStream = null;
     public Queue<Runnable> jobQueue;
     public ArrayList<WorkerThread> workers;
     public static int contextId = 0;
@@ -193,6 +194,10 @@ public class Context {
 
     public void clearSettings() {
         settings = new PropertyFile();
+    }
+
+    public void unset(String k) {
+        settings.unset(k);
     }
 
     public void set(String k, String v) {
@@ -835,6 +840,13 @@ public class Context {
 
         OutputStream stdout;
         OutputStream stderr;
+        InputStream stdin;
+
+        if (inputStream != null) {
+            stdin = inputStream;
+        } else {
+            stdin = new NullInputStream(this);
+        }
 
         if (outputStream != null) {
             stdout = outputStream;
@@ -854,19 +866,25 @@ public class Context {
 
             ProcessStreamThread stdoutStreamer = new ProcessStreamThread(runningProcess.getInputStream(), stdout);
             ProcessStreamThread stderrStreamer = new ProcessStreamThread(runningProcess.getErrorStream(), stderr);
+            ProcessStreamThread stdinStreamer = new ProcessStreamThread(stdin, runningProcess.getOutputStream());
 
             Thread stdoutThread = new Thread(stdoutStreamer);
             Thread stderrThread = new Thread(stderrStreamer);
+            Thread stdinThread = new Thread(stdinStreamer);
 
             stdoutThread.start();
             stderrThread.start();
+            stdinThread.start();
 
             runningProcess.waitFor();
+
             stdoutStreamer.stop();
             stderrStreamer.stop();
+            stdinStreamer.stop();
 
             stdoutThread.join();
             stderrThread.join();
+            stdinThread.join();
         } catch (Exception ex) {
             Debug.exception(ex);
             error(ex);
@@ -1018,12 +1036,20 @@ public class Context {
         return true;
     }
 
+    public void setInputStream(InputStream is) {
+        inputStream = is;
+    }
+
     public void setOutputStream(OutputStream pw) {
         outputStream = pw;
     }
    
     public void setErrorStream(OutputStream pw) {
         stderrStream = pw;
+    }
+
+    public void clearInputStream() {    
+        inputStream = null;
     }
 
     public void clearOutputStream() {

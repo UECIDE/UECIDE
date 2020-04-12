@@ -3,6 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
+/* Write data to a file (truncates) with newlines
+ *
+ * Usage:
+ *     __builtin_write::file::line[::line...]
+ */
+
 public class write extends BuiltinCommand {
     public write(Context c) { super(c); }
 

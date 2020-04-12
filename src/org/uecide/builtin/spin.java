@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* Spin a line
+ *
+ * Usage:
+ *     __builtin_spin
+ */
+
 public class spin extends BuiltinCommand {
     public spin(Context c) { super(c); }
 

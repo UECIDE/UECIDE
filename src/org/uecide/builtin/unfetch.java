@@ -4,7 +4,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-// Fetch all the text of the active editor into a variable
+/* Replace the contents of the active editor with the content of a variable
+ *
+ * Usage:
+ *     __builtin_unfetch::key.name
+ */
+
 public class unfetch extends BuiltinCommand {
     public unfetch(Context c) { super(c); }
 

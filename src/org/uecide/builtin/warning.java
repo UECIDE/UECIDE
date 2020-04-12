@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* Display a warning message
+ *
+ * Usage:
+ *     __builtin_warning::message[::...]
+ */
+
 public class warning extends BuiltinCommand {
     public warning(Context c) { super(c); }
 

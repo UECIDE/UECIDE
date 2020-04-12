@@ -3,6 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
+/* Read a file into a variable
+ *
+ * Usage:
+ *     __builtin_read_var::file::key.name
+ */
+
 public class read_var extends BuiltinCommand {
     public read_var(Context c) { super(c); }
 

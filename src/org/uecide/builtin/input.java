@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.Context;
 
+/* Ask a question and receive the answer into a key
+ *
+ * Usage:
+ *     __builtin_input::key.name::question
+ */
+
 public class input extends BuiltinCommand {
     public input(Context c) { super(c); }
 

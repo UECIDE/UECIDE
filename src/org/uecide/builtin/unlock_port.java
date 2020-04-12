@@ -32,6 +32,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* POSIX unlock a serial port
+ *
+ * Usage:
+ *     __builtin_unlock_port::port
+ */
+
 public class unlock_port extends BuiltinCommand {
     public unlock_port(Context c) { super(c); }
 

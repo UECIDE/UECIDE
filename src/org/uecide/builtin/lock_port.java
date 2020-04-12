@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* POSIX lock a serial port
+ *
+ * Usage:
+ *     __builtin_lock_port::portname
+ */
+
 public class lock_port extends BuiltinCommand {
     public lock_port(Context c) { super(c); }
 

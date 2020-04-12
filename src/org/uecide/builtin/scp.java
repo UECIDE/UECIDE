@@ -6,6 +6,12 @@ import java.awt.*;
 import javax.swing.*;
 import java.io.*;
 
+/* Copy a file to a remote host with scp
+ *
+ * Usage:
+ *     __builtin_scp::localfile::user@host:/path/to/remote/file
+ */
+
 public class scp extends BuiltinCommand {
     String host;
     String user;

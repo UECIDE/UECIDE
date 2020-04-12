@@ -6,6 +6,12 @@ import java.awt.*;
 import javax.swing.*;
 import java.io.*;
 
+/* Execute a command on a remote host through SSH
+ *
+ * Usage:
+ *     __builtin_ssh::user@host::command
+ */
+
 public class ssh  extends BuiltinCommand {
     String host;
     String user;

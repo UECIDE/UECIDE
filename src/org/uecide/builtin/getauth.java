@@ -7,6 +7,12 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.event.*;
 
+/* Request authentication. Assigns to a key
+ * 
+ * Usage: 
+ *     __builtin_getauth::prompt::key.name
+ */
+
 public class getauth extends BuiltinCommand {
     public getauth(Context c) { super(c); }
 

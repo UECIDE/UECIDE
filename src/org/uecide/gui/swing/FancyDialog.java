@@ -14,6 +14,7 @@ import java.awt.Point;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import java.awt.Dialog;
@@ -37,6 +38,7 @@ public class FancyDialog extends JDialog implements AnimationListener {
     static final int QUESTION_YESNOCANCEL = 2;
     static final int INPUT_OKCANCEL = 3;
     static final int ALERT = 4;
+    static final int PASSWORD_OKCANCEL = 5;
 
     static final int ANSWER_YES = 1;
     static final int ANSWER_NO = 2;
@@ -73,7 +75,8 @@ public class FancyDialog extends JDialog implements AnimationListener {
         switch (type) {
             case QUESTION_YESNO: qYesNo(); break;
             case QUESTION_YESNOCANCEL: qYesNoCancel(); break;
-            case INPUT_OKCANCEL: iOkCancel(); break;
+            case INPUT_OKCANCEL: iOkCancel(false); break;
+            case PASSWORD_OKCANCEL: iOkCancel(true); break;
             case ALERT: alert(); break;
         }
 
@@ -177,7 +180,7 @@ public class FancyDialog extends JDialog implements AnimationListener {
         });
     }
 
-    void iOkCancel() {
+    void iOkCancel(boolean hidden) {
 
         JPanel inner = new JPanel();
         inner.setLayout(new BorderLayout());
@@ -187,7 +190,11 @@ public class FancyDialog extends JDialog implements AnimationListener {
         message.setBorder(new EmptyBorder(5, 5, 5, 5));
         inner.add(message, BorderLayout.CENTER);
 
-        input = new JTextField();
+        if (hidden) {
+            input = new JPasswordField();
+        } else {
+            input = new JTextField();
+        }
         input.setText(defaultValue);
         inner.add(input, BorderLayout.SOUTH);
 

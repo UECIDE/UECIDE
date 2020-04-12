@@ -5,6 +5,12 @@ import java.io.*;
 import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.*;
 
+/* Copy file(s)
+ *
+ * Usage:
+ *     __builtin_cp::file[::file...]::destination
+ */
+
 
 public class cp extends BuiltinCommand {
     public cp(Context c) { super(c); }

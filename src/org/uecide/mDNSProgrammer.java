@@ -36,8 +36,8 @@ public class mDNSProgrammer extends Programmer {
 
         setRelatedObject(_board);
 
-        set("name", _programmer.getName() + "@" + _ip.getHostAddress());
-        set("description", _board.getDescription() + " on " + _ip.getHostAddress() + " (" + _info.getName() + ")");
+        set("name", _programmer.getName() + "@" + _info.getName() + ":" + _info.getPort());
+        set("description", _board.getDescription() + " on " + _info.getName() + "(" + _ip.getHostAddress() + ")");
         set("mdns.created", "true");
         set("hidden", "false");
     }
@@ -57,6 +57,7 @@ public class mDNSProgrammer extends Programmer {
 
     public boolean programFile(Context ctx, String file) {
         set("ip", _ip.getHostAddress());
+        set("hostname", _info.getName());
         set("port", String.valueOf(_info.getPort()));
         return _programmer.programFile(ctx, file);
     }

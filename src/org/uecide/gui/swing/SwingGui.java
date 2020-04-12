@@ -422,6 +422,22 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     }
 
     @Override
+    public String askPassword(String question, String defaultValue) {
+        CleverIcon i = null;
+        try { 
+            i = IconManager.getIcon(48, "misc.input"); 
+        } catch (IOException ignored) {
+            Debug.exception(ignored);
+        }
+        FancyDialog dialog = new FancyDialog(window, "Excuse me, but...", question, i, FancyDialog.PASSWORD_OKCANCEL);
+        if (dialog.getResult() == FancyDialog.ANSWER_OK) {
+            return dialog.getText();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public void openSketchFileEditor(SketchFile f) {
         for (AutoTab pane : panes) {
             for (int i = 0; i < pane.getTabCount(); i++) {

@@ -73,7 +73,7 @@ public class Instance {
         return new Instance(name, addresses, port, attributes);
     }
 
-    Instance(String name, List<InetAddress> addresses, int port, Map<String, String> attributes) {
+    public Instance(String name, List<InetAddress> addresses, int port, Map<String, String> attributes) {
         this.name = name;
         this.addresses = new HashSet<>();
         this.addresses.addAll(addresses);

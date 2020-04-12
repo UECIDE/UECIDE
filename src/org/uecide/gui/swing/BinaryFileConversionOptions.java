@@ -165,6 +165,7 @@ public class BinaryFileConversionOptions extends JDialog {
         ctx.getSketch().saveSettings();
     }
 
+    @SuppressWarnings("unchecked")
     void populateGraphic() {
 
         constraints.gridx = 0;
@@ -239,6 +240,7 @@ public class BinaryFileConversionOptions extends JDialog {
         populateGeneric();
     }
 
+    @SuppressWarnings("unchecked")
     void populateGeneric() {
         constraints.gridx = 0;
         constraints.weightx = 0.1d;

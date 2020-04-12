@@ -2,34 +2,41 @@ package org.uecide;
 
 import java.io.OutputStream;
 
-public class ContextStream extends OutputStream {
+public class VariableOutputStream extends OutputStream {
     Context ctx;
-    int type;
+    String key;
 
-    public ContextStream(Context context, int t) {
+    public VariableOutputStream(Context context, String k) {
         super();
         ctx = context;
-        type = t;
+        key = k;
+        ctx.set(key, ""); // Start empty
     }
 
     @Override
     public void write(int c) {
         if (c == 0) return;
         String l = String.valueOf((char)c);
-        ctx.triggerEvent("message", new Message(type, l));
+        String s = ctx.get(key);
+        s = s + l;
+        ctx.set(key, s);
     }
 
     @Override
     public void write(byte[] b, int off, int len) {
         if (b.length == 0) return;
         String l = new String(b, off, len);
-        ctx.triggerEvent("message", new Message(type, l));
+        String s = ctx.get(key);
+        s = s + l;
+        ctx.set(key, s);
     }
 
     @Override
     public void write(byte[] b) {
         if (b.length == 0) return;
         String l = new String(b);
-        ctx.triggerEvent("message", new Message(type, l));
+        String s = ctx.get(key);
+        s = s + l;
+        ctx.set(key, s);
     }
 }

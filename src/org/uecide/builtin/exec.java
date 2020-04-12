@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* Run a script or key
+ *
+ * Usage:
+ *     __builtin_exec::key.name
+ */
+
 public class exec extends BuiltinCommand {
     public exec(Context c) { super(c); }
 
@@ -12,7 +18,7 @@ public class exec extends BuiltinCommand {
 
         String key = arg[0];
 
-        return (Boolean)ctx.executeKey(key);
+        return ctx.action("runKey", key);
 
     }
 

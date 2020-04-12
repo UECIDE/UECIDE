@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.Context;
 
+/* Display an alert message
+ *
+ * Usage:
+ *     __builtin_alert::message
+ */
+
 public class alert extends BuiltinCommand {
     public alert(Context c) { super(c); }
 

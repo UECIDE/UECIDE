@@ -3,6 +3,12 @@ package org.uecide.builtin;
 import org.uecide.Context;
 import org.uecide.PropertyFile;
 
+/* Test if a key is set or not. Jumps to one of two keys
+ *
+ * Usage:
+ *     __builtin_isset::key.name::key.true::key.false
+ */
+
 public class isset extends BuiltinCommand {
     public isset(Context c) { super(c); }
 

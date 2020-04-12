@@ -3,7 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-// Fetch all the text of the active editor into a variable
+/* Fetch the text from the active editor into a variable
+ * 
+ * Usage:
+ *     __builtin_fetch::key.name
+ */
+
 public class fetch extends BuiltinCommand {
     public fetch(Context c) { super(c); }
 

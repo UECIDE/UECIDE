@@ -3,6 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
+/* Execute a command and capture the output to a file
+ *
+ * Usage:
+ *     __builtin_stdin::file::command[::arg...]
+ */
+
 public class stdin extends BuiltinCommand {
     public stdin(Context c) { super(c); }
 

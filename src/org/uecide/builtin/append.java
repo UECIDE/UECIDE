@@ -3,6 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
+/* Append a line of text to a file (includes newline)
+ *
+ * Usage:
+ *     __builtin_append::file::text
+ */
+
 public class append extends BuiltinCommand {
     public append(Context c) { super(c); }
 

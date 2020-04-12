@@ -597,4 +597,15 @@ public class CliGui extends Gui implements ContextEventListener {
         }
     }
 
+    @Override
+    public SketchFile getActiveSketchFile() {
+        return null;
+    }
+
+
+    @Override
+    public String askPassword(String prompt, String def) {
+        return askString(prompt, def);
+    }
+
 }

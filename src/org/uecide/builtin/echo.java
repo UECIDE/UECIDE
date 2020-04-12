@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* Display a message on the console
+ *
+ * Usage:
+ *     __builtin_echo::message
+ */
+
 public class echo extends BuiltinCommand {
     public echo(Context c) { super(c); }
 

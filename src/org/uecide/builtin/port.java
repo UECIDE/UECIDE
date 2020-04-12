@@ -14,6 +14,19 @@ import javax.usb.*;
 
 import org.usb4java.*;
 
+/* Perform various operations on the currently selected serial port
+ * 
+ * Usage: 
+ *     __builtin_port::open[::baud]
+ *     __builtin_port::close
+ *     __builtin_port::print::message
+ *     __builtin_port::println::message
+ *     __builtin_port::pulse
+ *     __builtin_port::set::{rts|dtr}
+ *     __builtin_port::clear::{rts|dtr}
+ *     __builtin_port::find::vid::pid
+ */
+
 public class port extends BuiltinCommand {
     public port(Context c) { super(c); }
 

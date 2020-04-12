@@ -3,6 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
+/* Write the contents of a variable to a file
+ *
+ * Usage:
+ *     __builtin_write_var::file::key.name
+ */
+
 public class write_var extends BuiltinCommand {
     public write_var(Context c) { super(c); }
 

@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* Append a value to an "array" string (a string of terms separated by ::)
+ *
+ * Usage:
+ *     __builtin_push::key.name::value
+ */
+
 public class push extends BuiltinCommand {
     public push(Context c) { super(c); }
 

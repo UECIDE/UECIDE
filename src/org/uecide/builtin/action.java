@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.Context;
 
+/* Run an action.
+ * 
+ * Usage:
+ *     __builtin_action::actionName::arg::arg::arg...
+ */
+
 public class action extends BuiltinCommand {
     
     public action(Context c) { super(c); }

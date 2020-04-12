@@ -3,6 +3,12 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
+/* Append the content of a variable to a file (includes newline)
+ *
+ * Usage:
+ *     __builtin_append::file::variable.name
+ */
+
 public class append_var extends BuiltinCommand {
     public append_var(Context c) { super(c); }
 

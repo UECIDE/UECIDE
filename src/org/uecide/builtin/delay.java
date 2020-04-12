@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
+/* Pause for a time
+ *
+ * Usage:
+ *     __builtin_delay::milliseconds
+ */
+
 public class delay extends BuiltinCommand {
     public delay(Context c) { super(c); }
 

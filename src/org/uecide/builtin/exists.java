@@ -4,6 +4,12 @@ import org.uecide.Context;
 
 import java.io.File;
 
+/* Test if a file exists or not. Jumps to one of two keys
+ *
+ * Usage:
+ *     __builtin_exists::file::key.true::key.false
+ */
+
 public class exists extends BuiltinCommand {
     public exists(Context c) { super(c); }
 

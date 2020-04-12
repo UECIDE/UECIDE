@@ -40,4 +40,15 @@ public class HTMLGui extends Gui {
 
     public static void endinit() {
     }
+
+    @Override
+    public SketchFile getActiveSketchFile() {
+        return null;
+    }
+
+    @Override
+    public String askPassword(String prompt, String def) {
+        return askString(prompt, def);
+    }
+
 }

@@ -2,6 +2,12 @@ package org.uecide.builtin;
 
 import org.uecide.Context;
 
+/* Ask a "Yes / No / Cancel" question. Jumps to one of three keys.
+ *
+ * Usage:
+ *     __builtin_askyesnocancel::question::key.yes::key.no::key.cancel
+ */
+
 public class askyesnocancel extends BuiltinCommand {
 
     public askyesnocancel(Context c) { super(c); }
