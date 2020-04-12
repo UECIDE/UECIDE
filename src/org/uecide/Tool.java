@@ -73,4 +73,13 @@ public class Tool extends UObject {
         return tools.get(name);
     }
 
+    public static TreeMap<String, Tool> getTools() {
+        return tools;
+    }
+
+    public String[] getScripts() {
+        String[] scripts = _properties.childKeysOf("tool");
+        return scripts;
+    }
+
 }

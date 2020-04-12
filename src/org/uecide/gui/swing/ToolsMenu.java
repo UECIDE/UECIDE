@@ -37,15 +37,9 @@ public class ToolsMenu extends JMenu implements MenuListener {
 
         addSeparator();
 
-        for (Tool t : Tool.tools.values()) {
+        for (Tool t : Tool.getTools().values()) {
             if (t.worksWith(ctx.getCore())) {
-
-                PropertyFile pf = t.getProperties();
-                
-                PropertyFile tlist = pf.getChildren("tool");
-                String[] toolNames = tlist.childKeys();
-
-                for (String toolName : toolNames) {
+                for (String toolName : t.getScripts()) {
                     ToolMenuItem m = new ToolMenuItem(ctx, t, toolName);
                     add(m);
                 }

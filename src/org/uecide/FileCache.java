@@ -5,8 +5,7 @@ import java.util.*;
 
 public class FileCache {
 
-    static ArrayList<String> files =
-        new ArrayList<String>();
+    static ArrayList<String> files = new ArrayList<String>();
 
     public static void add(File root) {
         File[] list = root.listFiles();
@@ -69,5 +68,9 @@ public class FileCache {
             }
         }
         return out;
+    }
+
+    public static void clear() {
+        files.clear();
     }
 }

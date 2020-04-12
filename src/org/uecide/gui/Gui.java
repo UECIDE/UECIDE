@@ -56,4 +56,7 @@ public abstract class Gui {
         return false;
     }
 
+    public void refresh() {
+    }
+
 }

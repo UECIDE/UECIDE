@@ -202,6 +202,7 @@ public class UECIDE {
     }
 
     static public void cacheSystemFiles() {
+        FileCache.clear();
         cacheSystemFilesFromList(getCoresFolders());
         cacheSystemFilesFromList(getToolsFolders());
         cacheSystemFilesFromList(getProgrammersFolders());

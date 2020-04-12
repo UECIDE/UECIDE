@@ -20,6 +20,7 @@ public class tmpfile extends BuiltinCommand {
 
         try {
             File f = File.createTempFile(arg[1], arg[2]);
+            f.deleteOnExit();
             ctx.set(arg[0], f.getAbsolutePath());
             return true;
         } catch (Exception ex) {

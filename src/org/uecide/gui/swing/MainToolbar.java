@@ -116,6 +116,17 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
             ActionToolbarButton button = new ActionToolbarButton(ctx, name, icon, "runKey", "script." + script);
             add(button);
         }
+        for (Tool t : Tool.getTools().values()) {
+            if (t.worksWith(ctx.getCore())) {
+                scripts = t.getScripts();
+                for (String s : scripts) {
+                    if (t.get("tool." + s + ".icon") != null) {
+                        ToolScriptToolbarButton button = new ToolScriptToolbarButton(ctx, t, t.get("tool." + s + ".name"), t.get("tool." + s + ".icon"), s);
+                        add(button);
+                    }
+                }
+            }
+        }
     }
 
     public void contextEventTriggered(ContextEvent e) {

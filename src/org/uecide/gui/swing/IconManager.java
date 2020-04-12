@@ -7,6 +7,7 @@ import org.uecide.Context;
 import org.uecide.Debug;
 import org.uecide.Programmer;
 import org.uecide.PropertyFile;
+import org.uecide.Tool;
 import org.uecide.UObject;
 import org.uecide.FileCache;
 import org.uecide.FileManager;
@@ -50,6 +51,19 @@ public class IconManager {
             return f;
         }
         return null;
+    }
+
+    public static CleverIcon getIconFromTool(Context ctx, Tool t, String name, int size) throws IOException {
+        String icon = t.get("icon." + name);
+        if (icon == null) { // Not found
+            return getIconFromContext(ctx, name, size);
+        }
+        File iconFile = new File(t.getFolder(), icon);
+        if (!iconFile.exists()) {
+            return getIconFromContext(ctx, name, size);
+        }
+        CleverIcon ci = new CleverIcon(size, iconFile);
+        return ci;
     }
 
     public static CleverIcon getIconFromContext(Context ctx, String name, int size) throws IOException {

@@ -839,4 +839,10 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         return null;
     }
 
+    @Override
+    public void refresh() {
+        setLookAndFeel();
+        toolbar.updateIcons();
+    }
+
 }
