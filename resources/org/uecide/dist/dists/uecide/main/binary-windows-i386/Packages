@@ -1,16 +1,16 @@
 Package: core-varcmd
-Version: 1.0.9
+Version: 1.1.3
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 84
+Installed-Size: 90
 Homepage: http://uecide.org
 Priority: extra
 Section: main
-Filename: pool/main/c/core-varcmd/core-varcmd_1.0.9_all.deb
-Size: 6784
-SHA256: 06a989a2851dc4c70e8d3aeb9619fdd7cbffa7364f226c2d17bc151a9114fce1
-SHA1: 5b356c929693da05cef35950e01b7c991f4e8157
-MD5sum: 6c4fa2bfc44f1d461a0343d865bb15f6
+Filename: pool/main/c/core-varcmd/core-varcmd_1.1.3_all.deb
+Size: 7468
+SHA256: f8e5379048ce817cb1717e6531db7c558a2313f05434019ab197e18f6612a12b
+SHA1: 2f1e80ba8f5561817b7e3a3953dd25902a451f1d
+MD5sum: 6edda3790a0ee3569a328f7b3534d24a
 Description: Core varcmd scriptlets
  Varcmd scriptlets are used to enhance the ability of the
  config and control files handling. They are called as the
@@ -20,21 +20,60 @@ Group: System
 Subgroup: Scriptlets
 
 Package: ctags
-Version: 1.0.5
+Version: 1.1.0
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
-Installed-Size: 2813
+Installed-Size: 40554
 Priority: required
 Section: main
-Filename: pool/main/c/ctags/ctags_1.0.5_all.deb
-Size: 496724
-SHA256: 3333b4f97a0bfc75f5af093315b8f86ce44839114c4f6aff54c7d6bdff398f54
-SHA1: 1356b7d547d09c3ec92bcd5b44e2593955e96749
-MD5sum: e6102f11d158987a5487e30783bea43a
+Filename: pool/main/c/ctags/ctags_1.1.0_all.deb
+Size: 7613952
+SHA256: f74e87da135b12041da9afa289782fb481a8daf03f56161df1cf7eb089c15425
+SHA1: ca0e4b77fb60f1d006c7c33e40644f40f8d14f29
+MD5sum: 6e0c79f87a74e402c59e7b545d084636
 Description: Exuberant CTags Parser
  This is the main parser for INO files used for gathering function prototypes.
 Group: System
 Subgroup: Tools
+
+Package: repos-experimental
+Version: 1.0.1
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 11
+Priority: extra
+Section: main
+Filename: pool/main/r/repos-experimental/repos-experimental_1.0.1_all.deb
+Size: 1436
+SHA256: 0d3b43315532dc0ddac68df7320101062efc38dc6b8c2391b6580b6e98c08c12
+SHA1: bd7cd9e275629eca3a178c37cbc97920cca04eca
+MD5sum: 283eb29bd129cc04f43013ec344ca93e
+Description: Experimental UECIDE Repository
+ This is the repository for experimental packages. That is, packages that are more stable that
+ "testing" but not main-line. Things like newer versions of compilers, or cores that are under
+ active development and not necessarily complete. Install this repository if you want to access
+ things that are bleeding edge.
+Group: System
+Subgroup: Repositories
+
+Package: repos-legacy
+Version: 1.0.1
+Architecture: all
+Maintainer: Matt Jenkins <matt@majenko.co.uk>
+Installed-Size: 11
+Priority: extra
+Section: main
+Filename: pool/main/r/repos-legacy/repos-legacy_1.0.1_all.deb
+Size: 1368
+SHA256: 11990d3da2fd7f6ad38f0e76e9316157fbbc48596f29064333430057fbc506de
+SHA1: f4be0ddcd189957c2771edae572a6495f12df529
+MD5sum: 7d1f64d5d02b91208fb8e16fc8020d01
+Description: Legacy UECIDE Repository
+ This is where older versions of packages are put out to pasture. Older versions of compilers
+ especially get placed here. Use this repository to access older systems that you may want
+ for supporting legacy products.
+Group: System
+Subgroup: Repositories
 
 Package: repos-master
 Source: repos-core
@@ -76,18 +115,18 @@ Group: System
 Subgroup: Repositories
 
 Package: uecide-families
-Version: 1.1.1
+Version: 1.1.2
 Architecture: all
 Maintainer: Matt Jenkins <matt@majenko.co.uk>
 Installed-Size: 13
 Homepage: http://uecide.org
 Priority: extra
 Section: main
-Filename: pool/main/u/uecide-families/uecide-families_1.1.1_all.deb
-Size: 2944
-SHA256: 224b7f1561fc07c78b581ba2eef1ffbcf7f7bbbac8e5ea7e27b5e19976d1a2c2
-SHA1: 57425e305a5e01f05f2fcfb1ccf59e63e162f5c1
-MD5sum: 9db94c9c905d15a50b07299dce7adafd
+Filename: pool/main/u/uecide-families/uecide-families_1.1.2_all.deb
+Size: 2984
+SHA256: 8731c7f5132ecd86d929017fc9ecf1838c1231b5e650bee8a170baafb046a03f
+SHA1: b959258c732db45062d6fe2b04a20b82a5934ab1
+MD5sum: 1c05074242bf47c5620fbbebd677fc3e
 Description: Family grouping control
  Family grouping control
 Family: all

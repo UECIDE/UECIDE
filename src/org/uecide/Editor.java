@@ -2643,7 +2643,6 @@ public class Editor extends JFrame {
     }
 
     public int openNewTab(File sf) {
-        if (sf.isDirectory()) return -1;
         if (sf == null) {
             error("No file specified");
             return -1;
@@ -2652,6 +2651,7 @@ public class Editor extends JFrame {
             error(Base.i18n.string("err.notfound", sf.getName()));
             return -1;
         }
+        if (sf.isDirectory()) return -1;
 
         try {
             String className = FileType.getEditor(sf.getName());

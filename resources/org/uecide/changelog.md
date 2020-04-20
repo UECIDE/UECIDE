@@ -4,6 +4,7 @@ Changelog
 0.11.4
 ------
 
+* Fixed missing tool vc. Prevent prototypes being added for non-ino files
 * Release 0.11.5
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Add escapes for quotes in windows command execution
@@ -750,6 +751,7 @@ Changelog
 0.8.5
 -----
 
+* Fixed missing tool vc. Prevent prototypes being added for non-ino files
 * Release 0.11.5
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Add escapes for quotes in windows command execution
