@@ -28,6 +28,7 @@ public class LibraryMenu extends JMenuItem implements ActionListener {
         String data = sf.getFileData();
         sf.setFileData(library.getInclude() + data);
         ctx.triggerEvent("restoreCursorLocation", sf);
+        ctx.triggerEvent("includeAdded", sf);
     }
 }
     

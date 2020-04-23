@@ -44,6 +44,7 @@ public abstract class VariableCommand {
                 case "ucase": vc = new vc_ucase(); break;
                 case "lcase": vc = new vc_lcase(); break;
                 case "csv": vc = new vc_csv(); break;
+                case "hex2dec": vc = new vc_hex2dec(); break;
                 default: return "BADVCMD";
             }
 

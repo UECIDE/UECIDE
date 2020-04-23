@@ -24,6 +24,8 @@ public class SetBoardAction extends Action {
 
             Board brd = null;
 
+            if (args[0] == null) return false;
+
             if (args[0] instanceof Board) {
                 brd = (Board)args[0];
             } else if (args[0] instanceof String) {

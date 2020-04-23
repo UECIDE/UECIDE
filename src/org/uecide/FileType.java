@@ -88,6 +88,9 @@ public class FileType {
     public static TreeMap<String, FileTypeInfo> fileTypeList;
     static {
         fileTypeList = new TreeMap<String, FileTypeInfo>();
+        fileTypeList.put("a",   new FileTypeInfo(FileType.LIBRARY, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_NONE, "none", GROUP_OTHER));
+        fileTypeList.put("lib",   new FileTypeInfo(FileType.LIBRARY, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_NONE, "none", GROUP_OTHER));
+
         fileTypeList.put("c",   new FileTypeInfo(FileType.CSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_C, "source_c", GROUP_SOURCE));
 
         fileTypeList.put("cpp", new FileTypeInfo(FileType.CPPSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_cpp", GROUP_SOURCE));
@@ -99,6 +102,7 @@ public class FileType {
         fileTypeList.put("C",   new FileTypeInfo(FileType.CPPSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_c", GROUP_SOURCE));
 
         fileTypeList.put("S",   new FileTypeInfo(FileType.ASMSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_c", GROUP_SOURCE));
+        fileTypeList.put("asm",   new FileTypeInfo(FileType.ASMSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_c", GROUP_SOURCE));
         fileTypeList.put("sx",  new FileTypeInfo(FileType.ASMSOURCE, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_c", GROUP_SOURCE));
 
         fileTypeList.put("h",   new FileTypeInfo(FileType.HEADER, "org.uecide.editors.code", SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS, "source_h", GROUP_HEADER));

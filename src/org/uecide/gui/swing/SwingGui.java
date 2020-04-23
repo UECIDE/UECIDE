@@ -119,6 +119,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         commandPrompt.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
         commandPrompt.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
+                focusTab(console);
                 console.showHideCommandPrompt();
             }
         });
@@ -457,6 +458,21 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
         centerPane.add(ce);
         centerPane.setSelectedComponent(ce);
         ce.requestFocus();
+    }
+
+    public void focusTab(TabPanel p) {
+        for (AutoTab pane : panes) {
+            for (int i = 0; i < pane.getTabCount(); i++) {
+                Component c = pane.getComponentAt(i);
+                if (c instanceof TabPanel) {
+                    TabPanel tp = (TabPanel)c;
+                    if (tp == p) {
+                        pane.setSelectedIndex(i);
+                        setActiveTab(tp);
+                    }
+                }
+            }
+        }
     }
 
     @Override

@@ -107,14 +107,6 @@ public class UECIDE {
     public static HashMap<File,Integer> MCUList;
     public static String gui;
 
-    // maps imported packages to their library folder
-    public static TreeMap<String, File> importToLibraryTable;
-
-    // classpath for all known libraries for p5
-    // (both those in the p5/libs folder and those with lib subfolders
-    // found in the sketchbook)
-    public static String librariesClassPath;
-
     public static Version systemVersion;
 
     public static Context systemContext;
@@ -861,7 +853,28 @@ public class UECIDE {
 
     /*! Load all the libraries in the system */
     public static void gatherLibraries() {
-        Library.loadLibraries();
+        LibraryManager.clearLocations();
+        File[] libdirs = getLibrariesFolders();
+        int i = 1;
+        for (File libdir : libdirs) {
+            if (libdir.exists() && libdir.isDirectory()) {
+                LibraryManager.addLibraryLocation(libdir, 50, "Libraries " + i);
+                i++;
+            }
+        }
+
+        String[] locs = Preferences.childKeysOf("locations.library");
+        for (String loc : locs) {
+            String name = Preferences.get("locations.library." + loc + ".name");
+            String path = Preferences.get("locations.library." + loc + ".path");
+            int priority = Preferences.getInteger("locations.library." + loc + ".priority", 100);
+            File f = new File(path);
+            if (f.exists() && f.isDirectory()) {
+                LibraryManager.addLibraryLocation(f, priority, name);
+            }
+        }
+
+        LibraryManager.rescanAllLibraries();
     }
 
     public static Platform getPlatform() {
@@ -1379,6 +1392,7 @@ public class UECIDE {
         Board.load();
         Programmer.load();
         Tool.load();
+
         gatherLibraries();
     }
 
@@ -1451,6 +1465,10 @@ public class UECIDE {
             System.err.println("Last session exited - quitting");
             System.exit(0);
         }
+    }
+
+    public static Version getVersion() {
+        return systemVersion;
     }
 }
 

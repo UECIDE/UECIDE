@@ -8,11 +8,12 @@ import org.uecide.Context;
 import org.uecide.ContextEvent;
 import org.uecide.ContextEventListener;
 
+import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
-import java.awt.FlowLayout;
+import javax.swing.BoxLayout;
 
 public class StatusBar extends JPanel implements ContextEventListener {
     Context ctx;
@@ -26,7 +27,7 @@ public class StatusBar extends JPanel implements ContextEventListener {
     public StatusBar(Context c) {
         super();
         ctx = c;
-        setLayout(new FlowLayout(FlowLayout.LEFT));
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
         ctx.listenForEvent("setBoard", this);
         ctx.listenForEvent("setCore", this);
@@ -42,6 +43,8 @@ public class StatusBar extends JPanel implements ContextEventListener {
         add(coreName);
         add(compilerName);
         add(programmerName);
+        add(Box.createHorizontalGlue());
+        percentageIndicator.setAlignmentX(JProgressBar.RIGHT_ALIGNMENT);
         add(percentageIndicator);
     }
 

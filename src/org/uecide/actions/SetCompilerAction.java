@@ -23,6 +23,8 @@ public class SetCompilerAction extends Action {
                 throw new SyntaxErrorActionException();
             }
 
+            if (args[0] == null) return false;
+
             if (args[0] instanceof Compiler) {
                 ctx.setCompiler((Compiler)args[0]);
                 Preferences.set("board." + ctx.getBoard().getName() + ".compiler", ctx.getCompiler().getName());

@@ -125,6 +125,12 @@ public class SketchFile implements Comparable, DocumentListener {
         }
     }
 
+    public void saveStrippedDataToDisk(File out) throws IOException {
+        PrintWriter pw = new PrintWriter(new FileWriter(out));
+        pw.print(stripComments());
+        pw.close();
+    }
+
     public File getFile() {
         return file;
     }
@@ -297,7 +303,7 @@ public class SketchFile implements Comparable, DocumentListener {
             }
 
             File tempSource = new File(tmp, file.getName());
-            saveDataToDisk(tempSource);
+            saveStrippedDataToDisk(tempSource);
             ctx.set("filename", file.getName());
             ctx.set("sketch.root", file.getParentFile().getAbsolutePath());
             ctx.set("build.root", sketch.buildFolder.getAbsolutePath());
@@ -550,6 +556,40 @@ public class SketchFile implements Comparable, DocumentListener {
             setFileData(storedData);
             bufferModified = Utils.millis();
         }
+    }
+
+    public ArrayList<Library> gatherLibraries() {
+        ArrayList<Library> out = new ArrayList<Library>();
+        String data = stripComments();
+        String[] lines = data.split("\n");
+
+        Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
+
+        for (String line : lines) {
+            Matcher m = inc.matcher(line);
+            if (m.find()) {
+                String libname = m.group(1);
+                if (sketch.containsFile(libname)) {
+                    System.err.println(libname + " is in the sketch itself.");
+                    continue;
+                } 
+                File hf = new File(sketch.getFolder(), libname);
+                if (hf.exists()) {
+                    System.err.println(libname + " is within the sketch folder.");
+                    continue;
+                }
+                
+                Library l = LibraryManager.getLibraryByName(libname, ctx.getCore());
+                if (l != null) {
+                    System.err.println("I think lib is: " + l.getFolder());
+                    out.add(l);
+                } else {
+                    System.err.println("I couldn't find " + libname);
+                }
+            }
+        }
+
+        return out;
     }
 
 }

@@ -412,6 +412,10 @@ public class Preferences {
         return preferences.getChildren(key);
     }
 
+    public static String[] childKeysOf(String key) {
+        return preferences.childKeysOf(key);
+    }
+
 }
 
 

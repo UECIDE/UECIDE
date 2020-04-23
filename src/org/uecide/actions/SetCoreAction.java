@@ -22,6 +22,8 @@ public class SetCoreAction extends Action {
                 throw new SyntaxErrorActionException();
             }
 
+            if (args[0] == null) return false;
+
             Core core = null;
 
             if (args[0] instanceof Core) {

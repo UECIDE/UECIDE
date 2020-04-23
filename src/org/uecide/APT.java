@@ -51,8 +51,6 @@ public class APT {
 
     ArrayList<Source>sources = new ArrayList<Source>();
 
-    static APT apt = null;
-
     public APT(Context context, String rootPath) throws FileNotFoundException, IOException {
         ctx = context;
         root = new File(rootPath);
@@ -422,55 +420,56 @@ public class APT {
         return true;
     }
 
+    public void upgradeOrInstallDependencies(Package[] deps) {
+        for (Package dep : deps) {
+            if (!isInstalled(dep) || isUpgradable(dep)) {
+                if (!dep.fetchPackage(cacheFolder)) {
+                    ctx.error("Error downloading " + dep);
+                }
+                if (!isInstalled(dep)) {
+                    dep.extractPackage(cacheFolder, packagesFolder, root);
+                } else {
+                    uninstallPackage(dep, true);
+                    dep.extractPackage(cacheFolder, packagesFolder, root);
+                }
+            }
+        }
+    }
+
     public void upgradePackage(Package p) throws FileNotFoundException, IOException{
         if (!isUpgradable(p)) {
             ctx.message(p + " is already up to date");
             return;
         }
         Package[] deps = resolveDepends(p);
-        for (Package dep : deps) {
-            if (!isInstalled(dep) || isUpgradable(dep)) {
-                if (!dep.fetchPackage(cacheFolder)) {
-                    ctx.error("Error downloading " + dep);
-                    return;
-                }
-            }
-        }
+        upgradeOrInstallDependencies(deps);
+
         if (!p.fetchPackage(cacheFolder)) {
             ctx.error("Error downloading " + p);
         }
 
-        for (Package dep : deps) {
-            if (!isInstalled(dep)) {
-                dep.extractPackage(cacheFolder, packagesFolder, root);
-            } else if(isUpgradable(dep)) {
-                uninstallPackage(dep, true);
-                dep.extractPackage(cacheFolder, packagesFolder, root);
+        uninstallPackage(p, true);
+        String reps[] = p.getReplaces();
+        if (reps != null) {
+            for (String rep : reps) {
+                Package rp = getPackage(rep);
+                if (isInstalled(rp)) {
+                    uninstallPackage(rp, true);
+                }
             }
         }
-        uninstallPackage(p, true);
         p.extractPackage(cacheFolder, packagesFolder, root);
         initRepository();
     }
+
     public void installPackage(Package p) throws FileNotFoundException, IOException{
         Package[] deps = resolveDepends(p);
-        for (Package dep : deps) {
-            if (!isInstalled(dep)) {
-                if (!dep.fetchPackage(cacheFolder)) {
-                    ctx.error("Error downloading " + dep);
-                    return;
-                }
-            }
-        }
+        upgradeOrInstallDependencies(deps);
+
         if (!p.fetchPackage(cacheFolder)) {
             ctx.error("Error downloading " + p);
         }
 
-        for (Package dep : deps) {
-            if (!isInstalled(dep)) {
-                dep.extractPackage(cacheFolder, packagesFolder, root);
-            }
-        }
         if (isInstalled(p)) {
             uninstallPackage(p, true);
         }
@@ -762,22 +761,19 @@ public class APT {
     }
 
     public static APT factory(Context context) throws IOException {
-        if (apt == null) {
-            File dd = UECIDE.getDataFolder();
+        File dd = UECIDE.getDataFolder();
 
-            File aptFolder = new File(dd, "apt");
-            if (!aptFolder.exists()) {
-                aptFolder.mkdirs();
-            }
-
-            File dbFolder = new File(aptFolder, "db");
-            if (!dbFolder.exists()) {
-                dbFolder.mkdirs();
-            }
-
-            apt = new APT(context, dd);
+        File aptFolder = new File(dd, "apt");
+        if (!aptFolder.exists()) {
+            aptFolder.mkdirs();
         }
-        return apt;
+
+        File dbFolder = new File(aptFolder, "db");
+        if (!dbFolder.exists()) {
+            dbFolder.mkdirs();
+        }
+
+        return new APT(context, dd);
     }
 
 }

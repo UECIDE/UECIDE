@@ -9,6 +9,7 @@ import org.uecide.Message;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import java.awt.Font;
 import java.awt.BorderLayout;
@@ -233,7 +234,11 @@ public class Console extends TabPanel implements MouseWheelListener, ContextEven
         promptShown = !promptShown;
         input.setVisible(promptShown);
         if (promptShown) {
-            input.requestFocus();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    input.requestFocus();
+                }
+            });
         }
         revalidate();
     }

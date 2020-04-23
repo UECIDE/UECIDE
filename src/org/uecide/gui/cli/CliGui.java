@@ -62,26 +62,30 @@ public class CliGui extends Gui implements ContextEventListener {
         }
         String[] boardNames = brdList.toArray(new String[0]);
 
-        String family = "none";
+        String[] families = {"none"};
         Board b = ctx.getBoard();
         if (b != null) {
-            family = ctx.getBoard().getFamily();
+            families = ctx.getBoard().getFamily();
         }
 
         ArrayList<String> corList = new ArrayList<String>();
-        for (Core c : Core.cores.values()) {
-            if (c.getFamily().equals(family)) {
-                corList.add(c.getName());
-            }
-        }
-        String[] coreNames = corList.toArray(new String[0]);
-
         ArrayList<String> comList = new ArrayList<String>();
-        for (Compiler c : Compiler.compilers.values()) {
-            if (c.getFamily().equals(family)) {
-                comList.add(c.getName());
+
+        for (String family : families) {
+            for (Core c : Core.cores.values()) {
+                if (c.inFamily(family)) {
+                    corList.add(c.getName());
+                }
+            }
+
+            for (Compiler c : Compiler.compilers.values()) {
+                if (c.inFamily(family)) {
+                    comList.add(c.getName());
+                }
             }
         }
+
+        String[] coreNames = corList.toArray(new String[0]);
         String[] compNames = comList.toArray(new String[0]);
 
         ArrayList<String> uninstalledPackages = new ArrayList<String>();
@@ -393,7 +397,7 @@ public class CliGui extends Gui implements ContextEventListener {
 
     @Override
     public void openSplash() {
-        System.out.println("UECIDE version 0.11.0");
+        System.out.println("UECIDE version " + UECIDE.getVersion());
         System.out.println("(c) 2019 Majenko Technologies");
     }
 

@@ -22,8 +22,9 @@ public class AddLibraryAction extends Action {
 
         File source = null;
         Integer priority = 100;
+        String name = null;
 
-        if (args.length != 2) {
+        if (args.length != 3) {
             throw new SyntaxErrorActionException();
         }
 
@@ -42,7 +43,13 @@ public class AddLibraryAction extends Action {
         } else {
             throw new BadArgumentActionException();
         }
+
+        if (args[2] instanceof String) {
+            name = (String)args[2];
+        } else {
+            throw new BadArgumentActionException();
+        }
             
-        return LibraryManager.addLibrary(source, priority);
+        return LibraryManager.addLibrary(source, priority, name);
     }
 }

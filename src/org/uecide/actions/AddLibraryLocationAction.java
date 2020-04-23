@@ -12,7 +12,7 @@ public class AddLibraryLocationAction extends Action {
 
     public String[] getUsage() {
         return new String[] {
-            "AddLibraryLocation <path> <priority>"
+            "AddLibraryLocation <path> <priority> <name>"
         };
     }
 
@@ -22,8 +22,9 @@ public class AddLibraryLocationAction extends Action {
 
         File source = null;
         int priority = 0;
+        String name;
 
-        if (args.length != 2) {
+        if (args.length != 3) {
             throw new SyntaxErrorActionException();
         }
 
@@ -43,7 +44,13 @@ public class AddLibraryLocationAction extends Action {
             throw new BadArgumentActionException();
         }
 
-        LibraryManager.addLibraryLocation(source, priority);
+        if (args[2] instanceof String) {
+            name = (String)args[2];
+        } else {
+            throw new BadArgumentActionException();
+        }
+
+        LibraryManager.addLibraryLocation(source, priority, name);
         return true;
     }
 }

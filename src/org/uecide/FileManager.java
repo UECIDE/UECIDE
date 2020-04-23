@@ -69,4 +69,30 @@ public class FileManager {
         return (new File(path)).toURI().toURL();
     }
 
+    static public ArrayList<File> findFilesInFolder(File sourceFolder, boolean recurse, int... accept) {
+        ArrayList<File> out = new ArrayList<File>();
+        if (!sourceFolder.isDirectory()) return out;
+
+        File[] files = sourceFolder.listFiles();
+        for (File f : files) {
+            if (f.getName().startsWith(".")) continue;
+            if (f.isDirectory()) {
+                if (recurse) {
+                    ArrayList<File> sub = findFilesInFolder(f, recurse, accept);
+                    if (sub.size() > 0) {
+                        out.addAll(sub);
+                    }
+                }
+            } else {
+                int ft = FileType.getType(f);
+                for (int acc : accept) {
+                    if (ft == acc) {
+                        out.add(f);
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
 }

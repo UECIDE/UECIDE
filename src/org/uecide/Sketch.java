@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -92,8 +93,7 @@ public class Sketch {
     // This lot is what the sketch consists of - the list of files, libraries, parameters etc.
     public TreeMap<String, SketchFile> sketchFiles = new TreeMap<String, SketchFile>();
 
-    public HashMap<String, Library> importedLibraries = new HashMap<String, Library>();
-    public ArrayList<Library> orderedLibraries = new ArrayList<Library>();
+    public ArrayList<Library> importedLibraries = new ArrayList<Library>();
     public ArrayList<String> unknownLibraries = new ArrayList<String>();
 
     TreeMap<String, String> selectedOptions = new TreeMap<String, String>();
@@ -179,6 +179,11 @@ public class Sketch {
         buildFolder = createBuildFolder();
 
         ctx.listenForEvent("fifteenSecondTimer", new ContextEventListener() {
+            public void contextEventTriggered(ContextEvent evt) {
+                updateLibraryList();
+            }
+        });
+        ctx.listenForEvent("includeAdded", new ContextEventListener() {
             public void contextEventTriggered(ContextEvent evt) {
                 updateLibraryList();
             }
@@ -434,33 +439,6 @@ public class Sketch {
         return sketchFolder;
     }
 
-    TreeMap<SketchFile, String> cleanedFiles;
-
-    public boolean cleanFiles() {
-        cleanedFiles = new TreeMap<SketchFile, String>();
-
-        for(SketchFile f : sketchFiles.values()) {
-            if(f.getType() == FileType.SKETCH) {
-                String data = f.getFileData();
-                String cleanData = stripComments(data);
-                String[] lines = cleanData.split("\n");
-                int lineno = 1;
-                StringBuilder out = new StringBuilder();
-
-                for(String line : lines) {
-                    line = line.trim();
-                    out.append(line + "\n");
-                }
-
-                cleanedFiles.put(f, out.toString());
-            } else {
-                cleanedFiles.put(f, f.getFileData());
-            }
-        }
-
-        return true;
-    }
-
     public int linesInString(String l) {
         return l.split("\n").length;
     }
@@ -487,7 +465,7 @@ public class Sketch {
 
 
         // First look in the sketch libs folder if it exists
-
+/*
         File libfolder = getLibrariesFolder();
 
         if(libfolder.exists() && libfolder.isDirectory()) {
@@ -505,16 +483,16 @@ public class Sketch {
                 }
             }
         }
-
+*/
         if (ctx.getCore() == null) {
             return null;
         }
-        Library lib = Library.getLibraryByInclude(filename, ctx.getCore().getName());
+        Library lib = LibraryManager.getLibraryByName(filename, ctx.getCore());
         if (lib == null) {
             if (ctx.getCore().get("core.alias") != null) {
                 String[] aliases = ctx.parseString(ctx.getCore().get("core.alias")).split("::");
                 for (String alias : aliases) {
-                    lib = Library.getLibraryByInclude(filename, alias);
+                    lib = LibraryManager.getLibraryByName(filename, Core.getCore(alias));
                     if (lib != null) {
                         return lib;
                     }
@@ -570,75 +548,41 @@ public class Sketch {
     public static final int LIB_PROCESSED = 1;
     public static final int LIB_SYSTEM = 2;
 
-    ArrayList<String> includeOrder = new ArrayList<String>();
-
     public synchronized void updateLibraryList() {
         PropertyFile props = ctx.getMerged();
-        cleanFiles();
 
-        importedLibraries = new HashMap<String, Library>();
-        unknownLibraries = new ArrayList<String>();
-        includeOrder = new ArrayList<String>();
-        Pattern inc = Pattern.compile("^#\\s*include\\s+[<\"](.*)[>\"]");
+        LibraryManager.updateSketchLibraries(ctx);
 
-        for(SketchFile f : cleanedFiles.keySet()) {
-            try {
-                String data = cleanedFiles.get(f);
-                String fname = f.toString();
-                if(f.getType() == FileType.SKETCH) {
-                    String ext = ctx.parseString(props.get("build.extension"));
-                    if (ext == null) {
-                        ext = "cpp";
-                    }
-                    fname = "deps-temp." + ext;
-                } else {
-                    String[] bits = fname.split("\\.");
-                    fname = "deps-temp." + bits[bits.length-1];
-                }
+        importedLibraries = new ArrayList<Library>();
 
-                File tempFile = new File(getBuildFolder(), fname);
-                PrintWriter pw = new PrintWriter(tempFile);
-                pw.print(data);
-                pw.close();
-                ctx.triggerEvent("buildFileAdded", tempFile);
-                
-                boolean haveHunted = huntForLibraries(tempFile, importedLibraries, unknownLibraries);
+        ArrayDeque<Library> queue = new ArrayDeque<Library>();
 
-                UECIDE.tryDelete(tempFile);
-                ctx.triggerEvent("buildFileRemoved", tempFile);
+        for(SketchFile f : sketchFiles.values()) {
+            if (f.getType() == FileType.SKETCH) {
+                ArrayList<Library> libraries = f.gatherLibraries();
+                queue.addAll(libraries);
+            }
+        }
 
-                String lines[] = data.split("\n");
-
-                for(String line : lines) {
-                    Matcher match = inc.matcher(line.trim());
-
-                    if (match.find()) {
-                        if (!haveHunted) {
-                            Library lib = findLibrary(match.group(1).trim());
-                            if (lib != null) {
-                                importedLibraries.put(lib.getMainInclude(), lib);
-                            } else {
-                                if(unknownLibraries.indexOf(match.group(1).trim()) == -1) {
-                                    unknownLibraries.add(match.group(1).trim());
-                                }
+        while (queue.size() > 0) {
+            Library l = queue.remove();
+            if (!importedLibraries.contains(l)) {
+                System.err.println("Adding library " + l);
+                importedLibraries.add(l);
+                ArrayList<String> recursedLibraries = l.getRequiredLibraries();
+                if (recursedLibraries != null) {
+                    for (String s : recursedLibraries) {
+                        Library rl = LibraryManager.getLibraryByName(s, ctx.getCore());
+                        if (rl != null) {
+                            if (!importedLibraries.contains(rl)) {
+                                queue.add(rl);
                             }
                         }
-                        if(includeOrder.indexOf(match.group(1)) == -1) {
-                            includeOrder.add(match.group(1));
-                        }
                     }
                 }
-            } catch (Exception e) {
-                Debug.exception(e);
             }
         }
 
-        orderedLibraries = new ArrayList<Library>();
-        for (String inclib : includeOrder) {
-            if (importedLibraries.get(inclib) != null) {
-                orderedLibraries.add(importedLibraries.get(inclib));
-            }
-        }
         ctx.triggerEvent("sketchLibraryListUpdated");
     }
 
@@ -833,10 +777,7 @@ public class Sketch {
         pw.close();
         ctx.triggerEvent("buildFileAdded", out);
 
-        String ext = ctx.parseString(props.get("build.extension"));
-        if (ext == null) {
-            ext = "cpp";
-        }
+        String ext = ctx.parseString(props.get("build.extension", "cpp"));
         File masterSketchFile = new File(buildFolder, getName() + "_combined." + ext);
         filesToCompile.add(masterSketchFile);
         pw = new PrintWriter(masterSketchFile);
@@ -882,112 +823,6 @@ public class Sketch {
         pw.close();
         ctx.triggerEvent("buildFileAdded", masterSketchFile);
         return true;
-    }
-
-    public String stripComments(String data) {
-        int cpos = 0;
-        boolean inString = false;
-        boolean inEscape = false;
-        boolean inMultiComment = false;
-        boolean inSingleComment = false;
-
-        // We'll work through the string a character at a time pushing it on to the
-        // string builder if we want it, or pushing a space if we don't.
-
-        StringBuilder out = new StringBuilder();
-
-        while (cpos < data.length()) {
-            char thisChar = data.charAt(cpos);
-            char nextChar = ' ';
-            if (cpos < data.length() - 1) {
-                nextChar = data.charAt(cpos + 1);
-            }
-
-            // Don't process any escaped characters - just add them verbatim.
-            if (thisChar == '\\') {
-                if (!inSingleComment && !inMultiComment)
-                    out.append(thisChar);
-                cpos++;
-                if (cpos < data.length()) {
-                    if (!inSingleComment && !inMultiComment)
-                        out.append(data.charAt(cpos));
-                    cpos++;
-                }
-                continue;
-            }
-
-            // If we're currently in a string then keep moving on until the end of the string.
-            // If we hit the closing quote we still want to move on since it'll start a new
-            // string otherwise.
-            if (inString) {
-                out.append(thisChar);
-                if (thisChar == '"') {
-                    inString = false;
-                }
-                cpos++;
-                continue;
-            }
-            
-            // If we're in a single line comment then keep skipping until we hit the end of the line.
-            if (inSingleComment) {
-                if (thisChar == '\n') {
-                    out.append(thisChar);
-                    inSingleComment = false;
-                    cpos++;
-                    continue;
-                }
-                cpos++;
-                continue;
-            }
-
-            // If we're in a multi-line comment then keep skipping until we
-            // hit the end of comment sequence.  Preserve newlines.
-            if (inMultiComment) {
-                if  (thisChar == '*' && nextChar == '/') {
-                    inMultiComment = false;
-                    cpos++;
-                    cpos++;
-                    continue;
-                }
-                if (thisChar == '\n') {
-                    out.append(thisChar);
-                    cpos++;
-                    continue;
-                }
-                cpos++;
-                continue;
-            }
-
-            // Is this the start of a quote?
-            if (thisChar == '"') {
-                out.append(thisChar);
-                cpos++;
-                inString = true;
-                continue;
-            }
-
-            // How about the start of a single line comment?
-            if (thisChar == '/' && nextChar == '/') {
-                inSingleComment = true;
-                out.append(" ");
-                cpos++;
-                continue;
-            }
-  
-            // The start of a muti-line comment?
-            if (thisChar == '/' && nextChar == '*') {
-                inMultiComment = true;
-                out.append(" ");
-                cpos++;
-                continue;
-            }
-
-            // None of those? Then let's just append.
-            out.append(thisChar);
-            cpos++;
-        }
-                
-        return out.toString();
     }
 
     public boolean upload() {
@@ -1199,13 +1034,8 @@ public class Sketch {
         return sketchName;
     }
 
-    public Collection<Library> getImportedLibraries() {
-        return importedLibraries.values();
-    }
-
-    public ArrayList<Library> getOrderedLibraries() {
-        
-        return orderedLibraries;
+    public ArrayList<Library> getImportedLibraries() {
+        return importedLibraries;
     }
 
     public ArrayList<String> getIncludePaths() {
@@ -1268,7 +1098,7 @@ public class Sketch {
             }
         }
 
-        for(Library l : getOrderedLibraries()) {
+        for(Library l : importedLibraries) {
             libFiles.add(l.getSourceFolder().getAbsolutePath());
         }
 
@@ -1385,41 +1215,60 @@ public class Sketch {
         if (!libDir.isDirectory()) {
             return null;
         }
-        Library libob = new Library(libDir, "sketch", "all");
-        if (!libob.isValid()) {
-            return null;
-        }
-        return libob;
+//        Library libob = new Library(libDir, "sketch", "all");
+//        if (!libob.isValid()) {
+//            return null;
+//        }
+//        return libob;
+return null;
     }
 
     public String generateIncludes() {
+        PropertyFile props = ctx.getMerged();
         updateLibraryList();
         ArrayList<File> includes = new ArrayList<File>();
 
-        TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
+        TreeMap<String, ArrayList<File>> coreLibs = ctx.getCoreLibs();
 
-        for(String lib : coreLibs.keySet()) {
-            ArrayList<File> libfiles = coreLibs.get(lib);
-            includes.addAll(libfiles);
-        }
-
-        for (Library l : orderedLibraries) {
-            if(includes.indexOf(l.getSourceFolder()) < 0) {
-                includes.add(l.getSourceFolder());
+        if (props.get("core.includes") == null)  {
+            for(String lib : coreLibs.keySet()) {
+                ArrayList<File> libfiles = coreLibs.get(lib);
+                includes.addAll(libfiles);
+            }
+        } else {
+            String[] ci = props.getArray("core.includes");
+            for (String i : ci) {
+                String pi = ctx.parseString(i);
+                File f = new File(pi);
+                if (f.exists() && f.isDirectory()) {
+                    includes.add(f);
+                }
             }
         }
 
-        for (Library l : importedLibraries.values()) {
-            if (includes.indexOf(l.getSourceFolder()) < 0) {
-                includes.add(l.getSourceFolder());
+        if (props.get("board.includes") == null)  {
+            includes.add(ctx.getBoard().getFolder());
+        } else {
+            String[] ci = props.getArray("board.includes");
+            for (String i : ci) {
+                String pi = ctx.parseString(i);
+                File f = new File(pi);
+                if (f.exists() && f.isDirectory()) {
+                    includes.add(f);
+                }
             }
         }
 
-        includes.add(ctx.getBoard().getFolder());
+        for (Library l : importedLibraries) {
+            includes.addAll(l.getIncludeFolders());
+        }
+
         includes.add(buildFolder);
         includes.add(sketchFolder);
 
         String includeList = "";
+
+        String includeFlag = props.get("compiler.includeflag", "-I");
 
         for(File f : includes) {
             if (f == null) {
@@ -1431,77 +1280,10 @@ public class Sketch {
                 includeList += "::";
             }
 
-            includeList += "-I" + path;
+            includeList += includeFlag + path;
         }
 
         return includeList;
-    }
-
-    public TreeMap<String, ArrayList<File>> getCoreLibs() {
-        PropertyFile props = ctx.getMerged();
-        TreeMap<String, ArrayList<File>> libs = new TreeMap<String, ArrayList<File>>();
-
-        for(String coreLibName : props.childKeysOf("compiler.library")) {
-            ArrayList<File> files = new ArrayList<File>();
-            String libPaths = ctx.parseString(props.get("compiler.library." + coreLibName));
-
-            if(libPaths != null && !(libPaths.trim().equals(""))) {
-                libPaths = ctx.parseString(libPaths);
-                String[] libPathsArray = libPaths.split("::");
-
-                for(String p : libPathsArray) {
-                    File f = new File(ctx.getCompiler().getFolder(), p);
-
-                    if(f.exists() && f.isDirectory()) {
-                        files.add(f);
-                    }
-                }
-
-                libs.put(coreLibName, files);
-            }
-        }
-
-        for(String coreLibName : props.childKeysOf("core.library")) {
-            ArrayList<File> files = new ArrayList<File>();
-            String libPaths = ctx.parseString(props.get("core.library." + coreLibName));
-
-            if(libPaths != null && !(libPaths.trim().equals(""))) {
-                libPaths = ctx.parseString(libPaths);
-                String[] libPathsArray = libPaths.split("::");
-
-                for(String p : libPathsArray) {
-                    File f = new File(ctx.getCore().getFolder(), p);
-
-                    if(f.exists() && f.isDirectory()) {
-                        files.add(f);
-                    }
-                }
-
-                libs.put(coreLibName, files);
-            }
-        }
-
-        for(String coreLibName : props.childKeysOf("board.library")) {
-            ArrayList<File> files = new ArrayList<File>();
-            String libPaths = ctx.parseString(props.get("board.library." + coreLibName));
-
-            if(libPaths != null && !(libPaths.trim().equals(""))) {
-                libPaths = ctx.parseString(libPaths);
-                String[] libPathsArray = libPaths.split("::");
-
-                for(String p : libPathsArray) {
-                    File f = new File(ctx.getBoard().getFolder(), p);
-
-                    if(f.exists() && f.isDirectory()) {
-                        files.add(f);
-                    }
-                }
-
-                libs.put(coreLibName, files);
-            }
-        }
-
-        return libs;
     }
 
     public void installLibrary(APT apt, Package pkg, boolean recurse) {
@@ -1531,8 +1313,6 @@ public class Sketch {
 
         long startTime = System.currentTimeMillis();
 
-//        ctx.clearSettings();
-//        checkForSettings();
         PropertyFile props = ctx.getMerged();
 
         ctx.set("cache.root", getCacheFolder().getAbsolutePath());
@@ -1551,14 +1331,6 @@ public class Sketch {
         ctx.set("includes", generateIncludes());
         ctx.set("filename", sketchName);
 
-        try {
-            if ((Preferences.getBoolean("editor.dialog.missinglibs")) && (UECIDE.isOnline())) {
-            }
-        } catch (Exception ex) { 
-            Debug.exception(ex);
-            ctx.error(ex); 
-        }
-
         if(doPrePurge) {
             doPrePurge = false;
             UECIDE.removeDir(getCacheFolder());
@@ -1568,27 +1340,10 @@ public class Sketch {
         ctx.set("option.cflags", getFlags("cflags"));
         ctx.set("option.cppflags", getFlags("cppflags"));
         ctx.set("option.ldflags", getFlags("ldflags"));
-
-        String libPaths = "";
-        String libNames = "";
-
-        for (Library lib : importedLibraries.values()) {
-            if (!libPaths.equals("")) {
-                libPaths += "::";
-            }
-            if (!libNames.equals("")) {
-                libNames += "::";
-            }
-            libPaths += lib.getSourceFolder().getAbsolutePath();
-            libNames += lib.getName();
-            ctx.set("library." + lib.getName() + ".path", lib.getSourceFolder().getAbsolutePath());
-        }
-
-        ctx.set("library.paths", libPaths);
-        ctx.set("library.names", libNames);
+        ctx.set("option.asflags", getFlags("asflags"));
+        ctx.set("option.arflags", getFlags("arflags"));
 
         ctx.set("build.path", buildFolder.getAbsolutePath());
-
 
         if (props.keyExists("compile.script")) {
             boolean ret = (Boolean)ctx.executeKey("compile.script");
@@ -1714,6 +1469,11 @@ public class Sketch {
     public boolean compileSize() {
         PropertyFile props = ctx.getMerged();
 
+        if (props.get("compile.size.script.0") != null) {
+            ctx.executeKey("compile.size.script");
+            return true;
+        }
+
         if (props.get("compile.size") != null) {
             if (!UECIDE.isQuiet()) ctx.heading(UECIDE.i18n.string("msg.compiling.memory"));
 
@@ -1801,8 +1561,8 @@ public class Sketch {
 
     public boolean compileLibraries() {
 
-        for(String lib : importedLibraries.keySet()) {
-            if (importedLibraries.get(lib).compile(ctx) == false) {
+        for(Library lib : importedLibraries) {
+            if (lib.compile(ctx) == false) {
                 return false;
             }
         }
@@ -1844,7 +1604,7 @@ public class Sketch {
     }
 
     public boolean compileCore() throws IOException {
-        TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
+        TreeMap<String, ArrayList<File>> coreLibs = ctx.getCoreLibs();
         PropertyFile props = ctx.getMerged();
 
         if (props.get("compile.stub") != null) {
@@ -1897,11 +1657,7 @@ public class Sketch {
 
         for(File f : core) {
             if(f.exists() && f.isDirectory()) {
-                fileList.addAll(findFilesInFolder(f, "S", false));
-                fileList.addAll(findFilesInFolder(f, "c", false));
-                fileList.addAll(findFilesInFolder(f, "cpp", false));
-                fileList.addAll(findFilesInFolder(f, "cxx", false));
-                fileList.addAll(findFilesInFolder(f, "cc", false));
+                fileList.addAll(FileManager.findFilesInFolder(f, false, FileType.ASMSOURCE, FileType.CSOURCE, FileType.CPPSOURCE));
             }
         }
 
@@ -1958,13 +1714,6 @@ public class Sketch {
         return ctx.get(k);
     }
 
-    public String getArchiveName(Library lib) {
-        PropertyFile props = ctx.getMerged();
-        String prefix = ctx.parseString(props.get("compiler.library.prefix","lib"));
-        String suffix = ctx.parseString(props.get("compiler.library", "a"));
-        return prefix + lib.getLinkName() + "." + suffix;
-    }
-
     private ArrayList<File> convertFiles(File dest, ArrayList<File> sources) throws IOException {
         ArrayList<File> objectPaths = new ArrayList<File>();
         PropertyFile props = ctx.getMerged();
@@ -2010,6 +1759,9 @@ public class Sketch {
 
         ArrayList<File> objectPaths = new ArrayList<File>();
 
+        PropertyFile props = localCtx.getMerged();
+        localCtx.set("build.path", dest.getAbsolutePath());
+
         for (File f : sources) {
             File out = ctx.compileFile(localCtx, f, dest);
             if (out == null) {
@@ -2018,30 +1770,6 @@ public class Sketch {
             objectPaths.add(out);
             ctx.triggerEvent("buildFileAdded", out);
         }
-
-        return objectPaths;
-    }
-
-    private ArrayList<File> compileFiles(Context localCtx, File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources) {
-
-        ArrayList<File> objectPaths = new ArrayList<File>();
-        PropertyFile props = localCtx.getMerged();
-
-        localCtx.set("build.path", dest.getAbsolutePath());
-        String objExt = localCtx.parseString(props.get("compiler.object","o"));
-
-        ArrayList<File> sObjects = compileFileList(localCtx, dest, sSources);
-        if (sObjects == null) { return null; }
-
-        ArrayList<File> cObjects = compileFileList(localCtx, dest, cSources);
-        if (cObjects == null) { return null; }
-
-        ArrayList<File> cppObjects = compileFileList(localCtx, dest, cppSources);
-        if (cppObjects == null) { return null; }
-
-        objectPaths.addAll(sObjects);
-        objectPaths.addAll(cObjects);
-        objectPaths.addAll(cppObjects);
 
         return objectPaths;
     }
@@ -2078,35 +1806,26 @@ public class Sketch {
 
         if(boardFiles != null) {
             if(!boardFiles.equals("")) {
-                ArrayList<File> sFiles = new ArrayList<File>();
-                ArrayList<File> cFiles = new ArrayList<File>();
-                ArrayList<File> cppFiles = new ArrayList<File>();
+                ArrayList<File> sourceFiles = new ArrayList<File>();
 
                 String[] bfs = boardFiles.split("::");
 
                 for(String bf : bfs) {
-                    if(bf.endsWith(".c")) {
-                        File f = new File(ctx.getBoard().getFolder(), bf);
 
-                        if(f.exists()) {
-                            cFiles.add(f);
-                        }
-                    } else if(bf.endsWith(".cpp")) {
-                        File f = new File(ctx.getBoard().getFolder(), bf);
+                    File boardFile = new File(ctx.getBoard().getFolder(), bf);
+                    if (!boardFile.exists()) continue;
 
-                        if(f.exists()) {
-                            cppFiles.add(f);
-                        }
-                    } else if(bf.endsWith(".S")) {
-                        File f = new File(ctx.getBoard().getFolder(), bf);
-
-                        if(f.exists()) {
-                            sFiles.add(f);
-                        }
+                    int type = FileType.getType(boardFile);
+                    switch (type) {
+                        case FileType.CSOURCE:
+                        case FileType.CPPSOURCE:
+                        case FileType.ASMSOURCE:
+                            sourceFiles.add(boardFile);
+                            break;
                     }
                 }
 
-                sf.addAll(compileFiles(ctx, buildFolder, sFiles, cFiles, cppFiles));
+                sf.addAll(compileFileList(ctx, buildFolder, sourceFiles));
             }
         }
 
@@ -2116,12 +1835,7 @@ public class Sketch {
             File buf = new File(buildFolder, "utility");
             buf.mkdirs();
             ctx.triggerEvent("buildFileAdded", buf);
-            ArrayList<File> uf = compileFiles(ctx,
-                                buf,
-                                findFilesInFolder(suf, "S", true),
-                                findFilesInFolder(suf, "c", true),
-                                findFilesInFolder(suf, "cpp", true)
-                            );
+            ArrayList<File> uf = compileFileList(ctx, buf, FileManager.findFilesInFolder(suf, true, FileType.ASMSOURCE, FileType.CSOURCE, FileType.CPPSOURCE));
             sf.addAll(uf);
         }
 
@@ -2131,59 +1845,16 @@ public class Sketch {
             File buf = new File(buildFolder, "src");
             buf.mkdirs();
             ctx.triggerEvent("buildFileAdded", buf);
-            ArrayList<File> uf = compileFiles(ctx,
-                                buf,
-                                findFilesInFolder(suf, "S", true),
-                                findFilesInFolder(suf, "c", true),
-                                findFilesInFolder(suf, "cpp", true)
-                            );
+            ArrayList<File> uf = compileFileList(ctx, buf, FileManager.findFilesInFolder(suf, true, FileType.ASMSOURCE, FileType.CSOURCE, FileType.CPPSOURCE));
             sf.addAll(uf);
         }
 
         return sf;
     }
 
-    static public ArrayList<File> findFilesInFolder(File sketchFolder,
-            String extension, boolean recurse) {
-        ArrayList<File> files = new ArrayList<File>();
-
-        if (sketchFolder == null) {
-            return files;
-        }
-
-        if(sketchFolder.listFiles() == null)
-            return files;
-
-        for(File file : sketchFolder.listFiles()) {
-            if(file.getName().startsWith("."))
-                continue; // skip hidden files
-
-            if(file.isDirectory()) {
-                if(recurse) {
-                    files.addAll(findFilesInFolder(file, extension, recurse));
-                }
-
-                continue;
-            }
-
-            if(extension == null) {
-                files.add(file);
-                continue;
-            }
-
-            if(file.getName().endsWith("." + extension)) {
-                files.add(file);
-                continue;
-            }
-
-        }
-
-        return files;
-    }
-
     private boolean compileLink(List<File> objectFiles) {
         PropertyFile props = ctx.getMerged();
-        TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
+        TreeMap<String, ArrayList<File>> coreLibs = ctx.getCoreLibs();
 
         String objectFileList = "";
 
@@ -2206,9 +1877,8 @@ public class Sketch {
 
         String liblist = "";
 
-        for(String libName : importedLibraries.keySet()) {
-            Library lib = importedLibraries.get(libName);
-            File aFile = getCacheFile(getArchiveName(lib));
+        for(Library lib : importedLibraries) {
+            File aFile = lib.getArchiveFile(ctx);
             String headerName = lib.getName() + ".h";
             boolean inc = true;
 
@@ -2289,7 +1959,7 @@ public class Sketch {
         return new File(sketchFolder, "libraries");
     }
 
-    public HashMap<String, Library> getLibraries() {
+    public ArrayList<Library> getLibraries() {
         return importedLibraries;
     }
 
@@ -2522,7 +2192,7 @@ public class Sketch {
                 String bits[] = opt.split("@");
                 String libLinkName = bits[0];
                 String libCatName = bits[1];
-                for(Library lib : importedLibraries.values()) {
+                for(Library lib : importedLibraries) {
                     if (lib.getLinkName().equals(libLinkName)) {
                         props = lib.getProperties();
                         optval = props.get("options." + libCatName + ".default");
@@ -2544,7 +2214,7 @@ public class Sketch {
             String bits[] = opt.split("@");
             String libLinkName = bits[0];
             String libCatName = bits[1];
-            for(Library lib : importedLibraries.values()) {
+            for(Library lib : importedLibraries) {
                 if (lib.getLinkName().equals(libLinkName)) {
                     props = lib.getProperties();
                     if (props.getBoolean("options." + libCatName + ".purge")) {
@@ -2570,7 +2240,7 @@ public class Sketch {
             out.put(opt, optName);
         }
 
-        for(Library lib : importedLibraries.values()) {
+        for(Library lib : importedLibraries) {
             props = lib.getProperties();
             options = props.childKeysOf("options");
             for (String opt : options) {
@@ -2591,7 +2261,7 @@ public class Sketch {
             String bits[] = group.split("@");
             String libLinkName = bits[0];
             String libCatName = bits[1];
-            for(Library lib : importedLibraries.values()) {
+            for(Library lib : importedLibraries) {
                 if (lib.getLinkName().equals(libLinkName)) {
                     props = lib.getProperties();
                     PropertyFile opts = props.getChildren("options." + libCatName);
@@ -2643,7 +2313,7 @@ public class Sketch {
                 String bits[] = opt.split("@");
                 String libLinkName = bits[0];
                 String libOptName = bits[1];
-                for (Library lib : importedLibraries.values()) {
+                for (Library lib : importedLibraries) {
                     if (lib.getLinkName().equals(libLinkName)) {
                         PropertyFile lprops = lib.getProperties();
                         String data = lprops.get("options." + libOptName + "." + value + "." + type);
@@ -2717,12 +2387,12 @@ public class Sketch {
             return true;
         }
 
-        File arch = new File(getCacheFolder(), getArchiveName(l));
+        File arch = l.getArchiveFile(ctx);
         return arch.exists();
     }
 
     public void purgeLibrary(Library lib) {
-        File arch = new File(getCacheFolder(), getArchiveName(lib));
+        File arch = lib.getArchiveFile(ctx);
         UECIDE.tryDelete(arch);
     }
 
@@ -2773,10 +2443,10 @@ public class Sketch {
     public boolean parentIsLibrary() {
         ArrayList<File> filelist = new ArrayList<File>();
 
-        TreeSet<String> groups = Library.getLibraryCategories();
+        TreeSet<String> groups = LibraryManager.getCategories(ctx.getCore());
 
         for(String group : groups) {
-            TreeSet<Library> libs = Library.getLibraries(group);
+            TreeSet<Library> libs = LibraryManager.getLibrariesForCategory(ctx.getCore(), group);
 
             if(libs == null) {
                 continue;
@@ -3060,7 +2730,7 @@ public class Sketch {
         if (ctx.getBoard() != null) {
             addKeywordsFromFile(ctx.getBoard().getKeywords());
         }
-        for (Library l : importedLibraries.values()) {
+        for (Library l : importedLibraries) {
             addKeywordsFromFile(l.getKeywords());
         }
         for (FunctionBookmark bm : functionListBm) {
@@ -3154,157 +2824,6 @@ public class Sketch {
         ctx.printParsed(e);
     }
 
-    public ArrayList<String> gatherIncludes(File f) {
-        String[] data;
-        ArrayList<String> requiredLibraries = new ArrayList<String>();
-
-        try {
-            FileReader in = new FileReader(f);
-            StringBuilder contents = new StringBuilder();
-            char[] buffer = new char[4096];
-            int read = 0;
-
-            do {
-                contents.append(buffer, 0, read);
-                read = in.read(buffer);
-            } while(read >= 0);
-
-            in.close();
-            data = contents.toString().split("\n");
-        } catch(Exception e) {
-            Debug.exception(e);
-            UECIDE.error(e);
-            return null;
-        }
-
-        for(String line : data) {
-            line = line.trim();
-
-            if(line.startsWith("#include")) {
-                int qs = line.indexOf("<");
-
-                if(qs == -1) {
-                    qs = line.indexOf("\"");
-                }
-
-                if(qs == -1) {
-                    continue;
-                }
-
-                qs++;
-                int qe = line.indexOf(">");
-
-                if(qe == -1) {
-                    qe = line.indexOf("\"", qs);
-                }
-
-                String i = line.substring(qs, qe);
-
-                requiredLibraries.add(i);
-            }
-        }
-        return requiredLibraries;
-    }
-
-    public void addRecursiveLibraries(HashMap<String, Library>foundLibs, ArrayList<String> missingLibs, Library lib) {
-        for (String inc : lib.getRequiredLibraries()) {
-            Library sl = findLibrary(inc);
-            if (sl != null) {
-                if (foundLibs.get(sl.getMainInclude()) == null) {
-                    foundLibs.put(sl.getMainInclude(), sl);
-                    addRecursiveLibraries(foundLibs, missingLibs, sl);
-                }
-            } else {
-                if (missingLibs.indexOf(inc) == -1) {
-                    missingLibs.add(inc);
-                }
-            }
-        }
-    }
-
-    public boolean huntForLibraries(File f, HashMap<String, Library>foundLibs, ArrayList<String> missingLibs) throws IOException {
-
-        if (getBuildFolder() == null) {
-            return false;
-        }
-        PropertyFile props = ctx.getMerged();
-        if (props.get("compile.preproc") == null) { // Manually parse it.
-
-            ArrayList<String> incs = gatherIncludes(f);
-            for (String inc : incs) {
-                Library l = findLibrary(inc);
-                if (l != null) {
-                    if (foundLibs.get(l.getMainInclude()) == null) {
-                        foundLibs.put(l.getMainInclude(), l);
-                        addRecursiveLibraries(foundLibs, missingLibs, l);
-                    }
-                } else {
-                    if (missingLibs.indexOf(inc) == -1) {
-                        missingLibs.add(inc);
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        File dst = new File(getBuildFolder(), "deps.txt");
-
-        ctx.silence = true;
-
-        int numberFoundThisPass = 0;
-        do {
-            ctx.snapshot();
-
-            ctx.set("option.flags", getFlags("flags"));
-            ctx.set("option.cflags", getFlags("cflags"));
-            ctx.set("option.cppflags", getFlags("cppflags"));
-            ctx.set("option.ldflags", getFlags("ldflags"));
-
-            numberFoundThisPass = 0;
-            ctx.set("source.name", f.getAbsolutePath());
-            ctx.set("object.name", dst.getAbsolutePath());
-            String libPaths = "";
-            for (Library aLib : foundLibs.values()) {
-                if (!libPaths.equals("")) {
-                    libPaths += "::";
-                }
-                libPaths += "-I" + aLib.getSourceFolder().getAbsolutePath();
-            }
-            ctx.set("includes", libPaths);
-
-            NullOutputStream os = new NullOutputStream();
-            ctx.setOutputStream(os);
-            ctx.executeKey("compile.preproc");
-            ctx.clearOutputStream();
-
-            if (dst.exists()) {
-                String data = Utils.getFileAsString(dst);
-                data = data.replaceAll("\\\\\n", " ");
-                data = data.replaceAll("\\s+", "::");
-                String[] entries = data.split("::");
-                for (String entry : entries) {
-                    if (entry.endsWith(".h")) {
-                        Library lib = findLibrary(entry);
-                        if (lib != null) {
-                            foundLibs.put(entry, lib);
-                            numberFoundThisPass++;
-                        } else {
-                            if(missingLibs.indexOf(entry) == -1) {
-                                missingLibs.add(entry);
-                            }
-                        }
-                    }
-                }
-            }
-
-            ctx.rollback();
-        } while (numberFoundThisPass > 0);
-
-        ctx.silence = false;
-        return true;
-    }
-
     public void outputErrorStream(String msg) {
         if (UECIDE.cli.isSet("verbose")) {
             System.err.print(msg);
@@ -3338,13 +2857,6 @@ public class Sketch {
         return functionListBm;
     }
 
-
-    public void dumpAllBookmarks() {
-        for (FunctionBookmark bm : functionListBm) {
-            System.err.println(bm.dump());
-        }
-    }
-
     public void set(String key, String value) { settings.set(key, value); saveSettings(); }
     public void set(String key, int value) { settings.setInteger(key, value); saveSettings(); }
     public void set(String key, long value) { settings.setLong(key, value); saveSettings(); }
@@ -3376,5 +2888,12 @@ public class Sketch {
 
     public PropertyFile getSettings() {
         return settings;
+    }
+
+    public boolean containsFile(String file) {
+        if (sketchFiles.get(file) != null) {
+            return true;
+        }
+        return false;
     }
 }

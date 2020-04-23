@@ -9,6 +9,7 @@ import org.uecide.FunctionBookmark;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
+import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JPanel;
 import javax.swing.JTree;
@@ -106,6 +107,13 @@ public class SketchLibraryNode extends SketchTreeNodeBase implements ContextEven
             }
         });
         menu.add(item);
+        JMenu sub = new JMenu("Info");
+        menu.add(sub);
+        item = new JMenuItem(library.getFolder().getAbsolutePath());
+        sub.add(item);
+        item = new JMenuItem("Version: " + library.getVersion().toString());
+        sub.add(item);
+        
         return menu;
     }
 

@@ -1,7 +1,7 @@
 package org.uecide.gui.swing;
 
 import org.uecide.Context;
-import org.uecide.Library;
+import org.uecide.LibraryManager;
 import org.uecide.Core;
 
 import java.util.TreeSet;
@@ -48,9 +48,9 @@ public class LibrariesMenu extends JMenu implements MenuListener {
             return;
         }
 
-        TreeMap<String, TreeSet<Library>> libs = Library.getFilteredLibraries(core.getName());
+        TreeSet<String> libs = LibraryManager.getCategories(core);
 
-        for(String cat : libs.keySet()) {
+        for(String cat : libs) {
             LibraryCategoryMenu item = new LibraryCategoryMenu(ctx, cat);
             add(item);
         }

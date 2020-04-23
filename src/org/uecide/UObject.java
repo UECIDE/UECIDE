@@ -47,7 +47,7 @@ public class UObject implements Comparable {
     protected String _name;
     protected String _version;
     protected String _revision;
-    protected String _family;
+    protected String[] _family;
     protected String _description;
     protected UObject _related;
 
@@ -118,7 +118,7 @@ public class UObject implements Comparable {
                     _revision = "0";
                 }
 
-                _family = get("family");
+                _family = getArray("family");
                 _description = get("description");
 
                 if(_description == null) {
@@ -166,6 +166,14 @@ public class UObject implements Comparable {
         return _valid;
     }
 
+    public String[] getArray(String k) {
+        if(_properties == null) {
+            return null;
+        }
+
+        return (String[]) _properties.getArray(k);
+    }
+
     public String get(String k) {
         if(_properties == null) {
             return null;
@@ -208,18 +216,12 @@ public class UObject implements Comparable {
         return _version + "-" + _revision;
     }
 
-    public String getFamily() {
+    public String[] getFamily() {
         return _family;
     }
 
     public boolean inFamily(String fam) {
-        String fly = getFamily();
-
-        if(fly == null) {
-            return false;
-        }
-
-        String fams[] = fly.split("::");
+        String[] fams = getFamily();
 
         for(String thisfam : fams) {
             if(thisfam.equals(fam)) {

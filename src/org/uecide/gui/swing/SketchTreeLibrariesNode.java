@@ -19,7 +19,7 @@ import java.awt.Font;
 import java.awt.Component;
 
 import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class SketchTreeLibrariesNode extends SketchTreeNodeBase implements ContextEventListener {
     public SketchTreeLibrariesNode(Context c, SketchTreeModel m) {
@@ -31,7 +31,7 @@ public class SketchTreeLibrariesNode extends SketchTreeNodeBase implements Conte
     public boolean updateChildren() {
         Sketch sketch = ctx.getSketch();
 
-        HashMap<String, Library> libraries = sketch.getLibraries();
+        ArrayList<Library> libraries = sketch.getLibraries();
 
         boolean somethingRemoved = false;
         boolean hasBeenModified = false;
@@ -39,7 +39,7 @@ public class SketchTreeLibrariesNode extends SketchTreeNodeBase implements Conte
             somethingRemoved = false;
             for (Enumeration e = children(); e.hasMoreElements();) {
                 SketchLibraryNode child = (SketchLibraryNode)e.nextElement();
-                if (!(libraries.containsValue(child.getLibrary()))) {
+                if (!(libraries.contains(child.getLibrary()))) {
                     remove(child);
                     somethingRemoved = true;
                     hasBeenModified = true;
@@ -48,7 +48,7 @@ public class SketchTreeLibrariesNode extends SketchTreeNodeBase implements Conte
             }
         } while (somethingRemoved);
 
-        for (Library l : libraries.values()) {
+        for (Library l : libraries) {
             if (!hasChildLibrary(l)) {
                 SketchLibraryNode sfn = new SketchLibraryNode(ctx, model, l);
                 add(sfn);

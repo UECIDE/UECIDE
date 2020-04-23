@@ -47,7 +47,7 @@ public class AptUpgradeAction extends Action {
             }
         } catch (Exception ex) {
             Debug.exception(ex);
-            throw new ActionException(ex.getMessage());
+            throw new ActionException(ex.toString());
         }
         return true;
     }

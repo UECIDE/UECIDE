@@ -20,8 +20,27 @@ public class NewLibrary extends Library {
         setCategory(properties.get("category"));
 
         source = new File(location, "src");
-        if (!source.exists()) throw new LibraryFormatException("src folder doesn't exist");
+        boolean recurse = true;
+        // If there is no source folder then it may be a flat format one.
+        if (!source.exists()) {
+            source = getFolder();
+            recurse = false;
+        }
         if (!source.isDirectory()) throw new LibraryFormatException("src is not a folder");
+
+        mainInclude = null;
+        ArrayList<File> files = FileManager.findFilesInFolder(source, recurse, FileType.CSOURCE, FileType.CPPSOURCE, FileType.HEADER, FileType.LIBRARY);
+        for (File f : files) {
+            addSourceFile(f);
+            if (f.getName().equals(location.getName() + ".h")) {
+                mainInclude = f;
+            }
+        }
+
+        if (mainInclude == null) {
+            throw new LibraryFormatException("No matching header file found");
+        }
+        
     }
 
     @Override
@@ -30,15 +49,35 @@ public class NewLibrary extends Library {
     }
 
     @Override
-    public ArrayList<File> getHeaderFiles() {
-        ArrayList<File> out = new ArrayList<File>();
-        File[] list = source.listFiles();
-        for (File f : list) {
-            if (f.isDirectory()) continue;
-            if (f.getName().endsWith(".h")) {
-                out.add(f);
+    public boolean worksWith(Core c) {
+        File location = getFolder();
+        if (location.getParentFile().getName().equals(c.getName())) return true;
+        String archlist = properties.get("architectures");
+        String[] arches = archlist.split(",");
+        for (String arch : arches) {
+            if (arch != null) {
+                if (arch.equals("*")) return true;
+                if (arch.equals(c.getName())) return true;
+                if (arch.equals(c.getFamily())) return true;
             }
         }
-        return out;
+        return false;
     }
+
+    @Override 
+    public String getName() {
+        return properties.get("name");
+    }
+
+    @Override
+    public ArrayList<File> getIncludeFolders() {
+        ArrayList<File> list = new ArrayList<File>();
+        list.add(source);
+        File u = new File(source, "utility");
+        if (u.exists()) {
+            list.add(u);
+        }
+        return list;
+    }
+
 }

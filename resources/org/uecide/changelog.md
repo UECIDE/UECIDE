@@ -4,6 +4,10 @@ Changelog
 0.11.5
 ------
 
+* Add toolbar icons for tool scripts
+* More builtin improvements and more stream objects
+* Big improvements to builtin commands
+* Protect against adding directories as extra serial ports
 * Improved serial port detection and handling
 * Added percentage stream filter
 * Working image file conversion
@@ -807,6 +811,10 @@ Changelog
 0.8.5
 -----
 
+* Add toolbar icons for tool scripts
+* More builtin improvements and more stream objects
+* Big improvements to builtin commands
+* Protect against adding directories as extra serial ports
 * Improved serial port detection and handling
 * Added percentage stream filter
 * Working image file conversion

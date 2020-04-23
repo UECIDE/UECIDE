@@ -22,6 +22,9 @@ public class RescanAllAction extends Action {
     public String getCommand() { return "rescanall"; }
 
     public boolean actionPerformed(Object[] args) throws ActionException {
+        String board = ctx.getBoard().getName();
+        String core = ctx.getCore().getName();
+        String compiler = ctx.getCompiler().getName();
         ctx.bullet("Reloading all internal structures.");
         ctx.bullet2("Caching files...");
         UECIDE.cacheSystemFiles();
@@ -39,6 +42,9 @@ public class RescanAllAction extends Action {
         Tool.load();
         ctx.bullet("Done");
         ctx.action("RefreshGui");
+        ctx.action("setCompiler", compiler);
+        ctx.action("setCore", core);
+        ctx.action("setBoard", board);
         return true;
     }
 }

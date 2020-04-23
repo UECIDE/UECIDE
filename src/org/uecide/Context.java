@@ -949,8 +949,8 @@ public class Context {
 
     public void killRunningProcess() {
         if(runningProcess != null) {
-//            runningProcess.destroy();
-//            UECIDE.processes.remove(runningProcess);
+            runningProcess.destroyForcibly();
+            UECIDE.processes.remove(runningProcess);
         }
     }
 
@@ -1156,6 +1156,18 @@ public class Context {
         }
     
         if (recipe == null) {
+            String extension = "";
+
+            int i = fileName.lastIndexOf('.');
+            if (i > 0) {
+                extension = fileName.substring(i+1);
+                if (props.get("compile." + extension) != null) {
+                    recipe = "compile." + extension;
+                }
+            }
+        }
+
+        if (recipe == null) {
             error(UECIDE.i18n.string("err.badfile", fileName));
             triggerEvent("fileCompilationFailed", src);
             localCtx.dispose();
@@ -1176,7 +1188,12 @@ public class Context {
             buildFolder = src.getParentFile();
         }
 
-        File dest = new File(buildFolder, fileName + "." + objExt);
+        File dest = null;
+        if (props.getBoolean("build.stripextension")) {
+            dest = new File(buildFolder, fileName.substring(0, fileName.lastIndexOf('.')) + "." + objExt);
+        } else {
+            dest = new File(buildFolder, fileName + "." + objExt);
+        }
 
         if (dest.exists()) {
             if (dest.lastModified() > src.lastModified()) {
@@ -1201,6 +1218,7 @@ public class Context {
 
         String output = "";
         if (!(Boolean)localCtx.executeKey(recipe)) {
+System.err.println("Failed running key " + recipe);
 //            localCtx.removeDataStreamParser();
             localCtx.dispose();
             triggerEvent("fileCompilationFailed", src);
@@ -1263,4 +1281,72 @@ public class Context {
     public SketchFile getActiveSketchFile() {
         return gui.getActiveSketchFile();
     }
+
+    public TreeMap<String, ArrayList<File>> getCoreLibs() {
+        PropertyFile props = getMerged();
+        TreeMap<String, ArrayList<File>> libs = new TreeMap<String, ArrayList<File>>();
+
+        for(String coreLibName : props.childKeysOf("compiler.library")) {
+            ArrayList<File> files = new ArrayList<File>();
+            String libPaths = parseString(props.get("compiler.library." + coreLibName));
+
+            if(libPaths != null && !(libPaths.trim().equals(""))) {
+                libPaths = parseString(libPaths);
+                String[] libPathsArray = libPaths.split("::");
+
+                for(String p : libPathsArray) {
+                    File f = new File(getCompiler().getFolder(), p);
+
+                    if(f.exists() && f.isDirectory()) {
+                        files.add(f);
+                    }
+                }
+
+                libs.put(coreLibName, files);
+            }
+        }
+
+        for(String coreLibName : props.childKeysOf("core.library")) {
+            ArrayList<File> files = new ArrayList<File>();
+            String libPaths = parseString(props.get("core.library." + coreLibName));
+
+            if(libPaths != null && !(libPaths.trim().equals(""))) {
+                libPaths = parseString(libPaths);
+                String[] libPathsArray = libPaths.split("::");
+
+                for(String p : libPathsArray) {
+                    File f = new File(getCore().getFolder(), p);
+
+                    if(f.exists() && f.isDirectory()) {
+                        files.add(f);
+                    }
+                }
+
+                libs.put(coreLibName, files);
+            }
+        }
+
+        for(String coreLibName : props.childKeysOf("board.library")) {
+            ArrayList<File> files = new ArrayList<File>();
+            String libPaths = parseString(props.get("board.library." + coreLibName));
+
+            if(libPaths != null && !(libPaths.trim().equals(""))) {
+                libPaths = parseString(libPaths);
+                String[] libPathsArray = libPaths.split("::");
+
+                for(String p : libPathsArray) {
+                    File f = new File(getBoard().getFolder(), p);
+
+                    if(f.exists() && f.isDirectory()) {
+                        files.add(f);
+                    }
+                }
+
+                libs.put(coreLibName, files);
+            }
+        }
+
+        return libs;
+    }
+
 }
