@@ -1,5 +1,8 @@
 # Compiler settings
 
+name=Preferences
+type=section
+
 compiler.name=Compiler
 compiler.type=section
 
@@ -186,24 +189,25 @@ theme.laf.type=dropdown
 theme.laf.options.gnome=Gnome
 theme.laf.options.acryl=Acryl
 theme.laf.options.aero=Aero
-theme.laf.options.aluminium=JTattoo: Aluminium
+theme.laf.options.aluminium=Aluminium (JTattoo)
 theme.laf.options.arduino=Arduino
-theme.laf.options.bernstein=JTattoo: Bernstein
-theme.laf.options.fast=JTattoo: Fast
-theme.laf.options.graphite=JTattoo: Graphite
-theme.laf.options.hifi=JTattoo: HiFi
-theme.laf.options.luna=JTattoo: Luna
-theme.laf.options.mcwin=JTattoo: McWin
-theme.laf.options.mint=JTattoo: Mint
-theme.laf.options.noire=JTattoo: Noire
-theme.laf.options.smart=JTattoo: Smart
+theme.laf.options.bernstein=Bernstein (JTattoo)
+theme.laf.options.fast=Fast (JTattoo)
+theme.laf.options.graphite=Graphite (JTattoo)
+theme.laf.options.hifi=HiFi (JTattoo)
+theme.laf.options.luna=Luna (JTattoo)
+theme.laf.options.mcwin=McWin (JTattoo)
+theme.laf.options.mint=Mint (JTattoo)
+theme.laf.options.noire=Noire (JTattoo)
+theme.laf.options.smart=Smart (JTattoo)
 theme.laf.options.liquid=Liquid
 theme.laf.options.material=Material
+theme.laf.options.material-dark=Material (Dark)
 theme.laf.options.metal=Metal
 theme.laf.options.motif=Motif
 theme.laf.options.nimbus=Nimbus
-theme.laf.options.office2003=Office 2003*
-theme.laf.options.officexp=Office XP*
+theme.laf.options.office2003=Office 2003 (Windows only)
+theme.laf.options.officexp=Office XP (Windows only)
 theme.laf.options.systemdefault=System Default
 theme.laf.options.tinyforest=Forest
 theme.laf.options.tinygolden=Golden
@@ -211,7 +215,7 @@ theme.laf.options.tinynightly=Nightly
 theme.laf.options.tinyplastic=Plastic
 theme.laf.options.tinysilver=Silver
 theme.laf.options.tinyunicode=Unicode
-theme.laf.options.vs2005=Visual Studio 2005*
+theme.laf.options.vs2005=Visual Studio 2005 (Windows only)
 theme.laf.default=aluminium
 theme.laf.tooltip=Defines the overall look of UECIDE. Have a play, there's lots to choose from.
 

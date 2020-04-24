@@ -13,6 +13,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import java.awt.Color;
+
 public class SketchTree extends JTree implements MouseListener {
     Context ctx;
     SketchTreeModel model;

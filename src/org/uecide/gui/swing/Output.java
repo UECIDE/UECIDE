@@ -114,9 +114,10 @@ public class Output extends JTextPane implements ClipboardOwner {
         setDocument(document);
         setEditable(false);
 
+        setOpaque(!Preferences.get("theme.console.background").equals("transparent"));
+
         addMouseListener(new TextClickListener());
         addMouseMotionListener(new TextMotionListener());
-        setOpaque(true);
     }   
 
     @Override
@@ -132,8 +133,10 @@ public class Output extends JTextPane implements ClipboardOwner {
         int w = getWidth();
         int h = getHeight();
 
-        g2d.setPaint(Preferences.getColor("theme.console.background"));
-        g2d.fillRect(0, 0, w, h);
+//        if (!Preferences.get("theme.console.background").equals("transparent")) {
+            g2d.setPaint(Preferences.getColor("theme.console.background"));
+            g2d.fillRect(0, 0, w, h);
+//        }
 
         int fillStart = 0;
         int fillEnd = getHeight();
@@ -249,13 +252,11 @@ public class Output extends JTextPane implements ClipboardOwner {
             }
         }
 
-            
-                
-
         super.paintComponent(g);
     }
 
     public void updateStyleSettings() {
+
         setStyle(body, "body");
         setStyle(warning, "warning");
         setStyle(error, "error");
@@ -276,6 +277,7 @@ public class Output extends JTextPane implements ClipboardOwner {
         StyleConstants.setForeground(fgWhite,   new Color(255, 255, 255));
 
         setBackground(new Color(1,1,1, (float) 0.01));
+
 //        PropertyFile theme = Base.getTheme();
 //        topLeft = loadImage(theme.get("console.background.image.topleft"));
 //        topMiddle = loadImage(theme.get("console.background.image.topmiddle"));

@@ -85,6 +85,11 @@ public class FileMenu extends JMenu {
         exportSarMenu = new JMenuItem("Export as SAR... (TODO)");
         importSarMenu = new JMenuItem("Import SAR... (TODO)");
         preferencesMenu = new JMenuItem("Preferences... (TODO)");
+        preferencesMenu.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                new PreferencesGui();
+            }
+        });
 
         quitMenu = new JMenuItem("Quit");
         quitMenu.addActionListener(new ActionListener() {

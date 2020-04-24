@@ -352,6 +352,10 @@ public class UECIDE {
 
         Preferences.init();
 
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
+        System.setProperty("sun.java2d.xrender", "true");
+
         if (Preferences.getBoolean("editor.hwaccel")) {
             Properties props = System.getProperties();
             props.setProperty("sun.java2d.opengl", "true");
@@ -412,124 +416,9 @@ public class UECIDE {
             doExit = true;
         }
 
-//        if (cli.isSet("remove-all")) {
-//            try {
-//                if (!cli.isSet("force")) {
-//                    System.err.println(i18n.string("err.notremove"));
-//                } else {
-//                    APT apt = APT.factory();
-//                    for (Package p : apt.getInstalledPackages()) {
-//                        apt.uninstallPackage(p, true);
-//                    }
-//                }
-//            } catch (Exception ex) { error(ex); }
-//            doExit = true;
-//        }
-
-//        if (cli.isSet("list")) {
-//            try {
-//                APT apt = APT.factory();
-//                Package[] pkgs = apt.getPackages();
-//                String format = "%-50s %10s %10s %s";
-//                System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
-//                ArrayList<Package> out = new ArrayList<Package>();
-//                for (Package p : pkgs) {
-//                    if (cli.isSet("section")) {
-//                        if (p.get("Section") == null) { continue; }
-//                        if (!p.get("Section").equals(cli.getString("section"))) { continue; }
-//                    }
-//                    if (cli.isSet("family")) {
-//                        if (p.get("Family") == null) { continue; }
-//                        if (!p.get("Family").equals(cli.getString("family"))) { continue; }
-//                    }
-//                    if (cli.isSet("group")) {
-//                        if (p.get("Group") == null) { continue; }
-//                        if (!p.get("Group").equals(cli.getString("group"))) { continue; }
-//                    }
-//                    if (cli.isSet("subgroup")) {
-//                        if (p.get("Subgroup") == null) { continue; }
-//                        if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
-//                    }
-//
-//                    String name = p.getName();
-//                    Package instPack = apt.getInstalledPackage(p.getName());
-//                    Version avail = p.getVersion();
-//                    Version inst = null;
-//                    String msg = "";
-//                    if (instPack != null) {
-//                        inst = instPack.getVersion();
-//                        if (avail.compareTo(inst) > 0) {
-//                            msg = i18n.string("apt.list.update");
-//                        }
-//                    }
-//                    System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
-//                    System.out.println("  " + p.getDescriptionLineOne());
-//
-//                }
-//            } catch (Exception ex) { error(ex); }
-//            doExit = true;
-//        }
-//                
-//        if (cli.isSet("search")) {
-//            try {
-//                APT apt = APT.factory();
-//                Package[] pkgs = apt.getPackages();
-//                String format = "%-50s %10s %10s %s";
-//                System.out.println(String.format(format, i18n.string("apt.list.package"), i18n.string("apt.list.installed"), i18n.string("apt.list.available"), ""));
-//                ArrayList<Package> out = new ArrayList<Package>();
-//                String term = cli.getString("search").toLowerCase();
-//                for (Package p : pkgs) {
-//                    if (cli.isSet("section")) {
-//                        if (p.get("Section") == null) { continue; }
-//                        if (!p.get("Section").equals(cli.getString("section"))) { continue; }
-//                    }
-//                    if (cli.isSet("family")) {
-//                        if (p.get("Family") == null) { continue; }
-//                        if (!p.get("Family").equals(cli.getString("family"))) { continue; }
-//                    }
-//                    if (cli.isSet("group")) {
-//                        if (p.get("Group") == null) { continue; }
-//                        if (!p.get("Group").equals(cli.getString("group"))) { continue; }
-//                    }
-//                    if (cli.isSet("subgroup")) {
-//                        if (p.get("Subgroup") == null) { continue; }
-//                        if (!p.get("Subgroup").equals(cli.getString("subgroup"))) { continue; }
-//                    }
-//
-//                    String name = p.getName();
-//                    Package instPack = apt.getInstalledPackage(p.getName());
-//                    Version avail = p.getVersion();
-//                    Version inst = null;
-//                    String msg = "";
-//                    if (instPack != null) {
-//                        inst = instPack.getVersion();
-//                        if (avail.compareTo(inst) > 0) {
-//                            msg = i18n.string("apt.list.update");
-//                        }
-//                    }
-//                    String comp = p.getName() + " " + p.getDescription();
-//                    if (comp.toLowerCase().contains(term)) {
-//                        System.out.println(String.format(format, name, inst == null ? "" : inst.toString(), avail.toString(), msg));
-//                        System.out.println("  " + p.getDescriptionLineOne());
-//                    }
-//
-//                }
-//            } catch (Exception ex) { error(ex); }
-//            doExit = true;
-//        }
-
         if (doExit) {
             System.exit(0);
         }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -578,7 +467,7 @@ public class UECIDE {
         systemContext.getGui().openSplash();
         systemContext.getGui().splashMessage("Loading UECIDE...", 10);
         systemContext.getGui().splashMessage(i18n.string("splash.msg.packagemanager"), 15);
-        initPackageManager();
+        initPackageManager(bootContext);
         systemContext.getGui().splashMessage(i18n.string("splash.msg.application"), 20);
         platform.init(this);
 
@@ -1289,7 +1178,7 @@ public class UECIDE {
     // If the package manager hasn't been configured then 
     // configure it, do an update, and then install the base packages.
 
-    public static void initPackageManager() {
+    public static void initPackageManager(Context bootContext) {
         try {
             File aptFolder = getDataFolder("apt");
             if (!aptFolder.exists()) {
@@ -1320,7 +1209,7 @@ public class UECIDE {
                 pw.close();
             }
 
-            APT reqapt = APT.factory(systemContext);
+            APT reqapt = APT.factory(bootContext);
             reqapt.update(true, true);
             Package[] reqpkgs = reqapt.getPackages();
             for (Package p : reqpkgs) {
@@ -1469,6 +1358,12 @@ public class UECIDE {
 
     public static Version getVersion() {
         return systemVersion;
+    }
+
+    public static void refreshAllGuis() {
+        for (Context ctx : sessions) {
+            ctx.getGui().refresh();
+        }
     }
 }
 

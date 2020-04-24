@@ -93,7 +93,8 @@ public class Package implements Comparable, Serializable {
     }
                     
 
-    public Package(String source, String data) {
+    public Package(Context c, String source, String data) {
+        ctx = c;
         parseData(data);
 
         addRepository(source);

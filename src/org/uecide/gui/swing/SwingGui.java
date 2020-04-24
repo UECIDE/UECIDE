@@ -15,6 +15,7 @@ import org.uecide.SketchFile;
 import org.uecide.gui.swing.laf.LookAndFeel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import java.io.IOException;
 import java.io.File;
@@ -27,6 +28,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UIDefaults;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -316,6 +320,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
     }
 
     public static void setLookAndFeel() {
+
         String lafname = Preferences.get("theme.laf");
 
         if (UECIDE.cli.isSet("laf")) {
@@ -353,6 +358,7 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
             case "tinyunicode": laf = new TinyUnicodeLAF(); break;
             case "vs2005": laf = new VisualStudio2005LAF(); break;
             case "material": laf = new MaterialLAF(); break;
+            case "material-dark": laf = new MaterialDarkLAF(); break;
             case "arduino": laf = new ArduinoLAF(); break;
             default:
                 laf = new SystemDefaultLAF();
@@ -857,8 +863,18 @@ public class SwingGui extends Gui implements ContextEventListener, TabChangeList
 
     @Override
     public void refresh() {
-        setLookAndFeel();
+//        endinit();
+//        SwingUtilities.updateComponentTreeUI(window);
+        window.pack();
+        window.revalidate();
+        window.repaint();
         toolbar.updateIcons();
+        for (AutoTab at : panes) {
+            for (int i = 0; i < at.getTabCount(); i++) {
+                TabPanel tp = (TabPanel)at.getComponentAt(i);
+                tp.refreshPanel();
+            }
+        }
     }
 
 }

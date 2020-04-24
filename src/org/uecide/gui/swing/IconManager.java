@@ -132,6 +132,14 @@ public class IconManager {
         initAnimation();
     }
 
+    public static String getDescription(String set) {
+        HashMap<String, String> pf = iconSets.get(set);
+        if (pf == null) {
+            return "Unknown";
+        }
+        return pf.get("description");
+    }
+
     public static String getName(String set) {
         HashMap<String, String> pf = iconSets.get(set);
         if (pf == null) {
@@ -244,6 +252,14 @@ public class IconManager {
                 i.animate();
             }
         }
+    }
+
+    public static File getIconFileFromSet(String set, String name) {
+        HashMap<String, String> iconData = iconSets.get(set);
+        String root = iconData.get("path");
+        String path = iconData.get(name);
+        File f = new File(root);
+        return new File(f, path); 
     }
 
 }

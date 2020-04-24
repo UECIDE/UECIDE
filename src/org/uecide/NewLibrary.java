@@ -38,6 +38,7 @@ public class NewLibrary extends Library {
         }
 
         if (mainInclude == null) {
+            System.err.println("Error loading " + location);
             throw new LibraryFormatException("No matching header file found");
         }
         

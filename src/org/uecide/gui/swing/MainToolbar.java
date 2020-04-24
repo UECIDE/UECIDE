@@ -102,6 +102,9 @@ public class MainToolbar extends JToolBar implements ContextEventListener {
         add(saveSketchButton);
         add(new ToolbarSpacer());
         addUObjectIcons();
+
+        revalidate();
+        repaint();
     }
 
     public void addUObjectIcons() {

@@ -40,8 +40,10 @@ public class Source {
     String urlRoot;
     String codename;
     String[] sectionList;
+    Context ctx;
 
-    public Source(String root, String dist, String arch, String[] sections) {
+    public Source(Context c, String root, String dist, String arch, String[] sections) {
+        ctx = c;
         urlRoot = root;
         codename = dist;
         sectionList = sections;
@@ -84,7 +86,7 @@ public class Source {
         } catch (Exception e) {
             Debug.exception(e);
             UECIDE.error(e);
-            System.err.println("Error downloading " + url + ": " + e.getMessage());
+            ctx.error("Error downloading " + url + ": " + e.getMessage());
         }
         return inData.toString();
     }
@@ -102,12 +104,12 @@ public class Source {
         HashMap<String, Package> packages = new HashMap<String, Package>();
         for (String url : sectionUrls.values()) {
             if (!silent) {
-                System.out.print("Update: " + url + "Packages.gz" + " ... ");
+                ctx.messageStream("Update: " + url + "Packages.gz" + " ... ");
             }
             if (url.startsWith("http://") || url.startsWith("https://")) {
                 inData.append(getCompressedFileHTTP(url + "Packages.gz"));
                 if (!silent) {
-                    System.out.println("done");
+                    ctx.message("done");
                 }
             } else if (url.startsWith("res://")) {
                 String s = (getCompressedFileRes(url.substring(6) + "Packages.gz"));
@@ -115,16 +117,16 @@ public class Source {
                     inData.append(s);
                 }
                 if (!silent) {
-                    System.out.println("done");
+                    ctx.message("done");
                 }
             } else if (url.startsWith("file://")) {
                 inData.append(getCompressedFileLocal(url.substring(7) + "Packages.gz"));
                 if (!silent) {
-                    System.out.println("done");
+                    ctx.message("done");
                 }
             } else {
                 if (!silent) {
-                    System.err.println("No URI Handler for URL");
+                    ctx.error("No URI Handler for URL");
                 }
             }
         }
@@ -134,7 +136,7 @@ public class Source {
         for (String line : lines) {
             if (line.equals("")) {
                 if (onePackage.toString().length() > 10) {
-                    Package thisPackage = new Package(urlRoot, onePackage.toString());
+                    Package thisPackage = new Package(ctx, urlRoot, onePackage.toString());
                     if (packages.get(thisPackage.getName()) != null) {
                         Package testPackage = packages.get(thisPackage.getName());
                         if (thisPackage.getVersion().compareTo(testPackage.getVersion()) > 0) {
@@ -151,7 +153,7 @@ public class Source {
         }
 
         if (onePackage.toString().length() > 10) {
-            Package thisPackage = new Package(urlRoot, onePackage.toString());
+            Package thisPackage = new Package(ctx, urlRoot, onePackage.toString());
             if (packages.get(thisPackage.getName()) != null) {
                 Package testPackage = packages.get(thisPackage.getName());
                 if (thisPackage.getVersion().compareTo(testPackage.getVersion()) > 0) {

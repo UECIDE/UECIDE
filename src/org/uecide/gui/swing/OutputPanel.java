@@ -22,6 +22,7 @@ public class OutputPanel extends TabPanel implements ContextEventListener {
         this.ctx = ctx;
         outputArea = new Output(ctx);
         scroll = new JScrollPane(outputArea);
+//        scroll.getViewport().setOpaque(false);
         add(scroll);
         ctx.listenForEvent("message", this);
         ctx.listenForEvent("buildStart", this);

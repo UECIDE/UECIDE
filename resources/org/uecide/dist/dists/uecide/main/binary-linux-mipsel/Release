@@ -1,7 +1,0 @@
-Archive: stable
-Version: 3.1
-Component: main
-Origin: UECIDE
-Label: UECIDE Internal
-Architecture: linux-mipsel
-Description: Internal repository for distribution of plugins

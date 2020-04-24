@@ -145,14 +145,14 @@
         <mkdir dir="bundle/macosx"/>
 
     <jarbundler
-        name="UECIDE"
-        shortname="UECIDE"
+        name="UECIDE Beta"
+        shortname="UECIDEBeta"
         icon="dist/macosx/icon.icns"
         stubfile="universalJavaApplicationStub/src/universalJavaApplicationStub"
         dir="bundle/macosx"
         useJavaXKey="true"
         jar="uecide.jar"
-        mainclass="org.uecide.UECIDEe"
+        mainclass="org.uecide.UECIDE"
         jvmversion="1.8+"
         >
         <documenttype
@@ -400,6 +400,10 @@
             <maven group="jfree"                                   artifact="jfreechart"               version="1.0.13" />
             <maven group="org.swinglabs"                        artifact="swingx"   version="1.6.1" />
             <maven group="de.waldheinz"                         artifact="fat32-lib"                version="0.6.5" />
+            <maven group="io.github.vincenzopalazzo"            artifact="material-ui-swing"        version="1.1.1_pre-release_6.1" />
+            <maven group="com.github.jiconfont"                 artifact="jiconfont-google_material_design_icons" version="2.2.0.2" />
+            <maven group="com.github.jiconfont"                 artifact="jiconfont" version="1.0.0" />
+            <maven group="com.github.jiconfont"                 artifact="jiconfont-swing" version="1.0.1" />
         </depends>
     </target>
 

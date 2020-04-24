@@ -20,6 +20,7 @@ public class TabPanel extends JPanel {
         defaultPanel = p;
         setLayout(new BorderLayout());
         tabLabel = new JLabel(name);
+        ((JLabel)tabLabel).setOpaque(false);
     }
 
     public Component getTab() {
@@ -28,5 +29,8 @@ public class TabPanel extends JPanel {
 
     public void reset() {
         defaultPanel.add(this);
+    }
+
+    public void refreshPanel() {
     }
 }

@@ -164,6 +164,12 @@ public class Preferences {
         Color parsed = Color.GRAY;
         String s = get(key);
 
+        if (s == null) return Color.GRAY;
+
+        if (s.equals("transparent")) {
+            return new Color(0f, 0f, 0f, 0f);
+        }
+
         if((s != null) && (s.indexOf("#") == 0)) {
             try {
                 parsed = new Color(Integer.parseInt(s.substring(1), 16));

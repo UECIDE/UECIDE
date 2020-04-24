@@ -122,7 +122,7 @@ public class APT {
                 String url = bits[1];
                 String codename = bits[2];
                 String[] sects = Arrays.copyOfRange(bits, 3, bits.length);
-                Source s = new Source(url, codename, getOS(), sects);
+                Source s = new Source(ctx, url, codename, getOS(), sects);
                 addSource(s);
             }
         }
@@ -231,7 +231,7 @@ public class APT {
     }
 
     public void addSource(String root, String codename, String arch, String[] sections) {
-        Source s = new Source(root, codename, arch, sections);
+        Source s = new Source(ctx, root, codename, arch, sections);
         addSource(s);
     }
 

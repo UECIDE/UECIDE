@@ -3,11 +3,14 @@ package org.uecide.gui.swing;
 import org.uecide.Context;
 
 import java.awt.Component;
+import java.awt.Color;
 import java.awt.Font;
 
 import java.io.IOException;
 
+import javax.swing.UIManager;
 import javax.swing.JLabel;
+import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.ImageIcon;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -27,18 +30,17 @@ public class SketchTreeCellRenderer extends DefaultTreeCellRenderer {
 
         ret.setFont(new JLabel().getFont());
 
+        if (sel) {
+            ret.setForeground(UIManager.getColor("Tree.selectionForeground"));
+        } else {
+            ret.setForeground(UIManager.getColor("Tree.foreground"));
+        }
+
         if (value instanceof SketchTreeNodeBase) {
             SketchTreeNodeBase n = (SketchTreeNodeBase)value;
-            return n.getRenderComponent(ret, tree);
-//            ret.setFont(n.getFont());
-//            try {
-//                ImageIcon i = n.getIcon(tree);
-//                if (i != null) {
-//                    ret.setIcon(i);
-//                }
-//            } catch (IOException ignored) {
-//                Debug.exception(ignored);
-//            }
+            Component ret1 = n.getRenderComponent(ret, tree);
+            return ret1;
+
         }
 
         return ret;
