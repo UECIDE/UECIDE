@@ -14,3 +14,5 @@
 
 override_dh_link:
 	dh_link usr/share/uecide/uecide usr/bin/uecide
+
+override_dh_strip_nondeterminism:

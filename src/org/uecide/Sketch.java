@@ -3149,7 +3149,7 @@ public class Sketch {
         return objectPaths;
     }
 
-    private ArrayList<File> compileFileList(Context localCtx, File dest, ArrayList<File> sources, String key) {
+    private ArrayList<File> compileFileList(Context localCtx, File dest, ArrayList<File> sources, String key, File srcroot) {
         ArrayList<File> objectPaths = new ArrayList<File>();
         PropertyFile props = localCtx.getMerged();
 
@@ -3176,8 +3176,20 @@ public class Sketch {
 
         for(File file : sources) {
             String fileName = file.getName();
+            String relative = srcroot.toURI().relativize(file.toURI()).getPath();
+
+            File out = new File(dest, relative);
+            File par = out.getParentFile();
+            if (!par.exists()) {
+                par.mkdirs();
+            }
+
+            if (Preferences.getBoolean("compiler.verbose_files")) {
+                bullet3(relative);
+            }
+
             String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            File objectFile = new File(dest, fileName + "." + objExt);
+            File objectFile = new File(par, fileName + "." + objExt);
             objectPaths.add(objectFile);
 
             localCtx.set("source.name", file.getAbsolutePath());
@@ -3216,7 +3228,7 @@ public class Sketch {
         return null;
     }
 
-    private ArrayList<File> compileFiles(Context localCtx, File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources) {
+    private ArrayList<File> compileFiles(Context localCtx, File dest, ArrayList<File> sSources, ArrayList<File> cSources, ArrayList<File> cppSources, File srcroot) {
 
         ArrayList<File> objectPaths = new ArrayList<File>();
         PropertyFile props = localCtx.getMerged();
@@ -3224,13 +3236,13 @@ public class Sketch {
         localCtx.set("build.path", dest.getAbsolutePath());
         String objExt = localCtx.parseString(props.get("compiler.object","o"));
 
-        ArrayList<File> sObjects = compileFileList(localCtx, dest, sSources, "compile.S");
+        ArrayList<File> sObjects = compileFileList(localCtx, dest, sSources, "compile.S", srcroot);
         if (sObjects == null) { return null; }
 
-        ArrayList<File> cObjects = compileFileList(localCtx, dest, cSources, "compile.c");
+        ArrayList<File> cObjects = compileFileList(localCtx, dest, cSources, "compile.c", srcroot);
         if (cObjects == null) { return null; }
 
-        ArrayList<File> cppObjects = compileFileList(localCtx, dest, cppSources, "compile.cpp");
+        ArrayList<File> cppObjects = compileFileList(localCtx, dest, cppSources, "compile.cpp", srcroot);
         if (cppObjects == null) { return null; }
 
         objectPaths.addAll(sObjects);
@@ -3301,7 +3313,7 @@ public class Sketch {
                     }
                 }
 
-                sf.addAll(compileFiles(ctx, buildFolder, sFiles, cFiles, cppFiles));
+                sf.addAll(compileFiles(ctx, buildFolder, sFiles, cFiles, cppFiles, getBoard().getFolder()));
             }
         }
 
@@ -3314,7 +3326,23 @@ public class Sketch {
                                 buf,
                                 findFilesInFolder(suf, "S", true),
                                 findFilesInFolder(suf, "c", true),
-                                findFilesInFolder(suf, "cpp", true)
+                                findFilesInFolder(suf, "cpp", true),
+                                suf
+                            );
+            sf.addAll(uf);
+        }
+
+        suf = new File(sketchFolder, "src");
+
+        if(suf.exists()) {
+            File buf = new File(buildFolder, "src");
+            buf.mkdirs();
+            ArrayList<File> uf = compileFiles(ctx,
+                                buf,
+                                findFilesInFolder(suf, "S", true),
+                                findFilesInFolder(suf, "c", true),
+                                findFilesInFolder(suf, "cpp", true),
+                                suf
                             );
             sf.addAll(uf);
         }

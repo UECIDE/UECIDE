@@ -1,3 +1,15 @@
+uecide (0.11.7) unstable; urgency=low 
+
+  * New version of Launch4j
+  * Get dnsjava from Maven
+  * Add escapes for quotes in windows command execution
+  * Merge branch 'master' of github.com:UECIDE/UECIDE
+  * Release 0.11.5
+  * Fixed missing tool vc. Prevent prototypes being added for non-ino files
+  * Bundled up-to-date base packages
+
+ -- Matt Jenkins <matt@majenko.co.uk>  Mon, 30 Mar 2020 14:33:20 +0100
+
 uecide (0.11.4) unstable; urgency=low 
 
   * Improved exception reporting for debugging

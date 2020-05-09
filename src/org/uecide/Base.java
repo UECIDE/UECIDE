@@ -2773,6 +2773,16 @@ System.err.println("Loading class " + className);
     }
 
     public static void setLookAndFeel() {
+
+        if (isMacOS()) {
+            Version catalina = new Version("10.15.0");
+            Version osVersion = new Version(System.getProperty("os.version"));
+            if (osVersion.compareTo(catalina) >= 0) {
+                System.err.println("Themes are disabled on OS X Catalina as they break display rendering.");
+                return;
+            }
+        }
+
         String lafname = Preferences.get("theme.laf");
 
         LookAndFeel laf = null;

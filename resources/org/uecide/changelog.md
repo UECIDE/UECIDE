@@ -1,15 +1,21 @@
 Changelog
 =========
 
-0.11.4
+0.11.7
 ------
 
+* Bundled up-to-date base packages
 * Fixed missing tool vc. Prevent prototypes being added for non-ino files
 * Release 0.11.5
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Add escapes for quotes in windows command execution
 * Get dnsjava from Maven
 * New version of Launch4j
+
+
+0.11.4
+------
+
 * Improved exception reporting for debugging
 
 
@@ -751,6 +757,7 @@ Changelog
 0.8.5
 -----
 
+* Bundled up-to-date base packages
 * Fixed missing tool vc. Prevent prototypes being added for non-ino files
 * Release 0.11.5
 * Merge branch 'master' of github.com:UECIDE/UECIDE
