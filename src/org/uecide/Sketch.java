@@ -88,6 +88,9 @@ public class Sketch {
 
     boolean terminateExecution = false;
 
+    boolean haveUtilityArchive = false;
+    boolean haveSrcArchive = false;
+
     Process runningProcess = null;
 
     // This lot is what the sketch consists of - the list of files, libraries, parameters etc.
@@ -919,12 +922,12 @@ public class Sketch {
             return false;
         }
 
-        if (!UECIDE.isQuiet()) ctx.heading(UECIDE.i18n.string("msg.compiling"));
+        if (!UECIDE.isQuiet()) ctx.heading("Compiling");
 
-        if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.preprocessing"));
+        if (!UECIDE.isQuiet()) ctx.bullet("Preprocessing...");
         try {
             if(!prepare()) {
-                ctx.error(UECIDE.i18n.string("err.compiling.failed"));
+                ctx.error("Preprocessing failed");
                 ctx.triggerEvent("buildFail");
                 return false;
             }
@@ -1388,14 +1391,14 @@ return null;
         ArrayList<File>sketchObjects = compileSketch();
 
         if(sketchObjects == null) {
-            ctx.error(UECIDE.i18n.string("err.compiling.failed"));
+            ctx.error("Compiling sketch failed");
             return false;
         }
 
         if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.compiling.core"));
 
         if(!compileCore()) {
-            ctx.error(UECIDE.i18n.string("err.compiling.failed"));
+            ctx.error("Compiling core failed");
             return false;
         }
 
@@ -1403,7 +1406,7 @@ return null;
         if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.compiling.libraries"));
 
         if(!compileLibraries()) {
-            ctx.error(UECIDE.i18n.string("err.compiling.failed"));
+            ctx.error("Compiling libraries failed");
             return false;
         }
 
@@ -1411,7 +1414,7 @@ return null;
         if (!UECIDE.isQuiet()) ctx.bullet(UECIDE.i18n.string("msg.linking"));
 
         if(!compileLink(sketchObjects)) {
-            ctx.error(UECIDE.i18n.string("err.compiling.failed"));
+            ctx.error("Linking failed");
             return false;
         }
 
@@ -1575,7 +1578,7 @@ return null;
     }
 
     public File compileFile(Context localCtx, File src, File fileBuildFolder) {
-        return ctx.compileFile(localCtx, src, fileBuildFolder);
+        return ctx.compileFile(localCtx, src, fileBuildFolder, src.getParentFile());
     }
 
     public File getCacheFolder() {
@@ -1661,48 +1664,28 @@ return null;
             }
         }
 
-        ArrayList<FileCompiler> files = new ArrayList<FileCompiler>();
+        ArrayList<QueueJob> files = new ArrayList<QueueJob>();
 
         for(File f : fileList) {
             if(f.lastModified() > archiveDate) {
-                files.add(new FileCompiler(ctx, f, coreBuildFolder));
+                files.add(new FileCompileAndArchive(ctx, f, coreBuildFolder, ctx.getCore().getFolder(), archive));
             }
         }
 
-        for (FileCompiler fc : files) {
+        for (QueueJob fc : files) {
             ctx.queueJob(fc);
         }
 
         ctx.waitQueue();
 
-        for (FileCompiler fc : files) {
-            if (fc.getState() == FileCompiler.FAILED) {
+        for (QueueJob fc : files) {
+            if (fc.getState() == QueueJob.FAILED) {
                 UECIDE.tryDelete(coreBuildFolder);
                 if (archive.exists()) UECIDE.tryDelete(archive);
                 return false;
             }
-
-            File out = fc.getResult();
-        
-            ctx.triggerEvent("buildFileAdded", out);
-
-            ctx.set("object.name", out.getAbsolutePath());
-            boolean ok = (Boolean)ctx.executeKey("compile.ar");
-
-            if(!ok) {
-                UECIDE.tryDelete(out);
-                UECIDE.tryDelete(coreBuildFolder);
-                ctx.triggerEvent("buildFileRemoved", out);
-                if (archive.exists()) UECIDE.tryDelete(archive);
-                return false;
-            }
-
-            UECIDE.tryDelete(out);
-            ctx.triggerEvent("buildFileRemoved", out);
         }
 
-        UECIDE.tryDelete(coreBuildFolder);
-        ctx.triggerEvent("buildFileRemoved", coreBuildFolder);
         return true;
     }
 
@@ -1755,25 +1738,6 @@ return null;
         return objectPaths;
     }
 
-    private ArrayList<File> compileFileList(Context localCtx, File dest, ArrayList<File> sources) {
-
-        ArrayList<File> objectPaths = new ArrayList<File>();
-
-        PropertyFile props = localCtx.getMerged();
-        localCtx.set("build.path", dest.getAbsolutePath());
-
-        for (File f : sources) {
-            File out = ctx.compileFile(localCtx, f, dest);
-            if (out == null) {
-                return null;
-            }
-            objectPaths.add(out);
-            ctx.triggerEvent("buildFileAdded", out);
-        }
-
-        return objectPaths;
-    }
-
     private ArrayList<File> compileSketch() throws IOException {
         ArrayList<File> sf = new ArrayList<File>();
 
@@ -1784,24 +1748,14 @@ return null;
             ext = "cpp";
         }
 
-        ArrayList<FileCompiler> fcs = new ArrayList<FileCompiler>();
+        ArrayList<QueueJob> fcs = new ArrayList<QueueJob>();
 
         for (File f : filesToCompile) {
-            FileCompiler fc = new FileCompiler(ctx, f, buildFolder);
+            QueueJob fc = new FileCompiler(ctx, f, buildFolder, buildFolder);
             fcs.add(fc);
             ctx.queueJob(fc);
         }
 
-        ctx.waitQueue();
-
-        for (FileCompiler fc : fcs) {
-            if (fc.getState() != FileCompiler.COMPILED) {
-                return null;
-            }
-            File obj = fc.getResult();
-            sf.add(obj);
-        }
-        
         String boardFiles = ctx.parseString(props.get("build.files"));
 
         if(boardFiles != null) {
@@ -1825,28 +1779,53 @@ return null;
                     }
                 }
 
-                sf.addAll(compileFileList(ctx, buildFolder, sourceFiles));
+                for (File f : sourceFiles) {
+                    QueueJob fc = new FileCompiler(ctx, f, new File(buildFolder, "board"), ctx.getBoard().getFolder());
+                    fcs.add(fc); 
+                    ctx.queueJob(fc);
+                }
             }
         }
 
         File suf = new File(sketchFolder, "utility");
 
+        haveUtilityArchive = false;
         if(suf.exists()) {
-            File buf = new File(buildFolder, "utility");
-            buf.mkdirs();
-            ctx.triggerEvent("buildFileAdded", buf);
-            ArrayList<File> uf = compileFileList(ctx, buf, FileManager.findFilesInFolder(suf, true, FileType.ASMSOURCE, FileType.CSOURCE, FileType.CPPSOURCE));
-            sf.addAll(uf);
+            ArrayList<File> uf = FileManager.findFilesInFolder(suf, true, FileType.ASMSOURCE, FileType.CSOURCE, FileType.CPPSOURCE);
+
+            for (File f : uf) {
+                QueueJob fc = new FileCompileAndArchive(ctx, f, new File(buildFolder, "utility"), suf, new File(buildFolder, "libSketch_utility.a"));
+                fcs.add(fc);
+                ctx.queueJob(fc);
+            }
+
+            haveUtilityArchive = true;
         }
 
         suf = new File(sketchFolder, "src");
 
+        haveSrcArchive = false;
         if(suf.exists()) {
-            File buf = new File(buildFolder, "src");
-            buf.mkdirs();
-            ctx.triggerEvent("buildFileAdded", buf);
-            ArrayList<File> uf = compileFileList(ctx, buf, FileManager.findFilesInFolder(suf, true, FileType.ASMSOURCE, FileType.CSOURCE, FileType.CPPSOURCE));
-            sf.addAll(uf);
+            ArrayList<File> uf = FileManager.findFilesInFolder(suf, true, FileType.ASMSOURCE, FileType.CSOURCE, FileType.CPPSOURCE);
+
+            for (File f : uf) {
+                QueueJob fc = new FileCompileAndArchive(ctx, f, new File(buildFolder, "src"), suf, new File(buildFolder, "libSketch_src.a"));
+                fcs.add(fc);
+                ctx.queueJob(fc);
+            }
+            haveSrcArchive = true;
+        }
+
+        ctx.waitQueue();
+
+        for (QueueJob fc : fcs) {
+            if (fc.getState() != QueueJob.COMPLETED) {
+                return null;
+            }
+            if (fc instanceof FileCompiler) {
+                File obj = ((FileCompiler)fc).getResult();
+                sf.add(obj);
+            }
         }
 
         return sf;
@@ -1897,6 +1876,14 @@ return null;
         for(String libName : coreLibs.keySet()) {
             ctx.set("library", "Core_" + libName);
             liblist += "::" + ctx.parseString(liboption);
+        }
+
+        if (haveUtilityArchive) {
+            liblist += "::-lSketch_utility";
+        }
+
+        if (haveSrcArchive) {
+            liblist += "::-lSketch_src";
         }
 
         ctx.set("libraries", liblist);
@@ -2369,7 +2356,7 @@ return null;
         ctx.waitQueue();
 
         for (BinaryFileConverter bc : bcs) {
-            if (bc.getState() != BinaryFileConverter.COMPILED) {
+            if (bc.getState() != BinaryFileConverter.COMPLETED) {
                 ctx.error("Binary file " + bc.getFile().getName() + " failed to convert.");
                 return null;
             }

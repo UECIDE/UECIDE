@@ -147,6 +147,7 @@ public abstract class Library implements Comparable {
     }
 
     public String getInclude() {
+        if (mainInclude == null) { return ""; }
         return "#include <" + mainInclude.getName() + ">\n";
     }
 
@@ -293,6 +294,9 @@ public abstract class Library implements Comparable {
     }
 
     public String getMainHeader() { 
+        if (mainInclude == null) {
+            return null;
+        }
         return mainInclude.getName();
     }
 
@@ -457,7 +461,7 @@ public abstract class Library implements Comparable {
         ArrayList<FileCompiler> compileJobs = new ArrayList<FileCompiler>();
 
         for (File f : filesToCompile) {
-            FileCompiler fc = new FileCompiler(localCtx, f, libBuildFolder);
+            FileCompiler fc = new FileCompiler(localCtx, f, libBuildFolder, sourceFolder);
             compileJobs.add(fc);
             ctx.queueJob(fc);
         }

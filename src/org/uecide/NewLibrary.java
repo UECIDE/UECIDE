@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class NewLibrary extends Library {
     PropertyFile properties;
     File source = null;
+    String[] includeLineFiles = null;
 
     public NewLibrary(File location, int priority) throws LibraryFormatException {
         super(location, priority);
@@ -29,19 +30,22 @@ public class NewLibrary extends Library {
         if (!source.isDirectory()) throw new LibraryFormatException("src is not a folder");
 
         mainInclude = null;
-        ArrayList<File> files = FileManager.findFilesInFolder(source, recurse, FileType.CSOURCE, FileType.CPPSOURCE, FileType.HEADER, FileType.LIBRARY);
-        for (File f : files) {
-            addSourceFile(f);
-            if (f.getName().equals(location.getName() + ".h")) {
-                mainInclude = f;
-            }
-        }
+
+        if (properties.get("includes") != null) {
+            String mi = properties.get("includes");
+            includeLineFiles = mi.split(",");
+            mainInclude = new File(source, includeLineFiles[0]);
+        } 
 
         if (mainInclude == null) {
-            System.err.println("Error loading " + location);
-            throw new LibraryFormatException("No matching header file found");
+            ArrayList<File> files = FileManager.findFilesInFolder(source, recurse, FileType.CSOURCE, FileType.CPPSOURCE, FileType.HEADER, FileType.LIBRARY);
+            for (File f : files) {
+                addSourceFile(f);
+                if (f.getName().equals(location.getName() + ".h")) {
+                    mainInclude = f;
+                }
+            }
         }
-        
     }
 
     @Override
@@ -80,5 +84,24 @@ public class NewLibrary extends Library {
         }
         return list;
     }
+
+    @Override
+    public String getInclude() {
+        String out = "";
+        if (includeLineFiles == null) {
+            File[] files = source.listFiles();
+            for (File file : files) {
+                if (file.getName().endsWith(".h")) {
+                    out += "#include <" + file.getName() + ">";
+                }
+            }
+        } else {
+            for (String inc : includeLineFiles) {
+                out += "#include <" + inc.trim() + ">\n";
+            }
+        }
+        return out;
+    }
+
 
 }

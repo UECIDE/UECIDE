@@ -60,7 +60,6 @@ public class Context {
     public StringBuilder buffer = null;
     boolean bufferError = false;
     public PropertyFile settings = null;
-    public Process runningProcess = null;
     public PropertyFile savedSettings = null;
     public DataStreamParser parser = null;
     public boolean silence = false;
@@ -72,10 +71,11 @@ public class Context {
     OutputStream outputStream = null;
     OutputStream stderrStream = null;
     InputStream inputStream = null;
-    public Queue<Runnable> jobQueue;
+    public Queue<QueueJob> jobQueue;
     public ArrayList<WorkerThread> workers;
     public static int contextId = 0;
     public int thisContextId = 0;
+    public ArrayList<Process> runningProcesses = new ArrayList<Process>();
 
     public Context(Context src) {
         board = src.board;
@@ -88,7 +88,6 @@ public class Context {
         listener = src.listener;
         buffer = src.buffer;
         bufferError = src.bufferError;
-        runningProcess = src.runningProcess;
         parser = src.parser;
         silence = src.silence;
         thisContextId = contextId++;
@@ -107,7 +106,7 @@ public class Context {
         updateSystem();
 
         startTimers();
-        jobQueue = new ArrayDeque<Runnable>();
+        jobQueue = new ArrayDeque<QueueJob>();
         workers = new ArrayList<WorkerThread>();
         thisContextId = contextId++;
 
@@ -807,7 +806,6 @@ public class Context {
         stringList.set(0, stringList.get(0).replace("//", "/"));
 
         ProcessBuilder process = new ProcessBuilder(stringList);
-        runningProcess = null;
 
         if (env != null) {
             Map<String, String> environment = process.environment();
@@ -860,9 +858,14 @@ public class Context {
             stderr = new ContextStream(this, Message.STREAM_ERROR);
         }
 
+        Process runningProcess = null;
         try {
             runningProcess = process.start();
-            UECIDE.processes.add(runningProcess);
+            if (runningProcess == null) {
+                System.err.println("Couldn't start!");
+            }
+
+            runningProcesses.add(runningProcess);
 
             ProcessStreamThread stdoutStreamer = new ProcessStreamThread(runningProcess.getInputStream(), stdout);
             ProcessStreamThread stderrStreamer = new ProcessStreamThread(runningProcess.getErrorStream(), stderr);
@@ -886,6 +889,8 @@ public class Context {
             stderrThread.join();
             stdinThread.join();
         } catch (Exception ex) {
+System.err.println("This happened");
+ex.printStackTrace();
             Debug.exception(ex);
             error(ex);
         }
@@ -920,9 +925,16 @@ public class Context {
 
         int result = -1;
         if (runningProcess != null) {
+            try {
+                runningProcess.waitFor();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        
             result = runningProcess.exitValue();
-            UECIDE.processes.remove(runningProcess);
         }
+
+        runningProcesses.remove(process);
 
         if(result == 0) {
             return true;
@@ -947,10 +959,17 @@ public class Context {
         }
     }
 
+    public void killAllRunningProcesses() {
+        for (Process p : runningProcesses) {
+            p.destroyForcibly();
+        }
+    }
+
     public void killRunningProcess() {
-        if(runningProcess != null) {
-            runningProcess.destroyForcibly();
-            UECIDE.processes.remove(runningProcess);
+        jobQueue.clear();
+        
+        for (WorkerThread t : workers) {
+            t.kill();
         }
     }
 
@@ -1126,11 +1145,11 @@ public class Context {
         return getSketch().getBuildFolder();
     }
 
-    public File compileFile(File src, File buildFolder) {
-        return compileFile(null, src, buildFolder);
+    public File compileFile(File src, File buildFolder, File sourceRoot) {
+        return compileFile(null, src, buildFolder, sourceRoot);
     }
 
-    public File compileFile(Context localCtx, File src, File buildFolder) {
+    public File compileFile(Context localCtx, File src, File buildFolder, File sourceRoot) {
         if (localCtx == null) {
             localCtx = new Context(this);
         }
@@ -1174,36 +1193,72 @@ public class Context {
             return null;
         }
 
+        String relative = sourceRoot.toURI().relativize(src.toURI()).getPath();
+
+        File reldest = new File(buildFolder, relative);
+        File par = reldest.getParentFile();
+        if (!par.exists()) {
+            par.mkdirs();
+        }
+
         if (Preferences.getBoolean("compiler.verbose_files")) {
-            bullet3(fileName);
+            bullet3(relative);
         }
 
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
         String objExt = localCtx.parseString(props.get("compiler.object", "o"));
 
-        String bfPath = buildFolder.getAbsolutePath();
+        String bfPath = par.getAbsolutePath();
         String srcPath = src.getParentFile().getAbsolutePath();
 
-        if (srcPath.startsWith(bfPath + "/")) {
-            buildFolder = src.getParentFile();
-        }
+        File depFile = null;
 
         File dest = null;
-        if (props.getBoolean("build.stripextension")) {
-            dest = new File(buildFolder, fileName.substring(0, fileName.lastIndexOf('.')) + "." + objExt);
+        if (props.getBoolean("build.stripextension", true)) {
+            dest = new File(par, baseName + "." + objExt);
+            depFile = new File(par, baseName + ".d");
         } else {
-            dest = new File(buildFolder, fileName + "." + objExt);
+            dest = new File(par, fileName + "." + objExt);
+            depFile = new File(par, fileName + ".d");
         }
 
         if (dest.exists()) {
-            if (dest.lastModified() > src.lastModified()) {
-                triggerEvent("fileCompilationFinished", src);
-                localCtx.dispose();
-                return dest;
+            if (dest.lastModified() >= src.lastModified()) {
+
+                // Do we have a deps file (.d) from a previous compilation?
+                boolean hasNewer = false;
+                if (depFile.exists()) {
+                    try {
+                        String depData = Utils.getFileAsString(depFile);
+                        String[] depLines = depData.split("\n");
+                        for (String depLine : depLines) {
+                            depLine = depLine.trim();
+                            if (depLine.endsWith("\\")) {
+                                depLine = depLine.substring(0, depLine.length() - 2);
+                                depLine = depLine.trim();
+                            }
+                            File dep = new File(depLine);
+                            if (dep.exists()) {
+                                if (dep.lastModified() > dest.lastModified()) {
+                                    hasNewer = true;
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (Exception ex) {
+                        Debug.exception(ex);
+                    }
+                }
+
+                if (!hasNewer) {
+                    triggerEvent("fileCompilationFinished", src);
+                    localCtx.dispose();
+                    return dest;
+                }
             }
         }
-        
-        localCtx.set("build.path", buildFolder.getAbsolutePath());
+
+        localCtx.set("build.path", par.getAbsolutePath());
         localCtx.set("source.name", src.getAbsolutePath());
         localCtx.set("object.name", dest.getAbsolutePath());
 
@@ -1253,7 +1308,7 @@ System.err.println("Failed running key " + recipe);
         }
     }
 
-    public void queueJob(Runnable r) {
+    public void queueJob(QueueJob r) {
         synchronized(jobQueue) {
             jobQueue.add(r);
             jobQueue.notify();
@@ -1261,8 +1316,12 @@ System.err.println("Failed running key " + recipe);
     }
 
     public void waitQueue() {
+        int queueSize = jobQueue.size();
         while (!jobQueue.isEmpty()) {
-            try { Thread.sleep(10); } catch (Exception ex) {    Debug.exception(ex); }
+            int remain = jobQueue.size();
+            int pct = remain * 100 / queueSize;
+            triggerEvent("percentComplete", 100 - pct);
+            try { Thread.sleep(1); } catch (Exception ex) {    Debug.exception(ex); }
         }
         boolean busy = false;
 
@@ -1271,7 +1330,7 @@ System.err.println("Failed running key " + recipe);
             for (WorkerThread t : workers) {
                 if (t.isRunning()) {
                     busy = true;
-                    try { Thread.sleep(10); } catch (Exception ex) {    Debug.exception(ex); }
+                    try { Thread.sleep(1); } catch (Exception ex) {    Debug.exception(ex); }
                     break;
                 }
             }

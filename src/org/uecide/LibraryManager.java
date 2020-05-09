@@ -59,22 +59,24 @@ public class LibraryManager {
 
     /* Add a library to the list of libraries associated with a specific header */
     public static void addLibrary(String header, Library l) {
-        ArrayList<Library> liblist = libraries.get(header);
-
-        if (liblist == null) {
-            liblist = new ArrayList<Library>();
-        }
 
         if (libraryIndex.get(l.getFolder()) == null) {
             libraryIndex.put(l.getFolder(), l);
         }
 
-        if (liblist.indexOf(l) > -1) {
-            return; // Already there
-        }
+        if (header != null) {
+            ArrayList<Library> liblist = libraries.get(header);
+            if (liblist == null) {
+                liblist = new ArrayList<Library>();
+            }
 
-        liblist.add(l);
-        libraries.put(header, liblist);
+            if (liblist.indexOf(l) > -1) {
+                return; // Already there
+            }
+
+            liblist.add(l);
+            libraries.put(header, liblist);
+        }
     }
 
     /* Take a File path and find the library related to it */
@@ -87,14 +89,37 @@ public class LibraryManager {
         return null;
     }
 
+    public static ArrayList<Library> findLibrariesThatHaveHeader(String header) {
+        ArrayList<Library> out = new ArrayList<Library>();
+        for (Library lib : libraryIndex.values()) {
+            if (lib.hasHeader(header)) {
+                out.add(lib);
+            }
+        }
+        return out;
+    }
+
     /* Get a library by the header name. Returns the highest priority one */
     public static Library getLibraryByName(String header, Core core) {
         Library foundLib = null;
         int prio = -1;
 
+        // First let's try finding the library by its main header (if it has one).
         ArrayList<Library> libs = libraries.get(header);
-        if (libs == null) return null;
 
+        // If it's not found then get all the libraries that contain the header
+        if (libs == null) {
+            libs = findLibrariesThatHaveHeader(header);
+        }
+
+        // If it's still not found then give up.
+        if (libs == null) {
+            return null;
+        }
+        if (libs.size() == 0) {
+            return null;
+        }
+ 
         for (Library lib : libs) {
             if (lib.worksWith(core)) {
                 if (lib.getPriority() > prio) {

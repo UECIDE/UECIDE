@@ -2,34 +2,28 @@ package org.uecide;
 
 import java.io.File;
 
-public class FileCompiler implements Runnable {
+public class FileCompiler extends QueueJob {
     File source;
     File destination;
     File result;
-    Context ctx;
-    int state;
+    File sourceRoot;
 
-    public final static int UNCOMPILED = 0;
-    public final static int COMPILING = 1;
-    public final static int COMPILED = 2;
-    public final static int FAILED = 3;
-
-    public FileCompiler(Context ctx, File source, File destination) {
+    public FileCompiler(Context ctx, File source, File destination, File sourceRoot) {
+        super(ctx);
         this.source = source;
         this.destination = destination;
-        this.ctx = ctx;
-        this.state = UNCOMPILED;
+        this.sourceRoot = sourceRoot;
     }
 
     public void run() {
-        state = COMPILING;
+        state = RUNNING;
         ctx.triggerEvent("fileCompileStarted", this);
-        result = ctx.compileFile(null, source, destination);
+        result = ctx.compileFile(null, source, destination, sourceRoot);
         if (result == null) {
             state = FAILED;
             ctx.triggerEvent("fileCompileFailed", this);
         } else {
-            state = COMPILED;
+            state = COMPLETED;
             ctx.triggerEvent("fileCompileFinished", this);
         }
     }
@@ -38,11 +32,11 @@ public class FileCompiler implements Runnable {
         return result;
     }
 
-    public int getState() {
-        return state;
-    }
-    
     public File getFile() {
         return source;
+    }
+
+    public void kill() {
+        ctx.killAllRunningProcesses();
     }
 }

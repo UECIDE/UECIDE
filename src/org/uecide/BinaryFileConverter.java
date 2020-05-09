@@ -2,29 +2,21 @@ package org.uecide;
 
 import java.io.File;
 
-public class BinaryFileConverter implements Runnable {
+public class BinaryFileConverter extends QueueJob {
     File source;
     File destination;
     File result;
-    Context ctx;
-    int state;
     String[] headerLines;
 
-    public final static int UNCOMPILED = 0;
-    public final static int COMPILING = 1;
-    public final static int COMPILED = 2;
-    public final static int FAILED = 3;
-
     public BinaryFileConverter(Context ctx, File source, File destination) {
+        super(ctx);
         this.source = source;
         this.destination = destination;
-        this.ctx = ctx;
-        this.state = UNCOMPILED;
         this.headerLines = null;
     }
 
     public void run() {
-        state = COMPILING;
+        state = RUNNING;
 
         FileConverter conv = null;
 
@@ -78,7 +70,7 @@ public class BinaryFileConverter implements Runnable {
         if (result == null) {
             state = FAILED;
         } else {
-            state = COMPILED;
+            state = COMPLETED;
         }
     }
 
@@ -96,5 +88,8 @@ public class BinaryFileConverter implements Runnable {
     
     public File getFile() {
         return source;
+    }
+
+    public void kill() {
     }
 }

@@ -219,7 +219,7 @@
         <delete dir="bundle/windows" />
     </target>
 
-    <target name="windows-exe-lite" depends="build">
+    <target name="windows-exe-lite" depends="build,uecide.exe,uecide-cli.exe">
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
         <copy file="uecide.jar" todir="bundle/windows/uecide-${Version}/lib" />
@@ -245,7 +245,7 @@
         <delete dir="windows" />
     </target>
 
-    <target name="windows-exe-full" depends="build">
+    <target name="windows-exe-full" depends="build,uecide.exe,uecide-cli.exe">
         <mkdir dir="bundle/windows/uecide-${Version}/lib" />
         <mkdir dir="windows" /> 
         <depends dir="tmp">

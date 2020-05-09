@@ -4,6 +4,7 @@ Changelog
 0.11.5
 ------
 
+* Updated material and most of preferences working
 * Overhaul of libraries and new actions
 * Add toolbar icons for tool scripts
 * More builtin improvements and more stream objects
@@ -812,6 +813,7 @@ Changelog
 0.8.5
 -----
 
+* Updated material and most of preferences working
 * Overhaul of libraries and new actions
 * Add toolbar icons for tool scripts
 * More builtin improvements and more stream objects

@@ -4,12 +4,13 @@ import java.util.Queue;
 
 public class WorkerThread extends Thread {
     private static int instance = 0;
-    private final Queue<Runnable> queue;
+    private final Queue<QueueJob> queue;
 
     private boolean running = false;
     Context ctx;
+    QueueJob work = null;
 
-    public WorkerThread(Queue<Runnable> queue, Context c) {
+    public WorkerThread(Queue<QueueJob> queue, Context c) {
         this.ctx = c;
         this.queue = queue;
         setName("Worker Thread " + (instance++));
@@ -19,8 +20,6 @@ public class WorkerThread extends Thread {
     public void run() {
         while ( true ) {
             try {
-                Runnable work = null;
-
                 synchronized ( queue ) {
                     while ( queue.isEmpty() ) {
                         queue.wait();
@@ -43,6 +42,14 @@ public class WorkerThread extends Thread {
 
     public boolean isRunning() {
         return running;
+    }
+
+    public void kill() {
+        if (running) {
+            if (work != null) {
+                work.kill();
+            }
+        }
     }
 }
 

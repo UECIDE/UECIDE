@@ -27,6 +27,8 @@ public class AbortAction extends Action {
             throw new BadArgumentActionException();
         }
 
+        ctx.killRunningProcess();
+
         return ctx.killThread((String)args[0]);
     }
 }
