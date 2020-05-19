@@ -1,9 +1,10 @@
 Changelog
 =========
 
-0.11.5
-------
+1.0.0
+-----
 
+* Improved archive building routines
 * Updated material and most of preferences working
 * Overhaul of libraries and new actions
 * Add toolbar icons for tool scripts
@@ -17,7 +18,12 @@ Changelog
 * Restored old output panel
 * Sub-contexts now raise events in the parent context
 * Parallel compilation
+* Release 0.11.5
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Add escapes for quotes in windows command execution
 * Initial work on binary conversion gui
+* Get dnsjava from Maven
+* New version of Launch4j
 * Improved global exception handling
 * Improved exception reporting for debugging
 * Protect against invalid sketch or file in tree update
@@ -67,6 +73,16 @@ Changelog
 * Open sketch
 * Close confirmation and save/saveas
 * Started work on separating the GUI from the core functionality
+
+
+0.11.5
+------
+
+* Release 0.11.5
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Add escapes for quotes in windows command execution
+* Get dnsjava from Maven
+* New version of Launch4j
 
 
 0.11.4
@@ -813,6 +829,7 @@ Changelog
 0.8.5
 -----
 
+* Improved archive building routines
 * Updated material and most of preferences working
 * Overhaul of libraries and new actions
 * Add toolbar icons for tool scripts

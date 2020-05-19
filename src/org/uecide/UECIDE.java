@@ -1324,7 +1324,11 @@ public class UECIDE {
 
             if (startSession) {
                 sessions.add(ctx);
-                ctx.action("openSketch", sf);
+                if (sf != null) {
+                    ctx.action("openSketch", sf);
+                } else {
+                    ctx.setSketch(new Sketch((File)null, ctx));
+                }
                 if (presetPort != null) { ctx.action("SetDevice", presetPort); }
                 if (presetBoard != null) { ctx.action("SetBoard", presetBoard); }
                 if (presetCore != null) { ctx.action("SetCore", presetCore); }

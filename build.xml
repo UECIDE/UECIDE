@@ -24,7 +24,7 @@
         <delete dir="deps" />
     </target>
 
-    <target name="clean" description="Clean out the build directories">
+    <target name="clean" description="Clean out the build directories" depends="modules-clean">
         <delete dir="bin" />
         <delete file="uecide.jar" />
         <delete>
@@ -40,7 +40,23 @@
         <exec output="resources/org/uecide/changelog.md" executable="./mklog"/>
     </target>
 
-    <target name="compile" description="Compile" depends="deps,git_contributors,changelog">
+    <target name="modules">
+        <parallel>
+            <subant antfile="build.xml" buildpath="modules/gritty" />
+            <subant antfile="build.xml" buildpath="modules/jtattoo" />
+            <subant antfile="build.xml" buildpath="modules/ardublock" />
+        </parallel>
+    </target>
+
+    <target name="modules-clean">
+        <parallel>
+            <subant antfile="build.xml" buildpath="modules/gritty" target="clean"/>
+            <subant antfile="build.xml" buildpath="modules/jtattoo" target="clean"/>
+            <subant antfile="build.xml" buildpath="modules/ardublock" target="clean"/>
+        </parallel>
+    </target>
+
+    <target name="compile" description="Compile" depends="deps,modules,git_contributors,changelog">
         <mkdir dir="bin" />
         <path id="class.path">
             <fileset dir="deps">
@@ -49,6 +65,9 @@
             <fileset dir="deps-bundle">
                 <include name="*.jar" />
             </fileset>
+            <pathelement location="modules/gritty/uecide-module-gritty.jar" />
+            <pathelement location="modules/jtattoo/uecide-module-jtattoo.jar" />
+            <pathelement location="modules/ardublock/uecide-module-ardublock.jar" />
         </path>
         <javac target="1.8" 
                source="1.8"
@@ -93,6 +112,9 @@
             <fileset dir="resources" />
             <zipgroupfileset dir="deps" includes="*.jar" />
             <zipgroupfileset dir="deps-bundle" includes="*.jar" />
+            <zipgroupfileset dir="modules/gritty" includes="uecide-module-gritty.jar" />
+            <zipgroupfileset dir="modules/jtattoo" includes="uecide-module-jtattoo.jar" />
+            <zipgroupfileset dir="modules/ardublock" includes="uecide-module-ardublock.jar" />
             <manifest>
                 <attribute name="Main-Class" value="org.uecide.UECIDE" />
                 <attribute name="Class-Path" value="uecide.jar" />
@@ -396,8 +418,6 @@
             <maven group="org.tukaani"                             artifact="xz"                       version="1.8" />
             <maven group="org.jline"                               artifact="jline"                    version="3.6.0" />
             <maven group="com.apple"                               artifact="AppleJavaExtensions"      version="1.4" />
-            <maven group="jfree"                                   artifact="jcommon"                  version="1.0.16" />
-            <maven group="jfree"                                   artifact="jfreechart"               version="1.0.13" />
             <maven group="org.swinglabs"                        artifact="swingx"   version="1.6.1" />
             <maven group="de.waldheinz"                         artifact="fat32-lib"                version="0.6.5" />
             <maven group="io.github.vincenzopalazzo"            artifact="material-ui-swing"        version="1.1.1_pre-release_6.1" />

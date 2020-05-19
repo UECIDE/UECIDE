@@ -219,7 +219,9 @@ public class Context {
         if (compiler != null) { pf.mergeData(compiler.getProperties()); }
         if (core != null) { pf.mergeData(core.getProperties()); }
         if (board != null) { pf.mergeData(board.getProperties()); }
-        pf.mergeData(sketch.getSettings());
+        if (sketch != null) {
+            pf.mergeData(sketch.getSettings());
+        }
         pf.mergeData(settings);
         return pf;
     }
