@@ -1,0 +1,10 @@
+Global=global
+Serial=serial
+Serial0=serial
+Serial1=serial
+Serial2=serial
+Serial3=serial
+Serial4=serial
+Serial5=serial
+Wire=wire
+SPI=spi

@@ -1,0 +1,10 @@
+begin=https://www.arduino.cc/en/Reference/WireBegin
+requestFrom=https://www.arduino.cc/en/Reference/WireRequestFrom
+beginTransmission=https://www.arduino.cc/en/Reference/WireBeginTransmission
+endTransmission=https://www.arduino.cc/en/Reference/WireEndTransmission
+write=https://www.arduino.cc/en/Reference/WireWrite
+available=https://www.arduino.cc/en/Reference/WireAvailable
+read=https://www.arduino.cc/en/Reference/WireRead
+SetClock=https://www.arduino.cc/en/Reference/WireSetClock
+onReceive=https://www.arduino.cc/en/Reference/WireOnReceive
+onRequest=https://www.arduino.cc/en/Reference/WireOnRequest

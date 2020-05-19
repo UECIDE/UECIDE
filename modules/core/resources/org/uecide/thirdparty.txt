@@ -1,0 +1,12 @@
+Apache Commons                http://commons.apache.org/
+Java Simple Serial Connector  http://github.com/scream3r/java-simple-serial-connector
+JFontChooser                  http://sourceforge.net/projects/jfontchooser/
+JmDNS                         http://jmdns.sourceforge.net/
+JSch                          http://www.jcraft.com/jsch/
+JSR-80                        https://jcp.org/en/jsr/detail?id=80
+JTattoo                       http://www.jtattoo.net/
+Liquid Look and Feel          http://sourceforge.net/projects/liquidlnf/
+OfficeLnFs                    http://fifesoft.com/officelnfs/
+RSyntaxTextArea               http://fifesoft.com/rsyntaxtextarea/
+TinyLAF                       http://www.javootoo.com/plaf/tinylaf/index.html
+Usb4Java                      http://usb4java.org/

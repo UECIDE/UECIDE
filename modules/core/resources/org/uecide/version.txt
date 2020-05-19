@@ -1,0 +1,3 @@
+Version=1.0.0-dev-09052020
+VersionName=1.0.0 Development
+Release=release

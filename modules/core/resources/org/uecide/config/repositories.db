@@ -1,0 +1,42 @@
+master.name=Main UECIDE Repository
+master.description=The master repository for the core UECIDE system
+master.country=GB
+master.url=http://repo-master.uecide.org/uecide
+master.codename=uecide
+master.sections=boards::cores::compilers::plugins::extra::libraries::themes
+
+slave.name=Backup UECIDE Repository
+slave.description=Backup of the master repository for the core UECIDE system
+slave.country=GB
+slave.url=http://repo-slave.uecide.org/uecide
+slave.codename=uecide
+slave.sections=boards::cores::compilers::plugins::extra::libraries::themes
+
+testing.name=Unstable testing repository
+testing.description=Cutting edge versions that may not work
+testing.country=GB
+testing.url=http://repo-master.uecide.org/testing
+testing.codename=uecide
+testing.sections=boards::cores::compilers::plugins::extra::libraries::themes
+
+4d.name=4D Systems Mirror Repository
+4d.description=A mirror of the UECIDE master repository
+4d.country=US
+4d.url=http://www.4dsystems.com.au/uecide
+4d.codename=uecide
+4d.sections=boards::cores::compilers::plugins::extra::libraries::themes
+
+legacy.name=Legacy Software Repository
+legacy.description=Older versions of cores for legacy applications
+legacy.country=GB
+legacy.url=http://repo.uecide.org/legacy
+legacy.codename=uecide
+legacy.sections=boards::cores::compilers::plugins::extra::libraries::themes
+
+internal.name=Internal Distribution Repository
+internal.description=Special internal repository within UECIDE package for distributing packages
+internal.country=NONE
+internal.url=res://org/uecide/dist
+internal.codename=uecide
+internal.sections=boards::cores::compilers::plugins::extra::libraries::themes
+

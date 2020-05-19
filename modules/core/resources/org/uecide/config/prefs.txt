@@ -1,0 +1,1118 @@
+# Compiler settings
+
+name=Preferences
+type=section
+
+compiler.name=Compiler
+compiler.type=section
+
+compiler.buildinsketch.type=checkbox
+compiler.buildinsketch.name=Compile the sketch in the sketch folder
+compiler.buildinsketch.default=false
+compiler.buildinsketch.tooltip=This will cause all compilation to take place within a folder "build" inside your sketch. It keeps everything nicely self contained.
+
+compiler.disableline.type=checkbox
+compiler.disableline.name=Disable insertion of #line numbering (useful for debugging)
+compiler.disableline.default=false
+compiler.disableline.tooltip=Removes #line entries in generated files. You should leave this off unless you know what a #line entry is.
+
+compiler.generate_lss.type=checkbox
+compiler.generate_lss.name=Generate assembly listing (requires core support)
+compiler.generate_lss.default=false
+compiler.generate_lss.tooltip=Redundant. Does nothing. Needs re-implementing.
+
+compiler.disable_prototypes.type=checkbox
+compiler.disable_prototypes.name=Disable generation of function prototypes
+compiler.disable_prototypes.default=false
+compiler.disable_prototypes.tooltip=Prevents the IDE generating function prototypes and inserting them at the start of your sketch.
+
+#compiler.combine_ino.type=checkbox
+#compiler.combine_ino.name=Combine all .INO and .PDE files into a single .CPP file
+#compiler.combine_ino.default=true
+#compiler.combine_ino.tooltip=Redundant. Does nothing. Needs re-implementing.
+
+compiler.generate_makefile.type=checkbox
+compiler.generate_makefile.name=Generate / update a Makefile each compile (core support required)
+compiler.generate_makefile.default=false
+compiler.generate_makefile.tooltip=If the core supports it this will generate a Makefile which can be used to build the project in other IDEs.
+
+compiler.verbose_compile.type=checkbox
+compiler.verbose_compile.name=Verbose command execution
+compiler.verbose_compile.default=false
+compiler.verbose_compile.tooltip=Causes all the commands that are executed to be displayed in the output console. Gets visually noisy.
+
+compiler.verbose_files.type=checkbox
+compiler.verbose_files.name=List files as they are compiled
+compiler.verbose_files.default=false
+compiler.verbose_files.tooltip=Lists each file in each library and the core as they are compiled.
+
+compiler.verbose_upload.type=checkbox
+compiler.verbose_upload.name=Verbose output during upload
+compiler.verbose_upload.default=false
+compiler.verbose_upload.tooltip=Gives more visual feedback during the upload process.
+
+compiler.purge.type=checkbox
+compiler.purge.name=Purge project on every build
+compiler.purge.default=false
+compiler.purge.tooltip=Delete all cached data before each build. Makes building much slower but can be good when developing a core.
+
+compiler.save_hex.type=checkbox
+compiler.save_hex.name=Save compiled output to sketch folder
+compiler.save_hex.default=false
+compiler.save_hex.tooltip=Copies the compiled output into your sketch folder.
+
+#compiler.save_lss.type=checkbox
+#compiler.save_lss.name=Save generated LSS file to sketch folder
+#compiler.save_lss.depends=compiler.generate_lss
+#compiler.save_lss.default=false
+#compiler.save_lss.tooltip=Redundant. Does nothing. Needs re-implementing.
+
+# Editor settings
+
+editor.name=Editor
+editor.type=section
+
+editor.dialog.name=Dialogs
+editor.dialog.type=section
+
+editor.external.name=External
+editor.external.type=section
+
+editor.find.name=Find & Replace
+editor.find.type=section
+
+editor.save.name=Load/Save
+editor.save.type=section
+
+editor.tabs.name=Tabs
+editor.tabs.type=section
+
+editor.toolbars.name=Toolbars
+editor.toolbars.type=section
+
+editor.dialog.crash.name=Enable crash reporter
+editor.dialog.crash.type=checkbox
+editor.dialog.crash.default=true
+editor.dialog.crash.tooltip=Redundant. Does nothing. Needs re-implementing or deleting.
+
+editor.dialog.missinglibs.name=Suggest installing missing libraries
+editor.dialog.missinglibs.type=checkbox
+editor.dialog.missinglibs.default=true
+editor.dialog.missinglibs.tooltip=If you don't have a library installed that a sketch requires this will try and offer to install it for you.
+
+editor.external.command.name=External editor command
+editor.external.command.type=string
+editor.external.command.default=
+editor.external.command.tooltip=External command to run when opting to use an external editor program.
+
+editor.find.keep.name=Keep Find & Replace permanantly open
+editor.find.keep.type=checkbox
+editor.find.keep.default=false
+editor.find.keep.tooltip=Always have the "find and replace" panel open at the bottom of the editing window.
+
+editor.save.loadlast.name=Open last sketch automatically
+editor.save.loadlast.type=checkbox
+editor.save.loadlast.default=false
+editor.save.loadlast.tooltip=When you open UECIDE the last sketch you used will be automatically opened for you.
+
+editor.save.remloc.name=Remember last load/save location for file dialogs
+editor.save.remloc.type=checkbox
+editor.save.remloc.default=false
+editor.save.remloc.tooltip=UECIDE will remember where you were the last time you saved or loaded something.
+
+editor.save.auto.name=Automatically save sketch before each compile
+editor.save.auto.type=checkbox
+editor.save.auto.default=false
+editor.save.auto.tooltip=When you hit the compile button the sketch will automatically be saved for you.
+
+editor.save.version.name=Save backup versions of your sketch
+editor.save.version.type=checkbox
+editor.save.version.default=false
+editor.save.version.tootip=Broken - do not use.
+
+editor.save.version_num.name=Number of backup copies to save
+editor.save.version_num.type=range
+editor.save.version_num.min=1
+editor.save.version_num.max=10
+editor.save.version_num.default=1
+editor.save.version_num.tooltip=Broken - do not use.
+
+editor.tabs.expand.name=Editor uses spaces for tabs
+editor.tabs.expand.type=checkbox
+editor.tabs.expand.default=true
+editor.tabs.expand.tooltip=Whenevr you press the TAB key you will get spaces instead of a tab character.
+
+editor.tabs.size.name=Number of spaces to use for a tab
+editor.tabs.size.type=range
+editor.tabs.size.min=1
+editor.tabs.size.max=10
+editor.tabs.size.default=4
+editor.tabs.size.tooltip=This is the number of spaces a TAB equates to.
+
+editor.tabs.show.name=Show tabs and indents
+editor.tabs.show.type=checkbox
+editor.tabs.show.default=false;
+editor.tabs.show.tooltip=Shows you in the editor where the tabs are in the text.
+
+editor.toolbars.sub_hidden.name=Hide the secondary editor toolbar
+editor.toolbars.sub_hidden.type=checkbox
+editor.toolbars.sub_hidden.default=false
+editor.toolbars.sub_hidden.tooltip=Removes the toolbar at the top of the editor tab.
+
+editor.version_check.name=Check for a new version at startup
+editor.version_check.type=checkbox
+editor.version_check.default=true
+editor.version_check.tooltip=Query the UECIDE servers to see if a new version has been released.
+
+editor.newonclose.name=Create new empty editor when last one closes
+editor.newonclose.type=checkbox
+editor.newonclose.default=false
+editor.newonclose.tooltip=This will keep UECIDE loaded and running even when you close the last window. A new empty sketch will automatically be created for you.
+
+editor.hwaccel.name=Enable hardware acceleration
+editor.hwaccel.type=checkbox
+editor.hwaccel.default=false
+editor.hwaccel.tooltip=This turns on Java's hardware accelerated graphics drawing.
+
+theme.name=Theme
+theme.type=section
+
+theme.scale.type=range
+theme.scale.name=UI Scale x 
+theme.scale.min=1
+theme.scale.max=4
+theme.scale.default=1
+theme.scale.tooltip=Increases the size of everything. Good of high resolution displays. Requires Java 9 or newer.
+
+theme.laf.name=Window Style
+theme.laf.type=dropdown
+theme.laf.options.gnome=Gnome
+theme.laf.options.acryl=Acryl
+theme.laf.options.aero=Aero
+theme.laf.options.aluminium=Aluminium (JTattoo)
+theme.laf.options.arduino=Arduino
+theme.laf.options.bernstein=Bernstein (JTattoo)
+theme.laf.options.fast=Fast (JTattoo)
+theme.laf.options.graphite=Graphite (JTattoo)
+theme.laf.options.hifi=HiFi (JTattoo)
+theme.laf.options.luna=Luna (JTattoo)
+theme.laf.options.mcwin=McWin (JTattoo)
+theme.laf.options.mint=Mint (JTattoo)
+theme.laf.options.noire=Noire (JTattoo)
+theme.laf.options.smart=Smart (JTattoo)
+theme.laf.options.liquid=Liquid
+theme.laf.options.material=Material
+theme.laf.options.material-dark=Material (Dark)
+theme.laf.options.metal=Metal
+theme.laf.options.motif=Motif
+theme.laf.options.nimbus=Nimbus
+theme.laf.options.office2003=Office 2003 (Windows only)
+theme.laf.options.officexp=Office XP (Windows only)
+theme.laf.options.systemdefault=System Default
+theme.laf.options.tinyforest=Forest
+theme.laf.options.tinygolden=Golden
+theme.laf.options.tinynightly=Nightly
+theme.laf.options.tinyplastic=Plastic
+theme.laf.options.tinysilver=Silver
+theme.laf.options.tinyunicode=Unicode
+theme.laf.options.vs2005=Visual Studio 2005 (Windows only)
+theme.laf.default=aluminium
+theme.laf.tooltip=Defines the overall look of UECIDE. Have a play, there's lots to choose from.
+
+theme.jtattoo.name=JTattoo Options
+theme.jtattoo.type=section
+
+theme.jtattoo.aafont.name=JTattoo Font Size
+theme.jtattoo.aafont.type=dropdown
+theme.jtattoo.aafont.options.Default=Default
+theme.jtattoo.aafont.options.Small-Font=Small
+theme.jtattoo.aafont.options.Large-Font=Large
+theme.jtattoo.aafont.options.Giant-Font=Giant
+theme.jtattoo.aafont.default=Default
+theme.jtattoo.aafont.tooltip=Sets the relative size of fonts in JTattoo window styles.
+
+theme.jtattoo.customdec.name=Custom window dectorator
+theme.jtattoo.customdec.type=checkbox
+theme.jtattoo.customdec.default=false
+theme.jtattoo.customdec.tooltip=Turns on or off the custom window decorator in JTattoo. This can solve some window rendering issues.
+
+theme.jtattoo.macdec.name=Mac-style dectorator
+theme.jtattoo.macdec.type=checkbox
+theme.jtattoo.macdec.default=false
+theme.jtattoo.macdec.tooltip=Moves the window controls to the other end of the title bar - like on OS X.
+
+
+theme.jtattoo.themes.name=Themes
+theme.jtattoo.themes.type=section
+
+theme.jtattoo.themes.acryl.name=Acryl Theme
+theme.jtattoo.themes.acryl.type=dropdown
+theme.jtattoo.themes.acryl.options.Default=Default
+theme.jtattoo.themes.acryl.options.Green=Green
+theme.jtattoo.themes.acryl.options.Lemmon=Lemon
+theme.jtattoo.themes.acryl.options.Red=Red
+theme.jtattoo.themes.acryl.default=Default
+
+theme.jtattoo.themes.aero.name=Aero Theme
+theme.jtattoo.themes.aero.type=dropdown
+theme.jtattoo.themes.aero.options.Default=Default
+theme.jtattoo.themes.aero.options.Gold=Gold
+theme.jtattoo.themes.aero.options.Green=Green
+theme.jtattoo.themes.aero.default=Default
+
+theme.jtattoo.themes.fast.name=Fast Theme
+theme.jtattoo.themes.fast.type=dropdown
+theme.jtattoo.themes.fast.options.Default=Default
+theme.jtattoo.themes.fast.options.Blue=Blue
+theme.jtattoo.themes.fast.options.Green=Green
+theme.jtattoo.themes.fast.default=Default
+
+theme.jtattoo.themes.mcwin.name=McWin Theme
+theme.jtattoo.themes.mcwin.type=dropdown
+theme.jtattoo.themes.mcwin.options.Default=Default
+theme.jtattoo.themes.mcwin.options.Modern=Modern
+theme.jtattoo.themes.mcwin.options.Pink=Pink
+theme.jtattoo.themes.mcwin.default=Default
+
+theme.jtattoo.themes.smart.name=Smart Theme
+theme.jtattoo.themes.smart.type=dropdown
+theme.jtattoo.themes.smart.options.Default=Default
+theme.jtattoo.themes.smart.options.Gold=Gold
+theme.jtattoo.themes.smart.options.Green=Green
+theme.jtattoo.themes.smart.options.Brown=Brown
+theme.jtattoo.themes.smart.options.Lemmon=Lemon
+theme.jtattoo.themes.smart.options.Gray=Gray
+theme.jtattoo.themes.smart.default=Default
+
+theme.icons.name=Icon set
+theme.icons.type=iconlist
+theme.icons.default=gnomic
+
+theme.iconsize.name=Toolbar Icon Size
+theme.iconsize.type=range
+theme.iconsize.min=16
+theme.iconsize.max=48
+theme.iconsize.default=32
+
+theme.miniiconsize.name=Small Toolbar Icon Size
+theme.miniiconsize.type=range
+theme.miniiconsize.min=16
+theme.miniiconsize.max=48
+theme.miniiconsize.default=24
+
+theme.treeiconsize.name=Tree Icon Size
+theme.treeiconsize.type=range
+theme.treeiconsize.min=16
+theme.treeiconsize.max=48
+theme.treeiconsize.default=16
+
+
+
+theme.console.name=Console
+theme.console.type=section
+
+theme.console.background.name=Background color
+theme.console.background.type=colorselect
+theme.console.background.default=#ffffff
+
+theme.console.foreground.name=Foreground color
+theme.console.foreground.type=colorselect
+theme.console.foreground.default=#000000
+
+theme.console.colors.name=Colors
+theme.console.colors.type=section
+
+theme.console.colors.background.name=Body color
+theme.console.colors.background.type=colorselect
+theme.console.colors.background.default=#222222
+
+theme.console.colors.warning.name=Warning color
+theme.console.colors.warning.type=colorselect
+theme.console.colors.warning.default=#FF7043
+
+theme.console.colors.error.name=Error color
+theme.console.colors.error.type=colorselect
+theme.console.colors.error.default=#F44336
+
+theme.console.colors.heading.name=Heading color
+theme.console.colors.heading.type=colorselect
+theme.console.colors.heading.default=#512DA8
+
+theme.console.colors.command.name=Command color
+theme.console.colors.command.type=colorselect
+theme.console.colors.command.default=#388E3C
+
+theme.console.colors.bullet.name=Bullet 1 color
+theme.console.colors.bullet.type=colorselect
+theme.console.colors.bullet.default=#607d8b
+
+theme.console.colors.bullet2.name=Bullet 2 color
+theme.console.colors.bullet2.type=colorselect
+theme.console.colors.bullet2.default=#607d8b
+
+theme.console.colors.bullet3.name=Bullet 3 color
+theme.console.colors.bullet3.type=colorselect
+theme.console.colors.bullet3.default=#607d8b
+
+theme.console.colors.link.name=Link color
+theme.console.colors.link.type=colorselect
+theme.console.colors.link.default=#2196F3
+
+
+theme.console.fonts.name=Fonts
+theme.console.fonts.type=section
+
+theme.console.fonts.body.name=Body font
+theme.console.fonts.body.type=fontselect
+theme.console.fonts.body.default=SansSerif,plain,12
+
+theme.console.fonts.warning.name=Warning font
+theme.console.fonts.warning.type=fontselect
+theme.console.fonts.warning.default=SansSerif,bold,12
+
+theme.console.fonts.error.name=Error font
+theme.console.fonts.error.type=fontselect
+theme.console.fonts.error.default=SansSerif,bold,12
+
+theme.console.fonts.heading.name=Heading font
+theme.console.fonts.heading.type=fontselect
+theme.console.fonts.heading.default=SansSerif,bold,20
+
+theme.console.fonts.command.name=Command font
+theme.console.fonts.command.type=fontselect
+theme.console.fonts.command.default=Monospaced,plain,10
+
+theme.console.fonts.bullet.name=Bullet 1 font
+theme.console.fonts.bullet.type=fontselect
+theme.console.fonts.bullet.default=SansSerif,plain,12
+
+theme.console.fonts.bullet2.name=Bullet 2 font
+theme.console.fonts.bullet2.type=fontselect
+theme.console.fonts.bullet2.default=SansSerif,plain,12
+
+theme.console.fonts.bullet3.name=Bullet 3 font
+theme.console.fonts.bullet3.type=fontselect
+theme.console.fonts.bullet3.default=SansSerif,plain,12
+
+theme.console.fonts.link.name=Link font
+theme.console.fonts.link.type=fontselect
+theme.console.fonts.link.default=Serif,plain,12
+
+
+theme.console.indents.name=Indents
+theme.console.indents.type=section
+
+theme.console.indents.body.name=Body indent
+theme.console.indents.body.type=range
+theme.console.indents.body.min=0
+theme.console.indents.body.max=1000
+theme.console.indents.body.default=20
+
+theme.console.indents.warning.name=Warning indent
+theme.console.indents.warning.type=range
+theme.console.indents.warning.min=0
+theme.console.indents.warning.max=1000
+theme.console.indents.warning.default=20
+
+theme.console.indents.error.name=Error indent
+theme.console.indents.error.type=range
+theme.console.indents.error.min=0
+theme.console.indents.error.max=1000
+theme.console.indents.error.default=20
+
+theme.console.indents.heading.name= indent
+theme.console.indents.heading.type=range
+theme.console.indents.heading.min=0
+theme.console.indents.heading.max=1000
+theme.console.indents.heading.default=20
+
+theme.console.indents.command.name=Command indent
+theme.console.indents.command.type=range
+theme.console.indents.command.min=0
+theme.console.indents.command.max=1000
+theme.console.indents.command.default=20
+
+theme.console.indents.bullet.name=Bullet 1 indent
+theme.console.indents.bullet.type=range
+theme.console.indents.bullet.min=0
+theme.console.indents.bullet.max=1000
+theme.console.indents.bullet.default=40
+
+theme.console.indents.bullet2.name=Bullet 2 indent
+theme.console.indents.bullet2.type=range
+theme.console.indents.bullet2.min=0
+theme.console.indents.bullet2.max=1000
+theme.console.indents.bullet2.default=60
+
+theme.console.indents.bullet3.name=Bullet 3 indent
+theme.console.indents.bullet3.type=range
+theme.console.indents.bullet3.min=0
+theme.console.indents.bullet3.max=1000
+theme.console.indents.bullet3.default=80
+
+theme.console.indents.link.name=Link indent
+theme.console.indents.link.type=range
+theme.console.indents.link.min=0
+theme.console.indents.link.max=1000
+theme.console.indents.link.default=20
+
+
+
+
+
+
+
+theme.console.shadow.name=Shadow
+theme.console.shadow.type=section
+
+theme.console.shadow.top.name=Top
+theme.console.shadow.top.type=range
+theme.console.shadow.top.min=0
+theme.console.shadow.top.max=10
+theme.console.shadow.top.default=0
+
+theme.console.shadow.bottom.name=Bottom
+theme.console.shadow.bottom.type=range
+theme.console.shadow.bottom.min=0
+theme.console.shadow.bottom.max=10
+theme.console.shadow.bottom.default=0
+
+theme.console.characters.name=Characters
+theme.console.characters.type=section
+
+theme.console.characters.bullet1.name=Bullet point 1
+theme.console.characters.bullet1.type=string
+theme.console.characters.bullet1.default=•
+
+theme.console.characters.bullet2.name=Bullet point 2
+theme.console.characters.bullet2.type=string
+theme.console.characters.bullet2.default=‣
+
+theme.console.characters.bullet3.name=Bullet point 3
+theme.console.characters.bullet3.type=string
+theme.console.characters.bullet3.default=◦
+
+
+
+
+
+
+theme.editor.name=Editor
+theme.editor.type=section
+
+theme.editor.fonts.name=Fonts
+theme.editor.fonts.type=section
+
+theme.editor.fonts.default.name=Default
+theme.editor.fonts.default.type=section
+
+theme.editor.fonts.editor_aa.name=Anti-aliasing
+theme.editor.fonts.editor_aa.type=checkbox
+theme.editor.fonts.editor_aa.default=true
+
+theme.editor.fonts.default.font.name=Font
+theme.editor.fonts.default.font.type=fontselect
+theme.editor.fonts.default.font.default=Monospaced,plain,14
+theme.editor.fonts.default.underline.name=Underlined
+theme.editor.fonts.default.underline.type=checkbox
+theme.editor.fonts.default.underline.default=false
+theme.editor.fonts.default.foreground.name=Foreground
+theme.editor.fonts.default.foreground.type=colorselect
+theme.editor.fonts.default.foreground.default=default
+theme.editor.fonts.default.background.name=Background
+theme.editor.fonts.default.background.type=colorselect
+theme.editor.fonts.default.background.default=default
+
+theme.editor.fonts.annotation.name=Annotation
+theme.editor.fonts.annotation.type=section
+theme.editor.fonts.annotation.font.name=Font
+theme.editor.fonts.annotation.font.type=fontselect
+theme.editor.fonts.annotation.font.default=default
+theme.editor.fonts.annotation.underline.name=Underlined
+theme.editor.fonts.annotation.underline.type=checkbox
+theme.editor.fonts.annotation.underline.default=false
+theme.editor.fonts.annotation.bold.name=Forced Bold
+theme.editor.fonts.annotation.bold.type=checkbox
+theme.editor.fonts.annotation.bold.default=false
+theme.editor.fonts.annotation.foreground.name=Foreground
+theme.editor.fonts.annotation.foreground.type=colorselect
+theme.editor.fonts.annotation.foreground.default=default
+theme.editor.fonts.annotation.background.name=Background
+theme.editor.fonts.annotation.background.type=colorselect
+theme.editor.fonts.annotation.background.default=default
+
+theme.editor.fonts.comment.name=Comments
+theme.editor.fonts.comment.type=section
+theme.editor.fonts.comment.font.name=Font
+theme.editor.fonts.comment.font.type=fontselect
+theme.editor.fonts.comment.font.default=default
+theme.editor.fonts.comment.underline.name=Underlined
+theme.editor.fonts.comment.underline.type=checkbox
+theme.editor.fonts.comment.underline.default=false
+theme.editor.fonts.comment.bold.name=Forced Bold
+theme.editor.fonts.comment.bold.type=checkbox
+theme.editor.fonts.comment.bold.default=false
+theme.editor.fonts.comment.foreground.name=Foreground
+theme.editor.fonts.comment.foreground.type=colorselect
+theme.editor.fonts.comment.foreground.default=#3949AB
+theme.editor.fonts.comment.background.name=Background
+theme.editor.fonts.comment.background.type=colorselect
+theme.editor.fonts.comment.background.default=default
+
+theme.editor.fonts.tags.name=Tags
+theme.editor.fonts.tags.type=section
+theme.editor.fonts.tags.font.name=Font
+theme.editor.fonts.tags.font.type=fontselect
+theme.editor.fonts.tags.font.default=default
+theme.editor.fonts.tags.underline.name=Underlined
+theme.editor.fonts.tags.underline.type=checkbox
+theme.editor.fonts.tags.underline.default=false
+theme.editor.fonts.tags.bold.name=Forced Bold
+theme.editor.fonts.tags.bold.type=checkbox
+theme.editor.fonts.tags.bold.default=false
+theme.editor.fonts.tags.foreground.name=Foreground
+theme.editor.fonts.tags.foreground.type=colorselect
+theme.editor.fonts.tags.foreground.default=default
+theme.editor.fonts.tags.background.name=Background
+theme.editor.fonts.tags.background.type=colorselect
+theme.editor.fonts.tags.background.default=default
+
+theme.editor.fonts.datatype.name=Datatypes
+theme.editor.fonts.datatype.type=section
+theme.editor.fonts.datatype.font.name=Font
+theme.editor.fonts.datatype.font.type=fontselect
+theme.editor.fonts.datatype.font.default=default
+theme.editor.fonts.datatype.underline.name=Underlined
+theme.editor.fonts.datatype.underline.type=checkbox
+theme.editor.fonts.datatype.underline.default=false
+theme.editor.fonts.datatype.bold.name=Forced Bold
+theme.editor.fonts.datatype.bold.type=checkbox
+theme.editor.fonts.datatype.bold.default=true
+theme.editor.fonts.datatype.foreground.name=Foreground
+theme.editor.fonts.datatype.foreground.type=colorselect
+theme.editor.fonts.datatype.foreground.default=#7986CB
+theme.editor.fonts.datatype.background.name=Background
+theme.editor.fonts.datatype.background.type=colorselect
+theme.editor.fonts.datatype.background.default=default
+
+theme.editor.fonts.error.name=Errors
+theme.editor.fonts.error.type=section
+theme.editor.fonts.error.font.name=Font
+theme.editor.fonts.error.font.type=fontselect
+theme.editor.fonts.error.font.default=default
+theme.editor.fonts.error.underline.name=Underlined
+theme.editor.fonts.error.underline.type=checkbox
+theme.editor.fonts.error.underline.default=false
+theme.editor.fonts.error.bold.name=Forced Bold
+theme.editor.fonts.error.bold.type=checkbox
+theme.editor.fonts.error.bold.default=false
+theme.editor.fonts.error.foreground.name=Foreground
+theme.editor.fonts.error.foreground.type=colorselect
+theme.editor.fonts.error.foreground.default=#E04336
+theme.editor.fonts.error.background.name=Background
+theme.editor.fonts.error.background.type=colorselect
+theme.editor.fonts.error.background.default=default
+
+theme.editor.fonts.function.name=Functions
+theme.editor.fonts.function.type=section
+theme.editor.fonts.function.font.name=Font
+theme.editor.fonts.function.font.type=fontselect
+theme.editor.fonts.function.font.default=default
+theme.editor.fonts.function.underline.name=Underlined
+theme.editor.fonts.function.underline.type=checkbox
+theme.editor.fonts.function.underline.default=false
+theme.editor.fonts.function.bold.name=Forced Bold
+theme.editor.fonts.function.bold.type=checkbox
+theme.editor.fonts.function.bold.default=true
+theme.editor.fonts.function.foreground.name=Foreground
+theme.editor.fonts.function.foreground.type=colorselect
+theme.editor.fonts.function.foreground.default=#311B92
+theme.editor.fonts.function.background.name=Background
+theme.editor.fonts.function.background.type=colorselect
+theme.editor.fonts.function.background.default=default
+
+theme.editor.fonts.identifier.name=Identifiers
+theme.editor.fonts.identifier.type=section
+theme.editor.fonts.identifier.font.name=Font
+theme.editor.fonts.identifier.font.type=fontselect
+theme.editor.fonts.identifier.font.default=default
+theme.editor.fonts.identifier.underline.name=Underlined
+theme.editor.fonts.identifier.underline.type=checkbox
+theme.editor.fonts.identifier.underline.default=false
+theme.editor.fonts.identifier.bold.name=Forced Bold
+theme.editor.fonts.identifier.bold.type=checkbox
+theme.editor.fonts.identifier.bold.default=false
+theme.editor.fonts.identifier.foreground.name=Foreground
+theme.editor.fonts.identifier.foreground.type=colorselect
+theme.editor.fonts.identifier.foreground.default=#795548
+theme.editor.fonts.identifier.background.name=Background
+theme.editor.fonts.identifier.background.type=colorselect
+theme.editor.fonts.identifier.background.default=default
+
+theme.editor.fonts.literal.name=Literals
+theme.editor.fonts.literal.type=section
+theme.editor.fonts.literal.font.name=Font
+theme.editor.fonts.literal.font.type=fontselect
+theme.editor.fonts.literal.font.default=default
+theme.editor.fonts.literal.underline.name=Underlined
+theme.editor.fonts.literal.underline.type=checkbox
+theme.editor.fonts.literal.underline.default=false
+theme.editor.fonts.literal.bold.name=Forced Bold
+theme.editor.fonts.literal.bold.type=checkbox
+theme.editor.fonts.literal.bold.default=false
+theme.editor.fonts.literal.foreground.name=Foreground
+theme.editor.fonts.literal.foreground.type=colorselect
+theme.editor.fonts.literal.foreground.default=#BF360C
+theme.editor.fonts.literal.background.name=Background
+theme.editor.fonts.literal.background.type=colorselect
+theme.editor.fonts.literal.background.default=default
+
+theme.editor.fonts.operator.name=Operators
+theme.editor.fonts.operator.type=section
+theme.editor.fonts.operator.font.name=Font
+theme.editor.fonts.operator.font.type=fontselect
+theme.editor.fonts.operator.font.default=default
+theme.editor.fonts.operator.underline.name=Underlined
+theme.editor.fonts.operator.underline.type=checkbox
+theme.editor.fonts.operator.underline.default=false
+theme.editor.fonts.operator.bold.name=Forced Bold
+theme.editor.fonts.operator.bold.type=checkbox
+theme.editor.fonts.operator.bold.default=false
+theme.editor.fonts.operator.foreground.name=Foreground
+theme.editor.fonts.operator.foreground.type=colorselect
+theme.editor.fonts.operator.foreground.default=default
+theme.editor.fonts.operator.background.name=Background
+theme.editor.fonts.operator.background.type=colorselect
+theme.editor.fonts.operator.background.default=default
+
+theme.editor.fonts.preprocessor.name=Preprocessor
+theme.editor.fonts.preprocessor.type=section
+theme.editor.fonts.preprocessor.font.name=Font
+theme.editor.fonts.preprocessor.font.type=fontselect
+theme.editor.fonts.preprocessor.font.default=default
+theme.editor.fonts.preprocessor.underline.name=Underlined
+theme.editor.fonts.preprocessor.underline.type=checkbox
+theme.editor.fonts.preprocessor.underline.default=false
+theme.editor.fonts.preprocessor.bold.name=Forced Bold
+theme.editor.fonts.preprocessor.bold.type=checkbox
+theme.editor.fonts.preprocessor.bold.default=false
+theme.editor.fonts.preprocessor.foreground.name=Foreground
+theme.editor.fonts.preprocessor.foreground.type=colorselect
+theme.editor.fonts.preprocessor.foreground.default=#999999
+theme.editor.fonts.preprocessor.background.name=Background
+theme.editor.fonts.preprocessor.background.type=colorselect
+theme.editor.fonts.preprocessor.background.default=default
+
+theme.editor.fonts.regex.name=Regular Expressions
+theme.editor.fonts.regex.type=section
+theme.editor.fonts.regex.font.name=Font
+theme.editor.fonts.regex.font.type=fontselect
+theme.editor.fonts.regex.font.default=default
+theme.editor.fonts.regex.underline.name=Underlined
+theme.editor.fonts.regex.underline.type=checkbox
+theme.editor.fonts.regex.underline.default=false
+theme.editor.fonts.regex.bold.name=Forced Bold
+theme.editor.fonts.regex.bold.type=checkbox
+theme.editor.fonts.regex.bold.default=false
+theme.editor.fonts.regex.foreground.name=Foreground
+theme.editor.fonts.regex.foreground.type=colorselect
+theme.editor.fonts.regex.foreground.default=default
+theme.editor.fonts.regex.background.name=Background
+theme.editor.fonts.regex.background.type=colorselect
+theme.editor.fonts.regex.background.default=default
+
+theme.editor.fonts.reserved.name=Reserved Words
+theme.editor.fonts.reserved.type=section
+theme.editor.fonts.reserved.font.name=Font
+theme.editor.fonts.reserved.font.type=fontselect
+theme.editor.fonts.reserved.font.default=default
+theme.editor.fonts.reserved.underline.name=Underlined
+theme.editor.fonts.reserved.underline.type=checkbox
+theme.editor.fonts.reserved.underline.default=false
+theme.editor.fonts.reserved.bold.name=Forced Bold
+theme.editor.fonts.reserved.bold.type=checkbox
+theme.editor.fonts.reserved.bold.default=true
+theme.editor.fonts.reserved.foreground.name=Foreground
+theme.editor.fonts.reserved.foreground.type=colorselect
+theme.editor.fonts.reserved.foreground.default=#90A4AE
+theme.editor.fonts.reserved.background.name=Background
+theme.editor.fonts.reserved.background.type=colorselect
+theme.editor.fonts.reserved.background.default=default
+
+theme.editor.fonts.variable.name=Variables
+theme.editor.fonts.variable.type=section
+theme.editor.fonts.variable.font.name=Font
+theme.editor.fonts.variable.font.type=fontselect
+theme.editor.fonts.variable.font.default=default
+theme.editor.fonts.variable.underline.name=Underlined
+theme.editor.fonts.variable.underline.type=checkbox
+theme.editor.fonts.variable.underline.default=false
+theme.editor.fonts.variable.bold.name=Forced Bold
+theme.editor.fonts.variable.bold.type=checkbox
+theme.editor.fonts.variable.bold.default=false
+theme.editor.fonts.variable.foreground.name=Foreground
+theme.editor.fonts.variable.foreground.type=colorselect
+theme.editor.fonts.variable.foreground.default=#00967E
+theme.editor.fonts.variable.background.name=Background
+theme.editor.fonts.variable.background.type=colorselect
+theme.editor.fonts.variable.background.default=default
+
+theme.editor.fonts.brackets.name=Brackets
+theme.editor.fonts.brackets.type=section
+theme.editor.fonts.brackets.font.name=Font
+theme.editor.fonts.brackets.font.type=fontselect
+theme.editor.fonts.brackets.font.default=default
+theme.editor.fonts.brackets.underline.name=Underlined
+theme.editor.fonts.brackets.underline.type=checkbox
+theme.editor.fonts.brackets.underline.default=false
+theme.editor.fonts.brackets.bold.name=Forced Bold
+theme.editor.fonts.brackets.bold.type=checkbox
+theme.editor.fonts.brackets.bold.default=false
+theme.editor.fonts.brackets.foreground.name=Foreground
+theme.editor.fonts.brackets.foreground.type=colorselect
+theme.editor.fonts.brackets.foreground.default=default
+theme.editor.fonts.brackets.background.name=Background
+theme.editor.fonts.brackets.background.type=colorselect
+theme.editor.fonts.brackets.background.default=default
+
+theme.editor.gutter.name=Gutter
+theme.editor.gutter.type=section
+
+theme.editor.gutter.font.name=Font
+theme.editor.gutter.font.type=fontselect
+theme.editor.gutter.font.default=SansSerif,plain,10
+
+theme.editor.gutter.background.name=Background
+theme.editor.gutter.background.type=colorselect
+theme.editor.gutter.background.default=#FFFFFF
+
+theme.editor.gutter.foreground.name=Foreground
+theme.editor.gutter.foreground.type=colorselect
+theme.editor.gutter.foreground.default=#616161
+
+theme.editor.colors.name=Colors
+theme.editor.colors.type=section
+
+theme.editor.colors.foreground.name=Foreground
+theme.editor.colors.foreground.type=colorselect
+theme.editor.colors.foreground.default=#000000
+
+theme.editor.colors.background.name=Background
+theme.editor.colors.background.type=colorselect
+theme.editor.colors.background.default=#FFFFFF
+
+theme.editor.colors.error.name=Error
+theme.editor.colors.error.type=colorselect
+theme.editor.colors.error.default=#EF9A9A
+
+theme.editor.colors.warning.name=Warning
+theme.editor.colors.warning.type=colorselect
+theme.editor.colors.warning.default=#F9A825
+
+
+
+theme.editor.highlight.name=Highlight
+theme.editor.highlight.type=section
+
+theme.editor.highlight.select.name=Selection color
+theme.editor.highlight.select.type=colorselect
+theme.editor.highlight.select.default=#C8DDF2
+
+theme.editor.highlight.search.name=Search highlight
+theme.editor.highlight.search.type=colorselect
+theme.editor.highlight.search.default=#03A9F4
+
+theme.editor.highlight.linecolor.name=Line highlight color
+theme.editor.highlight.linecolor.type=colorselect
+theme.editor.highlight.linecolor.default=#C8DDF2
+
+theme.editor.highlight.linefade.name=Fade line highlight
+theme.editor.highlight.linefade.type=checkbox
+theme.editor.highlight.linefade.default=true
+
+theme.editor.highlight.lineenabled.name=Enable line highlight
+theme.editor.highlight.lineenabled.type=checkbox
+theme.editor.highlight.lineenabled.default=true
+
+theme.editor.highlight.rounded.name=Rounded selection edges
+theme.editor.highlight.rounded.type=checkbox
+theme.editor.highlight.rounded.default=false
+
+theme.editor.highlight.markall.name=Mark all color
+theme.editor.highlight.markall.type=colorselect
+theme.editor.highlight.markall.default=#ddeeff
+
+theme.editor.highlight.markallborder.name=Mark all border
+theme.editor.highlight.markallborder.type=checkbox
+theme.editor.highloght.markallborder.default=true
+
+theme.editor.highlight.bracket.name=Highlight matched brackets
+theme.editor.highlight.bracket.type=checkbox
+theme.editor.highlight.bracket.default=true
+
+theme.editor.highlight.bracketbg.name=Bracket highlight
+theme.editor.highlight.bracketbg.type=colorselect
+theme.editor.highlight.bracketbg.default=#CCCCFF
+
+theme.editor.highlight.bracketborder.name=Bracket border color
+theme.editor.highlight.bracketborder.type=colorselect
+theme.editor.highlight.bracketborder.default=#6600cc
+
+theme.editor.margins.name=Margins
+theme.editor.margins.type=section
+
+theme.editor.margins.top.name=Top
+theme.editor.margins.top.type=range
+theme.editor.margins.top.min=0
+theme.editor.margins.top.max=1000
+theme.editor.margins.top.default=0
+
+theme.editor.margins.bottom.name=Bottom
+theme.editor.margins.bottom.type=range
+theme.editor.margins.bottom.min=0
+theme.editor.margins.bottom.max=1000
+theme.editor.margins.bottom.default=0
+
+theme.editor.margins.left.name=Left
+theme.editor.margins.left.type=range
+theme.editor.margins.left.min=0
+theme.editor.margins.left.max=1000
+theme.editor.margins.left.default=5
+
+theme.editor.margins.right.name=Right
+theme.editor.margins.right.type=range
+theme.editor.margins.right.min=0
+theme.editor.margins.right.max=1000
+theme.editor.margins.right.default=5
+
+
+
+theme.editor.caret.name=Caret
+theme.editor.caret.type=section
+theme.editor.caret.color.name=Color
+theme.editor.caret.color.type=colorselect
+theme.editor.caret.color.default=#000000
+
+theme.editor.caret.insert.name=Insert style
+theme.editor.caret.insert.type=dropdown
+theme.editor.caret.insert.options.box=Box
+theme.editor.caret.insert.options.block=Block
+theme.editor.caret.insert.options.line=Line
+theme.editor.caret.insert.options.thick=Thick
+theme.editor.caret.insert.options.underline=Underline
+theme.editor.caret.insert.default=line
+
+theme.editor.caret.replace.name=Overwrite style
+theme.editor.caret.replace.type=dropdown
+theme.editor.caret.replace.options.box=Box
+theme.editor.caret.replace.options.block=Block
+theme.editor.caret.replace.options.line=Line
+theme.editor.caret.replace.options.thick=Thick
+theme.editor.caret.replace.options.underline=Underline
+theme.editor.caret.replace.default=thick
+
+
+locations.name=Locations
+locations.type=section
+
+locations.data.name=Data location
+locations.data.type=dirselect
+
+locations.sketchbook.name=Sketchbook location
+locations.sketchbook.type=dirselect
+
+locations.library.name=Library locations
+locations.library.type=liblist
+
+debug.name=Debug
+debug.type=section
+debug.window.name=Layout
+debug.window.type=section
+
+debug.window.width.name=Window Width
+debug.window.width.type=string
+debug.window.width.default=600
+
+debug.window.height.name=Window Height
+debug.window.height.type=string
+debug.window.height.default=400
+
+debug.window.x.name=Window X Position
+debug.window.x.type=string
+debug.window.x.default=100
+
+debug.window.y.name=Window Y Position
+debug.window.y.type=string
+debug.window.y.default=100
+
+
+editor.layout.name=Layout
+editor.layout.type=section
+
+editor.layout.minimal.name=Minimalism mode
+editor.layout.minimal.type=checkbox
+editor.layout.minimal.default=false
+
+editor.layout.splits.name=Splits
+editor.layout.splits.type=section
+
+editor.layout.splits.console.name=Console height
+editor.layout.splits.console.type=range
+editor.layout.splits.console.default=200
+editor.layout.splits.console.min=0
+editor.layout.splits.console.max=9999999
+
+editor.layout.splits.console_lock.name=Lock console height
+editor.layout.splits.console_lock.type=checkbox
+editor.layout.splits.console_lock.default=false;
+
+editor.layout.splits.sidebar.name=Sidebar width
+editor.layout.splits.sidebar.type=range
+editor.layout.splits.sidebar.default=0
+editor.layout.splits.sidebar.min=0
+editor.layout.splits.sidebar.max=9999999
+
+editor.layout.splits.sidebar_lock.name=Lock sidebar width
+editor.layout.splits.sidebar_lock.type=checkbox
+editor.layout.splits.sidebar_lock.default=false;
+
+editor.layout.splits.tree.name=Project tree width
+editor.layout.splits.tree.type=range
+editor.layout.splits.tree.default=200
+editor.layout.splits.tree.min=0
+editor.layout.splits.tree.max=9999999
+
+editor.layout.splits.tree_lock.name=Lock project tree width
+editor.layout.splits.tree_lock.type=checkbox
+editor.layout.splits.tree_lock.default=false;
+
+editor.layout.window.name=Window
+editor.layout.window.type=section
+
+editor.layout.window.width.name=Window Width
+editor.layout.window.width.type=string
+editor.layout.window.width.default=700
+
+editor.layout.window.height.name=Window Height
+editor.layout.window.height.type=string
+editor.layout.window.height.default=500
+
+editor.layout.window.x.name=Window X Position
+editor.layout.window.x.type=string
+editor.layout.window.x.default=0
+
+editor.layout.window.y.name=Window Y Position
+editor.layout.window.y.type=string
+editor.layout.window.y.default=0
+
+network.name=Network
+network.type=section
+
+network.offline.name=Work in offline mode
+network.offline.type=checkbox
+network.offline.default=false
+
+editor.serial.name=Serial
+editor.serial.type=section
+
+editor.serial.port.type=portlist
+editor.serial.port.name=Additional Ports
+
+
+
+plugins.name=Plugins
+plugins.type=section
+
+plugins.enable.name=Enable / Disable
+plugins.enable.type=section
+
+plugins.enable.serialterminal.name=Serial Terminal
+plugins.enable.serialterminal.type=checkbox
+plugins.enable.serialterminal.default=true
+
+plugins.enable.astyle.name=Artistic Style
+plugins.enable.astyle.type=checkbox
+plugins.enable.astyle.default=true
+
+plugins.enable.copyforforum.name=Copy for Forum
+plugins.enable.copyforforum.type=checkbox
+plugins.enable.copyforforum.default=false
+
+plugins.enable.gitlink.name=GIT Link
+plugins.enable.gitlink.type=checkbox
+plugins.enable.gitlink.default=false
+
+plugins.enable.snippets.name=Code Snippets
+plugins.enable.snippets.type=checkbox
+plugins.enable.snippets.default=false
+
+plugins.enable.uploadlasthex.name=Upload Last HEX
+plugins.enable.uploadlasthex.type=checkbox
+plugins.enable.uploadlasthex.default=false
+
+plugins.enable.virtuallcd.name=Virtual LCD Display
+plugins.enable.virtuallcd.type=checkbox
+plugins.enable.virtuallcd.default=false
+
+
+theme.markdown.name=Markdown Viewer
+theme.markdown.type=section
+
+theme.markdown.font.name=Fonts
+theme.markdown.font.type=section
+
+theme.markdown.font.p.name=Paragraph
+theme.markdown.font.p.type=fontselect
+theme.markdown.font.p.default=SansSerif,plain,12
+
+theme.markdown.font.h1.name=Heading 1
+theme.markdown.font.h1.type=fontselect
+theme.markdown.font.h1.default=SansSerif,plain,24
+
+theme.markdown.font.h2.name=Heading 2
+theme.markdown.font.h2.type=fontselect
+theme.markdown.font.h2.default=SansSerif,plain,20
+
+theme.markdown.font.h3.name=Heading 3
+theme.markdown.font.h3.type=fontselect
+theme.markdown.font.h3.default=SansSerif,plain,16
+
+theme.markdown.font.li.name=List
+theme.markdown.font.li.type=fontselect
+theme.markdown.font.li.default=SansSerif,plain,12
+
+theme.markdown.font.pre.name=Pre-formatted
+theme.markdown.font.pre.type=fontselect
+theme.markdown.font.pre.default=Monospaced,plain,12
+
+theme.markdown.color.name=Colors
+theme.markdown.color.type=section
+
+theme.markdown.color.background=Background
+theme.markdown.color.background.type=colorselect
+theme.markdown.color.background.default=#ffffff
+
+theme.markdown.color.p.name=Paragraph
+theme.markdown.color.p.type=colorselect
+theme.markdown.color.p.default=#000000
+
+theme.markdown.color.h1.name=Heading 1
+theme.markdown.color.h1.type=colorselect
+theme.markdown.color.h1.default=#000000
+
+theme.markdown.color.h2.name=Heading 2
+theme.markdown.color.h2.type=colorselect
+theme.markdown.color.h2.default=#000000
+
+theme.markdown.color.h3.name=Heading 3
+theme.markdown.color.h3.type=colorselect
+theme.markdown.color.h3.default=#000000
+
+theme.markdown.color.li.name=List
+theme.markdown.color.li.type=colorselect
+theme.markdown.color.li.default=#000000
+
+theme.markdown.color.pre.name=Pre-formatted
+theme.markdown.color.pre.type=colorselect
+theme.markdown.color.pre.default=#000000
+

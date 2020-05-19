@@ -1,0 +1,850 @@
+<h1>Changelog</h1>
+
+<h2></h2>
+
+<ul>
+<li>Tidy up of splash screen</li>
+<li>Add --reset-preferences CLI option</li>
+<li>Protect against divide-by-zero with zero sized font</li>
+<ul>
+
+<h2>0.10.0-beta5</h2>
+
+<ul>
+<li>Fixed unable to select no conversion for images</li>
+<li>Made font scale temporary and local to each editor instance</li>
+<li>Removed duplication of image object</li>
+<li>Added convolution matrix</li>
+<li>Added create new png/jpg/gif file</li>
+<li>Fixed overflow of rubberband and added tooltips to tools</li>
+<li>Broken tools out into individual classes</li>
+<li>Implemented crop</li>
+<ul>
+
+<h2>0.10.0-beta4</h2>
+
+<ul>
+<li>Basic gfx editor, and binary file conversion system</li>
+<ul>
+
+<h2>0.10.0-beta3</h2>
+
+<ul>
+<li>Rework markdown editor</li>
+<li>Tightly integrated ardublocks</li>
+<li>Reworked editor selection code</li>
+<li>Fixed anti-aliasing on markdown panels</li>
+<li>Fixed prototype insertion location bug that crept in with new function prototype scanning</li>
+<ul>
+
+<h2>0.10.0-beta2</h2>
+
+<ul>
+<li>Cleaned up old deb packaging target</li>
+<li>Assign CTRL-SHIFT-T to Serial Terminal</li>
+<li>Advanced token parser allows more context-aware options in popup menu</li>
+<li>Shift+Ctrl+C now toggles single-line comments for the current line or selection</li>
+<ul>
+
+<h2>0.10.0-beta1</h2>
+
+<ul>
+<li>Fix divider not changing after minimal mode</li>
+<li>Improve markdown display and example browser</li>
+<li>Cleanup of syntax code</li>
+<li>Added token-aware context menu. Added manual page links. Improved token parsing. Added variable and class bookmarks</li>
+<li>Improved icon handling and made animated icons</li>
+<li>Added minimalist mode</li>
+<li>Auto conversion of old float split sizes</li>
+<li>Improved tree cell rendering</li>
+<li>Fixed split layout prefs and added split lock option</li>
+<li>Fixed split positions</li>
+<li>Fixed tree background colour</li>
+<li>Fix antialiasing problem and console incorrect font scaling</li>
+<li>Fixed serial terminal input line color with dark theme</li>
+<li>Removed serial terminal from internal repo</li>
+<li>* Re-write of the theme system * Plugins now in the core</li>
+<li>Add port pragma support</li>
+<ul>
+
+<h2>0.9.6</h2>
+
+<ul>
+<li>Released 0.9.6</li>
+<li>Updated families database</li>
+<li>Fixed bug with extracting control file that isn't specifically gzipped</li>
+<li>Improved OS X bundling</li>
+<li>Updated bundled packages</li>
+<ul>
+
+<h2>0.9.5</h2>
+
+<ul>
+<li>Released 0.9.5</li>
+<li>Improved pragma handling</li>
+<li>Updated source format</li>
+<ul>
+
+<h2>0.9.4</h2>
+
+<ul>
+<li>Updated version</li>
+<li>Fixed prototype return type formatting</li>
+<li>Released 0.9.3</li>
+<ul>
+
+<h2>0.9.3</h2>
+
+<ul>
+<li>Improvements to plugin manager tree system</li>
+<li>Updated bundled ctags</li>
+<li>Refined ctags regex</li>
+<li>Better USB attribute handling</li>
+<li>Ignore class members in tags parsing</li>
+<li>Ordered core file compilation</li>
+<ul>
+
+<h2>0.9.2</h2>
+
+<ul>
+<li>Added hostname support to data location preference</li>
+<li>Improved busy spinner</li>
+<li>Solved random null pointer when compiling</li>
+<li>Hidden tool execution spam</li>
+<li>Package updates</li>
+<li>Added tool-based context menu entries</li>
+<li>:Merge branch 'master' of github.com:UECIDE/UECIDE</li>
+<li>Overhauled mDNS board discovery</li>
+<li>Added missing lang3 dependency</li>
+<li>Made tree split as proportion of sub-window not entire window</li>
+<li>Improved missing port error handling</li>
+<li>Accelerate boot more and quieter startup</li>
+<li>New split location saving system</li>
+<li>Solve double cancel of compilation. Clean up network discovery. Remove extraneous exceptions</li>
+<li>Fixed deprecated and unchecked warnings</li>
+<li>Switch to commons-text instead of commons-lang3</li>
+<li>Switch custom file copy to NIO and pass exceptions up the call chain properly</li>
+<li>Switch to ant-dep</li>
+<li>Imported jfontchooser into the core source</li>
+<li>Added apple stubs to maven list</li>
+<li>Removed apt saving in boot</li>
+<li>Switched maven deps to maven-ant</li>
+<li>Upgrade to jline3</li>
+<li>Build time download of many deps</li>
+<li>Overhauled hex file handling</li>
+<li>Optimizing string catenations</li>
+<li>Cleaned up with FindBugs scanning</li>
+<li>Removed redundant function list functions</li>
+<li>Overhauled function bookmarks</li>
+<li>Scrapped redundant FunctionPrototype and switched to FunctionBookmark</li>
+<li>Fixed tab in function prototype issue</li>
+<li>Removed save-before-compile requirement (it broke examples). Cleaned up parsing and build file copying</li>
+<li>Bundled ctags and overhauled boot installation of packages</li>
+<li>Cleanup excess debugging</li>
+<li>Added Tool UObject. Switched to ctags for parsing. Accelerate boot with file cache.</li>
+<li>Updated serial terminal</li>
+<li>Added port disconnect support</li>
+<li>Added concurrent compilation of libraries</li>
+<li>Accelerated boot sequence with multithreading</li>
+<ul>
+
+<h2>0.9.1</h2>
+
+<ul>
+<li>Released 0.9.1</li>
+<li>Prevent last sketch opening if either headless or a sketch given on command line</li>
+<li>Fixed local libraries and implemented delete delay/retry code for locked files</li>
+<ul>
+
+<h2>0.9.0</h2>
+
+<ul>
+<li>Adopted new sensible numbering schema</li>
+<li>Removed unneeded import</li>
+<li>Added extra baud rates and improved Ecma execution</li>
+<li>Added "portable" folder support</li>
+<li>Fixed excepion on remove not found</li>
+<li>Improved error reporting in apt</li>
+<li>Added realtime SHA checking of downloads</li>
+<ul>
+
+<h2>0.8.9-pre17</h2>
+
+<ul>
+<li>Released 0.8.9-pre17</li>
+<li>Removed superfluous output and updated serial terminal</li>
+<li>* Rotated markdown editor * Cleaned up apt * Linked mouse wheel on output console to scroll</li>
+<li>Removed unneeded jsch</li>
+<li>Implemented Gritty terminal for output and deb installation progress</li>
+<li>Deprecated outdated java tests</li>
+<ul>
+
+<h2>0.8.9-pre16</h2>
+
+<ul>
+<li>Released pre-16</li>
+<li>Allow manual override of port name on POSIX systems from command line</li>
+<li>Improved missing library detection</li>
+<li>Improved library recursion for non-preproc compilers</li>
+<ul>
+
+<h2>0.8.9-pre15</h2>
+
+<ul>
+<li>Replaced JAVA stub for OSX</li>
+<ul>
+
+<h2>0.8.9-pre14</h2>
+
+<ul>
+<li>Released 0.8.9-pre14</li>
+<li>Fixed problem of null pointer on missing res: repo file</li>
+<ul>
+
+<h2>0.8.9-pre12</h2>
+
+<ul>
+<li>Updated plist to Java 1.8</li>
+<li>Released 0.8.9-pre12</li>
+<li>Only add extra ports that actually exist (posix only)</li>
+<li>Added console error reporting for failed downloads of packages and repos</li>
+<li>Updated bundled varcmd package to 1.0.3</li>
+<ul>
+
+<h2>0.8.9-pre11</h2>
+
+<ul>
+<li>First iteration of example browser</li>
+<li>Reinstated adding of missing port at sketch load</li>
+<li>Added displaying full path of library when compiling</li>
+<li>Fix no save as on close of unsaved sketch</li>
+<ul>
+
+<h2>0.8.9-pre10</h2>
+
+<ul>
+<li>Possible fox for font corruption on update</li>
+<li>Trapped failed extract of file</li>
+<li>Null Pointer when replacing non-existant package</li>
+<li>Temporarily removed SHA25 integrity check</li>
+<li>Temporarily removed SHA25 integrity check</li>
+<ul>
+
+<h2>0.8.9-pre9</h2>
+
+<ul>
+<li>Released 0.8.9-pre9</li>
+<li>Added experimental JavaScript plugin support</li>
+<li>Only send raw output to output tab when being otherwise preprocessed</li>
+<li>Added package validation system</li>
+<li>Added raw output to output tab</li>
+<ul>
+
+<h2>0.8.9-pre8</h2>
+
+<ul>
+<li>Released 0.8.9-pre8</li>
+<li>Updated JSch to 0.1.54</li>
+<li>Switched to dual launch4j launchers in Windows</li>
+<li>Only erase lines from console if the character following a CR is *not* an NL</li>
+<li>Upgraded windows FULL bundles to JRE 8</li>
+<ul>
+
+<h2>0.8.9-pre7</h2>
+
+<ul>
+<li>Released 0.8.9-pre7</li>
+<li>Updated varcmd package</li>
+<li>Added CR for console line clearing</li>
+<li>Added download file integrity check</li>
+<li>Fixed package file link dereferencing without full path</li>
+<li>Fixed null pointer with no default option in sketch.cfg</li>
+<li>Added recursive uninstall of packages and updated varcmd package</li>
+<li>Added NOP logger</li>
+<li>Added slf4j api</li>
+<li>Updated jmDNS</li>
+<li>Updated RSyntaxTextArea</li>
+<li>Added changelog window</li>
+<li>Added changelog generation</li>
+<li>Added some files to gitignore for tidiness</li>
+<li>Added updated VS files</li>
+<li>Display locally installed packages in tree</li>
+<li>Improved board no-core event debugging</li>
+<li>Added manual package installation option</li>
+<li>Converted varcmds to javascript scriptlets</li>
+<li>Added missing sub-sub-group nodes to plugin manager tree</li>
+<ul>
+
+<h2>0.8.9-pre6</h2>
+
+<ul>
+<li>Released pre6</li>
+<li>Fixed multiple-source overwrite bug</li>
+<li>Updated families package</li>
+<li>* Removed redundant uecide-repositories package from internal repo</li>
+<li>* Added multi-repo file system * Updated serial terminal * Included master repo package</li>
+<li>Reinstated basic Translate for existing plugins</li>
+<li>Added more I18N entries</li>
+<li>Fixed ant-contrib inclusion</li>
+<li>Added internationalization support</li>
+<ul>
+
+<h2>0.8.9-pre5</h2>
+
+<ul>
+<li>Released 0.8.9-pre5</li>
+<li>Improved console buffering strategy</li>
+<ul>
+
+<h2>0.8.9-pre4</h2>
+
+<ul>
+<li>Updated editor</li>
+<li>Enhanced port command. Added hex file merging</li>
+<ul>
+
+<h2>0.8.9-pre3</h2>
+
+<ul>
+<li>Bumped version</li>
+<li>Added script-based tools menu entry support</li>
+<ul>
+
+<h2>0.8.9-pre2</h2>
+
+<ul>
+<li>Bumped version</li>
+<li>Added themes to PiM</li>
+<ul>
+
+<h2>0.8.9-pre1</h2>
+
+<ul>
+<li>Couple of cleanups</li>
+<li>Added bullet3, Usb HID device support, kill support for builtin commands</li>
+<li>Added programmer objects and associated control logic and commands</li>
+<li>Added spinner icon graphics</li>
+<li>Added selected board/core/compiler names to top level hardware menu</li>
+<li>Added MCU list (Most Commonly Used) in Files menu</li>
+<li>Reverted draggable tabs</li>
+<li>Fixed Replaces: handling in GUI</li>
+<li>Updated preferences entries</li>
+<li>Added load/save dialog location remembering option and mark-all enable/disable option</li>
+<li>Overhaul of sketch properties system and updated RSyntaxTextArea</li>
+<li>Added version info file</li>
+<li>Draggable tabs and ultiple panes</li>
+<li>Added missing widgets</li>
+<li>Added support for editor data capture</li>
+<li>Updated internal repository</li>
+<li>Added plugin popup menu support and console copy menu</li>
+<li>Added console background tileable images</li>
+<li>Added font scaling</li>
+<li>Added theming to other components in the system</li>
+<li>Complete overhaul of theme system</li>
+<li>Properly handled escaped characters in comment stripping</li>
+<li>Properly handled escaped characters in comment stripping</li>
+<li>Fixed preference mismatch in autosave facility</li>
+<ul>
+
+<h2>0.8.8alpha22</h2>
+
+<ul>
+<li>Armoured integer parsing in IOKit</li>
+<ul>
+
+<h2>0.8.8alpha21</h2>
+
+<ul>
+<li> * Fixed linux packaging error  * Fixed broken menu shortcuts  * Cleaned up parsed errors to console  * Added ANSI codes to parsed console errors and warnings</li>
+<li>Fixed broken shortcut keys</li>
+<ul>
+
+<h2>0.8.8alpha20</h2>
+
+<ul>
+<li>Releasing new beta</li>
+<li>Overhauled debian building scripts</li>
+<li>Added configurable reset delays</li>
+<li>Fixed plugin preferences default loading</li>
+<li>Added border to preferences window</li>
+<li>Re-added debug files used by some plugins</li>
+<li> * Updated and added missing licenses  * Removed redundant files  * Added library list and port list widgets for preferences</li>
+<li>Added parsable message strings</li>
+<li>Fixed error and warning message flagging and todo list clearing</li>
+<li>Fixed version conflict</li>
+<li>Added some new builtins</li>
+<li>Fixed splash screen to middle of default screen in multiheaded environment</li>
+<li>Overhaul of communications systems</li>
+<li>Added environment handling, and fixed double-context creation in sketches</li>
+<li>Gradually cleaning up the prefs system</li>
+<li>Released beta</li>
+<ul>
+
+<h2>0.8.8alpha19</h2>
+
+<ul>
+<li>Bumped version</li>
+<li>Added embedded binary support</li>
+<li>Fixed broken redirection for object editor</li>
+<li>* New Context system for messaging and execution * Overhaul of scripting and command systems * Better javascript integration * Some more builtin commands for file writing and jar loading</li>
+<li>New preferences tree system</li>
+<li>Fixed bug with varcmd in baud rate setting</li>
+<li>Fixed ordering of option menu</li>
+<li>Added missing launch4j files</li>
+<li>Added launch4j config</li>
+<li>Bumped version</li>
+<li>Fixed crash at startup with .ino file parameter</li>
+<li>Added support for adublock URI</li>
+<li>Fixed splash screen flickering</li>
+<li>Bumped version</li>
+<li>Improved crash reporter</li>
+<li>Improved manual handling and project search facility</li>
+<li>Moved repo list into BorderLayout panel</li>
+<li>Added missing archive files</li>
+<li>Moved APT into core and added repository handling</li>
+<li>Updated version</li>
+<li>Added build status</li>
+<li>Added script tag</li>
+<li>Fixed ant deps error</li>
+<li>Made console unbuffered</li>
+<li>Made command input stream unbuffered at last</li>
+<li>Fixed unknown version in debian testing</li>
+<li>Added GPIO control, delay, and linux serial lock files</li>
+<li>Fixed some headless cli bugs with new install</li>
+<li>Added interactive CLI system</li>
+<li>Added online/offline option to file menu</li>
+<li>Added offline mode</li>
+<li>Numerous bug fixes. Setting to recreate makefile each compile</li>
+<li>Forced apt update before library installation</li>
+<li>Added version flag</li>
+<li>Added . as valid sketch name for mkmf</li>
+<li>Added Makefile generation and some extra force flags</li>
+<li>Fixed arm apt name</li>
+<li>Bumped Version</li>
+<li>Added command line options to manipulate APT repositories and packages</li>
+<li>Separated library and core build files from sketch build files</li>
+<li>Added apt</li>
+<li>Locked editor based services from running during compilation</li>
+<li>Bumped version</li>
+<li>Moved plugin manager into core Added missing library identification and installation Created markdown editor with realtime preview</li>
+<li>Added missing markdown processor jar</li>
+<li>Working on new repo system</li>
+<li>Rolled back custom parser for property files</li>
+<li>Bumped version</li>
+<li>Fixed escape bug in property file. Updated jgit. Added cloning to GitLink</li>
+<li>Added Arduino config file parsing vc</li>
+<li>Bumped version</li>
+<li>Added library options system</li>
+<li>Implemented icon sets</li>
+<li>Bumped version</li>
+<li>Added random number VC and added UUID to UECIDE VC.</li>
+<li>Complete overhaul of icon system. Added purge pragma parameter</li>
+<li>Fixed return value on headless compile or upload failure</li>
+<li>Bumped version</li>
+<li>Added per-sketch icon support</li>
+<li>Fixed UTF-8 saving in OS X</li>
+<li>Added full support for recursive .git finding</li>
+<li>Added recursive .git finding</li>
+<li>Hardened some functions with limits</li>
+<li>Added toolbar icon and line drawing support</li>
+<li>Rewrote protocol to flexible stack based system</li>
+<li>Added commands to set size and colour of LCD screen</li>
+<li>Made the window and widget resizable</li>
+<li>Added virtual LCD plugin</li>
+<li>Made extra ports override real ports when the extra is a symlink</li>
+<li>Bumped version</li>
+<li>Added pre- and post-commands to compile and upload</li>
+<li>Bumped version</li>
+<li>Added grapher to repo</li>
+<li>Added grapher to repo</li>
+<li>Added descriptions to plugins</li>
+<li>Added parsing to more strings in Sketch</li>
+<li>Added Variable Command for getting selected options data</li>
+<li>Incided jgit into the core</li>
+<li>Improved status line</li>
+<li>Updated stub to find all jre8 releases</li>
+<li>Fixed windows exe packaging</li>
+<li>Added menu entries and keyboard shortcuts for compile and upload</li>
+<ul>
+
+<h2>0.8.7z25</h2>
+
+<ul>
+<li>Fixed crash reports</li>
+<ul>
+
+<h2>0.8.7z24</h2>
+
+<ul>
+<li>Updated version</li>
+<li>Fixed XP launch, and some cosmetics</li>
+<li>Removed dependency version restrictions for launchpad</li>
+<li>Added ant as build depend</li>
+<li>Debianized package</li>
+<ul>
+
+<h2>0.8.7z23-1</h2>
+
+<ul>
+<li>Added windows and osx version probing</li>
+<li>Fixed prefs open in MacOSX</li>
+<li>Updated version</li>
+<li>Added option to disable crash reporter</li>
+<li>Fixed some null pointer errors</li>
+<li>Added OS version data and moved varfuncs to base</li>
+<li>Fixed compilation when main header is manually included</li>
+<li>Fixing concurrent modifications</li>
+<li>Fix compilation for newer JNA</li>
+<li>Fixed library naming problem</li>
+<li>Build enhancements to support more compilers</li>
+<li>Rebuilt console without HTML</li>
+<li>Added source for windows stub</li>
+<li>Bundled new plugin manager;</li>
+<li>Updated jna, added native java support on windows</li>
+<li>Fixed exe loader stub at last!</li>
+<li>Switched to using a batch file to load windows version for now until a better stub can be crafted</li>
+<li>Fixed windows and mac boot stubs</li>
+<li>Remove autoformat bundle</li>
+<li>Added new bundles of plugins</li>
+<ul>
+
+<h2>0.8.7z17</h2>
+
+<ul>
+<li>Added keyword.txt handling</li>
+<li>Big refactoring uecide.app -> org.uecide. New plugins loading methodology</li>
+<ul>
+
+<h2>0.8.7z16</h2>
+
+<ul>
+<li>Fixed a subtle bug in lib include selection</li>
+<li>Fixed preferences repainting on theme change and cleaned up toolbar button borders</li>
+<li>Fixed OS X application file permissions</li>
+<ul>
+
+<h2>0.8.7z15</h2>
+
+<ul>
+<li>Bumped version</li>
+<li>Finally fixed wandering tree entries</li>
+<li>Fixed windows slowness</li>
+<ul>
+
+<h2>0.8.7z14</h2>
+
+<ul>
+<li>Added code page handling</li>
+<ul>
+
+<h2>0.8.7z13</h2>
+
+<ul>
+<li>Added gutter flags</li>
+<li>Stopped the function list from bouncing around so much</li>
+<ul>
+
+<h2>0.8.7z12</h2>
+
+<ul>
+<li>Added note/todo/fixme parsing and task lists</li>
+<li>Tidy up of the build process</li>
+<ul>
+
+<h2>0.8.7z11</h2>
+
+<ul>
+<li>Bumped version</li>
+<li>Fixed sketch libraries</li>
+<ul>
+
+<h2>0.8.7z10</h2>
+
+<ul>
+<li>Fixed null pointer in getTabCount. Added snippets plugin. Added experimental background compiler service</li>
+<li>Upgrade RSTA</li>
+<ul>
+
+<h2>0.8.7z9</h2>
+
+<ul>
+<li>Bumped version</li>
+<li>Added new required libraries</li>
+<li>Added services and migrated some threads and timers to the service infrastructure</li>
+<ul>
+
+<h2>0.8.7z8</h2>
+
+<ul>
+<li>Fixed MRU initialize bug</li>
+<ul>
+
+<h2>0.8.7z7</h2>
+
+<ul>
+<li>Released version 0.8.7z7</li>
+<li>Made all plugin commands non-static and added javascript engine</li>
+<li>Improved command line handling</li>
+<li>Improved crash reporting system</li>
+<li>Sorted function list alphabetically</li>
+<ul>
+
+<h2>0.8.7z6</h2>
+
+<ul>
+<li>Fixed tree update collision bug</li>
+<ul>
+
+<h2>0.8.7z5</h2>
+
+<ul>
+<li>Added crash reporter</li>
+<ul>
+
+<h2>0.8.7z4</h2>
+
+<ul>
+<li>Added manual browser</li>
+<ul>
+
+<h2>0.8.7z3</h2>
+
+<ul>
+<li>Caught possible NullPointer exception in sketch loading</li>
+<li>Added context menu to console</li>
+<ul>
+
+<h2>0.8.7z2</h2>
+
+<ul>
+<li>Fixed typo in console CSS</li>
+<li>Bumped version</li>
+<ul>
+
+<h2>0.8.7z1</h2>
+
+<ul>
+<li>Changed console to HTML</li>
+<li>Added theme importer plugin</li>
+<li>Added third party library list and made About box HTML</li>
+<li>Backed out property file loader</li>
+<ul>
+
+<h2>0.8.7z</h2>
+
+<ul>
+<li>Reverted propertyfile loader update</li>
+<ul>
+
+<h2>0.8.7y</h2>
+
+<ul>
+<li>Fixed release</li>
+<li>Added USB javax source</li>
+<ul>
+
+<h2>0.8.7x</h2>
+
+<ul>
+<li>Added USB support, property file includes, etc</li>
+<li>Added USB HID device detection</li>
+<li>Big cleanup, plus better handling for 1.5.x libraries</li>
+<li>Made ssh and scp forget the password on authentication failure</li>
+<li>Added preferred programmer selection to network discovery service</li>
+<li>Fixed serial terminal method crash in OS X java 1.6_15</li>
+<li>Added goto/set/fail/end special functions to script</li>
+<li>Rewritten command execution routines</li>
+<li>Fixed null pointer in non-sketch upload</li>
+<li>Improvements to script system</li>
+<li>Updated version</li>
+<li>Fixed too many open files bug</li>
+<li>Added jmdns library</li>
+<li>Added Jsch library</li>
+<li>Cleaned up error output</li>
+<li>Added network ssh uploading</li>
+<li>Fixed plugin not-installed version bug</li>
+<li>Improved full screen with menu</li>
+<li>Merge branch 'master' of github.com:UECIDE/UECIDE</li>
+<li>Removed border painting control from toolbar buttons</li>
+<li>Added full screen mode</li>
+<li>Updated version</li>
+<li>Added office laf jar</li>
+<li>Added tinylaf jar</li>
+<li>Added extra LAFs and some fixes to themes</li>
+<li>Added selectable editor themes</li>
+<li>Added experimental tree merge routine</li>
+<li>Updated version</li>
+<li>Added auto-refresh of function list. Added documentation and markdown section</li>
+<li>Fixed new repo problem</li>
+<li>Added revert to last commit on files</li>
+<li>Updated version</li>
+<li>Added git ignore</li>
+<li>Added new stub for icon overlay</li>
+<li>Updated launch4j for trusty</li>
+<li>Embedded executables</li>
+<li>Removed old system plugins folder code</li>
+<li>Added ASM labels with corresponding .ent sections to tree function list</li>
+<li>Added template plugin</li>
+<li>Fixed missing asm files in tree</li>
+<li>Fixed sketch properties saving</li>
+<li>Added function list in project tree</li>
+<li>Fixed nested comment stripping</li>
+<li>Added bracket adding options</li>
+<li>Added Artistic Style plugin</li>
+<li>Fixed Save As path breaking</li>
+<li>Forced opened files to be java.io.File class</li>
+<li>Fixed library install bug</li>
+<li>Properly fixed windows compile #line problem</li>
+<li>Added elf inspector</li>
+<li>Added error flagging</li>
+<li>Added project search. Fixed windows file path #line issue</li>
+<li>Updated version</li>
+<li>Added plugin callbacks to context menus</li>
+<li>Fixed debian package lint problem</li>
+<li>Released version 0.8.7a</li>
+<li>Updated version</li>
+<li>Improved facilties for debugging sketches</li>
+<li>Added improved about box</li>
+<li>Added open data folder debug entry</li>
+<li>Updated bundled serial terminal</li>
+<li>Fix bug in serial terminal for width > 80 characters</li>
+<li>Rememberd last opened folder in import file. Added https and ftp to windows URL open handling</li>
+<li>Rememberd last opened folder in import file. Added https and ftp to windows URL open handling</li>
+<li>Merge pull request #39 from TCWORLD/master</li>
+<li>Corrected "Open In OS"</li>
+<li>Changed version url for new site layout</li>
+<li>Updated version</li>
+<li>Ported copy for forum plugin</li>
+<li>Bundled autoformat</li>
+<li>Ported AutoFormat plugin</li>
+<li>Updated plugin manager</li>
+<li>Made plugin manager modal</li>
+<li>Updated download URL for new site layout</li>
+<li>Updated patch to r</li>
+<li>Fixed stellaris compilation bugs</li>
+<li>Added sketch properties system</li>
+<li>Added sketch properties system</li>
+<li>Saved console split position as offset from top instead of bottom</li>
+<li>Fixed lib-local header file issue in library recursion</li>
+<li>Fixed Open in OS in Windows</li>
+<li>Fixed library compilation crashing in windows due to rogue :</li>
+<li>Updated version</li>
+<li>Added tools for opening files and folders externally</li>
+<li>Merge pull request #36 from UECIDE/complete_rebuild</li>
+<li>New support files URL</li>
+<li>Fixed old plugins crashing new version</li>
+<li>Fixed NullPointerException when no core installed</li>
+<li>Updated version</li>
+<li>Fixed disappearing output messages problem</li>
+<li>Moved library storage to Library class</li>
+<li>Added option to disable version check. Limited version checking to 3 hourly at most</li>
+<li>Added updated version checking</li>
+<li>Added libraries-within-libraries</li>
+<li>Updated version</li>
+<li>Fixed auto opening of plugin manager</li>
+<li>Fixed bad plugin manager tree refresh with no board selected in editor</li>
+<li>Updated version</li>
+<li>Fixed PropertyFile file locking issue</li>
+<li>Forced editor menu rebuild on board install/deinstall. Forced complete rebuild on plugin manager close.</li>
+<li>Added tooltips to tree</li>
+<li>Added multiple install/uninstall to pligin manager</li>
+<li>Added multiple install/uninstall to pligin manager</li>
+<li>Updated version</li>
+<li>Brought main plugins into main tree</li>
+<li>Added export local library option</li>
+<li>Added export local library option</li>
+<li>Added library template generator</li>
+<li>Made complete rebuild a separate thread</li>
+<li>Made find loop and added found failed background change</li>
+<li>Updated version</li>
+<li>Updated version</li>
+<li>Added import SAR file</li>
+<li>Added export as SAR file</li>
+<li>Added export as SAR file</li>
+<li>Added compile / upload abort button</li>
+<li>Added example sketch and localization protection</li>
+<li>Fixed editor font bug. Added USB device ident for Linux.</li>
+<li>Fixed serial lock problem</li>
+<li>Possible fix to locked port</li>
+<li>Updated version</li>
+<li>Fixed Save As main file bug, and attempted to fix bluetooth problems</li>
+<li>Added missing saveTo() function stub</li>
+<li>Updated version</li>
+<li>Added option to hide secondary editor toolbar</li>
+<li>Fixed saveAs empty file bug</li>
+<li>Fixed rescan all ports on tab change</li>
+<li>Various bug fixes</li>
+<li>Added prefs and theme getters in config file variables</li>
+<li>Added simple bitmap viewer</li>
+<li>Added simple bitmap viewer</li>
+<li>Fixed file save "modified outside" bug</li>
+<li>Updated version</li>
+<li>Made library utility recursion optional in library.txt file</li>
+<li>Allow headless compilation/upload</li>
+<li>Fixed DTR reset bug in Windows</li>
+<li>Added file watcher timer to tabs to monitor external file changes</li>
+<li>Switched most hashes to TreeHash.  Fixed some null pointer bugs.  Open new sketch in existing editor if untitled and not modified</li>
+<li>Fixed plugin install problems</li>
+<li>Improved library category adding</li>
+<li>Rewritten library installer. Ditched sketchbook libraries folder (made it part of categories)</li>
+<li>Added file tree, drag and drop, and lots more improvements</li>
+<li>Fixed saving of preferences on application exit</li>
+<li>Added build number generation, contributor list generation and sorting of user preferences file</li>
+<li>Cleaned up dir structure, implemented about menu entry</li>
+<li>Fixed #pragma parameter string space splitting</li>
+<li>Fixed virgin installation issues</li>
+<li>Added "unable to find port" error alert to serial system</li>
+<li>Added new plugin manager bundle</li>
+<li>Merge branch 'complete_rebuild' of github.com:UECIDE/UECIDE into complete_rebuild</li>
+<li>Plugin system work</li>
+<li>Added option to keep find & replace open</li>
+<li>More plugin work and added basic upload support</li>
+<li>Added libraries, and re-worked plugin system</li>
+<li>Library compilation meter, plus other cleaning up and progress towards completion</li>
+<li>Added code to indent / outdent buttons</li>
+<li>More progress towards the best IDE ever</li>
+<li>Added new plugin toolbar icon system</li>
+<li>Added editor toolbar</li>
+<li>More work re-writing all the functionality</li>
+<li>Hidden RSyntaxTextArea build folder</li>
+<li>Removed build tree and core tree and just created the tree</li>
+<li>Massive cleanup of the file structure.  All third party code removed from the main source tree and either placed into auto-updating third party area or placed in lib folder as .jar files.</li>
+<li>update version</li>
+<li>Embarked on a daring resign</li>
+<ul>
+
+<h2>0.8.5e</h2>
+
+<ul>
+<li>Fixed compile abort on sketch error</li>
+<li>Created basic sketch backup system</li>
+<li>Better default Linux sketchbook location</li>
+<li>Removed the windows JRE from the repo</li>
+<li>Merge branch 'master' of github.com:UECIDE/UECIDE</li>
+<li>Added version.plist file generation</li>
+<li>Porting to FreeBSD</li>
+<li>Removed early jre version</li>
+<ul>
+
+<h2>0.8.5d</h2>
+
+<ul>
+<li>Expand Save As to include all files</li>
+<li>Added sketch-level libraries</li>
+<li>Added ability to select to use the system dectorator</li>
+<li>Overhaul the UI</li>
+<li>Fixed version display</li>
+<ul>
+
+<h2>0.8.5c</h2>
+
+<ul>
+<li>Overhaul "external editor" facility</li>
+<li>Made better use of the build.number in build scripts</li>
+<li>Create and populate FileType class</li>
+<li>Obtain version number from git tag</li>
+<li>Automatically set UECIDE environment variable if unset</li>
+<li>Obtain package version number from git tag</li>
+<li>Fixed missing parameter to new format getLibraryCollection()</li>
+<ul>
+
