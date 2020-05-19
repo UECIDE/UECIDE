@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<project name="gui-swing" default="build">
+
+    <taskdef name="depends" classname="ant.dep.Depends" classpath="../../antlib/ant-dep.jar"/>
+
+    <target name="clean" description="Clean out the build directories">
+        <delete dir="bin" />
+        <delete file="uecide-module-${ant.project.name}.jar" />
+    </target>
+
+    <target name="compile" description="Compile" depends="depends">
+        <mkdir dir="bin" />
+
+        <path id="class.path">
+            <fileset dir="deps">
+                <include name="*.jar" />
+            </fileset>
+            <fileset dir="deps-bundle">
+                <include name="*.jar" />
+            </fileset>
+            <pathelement location="../core/uecide-module-core.jar" />
+            <pathelement location="../bmpedit/uecide-module-bmpedit.jar" />
+            <pathelement location="../gritty/uecide-module-gritty.jar" />
+            <pathelement location="../jtattoo/uecide-module-jtattoo.jar" />
+        </path>
+
+        <javac target="1.8" 
+               source="1.8"
+               debug="true"
+               debuglevel="lines,vars,source"
+               encoding="UTF-8"
+               bootclasspath="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"
+               includeAntRuntime="false"
+               deprecation="true"
+               srcdir="src" 
+               destdir="bin">
+            <classpath refid="class.path" />
+            <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>		
+
+    <target name="build" depends="compile" description="Build ${ant.project.name}">
+        <jar basedir="bin" destfile="uecide-module-${ant.project.name}.jar">
+            <fileset dir="bin" />
+            <fileset dir="resources" />
+            <zipgroupfileset dir="deps" includes="*.jar" />
+            <zipgroupfileset dir="deps-bundle" includes="*.jar" />
+        </jar>
+    </target>
+
+    <target name="depends">
+        <depends dir="deps">
+            <maven group="io.github.vincenzopalazzo"            artifact="material-ui-swing"        version="1.1.1_pre-release_6.1" />
+            <maven group="org.commonjava.googlecode.markdown4j"    artifact="markdown4j"               version="2.2-cj-1.1" />
+        </depends>
+    </target>
+</project>

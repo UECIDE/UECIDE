@@ -11,21 +11,14 @@
         </classpath>
     </taskdef>
 
-    <taskdef name="depends" classname="ant.dep.Depends" classpath="antlib/ant-dep.jar"/>
-
     <taskdef name="launch4j"
         classname="net.sf.launch4j.ant.Launch4jTask"
         classpath="${launch4j.dir}/launch4j.jar
             :${launch4j.dir}/lib/xstream.jar" />
 
-    <property file="resources/org/uecide/version.txt"/>
-
-    <target name="distclean" depends="clean" description="Clean out the build and dest directories">
-        <delete dir="deps" />
-    </target>
+    <property file="modules/core/resources/org/uecide/version.txt"/>
 
     <target name="clean" description="Clean out the build directories" depends="modules-clean">
-        <delete dir="bin" />
         <delete file="uecide.jar" />
         <delete>
             <fileset dir="." includes="uecide-*.zip" />
@@ -37,14 +30,30 @@
     </target>
 
     <target name="changelog">
-        <exec output="resources/org/uecide/changelog.md" executable="./mklog"/>
+        <exec output="modules/core/resources/org/uecide/changelog.md" executable="./mklog"/>
     </target>
 
     <target name="modules">
         <parallel>
-            <subant antfile="build.xml" buildpath="modules/gritty" />
-            <subant antfile="build.xml" buildpath="modules/jtattoo" />
-            <subant antfile="build.xml" buildpath="modules/ardublock" />
+            <subant antfile="build.xml" buildpath="modules/gritty" target="build"/>
+            <subant antfile="build.xml" buildpath="modules/jtattoo" target="build"/>
+            <!--subant antfile="build.xml" buildpath="modules/ardublock" target="build"/-->
+            <subant antfile="build.xml" buildpath="modules/bmpedit" target="build"/>
+            <subant antfile="build.xml" buildpath="modules/hexfile" target="build"/>
+        </parallel>
+    </target>
+
+    <target name="modules-core">
+        <parallel>
+            <subant antfile="build.xml" buildpath="modules/core" target="build"/>
+        </parallel>
+    </target>
+
+    <target name="modules-late">
+        <parallel>
+            <subant antfile="build.xml" buildpath="modules/gui-swing" target="build"/>
+            <subant antfile="build.xml" buildpath="modules/gui-cli" target="build"/>
+            <subant antfile="build.xml" buildpath="modules/gui-action" target="build"/>
         </parallel>
     </target>
 
@@ -53,82 +62,37 @@
             <subant antfile="build.xml" buildpath="modules/gritty" target="clean"/>
             <subant antfile="build.xml" buildpath="modules/jtattoo" target="clean"/>
             <subant antfile="build.xml" buildpath="modules/ardublock" target="clean"/>
+            <subant antfile="build.xml" buildpath="modules/bmpedit" target="clean"/>
+            <subant antfile="build.xml" buildpath="modules/hexfile" target="clean"/>
+            <subant antfile="build.xml" buildpath="modules/core" target="clean"/>
+            <subant antfile="build.xml" buildpath="modules/gui-swing" target="clean"/>
+            <subant antfile="build.xml" buildpath="modules/gui-cli" target="clean"/>
+            <subant antfile="build.xml" buildpath="modules/gui-action" target="clean"/>
         </parallel>
     </target>
 
-    <target name="compile" description="Compile" depends="deps,modules,git_contributors,changelog">
-        <mkdir dir="bin" />
-        <path id="class.path">
-            <fileset dir="deps">
-                <include name="*.jar" />
-            </fileset>
-            <fileset dir="deps-bundle">
-                <include name="*.jar" />
-            </fileset>
-            <pathelement location="modules/gritty/uecide-module-gritty.jar" />
-            <pathelement location="modules/jtattoo/uecide-module-jtattoo.jar" />
-            <pathelement location="modules/ardublock/uecide-module-ardublock.jar" />
-        </path>
-        <javac target="1.8" 
-               source="1.8"
-               debug="true"
-               debuglevel="lines,vars,source"
-               encoding="UTF-8"
-               bootclasspath="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"
-               includeAntRuntime="false"
-               deprecation="true"
-               srcdir="src" 
-               destdir="bin">
-            <classpath refid="class.path" />
-            <compilerarg value="-Xlint:unchecked"/>
-        </javac>
-    </target>		
-
-    <target name="plugins" depends="compile" description="Build and bundle plugins">
-        <subant target="bundle" buildpath="plugins" />
-    </target>
-
-    <target name="thirdparty" description="Build third party libraries">
-        <subant target="install" buildpath="thirdparty" />
-    </target>
-
-    <target name="build-minimal" depends="compile,i18n" description="Build uecide">
-        <jar basedir="bin" destfile="uecide.jar">
-            <fileset dir="bin" />
-            <fileset dir="resources" />
-            <manifest>
-                <attribute name="Main-Class" value="org.uecide.UECIDE" />
-                <attribute name="Class-Path" value="uecide.jar" />
-                <!--attribute name="Version" value="${Version}" />
-                <attribute name="Release" value="${Release}" /-->
-            </manifest>
-        </jar>
-        <chmod perm="0755" file="uecide.jar" />
-    </target>
-
-    <target name="build" depends="compile,i18n" description="Build uecide">
-        <jar basedir="bin" destfile="uecide.jar">
-            <fileset dir="bin" />
+    <target name="build" depends="modules,i18n,git_contributors,changelog,modules-core,modules-late" description="Build uecide">
+        <jar destfile="uecide.jar">
             <fileset dir="resources" />
             <zipgroupfileset dir="deps" includes="*.jar" />
             <zipgroupfileset dir="deps-bundle" includes="*.jar" />
             <zipgroupfileset dir="modules/gritty" includes="uecide-module-gritty.jar" />
             <zipgroupfileset dir="modules/jtattoo" includes="uecide-module-jtattoo.jar" />
-            <zipgroupfileset dir="modules/ardublock" includes="uecide-module-ardublock.jar" />
+            <!--zipgroupfileset dir="modules/ardublock" includes="uecide-module-ardublock.jar" /-->
+            <zipgroupfileset dir="modules/core" includes="uecide-module-core.jar" />
+            <zipgroupfileset dir="modules/gui-swing" includes="uecide-module-gui-swing.jar" />
+            <zipgroupfileset dir="modules/gui-cli" includes="uecide-module-gui-cli.jar" />
+            <zipgroupfileset dir="modules/gui-action" includes="uecide-module-gui-action.jar" />
             <manifest>
                 <attribute name="Main-Class" value="org.uecide.UECIDE" />
                 <attribute name="Class-Path" value="uecide.jar" />
-                <!--attribute name="Version" value="${Version}" />
-                <attribute name="Release" value="${Release}" /-->
             </manifest>
         </jar>
         <chmod perm="0755" file="uecide.jar" />
     </target>
 
-    <target name="test_git"><available file=".git" property="git.available" /></target>
-
-    <target name="git_contributors" depends="test_git" if="git.available">
-        <exec output="resources/org/uecide/contributors.txt" executable="git">
+    <target name="git_contributors">
+        <exec output="modules/core/resources/org/uecide/contributors.txt" executable="git">
             <arg value="shortlog" />
             <arg value="-sn" />
             <arg value="HEAD" />
@@ -368,63 +332,10 @@
 
     <target name="i18n">
         <foreach target="native2ascii" param="utf8">
-            <fileset dir="resources/org/uecide/i18n">
+            <fileset dir="modules/core/resources/org/uecide/i18n">
                 <include name="**/*.properties.utf8" />
             </fileset>
         </foreach>
-    </target>
-
-    <target name="maven">
-        <propertyregex property="grp" input="${group}" regexp="\." replace="/"/>
-        <get src="https://search.maven.org/remotecontent?filepath=${grp}/${artifact}/${version}/${artifact}-${version}.jar" dest="deps/${artifact}.jar" skipexisting="true" />
-        <if>
-            <isset property="native"/>
-            <then>
-                <for param="suffix" list="${native}">
-                    <sequential>
-                        <get src="https://search.maven.org/remotecontent?filepath=${grp}/${artifact}/${version}/${artifact}-${version}-@{suffix}.jar" dest="deps/${artifact}-@{suffix}.jar" skipexisting="true" />
-                    </sequential>
-                </for>
-            </then>
-        </if>
-    </target>
-    
-    <target name="deps">
-        <depends dir="deps">
-            <maven group="org.apache.commons"                      artifact="commons-compress"         version="1.15" />
-            <maven group="org.apache.commons"                      artifact="commons-io"               version="1.3.2" />
-            <maven group="org.apache.commons"                      artifact="commons-text"             version="1.2" />
-            <maven group="org.apache.commons"                      artifact="commons-lang3"            version="3.0" />
-            <maven group="com.google.guava"                        artifact="guava"                    version="24.0-jre" />
-            <maven group="org.javassist"                           artifact="javassist"                version="3.22.0-GA" />
-            <maven group="org.reflections"                         artifact="reflections"              version="0.9.11" />
-            <maven group="org.usb4java"                            artifact="usb4java-javax"           version="1.2.0" />
-            <maven group="org.usb4java"                            artifact="usb4java"                 version="1.2.0" />
-            <maven group="org.usb4java"                            artifact="libusb4java"              version="1.2.0" >
-                <native arch="linux-arm" />
-                <native arch="linux-x86" />
-                <native arch="linux-x86_64" />
-                <native arch="osx-x86" />
-                <native arch="osx-x86_64" />
-                <native arch="windows-x86" />
-                <native arch="windows-x86_64" />
-            </maven>
-            <maven group="com.googlecode.json-simple"              artifact="json-simple"              version="1.1.1" />
-            <maven group="com.sun.jna"                             artifact="jna"                      version="3.0.9" />
-            <maven group="org.commonjava.googlecode.markdown4j"    artifact="markdown4j"               version="2.2-cj-1.1" />
-            <maven group="com.jcraft"                              artifact="jsch"                     version="0.1.54" />
-            <maven group="org.slf4j"                               artifact="slf4j-api"                version="1.8.0-beta1" />
-            <maven group="org.slf4j"                               artifact="slf4j-nop"                version="1.8.0-beta1" />
-            <maven group="org.tukaani"                             artifact="xz"                       version="1.8" />
-            <maven group="org.jline"                               artifact="jline"                    version="3.6.0" />
-            <maven group="com.apple"                               artifact="AppleJavaExtensions"      version="1.4" />
-            <maven group="org.swinglabs"                        artifact="swingx"   version="1.6.1" />
-            <maven group="de.waldheinz"                         artifact="fat32-lib"                version="0.6.5" />
-            <maven group="io.github.vincenzopalazzo"            artifact="material-ui-swing"        version="1.1.1_pre-release_6.1" />
-            <maven group="com.github.jiconfont"                 artifact="jiconfont-google_material_design_icons" version="2.2.0.2" />
-            <maven group="com.github.jiconfont"                 artifact="jiconfont" version="1.0.0" />
-            <maven group="com.github.jiconfont"                 artifact="jiconfont-swing" version="1.0.1" />
-        </depends>
     </target>
 
     <target name="release" depends="tag,dist">

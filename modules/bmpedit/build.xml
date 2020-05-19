@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<project name="bmpedit" default="build">
+
+    <taskdef name="depends" classname="ant.dep.Depends" classpath="../../antlib/ant-dep.jar"/>
+
+    <target name="clean" description="Clean out the build directories">
+        <delete dir="bin" />
+        <delete file="uecide-module-${ant.project.name}.jar" />
+    </target>
+
+    <target name="compile" description="Compile" depends="depends">
+        <mkdir dir="bin" />
+
+        <path id="class.path">
+            <!--fileset dir="deps">
+                <include name="*.jar" />
+            </fileset-->
+        </path>
+
+        <javac target="1.8" 
+               source="1.8"
+               debug="true"
+               debuglevel="lines,vars,source"
+               encoding="UTF-8"
+               bootclasspath="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"
+               includeAntRuntime="false"
+               deprecation="true"
+               srcdir="src" 
+               destdir="bin">
+            <classpath refid="class.path" />
+            <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>		
+
+    <target name="build" depends="compile" description="Build ${ant.project.name}">
+        <jar basedir="bin" destfile="uecide-module-${ant.project.name}.jar">
+            <fileset dir="bin" />
+            <fileset dir="resources" />
+            <!--zipgroupfileset dir="deps" includes="*.jar" /-->
+        </jar>
+    </target>
+
+    <target name="depends">
+        <!--depends dir="deps">
+            <maven group="jfree"                                   artifact="jcommon"                  version="1.0.16" />
+            <maven group="jfree"                                   artifact="jfreechart"               version="1.0.13" />
+        </depends-->
+    </target>
+</project>

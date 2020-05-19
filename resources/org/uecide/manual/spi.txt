@@ -1,9 +1,0 @@
-begin=https://www.arduino.cc/en/Reference/SPIBegin
-end=https://www.arduino.cc/en/Reference/SPIEnd
-beginTransaction=https://www.arduino.cc/en/Reference/SPIbeginTransaction
-endTransaction=https://www.arduino.cc/en/Reference/SPIendTransaction
-setBitOrder=https://www.arduino.cc/en/Reference/SPISetBitOrder
-setClockDivider=https://www.arduino.cc/en/Reference/SPISetClockDivider
-setDataMode=https://www.arduino.cc/en/Reference/SPISetDataMode
-transfer=https://www.arduino.cc/en/Reference/SPITransfer
-usingInterrupt=https://www.arduino.cc/en/Reference/SPIusingInterrupt

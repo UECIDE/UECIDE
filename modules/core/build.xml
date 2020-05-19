@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<project name="core" default="build">
+
+    <taskdef name="depends" classname="ant.dep.Depends" classpath="../../antlib/ant-dep.jar"/>
+
+    <target name="clean" description="Clean out the build directories">
+        <delete dir="bin" />
+        <delete file="uecide-module-${ant.project.name}.jar" />
+    </target>
+
+    <target name="compile" description="Compile" depends="depends">
+        <mkdir dir="bin" />
+
+        <path id="class.path">
+            <fileset dir="deps">
+                <include name="*.jar" />
+            </fileset>
+            <fileset dir="deps-bundle">
+                <include name="*.jar" />
+            </fileset>
+            <pathelement location="../gritty/uecide-module-gritty.jar" />
+            <pathelement location="../jtattoo/uecide-module-jtattoo.jar" />
+            <pathelement location="../ardublock/uecide-module-ardublock.jar" />
+            <pathelement location="../bmpedit/uecide-module-bmpedit.jar" />
+            <pathelement location="../hexfile/uecide-module-hexfile.jar" />
+        </path>
+
+        <javac target="1.8" 
+               source="1.8"
+               debug="true"
+               debuglevel="lines,vars,source"
+               encoding="UTF-8"
+               bootclasspath="/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"
+               includeAntRuntime="false"
+               deprecation="true"
+               srcdir="src" 
+               destdir="bin">
+            <classpath refid="class.path" />
+            <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>		
+
+    <target name="build" depends="compile" description="Build ${ant.project.name}">
+        <jar basedir="bin" destfile="uecide-module-${ant.project.name}.jar">
+            <fileset dir="bin" />
+            <fileset dir="resources" />
+            <!--zipgroupfileset dir="deps" includes="*.jar" /-->
+        </jar>
+    </target>
+
+    <target name="depends">
+        <depends dir="deps">
+            <maven group="org.apache.commons"                      artifact="commons-compress"         version="1.15" />
+            <maven group="org.apache.commons"                      artifact="commons-io"               version="1.3.2" />
+            <maven group="org.apache.commons"                      artifact="commons-text"             version="1.2" />
+            <maven group="org.apache.commons"                      artifact="commons-lang3"            version="3.0" />
+            <maven group="com.google.guava"                        artifact="guava"                    version="24.0-jre" />
+            <maven group="org.javassist"                           artifact="javassist"                version="3.22.0-GA" />
+            <maven group="org.reflections"                         artifact="reflections"              version="0.9.11" />
+            <maven group="org.usb4java"                            artifact="usb4java-javax"           version="1.2.0" />
+            <maven group="org.usb4java"                            artifact="usb4java"                 version="1.2.0" />
+            <maven group="org.usb4java"                            artifact="libusb4java"              version="1.2.0" >
+                <native arch="linux-arm" />
+                <native arch="linux-x86" />
+                <native arch="linux-x86_64" />
+                <native arch="osx-x86" />
+                <native arch="osx-x86_64" />
+                <native arch="windows-x86" />
+                <native arch="windows-x86_64" />
+            </maven>
+            <maven group="com.googlecode.json-simple"              artifact="json-simple"              version="1.1.1" />
+            <maven group="com.sun.jna"                             artifact="jna"                      version="3.0.9" />
+            <maven group="org.commonjava.googlecode.markdown4j"    artifact="markdown4j"               version="2.2-cj-1.1" />
+            <maven group="com.jcraft"                              artifact="jsch"                     version="0.1.54" />
+            <maven group="org.slf4j"                               artifact="slf4j-api"                version="1.8.0-beta1" />
+            <maven group="org.slf4j"                               artifact="slf4j-nop"                version="1.8.0-beta1" />
+            <maven group="org.tukaani"                             artifact="xz"                       version="1.8" />
+            <maven group="com.apple"                               artifact="AppleJavaExtensions"      version="1.4" />
+            <maven group="org.swinglabs"                        artifact="swingx"   version="1.6.1" />
+            <maven group="de.waldheinz"                         artifact="fat32-lib"                version="0.6.5" />
+            <maven group="com.github.jiconfont"                 artifact="jiconfont-google_material_design_icons" version="2.2.0.2" />
+            <maven group="com.github.jiconfont"                 artifact="jiconfont" version="1.0.0" />
+            <maven group="com.github.jiconfont"                 artifact="jiconfont-swing" version="1.0.1" />
+        </depends>
+    </target>
+</project>
