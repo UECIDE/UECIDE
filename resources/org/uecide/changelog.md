@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.11.8
+------
+
+* Improved src and utility compilation output trees
+
+
 0.11.7
 ------
 
@@ -757,6 +763,7 @@ Changelog
 0.8.5
 -----
 
+* Improved src and utility compilation output trees
 * Bundled up-to-date base packages
 * Fixed missing tool vc. Prevent prototypes being added for non-ino files
 * Release 0.11.5

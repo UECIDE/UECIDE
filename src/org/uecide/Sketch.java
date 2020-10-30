@@ -4830,14 +4830,24 @@ public class Sketch {
             if (dst.exists()) {
                 String data = Base.getFileAsString(dst);
                 data = data.replaceAll("\\\\\n", " ");
+                data = data.replaceAll(":", " ");
                 data = data.replaceAll("\\s+", "::");
                 String[] entries = data.split("::");
                 for (String entry : entries) {
                     if (entry.endsWith(".h")) {
                         Library lib = findLibrary(entry);
                         if (lib != null) {
-                            foundLibs.put(entry, lib);
-                            numberFoundThisPass++;
+
+                            boolean exists = false;
+                            for (Library l : foundLibs.values()) {
+                                if (l == lib) {
+                                    exists = true;
+                                }
+                            }
+                            if (!exists) {
+                                foundLibs.put(entry, lib);
+                                numberFoundThisPass++;
+                            }
                         } else {
                             if(missingLibs.indexOf(entry) == -1) {
                                 missingLibs.add(entry);
