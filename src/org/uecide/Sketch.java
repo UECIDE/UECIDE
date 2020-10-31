@@ -4830,7 +4830,6 @@ public class Sketch {
             if (dst.exists()) {
                 String data = Base.getFileAsString(dst);
                 data = data.replaceAll("\\\\\n", " ");
-                data = data.replaceAll(":", " ");
                 data = data.replaceAll("\\s+", "::");
                 String[] entries = data.split("::");
                 for (String entry : entries) {
