@@ -4800,7 +4800,7 @@ public class Sketch {
 
         File dst = new File(getBuildFolder(), "deps.txt");
 
-//        ctx.silence = true;
+        ctx.silence = true;
         TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
         ArrayList<File> includes = new ArrayList<File>();
 
