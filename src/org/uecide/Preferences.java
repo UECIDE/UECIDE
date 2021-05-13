@@ -183,6 +183,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
         // setup dialog for the prefs
 
+
         JMenuBar menuBar = new JMenuBar();
         JMenu themeMenu = new JMenu("Theme");
         JMenuItem importTheme = new JMenuItem("Import Theme");
@@ -224,7 +225,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
         setLayout(new BorderLayout());
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel outer = new JPanel();
-        add(menuBar, BorderLayout.NORTH);
+//        add(menuBar, BorderLayout.NORTH);
 
         outer.setBorder(new EmptyBorder(10, 10, 10, 10));
         outer.setLayout(new BorderLayout());
@@ -359,6 +360,7 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
         pack();
         if (editor != null) setLocationRelativeTo(editor);
+
         setVisible(true);
     }
 
