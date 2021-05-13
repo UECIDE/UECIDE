@@ -874,16 +874,18 @@ public class Base {
         }
 
         if(loadLastSketch || Preferences.getBoolean("editor.save.loadlast")) {
-            File lastFile = MRUList.get(0);
+            if (MRUList.size() > 0) {
+                File lastFile = MRUList.get(0);
 
-            if(lastFile != null) {
-                if (!headless && !opened)
-                try {
-                    opened = doOpenThings(lastFile);
-                } catch (IOException ex) {
-                    Base.exception(ex);
-                    error(ex);
-                    return;
+                if(lastFile != null) {
+                    if (!headless && !opened)
+                    try {
+                        opened = doOpenThings(lastFile);
+                    } catch (IOException ex) {
+                        Base.exception(ex);
+                        error(ex);
+                        return;
+                    }
                 }
             }
         }
