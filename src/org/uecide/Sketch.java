@@ -4800,7 +4800,18 @@ public class Sketch {
 
         File dst = new File(getBuildFolder(), "deps.txt");
 
-        ctx.silence = true;
+//        ctx.silence = true;
+        TreeMap<String, ArrayList<File>> coreLibs = getCoreLibs();
+        ArrayList<File> includes = new ArrayList<File>();
+
+        for(String lib : coreLibs.keySet()) {
+            ArrayList<File> libfiles = coreLibs.get(lib);
+            includes.addAll(libfiles);
+        }
+
+        includes.add(getBoard().getFolder());
+        includes.add(buildFolder);
+        includes.add(sketchFolder);
 
         int numberFoundThisPass = 0;
         do {
@@ -4815,12 +4826,23 @@ public class Sketch {
             ctx.set("source.name", f.getAbsolutePath());
             ctx.set("object.name", dst.getAbsolutePath());
             String libPaths = "";
+
+
+            for (File inc : includes) {
+                if (!libPaths.equals("")) {
+                    libPaths += "::";
+                }
+                libPaths += "-I" + inc.getAbsolutePath();
+            }
+
+
             for (Library aLib : foundLibs.values()) {
                 if (!libPaths.equals("")) {
                     libPaths += "::";
                 }
                 libPaths += "-I" + aLib.getSourceFolder().getAbsolutePath();
             }
+
             ctx.set("includes", libPaths);
 
             ctx.startBuffer(true);
@@ -4854,6 +4876,8 @@ public class Sketch {
                         }
                     }
                 }
+            } else {
+                ctx.error("Error loading deps file");
             }
 
             ctx.rollback();
