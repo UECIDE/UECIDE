@@ -30,11 +30,11 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
-import java.io.File;
+import org.uecide.Context;
+import org.uecide.Base;
 
-public class vc_os implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_os extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         if (args.equals("name")) {
             return Base.getOSName();
         }
@@ -50,6 +50,6 @@ public class vc_os implements VariableCommand {
         if (args.equals("flavor")) {
             return Base.getOSFlavour();
         }
-        return "unknown";
+        throw new VariableCommandException("Invalid OS key");
     }
 }

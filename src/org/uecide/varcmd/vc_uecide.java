@@ -30,12 +30,13 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Base;
+import org.uecide.Context;
 import java.io.File;
 import java.util.UUID;
 
-public class vc_uecide implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_uecide extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         if (args.equals("name")) {
             return "UECIDE";
         }
@@ -54,6 +55,6 @@ public class vc_uecide implements VariableCommand {
             File jar = Base.getJarLocation();
             return jar.getAbsolutePath();
         }
-        return "unknown";
+        throw new VariableCommandException("Invalid UECIDE key");
     }
 }

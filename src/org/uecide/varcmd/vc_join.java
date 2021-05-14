@@ -30,18 +30,19 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
-import java.io.File;
+import org.uecide.Context;
 
-public class vc_join implements VariableCommand {
-    public String main(Context sketch, String args) {
-        int comma = args.indexOf(",");
-        if (comma == -1) {
-            return "[syntax error]";
+public class vc_join extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
+
+        String[] bits = args.split(",");
+
+        if (bits.length != 2) {
+            throw new VariableCommandException("Syntax Error");
         }
-    
-        String array = args.substring(0, comma);
-        String joiner = args.substring(comma + 1);
+
+        String array = bits[0];
+        String joiner = bits[1];
         return array.replaceAll("::", joiner);
     }
 }

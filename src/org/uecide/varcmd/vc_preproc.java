@@ -30,12 +30,14 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
-import java.io.*;
+import org.uecide.Base;
+import org.uecide.Context;
+import java.io.File;
+import java.io.PrintWriter;
 
-public class vc_preproc implements VariableCommand {
+public class vc_preproc extends VariableCommand {
 
-    public String main(Context ctx, String args) {
+    public String main(Context ctx, String args) throws VariableCommandException {
         ctx.snapshot();
         String file = args;
         String[] bits = args.split(",");
@@ -51,7 +53,7 @@ public class vc_preproc implements VariableCommand {
         File infile = new File(file);
         if (!infile.exists()) {
             ctx.rollback();
-            return "FILE NOT FOUND";
+            throw new VariableCommandException("File not found: " + file);
         }
 
         String data = Base.getFileAsString(infile);
@@ -73,14 +75,11 @@ public class vc_preproc implements VariableCommand {
             pw.print(data);
             pw.close();
         } catch (Exception e) {
-            Base.exception(e);
+            ctx.rollback();
+            throw new VariableCommandException(e.getMessage());
         }
 
         ctx.rollback();
-        if (tempfile != null) {
-            return tempfile.getAbsolutePath();
-        } else {
-            return "UNABLE TO CREATE TEMPFILE";
-        }
+        return tempfile.getAbsolutePath();
     }
 }

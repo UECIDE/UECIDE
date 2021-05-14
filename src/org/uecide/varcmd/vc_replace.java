@@ -30,16 +30,16 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
 
-public class vc_replace implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_replace extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
 
         if(bits.length != 3) {
-            return "Syntax error in replace - bad arg count";
-        } else {
-            return bits[0].replaceAll(bits[1], bits[2]);
+            throw new VariableCommandException("Syntax Error");
         }
+
+        return bits[0].replaceAll(bits[1], bits[2]);
     }
 }

@@ -30,19 +30,31 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
 
-public class vc_char implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_char extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         if (args.startsWith("0x")) {
             try {
-                int ch = Integer.parseInt(args.substring(2, 16));
+                int ch = Integer.parseInt(args.substring(2), 16);
                 return Character.toString((char)ch);
             } catch (Exception e) {
-                Base.exception(e);
-                return " ";
+                throw new VariableCommandException(e.getMessage());
+            }
+        } else if (args.startsWith("0")) {
+            try {
+                int ch = Integer.parseInt(args, 8);
+                return Character.toString((char)ch);
+            } catch (Exception e) {
+                throw new VariableCommandException(e.getMessage());
+            }
+        } else {
+            try {
+                int ch = Integer.parseInt(args, 10);
+                return Character.toString((char)ch);
+            } catch (Exception e) {
+                throw new VariableCommandException(e.getMessage());
             }
         }
-        return args;
     }
 }

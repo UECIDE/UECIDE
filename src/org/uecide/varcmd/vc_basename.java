@@ -30,14 +30,19 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+
 import java.io.File;
 
-public class vc_basename implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_basename extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
         String filename = bits[0];
         String extension = "";
+        if (bits.length > 2) {
+            throw new VariableCommandException("Synax Error");
+        }
+
         if (bits.length > 1) {
             extension = bits[1];
         }

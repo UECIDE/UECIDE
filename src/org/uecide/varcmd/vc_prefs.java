@@ -30,11 +30,11 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
-import java.io.File;
+import org.uecide.Context;
+import org.uecide.Preferences;
 
-public class vc_prefs implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_prefs extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         return Preferences.get(args);
     }
 }

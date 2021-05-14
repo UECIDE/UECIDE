@@ -30,24 +30,23 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
-import java.util.*;
+import org.uecide.Context;
+import java.util.Stack;
 
-public class vc_math implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_math extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
 
-        Stack<Float> stack = new Stack<Float>();
+        Stack<Double> stack = new Stack<Double>();
 
         for (String bit : bits) {
-            Float val = 0.0f;
+            Double val = 0.0d;
             boolean isNumber = false;
 
             try {
-                val = Float.parseFloat(bit);
+                val = Double.parseDouble(bit);
                 isNumber = true;
             } catch (Exception e) {
-                Base.exception(e);
                 isNumber = false;
             }
 
@@ -55,22 +54,28 @@ public class vc_math implements VariableCommand {
                 stack.push(val);
             } else {
                 if (bit.equals("+")) {
-                    Float a = stack.pop();
-                    Float b = stack.pop();
+                    Double a = stack.pop();
+                    Double b = stack.pop();
                     stack.push(a + b);
                 } else if (bit.equals("-")) {
-                    Float a = stack.pop();
-                    Float b = stack.pop();
+                    Double a = stack.pop();
+                    Double b = stack.pop();
                     stack.push(a - b);
                 } else if (bit.equals("/")) {
-                    Float a = stack.pop();
-                    Float b = stack.pop();
+                    Double a = stack.pop();
+                    Double b = stack.pop();
                     stack.push(a / b);
                 } else if (bit.equals("*")) {
-                    Float a = stack.pop();
-                    Float b = stack.pop();
+                    Double a = stack.pop();
+                    Double b = stack.pop();
                     stack.push(a * b);
-                } 
+                } else if (bit.equals("sin")) {
+                    Double a = stack.pop();
+                    stack.push(Math.sin(a));
+                } else if (bit.equals("cos")) {
+                    Double a = stack.pop();
+                    stack.push(Math.cos(a));
+                }
             }
         }
 

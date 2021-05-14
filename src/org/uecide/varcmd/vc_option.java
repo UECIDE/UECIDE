@@ -30,30 +30,38 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+import org.uecide.PropertyFile;
 
-public class vc_option implements VariableCommand {
-    public String main(Context ctx, String args) {
+public class vc_option extends VariableCommand {
+    public String main(Context ctx, String args) throws VariableCommandException {
 
         String[] bits = args.split("\\.");
 
-        if (bits.length != 2) {
-            return "ERR1";
+        if (bits.length < 2) {
+            throw new VariableCommandException("Syntax Error");
         }
 
         String opt = bits[0];
-        String key = bits[1];
+        String key = "";
+        for (int i = 1; i < bits.length; i++) {
+            if (i > 1) {
+                key += ".";
+            }
+            key += bits[i];
+        }
+
         String optval = ctx.getSketch().getOption(opt);
 
         if (optval == null) {
-            return "ERR2";
+            throw new VariableCommandException("Option not found");
         }
 
         String val = "options." + opt + "." + optval + "." + key;
         PropertyFile props = ctx.getMerged();
         String retval = props.get(val);
         if (retval == null) {
-            return "ERR3";
+            throw new VariableCommandException("Option property not found: " + val);
         }
         return retval;
     }

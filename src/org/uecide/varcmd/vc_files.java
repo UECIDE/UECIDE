@@ -30,13 +30,13 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
-import java.io.*;
+import org.uecide.Context;
+import java.io.File;
 
 // Given a folder, list all the files with a given extension within that folder.
 
-public class vc_files implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_files extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         int commaPos = args.indexOf(',');
 
         String path = args;
@@ -48,10 +48,10 @@ public class vc_files implements VariableCommand {
 
         File dir = new File(path);
         if (!dir.exists()) {    
-            return "[not found]";
+            throw new VariableCommandException("Directory not found: " + dir);
         }
         if (!dir.isDirectory()) {
-            return "[not directory]";
+            throw new VariableCommandException("Not a directory: " + dir);
         }
 
         File[] files = dir.listFiles();

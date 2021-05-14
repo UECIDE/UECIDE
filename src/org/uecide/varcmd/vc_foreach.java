@@ -30,31 +30,32 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
 
-public class vc_foreach implements VariableCommand {
-    public String main(Context sketch, String args) {
-        int commaPos = args.indexOf(',');
+public class vc_foreach extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
 
-        if(commaPos > 0) {
-            String data = args.substring(0, commaPos);
-            String format = args.substring(commaPos + 1);
-            String[] each = data.split("::");
-            String outString = "";
+        String[] bits = args.split(",");
 
-            for(String chunk : each) {
-                String ns = format.replaceAll("%0", chunk);
-
-                if(outString.equals("")) {
-                    outString = ns;
-                } else {
-                    outString = outString + "::" + ns;
-                }
-            }
-
-            return outString;
-        } else {
-            return "Syntax error in foreach";
+        if (bits.length != 2) {
+            throw new VariableCommandException("Syntax Error");
         }
+
+        String[] options = bits[0].split("::");
+        String format = bits[1];
+
+        String outString = "";
+
+        for(String option : options) {
+            String ns = format.replaceAll("%0", option);
+
+            if(outString.equals("")) {
+                outString = ns;
+            } else {
+                outString = outString + "::" + ns;
+            }
+        }
+
+        return outString;
     }
 }

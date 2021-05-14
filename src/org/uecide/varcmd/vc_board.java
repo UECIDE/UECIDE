@@ -30,13 +30,34 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+import org.uecide.Base;
+import org.uecide.Board;
 
-public class vc_board implements VariableCommand {
-    public String main(Context sketch, String args) {
-        if (args.equals("root")) {
-            return sketch.getBoard().getFolder().getAbsolutePath();
+public class vc_board extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
+
+        String[] alist = args.split(",");
+        Board board = sketch.getBoard();
+        String prop = "";
+
+        if (alist.length > 2) {
+            throw new VariableCommandException("Syntax Error");
         }
-        return sketch.getBoard().get(args);
+
+        if (alist.length == 2) {
+            board = Base.boards.get(alist[0]);
+            if (board == null) {
+                throw new VariableCommandException("Board not found: " + alist[0]);
+            }
+            prop = alist[1];
+        } else {
+            prop = alist[0];
+        }
+
+        if (prop.equals("root")) {
+            return board.getFolder().getAbsolutePath();
+        }
+        return board.get(prop);
     }
 }

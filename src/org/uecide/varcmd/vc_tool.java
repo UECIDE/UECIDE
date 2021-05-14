@@ -30,10 +30,12 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Base;
+import org.uecide.Context;
+import org.uecide.Tool;
 
-public class vc_tool implements VariableCommand {
-    public String main(Context ctx, String args) {
+public class vc_tool extends VariableCommand {
+    public String main(Context ctx, String args) throws VariableCommandException {
 
         String[] alist = args.split(",");
 
@@ -41,15 +43,14 @@ public class vc_tool implements VariableCommand {
         Tool tool = null;
 
         if (alist.length == 1) {
-            ctx.error("No tool name specified");
-            return "ERROR";
-        } else {
-            tool = Base.tools.get(alist[0]);
-            prop = alist[1];
+            throw new VariableCommandException("Syntax Error");
         }
 
+        tool = Base.tools.get(alist[0]);
+        prop = alist[1];
+
         if (tool == null) {
-            return "ERROR";
+            throw new VariableCommandException("Tool not found: " + alist[0]);
         }
 
         if (prop.equals("root")) {

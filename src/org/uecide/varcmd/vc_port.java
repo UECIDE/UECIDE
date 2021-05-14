@@ -30,18 +30,20 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+import org.uecide.CommunicationPort;
 
-public class vc_port implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_port extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         if (args == null) {
-            return "";
+            throw new VariableCommandException("No Port Specified");
         }
         CommunicationPort p = sketch.getDevice();
         String v = p.get(args);
         if (v == null) {
-            return "";
+            throw new VariableCommandException("Port Not Found");
         }
         return v;
     }
 }
+

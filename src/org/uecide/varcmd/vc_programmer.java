@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Majenko Technologies
+ * Copyright (c) 2015, Majenko Technologies
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification,
@@ -30,30 +30,34 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+import org.uecide.Base;
+import org.uecide.Programmer;
 
-public class vc_programmer implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_programmer extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
 
         String[] alist = args.split(",");
-        Programmer prog = sketch.getProgrammer();
+        Programmer programmer = sketch.getProgrammer();
+        String prop = "";
 
-        String prop = alist[alist.length-1];
-
-        if (alist.length == 1) {
-            prop = alist[0];
-        } else {
-            prog = Base.programmers.get(alist[0]);
-            prop = alist[1];
+        if (alist.length > 2) {
+            throw new VariableCommandException("Syntax Error");
         }
 
-        if (prog == null) {
-            return "ERROR";
+        if (alist.length == 2) {
+            programmer = Base.programmers.get(alist[0]);
+            if (programmer == null) {
+                throw new VariableCommandException("Programmer not found: " + alist[0]);
+            }
+            prop = alist[1];
+        } else {
+            prop = alist[0];
         }
 
         if (prop.equals("root")) {
-            return prog.getFolder().getAbsolutePath();
+            return programmer.getFolder().getAbsolutePath();
         }
-        return prog.getProperties().getPlatformSpecific(prop);
+        return programmer.get(prop);
     }
 }

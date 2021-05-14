@@ -31,22 +31,19 @@
 package org.uecide.varcmd;
 
 import org.uecide.Context;
-import org.uecide.Utils;
-import java.util.Random;
+import java.io.File;
 
-public class vc_random extends VariableCommand {
+public class vc_onefile extends VariableCommand {
     public String main(Context sketch, String args) throws VariableCommandException {
-        String[] bits = args.split(",");
-        if (bits.length != 2) {
-            throw new VariableCommandException("Syntax Error");
-        }
+        String[] files = args.split(",");
 
-        int low = Utils.s2i(bits[0]);
-        int high = Utils.s2i(bits[1]);
-        Random r = new Random();
-        int val = Math.abs(r.nextInt() / 2);
-        val = val % (high - low);
-        val += low;
-        return Integer.toString(val);
+        for (String file : files) {
+            File found = new File(file);
+            if (found.exists()) {
+                return found.getAbsolutePath();
+            }
+        }
+        throw new VariableCommandException("File not found");
     }
 }
+

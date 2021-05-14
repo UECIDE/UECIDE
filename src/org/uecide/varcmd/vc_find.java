@@ -30,35 +30,35 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+
 import java.io.File;
 
-public class vc_find implements VariableCommand {
-    public String main(Context sketch, String args) {
-        int commaPos = args.indexOf(',');
+public class vc_find extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
 
-        if(commaPos > 0) {
-            String data = args.substring(0, commaPos);
-            String fname = args.substring(commaPos + 1);
-            String[] each = data.split("::");
+        String[] bits = args.split(",");
+        if (bits.length != 2) {
+            throw new VariableCommandException("Syntax Error");
+        }
 
-            String outString = "";
+        String[] paths = bits[0].split("::");
+        String fname = bits[1];
 
-            for(String chunk : each) {
-                File f = new File(chunk);
+        String outString = "";
 
-                if(f.exists() && f.isDirectory()) {
-                    File ff = new File(f, fname);
+        for(String path : paths) {
+            File dir = new File(path);
 
-                    if(ff.exists()) {
-                        return ff.getAbsolutePath();
-                    }
+            if(dir.exists() && dir.isDirectory()) {
+                File file = new File(dir, fname);
+
+                if(file.exists()) {
+                    return file.getAbsolutePath();
                 }
             }
-
-            return "Not found";
-        } else {
-            return "Syntax Error in find";
         }
+
+        throw new VariableCommandException("File not found: " + fname);
     }
 }

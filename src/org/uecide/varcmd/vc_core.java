@@ -30,14 +30,34 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+import org.uecide.Core;
+import org.uecide.Base;
 
-public class vc_core implements VariableCommand {
-    public String main(Context sketch, String args) {
-        if(args.equals("root")) {
-            return sketch.getCore().getFolder().getAbsolutePath();
+public class vc_core extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
+
+        String[] alist = args.split(",");
+        Core core = sketch.getCore();
+        String prop = "";
+
+        if (alist.length > 2) {
+            throw new VariableCommandException("Syntax Error");
         }
 
-        return sketch.getCore().get(args);
+        if (alist.length == 2) {
+            core = Base.cores.get(alist[0]);
+            if (core == null) {
+                throw new VariableCommandException("Core not found: " + alist[0]);
+            }
+            prop = alist[1];
+        } else {
+            prop = alist[0];
+        }
+
+        if (prop.equals("root")) {
+            return core.getFolder().getAbsolutePath();
+        }
+        return core.get(prop);
     }
 }

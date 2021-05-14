@@ -60,8 +60,6 @@ public class Context {
 
     public StringBuilder buffer = null;
 
-    public HashMap<String, String> varcmds = new HashMap<String, String>();
-
     boolean bufferError = false;
 
     public PropertyFile settings = null;
@@ -92,9 +90,6 @@ public class Context {
         parser = src.parser;
         silence = src.silence;
 
-        for (String vc : src.varcmds.keySet()) {
-            varcmds.put(vc, src.varcmds.get(vc));
-        }
         settings = new PropertyFile(src.settings);
         sketchSettings = new PropertyFile(src.sketchSettings);
         savedSettings = new PropertyFile(src.savedSettings);
@@ -128,37 +123,8 @@ public class Context {
 
     }
 
-    public void loadVarCmdsFromDirectory(File vcdir) {
-        if (vcdir.exists() && vcdir.isDirectory()) {
-            File[] flist = vcdir.listFiles();
-            for (File f : flist) {
-                if (f.getName().endsWith(".jvc")) {
-                    String src = Base.getFileAsString(f);
-                    String fn = f.getName();
-                    fn = fn.substring(0, fn.length() - 4);
-                    varcmds.put(fn, src);
-                }
-            }
-        }
-    }
-
     public synchronized void updateSystem() {
-        // Load varcmds:
-        varcmds = new HashMap<String, String>();
-        loadVarCmdsFromDirectory(new File(Base.getDataFolder(), "usr/share/uecide/system/vc"));
 
-        if (compiler != null && compiler.get("system.varcmd") != null) {
-            loadVarCmdsFromDirectory(new File(compiler.getFolder(), compiler.get("system.varcmd")));
-        }
-        if (core != null && core.get("system.varcmd") != null) {
-            loadVarCmdsFromDirectory(new File(core.getFolder(), core.get("system.varcmd")));
-        }
-        if (board != null && board.get("system.varcmd") != null) {
-            loadVarCmdsFromDirectory(new File(board.getFolder(), board.get("system.varcmd")));
-        }
-        if (programmer != null && programmer.get("system.varcmd") != null) {
-            loadVarCmdsFromDirectory(new File(programmer.getFolder(), programmer.get("system.varcmd")));
-        }
     }
 
     // Getters for all the above.
@@ -284,7 +250,7 @@ public class Context {
 
     // Reporting and messaging functions.
 
-    public void error(Exception e) {
+    public void error(Throwable e) {
         if (editor != null) {
             editor.error(e);
             return;
@@ -883,59 +849,7 @@ public class Context {
     }
 
     public String runFunctionVariable(String command, String param) {
-        if (varcmds.get(command) != null) {
-            Object[] pars = {this, param};
-            Object ret = executeJavaScript(command, varcmds.get(command), "main", pars);
-            if (ret instanceof Boolean) {
-                if ((Boolean)ret == false) {
-                    return "ERR";
-                } else {
-                    return "OK";
-                }
-            } else {
-                return (String)ret;
-            }
-        }
-
-
-        try {
-            Class<?> c = Class.forName("org.uecide.varcmd.vc_" + command);
-
-            if(c == null) {
-                return "";
-            }
-
-            Constructor<?> ctor = c.getConstructor();
-            VariableCommand  p = (VariableCommand)(ctor.newInstance());
-
-            if (p == null) {
-                return "";
-            }
-
-            Class[] param_types = new Class<?>[2];
-            param_types[0] = org.uecide.Context.class;
-            param_types[1] = String.class;
-            Method m = c.getMethod("main", param_types);
-
-            if(m == null) {
-                return "";
-            }
-
-            Object[] args = new Object[2];
-            args[0] = this;
-            args[1] = param;
-            try {
-                return (String)m.invoke(p, args);
-            } catch (Exception e2) {
-                Base.exception(e2);
-            }
-            return "";
-        } catch(Exception e) {
-            Base.exception(e);
-            error(e);
-        }
-
-        return "";
+        return VariableCommand.run(this, command, param);
     }
 
     public Object runBuiltinCommand(String commandline) {
@@ -1292,7 +1206,7 @@ public class Context {
             process.exitValue();
             return false;
         } catch(IllegalThreadStateException e) {
-            Base.exception(e);
+            //Base.exception(e);
             return true;
         }
     }

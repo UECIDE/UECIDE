@@ -30,7 +30,7 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
 import java.io.File;
 
 import org.eclipse.jgit.api.*;
@@ -56,17 +56,17 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.KeyPair;
 
 
-public class vc_git implements VariableCommand {
+public class vc_git extends VariableCommand {
 
     File dotGit;
     FileRepository localRepo;
     File repoRoot;
     Git git;
 
-    public String main(Context sketch, String args) {
+    public String main(Context sketch, String args) throws VariableCommandException {
 
         if (!openRepo(sketch.getSketch().getFolder())) {
-            return "ERR:NOTGIT";
+            throw new VariableCommandException("Not a Git folder");
         }
         if (args.equals("hash")) {
             return getLatestCommit();
@@ -74,10 +74,10 @@ public class vc_git implements VariableCommand {
         if (args.equals("describe")) {
             return getDescription();
         }
-        return "ERR:NOKEY";
+        throw new VariableCommandException("Invalid Git key requested");
     }
 
-    public String getLatestCommit() {
+    public String getLatestCommit() throws VariableCommandException {
         try {
             LogCommand cmd = git.log();
 
@@ -88,25 +88,23 @@ public class vc_git implements VariableCommand {
             for (RevCommit commit : it) {
                 return commit.getId().toString();
             }
-            return "ERR:NOCOMMIT";
+            throw new VariableCommandException("No Git commit found");
         } catch (Exception e) {
-            Base.exception(e);
+            throw new VariableCommandException(e.getMessage());
         }
-        return "ERR:EXCEPT";
     }
 
-    public String getDescription() {
+    public String getDescription() throws VariableCommandException {
         try {
             DescribeCommand cmd = git.describe();
             String desc = cmd.call();
             return desc;
         } catch (Exception e) {
-            Base.exception(e);
-            return "ERR:NOTAG";
+            throw new VariableCommandException("No Git tag found");
         }
     }
 
-    public boolean openRepo(File where) {
+    public boolean openRepo(File where) throws VariableCommandException {
         try {
             File here = where;
             dotGit = new File(here, ".git");
@@ -126,11 +124,9 @@ public class vc_git implements VariableCommand {
             localRepo = new FileRepository(dotGit);
             git = new Git(localRepo);
         } catch (Exception e) {
-            Base.exception(e);
-            Base.error(e);
             localRepo = null;
             repoRoot = null;
-            return false;
+            throw new VariableCommandException(e.getMessage());
         }
         return true;
     }

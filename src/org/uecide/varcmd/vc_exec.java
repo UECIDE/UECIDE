@@ -30,11 +30,11 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
 
-public class vc_exec implements VariableCommand {
-    public String main(Context sketch, String args) {
-        if((Boolean)sketch.executeKey(args)) {
+public class vc_exec extends VariableCommand {
+    public String main(Context ctx, String args) throws VariableCommandException {
+        if((Boolean)ctx.executeKey(args)) {
             return "true";
         }
 

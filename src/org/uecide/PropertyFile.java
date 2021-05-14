@@ -509,7 +509,6 @@ public class PropertyFile {
         try {
             return Integer.parseInt(get(attribute));
         } catch(Exception e) {
-            Base.exception(e);
             return def;
         }
     }
@@ -519,7 +518,6 @@ public class PropertyFile {
         try {
             return Long.parseLong(get(attribute));
         } catch(Exception e) {
-            Base.exception(e);
             return def;
         }
     }
@@ -529,7 +527,6 @@ public class PropertyFile {
         try {
             return Float.parseFloat(get(attribute));
         } catch(Exception e) {
-            Base.exception(e);
             return def;
         }
     }
@@ -539,7 +536,6 @@ public class PropertyFile {
         try {
             return Integer.parseInt(get(attribute));
         } catch(Exception e) {
-            Base.exception(e);
             return 0;
         }
     }
@@ -549,7 +545,6 @@ public class PropertyFile {
         try {
             return Long.parseLong(get(attribute));
         } catch(Exception e) {
-            Base.exception(e);
             return 0;
         }
     }
@@ -559,7 +554,6 @@ public class PropertyFile {
         try {
             return Float.parseFloat(get(attribute));
         } catch(Exception e) {
-            Base.exception(e);
             return 0;
         }
     }
@@ -589,7 +583,6 @@ public class PropertyFile {
             try {
                 parsed = new Color(Integer.parseInt(s.substring(1), 16));
             } catch(Exception e) {
-                Base.exception(e);
             }
         }
 
@@ -738,7 +731,6 @@ public class PropertyFile {
 
             if(size <= 0) size = 12;
         } catch(Exception e) {
-            Base.exception(e);
             size = 12;
         }
 
@@ -750,8 +742,6 @@ public class PropertyFile {
                 Font baseFont = Font.createFont(Font.TRUETYPE_FONT, is);
                 font = baseFont.deriveFont(style, size);
             } catch (Exception e) {
-                Base.exception(e);
-                Base.error(e);
                 font = new Font("Monospaced", Font.PLAIN, 12);
             }
         } else {

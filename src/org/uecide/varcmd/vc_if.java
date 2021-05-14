@@ -30,33 +30,68 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
+import org.uecide.Utils;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
-public class vc_if implements VariableCommand {
-    public String main(Context sketch, String args) {
+public class vc_if extends VariableCommand {
+    public String main(Context sketch, String args) throws VariableCommandException {
         String[] bits = args.split(",");
 
         if(bits.length != 3) {
-            return "Syntax error in if - bad arg count";
-        } else {
-            String condition = bits[0];
-            String trueVal = bits[1];
-            String falseVal = bits[2];
+            throw new VariableCommandException("Syntax Error");
+        } 
 
-            String[] conditionBits = condition.split("=");
+        String condition = bits[0];
+        String trueVal = bits[1];
+        String falseVal = bits[2];
 
-            if(conditionBits.length != 2) {
-                return "Syntax Error in if - bad comparison";
-            } else {
-                String leftVal = conditionBits[0].trim();
-                String rightVal = conditionBits[1].trim();
 
-                if(leftVal.equals(rightVal)) {
-                    return trueVal;
-                } else {
-                    return falseVal;
-                }
-            }
+        Pattern pat = Pattern.compile("^\\s*(\\w+)\\s*([=!<>]+)\\s*(\\w+)\\s*$");
+        Matcher mat = pat.matcher(condition);
+
+        if (!mat.find()) {
+            throw new VariableCommandException("Syntax Error");
         }
+
+        String leftVal = mat.group(1);
+        String comparison = mat.group(2);
+        String rightVal = mat.group(3);
+
+        boolean result = false;
+
+        int leftNum = Utils.s2i(leftVal);
+        int rightNum = Utils.s2i(rightVal);
+
+        switch (comparison) {
+            case "=":
+            case "==":
+                result = leftVal.equals(rightVal);
+                break;
+            case "!=":
+            case "=!=":
+            case "!==":
+                result = !leftVal.equals(rightVal);
+                break;
+            case "<":
+                result = leftNum < rightNum;
+                break;
+            case ">":
+                result = leftNum > rightNum;
+                break;
+            case "<=":
+                result = leftNum <= rightNum;
+                break;
+            case ">=":
+                result = leftNum >= rightNum;
+                break;
+            default:
+                throw new VariableCommandException("Syntax Error");
+        }
+        if (result == true) {
+            return trueVal;
+        }
+        return falseVal;
     }
 }

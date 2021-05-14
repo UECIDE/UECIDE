@@ -30,16 +30,16 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.*;
+import org.uecide.Context;
 
-public class vc_sketch implements VariableCommand {
-    public String main(Context ctx, String args) {
+public class vc_sketch extends VariableCommand {
+    public String main(Context ctx, String args) throws VariableCommandException {
         if (args.equals("root")) {
             return ctx.getSketch().getFolder().getAbsolutePath();
         }
         if (args.equals("name")) {
             return ctx.getSketch().getName();
         }
-        return "[ERR]";
+        throw new VariableCommandException("Invalid sketch key");
     }
 }
