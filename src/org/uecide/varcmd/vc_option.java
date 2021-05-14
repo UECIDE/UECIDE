@@ -59,7 +59,7 @@ public class vc_option extends VariableCommand {
 
         String val = "options." + opt + "." + optval + "." + key;
         PropertyFile props = ctx.getMerged();
-        String retval = props.get(val);
+        String retval = props.get(val, "");
         if (retval == null) {
             throw new VariableCommandException("Option property not found: " + val);
         }

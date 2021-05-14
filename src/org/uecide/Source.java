@@ -84,13 +84,33 @@ public class Source {
         } catch (Exception e) {
             Base.exception(e);
             Base.error(e);
-            System.err.println("Error downloading " + url + ": " + e.getMessage());
+            System.err.println("Error downloading resource " + url + ": " + e.getMessage());
         }
         return inData.toString();
     }
 
     String getCompressedFileLocal(String url) {
-        return "";
+        if (!url.startsWith("/")) {
+            url = "/" + url;
+        }
+        StringBuilder inData = new StringBuilder();
+        try {
+            byte[] buffer = new byte[1024];
+            InputStream rawIn = new FileInputStream(new File(url));
+            GZIPInputStream in = new GZIPInputStream(rawIn);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            int n;
+            while ((n = in.read(buffer)) > 0) {
+                out.write(buffer, 0, n);
+            }
+            in.close();
+            inData.append(out.toString("UTF-8"));
+        } catch (Exception e) {
+            Base.exception(e);
+            Base.error(e);
+            System.err.println("Error downloading local file " + url + ": " + e.getMessage());
+        }
+        return inData.toString();
     }
 
     public Package[] getPackages() {

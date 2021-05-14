@@ -305,7 +305,17 @@ public class Package implements Comparable, Serializable {
                             return false;
                         }
                     } else if (repo.startsWith("file://")) {
-                        return false;
+                        String src = repo.substring(7);
+                        src += "/";
+                        src += properties.get("Filename");
+                        File sfile = new File(src);
+                        if (!sfile.exists()) {
+                            return false;
+                        }
+                        Base.copyFile(sfile, downloadTo);
+                        return true;
+
+                        
                     } else {
                         System.err.println("Error: No URI handler for " + repo);
                         return false;

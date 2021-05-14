@@ -52,10 +52,7 @@ public abstract class VariableCommand {
             String ret = vc.main(ctx, param);
             return ret;
         } catch (VariableCommandException ex) {
-            ex.printStackTrace();
-            Base.exception(ex);
-            ctx.error(ex);
-            ctx.error(vc.toString());
+            ctx.error(ex.getMessage());
         } catch (Exception ex) {
             ex.printStackTrace();
             Base.exception(ex);

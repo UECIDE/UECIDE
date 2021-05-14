@@ -2854,30 +2854,30 @@ public class Sketch {
         localCtx.set("source.name", src.getAbsolutePath());
         localCtx.set("object.name", dest.getAbsolutePath());
 
-        localCtx.addDataStreamParser(new DataStreamParser() {
-            public String parseStreamMessage(Context ctx, String m) {
-                if (parseLineForWarningMessage(ctx, m)) {
-                    return "";
-                }
-                return m;
-            }
-            public String parseStreamError(Context ctx, String m) {
-                if (parseLineForErrorMessage(ctx, m)) {
-                    return "";
-                }
-                if (parseLineForWarningMessage(ctx, m)) {
-                    return "";
-                }
-                return m;
-            }
-        });
-
+//        localCtx.addDataStreamParser(new DataStreamParser() {
+//            public String parseStreamMessage(Context ctx, String m) {
+//                if (parseLineForWarningMessage(ctx, m)) {
+//                    return "";
+//                }
+//                return m;
+//            }
+//            public String parseStreamError(Context ctx, String m) {
+//                if (parseLineForErrorMessage(ctx, m)) {
+//                    return "";
+//                }
+//                if (parseLineForWarningMessage(ctx, m)) {
+//                    return "";
+//                }
+//                return m;
+//            }
+//        });
+//
         String output = "";
         if(!(Boolean)localCtx.executeKey(recipe)) {
-            localCtx.removeDataStreamParser();
+//            localCtx.removeDataStreamParser();
             return null;
         }
-        localCtx.removeDataStreamParser();
+//        localCtx.removeDataStreamParser();
 
         if(!dest.exists()) {
             return null;

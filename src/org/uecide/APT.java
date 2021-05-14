@@ -425,13 +425,13 @@ System.err.println("Required package " + p.getName());
         for (Package dep : deps) {
             if (!isInstalled(dep) || isUpgradable(dep)) {
                 if (!dep.fetchPackage(cacheFolder)) {
-                    System.err.println("Error downloading " + dep);
+                    System.err.println("Error downloading " + dep + " (fetch dep failed)");
                     return;
                 }
             }
         }
         if (!p.fetchPackage(cacheFolder)) {
-            System.err.println("Error downloading " + p);
+            System.err.println("Error downloading " + p + " (fetch failed)");
         }
 
         for (Package dep : deps) {

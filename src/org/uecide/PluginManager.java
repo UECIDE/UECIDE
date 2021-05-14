@@ -998,6 +998,9 @@ public class PluginManager implements PropertyChangeListener
     public void propertyChange(PropertyChangeEvent e) {
         if (e.getPropertyName().equals("finished")) {
             QueueWorker[] finished = queue.getFinishedTasks();
+            if (queue.getQueueSize() == 0) {
+                System.out.println("Tasks complete");
+            }
         }
     }
 
