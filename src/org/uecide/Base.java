@@ -1960,65 +1960,6 @@ System.err.println("Loading class " + className);
         loadJSPlugins();
     }
 
-    public static Version getPluginVersion(String plugin) {
-
-        Class<?> pluginClass = plugins.get(plugin);
-        if (pluginClass == null) {
-            return new Version(null);
-        }
-        File f = Base.getJarLocation(pluginClass);
-
-        try {
-            JarFile myself = new JarFile(f);
-            Manifest manifest = myself.getManifest();
-            myself.close();
-            Attributes manifestContents = manifest.getMainAttributes();
-
-            return new Version(manifestContents.getValue("Version"));
-        } catch (IOException ex) {
-            Base.exception(ex);
-        }
-        return new Version(null);
-    }
-
-    public static String findClassInZipFile(File file) {
-        String base = file.getName();
-
-        if(!base.endsWith(".jar")) {
-            return null;
-        }
-
-        base = base.substring(0, base.length() - 4);
-
-        String classFileName = "/" + base + ".class";
-
-
-        try {
-            ZipFile zipFile = new ZipFile(file);
-            Enumeration<?> entries = zipFile.entries();
-
-            while(entries.hasMoreElements()) {
-                ZipEntry entry = (ZipEntry) entries.nextElement();
-
-                if(!entry.isDirectory()) {
-                    String name = entry.getName();
-
-                    if(name.endsWith(classFileName)) {
-                        // Remove .class and convert slashes to periods.
-                        zipFile.close();
-                        return name.substring(0, name.length() - 6).replace('/', '.');
-                    }
-                }
-            }
-            zipFile.close();
-        } catch(IOException e) {
-            Base.exception(e);
-            error(e);
-        }
-
-        return null;
-    }
-
     public static File getTmpDir() {
         return new File(System.getProperty("java.io.tmpdir"));
     }
