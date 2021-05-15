@@ -419,7 +419,9 @@ public class PluginManager implements PropertyChangeListener
             }
             public void keyReleased(KeyEvent e) {
                 try {
-                    updateTree();
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        updateTree();
+                    }
                 } catch (Exception ex) { 
                     Base.exception(ex);
                     Base.error(ex); 
