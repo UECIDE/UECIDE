@@ -181,7 +181,6 @@ public class Base {
      *  object and passes the command line arguments.
      */
     public static void main(String args[]) {
-        replaceSystemClassLoader();
         try {
             new Base(args);
         } catch (Exception e) {
@@ -3059,19 +3058,6 @@ System.err.println("Loading class " + className);
             } else {
                 manualPages.mergeData(partFile, k);
             }
-        }
-    }
-
-    private static void replaceSystemClassLoader() {
-        try {
-            urlClassLoader = new URLClassLoader(new URL[0], ClassLoader.getSystemClassLoader());
-
-            Field scl = ClassLoader.class.getDeclaredField("scl");
-            scl.setAccessible(true);
-            scl.set(null, urlClassLoader);
-            Thread.currentThread().setContextClassLoader(urlClassLoader);
-        } catch (Exception ex) {
-            Base.exception(ex);
         }
     }
 
