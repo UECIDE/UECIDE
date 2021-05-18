@@ -403,7 +403,8 @@
             <maven group="jfree"                                   artifact="jfreechart"               version="1.0.13" />
             <!--maven group="junit"                                   artifact="junit"                    version="4.10" /-->
             <!--maven group="org.dnsjava"                             artifact="dnsjava"                  version="2.1.5" /-->
-            <maven group="dnsjava"                                 artifact="dnsjava"                  version="2.1.8" />
+            <!--maven group="dnsjava"                                 artifact="dnsjava"                  version="2.1.8" /-->
+            <maven group="dnsjava"                                 artifact="dnsjava"                  version="3.3.1" />
             <maven group="org.swinglabs"                        artifact="swingx"   version="1.6.1" />
             <!--maven group="com.fazecast"                         artifact="jSerialComm"              version="2.5.1" /-->
             <maven group="de.waldheinz"                         artifact="fat32-lib"                version="0.6.5" />
