@@ -284,7 +284,9 @@ public class APT {
         }
 
         Package[] ul = getUpgradeList();
-        System.out.println(ul.length + " packages can be upgraded.");
+        if (ul.length > 0) {
+            System.out.println(ul.length + " packages can be upgraded.");
+        }
     }
 
     public void listPackages(String section) {
