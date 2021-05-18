@@ -32,7 +32,7 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class bullet2 implements BuiltinCommand {
+public class bullet2 extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         StringBuilder sb = new StringBuilder();
 

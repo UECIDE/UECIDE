@@ -32,7 +32,7 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class echo implements BuiltinCommand {
+public class echo extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         StringBuilder sb = new StringBuilder();
 

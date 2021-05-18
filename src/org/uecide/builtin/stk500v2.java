@@ -34,7 +34,7 @@ import org.uecide.*;
 import java.util.*;
 import java.io.*;
 
-public class stk500v2 implements BuiltinCommand, CommsListener {
+public class stk500v2 extends BuiltinCommand implements CommsListener {
 
     boolean replyIsAvailable = false;
 

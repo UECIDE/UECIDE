@@ -33,7 +33,7 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-public class stdin implements BuiltinCommand {
+public class stdin extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
 
         if (arg.length < 2) { // We need at least a file and a command

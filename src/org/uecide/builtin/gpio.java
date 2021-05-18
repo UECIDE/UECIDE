@@ -33,7 +33,7 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-public class gpio implements BuiltinCommand {
+public class gpio extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         try {
             int pin = Integer.parseInt(arg[0]);

@@ -32,7 +32,7 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class foreach implements BuiltinCommand {
+public class foreach extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         if (arg.length != 3) {
             for (String a : arg) {

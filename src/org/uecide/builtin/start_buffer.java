@@ -32,7 +32,7 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class start_buffer implements BuiltinCommand {
+public class start_buffer extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         ctx.startBuffer(arg.length == 1);
         return true;

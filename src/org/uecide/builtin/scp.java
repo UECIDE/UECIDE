@@ -36,7 +36,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.io.*;
 
-public class scp implements BuiltinCommand {
+public class scp extends BuiltinCommand {
     String host;
     String user;
 

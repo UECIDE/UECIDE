@@ -46,7 +46,7 @@ import java.awt.*;
 import javax.swing.*;
 import java.io.*;
 
-public class ssh  implements BuiltinCommand {
+public class ssh  extends BuiltinCommand {
     String host;
     String user;
 

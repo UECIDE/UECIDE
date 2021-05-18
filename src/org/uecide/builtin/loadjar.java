@@ -34,7 +34,7 @@ import org.uecide.*;
 import java.io.*;
 import java.net.*;
 
-public class loadjar implements BuiltinCommand {
+public class loadjar extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         try {
             if (arg.length != 1) {

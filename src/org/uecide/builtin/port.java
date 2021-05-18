@@ -40,7 +40,7 @@ import javax.usb.*;
 import javax.usb.event.*;
 
 
-public class port implements BuiltinCommand {
+public class port extends BuiltinCommand {
     static CommunicationPort comPort = null;
 
     public boolean main(org.uecide.Context ctx, String[] arg) {

@@ -35,7 +35,7 @@ import java.io.*;
 
 import uk.co.majenko.hexfile.*;
 
-public class merge_hex implements BuiltinCommand {
+public class merge_hex extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         try {
             if (arg.length < 2) {

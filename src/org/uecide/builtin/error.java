@@ -32,7 +32,7 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public class error implements BuiltinCommand {
+public class error extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         StringBuilder sb = new StringBuilder();
 

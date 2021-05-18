@@ -36,7 +36,7 @@ import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.*;
 
 
-public class cp implements BuiltinCommand {
+public class cp extends BuiltinCommand {
     Context ctx;
 
     public boolean main(Context c, String[] arg) {

@@ -33,7 +33,7 @@ package org.uecide.builtin;
 import org.uecide.*;
 import java.io.*;
 
-public class append implements BuiltinCommand {
+public class append extends BuiltinCommand {
     public boolean main(Context ctx, String[] arg) {
         try {
             File f = new File(arg[0]);

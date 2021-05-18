@@ -32,7 +32,66 @@ package org.uecide.builtin;
 
 import org.uecide.*;
 
-public abstract interface BuiltinCommand {
-        public abstract boolean main(Context ctx, String[] arg);
+public abstract class BuiltinCommand {
+        public abstract boolean main(Context ctx, String[] arg) throws BuiltinCommandException;
         public abstract void kill();
+
+        public static boolean run(Context c, String cmdName, String[] arg) {
+                BuiltinCommand cmd = null;
+
+                switch(cmdName) {
+                        case "append":          cmd = new append(); break;
+                        case "append_var":      cmd = new append_var(); break;
+                        case "bullet2":         cmd = new bullet2(); break;
+                        case "bullet3":         cmd = new bullet3(); break;
+                        case "bullet":          cmd = new bullet(); break;
+                        case "cout":            cmd = new cout(); break;
+                        case "cp":              cmd = new cp(); break;
+                        case "delay":           cmd = new delay(); break;
+                        case "dot":             cmd = new dot(); break;
+                        case "echo":            cmd = new echo(); break;
+                        case "ecma":            cmd = new ecma(); break;
+                        case "end_buffer":      cmd = new end_buffer(); break;
+                        case "error":           cmd = new error(); break;
+                        case "exec":            cmd = new exec(); break;
+                        case "fetch":           cmd = new fetch(); break;
+                        case "foreach":         cmd = new foreach(); break;
+                        case "getauth":         cmd = new getauth(); break;
+                        case "gpio":            cmd = new gpio(); break;
+                        case "loadjar":         cmd = new loadjar(); break;
+                        case "lock_port":       cmd = new lock_port(); break;
+                        case "merge_hex":       cmd = new merge_hex(); break;
+                        case "port":            cmd = new port(); break;
+                        case "push":            cmd = new push(); break;
+                        case "read_var":        cmd = new read_var(); break;
+                        case "refresh":         cmd = new refresh(); break;
+                        case "scp":             cmd = new scp(); break;
+                        case "set":             cmd = new set(); break;
+                        case "spin":            cmd = new spin(); break;
+                        case "ssh":             cmd = new ssh(); break;
+                        case "start_buffer":    cmd = new start_buffer(); break;
+                        case "stdin":           cmd = new stdin(); break;
+                        case "stk500v1":        cmd = new stk500v1(); break;
+                        case "stk500v2":        cmd = new stk500v2(); break;
+                        case "tmpfile":         cmd = new tmpfile(); break;
+                        case "unfetch":         cmd = new unfetch(); break;
+                        case "unlock_port":     cmd = new unlock_port(); break;
+                        case "warning":         cmd = new warning(); break;
+                        case "write":           cmd = new write(); break;
+                        case "write_var":       cmd = new write_var(); break;
+                        default:
+                                c.error("Unknown builtin command: " + cmdName);
+                                return false;
+                }
+
+                try {
+                        return cmd.main(c, arg);
+                } catch (BuiltinCommandException ex) {
+                        c.error(ex.getMessage());
+                        return false;
+                } catch (Exception ex) {
+                        c.error(ex);
+                        return false;
+                }
+        }
 }

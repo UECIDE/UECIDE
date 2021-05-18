@@ -34,7 +34,7 @@ import org.uecide.*;
 import javax.script.*;
 import java.io.*;
 
-public class ecma implements BuiltinCommand {
+public class ecma extends BuiltinCommand {
     PipedReader stdo_pr;
     PipedWriter stdo_pw;
     PipedReader stde_pr;
