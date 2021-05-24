@@ -27,6 +27,7 @@ public abstract class VariableCommand {
                 case "git": vc = new vc_git(); break;
                 case "hex2dec": vc = new vc_hex2dec(); break;
                 case "if": vc = new vc_if(); break;
+                case "isset": vc = new vc_isset(); break;
                 case "java": vc = new vc_java(); break;
                 case "join": vc = new vc_join(); break;
                 case "lcase": vc = new vc_lcase(); break;
@@ -52,7 +53,7 @@ public abstract class VariableCommand {
             String ret = vc.main(ctx, param);
             return ret;
         } catch (VariableCommandException ex) {
-            ctx.error(ex.getMessage());
+            ctx.error(ex);
         } catch (Exception ex) {
             ex.printStackTrace();
             Base.exception(ex);

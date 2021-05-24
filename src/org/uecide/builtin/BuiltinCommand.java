@@ -48,12 +48,14 @@ public abstract class BuiltinCommand {
                         case "cout":            cmd = new cout(); break;
                         case "cp":              cmd = new cp(); break;
                         case "delay":           cmd = new delay(); break;
+                        case "deltree":         cmd = new deltree(); break;
                         case "dot":             cmd = new dot(); break;
                         case "echo":            cmd = new echo(); break;
                         case "ecma":            cmd = new ecma(); break;
                         case "end_buffer":      cmd = new end_buffer(); break;
                         case "error":           cmd = new error(); break;
                         case "exec":            cmd = new exec(); break;
+                        case "export":          cmd = new export(); break;
                         case "fetch":           cmd = new fetch(); break;
                         case "foreach":         cmd = new foreach(); break;
                         case "getauth":         cmd = new getauth(); break;

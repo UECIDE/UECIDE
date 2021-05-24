@@ -31,12 +31,9 @@
 package org.uecide.varcmd;
 
 import org.uecide.Context;
-import org.uecide.Utils;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
-public class vc_if extends VariableCommand {
-    public String main(Context sketch, String args) throws VariableCommandException {
+public class vc_isset extends VariableCommand {
+    public String main(Context ctx, String args) throws VariableCommandException {
         String[] bits = args.split(",");
 
         if(bits.length != 3) {
@@ -47,48 +44,7 @@ public class vc_if extends VariableCommand {
         String trueVal = bits[1];
         String falseVal = bits[2];
 
-        Pattern pat = Pattern.compile("^\\s*([^\\s=!<>]+)\\s*([=!<>]+)\\s*([^\\s=!<>]+)\\s*$");
-        Matcher mat = pat.matcher(condition);
-
-        if (!mat.find()) {
-            throw new VariableCommandException("Syntax Error");
-        }
-
-        String leftVal = mat.group(1);
-        String comparison = mat.group(2);
-        String rightVal = mat.group(3);
-
-        boolean result = false;
-
-        int leftNum = Utils.s2i(leftVal);
-        int rightNum = Utils.s2i(rightVal);
-
-        switch (comparison) {
-            case "=":
-            case "==":
-                result = leftVal.equals(rightVal);
-                break;
-            case "!=":
-            case "=!=":
-            case "!==":
-                result = !leftVal.equals(rightVal);
-                break;
-            case "<":
-                result = leftNum < rightNum;
-                break;
-            case ">":
-                result = leftNum > rightNum;
-                break;
-            case "<=":
-                result = leftNum <= rightNum;
-                break;
-            case ">=":
-                result = leftNum >= rightNum;
-                break;
-            default:
-                throw new VariableCommandException("Syntax Error");
-        }
-        if (result == true) {
+        if (ctx.getMerged().get(condition) != null) {
             return trueVal;
         }
         return falseVal;
