@@ -102,7 +102,6 @@ public class Base {
     // these are static because they're used by Sketch
     static private File examplesFolder;
     static private File librariesFolder;
-    static private File toolsFolder;
     static private File hardwareFolder;
     public static ArrayList<File> MRUList;
     public static HashMap<File,Integer> MCUList;
@@ -123,7 +122,6 @@ public class Base {
     public static TreeMap<String, Board> boards;
     public static TreeMap<String, Core> cores;
     public static TreeMap<String, Programmer> programmers;
-    public static TreeMap<String, Tool> tools;
 //    public static TreeMap<String, Plugin> plugins;
     public static TreeMap<String, Class<?>> plugins = new TreeMap<String, Class<?>>();
     public static ArrayList<Plugin> pluginInstances;
@@ -636,7 +634,6 @@ public class Base {
             platform.init(this);
             compilers = new TreeMap<String, Compiler>();
             cores = new TreeMap<String, Core>();
-            tools = new TreeMap<String, Tool>();
             boards = new TreeMap<String, Board>();
             programmers = new TreeMap<String, Programmer>();
             plugins = new TreeMap<String, Class<?>>();
@@ -690,7 +687,6 @@ public class Base {
 
         Debug.message("Get system folders");
         examplesFolder = getContentFile("examples");
-        toolsFolder = getContentFile("tools");
 
         // Get the sketchbook path, and make sure it's set properly
         String sketchbookPath = preferences.get("locations.sketchbook");
@@ -714,7 +710,6 @@ public class Base {
 
         compilers = new TreeMap<String, Compiler>();
         cores = new TreeMap<String, Core>();
-        tools = new TreeMap<String, Tool>();
         boards = new TreeMap<String, Board>();
         programmers = new TreeMap<String, Programmer>();
         plugins = new TreeMap<String, Class<?>>();
@@ -1388,29 +1383,7 @@ System.err.println("Loading class " + className);
     }
 
     public static void loadTools() {
-
         Tool.loadTools();
-
-        tools.clear();
-//        toolLoaderThread = new Thread() {
-//            public void run() {
-
-                ArrayList<File> toolFiles = FileCache.getFilesByName("tool.txt");
-                for (File tfile : toolFiles) {
-                    if(tfile.exists()) {
-                        Debug.message("    Loading tool " + tfile.getAbsolutePath());
-                        Tool newTool = new Tool(tfile.getParentFile());
-
-                        if(newTool.isValid()) {
-                            tools.put(newTool.getName(), newTool);
-                        } else {
-                            Debug.message("    ==> IS NOT VALID!!!");
-                        }
-                    }
-                }
-//            }
-//        };
-//        toolLoaderThread.start();
     }
 
 
@@ -1606,16 +1579,6 @@ System.err.println("Loading class " + className);
 
     public static String getExamplesPath() {
         return examplesFolder.getAbsolutePath();
-    }
-
-
-    public static File getToolsFolder() {
-        return toolsFolder;
-    }
-
-
-    public static String getToolsPath() {
-        return toolsFolder.getAbsolutePath();
     }
 
 
@@ -2267,7 +2230,6 @@ System.err.println("Loading class " + className);
     }
 
     public static void rescanTools() {
-        tools = new TreeMap<String, Tool>();
         loadTools();
     }
 
@@ -2954,10 +2916,6 @@ System.err.println("Loading class " + className);
             extension = fileName.substring(i+1);
         }
         return extension;
-    }
-
-    public static Tool getTool(String name) {
-        return tools.get(name);
     }
 
     public static void loadAssets() throws IOException {

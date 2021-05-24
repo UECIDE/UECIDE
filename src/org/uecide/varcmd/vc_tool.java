@@ -30,7 +30,6 @@
 
 package org.uecide.varcmd;
 
-import org.uecide.Base;
 import org.uecide.Context;
 import org.uecide.Tool;
 
@@ -46,7 +45,7 @@ public class vc_tool extends VariableCommand {
             throw new VariableCommandException("Syntax Error");
         }
 
-        tool = Base.tools.get(alist[0]);
+        tool = Tool.getTool(alist[0]);
         prop = alist[1];
 
         if (tool == null) {

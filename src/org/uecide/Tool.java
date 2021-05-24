@@ -30,15 +30,14 @@
 
 package org.uecide;
 
-import java.io.*;
-import java.util.*;
-
-import org.uecide.plugin.*;
-
-import java.util.regex.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Tool extends UObject {
-    public static ArrayList<Tool> tools = new ArrayList<Tool>();
+    public static HashMap<String, Tool> tools = new HashMap<String, Tool>();
 
 
     public Tool(File folder) {
@@ -88,7 +87,7 @@ public class Tool extends UObject {
 
     public static ArrayList<ToolMenu> getToolMenuItems() {
         ArrayList<ToolMenu> out = new ArrayList<ToolMenu>();
-        for (Tool tool : tools) {
+        for (Tool tool : tools.values()) {
             ArrayList<ToolMenu> items = tool.getMenuItems();
             out.addAll(items);
         }
@@ -97,10 +96,11 @@ public class Tool extends UObject {
 
     public static ArrayList<ToolIcon> getRegionIcons(int region) throws IOException {
         ArrayList<ToolIcon> out = new ArrayList<ToolIcon>();
-        for (Tool tool : tools) {
+        for (Tool tool : tools.values()) {
             ArrayList<ToolIcon> icons = tool.getIcons(region);
             out.addAll(icons);
         }
+        Collections.sort(out);
         return out;
     }
 
@@ -122,10 +122,14 @@ public class Tool extends UObject {
                 File tfile = new File(f, "tool.txt");
                 if (tfile.exists()) {
                     Tool t = new Tool(f);
-                    tools.add(t);
+                    tools.put(t.getName(), t);
                 }
             }
         }
         return true;
+    }
+
+    public static Tool getTool(String name) {
+        return tools.get(name);
     }
 }

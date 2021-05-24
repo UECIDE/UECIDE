@@ -30,7 +30,17 @@ public class export extends BuiltinCommand {
 
         File dir = new File(args[0], sketch.getName());
         if (dir.exists()) {
-            throw new BuiltinCommandException("Directory exists");
+            File[] files = dir.listFiles();
+            for (File f : files) {
+                if (f.getName().equals("build")) {
+                    if (f.isDirectory()) continue;
+                }
+                if (f.isDirectory()) {
+                    Base.removeDir(f);
+                } else {
+                    f.delete();
+                }
+            }
         }
 
         dir.mkdirs();
@@ -39,8 +49,6 @@ public class export extends BuiltinCommand {
         File mainOutputFile = new File(dir, mainFile.getName());
 
         boolean hasHeader = false;
-
-        
 
         for (File f : sketch.sketchFiles) {
             int ft = FileType.getType(f);

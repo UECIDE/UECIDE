@@ -1263,7 +1263,7 @@ public class Sketch {
 
         ArrayList<FunctionBookmark> protos = new ArrayList<FunctionBookmark>();
         
-        Tool t = Base.getTool("ctags");
+        Tool t = Tool.getTool("ctags");
         if (t != null) {
             Pattern pat = Pattern.compile("\\^([^\\(]+)\\(");
             ctx.set("filename", f.getName());

@@ -4006,40 +4006,6 @@ public class Editor extends JFrame {
                 Base.exception(e);
             }
         }
-
-                
-        if ((filterFlags & (Plugin.MENU_TREE_ID | Plugin.MENU_BOTTOM)) == (Plugin.MENU_TREE_ID | Plugin.MENU_BOTTOM)) {
-            Object o = node.getUserObject();
-            if (o instanceof File) {
-                File f = (File)o;
-                String ext = Base.getFileExtension(f);
-                for (Tool tool : Base.tools.values()) {
-                    String[] entries = tool.getProperties().childKeysOf("sketchtree");
-                    if (entries.length > 0) {
-                        for (String key : entries) {
-                            String reqExt = tool.get("sketchtree." + key + ".extension");
-                            if (reqExt == null) continue;
-                            if (reqExt.equals(ext)) {
-                                JMenuItemWithFileAndTool item = new JMenuItemWithFileAndTool(tool.get("sketchtree." + key + ".name"), f, tool);
-                                item.setActionCommand(key);
-                                item.addActionListener(new ActionListener() {
-                                    public void actionPerformed(ActionEvent e) {
-                                        JMenuItemWithFileAndTool item = (JMenuItemWithFileAndTool)(e.getSource());
-                                        Tool t = item.getTool();
-                                        File f = item.getFile();
-                                        Context ctx = loadedSketch.getContext();
-                                        ctx.set("tool.file", f.getAbsolutePath());
-                                        String cmd = e.getActionCommand();
-                                        t.execute(ctx, "sketchtree." + cmd + ".command");
-                                    }
-                                });
-                                menu.add(item);
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     public void addPluginsToMenu(JPopupMenu menu, int filterFlags) {
@@ -5958,7 +5924,7 @@ public class Editor extends JFrame {
             return;
         }
         if (type.equals("SPIFFS")) {
-            Tool t = Base.getTool("mkspiffs");
+            Tool t = Tool.getTool("mkspiffs");
             if (t == null) {
                 alert("Unable to find the mkspiffs package");
                 return;

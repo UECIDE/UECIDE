@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.File;
 //import javax.swing.ImageIcon;
 
-public class ToolIcon extends ToolbarButton implements ActionListener {
+public class ToolIcon extends ToolbarButton implements ActionListener, Comparable<ToolIcon> {
     public static final int TOOLBAR = 0;
     public static final int EDITOR = 1;
 
@@ -22,6 +22,7 @@ public class ToolIcon extends ToolbarButton implements ActionListener {
     public String icon;
     public Context ctx = null;
     public CleverIcon imgIcon = null;
+    public int weight = 0;
     
     public ToolIcon(Tool t, String k, PropertyFile data, int s) throws IOException {
         super(data.get("icon"), data.get("name"), s);
@@ -31,6 +32,7 @@ public class ToolIcon extends ToolbarButton implements ActionListener {
 
         name = data.get("name");
         icon = data.get("icon");
+        weight = data.getInteger("weight");
 
         try {
             imgIcon = new CleverIcon(s, new File(t.getFolder(), icon));
@@ -60,5 +62,15 @@ public class ToolIcon extends ToolbarButton implements ActionListener {
             });
             t.start();
         }
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public int compareTo(ToolIcon t) {
+        if (weight < t.getWeight()) return -1;
+        if (weight > t.getWeight()) return 1;
+        return 0;
     }
 }

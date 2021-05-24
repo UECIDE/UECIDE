@@ -31,6 +31,7 @@ public abstract class VariableCommand {
                 case "java": vc = new vc_java(); break;
                 case "join": vc = new vc_join(); break;
                 case "lcase": vc = new vc_lcase(); break;
+                case "library": vc = new vc_library(); break;
                 case "math": vc = new vc_math(); break;
                 case "onefile": vc = new vc_onefile(); break;
                 case "option": vc = new vc_option(); break;
@@ -53,6 +54,8 @@ public abstract class VariableCommand {
             String ret = vc.main(ctx, param);
             return ret;
         } catch (VariableCommandException ex) {
+            ex.printStackTrace();
+            Base.exception(ex);
             ctx.error(ex);
         } catch (Exception ex) {
             ex.printStackTrace();

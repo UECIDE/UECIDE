@@ -40,6 +40,14 @@ public class vc_sketch extends VariableCommand {
         if (args.equals("name")) {
             return ctx.getSketch().getName();
         }
+        if (args.equals("untitled")) {
+            return ctx.getSketch().isUntitled() ? "YES" : "NO";
+        }
+
+        if (args.equals("protected")) {
+            return ctx.getSketch().parentIsProtected() ? "YES" : "NO";
+        }
+
         throw new VariableCommandException("Invalid sketch key");
     }
 }

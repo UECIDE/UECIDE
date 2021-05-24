@@ -856,5 +856,25 @@ public class Library implements Comparable {
     public String getMainInclude() {
         return mainInclude.getName();
     }
+
+    public static String getLibraryRootPaths(String core) {
+        TreeMap<String, TreeSet<Library>> libs = getFilteredLibraries(core);
+        TreeSet<File> paths = new TreeSet<File>();
+
+        for (TreeSet<Library> catlibs : libs.values()) {
+            for (Library l : catlibs) {
+                paths.add(l.getFolder().getParentFile());
+            }
+        }
+
+        String out = "";
+        for (File p : paths) {
+            if (!out.equals("")) {
+                out += "::";
+            }
+            out += p.getAbsolutePath();
+        }
+        return out;
+    }
 }
 

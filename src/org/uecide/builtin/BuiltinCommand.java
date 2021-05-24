@@ -57,6 +57,7 @@ public abstract class BuiltinCommand {
                         case "exec":            cmd = new exec(); break;
                         case "export":          cmd = new export(); break;
                         case "fetch":           cmd = new fetch(); break;
+                        case "filedlg":         cmd = new filedlg(); break;
                         case "foreach":         cmd = new foreach(); break;
                         case "getauth":         cmd = new getauth(); break;
                         case "gpio":            cmd = new gpio(); break;
@@ -67,6 +68,7 @@ public abstract class BuiltinCommand {
                         case "push":            cmd = new push(); break;
                         case "read_var":        cmd = new read_var(); break;
                         case "refresh":         cmd = new refresh(); break;
+                        case "save":            cmd = new save(); break;
                         case "scp":             cmd = new scp(); break;
                         case "set":             cmd = new set(); break;
                         case "spin":            cmd = new spin(); break;
