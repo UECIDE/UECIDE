@@ -605,6 +605,8 @@ public class Context {
     }
 
     public Object executeJavaScript(String filename, String script, String function, Object[] args, boolean silent) {
+
+        System.err.println("Running Javascript " + function + " from " + filename);
         if (function == null) {
             return false;
         }
@@ -857,77 +859,37 @@ public class Context {
     }
 
     public Object runBuiltinCommand(String commandline, boolean silent) {
-        try {
-            String[] split = commandline.split("::");
-            int argc = split.length - 1;
+        String[] split = commandline.split("::");
+        int argc = split.length - 1;
 
-            String cmdName = split[0];
+        String cmdName = split[0];
 
-            String[] arg = new String[argc];
+        String[] arg = new String[argc];
 
-            for(int i = 0; i < argc; i++) {
-                arg[i] = split[i + 1];
-            }
-
-            if(!cmdName.startsWith("__builtin_")) {
-                return false;
-            }
-
-            cmdName = cmdName.substring(10);
-            if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
-
-                StringBuilder args = new StringBuilder();
-
-                args.append(cmdName);
-
-                for (String s : arg) {
-                    args.append(" ");
-                    args.append(s);
-                }
-                if (!silent) command(args.toString());
-            }
-
-            Class<?> c = Class.forName("org.uecide.builtin." + cmdName);
-
-            Constructor<?> ctor = c.getConstructor();
-            final BuiltinCommand  p = (BuiltinCommand)(ctor.newInstance());
-
-            if(c == null) {
-                return false;
-            }
-
-            Class<?>[] param_types = new Class<?>[2];
-            param_types[0] = org.uecide.Context.class;
-            param_types[1] = String[].class;
-            
-            final Method m = c.getMethod("main", param_types);
-//            final Method k = c.getMethod("kill");
-
-            Object[] args = new Object[2];
-            args[0] = this;
-            args[1] = arg;
-
-            final Object[] aa = args;
-
-            Boolean retval = false;
-            try {
-                retval = (Boolean)m.invoke(p, aa);
-            } catch (Exception e2) {
-                Base.exception(e2);
-                error(e2);
-                return false;
-            }
-            return retval;
-
-        } catch(Exception e) {
-            Base.exception(e);
-            Base.error(e);
+        for(int i = 0; i < argc; i++) {
+            arg[i] = split[i + 1];
         }
 
-        return false;
+        if(!cmdName.startsWith("__builtin_")) {
+            return false;
+        }
+
+        cmdName = cmdName.substring(10);
+        if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
+
+            StringBuilder args = new StringBuilder();
+
+            args.append(cmdName);
+
+            for (String s : arg) {
+                args.append(" ");
+                args.append(s);
+            }
+            if (!silent) command(args.toString());
+        }
+
+        return BuiltinCommand.run(this, cmdName, arg);
     }
-
-
 
     public Object runSystemCommand(String command, String env) {
         return runSystemCommand(command, env, false);

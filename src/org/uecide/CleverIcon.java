@@ -30,6 +30,22 @@ public class CleverIcon extends ImageIcon {
         updateIcon();
     }
 
+    public CleverIcon(int s, File path) throws IOException {
+        super();
+        size = s;
+        frames = 1;
+        name = new String[1];
+        scaledImage = new BufferedImage[1];
+        name[0] = path.getName();
+        BufferedImage orig = ImageIO.read(path);
+        Image scaled = Utils.getScaledImage(orig, size, size);
+        scaledImage[0] = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = scaledImage[0].createGraphics();
+        g.drawImage(scaled, 0, 0, size, size, 0, 0, size, size, null);
+        disabledIcon = new ImageIcon(scaledImage[0]);
+        setImage(scaledImage[0]);
+    }
+
     public void updateIcon() throws IOException, MalformedURLException {
         for (int i = 0; i < frames; i++) {
             BufferedImage image;
@@ -70,7 +86,6 @@ public class CleverIcon extends ImageIcon {
 
 
         disabledIcon = new ImageIcon(disabledImage);
-        
 
         setImage(scaledImage[0]);
     }

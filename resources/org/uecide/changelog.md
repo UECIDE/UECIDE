@@ -1,6 +1,44 @@
 Changelog
 =========
 
+0.11.10
+-------
+
+* Regress dnsjava to v2
+* Overhaul of builtin commands
+* Bump dnsjava to 3.3.1
+* Silence upgrade message if package count == 0
+* Remove redundant introspection code
+* PluginManager search only on enter key
+* Notification plugin installs and upgrades are finished
+* Added compilation tests
+* Remove old redundant plugin code from core
+* Move all varcmd into core and overhaul calling method
+* Re-silence preproc debugging output
+* Release 0.11.10
+* Remove menubar in preferences to prevent blank window in OS X
+* Remove incorrect warning message
+* Fix crash on load-last with empty MRU list
+* Bump xstream version
+* Bump xstream version
+* Merge pull request #154 from UECIDE/dependabot/maven/launch4j/maven/com.thoughtworks.xstream-xstream-1.4.13-java7
+* Merge pull request #153 from UECIDE/dependabot/maven/launch4j/maven/org.apache.ant-ant-1.9.15
+* Bump xstream from 1.4.10-java7 to 1.4.13-java7 in /launch4j/maven
+* Remove colon filtering for library preproc
+* Bump ant from 1.8.2 to 1.9.15 in /launch4j/maven
+
+
+0.11.9
+------
+
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Prevent libraries being added multiple times with different headers in compiler preprocessing
+* Merge pull request #152 from UECIDE/dependabot/maven/launch4j/maven/commons-beanutils-commons-beanutils-1.9.4
+* Bump commons-beanutils from 1.7.0 to 1.9.4 in /launch4j/maven
+* Merge pull request #151 from UECIDE/dependabot/maven/launch4j/maven/com.thoughtworks.xstream-xstream-1.4.10-java7
+* Bump xstream from 1.4.8 to 1.4.10-java7 in /launch4j/maven
+
+
 0.11.8
 ------
 
@@ -12,6 +50,11 @@ Changelog
 
 * Bundled up-to-date base packages
 * Fixed missing tool vc. Prevent prototypes being added for non-ino files
+
+
+0.11.5
+------
+
 * Release 0.11.5
 * Merge branch 'master' of github.com:UECIDE/UECIDE
 * Add escapes for quotes in windows command execution
@@ -763,6 +806,34 @@ Changelog
 0.8.5
 -----
 
+* Regress dnsjava to v2
+* Overhaul of builtin commands
+* Bump dnsjava to 3.3.1
+* Silence upgrade message if package count == 0
+* Remove redundant introspection code
+* PluginManager search only on enter key
+* Notification plugin installs and upgrades are finished
+* Added compilation tests
+* Remove old redundant plugin code from core
+* Move all varcmd into core and overhaul calling method
+* Re-silence preproc debugging output
+* Release 0.11.10
+* Remove menubar in preferences to prevent blank window in OS X
+* Remove incorrect warning message
+* Fix crash on load-last with empty MRU list
+* Bump xstream version
+* Bump xstream version
+* Merge pull request #154 from UECIDE/dependabot/maven/launch4j/maven/com.thoughtworks.xstream-xstream-1.4.13-java7
+* Merge pull request #153 from UECIDE/dependabot/maven/launch4j/maven/org.apache.ant-ant-1.9.15
+* Bump xstream from 1.4.10-java7 to 1.4.13-java7 in /launch4j/maven
+* Remove colon filtering for library preproc
+* Merge branch 'master' of github.com:UECIDE/UECIDE
+* Prevent libraries being added multiple times with different headers in compiler preprocessing
+* Bump ant from 1.8.2 to 1.9.15 in /launch4j/maven
+* Merge pull request #152 from UECIDE/dependabot/maven/launch4j/maven/commons-beanutils-commons-beanutils-1.9.4
+* Bump commons-beanutils from 1.7.0 to 1.9.4 in /launch4j/maven
+* Merge pull request #151 from UECIDE/dependabot/maven/launch4j/maven/com.thoughtworks.xstream-xstream-1.4.10-java7
+* Bump xstream from 1.4.8 to 1.4.10-java7 in /launch4j/maven
 * Improved src and utility compilation output trees
 * Bundled up-to-date base packages
 * Fixed missing tool vc. Prevent prototypes being added for non-ino files

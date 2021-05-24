@@ -305,13 +305,6 @@ public class Preferences extends JDialog implements TreeSelectionListener {
 
         Context ctx = new Context();
 
-        for (JSPlugin plugin : Base.jsplugins.values()) {
-            PropertyFile pf = (PropertyFile)plugin.call("getPreferencesTree", ctx, null);
-            if (pf != null) {
-                Base.preferencesTree.mergeData(pf);
-            }
-        }
-
         for(Class<?> pluginClass : Base.plugins.values()) {
             try {
                 Method getPreferencesTree = pluginClass.getMethod("getPreferencesTree");

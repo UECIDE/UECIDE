@@ -93,8 +93,6 @@ public class Base {
 
     public static ArrayList<Process> processes = new ArrayList<Process>();
 
-    public static HashMap<String, JSPlugin> jsplugins;
-
     static Platform platform;
 
     public static PropertyFile manualPages;
@@ -1390,6 +1388,9 @@ System.err.println("Loading class " + className);
     }
 
     public static void loadTools() {
+
+        Tool.loadTools();
+
         tools.clear();
 //        toolLoaderThread = new Thread() {
 //            public void run() {
@@ -1956,7 +1957,6 @@ System.err.println("Loading class " + className);
             }
         }
 
-        loadJSPlugins();
     }
 
     public static File getTmpDir() {
@@ -2529,15 +2529,6 @@ System.err.println("Loading class " + className);
         }
 
         loadPreferencesTree("/org/uecide/config/prefs.txt");
-        Context ctx = new Context();
-
-        for (JSPlugin p : jsplugins.values()) {
-            PropertyFile pf = (PropertyFile)p.call("getPreferencesTree", ctx, null);
-            if (pf != null) {
-                Base.preferencesTree.mergeData(pf);
-            }
-            p.onBoot();
-        }
 
     }
 
@@ -2877,41 +2868,6 @@ System.err.println("Loading class " + className);
             }
         }
         return Locale.getDefault();
-    }
-
-    public static void loadJSPlugins() {
-        jsplugins = new HashMap<String, JSPlugin>();
-
-        File[] pfs = getPluginsFolders();
-        for (File pf : pfs) {
-            loadJSPluginsFromFolder(pf);
-        }
-
-        for (JSPlugin p : jsplugins.values()) {
-            p.onBoot();
-        }
-    }
-
-    public static void loadJSPluginsFromFolder(File f) {
-        if (!f.exists()) return;
-        if (!f.isDirectory()) return;
-        File[] files = f.listFiles();
-        for (File file : files) {
-            if (file.getName().endsWith(".jpl")) {
-                Debug.message("Loading javascript plugin " + file.getAbsolutePath());
-                JSPlugin p = new JSPlugin(file);
-                JSPlugin op = jsplugins.get(file.getName());
-                if (op != null) {
-                    Version vold = new Version(op.getVersion());
-                    Version vnew = new Version(p.getVersion());
-                    if (vold.compareTo(vnew) < 0) {
-                        jsplugins.put(file.getName(), p);
-                    }
-                } else {
-                    jsplugins.put(file.getName(), p);
-                }
-            }
-        }
     }
 
     public static void tryDelete(File file) {
