@@ -870,11 +870,12 @@ public class Context {
             arg[i] = split[i + 1];
         }
 
-        if(!cmdName.startsWith("__builtin_")) {
+        if (!cmdName.startsWith("__builtin_")) {
             return false;
         }
 
         cmdName = cmdName.substring(10);
+
         if (Preferences.getBoolean("compiler.verbose_compile") && !silence) {
 
             StringBuilder args = new StringBuilder();

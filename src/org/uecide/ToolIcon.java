@@ -35,7 +35,7 @@ public class ToolIcon extends ToolbarButton implements ActionListener, Comparabl
         weight = data.getInteger("weight");
 
         try {
-            imgIcon = new CleverIcon(s, new File(t.getFolder(), icon));
+            imgIcon = new CleverIcon(s * 66 / 100, new File(t.getFolder(), icon));
             setIcon(imgIcon);
         } catch (Exception ex) {
             Base.error(ex.getMessage());

@@ -4,6 +4,10 @@ Changelog
 0.11.10
 -------
 
+* More builtins and varcmds
+* Work towards stripping out all javascript
+* Additional builtins and varcmds
+* Execute scripts in separate thread
 * Regress dnsjava to v2
 * Overhaul of builtin commands
 * Bump dnsjava to 3.3.1
@@ -806,6 +810,10 @@ Changelog
 0.8.5
 -----
 
+* More builtins and varcmds
+* Work towards stripping out all javascript
+* Additional builtins and varcmds
+* Execute scripts in separate thread
 * Regress dnsjava to v2
 * Overhaul of builtin commands
 * Bump dnsjava to 3.3.1

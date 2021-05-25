@@ -48,6 +48,10 @@ public class vc_sketch extends VariableCommand {
             return ctx.getSketch().parentIsProtected() ? "YES" : "NO";
         }
 
+        if (args.equals("blank")) {
+            return (ctx.getSketch().isUntitled() && !ctx.getSketch().isModified()) ? "YES" : "NO";
+        }
+
         throw new VariableCommandException("Invalid sketch key");
     }
 }

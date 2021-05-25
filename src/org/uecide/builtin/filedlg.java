@@ -32,7 +32,7 @@ public class filedlg extends BuiltinCommand {
             case "opendir":
                 break;
             case "opensdir":
-                break;
+                return opensdir(ctx, args);
             case "savefile":
                 break;
             case "openfile":
@@ -91,6 +91,44 @@ public class filedlg extends BuiltinCommand {
             ctx.set(args[1], newFile.getAbsolutePath());
             return true;
         }
+        return false;
+    }
+
+    boolean opensdir(Context ctx, String[] args) {
+
+        // get the frontmost window frame for placing file dialog
+
+        JFileChooser fc = new JFileChooser();
+
+        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+        FileFilter filter = new SketchFolderFilter();
+        fc.setFileFilter(filter);
+
+        FileView view = new SketchFileView();
+        fc.setFileView(view);
+
+        if (Preferences.getBoolean("editor.save.remloc")) {
+            File loc = Preferences.getFile("editor.locations.opensketch");
+            if (loc == null) {
+                loc = Base.getSketchbookFolder();
+            }
+            fc.setCurrentDirectory(loc);
+        } else {
+            fc.setCurrentDirectory(Base.getSketchbookFolder());
+        }
+
+        int rv = fc.showOpenDialog(ctx.getEditor());
+
+        if(rv == JFileChooser.APPROVE_OPTION) {
+            File f = new File(fc.getSelectedFile().getAbsolutePath());
+            if (Preferences.getBoolean("editor.save.remloc")) {
+                Preferences.setFile("editor.locations.opensketch", f.getParentFile());
+            }
+            ctx.set(args[1], f.getAbsolutePath());
+            return true;
+        }
+
         return false;
     }
 }

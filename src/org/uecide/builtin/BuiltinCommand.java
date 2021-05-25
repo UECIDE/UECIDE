@@ -68,7 +68,7 @@ public abstract class BuiltinCommand {
                         case "push":            cmd = new push(); break;
                         case "read_var":        cmd = new read_var(); break;
                         case "refresh":         cmd = new refresh(); break;
-                        case "save":            cmd = new save(); break;
+                        case "sketch":          cmd = new sketch(); break;
                         case "scp":             cmd = new scp(); break;
                         case "set":             cmd = new set(); break;
                         case "spin":            cmd = new spin(); break;

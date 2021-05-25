@@ -50,7 +50,7 @@ public class ToolbarButton extends JButton {
     public ToolbarButton(String name, String tooltip, int s, ActionListener al) throws IOException {
         super();
         size = s;
-        CleverIcon icon = IconManager.getIcon(size * 75 / 100, name);
+        CleverIcon icon = IconManager.getIcon(size * 66 / 100, name);
         buttonIcon = icon;
         setIcon(icon);
         setDisabledIcon(icon.disabled());
