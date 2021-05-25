@@ -29,9 +29,36 @@ public class sketch extends BuiltinCommand {
                 return saveas(ctx, args[1]);
             case "close":
                 return close(ctx);
+            case "compile":
+                return compile(ctx);
+            case "upload":
+                return upload(ctx);
+            case "purge":
+                return purge(ctx);
 
         }
         throw new BuiltinCommandException("Unknown sketch operation");
+    }
+
+    boolean purge(Context ctx) {
+        Sketch s = ctx.getSketch();
+        s.purgeCache();
+        s.purgeBuildFiles();
+        return true;
+    }
+
+    boolean upload(Context ctx) {
+        Sketch s = ctx.getSketch();
+        return s.upload();
+    }
+
+    boolean compile(Context ctx) throws BuiltinCommandException {
+        try {
+            Sketch s = ctx.getSketch();
+            return s.build();
+        } catch (IOException ex) {
+            throw new BuiltinCommandException(ex.toString());
+        }
     }
 
     boolean newblank(Context ctx) throws BuiltinCommandException {

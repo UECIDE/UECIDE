@@ -55,6 +55,11 @@ public class ToolIcon extends ToolbarButton implements ActionListener, Comparabl
 
     public void actionPerformed(ActionEvent evt) {
         if (type == SCRIPT) {
+            int mods = evt.getModifiers();
+            ctx.set("mod.shift", ((mods & ActionEvent.SHIFT_MASK) != 0) ? "YES" : "NO");
+            ctx.set("mod.ctrl", ((mods & ActionEvent.CTRL_MASK) != 0) ? "YES" : "NO");
+            ctx.set("mod.alt", ((mods & ActionEvent.ALT_MASK) != 0) ? "YES" : "NO");
+            ctx.set("mod.meta", ((mods & ActionEvent.META_MASK) != 0) ? "YES" : "NO");
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     tool.execute(ctx, script);
