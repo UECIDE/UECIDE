@@ -7,11 +7,16 @@ import java.awt.image.*;
 import java.awt.event.*;
 import java.io.*;
 
-public class ToolbarButton extends JButton {
+import java.awt.font.FontRenderContext;
+
+public class ToolbarButton extends JButton implements MouseListener {
 
     ImageIcon buttonIcon;
 
     int size;
+    boolean hover = false;
+    String text = "";
+    Font font;
 
     public ToolbarButton(ImageIcon ico) {
         this(ico, null);
@@ -33,6 +38,8 @@ public class ToolbarButton extends JButton {
 
         setBorderPainted(false);
         setContentAreaFilled(false);
+        super.addMouseListener(this);
+        System.err.println("This is used...?!");
     }
 
     public ToolbarButton(String name, String tooltip, int s) throws IOException {
@@ -54,9 +61,16 @@ public class ToolbarButton extends JButton {
         buttonIcon = icon;
         setIcon(icon);
         setDisabledIcon(icon.disabled());
-        setToolTipText(tooltip);
+        text = tooltip;
         if (al != null) {
             super.addActionListener(al);
+        }
+        super.addMouseListener(this);
+        InputStream is = ToolbarButton.class.getResourceAsStream("/fonts/NotoSans-Light.ttf");
+        try {
+            font = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(10.0f);
+        } catch (FontFormatException ex) {
+            Base.error(ex);
         }
     }
 
@@ -75,7 +89,8 @@ public class ToolbarButton extends JButton {
             scale = new Integer(125);
         }
         Integer scaled = size * scale / 100;
-        return new Dimension(scaled, scaled);
+        Dimension s = new Dimension(hover ? (scaled + getTextWidth()) : scaled, scaled);
+        return s;
     }
 
     @Override
@@ -84,5 +99,95 @@ public class ToolbarButton extends JButton {
     public Dimension getMinimumSize() { return getSize(); }
     @Override
     public Dimension getMaximumSize() { return getSize(); }
+
+    public void mouseClicked(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) { hover = true; SwingUtilities.updateComponentTreeUI(this); }
+    public void mouseExited(MouseEvent e) { hover = false; SwingUtilities.updateComponentTreeUI(this); }
+
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+
+    @Override
+    public void paintComponent(Graphics g) {
+        if (!hover) {
+            super.paintComponent(g);
+            return;
+        }
+
+        Graphics2D g2d = (Graphics2D)g;
+
+        RenderingHints rh = new RenderingHints(
+             RenderingHints.KEY_TEXT_ANTIALIASING,
+             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHints(rh);
+
+        Dimension dim = getSize();
+
+        Icon icon = getIcon();
+        int ix = 10;
+        int iy = dim.height / 2 - icon.getIconHeight() / 2;
+        icon.paintIcon(this, g, ix, iy);
+
+        if (text.length() < 10) {
+            g2d.setColor(Color.BLACK);
+            g2d.setFont(font);
+            g2d.drawString(text, size, dim.height / 2 + 5);
+        } else {
+            int l = text.length();
+            int mid = l/2;
+            int i = 0;
+            String line1 = "";
+            String line2 = "";
+            while (((mid - i) > 0) && ((mid + i) < l)) {
+                if (text.charAt(mid + i) == ' ') {
+                    line1 = text.substring(0, mid + i);
+                    line2 = text.substring(mid + i + 1);
+                    break;
+                }
+                if (text.charAt(mid - i) == ' ') {
+                    line1 = text.substring(0, mid - i);
+                    line2 = text.substring(mid - i + 1);
+                    break;
+                }
+                i++;
+            }
+            g2d.setColor(Color.BLACK);
+            g2d.setFont(font);
+            g2d.drawString(line1, size + 2, dim.height / 2 );
+            g2d.drawString(line2, size + 2, dim.height / 2 + 10);
+            
+        }
+    }
+
+    int getTextWidth() {
+        FontMetrics fm = getFontMetrics(font);
+        if (text.length() < 10) {
+            return fm.stringWidth(text);
+        } else {
+            int l = text.length();
+            int mid = l/2;
+            int i = 0;
+            String line1 = "";
+            String line2 = "";
+            while (((mid - i) > 0) && ((mid + i) < l)) {
+                if (text.charAt(mid + i) == ' ') {
+                    line1 = text.substring(0, mid + i);
+                    line2 = text.substring(mid + i + 1);
+                    break;
+                }
+                if (text.charAt(mid - i) == ' ') {
+                    line1 = text.substring(0, mid - i);
+                    line2 = text.substring(mid - i + 1);
+                    break;
+                }
+                i++;
+            }
+
+            int l1 = fm.stringWidth(line1);
+            int l2 = fm.stringWidth(line2);
+            if (l1 > l2) return l1;
+            return l2;
+        }
+    }
 
 }

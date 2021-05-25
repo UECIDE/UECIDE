@@ -495,7 +495,7 @@ public class Editor extends JFrame {
 
         updateToolbar();
 
-        toolbar.add(new ToolbarSpacer()); //Separator();
+        //toolbar.add(new ToolbarSpacer()); //Separator();
 
         consoleToolbar = new JToolBar();
         consoleToolbar.setBorderPainted(false);
@@ -702,6 +702,7 @@ public class Editor extends JFrame {
 
     public void updateToolbar() throws IOException {
         toolbar.removeAll();
+/*
 
         abortIcon = IconManager.getIcon(Preferences.getInteger("theme.iconsize") * 75 / 100, 
                 "spinner.pos-1",
@@ -786,6 +787,7 @@ public class Editor extends JFrame {
         }));
 
         toolbar.add(new ToolbarSpacer()); //Separator();
+*/
 
         addPluginsToToolbar(toolbar, Plugin.TOOLBAR_EDITOR);
         toolbar.repaint();
@@ -4033,6 +4035,7 @@ public class Editor extends JFrame {
     }
 
     public void addPluginsToToolbar(JToolBar tb, int filterFlags) throws IOException {
+/*
         for(final Plugin plugin : plugins) {
             try {
                 plugin.addToolbarButtons(tb, filterFlags);
@@ -4042,7 +4045,7 @@ public class Editor extends JFrame {
                 Base.exception(e);
             }
         }
-
+*/
         if (filterFlags == Plugin.TOOLBAR_EDITOR) {
             for (ToolIcon i : toolbaricons) {
                 i.setContext(loadedSketch.getContext());
