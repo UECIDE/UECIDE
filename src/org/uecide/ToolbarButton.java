@@ -11,7 +11,7 @@ import java.awt.font.FontRenderContext;
 
 public class ToolbarButton extends JButton implements MouseListener {
 
-    ImageIcon buttonIcon;
+    Icon buttonIcon;
 
     int size;
     boolean hover = false;
@@ -52,6 +52,11 @@ public class ToolbarButton extends JButton implements MouseListener {
 
     public ToolbarButton(String name, String tooltip, ActionListener al) throws IOException {
         this(name, tooltip, Preferences.getInteger("theme.iconsize"), al);
+    }
+
+    @Override
+    public void setIcon(Icon i) {
+        buttonIcon = i;
     }
 
     public ToolbarButton(String name, String tooltip, int s, ActionListener al) throws IOException {
@@ -107,13 +112,35 @@ public class ToolbarButton extends JButton implements MouseListener {
     public void mousePressed(MouseEvent e) {}
     public void mouseReleased(MouseEvent e) {}
 
-    @Override
-    public void paintComponent(Graphics g) {
-        if (!hover) {
-            super.paintComponent(g);
-            return;
+    void paintColouredIcon(Graphics2D g, Icon i, int x, int y, Color c) {
+
+        int red = c.getRed();
+        int green = c.getGreen();
+        int blue = c.getBlue();
+
+        int w = i.getIconWidth();
+        int h = i.getIconHeight();
+
+        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics ig = img.createGraphics();
+        i.paintIcon(null, ig, 0, 0);
+        ig.dispose();
+
+        for (int py = 0; py < h; py++) {
+            for (int px = 0; px < w; px++) {
+                int rgba = img.getRGB(px, py);
+                Color col = new Color(rgba, true);
+                int alpha = col.getAlpha();
+                Color destCol = new Color(red, green, blue, alpha);
+                g.setColor(destCol);
+                g.drawLine(x + px, y + py, x + px, y + py);
+            }
         }
 
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D)g;
 
         RenderingHints rh = new RenderingHints(
@@ -123,14 +150,21 @@ public class ToolbarButton extends JButton implements MouseListener {
 
         Dimension dim = getSize();
 
-        Icon icon = getIcon();
-        int ix = 10;
-        int iy = dim.height / 2 - icon.getIconHeight() / 2;
-        icon.paintIcon(this, g, ix, iy);
+        if (!hover) {
+            int iy = dim.height / 2 - buttonIcon.getIconHeight() / 2;
+            int ix = iy;
+
+            paintColouredIcon(g2d, buttonIcon, ix, iy, UIManager.getColor("Button.foreground"));
+            return;
+        }
+
+        int iy = dim.height / 2 - buttonIcon.getIconHeight() / 2;
+        int ix = iy;
+        paintColouredIcon(g2d, buttonIcon, ix, iy, UIManager.getColor("Button.foreground"));
+        g2d.setColor(UIManager.getColor("Button.foreground"));
+        g2d.setFont(font);
 
         if (text.length() < 10) {
-            g2d.setColor(Color.BLACK);
-            g2d.setFont(font);
             g2d.drawString(text, size, dim.height / 2 + 5);
         } else {
             int l = text.length();
@@ -151,8 +185,6 @@ public class ToolbarButton extends JButton implements MouseListener {
                 }
                 i++;
             }
-            g2d.setColor(Color.BLACK);
-            g2d.setFont(font);
             g2d.drawString(line1, size + 2, dim.height / 2 );
             g2d.drawString(line2, size + 2, dim.height / 2 + 10);
             
